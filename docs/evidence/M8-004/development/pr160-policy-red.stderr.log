@@ -1,0 +1,1058 @@
+[33mwarning[0m: unused expression
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:242:49:
+    [36m| [0m
+[36m242[0m [36m| [0m        @AssertThrows[IllegalArgumentException](DnsMessageSummary([0m
+    [36m| [0m                                                [33m^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:540:22:
+    [36m| [0m
+[36m540[0m [36m| [0m                case None => ()[0m
+    [36m| [0m                     [33m^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:156:1:
+    [36m| [0m
+[36m156[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m157[0m [36m| [0m[34m|[0m class DnsResolverPolicyTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m585[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m283[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+53 warnings generated, 53 warnings printed.
+Error: cjpm test failed
