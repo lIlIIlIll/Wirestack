@@ -1,0 +1,38 @@
+[33mwarning[0m: unused function:'waitUntilWriteActive'
+   [36m==>[0m /tmp/wirestack-m8-004-publication/src/internal/transport_stdnet/package.cj:612:5:
+    [36m| [0m
+[36m612[0m [36m| [0m      internal func waitUntilWriteActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m613[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m622[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilAcceptActive'
+   [36m==>[0m /tmp/wirestack-m8-004-publication/src/internal/transport_stdnet/package.cj:910:5:
+    [36m| [0m
+[36m910[0m [36m| [0m      func waitUntilAcceptActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m911[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m919[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m /tmp/wirestack-m8-004-publication/src/internal/http1/connection_pool.cj:374:5:
+    [36m| [0m
+[36m374[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m375[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m384[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
