@@ -1,0 +1,1511 @@
+{
+  "binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "66869f73668d484d0e4f7175a010bd0327d25ba9616e66f722a039b2f4e7ef65"
+  },
+  "commands": [
+    {
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+      "exit_code": 0,
+      "id": "toolchain",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/toolchain.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        },
+        "path": "docs/evidence/M8-004/native-dns/toolchain.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tools/build_linux_resolver.py",
+        "--root",
+        "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "--quiet"
+      ],
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+      "exit_code": 0,
+      "id": "resolver-native-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/resolver-native-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/resolver-native-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1",
+      "exit_code": 0,
+      "id": "consumer-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+        },
+        "path": "docs/evidence/M8-004/native-dns/consumer-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M8-004/native-dns/consumer-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "basic"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "44203"
+      },
+      "exit_code": 0,
+      "id": "consumer-basic",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/basic.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+        },
+        "path": "docs/evidence/M8-004/native-dns/basic.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "fallback-identity"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "36383"
+      },
+      "exit_code": 0,
+      "id": "consumer-fallback-identity",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/fallback-identity.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+        },
+        "path": "docs/evidence/M8-004/native-dns/fallback-identity.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "cache-policy"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "46081"
+      },
+      "exit_code": 0,
+      "id": "consumer-cache-policy",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cache-policy.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cache-policy.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "cname-ttl"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "46105"
+      },
+      "exit_code": 0,
+      "id": "consumer-cname-ttl",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cname-ttl.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cname-ttl.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "cache-capacity"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "41491"
+      },
+      "exit_code": 0,
+      "id": "consumer-cache-capacity",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cache-capacity.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cache-capacity.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "cname-bounds"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "45691"
+      },
+      "exit_code": 0,
+      "id": "consumer-cname-bounds",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cname-bounds.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+        },
+        "path": "docs/evidence/M8-004/native-dns/cname-bounds.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "combined-negative"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "39333"
+      },
+      "exit_code": 0,
+      "id": "consumer-combined-negative",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/combined-negative.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+        },
+        "path": "docs/evidence/M8-004/native-dns/combined-negative.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "negative-scope"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "37227"
+      },
+      "exit_code": 0,
+      "id": "consumer-negative-scope",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/negative-scope.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+        },
+        "path": "docs/evidence/M8-004/native-dns/negative-scope.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "search-boundary"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "45927"
+      },
+      "exit_code": 0,
+      "id": "consumer-search-boundary",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/search-boundary.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+        },
+        "path": "docs/evidence/M8-004/native-dns/search-boundary.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "lifecycle"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "43831"
+      },
+      "exit_code": 0,
+      "id": "consumer-lifecycle",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/lifecycle.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+        },
+        "path": "docs/evidence/M8-004/native-dns/lifecycle.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "connect"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "38491",
+        "WIRESTACK_SERVICE_PORT": "38421"
+      },
+      "exit_code": 0,
+      "id": "consumer-connect",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/connect.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+        },
+        "path": "docs/evidence/M8-004/native-dns/connect.stdout.log"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "unshare",
+        "--user",
+        "--map-root-user",
+        "--net",
+        "--mount",
+        "--propagation",
+        "private",
+        "/usr/bin/python3",
+        "-c",
+        "import sys; from pathlib import Path; from tools.m8_004_native_dns import system_fallback_namespace; system_fallback_namespace(Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3])",
+        "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+        "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/docs/evidence/M8-004/native-dns",
+        "{\"user\": \"user:[4026531837]\", \"mnt\": \"mnt:[4026531832]\", \"net\": \"net:[4026531833]\"}"
+      ],
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+      "exit_code": 0,
+      "id": "system-fallback-namespace",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-dns/system-fallback-namespace.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "219ddb8db64860a249861a2bdb7c5733acbbbe83a217e2057c0427c0e2082f4a"
+        },
+        "path": "docs/evidence/M8-004/native-dns/system-fallback-namespace.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 40
+    }
+  ],
+  "invocation": {
+    "argv": [
+      "/usr/bin/python3",
+      "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/tools/m8_004_native_dns.py",
+      "--report",
+      "docs/evidence/M8-004/native-dns.json"
+    ],
+    "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+    "output_dir": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/docs/evidence/M8-004/native-dns",
+    "report": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/docs/evidence/M8-004/native-dns.json"
+  },
+  "limits": {
+    "case_timeout_seconds": 30,
+    "cname_delay_seconds": 1.25,
+    "dns_packet_bytes": 65535,
+    "public_client_query_timeout_seconds": 5,
+    "public_connect_deadline_seconds": 2,
+    "socket_timeout_seconds": 5,
+    "tcp_backlog": 8
+  },
+  "platform": {
+    "libc": [
+      "glibc",
+      "2.44"
+    ],
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "scenarios": [
+    {
+      "checks": [
+        "udp_a",
+        "udp_aaaa",
+        "cname_answer_owner",
+        "compressed_ns_glue_excluded_from_answer"
+      ],
+      "mode": "basic",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6940351,
+          "class": 1,
+          "id": 243,
+          "name": "a.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 52414,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 7880512,
+          "class": 1,
+          "id": 41303,
+          "name": "a.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 39949,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 8779637,
+          "class": 1,
+          "id": 13065,
+          "name": "aaaa.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 56252,
+          "transport": "UDP",
+          "type": 28
+        },
+        {
+          "at_monotonic_ns_from_case_start": 9605661,
+          "class": 1,
+          "id": 48400,
+          "name": "owner.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 54725,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 4,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 4
+    },
+    {
+      "checks": [
+        "wrong_source_rejected",
+        "wrong_id_rejected",
+        "wrong_name_rejected",
+        "wrong_type_rejected",
+        "wrong_class_rejected",
+        "wrong_qr_rejected",
+        "wrong_opcode_rejected",
+        "invalid_tc_no_tcp_fallback",
+        "tc_tcp_fallback"
+      ],
+      "mode": "fallback-identity",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6674443,
+          "class": 1,
+          "id": 13548,
+          "name": "fallback.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 35796,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 107286646,
+          "class": 1,
+          "id": 13548,
+          "name": "fallback.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 52064,
+          "transport": "TCP",
+          "type": 1
+        }
+      ],
+      "query_count": 2,
+      "rejected_candidates_sent": 7,
+      "status": "PASS",
+      "tcp_connections": 1,
+      "tcp_frame_bytes": 56,
+      "tcp_frame_chunk_sizes": [
+        1,
+        6,
+        49
+      ],
+      "udp_response_datagrams": 8
+    },
+    {
+      "checks": [
+        "authoritative_negative_cache",
+        "no_soa_no_cache",
+        "unrelated_soa_no_cache",
+        "recursive_negative_cache",
+        "ttl_zero_no_cache"
+      ],
+      "mode": "cache-policy",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6759891,
+          "class": 1,
+          "id": 18087,
+          "name": "auth-negative.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 47337,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 7804226,
+          "class": 1,
+          "id": 56707,
+          "name": "no-soa.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 42797,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 8698307,
+          "class": 1,
+          "id": 55045,
+          "name": "no-soa.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 47540,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 9548795,
+          "class": 1,
+          "id": 39196,
+          "name": "unrelated-soa.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 51866,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 10431826,
+          "class": 1,
+          "id": 21982,
+          "name": "unrelated-soa.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 55690,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 11327676,
+          "class": 1,
+          "id": 33617,
+          "name": "nonauth-soa.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 40132,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 12230410,
+          "class": 1,
+          "id": 38033,
+          "name": "ttl-zero.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 42302,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 13155909,
+          "class": 1,
+          "id": 26682,
+          "name": "ttl-zero.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 41362,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 8,
+      "query_counts_by_name": {
+        "auth-negative.native.test": 1,
+        "no-soa.native.test": 2,
+        "nonauth-soa.native.test": 1,
+        "ttl-zero.native.test": 2,
+        "unrelated-soa.native.test": 2
+      },
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 8
+    },
+    {
+      "checks": [
+        "delayed_multihop_positive_ttl",
+        "delayed_multihop_negative_ttl"
+      ],
+      "mode": "cname-ttl",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6822434,
+          "class": 1,
+          "id": 27105,
+          "name": "short-alias.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 48561,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 7766017,
+          "class": 1,
+          "id": 64153,
+          "name": "delayed-middle.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 33101,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 1258326911,
+          "class": 1,
+          "id": 1423,
+          "name": "slow-target.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 47669,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 1259361001,
+          "class": 1,
+          "id": 31967,
+          "name": "short-alias.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 38524,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 1260331914,
+          "class": 1,
+          "id": 14698,
+          "name": "short-negative-alias.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 56991,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 1261258796,
+          "class": 1,
+          "id": 51962,
+          "name": "delayed-negative-middle.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 52954,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 2511717630,
+          "class": 1,
+          "id": 16046,
+          "name": "slow-missing.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 45786,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 2512723735,
+          "class": 1,
+          "id": 49731,
+          "name": "short-negative-alias.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 56126,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 8,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "timing": [
+        {
+          "alias_to_later_cname_response_elapsed_ns": 1250984618,
+          "chain": "positive",
+          "configured_delay_seconds": 1.25
+        },
+        {
+          "alias_to_later_cname_response_elapsed_ns": 1250966221,
+          "chain": "negative",
+          "configured_delay_seconds": 1.25
+        }
+      ],
+      "udp_response_datagrams": 8
+    },
+    {
+      "checks": [
+        "bounded_lru_eviction",
+        "cache_hit_updates_recency",
+        "configured_ttl_cap"
+      ],
+      "mode": "cache-capacity",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6595405,
+          "class": 1,
+          "id": 4370,
+          "name": "lru-a.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 58500,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 7568452,
+          "class": 1,
+          "id": 11080,
+          "name": "lru-b.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 54641,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 8484623,
+          "class": 1,
+          "id": 52169,
+          "name": "lru-c.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 54295,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 9363372,
+          "class": 1,
+          "id": 34293,
+          "name": "lru-b.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 34467,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 4,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 4
+    },
+    {
+      "checks": [
+        "lookup_wide_eight_alias_limit",
+        "cross_response_intermediate_alias_loop"
+      ],
+      "mode": "cname-bounds",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 7292928,
+          "class": 1,
+          "id": 36645,
+          "name": "long-chain.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 39648,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 8548141,
+          "class": 1,
+          "id": 19573,
+          "name": "hop8.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 36765,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 9486181,
+          "class": 1,
+          "id": 59213,
+          "name": "loop-chain.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 49645,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 10384970,
+          "class": 1,
+          "id": 44008,
+          "name": "end.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 59699,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 4,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 4
+    },
+    {
+      "checks": [
+        "same_response_cname_bounds_negative_expiry"
+      ],
+      "elapsed_alias_lifetime_ns": 1251048714,
+      "mode": "combined-negative",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6552485,
+          "class": 1,
+          "id": 17976,
+          "name": "combined-negative.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 40582,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 7564668,
+          "class": 1,
+          "id": 43980,
+          "name": "expiry-barrier.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 45605,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 1258092559,
+          "class": 1,
+          "id": 48680,
+          "name": "combined-negative.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 48411,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 3,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 3
+    },
+    {
+      "checks": [
+        "nxdomain_cache_is_namewide"
+      ],
+      "mode": "negative-scope",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6942290,
+          "class": 1,
+          "id": 26721,
+          "name": "namewide.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 44783,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 1,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 1
+    },
+    {
+      "checks": [
+        "absolute_first_uses_sixteen_candidate_bound"
+      ],
+      "mode": "search-boundary",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 7559247,
+          "class": 1,
+          "id": 41281,
+          "name": "node.test",
+          "source_address": "127.0.0.1",
+          "source_port": 56439,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 8511742,
+          "class": 1,
+          "id": 25252,
+          "name": "node.test.s0.test",
+          "source_address": "127.0.0.1",
+          "source_port": 52161,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 9373889,
+          "class": 1,
+          "id": 57703,
+          "name": "node.test.s1.test",
+          "source_address": "127.0.0.1",
+          "source_port": 40206,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 10250842,
+          "class": 1,
+          "id": 15771,
+          "name": "node.test.s2.test",
+          "source_address": "127.0.0.1",
+          "source_port": 54293,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 11138202,
+          "class": 1,
+          "id": 58442,
+          "name": "node.test.s3.test",
+          "source_address": "127.0.0.1",
+          "source_port": 60826,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 11996562,
+          "class": 1,
+          "id": 51816,
+          "name": "node.test.s4.test",
+          "source_address": "127.0.0.1",
+          "source_port": 35323,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 12836467,
+          "class": 1,
+          "id": 18985,
+          "name": "node.test.s5.test",
+          "source_address": "127.0.0.1",
+          "source_port": 39355,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 13699466,
+          "class": 1,
+          "id": 39619,
+          "name": "node.test.s6.test",
+          "source_address": "127.0.0.1",
+          "source_port": 58861,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 14550215,
+          "class": 1,
+          "id": 23874,
+          "name": "node.test.s7.test",
+          "source_address": "127.0.0.1",
+          "source_port": 34119,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 15403373,
+          "class": 1,
+          "id": 24944,
+          "name": "node.test.s8.test",
+          "source_address": "127.0.0.1",
+          "source_port": 42481,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 16261575,
+          "class": 1,
+          "id": 63888,
+          "name": "node.test.s9.test",
+          "source_address": "127.0.0.1",
+          "source_port": 58650,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 17134181,
+          "class": 1,
+          "id": 2597,
+          "name": "node.test.s10.test",
+          "source_address": "127.0.0.1",
+          "source_port": 56944,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 17987317,
+          "class": 1,
+          "id": 54272,
+          "name": "node.test.s11.test",
+          "source_address": "127.0.0.1",
+          "source_port": 38456,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 18851203,
+          "class": 1,
+          "id": 22541,
+          "name": "node.test.s12.test",
+          "source_address": "127.0.0.1",
+          "source_port": 42780,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 19766365,
+          "class": 1,
+          "id": 50758,
+          "name": "node.test.s13.test",
+          "source_address": "127.0.0.1",
+          "source_port": 59666,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 20626631,
+          "class": 1,
+          "id": 41923,
+          "name": "node.test.s14.test",
+          "source_address": "127.0.0.1",
+          "source_port": 48255,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 16,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 16
+    },
+    {
+      "checks": [
+        "pending_udp_cancel",
+        "pending_udp_close",
+        "partial_tcp_cancel",
+        "partial_tcp_close"
+      ],
+      "mode": "lifecycle",
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 6954080,
+          "class": 1,
+          "id": 33117,
+          "name": "pending-udp-cancel.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 54330,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 8235021,
+          "class": 1,
+          "id": 43760,
+          "name": "pending-udp-close.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 52102,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 9651463,
+          "class": 1,
+          "id": 25234,
+          "name": "pending-tcp-cancel.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 35688,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 10525425,
+          "class": 1,
+          "id": 25234,
+          "name": "pending-tcp-cancel.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 48846,
+          "transport": "TCP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 12066706,
+          "class": 1,
+          "id": 22211,
+          "name": "pending-tcp-close.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 60098,
+          "transport": "UDP",
+          "type": 1
+        },
+        {
+          "at_monotonic_ns_from_case_start": 12912369,
+          "class": 1,
+          "id": 22211,
+          "name": "pending-tcp-close.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 48858,
+          "transport": "TCP",
+          "type": 1
+        }
+      ],
+      "query_count": 6,
+      "status": "PASS",
+      "tcp_connections": 2,
+      "udp_response_datagrams": 2,
+      "waits": [
+        {
+          "action": "cancel",
+          "partial_tcp_length_prefix_bytes": 0,
+          "peer_observed_eof": null,
+          "socket_fds_after_completion": [],
+          "transport": "UDP"
+        },
+        {
+          "action": "close",
+          "partial_tcp_length_prefix_bytes": 0,
+          "peer_observed_eof": null,
+          "socket_fds_after_completion": [],
+          "transport": "UDP"
+        },
+        {
+          "action": "cancel",
+          "partial_tcp_length_prefix_bytes": 1,
+          "peer_observed_eof": true,
+          "socket_fds_after_completion": [],
+          "transport": "TCP"
+        },
+        {
+          "action": "close",
+          "partial_tcp_length_prefix_bytes": 1,
+          "peer_observed_eof": true,
+          "socket_fds_after_completion": [],
+          "transport": "TCP"
+        }
+      ]
+    },
+    {
+      "checks": [
+        "resolver_connect_dns_to_real_tcp_service",
+        "single_operation_context"
+      ],
+      "dns_response_at_ns_from_start": 107073301,
+      "mode": "connect",
+      "operation_deadline_seconds": 2,
+      "queries": [
+        {
+          "at_monotonic_ns_from_case_start": 7674161,
+          "class": 1,
+          "id": 56454,
+          "name": "service.native.test",
+          "source_address": "127.0.0.1",
+          "source_port": 59645,
+          "transport": "UDP",
+          "type": 1
+        }
+      ],
+      "query_count": 1,
+      "service_accept_at_ns_from_start": 107705368,
+      "service_connections": 1,
+      "service_remote_address": "127.0.0.1",
+      "service_remote_port": 43942,
+      "status": "PASS",
+      "tcp_connections": 0,
+      "udp_response_datagrams": 1
+    },
+    {
+      "commands": [
+        {
+          "argv": [
+            "ip",
+            "link",
+            "set",
+            "lo",
+            "up"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-network-0",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-0.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-0.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "ip",
+            "link",
+            "add",
+            "dns0",
+            "type",
+            "veth",
+            "peer",
+            "name",
+            "dns1"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-network-1",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-1.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-1.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "ip",
+            "address",
+            "add",
+            "192.0.2.1/24",
+            "dev",
+            "dns0"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-network-2",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-2.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-2.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "ip",
+            "link",
+            "set",
+            "dns0",
+            "up"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-network-3",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-3.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-3.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "ip",
+            "link",
+            "set",
+            "dns1",
+            "up"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-network-4",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-4.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-network-4.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "mount",
+            "--bind",
+            "/tmp/wirestack-dns-policy-_6wmsl7l/resolv.conf",
+            "/etc/resolv.conf"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-resolv.conf",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-resolv.conf.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-resolv.conf.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "mount",
+            "--bind",
+            "/tmp/wirestack-dns-policy-_6wmsl7l/nsswitch.conf",
+            "/etc/nsswitch.conf"
+          ],
+          "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+          "exit_code": 0,
+          "id": "system-fallback-nsswitch.conf",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-nsswitch.conf.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback-nsswitch.conf.stdout.log"
+          },
+          "timed_out": false,
+          "timeout_seconds": 5
+        },
+        {
+          "argv": [
+            "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin/main",
+            "system-fallback"
+          ],
+          "cwd": "/tmp/wirestack-m8-004-consumer-0kjqngy1/target/release/bin",
+          "environment": {
+            "WIRESTACK_SERVICE_PORT": "46827"
+          },
+          "exit_code": 0,
+          "id": "consumer-system-fallback",
+          "stderr": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback.stderr.log"
+          },
+          "stdout": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "d2f5cf36c43898886dd4a4915c42e5d525fdaefc6ad714fd8fdcafd30a8fb2d8"
+            },
+            "path": "docs/evidence/M8-004/native-dns/system-fallback.stdout.log"
+          },
+          "timeout_seconds": 30
+        }
+      ],
+      "literal_exchange": [
+        {
+          "received": "70696e67",
+          "sent": "706f6e67"
+        }
+      ],
+      "mode": "system-fallback",
+      "queries": [
+        {
+          "name": "printer",
+          "type": 1
+        },
+        {
+          "name": "printer.chosen.test",
+          "type": 1
+        },
+        {
+          "name": "direct",
+          "type": 1
+        },
+        {
+          "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": 1
+        }
+      ],
+      "status": "PASS",
+      "system_policy": {
+        "nsswitch.conf": "hosts: dns\n",
+        "resolv.conf": "nameserver 127.0.0.1\nsearch corp.test\noptions ndots:15 timeout:1 attempts:1\n"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source_digests": {
+    "examples/linux/m8_004/native_dns.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ddb9c88e5db2be784ee9bccf70e2af53ceb4bee4dd1f9e49afcbe6a166ee86d6"
+    },
+    "tools/m8_004_native_dns.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a9e39da8ed7b54c11dbce7df2f562ca301056087d099ec90aa83df8ee2e5aa1"
+    }
+  },
+  "source_task": "M8-004",
+  "status": "PASS"
+}

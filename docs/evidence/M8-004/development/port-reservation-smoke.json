@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "argv": [
+    "python3",
+    "-c",
+    "import sys, socket, errno, os\nsys.path.insert(0, '/tmp/wirestack-m8-004-publication/tools')\nimport m8_004_native_dns as native\nreal_socket = socket.socket\nremaining = [1]\nclass ForcedCollisionSocket(real_socket):\n    def bind(self, address):\n        if self.type == socket.SOCK_STREAM and address[1] == 0 and remaining[0]:\n            remaining[0] -= 1\n            address = ('127.0.0.1', occupied_port)\n        return super().bind(address)\nwith real_socket(socket.AF_INET, socket.SOCK_DGRAM) as occupied:\n    occupied.bind(('127.0.0.1', 0))\n    occupied_port = occupied.getsockname()[1]\n    baseline = len(os.listdir('/proc/self/fd'))\n    socket.socket = ForcedCollisionSocket\n    try:\n        with native.DnsPeers() as peers:\n            assert peers.port != occupied_port\n            assert remaining[0] == 0\n        assert len(os.listdir('/proc/self/fd')) == baseline\n        remaining[0] = 16\n        try:\n            native.DnsPeers()\n        except OSError as error:\n            assert error.errno == errno.EADDRINUSE\n        else:\n            raise AssertionError('exhausted reservation unexpectedly succeeded')\n        assert remaining[0] == 0\n        assert len(os.listdir('/proc/self/fd')) == baseline\n    finally:\n        socket.socket = real_socket\nprint('PORT_RESERVATION_PASS real collision, bounded exhaustion, no descriptor leak')\n"
+  ],
+  "cwd": "/tmp/wirestack-m8-004-publication",
+  "exit_code": 0,
+  "stdout": "PORT_RESERVATION_PASS real collision, bounded exhaustion, no descriptor leak\n",
+  "stderr": ""
+}

@@ -1,0 +1,143 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 2065865797 ns, RESULT:
+    TCS: DnsClientWireTest, time elapsed: 1290322357 ns, RESULT:
+    [ PASSED ] CASE: publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry (5365135 ns)
+    [ PASSED ] CASE: publicQueryEncodesEveryModeledRecordType (11788877 ns)
+    [ PASSED ] CASE: wrongSourceIdAndQuestionAreIgnoredBeforeValidUdpResponse (2445783 ns)
+    [ PASSED ] CASE: validatedTruncationFallsBackToExactTcpFrame (1315369 ns)
+    [ PASSED ] CASE: dnsTransportFailuresRetainSelectedNameserver (259439036 ns)
+    [ PASSED ] CASE: tcpResponseCannotRemainTruncated (2777743 ns)
+    [ PASSED ] CASE: malformedMatchingResponseAndUnrelatedSectionsCannotPoisonCache (7489834 ns)
+    [ PASSED ] CASE: cnameTraversalUsesAnswerOwnersAndRejectsConflictingTargets (7096020 ns)
+    [ PASSED ] CASE: rfc2308CacheRetainsNxdomainVersusNodataWithoutNewPackets (8269000 ns)
+    [ PASSED ] CASE: zeroTtlNeverCreatesAPositiveCacheEntry (7244571 ns)
+    [ PASSED ] CASE: callerCancellationAndClientCloseWakeActiveNativeReceive (4365793 ns)
+    [ PASSED ] CASE: anyFamilyRetainsAddressesWhenTheOtherFamilyFails (12438475 ns)
+    [ PASSED ] CASE: boundedAdmissionRejectsExcessAndCloseWakesQueuedCallers (4810752 ns)
+    [ ERROR  ] CASE: silentDnsAttemptsLeaveBudgetForServerAndPassFailover (947350870 ns)
+    REASON: An exception has occurred:ResolveException: DNS operation deadline exceeded
+	at std.io.IOException.init(std.core.String)(std/io/io_exception.cj:19)
+	at wirestack.NetworkException.init(wirestack.NetworkErrorCategory, wirestack.NetworkPhase, wirestack.NetworkErrorCode, std.core.String, wirestack.Retryability, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/network_error.cj:392)
+	at wirestack.ResolveException.init(wirestack.ResolveErrorCode, std.core.String, std.core.Option<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/resolver.cj:245)
+	at wirestack.net.checkDnsContext(wirestack.OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver.cj:135)
+	at wirestack.net.DnsClient.queryWire(std.core.String, wirestack.net.DnsRecordType, wirestack.OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_client.cj:389)
+	at wirestack.net.DnsClient.query(std.core.String, wirestack.net.DnsRecordType, wirestack.OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_client.cj:191)
+	at wirestack.net/test.DnsClientWireTest.silentDnsAttemptsLeaveBudgetForServerAndPassFailover()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_client_test.cj:489)
+	at wirestack.net/test.DnsClientWireTest.asTestSuite.lambda.4.lambda.0()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_client_test.cj:976)
+    STDERR:
+    An exception has occurred:
+    NetworkException: transport is closed
+    	 at wirestack.internal.transport_stdnet::networkClosedError(wirestack::NetworkErrorCategory, wirestack::NetworkPhase, std.core::Option<...>, std.core::Option<...>, std.core::Option<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/transport_stdnet/package.cj:1197)
+    	 at wirestack.internal.transport_stdnet::StdNetDatagramSocket::mapSocketError(std.net::SocketException, wirestack::OperationContext, wirestack::NetworkErrorCategory, wirestack::NetworkPhase, std.core::Option<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/transport_stdnet/udp_socket.cj:778)
+    	 at wirestack.internal.transport_stdnet::StdNetDatagramSocket::receive(Int64, wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/transport_stdnet/udp_socket.cj:376)
+    	 at wirestack.net::DatagramSocketFacadeCore::receive(Int64, wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/datagram_socket_core.cj:122)
+    	 at wirestack.net::UdpSocket::receive(Int64, wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/udp_socket.cj:123)
+    	 at wirestack.net/test::DnsClientWireTest::silentDnsAttemptsLeaveBudgetForServerAndPassFailover::lambda.0()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_client_test.cj:478)
+    [ FAILED ] CASE: exhaustedResponseCodesRetainTheLastRespondingNameserver (3086083 ns)
+    Assert Failed: `(DNS RCODE failure lost its responding nameserver)`
+
+    TCS: DnsResolverPolicyTest, time elapsed: 274949844 ns, RESULT:
+    [ PASSED ] CASE: fromSystemParsesTabsCommentsLastSearchAndClampedNdots (514594 ns)
+    [ PASSED ] CASE: directConfigRejectsUnsupportedNameserverZonesBeforeQueries (59856 ns)
+    [ PASSED ] CASE: systemNameserversRetainOnlySupportedNumericZones (579319 ns)
+    [ PASSED ] CASE: configOwnsInputArraysAndReturnsDefensiveCopies (90952 ns)
+    [ PASSED ] CASE: systemFilesFailClosedWhenMissingOversizedOrNonregular (35217707 ns)
+    [ PASSED ] CASE: hostsSnapshotRetainsOnlyUsableIpv6Zones (496142 ns)
+    [ PASSED ] CASE: hostsAliasesFilterFamiliesAndRemainSnapshotted (705571 ns)
+    [ PASSED ] CASE: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst (6395321 ns)
+    [ PASSED ] CASE: exactHostsEntryWinsBeforeSearchSuffixDns (213969909 ns)
+    [ PASSED ] CASE: cancelledExpiredAndClosedCallsRetainPublicResolveClassifications (521802 ns)
+    [ PASSED ] CASE: connectUsesHostsMappingForANativeListenerExchange (10809570 ns)
+    [ PASSED ] CASE: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission (691445 ns)
+    TCS: DnsWireParserTest, time elapsed: 93727427 ns, RESULT:
+    [ PASSED ] CASE: decodesCompressedTargetsBinaryTxtSoaAndUnknownData (204711 ns)
+    [ PASSED ] CASE: recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit (100312 ns)
+    [ PASSED ] CASE: summariesAndRecordsOwnParserAndConstructorInputs (75580 ns)
+    [ PASSED ] CASE: publicSummaryRejectsCountsBeyondWireAndCombinedRecordBounds (87606155 ns)
+    [ PASSED ] CASE: parserPreservesQuestionIdentityAndRejectsIncompleteRecords (200089 ns)
+    [ PASSED ] CASE: asciiNameProfileRejectsAmbiguousLabels (231839 ns)
+    [ PASSED ] CASE: compressionLoopsForwardPointersAndOutOfRangePointersAreRejected (122165 ns)
+    [ PASSED ] CASE: expandedNameAndSectionCountsRespectConfiguredBounds (165891 ns)
+    [ PASSED ] CASE: completeParserRejectsTrailingAndTruncatedSectionBytes (122540 ns)
+    [ PASSED ] CASE: typedRdataLengthsAndTxtSegmentsAreExact (185658 ns)
+    [ PASSED ] CASE: compressedRdataNamesCannotConsumeNeighboringRecordBytes (173695 ns)
+    [ PASSED ] CASE: srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds (124447 ns)
+    [ PASSED ] CASE: summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries (58837 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceAuthorityNameserverTarget (173440 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceSecondLegacyMailboxName (220158 ns)
+    TCS: DnsWireFuzzTest, time elapsed: 261737736 ns, RESULT:
+    [ PASSED ] CASE: wireMutationsRejectMalformedMessagesOrRetainOwnedSections (261265092 ns)
+    TCS: M8002TcpListenerTest, time elapsed: 61455793 ns, RESULT:
+    [ PASSED ] CASE: bindRejectsInvalidBacklogAndStoppedContextsWithStructuredErrors (112772 ns)
+    [ PASSED ] CASE: bindFailureRetainsPublicCoordinatesAndCause (314590 ns)
+    [ PASSED ] CASE: cancelledAndExpiredAcceptsLeaveListenerReusable (28894019 ns)
+    [ PASSED ] CASE: acceptedStreamTransfersExactDataInBothDirections (243656 ns)
+    [ PASSED ] CASE: overlappingAcceptIsRejectedWithoutCreatingAPendingQueue (30161107 ns)
+    [ PASSED ] CASE: stoppedCloseAdmissionHasNoNativeEffectAndListenerRemainsUsable (257387 ns)
+    [ PASSED ] CASE: gracefulAndAbortTerminalOwnersAreStableAndWakeAccept (129996 ns)
+    TCS: M8002UdpSocketTest, time elapsed: 33545372 ns, RESULT:
+    [ PASSED ] CASE: datagramBoundariesAndOwnedPayloadSurviveScratchReuse (197322 ns)
+    [ PASSED ] CASE: exactCapacityAndTruncationDiscardOnlyTheCurrentDatagramTail (141934 ns)
+    [ PASSED ] CASE: connectedSocketSelectsNativePeerAndFiltersOtherSenders (186138 ns)
+    [ PASSED ] CASE: invalidAndUnsupportedInputsLeaveSocketReusable (1657721 ns)
+    [ PASSED ] CASE: cancellationDeadlineCloseAndAbortRetainDistinctState (30420452 ns)
+    TCS: NetworkFoundationContractTest, time elapsed: 49079048 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (46812 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (46090 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (65814 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (77252 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (120455 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (39125 ns)
+    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (98112 ns)
+    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (66600 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (60813 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (100154 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (58328 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (78797 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (73519 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (30574 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (66744 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (17057 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (44416 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (88892 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (102775 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (33786 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (62041 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (1247785 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (322482 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (171246 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (97806 ns)
+    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (45859 ns)
+    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (69256 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (112826 ns)
+    [ PASSED ] CASE: tcpStreamJoiningBackgroundCloseWaitsForCompletion (31127562 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (89137 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (93335 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (81524 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (50083 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (113352 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (8480719 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (30443 ns)
+Summary: TOTAL: 91
+    PASSED: 89, SKIPPED: 0, ERROR: 1
+    FAILED: 1, listed below:
+            TCS: DnsClientWireTest, CASE: silentDnsAttemptsLeaveBudgetForServerAndPassFailover
+            TCS: DnsClientWireTest, CASE: exhaustedResponseCodesRetainTheLastRespondingNameserver
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2073308912 ns, RESULT:
+TP: wirestack.*, time elapsed: 2073256061 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 2065865797 ns, RESULT:
+        TCS: DnsClientWireTest, time elapsed: 1290322357 ns, RESULT:
+        [ ERROR  ] CASE: silentDnsAttemptsLeaveBudgetForServerAndPassFailover (947350870 ns)
+        [ FAILED ] CASE: exhaustedResponseCodesRetainTheLastRespondingNameserver (3086083 ns)
+        TCS: DnsResolverPolicyTest, time elapsed: 274949844 ns, RESULT:
+        TCS: DnsWireParserTest, time elapsed: 93727427 ns, RESULT:
+        TCS: DnsWireFuzzTest, time elapsed: 261737736 ns, RESULT:
+        TCS: M8002TcpListenerTest, time elapsed: 61455793 ns, RESULT:
+        TCS: M8002UdpSocketTest, time elapsed: 33545372 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 49079048 ns, RESULT:
+Summary: TOTAL: 91
+    PASSED: 89, SKIPPED: 0, ERROR: 1
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "command": {
+    "id": "plan-validation",
+    "argv": [
+      "python3",
+      "tools/repository/repository_tooling.py",
+      "--root",
+      ".",
+      "validate-plan",
+      "docs/evidence/M8-004/test-plan.md",
+      "--json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-12T21:28:30.627026Z",
+    "finished_at_utc": "2026-09-12T21:28:30.740874Z",
+    "duration_ms": 113.848,
+    "stdout_path": "docs/evidence/M8-004/development/pr160-acceptance/plan-validation.stdout.log",
+    "stderr_path": "docs/evidence/M8-004/development/pr160-acceptance/plan-validation.stderr.log",
+    "stdout_excerpt": "{\"counts\": {\"paths\": 10, \"scenarios\": 39, \"tests\": 17}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "64d2355acf4cd167162a14964ef0d1b697224f2b",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "exit_code": 1,
+      "total": 95,
+      "passed": 93,
+      "failed": 1,
+      "errors": 1
+    },
+    "green": {
+      "exit_code": 0,
+      "total": 95,
+      "passed": 95,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-response-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-response-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-response-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-response-green.stderr.log"
+      }
+    }
+  },
+  "findings": [
+    {
+      "comment": 3997500651,
+      "correction": "Retain the responding nameserver alongside each wire summary. Live NXDOMAIN, CNAME NXDOMAIN and NODATA use endpoint-aware response errors, distinct from cache errors. Family aggregation retains the original exceptions rather than Boolean flags.",
+      "proof": "The existing RFC2308 regression now checks all three live negative answers against the owned UDP peer, then repeats them from cache without a remote endpoint or new queries."
+    },
+    {
+      "comment": 3997500655,
+      "correction": "Stop iterating address families after the requested result capacity is filled, after retaining its expiration.",
+      "proof": "An Any/maxResults=1 lookup returns the available A result from the owned UDP peer. Repeating the cached lookup also succeeds; the peer receives no extra AAAA query. Baseline timed out despite already receiving the required IPv4 result."
+    }
+  ],
+  "pre_runtime_compile_failures": {
+    "explanation": "Initial assertions used equality on a non-Equatable endpoint enum and an incorrectly named timeout variant. Corrected to the repository match conventions before runtime red evidence; neither compile attempt is counted as a runtime reproduction.",
+    "raw": {
+      "assertion": {
+        "stdout": "docs/evidence/M8-004/development/pr160-response-assertion-compile.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-response-assertion-compile.stderr.log"
+      },
+      "timeout": {
+        "stdout": "docs/evidence/M8-004/development/pr160-response-timeout-compile.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-response-timeout-compile.stderr.log"
+      }
+    }
+  }
+}
