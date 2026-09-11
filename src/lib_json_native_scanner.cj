@@ -7,7 +7,6 @@ const YJ_JSON_SCAN_FALLBACK: Int32 = 1
 const YJ_JSON_SCAN_CAPACITY: Int32 = 2
 const YJ_JSON_SCAN_VALIDATE_STRINGS = 1u32
 const YJSON_NATIVE_FLOAT_MAX_TOKEN_BYTES: Int64 = 256
-const YJSON_NATIVE_FLOAT_MAX_SIGNIFICANT_DIGITS: Int64 = 15
 
 const YJSON_NATIVE_MIN_SKIP_BYTES = 32
 const YJSON_NATIVE_MIN_OBJECT_SCAN_BYTES = 1024
@@ -304,40 +303,9 @@ func jsonNativeFloatParserAvailable(): Bool {
     jsonNativeAccelerationPrimitives.isSome()
 }
 
-// libc and the STS parser can choose adjacent IEEE-754 values for long decimal
-// tokens. Keep native conversion on the conservative 15-digit subset and defer
-// the remaining tokens to the semantic Float64 parser.
-func jsonNativeFloatTokenHasTooManySignificantDigits(reader: JsonFastReader): Bool {
-    var significantDigits: Int64 = 0
-    var nonZeroSeen = false
-    var offset: Int64 = 0
-    let tokenLength = reader.currentRawTokenSize()
-    while (offset < tokenLength) {
-        let value = reader.currentRawTokenByte(offset)
-        if (value == b'e' || value == b'E') {
-            break
-        }
-        if (value >= b'0' && value <= b'9') {
-            if (value != b'0' || nonZeroSeen) {
-                nonZeroSeen = true
-                significantDigits++
-                if (significantDigits > YJSON_NATIVE_FLOAT_MAX_SIGNIFICANT_DIGITS) {
-                    return true
-                }
-            }
-        }
-        offset++
-    }
-    false
-}
-
-
 func jsonNativeParseFloat64(reader: JsonFastReader): Option<Float64> {
     let tokenLength = reader.currentRawTokenSize()
     if (tokenLength <= 0 || tokenLength > YJSON_NATIVE_FLOAT_MAX_TOKEN_BYTES) {
-        return None<Float64>
-    }
-    if (jsonNativeFloatTokenHasTooManySignificantDigits(reader)) {
         return None<Float64>
     }
     let backend = match (jsonNativeAccelerationPrimitives) {

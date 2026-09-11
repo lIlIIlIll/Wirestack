@@ -55,10 +55,17 @@ foreign func YJ_JSON_ParseInt64Array(input: CPointer<UInt8>, len: Int64, start: 
     values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
     outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
 
+const YJSON_NATIVE_FLOAT_MAX_SAFE_TOKEN_BYTES: Int64 = 16
+
 private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
     public func simdCaps(): UInt32 { unsafe { YJ_JSON_SimdCaps() } }
 
     public func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64 {
+        // libc and STS may choose adjacent values for long decimal tokens;
+        // let the core Float64 parser remain the semantic authority.
+        if (tokenLength <= 0 || tokenLength > YJSON_NATIVE_FLOAT_MAX_SAFE_TOKEN_BYTES) {
+            return Float64.NaN
+        }
         unsafe { YJ_JSON_ParseDouble(input, len, start, tokenLength) }
     }
 
