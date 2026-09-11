@@ -24,9 +24,9 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 `b867fca2fd0d4bc19bf195e7872f6f13d5019fd3ba5f409291814f7c5bdfa313`。
 本地工具链为 `<home>/cangjie_sdk/daily/cangjie`，clang=`22.1.8`，
 gcc=`16.2.1`。
-Hosted PR 为 [#20](https://github.com/lIlIIlIll/yjson/pull/20)，最新完整
-run 为 [`34494604326`](https://github.com/lIlIIlIll/yjson/actions/runs/34494604326)；
-run conclusion=`success`。
+Hosted PR 为 [#26](https://github.com/lIlIIlIll/yjson/pull/26)，最新完整
+run 为 [`34553858937`](https://github.com/lIlIIlIll/yjson/actions/runs/34553858937)；
+run conclusion=`success`；该 run 的 `Cangjie STS (pinned)` 与 `CI Required` 均通过。
 
 ## 2. Gate 状态
 
@@ -35,7 +35,7 @@ run conclusion=`success`。
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | **BLOCKING** | `release/public-cangjie-delta-bfd29.toml` 仍有 `pending-migration-review` 组；发布图仍为 `migration` |
 | Local Linux fresh candidate | PASS | 当前候选的本地 registry rehearsal 完成；`576/576` root tests，九包暂存、构建和 consumer 检查通过 |
-| Hosted PR CI | PASS | run `34494604326` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage 和 CI Required 均通过 |
+| Hosted PR CI | PASS | PR [#26](https://github.com/lIlIIlIll/yjson/pull/26) run `34553858937` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage、Cangjie STS 和 CI Required 均通过 |
 | Hosted main CI / Pages | PASS | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) passed all 28 jobs; [`Deploy API Documentation`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542/job/102990740002) completed its `Deploy GitHub Pages` step; site [`liliilill.github.io/yjson`](https://liliilill.github.io/yjson/); `github-pages` artifact digest `sha256:a454b4519cc9cf5e311e301035681a18324ce73811dd3e5c2e7d1cf74b9ddbfa` |
 | Coverage | PASS | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line `26/26=100.0%`、branch `16/16=100.0%`；hosted Core Coverage 成功 |
 | Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `292` 个文件并通过 |
