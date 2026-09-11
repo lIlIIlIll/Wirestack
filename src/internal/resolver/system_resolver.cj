@@ -38,6 +38,15 @@ public class SystemResolver <: Resolver & Resource {
         resolve(host, None<String>, options, context)
     }
 
+    /** Internal DNS adapter path that skips platform search suffixes. */
+    public func resolveExact(
+        host: HostName,
+        options: ResolveOptions,
+        context: OperationContext
+    ): ResolveResult {
+        backend.resolve(host, None<String>, options, context, absolute: true)
+    }
+
     public func close(): Unit {
         backend.close()
     }

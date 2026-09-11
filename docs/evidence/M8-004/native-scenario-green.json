@@ -1,0 +1,127 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-publication",
+      "exit_code": 0,
+      "id": "toolchain",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-scenario-green/toolchain.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        },
+        "path": "docs/evidence/M8-004/native-scenario-green/toolchain.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tools/build_linux_resolver.py",
+        "--root",
+        "/tmp/wirestack-m8-004-publication",
+        "--quiet"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-publication",
+      "exit_code": 0,
+      "id": "resolver-native-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-scenario-green/resolver-native-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-scenario-green/resolver-native-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "/tmp/wirestack-m8-004-consumer-pnr_nihi",
+      "exit_code": 1,
+      "id": "consumer-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a0dd159d3e0d47447c1cfb8d46dc36a097f35ea582d3358a9a70544bafec60f3"
+        },
+        "path": "docs/evidence/M8-004/native-scenario-green/consumer-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/native-scenario-green/consumer-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    }
+  ],
+  "error": "RuntimeError: consumer-build exited 1; see /tmp/wirestack-m8-004-publication/docs/evidence/M8-004/native-scenario-green/consumer-build.stderr.log",
+  "invocation": {
+    "argv": [
+      "/usr/bin/python3",
+      "/tmp/wirestack-m8-004-publication/tools/m8_004_native_dns.py",
+      "--report",
+      "docs/evidence/M8-004/native-scenario-green.json",
+      "--output-dir",
+      "docs/evidence/M8-004/native-scenario-green"
+    ],
+    "cwd": "/tmp/wirestack-m8-004-publication",
+    "output_dir": "/tmp/wirestack-m8-004-publication/docs/evidence/M8-004/native-scenario-green",
+    "report": "/tmp/wirestack-m8-004-publication/docs/evidence/M8-004/native-scenario-green.json"
+  },
+  "limits": {
+    "case_timeout_seconds": 30,
+    "cname_delay_seconds": 1.25,
+    "dns_packet_bytes": 65535,
+    "public_client_query_timeout_seconds": 5,
+    "public_connect_deadline_seconds": 2,
+    "socket_timeout_seconds": 5,
+    "tcp_backlog": 8
+  },
+  "platform": {
+    "libc": [
+      "glibc",
+      "2.44"
+    ],
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "scenarios": [],
+  "schema_version": 1,
+  "source_digests": {
+    "examples/linux/m8_004/native_dns.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8aca67c6da7e1bfc2905354d652a1fb2eb8221cc990c3440c5dd44082a713bb3"
+    },
+    "tools/m8_004_native_dns.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5b7368877e57f47c1eece364cee0ffd7197d15fa3e84fed528f5f9bd9066e93e"
+    }
+  },
+  "source_task": "M8-004",
+  "status": "FAIL"
+}

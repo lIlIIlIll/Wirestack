@@ -496,8 +496,10 @@ evidence are recorded in `docs/evidence/M8-002/`. M8-003 adds qualified Unix
 stream/listener and explicitly addressed datagrams, with native evidence in
 `docs/evidence/M8-003/`. Outgoing abstract names are restricted to the supported
 107-byte UTF-8 profile; Unix connected send, unnamed datagram source conversion
-and privileged raw I/O remain explicit SDK/adapter exclusions. M8-004 through
-M8-007 remain pending and must not inherit these socket qualification claims.
+and privileged raw I/O remain explicit SDK/adapter exclusions. M8-004 passes
+all twelve acceptance commands, including 99 network tests and twelve native
+DNS scenarios. M8-005 through M8-007 remain pending and must not inherit these
+socket or DNS qualification claims.
 
 | ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD/ADR 追踪 | 合并/验收条件 |
 |---|---|---|---:|---|---|---|
