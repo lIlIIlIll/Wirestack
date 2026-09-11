@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "4b081a5be04aeab87f3b371ca855f3aab432ca3e",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "exit_code": 1,
+      "total": 100,
+      "passed": 99,
+      "failed": 1,
+      "errors": 0
+    },
+    "green": {
+      "exit_code": 0,
+      "total": 100,
+      "passed": 100,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-nxdomain-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-nxdomain-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-nxdomain-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-nxdomain-green.stderr.log"
+      }
+    }
+  },
+  "findings": [
+    {
+      "comment": 3997808898,
+      "correction": "Remove deferred NameNotFound aggregation. NXDOMAIN now follows the terminal error path immediately, regardless of whether a negative TTL can be cached or another family previously succeeded.",
+      "proof": "The owned UDP peer returns NXDOMAIN without SOA first and can return a valid AAAA answer next. Before correction Any incorrectly accepted that second answer. After correction Any reports NameNotFound after exactly one observed query. A later explicit IPv6 lookup performs the second query and succeeds, proving no negative cache lifetime was invented."
+    }
+  ],
+  "pre_runtime_compile_failure": {
+    "explanation": "Cangjie rejected a spawned lambda capturing a mutable local counter. Replaced it with the existing AtomicInt64 counter convention before runtime red evidence.",
+    "raw": {
+      "stdout": "docs/evidence/M8-004/development/pr160-nxdomain-counter-compile.stdout.log",
+      "stderr": "docs/evidence/M8-004/development/pr160-nxdomain-counter-compile.stderr.log"
+    }
+  },
+  "counter_api_evidence": {
+    "documentation_branch": "main",
+    "module": "std.sync",
+    "signatures": [
+      "public init(val: Int64)",
+      "public func fetchAdd(val: Int64): Int64",
+      "public func load(): Int64"
+    ],
+    "deprecated": false,
+    "url": "https://955work.icu/dev/std/std/sync/sync_package_api/sync_package_classes.html",
+    "installed_toolchain_proof": "The corrected network regression compiles and runs with STS 1.1.3; main documentation is not represented as version-specific STS documentation."
+  }
+}

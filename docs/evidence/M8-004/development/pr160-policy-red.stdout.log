@@ -1,0 +1,50 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 231299787 ns, RESULT:
+    TCS: DnsResolverPolicyTest, time elapsed: 225367017 ns, RESULT:
+    [ PASSED ] CASE: fromSystemParsesTabsCommentsLastSearchAndClampedNdots (584272 ns)
+    [ PASSED ] CASE: configOwnsInputArraysAndReturnsDefensiveCopies (48972 ns)
+    [ PASSED ] CASE: systemFilesFailClosedWhenMissingOversizedOrNonregular (14631089 ns)
+    [ PASSED ] CASE: hostsAliasesFilterFamiliesAndRemainSnapshotted (673713 ns)
+    [ PASSED ] CASE: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst (3048140 ns)
+    [ PASSED ] CASE: exactHostsEntryWinsBeforeSearchSuffixDns (200638663 ns)
+    [ PASSED ] CASE: cancelledExpiredAndClosedCallsRetainPublicResolveClassifications (411285 ns)
+    [ PASSED ] CASE: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission (365889 ns)
+    [ FAILED ] CASE: systemNameserversRetainOnlySupportedNumericZones (212783 ns)
+    Assert Failed: `(servers.size == 2)`
+       left: 4
+      right: 2
+
+    [ ERROR  ] CASE: connectUsesHostsMappingForANativeListenerExchange (2805574 ns)
+    REASON: An exception has occurred:ConnectException: connection deadline exceeded
+	at wirestack.NetworkException.init(wirestack.NetworkErrorCategory, wirestack.NetworkPhase, wirestack.NetworkErrorCode, std.core.String, wirestack.Retryability, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/network_error.cj:392)
+	at wirestack.internal.connector.ConnectException.init(wirestack.NetworkErrorCode, std.core.String, std.core.Array<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/connector/happy_eyeballs.cj:69)
+	at wirestack.internal.connector.AttemptCoordinator.failure()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/connector/happy_eyeballs.cj:425)
+	at wirestack.internal.connector.HappyEyeballsConnector.runPlan(wirestack.internal.connector.AttemptPlan, wirestack.ResolveDiagnostics, wirestack.OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/connector/happy_eyeballs.cj:190)
+	at wirestack.internal.connector.HappyEyeballsConnector.connect(wirestack.HostName, UInt16, wirestack.ResolveOptions, wirestack.OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/connector/happy_eyeballs.cj:135)
+	at wirestack.net.Resolver.connect(wirestack.HostName, UInt16, wirestack.ResolveOptions, std.core.Duration, wirestack.OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver.cj:306)
+	at wirestack.net/test.DnsResolverPolicyTest.connectUsesHostsMappingForANativeListenerExchange()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:505)
+	at wirestack.net/test.DnsResolverPolicyTest.asTestSuite.lambda.8.lambda.0()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:468)
+    STDERR:
+    An exception has occurred:
+    NetworkException: transport is closed
+    	 at wirestack.internal.transport_stdnet::closedError(wirestack::NetworkErrorCategory, wirestack::NetworkPhase, std.core::Option<...>, std.core::Option<...>, std.core::Option<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/transport_stdnet/package.cj:1098)
+    	 at wirestack.internal.transport_stdnet::StdNetTransportListener::accept(wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/transport_stdnet/package.cj:863)
+    	 at wirestack.net::TcpListener::accept(wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/tcp_listener.cj:139)
+    	 at wirestack.net/test::DnsResolverPolicyTest::connectUsesHostsMappingForANativeListenerExchange::lambda.0()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:481)
+Summary: TOTAL: 83
+    PASSED: 8, SKIPPED: 73, ERROR: 1
+    FAILED: 1, listed below:
+            TCS: DnsResolverPolicyTest, CASE: systemNameserversRetainOnlySupportedNumericZones
+            TCS: DnsResolverPolicyTest, CASE: connectUsesHostsMappingForANativeListenerExchange
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 237575250 ns, RESULT:
+TP: wirestack.*, time elapsed: 237480449 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 231299787 ns, RESULT:
+        TCS: DnsResolverPolicyTest, time elapsed: 225367017 ns, RESULT:
+        [ FAILED ] CASE: systemNameserversRetainOnlySupportedNumericZones (212783 ns)
+        [ ERROR  ] CASE: connectUsesHostsMappingForANativeListenerExchange (2805574 ns)
+Summary: TOTAL: 83
+    PASSED: 8, SKIPPED: 73, ERROR: 1
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

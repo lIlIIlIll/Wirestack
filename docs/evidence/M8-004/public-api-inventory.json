@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "scope": "Exact candidate declaration baseline check",
+  "command": {
+    "id": "public-api-inventory",
+    "argv": [
+      "python3",
+      "tools/m7_026_linux_api_freeze.py",
+      "--baseline",
+      "docs/api/baselines/wirestack-linux-pre1-m8-004.json",
+      "--report",
+      "docs/evidence/M8-004/api-inventory.json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-12T22:28:27.275942Z",
+    "finished_at_utc": "2026-09-12T22:28:28.140395Z",
+    "duration_ms": 864.461,
+    "stdout_path": "docs/evidence/M8-004/development/pr160-acceptance/public-api-inventory.stdout.log",
+    "stderr_path": "docs/evidence/M8-004/development/pr160-acceptance/public-api-inventory.stderr.log",
+    "stdout_excerpt": "M7-026 Linux API compatibility: PASS\npackage=wirestack@0.1.0\ndeclarations=274\nresolved_aliases=103\ninventory_sha256=50020690d75403f01de9a34e5c0b2388c3cc54d741d794921e338bbe304145dc\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "producer_report": "docs/evidence/M8-004/api-inventory.json",
+  "compatibility_limits": "docs/evidence/M8-004/compatibility-inventory.json"
+}

@@ -1,0 +1,8 @@
+An exception has occurred:
+ResolveException: system resolver rejected the request: 1
+	 at wirestack.internal.resolver::BoundedSystemResolverBackend::submit(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, Bool)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/resolver/bounded_backend.cj:246)
+	 at wirestack.internal.resolver::BoundedSystemResolverBackend::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext, Bool)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/resolver/bounded_backend.cj:147)
+	 at wirestack.internal.resolver::SystemResolver::resolveExact(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/internal/resolver/system_resolver.cj:47)
+	 at wirestack.net::DnsClient::lookup(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_client.cj:143)
+	 at wirestack_m8_004_native_dns::runSystemFallback()(/tmp/wirestack-m8-004-consumer-j96unz5p/src/main.cj:295)
+	 at wirestack_m8_004_native_dns::main(std.core::Array<...>)(/tmp/wirestack-m8-004-consumer-j96unz5p/src/main.cj:329)
