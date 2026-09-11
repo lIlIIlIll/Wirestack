@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       cangjie_version:
-        description: Pinned Cangjie STS version for release qualification (currently 1.1.0)
+        description: Pinned Cangjie STS version for release qualification (currently 1.1.3)
         required: false
         type: string
 
@@ -110,7 +110,7 @@ jobs:
               --validate-version "$REQUESTED_VERSION")
             resolution=workflow-dispatch-exact
           else
-            value=1.1.0
+            value=1.1.3
             python3 scripts/validate_cangjie_sts.py \
               --validate-version "$value" >/dev/null
             resolution=pinned-sts
