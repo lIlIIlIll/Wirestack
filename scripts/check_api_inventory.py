@@ -219,6 +219,10 @@ CANGJIE_REVIEW_RATIONALES = {
         "bundle; keep JSON separators, state, limits, and semantic fallback in the "
         "portable writer."
     ),
+    "native-activation-path-removal": (
+        "Remove the unvalidated public native primitive activator; keep slot installation "
+        "inside the checked runtime initialization path."
+    ),
     "unclassified": "No reviewed migration rule matches this declaration.",
 }
 
@@ -228,6 +232,10 @@ def _classify_cangjie_delta_record(record: str) -> str:
     if len(parts) != 4:
         return "unclassified"
     package, source, owner, declaration = parts
+    if source == "src/lib_json_native_scanner.cj" and declaration.startswith(
+        "public func activateJsonNativePrimitivesV1("
+    ):
+        return "native-activation-path-removal"
     if source == "src/lib_json_native_scanner.cj":
         return "native-writer-acceleration-seam"
     if package == "yjson_algorithms":

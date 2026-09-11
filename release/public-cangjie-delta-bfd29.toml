@@ -1495,12 +1495,19 @@ added = [
 ]
 
 [[review_groups]]
-classification = "native-writer-acceleration-seam"
-rationale = "Add the versioned native writer formatting seam to the optional acceleration bundle; keep JSON separators, state, limits, and semantic fallback in the portable writer."
+classification = "native-activation-path-removal"
+rationale = "Remove the unvalidated public native primitive activator; keep slot installation inside the checked runtime initialization path."
 review_status = "reviewed-for-0.1.0"
 removed = [
   "yjson|src/lib_json_native_scanner.cj|<top-level>|public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit",
 ]
+added = []
+
+[[review_groups]]
+classification = "native-writer-acceleration-seam"
+rationale = "Add the versioned native writer formatting seam to the optional acceleration bundle; keep JSON separators, state, limits, and semantic fallback in the portable writer."
+review_status = "reviewed-for-0.1.0"
+removed = []
 added = [
   "yjson|src/lib_json_native_scanner.cj|JsonNativeWriterBackend|func formatFloat64(value: Float64, output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64): Int64",
   "yjson|src/lib_json_native_scanner.cj|JsonNativeWriterBackend|func formatFloat64Array(values: CPointer<Float64>, count: Int64, output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64, outWritten: CPointer<Int64>): Int32",
