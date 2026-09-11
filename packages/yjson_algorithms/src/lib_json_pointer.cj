@@ -11,7 +11,9 @@ func jsonPointerError(message: String, pointer: String,
     JsonException(message, code: code, path: path)
 }
 
-/// An immutable RFC 6901 JSON Pointer.
+/**
+ * An immutable RFC 6901 JSON Pointer.
+ */
 public class JsonPointer <: ToString {
     private let source: String
     private let segments: Array<String>

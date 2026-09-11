@@ -4,8 +4,10 @@ import std.collection.*
 import std.math.numeric.*
 import std.time.*
 
-/// Narrow semantic reader contract consumed by generated codecs. Implementors
-/// remain runtime-owned; generated source never names a concrete parser class.
+/**
+ * Narrow semantic reader contract consumed by generated codecs. Implementors
+ * remain runtime-owned; generated source never names a concrete parser class.
+ */
 public interface GeneratedSupportV1Reader {
     func expectEnd(): Unit
     func startRawObject(): Unit
@@ -40,8 +42,10 @@ public interface GeneratedSupportV1Reader {
     func skipRawWithDepth(maxDepth: Int64): Unit
 }
 
-/// Allocation-free concrete-reader view used by generated object codecs after
-/// resolving the versioned reader interface once per object.
+/**
+ * Allocation-free concrete-reader view used by generated object codecs after
+ * resolving the versioned reader interface once per object.
+ */
 public struct GeneratedSupportV1ReadCursor {
     private let reader: JsonFastReader
 
@@ -225,14 +229,18 @@ public struct GeneratedSupportV1ReadCursor {
         reader.readRawInt64ArrayMapFast()
     }
     public func skipRawWithDepth(maxDepth: Int64): Unit { reader.skipRawWithDepth(maxDepth) }
-    /// Policy-aware unknown-field skip: the underlying reader enforces the
-    /// configured duplicate/unknown field policies while skipping the value
-    /// at the current cursor. Generated fast paths route unknown-field skips
-    /// here instead of the raw syntactic skip.
+    /**
+     * Policy-aware unknown-field skip: the underlying reader enforces the
+     * configured duplicate/unknown field policies while skipping the value
+     * at the current cursor. Generated fast paths route unknown-field skips
+     * here instead of the raw syntactic skip.
+     */
     public func skipValue(maxDepth: Int64): Unit { reader.skipValue(maxDepth) }
 }
-/// Narrow semantic writer contract consumed by generated codecs. Structural
-/// correctness remains owned by the core writer state machine.
+/**
+ * Narrow semantic writer contract consumed by generated codecs. Structural
+ * correctness remains owned by the core writer state machine.
+ */
 public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 & GeneratedWriteStateV1Owner {
     func finishString(): String
     func generatedCursorV1(): GeneratedSupportV1WriteCursor
@@ -251,9 +259,11 @@ public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 
     func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool
 }
 
-/// Versioned, allocation-free view used after the runtime writer has been
-/// resolved once. Generated source only depends on generated_support.v1 while
-/// field loops avoid repeated interface dispatch.
+/**
+ * Versioned, allocation-free view used after the runtime writer has been
+ * resolved once. Generated source only depends on generated_support.v1 while
+ * field loops avoid repeated interface dispatch.
+ */
 public struct GeneratedSupportV1WriteCursor {
     private let writer: JsonDirectWriter
 
@@ -545,10 +555,12 @@ public class GeneratedSupportV1 {
         }
     }
 
-    /// Unified gate for every public generated-codec entry point. Exact
-    /// toJson/fromJson overloads and the compact raw provider call this before
-    /// touching any runtime state so the protocol version is validated and the
-    /// portable engine is frozen exactly once.
+    /**
+     * Unified gate for every public generated-codec entry point. Exact
+     * toJson/fromJson overloads and the compact raw provider call this before
+     * touching any runtime state so the protocol version is validated and the
+     * portable engine is frozen exactly once.
+     */
     public static func enterGeneratedEntry(): Unit {
         requireProtocolVersion(1)
         freezeYJsonRuntime()
@@ -570,9 +582,11 @@ public class GeneratedSupportV1 {
         writer.generatedCursorV1()
     }
 
-    /// Public primitive writer seam for macro-generated code. The runtime keeps
-    /// raw primitive state transitions private while this versioned bridge
-    /// preserves depth and output-budget enforcement.
+    /**
+     * Public primitive writer seam for macro-generated code. The runtime keeps
+     * raw primitive state transitions private while this versioned bridge
+     * preserves depth and output-budget enforcement.
+     */
     public static func writeRawBool(writer: GeneratedSupportV1Writer, value: Bool): Unit {
         match (writer) {
             case direct: JsonDirectWriter => direct.writeRawBool(value)
@@ -604,8 +618,10 @@ public class GeneratedSupportV1 {
         }
     }
 
-    /// Cursor overloads keep generated field loops on the allocation-free
-    /// cursor without naming the runtime's concrete writer class.
+    /**
+     * Cursor overloads keep generated field loops on the allocation-free
+     * cursor without naming the runtime's concrete writer class.
+     */
     public static func writeRawBool(cursor: GeneratedSupportV1WriteCursor, value: Bool): Unit {
         cursor.writeRawBool(value)
     }
@@ -665,11 +681,13 @@ public class GeneratedSupportV1 {
         }
     }
 
-    /// Returns whether a generated reader may use the compact fast path
-    /// without constructing the general semantic reader. Generated exact
-    /// overloads use this tiny public seam so they can keep their concrete
-    /// codec call at the application call site instead of routing through a
-    /// type-erased generic YJson wrapper.
+    /**
+     * Returns whether a generated reader may use the compact fast path
+     * without constructing the general semantic reader. Generated exact
+     * overloads use this tiny public seam so they can keep their concrete
+     * codec call at the application call site instead of routing through a
+     * type-erased generic YJson wrapper.
+     */
     public static func usesDefaultFastReadOptions(options: JsonReadOptions): Bool {
         jsonReadOptionsUsesDefaultFastPath(options)
     }

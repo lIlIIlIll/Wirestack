@@ -6,11 +6,13 @@ import std.math.numeric.*
 import std.sync.AtomicOptionReference
 import std.time.*
 
-/// Backend-neutral semantic reader consumed by typed JSON codecs.
-///
-/// `JsonFastReader` remains a separate generated-code optimization contract;
-/// implementations of this interface must preserve the normal configured
-/// parsing, resource-limit, and error-location semantics.
+/**
+ * Backend-neutral semantic reader consumed by typed JSON codecs.
+ *
+ * `JsonFastReader` remains a separate generated-code optimization contract;
+ * implementations of this interface must preserve the normal configured
+ * parsing, resource-limit, and error-location semantics.
+ */
 public interface JsonReader {
     func path(): String
     func location(): Option<JsonLocation>
@@ -36,21 +38,27 @@ public interface JsonReader {
     func readNode(): JsonNode
 }
 
-/// A captured JSON value that can be replayed without serializing and parsing
-/// it again. This is public because generated codecs live in a separate
-/// package; applications normally do not need to implement it.
+/**
+ * A captured JSON value that can be replayed without serializing and parsing
+ * it again. This is public because generated codecs live in a separate
+ * package; applications normally do not need to implement it.
+ */
 public interface GeneratedReplayValueV1 <: Resource {
     func rootStringField(name: String): Option<String>
 
-    /// Opens a fresh reader over the captured root object while omitting every
-    /// occurrence of `name`. Duplicate rejection has already happened when the
-    /// value was captured; LastWins lookup is used by `rootStringField`.
+    /**
+     * Opens a fresh reader over the captured root object while omitting every
+     * occurrence of `name`. Duplicate rejection has already happened when the
+     * value was captured; LastWins lookup is used by `rootStringField`.
+     */
     func openObjectReaderExcluding(name: String): JsonReader
 
     func materialize(): JsonNode
 }
 
-/// Backend-neutral semantic writer consumed by typed JSON codecs.
+/**
+ * Backend-neutral semantic writer consumed by typed JSON codecs.
+ */
 public interface JsonWriter {
     func path(): String
     func error(message: String, code: String): JsonException
@@ -79,8 +87,10 @@ interface GeneratedReadStateV1Owner {
     func generatedReadStateV1(): GeneratedReadStateV1
 }
 
-/// Optional bulk hooks used by generated and built-in codecs. Returning false
-/// asks the codec to use the structural `JsonWriter` fallback.
+/**
+ * Optional bulk hooks used by generated and built-in codecs. Returning false
+ * asks the codec to use the structural `JsonWriter` fallback.
+ */
 public interface GeneratedBulkWriterV1 {
     func tryWriteCompactInt64Array(values: Array<Int64>): Bool
     func tryWriteCompactFloat64Array(values: Array<Float64>): Bool
@@ -172,9 +182,30 @@ public func jsonTryWriteCompactInt64ArrayMap(
     }
 }
 
+/**
+ * Defines how one value of T is written to and read from JSON.
+ *
+ * Implement write and read for the same wire representation. A codec processes one value using the supplied reader or writer; it does not own the stream or finish the enclosing document. YJson performs end-of-document validation and output finalization.
+ */
 public interface JsonCodec<T> {
+    /**
+     * Writes one value using this codec's JSON representation.
+     *
+     * Do not finish or close the enclosing writer; YJson or the caller owns that lifecycle.
+     *
+     * @param value Value to encode.
+     * @param writer Writer positioned where this codec must emit one JSON value.
+     */
     func write(value: T, writer: JsonWriter): Unit
 
+    /**
+     * Reads one JSON value using this codec's representation.
+     *
+     * Consume the value assigned to this codec. Enclosing-document end validation belongs to YJson or the caller.
+     *
+     * @param reader Reader positioned at the next JSON value.
+     * @return Decoded value.
+     */
     func read(reader: JsonReader): T
 }
 
@@ -182,8 +213,10 @@ public interface GeneratedObjectCodecV1<T> <: JsonCodec<T> {
     func writeObjectFields(value: T, writer: JsonWriter): Unit
 }
 
-/// Zero-state type token that keeps inherited generated-codec providers
-/// overloadable without erasing `T`.
+/**
+ * Zero-state type token that keeps inherited generated-codec providers
+ * overloadable without erasing `T`.
+ */
 public class GeneratedCodecTokenV1<T> {
     init() {}
 }
@@ -192,19 +225,23 @@ public interface GeneratedCodecProviderV1<T> {
     static func generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>
 }
 
-/// Static dispatch seam for generated compact codecs. The explicit codec
-/// argument remains part of the public overload for source compatibility, but
-/// generated model types can route the hot path through their own static
-/// provider without an erased codec-interface call on every value.
+/**
+ * Static dispatch seam for generated compact codecs. The explicit codec
+ * argument remains part of the public overload for source compatibility, but
+ * generated model types can route the hot path through their own static
+ * provider without an erased codec-interface call on every value.
+ */
 public interface GeneratedCompactCodecProviderV1<T> {
     static func generatedCompactRawV1(value: T, writer: JsonDirectWriter): Unit
 }
 
-/// Typed object-codec bridge used by generated polymorphic dispatch.
-///
-/// This is deliberately separate from GeneratedCodecProviderV1<T>: a
-/// polymorphic base codec performs subtype dispatch, while each concrete
-/// subtype must expose its own object fields.
+/**
+ * Typed object-codec bridge used by generated polymorphic dispatch.
+ *
+ * This is deliberately separate from GeneratedCodecProviderV1<T>: a
+ * polymorphic base codec performs subtype dispatch, while each concrete
+ * subtype must expose its own object fields.
+ */
 public interface GeneratedObjectCodecProviderV1<T> {
     static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<T>): GeneratedObjectCodecV1<T>
 }
@@ -222,45 +259,57 @@ public func generatedObjectCodecV1Of<T>(): GeneratedObjectCodecV1<T>
 public interface GeneratedCodecV1<T> <: JsonCodec<T> {
     func readFast(reader: GeneratedSupportV1Reader): T
 }
-/// Optional concrete-reader seam for recursive generated fast decoding.
-/// Generic containers use it only when every nested codec opts in; the
-/// versioned reader overload remains the compatibility fallback.
+/**
+ * Optional concrete-reader seam for recursive generated fast decoding.
+ * Generic containers use it only when every nested codec opts in; the
+ * versioned reader overload remains the compatibility fallback.
+ */
 public interface GeneratedDirectFastReadCodecV1<T> <: JsonCodec<T> {
     func readFastDirect(reader: JsonFastReader): T
 }
 
-/// Opt-in generated-code seam for codecs that can consume an already-resolved
-/// reader cursor. Recursive codecs pass the same cursor through the whole
-/// value graph and use GeneratedCodecV1 only as a compatibility fallback.
+/**
+ * Opt-in generated-code seam for codecs that can consume an already-resolved
+ * reader cursor. Recursive codecs pass the same cursor through the whole
+ * value graph and use GeneratedCodecV1 only as a compatibility fallback.
+ */
 public interface GeneratedCursorReadCodecV1<T> <: JsonCodec<T> {
     func readFastWithCursor(reader: GeneratedSupportV1Reader,
         cursor: GeneratedSupportV1ReadCursor): T
 }
 
-/// Matching-version bridge used by generated codecs to retain the concrete
-/// direct-writer type across nested semantic encode calls.
+/**
+ * Matching-version bridge used by generated codecs to retain the concrete
+ * direct-writer type across nested semantic encode calls.
+ */
 public interface GeneratedDirectWriteCodecV1<T> <: JsonCodec<T> {
     func writeDirect(value: T, writer: GeneratedSupportV1Writer): Unit
 }
 
-/// Matching-version generated-code bridge for objects whose fields can be
-/// emitted directly in compact mode without bypassing encode context checks.
+/**
+ * Matching-version generated-code bridge for objects whose fields can be
+ * emitted directly in compact mode without bypassing encode context checks.
+ */
 public interface GeneratedCompactWriteCodecV1<T> <: GeneratedDirectWriteCodecV1<T> {
     func supportsCompactRaw(): Bool
     func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer): Unit
 }
 
-/// Opt-in generated-code seam for custom and recursive codecs that can emit a
-/// compact value through an already-resolved writer cursor.
+/**
+ * Opt-in generated-code seam for custom and recursive codecs that can emit a
+ * compact value through an already-resolved writer cursor.
+ */
 public interface GeneratedCursorWriteCodecV1<T> <: JsonCodec<T> {
     func supportsCompactCursorWrite(): Bool
     func writeCompactWithCursor(value: T, writer: GeneratedSupportV1Writer,
         cursor: GeneratedSupportV1WriteCursor): Unit
 }
 
-/// Optional generated-code seam for nested compact objects. It refines the
-/// general cursor protocol, so statically compact generated codecs need only
-/// advertise one interface while remaining usable by generic containers.
+/**
+ * Optional generated-code seam for nested compact objects. It refines the
+ * general cursor protocol, so statically compact generated codecs need only
+ * advertise one interface while remaining usable by generic containers.
+ */
 public interface GeneratedCompactCursorWriteCodecV1<T> <:
     GeneratedCompactWriteCodecV1<T> & GeneratedCursorWriteCodecV1<T> &
     GeneratedCodecV1<T> & GeneratedCursorReadCodecV1<T> {
@@ -268,8 +317,10 @@ public interface GeneratedCompactCursorWriteCodecV1<T> <:
         cursor: GeneratedSupportV1WriteCursor): Unit
     func writeCompactRawWithWriter(value: T, writer: JsonDirectWriter): Unit
 }
-/// Optional generated-code bulk seam. ArrayList resolves it once so an
-/// element codec can reuse one writer cursor across the complete loop.
+/**
+ * Optional generated-code bulk seam. ArrayList resolves it once so an
+ * element codec can reuse one writer cursor across the complete loop.
+ */
 public interface GeneratedCompactArrayListElementCodecV1<T> {
     func writeCompactRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer): Unit
 }
@@ -2497,7 +2548,9 @@ private func writeJsonValueView(writer: JsonWriter, value: JsonValueView): Unit 
     }
 }
 
-/// Stateless entry points for typed JSON encoding, decoding, and documents.
+/**
+ * Stateless entry points for typed JSON encoding, decoding, and documents.
+ */
 private let yJsonGeneratedCompactWriterPool = AtomicOptionReference<JsonDirectWriter>()
 
 private func generatedCompactWriterConfig(options: JsonWriteOptions): Bool {
@@ -2522,34 +2575,81 @@ private func releaseGeneratedCompactWriter(writer: JsonDirectWriter): Unit {
     let _ = yJsonGeneratedCompactWriterPool.compareAndSwap(None, Some(writer))
 }
 
+/**
+ * Entry points for typed JSON conversion, value-view output, and managed documents.
+ *
+ * Overloads without codec: use the codec generated for T. Explicit codec: overloads also support hand-written codecs. Each read consumes one complete JSON document and rejects trailing non-whitespace data. Streams remain caller-owned. Stream output is not transactional: a failure may leave a written prefix. JSON failures use JsonException; I/O and custom-codec exceptions may propagate unchanged. Initialize optional native acceleration before the first ordinary YJson operation.
+ */
 public class YJson {
-    /// Internal seam used by generated codecs to reuse the default compact
-    /// string writer without changing the public codec contract. Non-default
-    /// options are never inserted into the pool.
+    /**
+     * Acquires a compact string writer for generated-code integration.
+     *
+     * Internal cross-package support API. Applications should call toJson instead. Nondefault options are not inserted into the default writer pool.
+     *
+     * @param options Read or write policies and resource limits for this call.
+     * @return Writer to release in a finally block.
+     */
     public static func acquireGeneratedCompactStringWriter(
         options: JsonWriteOptions
     ): JsonDirectWriter {
         acquireGeneratedCompactWriter(options)
     }
 
+    /**
+     * Releases an acquired generated compact writer when it is reusable.
+     *
+     * Internal cross-package support API. Do not continue using or share the writer after this call.
+     *
+     * @param writer Writer acquired for generated-code use; do not retain it after release.
+     */
     public static func releaseGeneratedCompactStringWriter(
         writer: JsonDirectWriter
     ): Unit {
         releaseGeneratedCompactWriter(writer)
     }
 
+    /**
+     * Parses a complete JSON document into GC-managed immutable storage.
+     *
+     * This is the managed document API, not an explicitly closeable native backend. Use materialize when a mutable copy is needed.
+     *
+     * @param text One complete JSON document as a string.
+     * @param config Parsing policies and positive resource limits for this document.
+     * @return Managed document whose root is a read-only view.
+     * @throws JsonException The input is invalid JSON or exceeds a configured resource limit.
+     */
     public static func parseDocument(text: String,
         config!: JsonReadOptions = JsonReadOptions.defaults): JsonDocument {
         freezeYJsonRuntime()
         parseManagedJsonDocument(text, config)
     }
 
+    /**
+     * Parses a complete JSON document into GC-managed immutable storage.
+     *
+     * This is the managed document API, not an explicitly closeable native backend. Use materialize when a mutable copy is needed.
+     *
+     * @param bytes One complete JSON document encoded as UTF-8 bytes.
+     * @param config Parsing policies and positive resource limits for this document.
+     * @return Managed document whose root is a read-only view.
+     * @throws JsonException The input is invalid JSON or exceeds a configured resource limit.
+     */
     public static func parseDocument(bytes: Array<Byte>,
         config!: JsonReadOptions = JsonReadOptions.defaults): JsonDocument {
         freezeYJsonRuntime()
         parseManagedJsonDocument(bytes, config)
     }
 
+    /**
+     * Encodes a value as a JSON string.
+     *
+     * Reads the supplied view without materializing a mutable tree first.
+     *
+     * @param value Value to encode.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON text.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJson(value: JsonValueView,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): String {
         freezeYJsonRuntime()
@@ -2558,6 +2658,16 @@ public class YJson {
         writer.finishString()
     }
 
+    /**
+     * Encodes a value as UTF-8 JSON bytes.
+     *
+     * Reads the supplied view without materializing a mutable tree first.
+     *
+     * @param value Value to encode.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON bytes.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJsonBytes(value: JsonValueView,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Array<Byte> {
         freezeYJsonRuntime()
@@ -2566,6 +2676,16 @@ public class YJson {
         writer.finishBytes()
     }
 
+    /**
+     * Writes a JSON value to a caller-owned output stream.
+     *
+     * Reads the supplied view without materializing a mutable tree first. The stream is not closed. Failure can leave a written prefix; no rollback is performed.
+     *
+     * @param value Value to encode.
+     * @param output Caller-owned output stream. This operation does not close it.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func writeJson(value: JsonValueView, output: OutputStream,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit {
         freezeYJsonRuntime()
@@ -2577,11 +2697,32 @@ public class YJson {
         writer.finish()
     }
 
+    /**
+     * Encodes a value as a JSON string.
+     *
+     * Uses the codec generated for T.
+     *
+     * @param value Value to encode.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON text.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJson<T>(value: T,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): String where T <: GeneratedCodecProviderV1<T> {
         encodeString(value, generatedCodecV1Of<T>(), options)
     }
 
+    /**
+     * Encodes a value as a JSON string.
+     *
+     * Uses the supplied codec.
+     *
+     * @param value Value to encode.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON text.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJson<T>(value: T,
         codec!: GeneratedCompactCursorWriteCodecV1<T>,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): String
@@ -2589,74 +2730,223 @@ public class YJson {
         encodeStringStatic(value, codec, options)
     }
 
+    /**
+     * Encodes a value as a JSON string.
+     *
+     * Uses the supplied codec.
+     *
+     * @param value Value to encode.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON text.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJson<T>(value: T, codec!: JsonCodec<T>,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): String {
         encodeString(value, codec, options)
     }
 
+    /**
+     * Encodes a value as UTF-8 JSON bytes.
+     *
+     * Uses the codec generated for T.
+     *
+     * @param value Value to encode.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON bytes.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJsonBytes<T>(value: T,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Array<Byte> where T <: GeneratedCodecProviderV1<T> {
         encodeBytes(value, generatedCodecV1Of<T>(), options)
     }
 
+    /**
+     * Encodes a value as UTF-8 JSON bytes.
+     *
+     * Uses the supplied codec.
+     *
+     * @param value Value to encode.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON bytes.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJsonBytes<T>(value: T,
         codec!: GeneratedCompactCursorWriteCodecV1<T>,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Array<Byte> {
         encodeBytes(value, codec, options)
     }
 
+    /**
+     * Encodes a value as UTF-8 JSON bytes.
+     *
+     * Uses the supplied codec.
+     *
+     * @param value Value to encode.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @return Serialized JSON bytes.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func toJsonBytes<T>(value: T, codec!: JsonCodec<T>,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Array<Byte> {
         encodeBytes(value, codec, options)
     }
 
+    /**
+     * Writes a JSON value to a caller-owned output stream.
+     *
+     * Uses the codec generated for T. The stream is not closed. Failure can leave a written prefix; no rollback is performed.
+     *
+     * @param value Value to encode.
+     * @param output Caller-owned output stream. This operation does not close it.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func writeJson<T>(value: T, output: OutputStream,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit where T <: GeneratedCodecProviderV1<T> {
         encodeStream(value, generatedCodecV1Of<T>(), output, options)
     }
 
+    /**
+     * Writes a JSON value to a caller-owned output stream.
+     *
+     * Uses the supplied codec. The stream is not closed. Failure can leave a written prefix; no rollback is performed.
+     *
+     * @param value Value to encode.
+     * @param output Caller-owned output stream. This operation does not close it.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Formatting and output limits; defaults to JsonWriteOptions.defaults.
+     * @throws JsonException The value or output violates the JSON writer contract or its resource limits.
+     */
     public static func writeJson<T>(value: T, output: OutputStream, codec!: JsonCodec<T>,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit {
         encodeStream(value, codec, output, options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the codec generated for T. Trailing non-whitespace data is rejected; this is not a multi-document stream reader.
+     *
+     * @param text One complete JSON document as a string.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(text: String,
         options!: JsonReadOptions = JsonReadOptions.defaults): T where T <: GeneratedCodecProviderV1<T> {
         decodeString(text, generatedCodecV1Of<T>(), options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the supplied codec. Trailing non-whitespace data is rejected; this is not a multi-document stream reader.
+     *
+     * @param text One complete JSON document as a string.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(text: String,
         codec!: GeneratedCompactCursorWriteCodecV1<T>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T {
         decodeString(text, codec, options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the supplied codec. Trailing non-whitespace data is rejected; this is not a multi-document stream reader.
+     *
+     * @param text One complete JSON document as a string.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(text: String, codec!: JsonCodec<T>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T {
         decodeString(text, codec, options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the codec generated for T. Trailing non-whitespace data is rejected; this is not a multi-document stream reader.
+     *
+     * @param bytes One complete JSON document encoded as UTF-8 bytes.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(bytes: Array<Byte>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T where T <: GeneratedCodecProviderV1<T> {
         decodeBytes(bytes, generatedCodecV1Of<T>(), options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the supplied codec. Trailing non-whitespace data is rejected; this is not a multi-document stream reader.
+     *
+     * @param bytes One complete JSON document encoded as UTF-8 bytes.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(bytes: Array<Byte>,
         codec!: GeneratedCompactCursorWriteCodecV1<T>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T {
         decodeBytes(bytes, codec, options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the supplied codec. Trailing non-whitespace data is rejected; this is not a multi-document stream reader.
+     *
+     * @param bytes One complete JSON document encoded as UTF-8 bytes.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(bytes: Array<Byte>, codec!: JsonCodec<T>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T {
         decodeBytes(bytes, codec, options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the codec generated for T. Trailing non-whitespace data is rejected; this is not a multi-document stream reader. The stream is not closed, and underlying I/O errors can propagate.
+     *
+     * @param input Caller-owned input stream. This operation does not close it.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(input: InputStream,
         options!: JsonReadOptions = JsonReadOptions.defaults): T where T <: GeneratedCodecProviderV1<T> {
         decodeStream(input, generatedCodecV1Of<T>(), options)
     }
 
+    /**
+     * Decodes exactly one complete JSON document into T.
+     *
+     * Uses the supplied codec. Trailing non-whitespace data is rejected; this is not a multi-document stream reader. The stream is not closed, and underlying I/O errors can propagate.
+     *
+     * @param input Caller-owned input stream. This operation does not close it.
+     * @param codec Codec defining the JSON representation of the value.
+     * @param options Parsing and decoding policies; defaults to JsonReadOptions.defaults.
+     * @return Decoded value.
+     * @throws JsonException JSON syntax, decoded value, or resource limits are invalid.
+     */
     public static func fromJson<T>(input: InputStream, codec!: JsonCodec<T>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T {
         decodeStream(input, codec, options)
@@ -2859,26 +3149,87 @@ public class YJson {
     }
 }
 
-/// Built-in and composition codecs used with the explicit `codec:` overloads.
+/**
+ * Built-in codecs and container-codec factories for explicit codec: overloads.
+ *
+ * Compose container codecs from an element codec and pass the result to YJson. JSON object keys remain strings; stringMap does not introduce an arbitrary-key conversion format.
+ */
 public class JsonCodecs {
+    /**
+     * Codec for JSON booleans.
+     */
     public static prop bool: JsonCodec<Bool> { get() { BoolJson } }
+    /**
+     * Codec for Int64 JSON numbers.
+     */
     public static prop int64: JsonCodec<Int64> { get() { Int64Json } }
+    /**
+     * Codec for Int32 JSON numbers.
+     */
     public static prop int32: JsonCodec<Int32> { get() { Int32Json } }
+    /**
+     * Codec for Int16 JSON numbers.
+     */
     public static prop int16: JsonCodec<Int16> { get() { Int16Json } }
+    /**
+     * Codec for Int8 JSON numbers.
+     */
     public static prop int8: JsonCodec<Int8> { get() { Int8Json } }
+    /**
+     * Codec for UInt64 JSON numbers.
+     */
     public static prop uint64: JsonCodec<UInt64> { get() { UInt64Json } }
+    /**
+     * Codec for UInt32 JSON numbers.
+     */
     public static prop uint32: JsonCodec<UInt32> { get() { UInt32Json } }
+    /**
+     * Codec for UInt16 JSON numbers.
+     */
     public static prop uint16: JsonCodec<UInt16> { get() { UInt16Json } }
+    /**
+     * Codec for UInt8 JSON numbers.
+     */
     public static prop uint8: JsonCodec<UInt8> { get() { UInt8Json } }
+    /**
+     * Codec for Float64 JSON numbers.
+     */
     public static prop float64: JsonCodec<Float64> { get() { Float64Json } }
+    /**
+     * Codec for Float32 JSON numbers.
+     */
     public static prop float32: JsonCodec<Float32> { get() { Float32Json } }
+    /**
+     * Codec for Float16 JSON numbers.
+     */
     public static prop float16: JsonCodec<Float16> { get() { Float16Json } }
+    /**
+     * Codec for JSON strings.
+     */
     public static prop string: JsonCodec<String> { get() { StringJson } }
+    /**
+     * Codec for Rune using a JSON string.
+     */
     public static prop rune: JsonCodec<Rune> { get() { RuneJson } }
+    /**
+     * Codec for BigInt JSON numbers.
+     */
     public static prop bigInt: JsonCodec<BigInt> { get() { BigIntJson } }
+    /**
+     * Codec for Decimal JSON numbers.
+     */
     public static prop decimal: JsonCodec<Decimal> { get() { DecimalJson } }
+    /**
+     * Codec for DateTime using an RFC 3339 JSON string.
+     */
     public static prop rfc3339DateTime: JsonCodec<DateTime> { get() { DateTimeJson } }
 
+    /**
+     * Creates a codec for an optional value; None is represented as JSON null.
+     *
+     * @param inner Codec for each contained value.
+     * @return Composed codec using inner for contained values.
+     */
     public static func option<T>(inner: JsonCodec<T>): JsonCodec<Option<T>> {
         match (inner) {
             case _: LambdaFastRawJsonCodec<String> =>
@@ -2887,6 +3238,12 @@ public class JsonCodecs {
         }
     }
 
+    /**
+     * Creates a codec for an Array represented as a JSON array.
+     *
+     * @param inner Codec for each contained value.
+     * @return Composed codec using inner for contained values.
+     */
     public static func array<T>(inner: JsonCodec<T>): JsonCodec<Array<T>> {
         match (inner) {
             case _: LambdaFastRawJsonCodec<Int64> =>
@@ -2895,6 +3252,12 @@ public class JsonCodecs {
         }
     }
 
+    /**
+     * Creates a codec for an ArrayList represented as a JSON array.
+     *
+     * @param inner Codec for each contained value.
+     * @return Composed codec using inner for contained values.
+     */
     public static func arrayList<T>(inner: JsonCodec<T>): JsonCodec<ArrayList<T>> {
         match (inner) {
             case _: LambdaFastRawJsonCodec<Int64> =>
@@ -2905,6 +3268,12 @@ public class JsonCodecs {
         }
     }
 
+    /**
+     * Creates a codec for a string-keyed HashMap represented as a JSON object.
+     *
+     * @param inner Codec for each contained value.
+     * @return Composed codec using inner for contained values.
+     */
     public static func stringMap<T>(inner: JsonCodec<T>): JsonCodec<HashMap<String, T>> {
         match (inner) {
             case _: LambdaFastRawJsonCodec<Int64> =>

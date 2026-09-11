@@ -1,0 +1,104 @@
+{
+  "YJson": {
+    "acquireGeneratedCompactStringWriter": 1,
+    "fromJson": 8,
+    "parseDocument": 2,
+    "releaseGeneratedCompactStringWriter": 1,
+    "toJson": 4,
+    "toJsonBytes": 4,
+    "writeJson": 3
+  },
+  "JsonCodecs": {
+    "array": 1,
+    "arrayList": 1,
+    "option": 1,
+    "stringMap": 1,
+    "bigInt": 1,
+    "bool": 1,
+    "decimal": 1,
+    "float16": 1,
+    "float32": 1,
+    "float64": 1,
+    "int16": 1,
+    "int32": 1,
+    "int64": 1,
+    "int8": 1,
+    "rfc3339DateTime": 1,
+    "rune": 1,
+    "string": 1,
+    "uint16": 1,
+    "uint32": 1,
+    "uint64": 1,
+    "uint8": 1
+  },
+  "JsonReadOptions": {
+    "init": 1,
+    "rejectsDuplicateKeys": 1,
+    "rejectsUnknownFields": 1,
+    "defaults": 1,
+    "duplicateKeyPolicy": 1,
+    "maxBufferedValueBytes": 1,
+    "maxDepth": 1,
+    "maxInputBytes": 1,
+    "maxStringBytes": 1,
+    "unknownFieldPolicy": 1
+  },
+  "JsonWriteOptions": {
+    "init": 1,
+    "pretty": 1,
+    "compact": 1,
+    "defaults": 1,
+    "htmlSafe": 1,
+    "htmlSafePreset": 1,
+    "indent": 1,
+    "maxDepth": 1,
+    "maxOutputBytes": 1
+  },
+  "JsonDocument": {
+    "materialize": 2,
+    "root": 1,
+    "toString": 1
+  },
+  "JsonCodec": {
+    "read": 1,
+    "write": 1
+  },
+  "JsonLocation": {
+    "init": 1,
+    "byteOffset": 1,
+    "column": 1,
+    "line": 1
+  },
+  "JsonException": {
+    "init": 2,
+    "code": 1,
+    "location": 1,
+    "path": 1
+  },
+  "JsonName": {
+    "init": 1,
+    "value": 1
+  },
+  "JsonAlias": {
+    "init": 1,
+    "value": 1
+  },
+  "JsonIgnore": {
+    "init": 1
+  },
+  "JsonIncludeNull": {
+    "init": 1
+  },
+  "JsonUsingMetadata": {
+    "init": 1,
+    "expression": 1
+  },
+  "JsonSubtypeMetadata": {
+    "init": 1,
+    "expression": 1
+  },
+  "JsonPolymorphic": {
+    "init": 1,
+    "discriminator": 1
+  }
+}

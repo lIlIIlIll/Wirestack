@@ -8,16 +8,24 @@ public class JsonPathLimits {
     public let maxRegexSteps: Int64
     public let maxMatches: Int64
     public let maxDepth: Int64
-    /// Compile-time byte budget for one filter expression. 0 disables it.
+    /**
+     * Compile-time byte budget for one filter expression. 0 disables it.
+     */
     public let maxFilterExpressionBytes: Int64
-    /// Compile-time budget for logical operators (`&&`, `||`, `!`) in one
-    /// filter expression. 0 disables it.
+    /**
+     * Compile-time budget for logical operators (`&&`, `||`, `!`) in one
+     * filter expression. 0 disables it.
+     */
     public let maxFilterOperators: Int64
-    /// Compile-time budget for logical recursion depth in one filter
-    /// expression. 0 disables it.
+    /**
+     * Compile-time budget for logical recursion depth in one filter
+     * expression. 0 disables it.
+     */
     public let maxFilterDepth: Int64
-    /// Run-time budget for logical operations evaluated across a whole
-    /// path execution. 0 disables it.
+    /**
+     * Run-time budget for logical operations evaluated across a whole
+     * path execution. 0 disables it.
+     */
     public let maxFilterOperations: Int64
     public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000,
         maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256,

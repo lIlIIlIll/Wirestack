@@ -86,7 +86,9 @@ public class JsonPatch {
         result.toArray()
     }
 
-    /// Applies atomically to a detached copy. The input is never changed.
+    /**
+     * Applies atomically to a detached copy. The input is never changed.
+     */
     public func apply(target: JsonValueView, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
         enforceWorkLimit(patchOperations.size, limits.maxOperations, "patch operations")
         for (operation in patchOperations) {
@@ -100,8 +102,10 @@ public class JsonPatch {
         applyJsonPatchOperations(target.materialize(), patchOperations, copyWork)
     }
 
-    /// Applies atomically and commits into the original root container when
-    /// its kind is unchanged. Callers must always use the returned root.
+    /**
+     * Applies atomically and commits into the original root container when
+     * its kind is unchanged. Callers must always use the returned root.
+     */
     public func applyInPlace(target: JsonNode,
         limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
         let result = apply(target, limits: limits)

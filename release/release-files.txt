@@ -23,6 +23,7 @@ docs/codec-generation.md
 docs/configuration-and-errors.md
 docs/custom-codecs.md
 docs/library-comparison.md
+docs/maintainers/api-documentation.md
 docs/maintainers/native-internals.md
 docs/maintainers/repository-layout.md
 docs/maintainers/releasing.md
@@ -151,6 +152,8 @@ scripts/test_check_cjdoc_qualification.py
 scripts/prepare_cjdoc.py
 scripts/generate_api_docs.py
 scripts/test_generate_api_docs.py
+scripts/check_api_documentation.py
+scripts/test_check_api_documentation.py
 scripts/release_graph.py
 scripts/test_release_graph.py
 scripts/test_release_temp_tree.py
@@ -214,6 +217,7 @@ release/package-manifests/yjson_schema_formats.toml
 release/package-manifests/yjson_yyjson.toml
 release/cjdoc-tool.toml
 release/cjdoc-policy.toml
+release/api-documentation-required.json
 release/release-graph.toml
 release/public-api-inventory.toml
 release/public-api-snapshot.txt
@@ -287,6 +291,7 @@ packages/examples/README.md
 packages/examples/src/main.cj
 packages/codec_integration/cjpm.toml
 packages/codec_integration/cjpm.lock
+packages/codec_integration/src/api_documentation_contract_test.cj
 packages/codec_integration/src/generated_collections_test.cj
 packages/codec_integration/src/main.cj
 packages/codec_integration/src/json_literal_test.cj

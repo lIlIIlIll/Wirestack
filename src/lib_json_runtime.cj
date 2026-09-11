@@ -2,8 +2,10 @@ package yjson
 
 import std.sync.*
 
-/// Versioned cross-package activation seam used by yjson_native_accel.
-/// Applications configure it through YJsonNativeAccel.initialize().
+/**
+ * Versioned cross-package activation seam used by yjson_native_accel.
+ * Applications configure it through YJsonNativeAccel.initialize().
+ */
 public interface JsonAccelerationProviderV1 {
     func identity(): String
     func protocolVersion(): Int64
@@ -11,10 +13,12 @@ public interface JsonAccelerationProviderV1 {
     func activate(): Unit
 }
 
-/// Optional extension implemented by the first-party native primitive
-/// provider. It lets the runtime validate and install the primitive bundle
-/// itself, inside the initialization lock, instead of exposing a public
-/// unvalidated installation entry point.
+/**
+ * Optional extension implemented by the first-party native primitive
+ * provider. It lets the runtime validate and install the primitive bundle
+ * itself, inside the initialization lock, instead of exposing a public
+ * unvalidated installation entry point.
+ */
 public interface JsonNativePrimitivesProviderV1 <: JsonAccelerationProviderV1 {
     func primitives(): JsonNativeAccelerationPrimitivesV1
 }
@@ -40,7 +44,9 @@ private var yJsonRuntimeState: Int64 = YJSON_RUNTIME_UNCONFIGURED
 private var yJsonRuntimeProviderIdentity: String = ""
 private var yJsonRuntimeInitializationOwner: Int64 = 0
 
-/// Freezes the portable engine on the first ordinary YJson call.
+/**
+ * Freezes the portable engine on the first ordinary YJson call.
+ */
 func freezeYJsonRuntime(): Unit {
     if (yJsonRuntimeFrozen.load() != 0) { return }
     yJsonRuntimeSlowFreezeEntriesForTest.fetchAdd(1)
@@ -60,8 +66,10 @@ func freezeYJsonRuntime(): Unit {
     }
 }
 
-/// Internal product seam. Optional acceleration packages must call this only
-/// from their single public initialize entry point.
+/**
+ * Internal product seam. Optional acceleration packages must call this only
+ * from their single public initialize entry point.
+ */
 public func initializeYJsonAccelerationV1(provider: JsonAccelerationProviderV1): Unit {
     // Provider methods are callbacks into another package. Resolve metadata
     // before taking the runtime lock and run activation without holding it.
@@ -154,6 +162,8 @@ private func rollbackYJsonAccelerationInitialization(): Unit {
     }
 }
 
-/// Version queried by generated codecs. Patch releases remain compatible as
-/// long as this value stays unchanged.
+/**
+ * Version queried by generated codecs. Patch releases remain compatible as
+ * long as this value stays unchanged.
+ */
 public func yJsonGeneratedProtocolVersion(): Int64 { 1 }

@@ -21,7 +21,9 @@ public class JsonSchemaViolation {
     }
 }
 
-/// Immutable result of one JSON Schema validation.
+/**
+ * Immutable result of one JSON Schema validation.
+ */
 public class JsonSchemaResult {
     private let items: Array<JsonSchemaViolation>
 
@@ -41,21 +43,27 @@ public class JsonSchemaResult {
 
 private class JsonSchemaMismatchSignal <: Exception {}
 
-/// A named JSON Schema format assertion.
-///
-/// Implementations must be immutable or synchronize their own state: a single
-/// validator instance can be shared across threads, and the same format
-/// instance may be invoked concurrently without yjson-side locking.
+/**
+ * A named JSON Schema format assertion.
+ *
+ * Implementations must be immutable or synchronize their own state: a single
+ * validator instance can be shared across threads, and the same format
+ * instance may be invoked concurrently without yjson-side locking.
+ */
 public interface JsonSchemaFormat {
     func validate(value: String): Bool
 }
 
-/// Installs a coherent group of format assertions into a registry.
+/**
+ * Installs a coherent group of format assertions into a registry.
+ */
 public interface JsonSchemaFormatProvider {
     func installInto(registry: JsonSchemaFormatRegistry): Unit
 }
 
-/// Explicit format registry used by Assertion mode.
+/**
+ * Explicit format registry used by Assertion mode.
+ */
 public class JsonSchemaFormatRegistry {
     private let formats = HashMap<String, JsonSchemaFormat>()
     private var frozen: Bool = false
@@ -91,9 +99,11 @@ public class JsonSchemaFormatRegistry {
 }
 
 public interface UriResolver {
-    /// Resolves an absolute or application-defined schema resource URI.
-    /// Implementations may load from memory, disk, or an application cache;
-    /// yjson itself never performs network I/O.
+    /**
+     * Resolves an absolute or application-defined schema resource URI.
+     * Implementations may load from memory, disk, or an application cache;
+     * yjson itself never performs network I/O.
+     */
     func resolve(uri: String): Option<JsonNode>
 }
 
@@ -147,7 +157,9 @@ public class JsonSchema {
     public let config: JsonSchemaConfig
     let validationVocabulary: Bool
 
-    /// Returns a detached copy so callers cannot mutate the compiled schema.
+    /**
+     * Returns a detached copy so callers cannot mutate the compiled schema.
+     */
     public prop document: JsonNode {
         get() { documentValue.deepCopy() }
     }

@@ -48,17 +48,21 @@ public interface JsonNativeNumericTapeBackend {
         outNext: CPointer<Int64>, outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
 }
 
-/// Optional scalar seam for numeric-heavy typed codecs. The portable package
-/// never installs this backend; yjson_native provides a short, non-blocking
-/// @FastNative implementation. A Float64 NaN return means that the backend
-/// declined the token and the caller must use the semantic Cangjie parser.
+/**
+ * Optional scalar seam for numeric-heavy typed codecs. The portable package
+ * never installs this backend; yjson_native provides a short, non-blocking
+ * @FastNative implementation. A Float64 NaN return means that the backend
+ * declined the token and the caller must use the semantic Cangjie parser.
+ */
 public interface JsonNativeFloatParserBackend {
     func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
 }
 
-/// Writer-side primitive. It only transforms a single already accepted
-/// Cangjie String into one quoted JSON token; separator/state/limits remain in
-/// JsonDirectWriter.
+/**
+ * Writer-side primitive. It only transforms a single already accepted
+ * Cangjie String into one quoted JSON token; separator/state/limits remain in
+ * JsonDirectWriter.
+ */
 public interface JsonNativeWriterBackend {
     func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
         output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
@@ -72,8 +76,10 @@ public interface JsonNativeWriterBackend {
         outputOffset: Int64): Int64
 }
 
-/// Versioned internal product bundle consumed by yjson_native. Applications
-/// configure it only through YJsonNativeAccel.initialize().
+/**
+ * Versioned internal product bundle consumed by yjson_native. Applications
+ * configure it only through YJsonNativeAccel.initialize().
+ */
 public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend &
     JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend &
     JsonNativeWriterBackend {}
@@ -225,10 +231,12 @@ func jsonNativeFormatFloat64ArrayInto(values: Array<Float64>, output: Array<Byte
     Some(written[0])
 }
 
-/// Installs the complete v1 primitive bundle atomically during runtime freeze.
-/// Called by the runtime initialization path while holding the runtime lock.
-/// Not part of the public surface: external code cannot install a bundle
-/// without passing provider validation.
+/**
+ * Installs the complete v1 primitive bundle atomically during runtime freeze.
+ * Called by the runtime initialization path while holding the runtime lock.
+ * Not part of the public surface: external code cannot install a bundle
+ * without passing provider validation.
+ */
 internal func installJsonNativePrimitivesLocked(backend: JsonNativeAccelerationPrimitivesV1): Unit {
     if (jsonNativeAccelerationPrimitives.isSome()) {
         throw IllegalStateException("JSON native acceleration is already installed")
