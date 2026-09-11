@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "command": {
+    "id": "architecture-guard",
+    "argv": [
+      "python3",
+      "tools/architecture_guard.py",
+      "--format",
+      "json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-12T19:00:30.666481Z",
+    "finished_at_utc": "2026-09-12T19:00:34.483487Z",
+    "duration_ms": 3817.012,
+    "stdout_path": "docs/evidence/M8-004/development/pr160-acceptance/architecture-guard.stdout.log",
+    "stderr_path": "docs/evidence/M8-004/development/pr160-acceptance/architecture-guard.stderr.log",
+    "stdout_excerpt": "{\n  \"kind\": \"architecture-guard\",\n  \"ok\": true,\n  \"root\": \"/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication\",\n  \"schema_version\": 1,\n  \"status\": \"PASS\",\n  \"violation_count\": 0,\n  \"violations\": []\n}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  }
+}
