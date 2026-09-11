@@ -1,0 +1,31 @@
+1361319 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+1361319 setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+1361319 bind(3, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+1361319 listen(3, 1024)                 = 0
+1361319 getsockname(3, {sa_family=AF_INET, sin_port=htons(33813), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 0
+1361319 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+1361319 setsockopt(5, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+1361319 connect(5, {sa_family=AF_INET, sin_port=htons(33813), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+1361319 getsockopt(5, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+1361319 accept4(3, {sa_family=AF_INET, sin_port=htons(59688), sin_addr=inet_addr("127.0.0.1")}, [120 => 16], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
+1361319 setsockopt(6, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+1361319 sendto(5, "B", 1, MSG_NOSIGNAL, NULL, 0) = 1
+1361319 recvfrom(6, "B", 1, 0, NULL, NULL) = 1
+1361319 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+1361319 bind(3, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+1361319 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+1361319 bind(5, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+1361319 getsockname(5, {sa_family=AF_INET, sin_port=htons(48482), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 0
+1361319 sendto(3, "\1\2\3\4\5", 5, 0, {sa_family=AF_INET, sin_port=htons(48482), sin_addr=inet_addr("127.0.0.1")}, 16) = 5
+1361319 recvfrom(5, "\1\2\3", 3, 0, {sa_family=AF_INET, sin_port=htons(46229), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 3
+1361319 getsockname(3, {sa_family=AF_INET, sin_port=htons(46229), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 0
+1361319 connect(3, {sa_family=AF_INET, sin_port=htons(48482), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+1361319 getpeername(3, {sa_family=AF_INET, sin_port=htons(48482), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 0
+1361319 sendto(3, "\t\n", 2, 0, {sa_family=AF_INET, sin_port=htons(48482), sin_addr=inet_addr("127.0.0.1")}, 16) = 2
+1361319 recvfrom(5, "\t\n", 3, 0, {sa_family=AF_INET, sin_port=htons(46229), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 2
+1361324 +++ exited with 0 +++
+1361322 +++ exited with 0 +++
+1361321 +++ exited with 0 +++
+1361320 +++ exited with 0 +++
+1361325 +++ exited with 1 +++
+1361319 +++ exited with 1 +++

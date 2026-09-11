@@ -1,0 +1,2 @@
+UDP_ZERO_RECEIVE_READY
+ZERO_RECEIVED count=0; sender=127.0.0.1:41599; closed=false

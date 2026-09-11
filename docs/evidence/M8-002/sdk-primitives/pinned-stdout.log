@@ -1,0 +1,4 @@
+TCP_LOOPBACK_PASS
+EMPTY_DATAGRAM_FAILURE=SocketException: Socket is already closed; senderClosed=false
+CONNECTED_EMPTY_FAILURE=SocketException: Socket is already closed; senderClosed=false
+UDP_TRUNCATION_AND_CONNECTED_SEND_PASS

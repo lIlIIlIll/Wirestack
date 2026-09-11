@@ -1,0 +1,10 @@
+902504 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+902504 sendto(3, "\1", 1, 0, {sa_family=AF_INET, sin_port=htons(41599), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+902504 recvfrom(3, 0x55f4838ee360, 1, 0, 0x55f48390e5e0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+902504 recvfrom(3, "", 1, 0, {sa_family=AF_INET, sin_port=htons(41599), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 0
+902508 +++ exited with 0 +++
+902507 +++ exited with 0 +++
+902506 +++ exited with 0 +++
+902505 +++ exited with 0 +++
+902510 +++ exited with 0 +++
+902504 +++ exited with 0 +++

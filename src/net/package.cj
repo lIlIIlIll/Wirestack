@@ -46,6 +46,8 @@ public struct SocketCapabilities {
     public let raw: Bool
 /** Whether ancillary data is available. */
     public let ancillaryData: Bool
+/** Whether this backend can send a zero-length datagram. Empty datagram reception is independent. */
+    public let zeroLengthDatagramSend: Bool
 
     /** Creates an advisory capability value.
      *
@@ -56,6 +58,7 @@ public struct SocketCapabilities {
      * @param multicast Multicast capability.
      * @param nonBlocking Non-blocking capability.
      * @param raw Raw-socket capability.
+     * @param zeroLengthDatagramSend Whether the backend supports empty datagram sends.
      */
     public init(
         nonBlocking!: Bool = true,
@@ -64,7 +67,8 @@ public struct SocketCapabilities {
         broadcast!: Bool = true,
         multicast!: Bool = true,
         raw!: Bool = false,
-        ancillaryData!: Bool = false
+        ancillaryData!: Bool = false,
+        zeroLengthDatagramSend!: Bool = false
     ) {
         this.nonBlocking = nonBlocking
         this.closeOnExec = closeOnExec
@@ -73,6 +77,7 @@ public struct SocketCapabilities {
         this.multicast = multicast
         this.raw = raw
         this.ancillaryData = ancillaryData
+        this.zeroLengthDatagramSend = zeroLengthDatagramSend
     }
 }
 
@@ -148,6 +153,15 @@ public struct DatagramReceiveResult {
         this.source = source
         this.truncated = truncated
     }
+
+    internal init(source: ?NetworkEndpoint, truncated: Bool, ownedPayload!: Array<Byte>) {
+        if (ownedPayload.size > 65507) {
+            throw IllegalArgumentException("datagram payload exceeds the IPv4 payload bound")
+        }
+        this.payload = ownedPayload
+        this.source = source
+        this.truncated = truncated
+    }
 }
 
 /**
@@ -178,9 +192,10 @@ public interface DatagramSocket <: Resource {
 
     /** Sends one complete datagram to the selected peer.
      *
-     * Success returns exactly `source.length`, including zero for an empty
-     * datagram. Missing peers and payloads above 65,507 bytes fail before I/O;
-     * a partial send is an error, never successful stream-like progress.
+     * Success returns exactly `source.length`. Empty datagrams remain valid:
+     * a backend without `zeroLengthDatagramSend` rejects only their sending
+     * with `Unsupported`. Missing peers and payloads above 65,507 bytes fail
+     * before I/O; a partial send is never successful stream-like progress.
      *
      * @param source Datagram payload retained only for this operation.
      * @param context Shared absolute deadline and cancellation token.
@@ -287,11 +302,12 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     private let lifecycleMutex = Mutex()
     private var lifecycleState = SocketState.Open
     private var closeActive = false
-    private var closeCoordination: ?TcpCloseCoordination = None<TcpCloseCoordination>
+    private var closeCoordination: ?SocketCloseCoordination = None<SocketCloseCoordination>
     private var readShutdownInFlight: Int64 = 0
     private var writeShutdownInFlight: Int64 = 0
 
-    internal init(delegate: stdnet.SocketTransport) {
+    internal init(delegate: stdnet.SocketTransport,
+        nonBlocking!: Bool = false, closeOnExec!: Bool = false) {
         let info = delegate.info
         this.delegate = delegate
         this.connectionInfo = info
@@ -304,8 +320,8 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
             case None => None<NetworkEndpoint>
         }
         this.capabilityValue = SocketCapabilities(
-            nonBlocking: false,
-            closeOnExec: false,
+            nonBlocking: nonBlocking,
+            closeOnExec: closeOnExec,
             halfClose: info.supportsHalfClose,
             broadcast: false,
             multicast: false,
@@ -323,7 +339,8 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         context!: api.OperationContext = api.OperationContext.background()
     ): TcpStream {
         try {
-            TcpStream(stdnet.StdNetTransport.connect(endpoint, context: context))
+            TcpStream(stdnet.StdNetTransport.connect(endpoint, context: context),
+                nonBlocking: true, closeOnExec: true)
         } catch (error: Exception) {
             throw socketFailure(error, api.NetworkErrorCategory.Connect, api.NetworkPhase.TcpConnect,
                 None<NetworkEndpoint>, Some(NetworkEndpoint.Internet(endpoint)))
@@ -334,7 +351,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     public prop state: SocketState {
         get() { synchronized(lifecycleMutex) { lifecycleState } }
     }
-    /** Advisory stream capabilities. Unrepresented descriptor, datagram and raw features remain false. */
+    /** Advisory stream capabilities. Native Linux factories report qualified descriptor flags. */
     public prop capabilities: SocketCapabilities { get() { capabilityValue } }
     /** Immutable local endpoint captured when the connection completed. */
     public prop localEndpoint: ?NetworkEndpoint { get() { localEndpointValue } }
@@ -501,7 +518,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
                 return
             }
             if (!coordinated) {
-                match (runClose(context)) {
+                let result = runClose(context)
+                publishCloseResult(result)
+                match (result) {
                     case Some(error) => throw error
                     case None => ()
                 }
@@ -515,8 +534,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
             try {
                 spawn {
                     let result = runClose(cleanupContext)
-                    pending.complete(result)
-                    releaseCloseCoordination()
+                    publishCloseResult(result)
                 }
             } catch (error: Exception) {
                 let reported = socketFailure(error, api.NetworkErrorCategory.System,
@@ -524,8 +542,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
                 try {
                     failClose()
                 } finally {
-                    pending.complete(Some(reported))
-                    releaseCloseCoordination()
+                    publishCloseResult(Some(reported))
                 }
                 throw reported
             }
@@ -659,18 +676,21 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         if (bothDirectionsClosed && delegate.isClosed()) { finishClose() }
     }
 
-    private func beginClose(coordinated: Bool): (Bool, ?TcpCloseCoordination) {
+    private func beginClose(coordinated: Bool): (Bool, ?SocketCloseCoordination) {
         synchronized(lifecycleMutex) {
             match (lifecycleState) {
                 case SocketState.Open | SocketState.ReadHalfClosed |
                      SocketState.WriteHalfClosed | SocketState.Closing =>
                     if (closeActive) {
+                        if (closeCoordination.isNone()) {
+                            closeCoordination = Some(SocketCloseCoordination())
+                        }
                         (false, closeCoordination)
                     } else {
                         let pending = if (coordinated) {
-                            Some(TcpCloseCoordination())
+                            Some(SocketCloseCoordination())
                         } else {
-                            None<TcpCloseCoordination>
+                            None<SocketCloseCoordination>
                         }
                         lifecycleState = SocketState.Closing
                         closeActive = true
@@ -726,9 +746,15 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         }
     }
 
-    private func releaseCloseCoordination(): Unit {
-        synchronized(lifecycleMutex) {
-            closeCoordination = None<TcpCloseCoordination>
+    private func publishCloseResult(result: ?api.NetworkException): Unit {
+        let pending = synchronized(lifecycleMutex) {
+            let value = closeCoordination
+            closeCoordination = None<SocketCloseCoordination>
+            value
+        }
+        match (pending) {
+            case Some(value) => value.complete(result)
+            case None => ()
         }
     }
 
@@ -810,7 +836,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     }
 }
 
-private class TcpCloseCoordination {
+internal class SocketCloseCoordination {
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private var completed = false
@@ -879,11 +905,11 @@ private class TcpCloseCoordination {
     }
 }
 
-private func requiresCloseCoordination(context: api.OperationContext): Bool {
+internal func requiresCloseCoordination(context: api.OperationContext): Bool {
     context.deadline.isSome() || !context.cancellation.permanentlyActive
 }
 
-private func checkCloseContext(
+internal func checkCloseContext(
     context: api.OperationContext,
     localEndpoint: ?NetworkEndpoint,
     remoteEndpoint: ?NetworkEndpoint
@@ -904,7 +930,7 @@ private func closeContextFailure(
             api.NetworkErrorCategory.Cancelled,
             api.NetworkPhase.TransportClose,
             api.NetworkErrorCode.Cancelled,
-            "TCP stream close cancelled",
+            "socket close cancelled",
             retryability: api.Retryability.Never,
             localEndpoint: localEndpoint,
             remoteEndpoint: remoteEndpoint
@@ -915,7 +941,7 @@ private func closeContextFailure(
             api.NetworkErrorCategory.DeadlineExceeded,
             api.NetworkPhase.TransportClose,
             api.NetworkErrorCode.TimedOut,
-            "TCP stream close deadline exceeded",
+            "socket close deadline exceeded",
             retryability: api.Retryability.Temporary,
             localEndpoint: localEndpoint,
             remoteEndpoint: remoteEndpoint
@@ -924,7 +950,7 @@ private func closeContextFailure(
     None<api.NetworkException>
 }
 
-private func socketFailure(
+internal func socketFailure(
     error: Exception,
     category: api.NetworkErrorCategory,
     phase: api.NetworkPhase,
@@ -948,7 +974,7 @@ private func socketFailure(
     } else {
         api.NetworkException(
             category, phase, api.NetworkErrorCode.SystemFailure,
-            "TCP socket operation failed",
+            "socket operation failed",
             retryability: api.Retryability.Never,
             localEndpoint: localEndpoint,
             remoteEndpoint: remoteEndpoint,

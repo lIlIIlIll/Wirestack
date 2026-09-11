@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-002",
+  "kind": "api-compatibility-classification",
+  "status": "PASS",
+  "meaning": "Classification completed; PASS is not an ABI-compatibility claim.",
+  "baseline": "docs/api/baselines/wirestack-linux-pre1-m8-001.json",
+  "candidate_inventory": "docs/api/baselines/wirestack-linux-pre1-m8-002.json",
+  "added_declarations": [
+    "wirestack.net.TcpListener",
+    "wirestack.net.UdpSocket"
+  ],
+  "removed_declarations": [],
+  "changed_declarations": [
+    {
+      "before": {
+        "kind": "struct",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = true, multicast!: Bool = true, raw!: Bool = false, ancillaryData!: Bool = false )"
+          },
+          {
+            "kind": "let",
+            "name": "ancillaryData",
+            "signature": "public let ancillaryData: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "broadcast",
+            "signature": "public let broadcast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "closeOnExec",
+            "signature": "public let closeOnExec: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "halfClose",
+            "signature": "public let halfClose: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "multicast",
+            "signature": "public let multicast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "nonBlocking",
+            "signature": "public let nonBlocking: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "raw",
+            "signature": "public let raw: Bool"
+          }
+        ],
+        "name": "SocketCapabilities",
+        "package": "wirestack.net",
+        "signature": "public struct SocketCapabilities"
+      },
+      "after": {
+        "kind": "struct",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = true, multicast!: Bool = true, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false )"
+          },
+          {
+            "kind": "let",
+            "name": "ancillaryData",
+            "signature": "public let ancillaryData: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "broadcast",
+            "signature": "public let broadcast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "closeOnExec",
+            "signature": "public let closeOnExec: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "halfClose",
+            "signature": "public let halfClose: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "multicast",
+            "signature": "public let multicast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "nonBlocking",
+            "signature": "public let nonBlocking: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "raw",
+            "signature": "public let raw: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "zeroLengthDatagramSend",
+            "signature": "public let zeroLengthDatagramSend: Bool"
+          }
+        ],
+        "name": "SocketCapabilities",
+        "package": "wirestack.net",
+        "signature": "public struct SocketCapabilities"
+      }
+    }
+  ],
+  "source_compatibility": "Existing constructor call forms retain the added named parameter default; existing repository tests and the external consumer compile. No universal downstream source-compatibility claim.",
+  "abi_compatibility": "BREAKING: SocketCapabilities gains an instance field and changes its constructor signature. Rebuild consumers.",
+  "rule": "Cangjie API declaration compatibility specification 5.1.3.3.3.10.1 classifies adding a struct instance field as ABI-incompatible.",
+  "release_policy": "Intentional pre-1.0 M8 inventory change; no stable binary compatibility guarantee.",
+  "semantic_changes": [
+    "Native TcpStream creation reports qualified NONBLOCK/CLOEXEC flags.",
+    "Current UDP backend advertises zeroLengthDatagramSend=false and returns Unsupported without closing for empty sends.",
+    "Empty datagram receive remains supported.",
+    "Unconnected nonempty send reports NotConnected.",
+    "Concurrent close waits for the admitted background owner; admitted UDP send failures remain non-retryable."
+  ]
+}

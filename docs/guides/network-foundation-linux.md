@@ -1,9 +1,10 @@
 # 使用 Linux 网络契约
 
 M8-001 在 `wirestack` 提供共享的 Internet/Unix endpoint，在 `wirestack.net` 提供
-生命周期、capability 类型与复用 Transport SPI 的 `TcpStream`。它不暴露 SDK socket 或 native
-handle。本页只覆盖这个任务；完整 TCP/UDP listener、Unix adapter、DNS 和协议集成
-分别由后续 M8 任务验收。
+生命周期、capability 类型与复用 Transport SPI 的 `TcpStream`。M8-002 增加了基于
+`std.net` 的 Linux 公共 `TcpListener` 和 `UdpSocket`，仍不暴露 SDK socket 或 native
+handle。本页说明这些已经实现的 Internet socket 接口。Unix adapter、DNS 和协议集成
+属于仍待执行的 M8-003 及后续任务。
 
 ## 连接已解析的 TCP endpoint
 
@@ -36,6 +37,21 @@ main(): Int64 {
 `finally` 使用无参 `close()` 回收资源，不重复使用可能已经耗尽的读写预算。
 需要限制等待关闭的时间时，显式调用 `close(context:)` 并处理取消或超时。
 
+## 监听已解析的 TCP endpoint
+
+使用 `TcpListener.bind(endpoint, backlog:, context:)` 绑定已解析的 IPv4 或 IPv6
+`SocketEndpoint`。端口为 0 时，`localEndpoint` 返回内核实际分配的端口。
+`backlog` 默认为 128，只接受 1 至 65,535。无效范围、预取消或已过期 context 都在
+listener 创建前失败。
+
+同一 listener 同时只允许一个 `accept`。第二个重叠调用返回结构化
+`ConcurrentOperation`，不会进入等待队列。活动 `accept` 的取消或 Deadline 只结束
+该次接受操作，listener 保持 `Listening`，之后仍可再次接受连接。这是
+operation-local cancellation。`close` 和 `abort` 才会唤醒接受者并终止 listener，
+且第一个取得 native close 所有权的操作决定保留 `Closed`、`Aborted` 或 `Failed`
+终态。接受成功后返回 `TcpStream`，其 `localEndpoint` 和 `remoteEndpoint` 都是已解析
+endpoint。
+
 ## 生命周期与能力边界
 
 流式 `read`/`write` 可以部分完成；需要完整缓冲区时使用 `readExact`/`writeAll`。
@@ -66,17 +82,30 @@ socket 保留对应的半关闭状态，不因此转为 `Failed`。空 buffer �
 底层正常关闭已经占有资源时，后到的 `abort` 不升级或打断该关闭，也不把 `Closing` 或
 `Closed` 改成 `Aborted`。若中止先占有底层关闭，后到的正常关闭不覆盖 `Aborted`。
 
-`DatagramSocket` 冻结 Internet 与 Unix adapter 的同步操作接口；原生创建与绑定
-由 M8-002/M8-003 实现。`connect` 选择已解析的 peer，`send`/`sendTo` 成功时必须
-发送完整报文，不能把部分发送当成流式进度。`receive` 接收一条报文，容量范围为
-1–65,507 字节；超出容量的部分丢弃并设置 `truncated`。零长度报文不是 EOF。
-同一 socket 最多同时进行一次发送和一次接收，操作共享调用者的绝对 context。
+## 收发 UDP 报文
 
-下面的调用方代码可按该接口编译；本任务不把它记为原生 datagram I/O 验收：
+`UdpSocket.bind(endpoint, context:)` 实现 Internet datagram 的原生创建与绑定，
+不执行 DNS。端口为 0 时，`localEndpoint` 返回包含实际绑定地址的
+`NetworkEndpoint.Internet`；`remoteEndpoint` 在 `connect` 成功前为 `None`。
+`connect` 选择一个已解析的 Internet peer，并在 native socket 上安装接收来源过滤。
+之后 `send` 发送给该 peer，未连接时以 `NotConnected` 失败；`sendTo` 则不改变已选择
+的 peer。
+
+`send` 和 `sendTo` 把报文作为原子单元处理，成功时返回完整 payload 长度。当前
+Linux `std.net` backend 接受的非空 payload 上限是 65,507 字节。空 payload 在 native
+I/O 前以结构化 `Unsupported` 失败，`capabilities.zeroLengthDatagramSend` 为 false，
+socket 保持可用。这个限制只影响发送。接收空 UDP 报文是已实现的必需行为，
+`receive` 会返回空 payload 和 `truncated == false`，不能把它当作 EOF。
+
+`receive(capacity, context:)` 的 capacity 范围是 1 至 65,507。结果拥有自己的 payload，
+并保留已解析的 source endpoint。报文超过 capacity 时只保留前缀，丢弃该报文剩余字节，
+并设置 `truncated`；下一次 `receive` 从下一条报文开始。一次 send-like 操作可以与一次
+receive 重叠。同方向的第二个操作以及与活动 I/O 竞态的 `connect` 返回
+`ConcurrentOperation`，不会形成无界队列。
 
 ```cj
 func forwardOneDatagram(
-    socket: DatagramSocket,
+    socket: UdpSocket,
     target: api.NetworkEndpoint,
     context: api.OperationContext
 ): Int64 {
@@ -87,6 +116,12 @@ func forwardOneDatagram(
     socket.sendTo(target, api.ByteSpan(received.payload), context: context)
 }
 ```
+
+预取消或已经到期的 context 在 UDP I/O admission 前失败，不改变 socket 的 `Open`
+状态。Deadline 到期会终止该次等待，socket 仍可复用。取消已经活动的 UDP
+`connect`、`send`、`sendTo` 或 `receive` 不同：该操作通过 abortive close 唤醒
+`std.net`，因此关闭此 `UdpSocket` 并保留 `Aborted` 所有权。每个 socket 必须在
+`finally` 中调用 `close()`；不要把活动 UDP 取消当成 listener accept 那样的局部取消。
 
 `api.UnixEndpoint.pathname`、`abstractName` 和 `unnamed` 是不同的值。pathname
 拒绝 NUL 字节；abstract name 保留任意字节，包括 NUL。两类地址都由
@@ -109,8 +144,17 @@ func unixPeer(error: api.NetworkException): ?api.UnixEndpoint {
 }
 ```
 
-Socket option 值类型在 M8-001 定义，实际应用由 M8-002 提供。DNS wire parser、
-身份验证和 resolver 策略属于 M8-004；HTTP parity 值、hooks 和协议集成属于
-M8-005，均不纳入本任务的公共接口基线。
+`SocketCapabilities` 是 advisory 值，调用结果仍是权威。当前 Linux listener、接受的
+TCP stream 和 UDP socket 报告 `nonBlocking` 与 `closeOnExec`。UDP 还报告
+`broadcast` 与 `multicast`；`halfClose`、`raw`、`ancillaryData` 和
+`zeroLengthDatagramSend` 为 false。`SocketOption` 仍只是类型化值，M8-002 没有增加
+公共 option application 操作。
 
-查看[当前任务证据](../evidence/M8-001/README.md)及[公共 API 参考](../api/README.md)。
+Unix endpoint 与 raw socket 的 native adapter 仍属于 M8-003，DNS wire parser 和
+resolver policy 属于 M8-004。M8-003 至 M8-007 都保持待执行。M8-002 的 Linux
+IPv4/IPv6 原生结果和任务门禁见[验收记录](../evidence/M8-002/README.md)。
+
+查看[公共 API 参考](../api/README.md)、[原生 consumer 源码](../../examples/linux/m8_002/main.cj)
+和[对应 runner](../../tools/m8_002_native_sockets.py)。M8-002 的目标公开 API baseline
+是
+[`wirestack-linux-pre1-m8-002.json`](../api/baselines/wirestack-linux-pre1-m8-002.json)。
