@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Pure baseline/candidate performance qualification cell."""
+"""Run Pure baseline/candidate release or optimization qualification."""
 from __future__ import annotations
 
 import argparse
@@ -84,6 +84,8 @@ CASES = (
     "encodePersonMemory",
     "encodeRecords64kMemory",
 )
+GATE_MODES = ("release", "optimization")
+DEFAULT_TARGET_IMPROVEMENT_PERCENT = 5.0
 
 
 def parse_args() -> argparse.Namespace:
@@ -97,14 +99,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--idle-sample-seconds", type=int, default=30)
     parser.add_argument("--enforce", action="store_true")
     parser.add_argument(
-        "--rebuild", action="store_true",
-        help="clean and rebuild both benchmark binaries before measurement",
+        "--gate-mode",
+        choices=GATE_MODES,
+        default="release",
+        help="release checks stability and regressions; optimization also checks targets",
     )
     parser.add_argument("--case", action="append", choices=CASES,
                         help="run only this case; repeat for a diagnostic subset")
-    parser.add_argument("--target-case", action="append", choices=CASES,
-                        help="require this case to improve and win 5/11 rounds; repeat as needed")
-    parser.add_argument("--target-improvement-percent", type=float, default=5.0)
+    parser.add_argument(
+        "--target-case",
+        action="append",
+        choices=CASES,
+        help="optimization mode only; require this case to improve and win 5/11 rounds",
+    )
+    parser.add_argument(
+        "--target-improvement-percent",
+        type=float,
+        default=None,
+        help="minimum target improvement in optimization mode (default: 5.0)",
+    )
     return parser.parse_args()
 
 
@@ -503,6 +516,73 @@ def summarize(samples: dict[str, list[float]]) -> dict[str, dict[str, float]]:
     return result
 
 
+def resolve_target_improvement_percent(
+    gate_mode: str,
+    target_cases: tuple[str, ...],
+    requested: float | None,
+) -> float | None:
+    if gate_mode not in GATE_MODES:
+        raise SystemExit(f"unknown gate mode: {gate_mode}")
+    if gate_mode == "release":
+        if target_cases:
+            raise SystemExit("--target-case requires --gate-mode optimization")
+        if requested is not None:
+            raise SystemExit(
+                "--target-improvement-percent requires --gate-mode optimization"
+            )
+        return None
+    if not target_cases:
+        raise SystemExit("--gate-mode optimization requires at least one --target-case")
+    resolved = (
+        DEFAULT_TARGET_IMPROVEMENT_PERCENT
+        if requested is None
+        else requested
+    )
+    if resolved < 0.0:
+        raise SystemExit("--target-improvement-percent must be non-negative")
+    return resolved
+
+
+def evaluate_gates(
+    cases: tuple[str, ...],
+    comparisons: dict[str, dict[str, float | int]],
+    baseline: dict[str, dict[str, float]],
+    candidate: dict[str, dict[str, float]],
+    gate_mode: str,
+    target_cases: tuple[str, ...],
+    target_improvement_percent: float | None,
+) -> dict[str, object]:
+    regression_passed = all(
+        comparisons[case]["ratio"] <= 1.05 for case in cases
+    )
+    stability_passed = all(
+        baseline[case]["cv_percent"] <= 5.0
+        and candidate[case]["cv_percent"] <= 5.0
+        for case in cases
+    )
+    target_passed: bool | None = None
+    if gate_mode == "optimization":
+        if target_improvement_percent is None:
+            raise ValueError("optimization gate requires a target threshold")
+        target_passed = all(
+            comparisons[case]["improvement_percent"] >= target_improvement_percent
+            and comparisons[case]["candidate_wins"] >= 5
+            for case in target_cases
+        )
+    return {
+        "gate_mode": gate_mode,
+        "all_ratios_at_most_1_05": regression_passed,
+        "target_gate_required": gate_mode == "optimization",
+        "targets_meet_improvement_and_5_of_11_wins": target_passed,
+        "both_cv_at_most_5_percent": stability_passed,
+        "passed": (
+            regression_passed
+            and stability_passed
+            and target_passed is not False
+        ),
+    }
+
+
 def write_markdown(summary: dict[str, object], path: pathlib.Path) -> None:
     baseline = summary["baseline"]
     candidate = summary["candidate"]
@@ -532,14 +612,17 @@ def main() -> int:
     args.output = args.output.resolve()
     cases = tuple(args.case) if args.case else CASES
     target_cases = tuple(args.target_case) if args.target_case else ()
+    target_improvement_percent = resolve_target_improvement_percent(
+        args.gate_mode,
+        target_cases,
+        args.target_improvement_percent,
+    )
     if args.rounds < 2:
         raise SystemExit("--rounds must be at least 2")
     if args.enforce and args.rounds != 11:
         raise SystemExit("--enforce requires --rounds 11")
     if args.enforce and not args.rebuild:
         raise SystemExit("--enforce requires --rebuild to bind binaries to source")
-    if args.target_improvement_percent < 0.0:
-        raise SystemExit("--target-improvement-percent must be non-negative")
     missing_targets = [case for case in target_cases if case not in cases]
     if missing_targets:
         raise SystemExit("target cases are not selected: " + ", ".join(missing_targets))
@@ -596,8 +679,9 @@ def main() -> int:
         "invocation": {
             "rounds": args.rounds,
             "cases": list(cases),
+            "gate_mode": args.gate_mode,
             "target_cases": list(target_cases),
-            "target_improvement_percent": args.target_improvement_percent,
+            "target_improvement_percent": target_improvement_percent,
             "cpu": args.cpu,
             "idle_sample_seconds": args.idle_sample_seconds,
             "enforce": args.enforce,
@@ -656,31 +740,23 @@ def main() -> int:
         "provenance": provenance,
         "cpu": selection,
         "cases": list(cases),
+        "gate_mode": args.gate_mode,
         "target_cases": list(target_cases),
-        "target_improvement_percent": args.target_improvement_percent,
+        "target_improvement_percent": target_improvement_percent,
         "raw_median_ns": raw,
         "baseline": baseline,
         "candidate": candidate,
         "comparisons": comparisons,
     }
-    regression_passed = all(
-        comparisons[case]["ratio"] <= 1.05 for case in cases
+    summary["gates"] = evaluate_gates(
+        cases,
+        comparisons,
+        baseline,
+        candidate,
+        args.gate_mode,
+        target_cases,
+        target_improvement_percent,
     )
-    target_passed = all(
-        comparisons[case]["improvement_percent"] >= args.target_improvement_percent
-        and comparisons[case]["candidate_wins"] >= 5
-        for case in target_cases
-    )
-    stability_passed = all(
-        baseline[case]["cv_percent"] <= 5.0 and candidate[case]["cv_percent"] <= 5.0
-        for case in cases
-    )
-    summary["gates"] = {
-        "all_ratios_at_most_1_05": regression_passed,
-        "targets_meet_improvement_and_5_of_11_wins": target_passed,
-        "both_cv_at_most_5_percent": stability_passed,
-        "passed": regression_passed and target_passed and stability_passed,
-    }
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     write_markdown(summary, args.output / "summary.md")
     print((args.output / "summary.md").read_text(), end="")

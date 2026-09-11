@@ -28,9 +28,9 @@
 
 ## 比较 Pure 基线与候选版本
 
-`scripts/json_pure_perf_compare.py` 用于判断内部优化是否值得保留。准备两个独立且没有未提交修改的
-源码目录；正式运行通过 `--rebuild --enforce` 在两侧清理并重建 `packages/benchmarks`。结果
-目录必须位于两个源码目录之外。两个目录中的性能测试程序必须相同，产品源码可以不同。
+`scripts/json_pure_perf_compare.py` 支持普通 Release 验收和内部优化评估。准备两个独立且没有未提交
+修改的源码目录；正式运行通过 `--rebuild --enforce` 在两侧清理并重建 `packages/benchmarks`。
+结果目录必须位于两个源码目录之外。两个目录中的性能测试程序必须相同，产品源码可以不同。
 
 语料目录必须包含 `person.json`、`records-64k.json` 和 `records-1m.json`。各用例测量
 以下操作：
@@ -64,7 +64,7 @@ XL 用例在构造阶段解析一次具体的编解码器，不在遍历元素�
 解析 Schema。测试程序在计时前验证结果一致。这组测试用于观察性能回退，不与类型编解码器或 DOM
 后端的排名混合。
 
-在 Linux Server 上运行完整矩阵：
+在 Linux Server 上运行发布验收矩阵：
 
 ```terminal
 scripts/json_pure_perf_compare.py \
@@ -73,10 +73,33 @@ scripts/json_pure_perf_compare.py \
   --corpus /path/to/corpus \
   --output /path/to/result \
   --rounds 11 \
-  --target-case yjsonStringDecodeLargeProfileArray \
+  --gate-mode release \
   --rebuild \
   --enforce
 ```
+
+`release` 模式只检查完整结果的稳定性和回退：任何用例回退超过 5%，或任一方 CV
+超过 5%，命令返回非零状态。它不要求候选版本相对基线提升。
+
+如果正在评估一个明确的内部优化，再显式启用优化模式：
+
+```terminal
+scripts/json_pure_perf_compare.py \
+  --baseline /path/to/baseline \
+  --candidate /path/to/candidate \
+  --corpus /path/to/corpus \
+  --output /path/to/result \
+  --rounds 11 \
+  --gate-mode optimization \
+  --target-case yjsonStringDecodeLargeProfileArray \
+  --target-improvement-percent 5 \
+  --rebuild \
+  --enforce
+```
+
+优化模式在发布模式的基础上，要求每个 `--target-case` 至少提升指定百分比，并在
+11 轮中至少胜出 5 轮。`--target-case` 和 `--target-improvement-percent` 只能与
+`--gate-mode optimization` 一起使用；目标优化门禁不是普通 Release 的必要条件。
 
 不传 `--cpu` 时，脚本采样物理核心的两个硬件线程，并选择两者利用率都低于 1%
 的核心。每次测量固定到其中一个线程，另一个由 `scripts/monitor_cpu_pair.py` 记录。脚本
@@ -85,8 +108,7 @@ scripts/json_pure_perf_compare.py \
 成功运行会生成 `provenance.json`、`summary.json`、`summary.md`、`cpu-selection.json`、两侧
 构建日志、CPU 监控 CSV，以及每轮原始性能报告和日志。来源记录包含共同测试程序的
 摘要、两侧源码和可执行文件的版本与摘要、工具链、语料与调用参数。`--enforce` 固定要求 11 轮、
-`--rebuild` 和无未提交修改的源码树；任一用例回退超过 5%、任一方 CV 超过 5%，或
-`--target-case` 指定的目标未提升 5% 或少于 5/11 轮胜出时，命令返回非零状态。
+`--rebuild` 和无未提交修改的源码树。
 
 ## 发布结果要求
 

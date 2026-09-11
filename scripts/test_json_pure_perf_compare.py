@@ -142,5 +142,75 @@ class PurePerfProvenanceTest(unittest.TestCase):
                 MODULE.verify_post_build_source_identity("candidate", before, after, True)
 
 
+class PurePerfGatePolicyTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.cases = ("target", "ordinary")
+        self.comparisons = {
+            "target": {
+                "ratio": 0.99,
+                "improvement_percent": 1.0,
+                "candidate_wins": 1,
+            },
+            "ordinary": {
+                "ratio": 1.0,
+                "improvement_percent": 0.0,
+                "candidate_wins": 5,
+            },
+        }
+        self.baseline = {case: {"cv_percent": 1.0} for case in self.cases}
+        self.candidate = {case: {"cv_percent": 1.0} for case in self.cases}
+
+    def test_release_mode_does_not_require_target_improvement(self) -> None:
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "release",
+            (),
+            None,
+        )
+        self.assertFalse(gates["target_gate_required"])
+        self.assertIsNone(gates["targets_meet_improvement_and_5_of_11_wins"])
+        self.assertTrue(gates["passed"])
+
+    def test_optimization_mode_requires_target_improvement(self) -> None:
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "optimization",
+            ("target",),
+            5.0,
+        )
+        self.assertTrue(gates["target_gate_required"])
+        self.assertFalse(gates["targets_meet_improvement_and_5_of_11_wins"])
+        self.assertFalse(gates["passed"])
+
+    def test_release_mode_still_rejects_regression(self) -> None:
+        self.comparisons["ordinary"]["ratio"] = 1.06
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "release",
+            (),
+            None,
+        )
+        self.assertFalse(gates["passed"])
+
+    def test_target_options_require_optimization_mode(self) -> None:
+        with self.assertRaisesRegex(
+            SystemExit, "--target-case requires --gate-mode optimization"
+        ):
+            MODULE.resolve_target_improvement_percent("release", ("target",), None)
+        with self.assertRaisesRegex(
+            SystemExit, "optimization requires at least one --target-case"
+        ):
+            MODULE.resolve_target_improvement_percent("optimization", (), None)
+
+
 if __name__ == "__main__":
     unittest.main()

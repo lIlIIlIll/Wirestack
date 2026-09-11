@@ -17,6 +17,10 @@
 - 校验和、RSS，以及不同配置下的重复测试；
 - 双方变异系数（CV）不超过 5%；超出时保留完整批次并标记为噪声较大。
 
+普通 Release 的 Pure 对比使用 `--gate-mode release`，验收稳定性和回退，不要求
+candidate 提升。只有 Release notes 明确声明性能优化时，才使用
+`--gate-mode optimization --target-case ...` 额外验证目标提升。
+
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 

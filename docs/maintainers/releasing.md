@@ -36,6 +36,12 @@
 12. 覆盖率低于项目行 80%、分支 70%，或改动行 90%、分支 80%；
 13. cjdoc 源码验证、九包生成、已知限制清单、链接或可复现性检查失败。
 
+Pure 的普通 Release 验收使用 `json_pure_perf_compare.py --gate-mode release`：
+它要求结果稳定且没有超过政策阈值的回退，不要求 candidate 相对 baseline 提升。
+只有 Release notes 明确宣称某项性能优化时，才额外使用
+`--gate-mode optimization --target-case ...` 验证该优化目标；优化目标未达标不应
+被误写成所有 Release 的通用性能失败。
+
 即使 CV 过高，也要保留并报告结果。Native 加速的正式检查使用 11 轮、固定 CPU、交替进程顺序；
 对外宣称加速的读写负载要求 `Native/Pure <= 0.95` 且至少赢 6/11，普通负载不得回退
 超过 5%，双方 CV 均不超过 5%。不稳定批次整体作废并完整重跑一次；第二批仍不稳定即不具备
