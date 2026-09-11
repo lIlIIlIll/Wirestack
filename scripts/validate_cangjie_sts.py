@@ -4,19 +4,39 @@
 from __future__ import annotations
 
 import argparse
+import pathlib
 import re
 import sys
+import tomllib
 
 
 VERSION_PATTERN = r"\d+\.\d+\.\d+"
 VERSION_RE = re.compile(rf"^{VERSION_PATTERN}$")
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+QUALIFICATION_CONFIG = ROOT / "release" / "cjdoc-tool.toml"
+
+
+def pinned_sts_version() -> str:
+    """Read the single STS version accepted by release qualification."""
+
+    try:
+        config = tomllib.loads(QUALIFICATION_CONFIG.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        raise ValueError(f"cannot read STS qualification pin: {error}") from error
+    version = config.get("cjc_version")
+    if not isinstance(version, str) or VERSION_RE.fullmatch(version) is None:
+        raise ValueError("STS qualification pin must be a complete semantic version")
+    return version
 
 
 def validate_version(version: str) -> str:
-    """Return an exact STS version or raise ``ValueError``."""
+    """Return the exact STS version accepted by release qualification."""
 
     if VERSION_RE.fullmatch(version) is None:
         raise ValueError("STS version must match <major>.<minor>.<patch>")
+    expected = pinned_sts_version()
+    if version != expected:
+        raise ValueError(f"STS version is pinned to {expected}")
     return version
 
 

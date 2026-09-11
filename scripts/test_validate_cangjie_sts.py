@@ -21,7 +21,8 @@ VERSION = "1.1.0"
 
 
 class StsResolverTests(unittest.TestCase):
-    def test_exact_version_validation(self) -> None:
+    def test_exact_pinned_version_validation(self) -> None:
+        self.assertEqual(STS.pinned_sts_version(), VERSION)
         self.assertEqual(STS.validate_version(VERSION), VERSION)
         for invalid in (
             "",
@@ -31,6 +32,7 @@ class StsResolverTests(unittest.TestCase):
             "1.1.0-alpha.20260831010012",
             "1.1.0-beta.1",
             "1.1.0.1",
+            "1.1.1",
         ):
             with self.subTest(version=invalid):
                 with self.assertRaises(ValueError):

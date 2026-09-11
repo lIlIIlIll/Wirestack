@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       cangjie_version:
-        description: Exact Cangjie STS version for release qualification
+        description: Pinned Cangjie STS version for release qualification (currently 1.1.0)
         required: false
         type: string
 
