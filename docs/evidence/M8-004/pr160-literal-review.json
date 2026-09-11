@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "3097eb58c7534a8f79a45ae758f08616a2041d9e",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "total": 94,
+      "passed": 93,
+      "failed": 1,
+      "errors": 0
+    },
+    "green": {
+      "total": 94,
+      "passed": 94,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-literal-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-literal-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-literal-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-literal-green.stderr.log"
+      }
+    }
+  },
+  "native_red_report": "docs/evidence/M8-004/pr160-native-literal-red.json",
+  "native_red_namespace_transcript": {
+    "commands": [
+      {
+        "argv": [
+          "ip",
+          "link",
+          "set",
+          "lo",
+          "up"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-network-0",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-0.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-0.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "ip",
+          "link",
+          "add",
+          "dns0",
+          "type",
+          "veth",
+          "peer",
+          "name",
+          "dns1"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-network-1",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-1.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-1.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "ip",
+          "address",
+          "add",
+          "192.0.2.1/24",
+          "dev",
+          "dns0"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-network-2",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-2.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-2.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "ip",
+          "link",
+          "set",
+          "dns0",
+          "up"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-network-3",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-3.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-3.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "ip",
+          "link",
+          "set",
+          "dns1",
+          "up"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-network-4",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-4.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-4.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "mount",
+          "--bind",
+          "/tmp/wirestack-dns-policy-csyy3xk5/resolv.conf",
+          "/etc/resolv.conf"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-resolv.conf",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-resolv.conf.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-resolv.conf.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "mount",
+          "--bind",
+          "/tmp/wirestack-dns-policy-csyy3xk5/nsswitch.conf",
+          "/etc/nsswitch.conf"
+        ],
+        "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+        "exit_code": 0,
+        "id": "system-fallback-nsswitch.conf",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-nsswitch.conf.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-nsswitch.conf.stdout.log"
+        },
+        "timed_out": false,
+        "timeout_seconds": 5
+      },
+      {
+        "argv": [
+          "/tmp/wirestack-m8-004-consumer-j96unz5p/target/release/bin/main",
+          "system-fallback"
+        ],
+        "cwd": "/tmp/wirestack-m8-004-consumer-j96unz5p/target/release/bin",
+        "environment": {
+          "WIRESTACK_SERVICE_PORT": "36877"
+        },
+        "exit_code": 1,
+        "id": "consumer-system-fallback",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "8561370dee7cac052f87ddf36d555d3e24ac85bc72f7ef90170b2da1d063a172"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback.stdout.log"
+        },
+        "timeout_seconds": 30
+      }
+    ],
+    "error": "RuntimeError: system-fallback exited before emitting 'SYSTEM_FALLBACK_PASS'",
+    "literal_exchange": [],
+    "mode": "system-fallback",
+    "queries": [
+      {
+        "name": "printer",
+        "type": 1
+      },
+      {
+        "name": "printer.chosen.test",
+        "type": 1
+      },
+      {
+        "name": "direct",
+        "type": 1
+      }
+    ],
+    "status": "FAIL",
+    "system_policy": {
+      "nsswitch.conf": "hosts: dns\n",
+      "resolv.conf": "nameserver 127.0.0.1\nsearch corp.test\noptions ndots:15 timeout:1 attempts:1\n"
+    }
+  },
+  "native_green_report": "docs/evidence/M8-004/pr160-native-literal-green.json",
+  "observed_failure": "The 253-byte HostName became a 254-byte absolute native input and was rejected before getaddrinfo. Raw consumer stderr records native submission status 1.",
+  "decisions": [
+    "Strict dotted IPv4 literals are resolved before hosts, search and DNS using the existing parser and ResolverSource.Static.",
+    "Address-family policy and stopped contexts remain enforced for literal results.",
+    "Literal Resolver.connect exchanges ping/pong with an independent TCP peer while the DNS peer observes no numeric-name queries.",
+    "Native hostname buffers remain bounded at 254 bytes to include a root dot after a maximum canonical name.",
+    "The Windows native bound is kept consistent with the POSIX implementation. Only Linux execution is qualified; Darwin shares the POSIX source and is not claimed as executed."
+  ],
+  "native_green": {
+    "modes": 12,
+    "maximum_canonical_name_bytes": 253,
+    "expected_dns_queries": 4,
+    "literal_exchange": [
+      {
+        "received": "70696e67",
+        "sent": "706f6e67"
+      }
+    ]
+  }
+}

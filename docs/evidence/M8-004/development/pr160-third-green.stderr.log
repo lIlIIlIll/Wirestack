@@ -1,0 +1,2482 @@
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.112 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.113 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.114 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 8.1 */@Attribute[TEST_GENERATED] class DnsWireParserTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 8.2 */    @Attribute[TestCase_25][0m
+    [36m| [0m[34m|[0m /* 8.3 */    func decodesCompressedTargetsBinaryTxtSoaAndUnknownData(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.4 */        let message = dnsTestHeader(0x1234u16, 0x8180u16, 1, 7, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.5 */        dnsTestAppendQuestion(message, "Example.COM", 1)[0m
+    [36m| [0m[34m|[0m /* 8.6 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 5,[0xC0u8, 0x0Cu8])[0m
+    [36m| [0m[34m|[0m /* 8.7 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 12,[0xC0u8, 0x0Cu8])[0m
+    [36m| [0m[34m|[0m /* 8.8 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 15,[0u8, 10u8, 0xC0u8, 0x0Cu8])[0m
+    [36m| [0m[34m|[0m /* 8.9 */        let srv = ArrayList < Byte >()[0m
+    [36m| [0m[34m|[0m /* 8.10 */        for(value in[0u8, 1u8, 0u8, 2u8, 1u8, 187u8]) {[0m
+    [36m| [0m[34m|[0m /* 8.11 */            srv.add(value)[0m
+    [36m| [0m[34m|[0m /* 8.12 */        }[0m
+    [36m| [0m[34m|[0m /* 8.13 */        dnsTestAppendName(srv, "Target.Example")[0m
+    [36m| [0m[34m|[0m /* 8.14 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 33, srv.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.15 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 16,[3u8, 0u8, 255u8, 65u8, 0u8])[0m
+    [36m| [0m[34m|[0m /* 8.16 */        let soa = ArrayList < Byte >()[0m
+    [36m| [0m[34m|[0m /* 8.17 */        soa.add(0xC0u8)[0m
+    [36m| [0m[34m|[0m /* 8.18 */        soa.add(0x0Cu8)[0m
+    [36m| [0m[34m|[0m /* 8.19 */        soa.add(0xC0u8)[0m
+    [36m| [0m[34m|[0m /* 8.20 */        soa.add(0x0Cu8)[0m
+    [36m| [0m[34m|[0m /* 8.21 */        for(value in[1u32, 2u32, 3u32, 4u32, 30u32]) {[0m
+    [36m| [0m[34m|[0m /* 8.22 */            dnsTestAppendU32(soa, value)[0m
+    [36m| [0m[34m|[0m /* 8.23 */        }[0m
+    [36m| [0m[34m|[0m /* 8.24 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 6, soa.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.25 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 65280,[0xDEu8, 0xADu8])[0m
+    [36m| [0m[34m|[0m /* 8.26 */        let summary = DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.27 */        expectEqual("summary.transactionId", "0x1234u16", summary.transactionId, 0x1234u16, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.28 */        expectEqual("summary.isResponse", "true", summary.isResponse, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.29 */        expectEqual("summary.opcode", "0", summary.opcode, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.30 */        expectEqual("summary.questions[0].name", "\"example.com\"", summary.questions[0].name, "example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.31 */        expectEqual("summary.records.size", "7", summary.records.size, 7, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.32 */        expectEqual("dnsTestTarget(summary.records[0])", "\"example.com\"", dnsTestTarget(summary.records[0]), "example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.33 */        expectEqual("dnsTestTarget(summary.records[1])", "\"example.com\"", dnsTestTarget(summary.records[1]), "example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.34 */        expectEqual("dnsTestTarget(summary.records[2])", "\"example.com\"", dnsTestTarget(summary.records[2]), "example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.35 */        expectEqual("dnsTestTarget(summary.records[3])", "\"target.example\"", dnsTestTarget(summary.records[3]), "target.example", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.36 */        expectEqual("summary.records[4].data()", "[3u8, 0u8, 255u8, 65u8, 0u8]", summary.records[4].data(),[3u8, 0u8, 255u8, 65u8, 0u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.37 */        match(summary.records[5].soaMinimum) {[0m
+    [36m| [0m[34m|[0m /* 8.38 */            case Some(value) => expectEqual("value", "30u32", value, 30u32, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.39 */            case None => fail("SOA minimum was not decoded")[0m
+    [36m| [0m[34m|[0m /* 8.40 */        }[0m
+    [36m| [0m[34m|[0m /* 8.41 */        match(summary.records[6].recordType) {[0m
+    [36m| [0m[34m|[0m /* 8.42 */            case DnsRecordType.Unknown(value) => expectEqual("value", "65280", value, 65280, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.43 */            case _ => fail("unknown record type was not preserved")[0m
+    [36m| [0m[34m|[0m /* 8.44 */        }[0m
+    [36m| [0m[34m|[0m /* 8.45 */        expectEqual("summary.records[6].data()", "[0xDEu8, 0xADu8]", summary.records[6].data(),[0xDEu8, 0xADu8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.46 */    }[0m
+    [36m| [0m[34m|[0m /* 8.47 */    [0m
+    [36m| [0m[34m|[0m /* 8.48 */    @Attribute[TestCase_26][0m
+    [36m| [0m[34m|[0m /* 8.49 */    func recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.50 */        let message = dnsTestHeader(7u16, 0x8180u16, 1, 1, 1, 1)[0m
+    [36m| [0m[34m|[0m /* 8.51 */        dnsTestAppendQuestion(message, "ordered.example", 1)[0m
+    [36m| [0m[34m|[0m /* 8.52 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[1u8, 1u8, 1u8, 1u8])[0m
+    [36m| [0m[34m|[0m /* 8.53 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[2u8, 2u8, 2u8, 2u8])[0m
+    [36m| [0m[34m|[0m /* 8.54 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[3u8, 3u8, 3u8, 3u8])[0m
+    [36m| [0m[34m|[0m /* 8.55 */        let summary = DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.56 */        expectEqual("summary.answerCount", "1", summary.answerCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.57 */        expectEqual("summary.authorityCount", "1", summary.authorityCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.58 */        expectEqual("summary.additionalCount", "1", summary.additionalCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.59 */        expectEqual("summary.records[0].data()", "[1u8, 1u8, 1u8, 1u8]", summary.records[0].data(),[1u8, 1u8, 1u8, 1u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.60 */        expectEqual("summary.records[summary.answerCount].data()", "[2u8, 2u8, 2u8, 2u8]", summary.records[summary.answerCount].data(),[2u8, 2u8, 2u8, 2u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.61 */        expectEqual("summary.records[summary.answerCount + summary.authorityCount].data()", "[3u8, 3u8, 3u8, 3u8]", summary.records[summary.answerCount + summary.authorityCount].data(),[3u8, 3u8, 3u8, 3u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.62 */    }[0m
+    [36m| [0m[34m|[0m /* 8.63 */    [0m
+    [36m| [0m[34m|[0m /* 8.64 */    @Attribute[TestCase_27][0m
+    [36m| [0m[34m|[0m /* 8.65 */    func summariesAndRecordsOwnParserAndConstructorInputs(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.66 */        let message = dnsTestHeader(9u16, 0x8180u16, 1, 1, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.67 */        dnsTestAppendQuestion(message, "owned.example", 1)[0m
+    [36m| [0m[34m|[0m /* 8.68 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[10u8, 20u8, 30u8, 40u8])[0m
+    [36m| [0m[34m|[0m /* 8.69 */        let wire = message.toArray()[0m
+    [36m| [0m[34m|[0m /* 8.70 */        let summary = DnsMessageParser().parse(wire)[0m
+    [36m| [0m[34m|[0m /* 8.71 */        wire[wire.size - 1] = 99u8[0m
+    [36m| [0m[34m|[0m /* 8.72 */        let returnedData = summary.records[0].data()[0m
+    [36m| [0m[34m|[0m /* 8.73 */        returnedData[0] = 99u8[0m
+    [36m| [0m[34m|[0m /* 8.74 */        let supplied =[summary.records[0]][0m
+    [36m| [0m[34m|[0m /* 8.75 */        let constructed = DnsMessageSummary(9u16, 1, false, records: supplied)[0m
+    [36m| [0m[34m|[0m /* 8.76 */        supplied[0] = DnsRecord("changed.example", DnsRecordType.A, 1u16, 0u32,[9u8, 9u8, 9u8, 9u8])[0m
+    [36m| [0m[34m|[0m /* 8.77 */        expectEqual("summary.records[0].name", "\"owned.example\"", summary.records[0].name, "owned.example", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.78 */        expectEqual("summary.records[0].data()", "[10u8, 20u8, 30u8, 40u8]", summary.records[0].data(),[10u8, 20u8, 30u8, 40u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.79 */        expectEqual("constructed.records[0].name", "\"owned.example\"", constructed.records[0].name, "owned.example", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.80 */    }[0m
+    [36m| [0m[34m|[0m /* 8.81 */    [0m
+    [36m| [0m[34m|[0m /* 8.82 */    @Attribute[TestCase_28][0m
+    [36m| [0m[34m|[0m /* 8.83 */    func parserPreservesQuestionIdentityAndRejectsIncompleteRecords(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.84 */        let wire = dnsTestHeader(0xBEEFu16, 0x0100u16, 1, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.85 */        dnsTestAppendQuestion(wire, "_HTTPS._TCP.Example.COM", 33)[0m
+    [36m| [0m[34m|[0m /* 8.86 */        let query = wire.toArray()[0m
+    [36m| [0m[34m|[0m /* 8.87 */        let parsedQuery = DnsMessageParser().parse(query)[0m
+    [36m| [0m[34m|[0m /* 8.88 */        expectEqual("! parsedQuery.isResponse", "true", ! parsedQuery.isResponse, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.89 */        expectEqual("parsedQuery.opcode", "0", parsedQuery.opcode, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.90 */        expectEqual("parsedQuery.questionCount", "1", parsedQuery.questionCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.91 */        expectEqual("parsedQuery.questions[0].name", "\"_https._tcp.example.com\"", parsedQuery.questions[0].name, "_https._tcp.example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.92 */        expectEqual("match(parsedQuery.questions[0].recordType) {\n    case DnsRecordType.SRV => true\n    case _ => false\n}", "true", match(parsedQuery.questions[0].recordType) {[0m
+    [36m| [0m[34m|[0m /* 8.93 */            case DnsRecordType.SRV => true[0m
+    [36m| [0m[34m|[0m /* 8.94 */            case _ => false[0m
+    [36m| [0m[34m|[0m /* 8.95 */        }, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.96 */        expectEqual("parsedQuery.questions[0].recordClass", "1u16", parsedQuery.questions[0].recordClass, 1u16, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.97 */        let opcodeMessage = dnsTestHeader(1u16, 0x9000u16, 0, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.98 */        let opcodeSummary = DnsMessageParser().parse(opcodeMessage.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.99 */        expectEqual("opcodeSummary.isResponse", "true", opcodeSummary.isResponse, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.100 */        expectEqual("opcodeSummary.opcode", "2", opcodeSummary.opcode, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.101 */        let truncated = query.clone()[0m
+    [36m| [0m[34m|[0m /* 8.102 */        truncated[2] = 0x83u8[0m
+    [36m| [0m[34m|[0m /* 8.103 */        truncated[3] = 0x00u8[0m
+    [36m| [0m[34m|[0m /* 8.104 */        truncated[6] = 0u8[0m
+    [36m| [0m[34m|[0m /* 8.105 */        truncated[7] = 1u8[0m
+    [36m| [0m[34m|[0m /* 8.106 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.107 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.108 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.109 */                DnsMessageParser().parse(truncated)[0m
+    [36m| [0m[34m|[0m /* 8.110 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.111 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.112 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.113 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.114 */                }[0m
+    [36m| [0m[34m|[0m /* 8.115 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.116 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.117 */                }[0m
+    [36m| [0m[34m|[0m /* 8.118 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.119 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.120 */                }[0m
+    [36m| [0m[34m|[0m /* 8.121 */                e[0m
+    [36m| [0m[34m|[0m /* 8.122 */            }[0m
+    [36m| [0m[34m|[0m /* 8.123 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.124 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.125 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.126 */            }[0m
+    [36m| [0m[34m|[0m /* 8.127 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.128 */        }[0m
+    [36m| [0m[34m|[0m /* 8.129 */    }[0m
+    [36m| [0m[34m|[0m /* 8.130 */    [0m
+    [36m| [0m[34m|[0m /* 8.131 */    @Attribute[TestCase_29][0m
+    [36m| [0m[34m|[0m /* 8.132 */    func asciiNameProfileRejectsAmbiguousLabels(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.133 */        for(invalid in["a..b", "-bad.example", "bad-.example", "bad label", "a/b", "é.example"]) {[0m
+    [36m| [0m[34m|[0m /* 8.134 */            let wire = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.135 */            dnsTestAppendQuestion(wire, invalid, 1)[0m
+    [36m| [0m[34m|[0m /* 8.136 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.137 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.138 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.139 */                    DnsMessageParser().parse(wire.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.140 */                    fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.141 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.142 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.143 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.144 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.145 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.146 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.147 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.148 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.149 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.150 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.151 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.152 */                }[0m
+    [36m| [0m[34m|[0m /* 8.153 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.154 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.155 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.156 */                }[0m
+    [36m| [0m[34m|[0m /* 8.157 */                assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.158 */            }[0m
+    [36m| [0m[34m|[0m /* 8.159 */        }[0m
+    [36m| [0m[34m|[0m /* 8.160 */        let message = dnsTestHeader(3u16, 0x8180u16, 1, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.161 */        message.add(3u8)[0m
+    [36m| [0m[34m|[0m /* 8.162 */        message.add(b'a')[0m
+    [36m| [0m[34m|[0m /* 8.163 */        message.add(b'.')[0m
+    [36m| [0m[34m|[0m /* 8.164 */        message.add(b'b')[0m
+    [36m| [0m[34m|[0m /* 8.165 */        message.add(0u8)[0m
+    [36m| [0m[34m|[0m /* 8.166 */        dnsTestAppendU16(message, 1)[0m
+    [36m| [0m[34m|[0m /* 8.167 */        dnsTestAppendU16(message, 1)[0m
+    [36m| [0m[34m|[0m /* 8.168 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.169 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.170 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.171 */                DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.172 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.173 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.174 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.175 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.176 */                }[0m
+    [36m| [0m[34m|[0m /* 8.177 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.178 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.179 */                }[0m
+    [36m| [0m[34m|[0m /* 8.180 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.181 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.182 */                }[0m
+    [36m| [0m[34m|[0m /* 8.183 */                e[0m
+    [36m| [0m[34m|[0m /* 8.184 */            }[0m
+    [36m| [0m[34m|[0m /* 8.185 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.186 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.187 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.188 */            }[0m
+    [36m| [0m[34m|[0m /* 8.189 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.190 */        }[0m
+    [36m| [0m[34m|[0m /* 8.191 */    }[0m
+    [36m| [0m[34m|[0m /* 8.192 */    [0m
+    [36m| [0m[34m|[0m /* 8.193 */    @Attribute[TestCase_30][0m
+    [36m| [0m[34m|[0m /* 8.194 */    func compressionLoopsForwardPointersAndOutOfRangePointersAreRejected(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.195 */        for(name in[[0xC0u8, 0x0Cu8],[0xC0u8, 0x0Eu8],[0xFFu8, 0xFFu8]]) {[0m
+    [36m| [0m[34m|[0m /* 8.196 */            let message = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.197 */            for(value in name) {[0m
+    [36m| [0m[34m|[0m /* 8.198 */                message.add(value)[0m
+    [36m| [0m[34m|[0m /* 8.199 */            }[0m
+    [36m| [0m[34m|[0m /* 8.200 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.201 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.202 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.203 */                    DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.204 */                    fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.205 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.206 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.207 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.208 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.209 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.210 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.211 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.212 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.213 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.214 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.215 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.216 */                }[0m
+    [36m| [0m[34m|[0m /* 8.217 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.218 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.219 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.220 */                }[0m
+    [36m| [0m[34m|[0m /* 8.221 */                assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.222 */            }[0m
+    [36m| [0m[34m|[0m /* 8.223 */        }[0m
+    [36m| [0m[34m|[0m /* 8.224 */    }[0m
+    [36m| [0m[34m|[0m /* 8.225 */    [0m
+    [36m| [0m[34m|[0m /* 8.226 */    @Attribute[TestCase_31][0m
+    [36m| [0m[34m|[0m /* 8.227 */    func expandedNameAndSectionCountsRespectConfiguredBounds(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.228 */        let question = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.229 */        dnsTestAppendQuestion(question, "abcd", 1)[0m
+    [36m| [0m[34m|[0m /* 8.230 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.231 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.232 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.233 */                DnsMessageParser(limits: DnsParserLimits(maximumNameBytes: 3)).parse(question.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.234 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.235 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.236 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.237 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.238 */                }[0m
+    [36m| [0m[34m|[0m /* 8.239 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.240 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.241 */                }[0m
+    [36m| [0m[34m|[0m /* 8.242 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.243 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.244 */                }[0m
+    [36m| [0m[34m|[0m /* 8.245 */                e[0m
+    [36m| [0m[34m|[0m /* 8.246 */            }[0m
+    [36m| [0m[34m|[0m /* 8.247 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.248 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.249 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.250 */            }[0m
+    [36m| [0m[34m|[0m /* 8.251 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.252 */        }[0m
+    [36m| [0m[34m|[0m /* 8.253 */        let tooManyQuestions = dnsTestHeader(1u16, 0x8180u16, 2, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.254 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.255 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.256 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.257 */                DnsMessageParser(limits: DnsParserLimits(maximumQuestions: 1)).parse(tooManyQuestions.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.258 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.259 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.260 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.261 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.262 */                }[0m
+    [36m| [0m[34m|[0m /* 8.263 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.264 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.265 */                }[0m
+    [36m| [0m[34m|[0m /* 8.266 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.267 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.268 */                }[0m
+    [36m| [0m[34m|[0m /* 8.269 */                e[0m
+    [36m| [0m[34m|[0m /* 8.270 */            }[0m
+    [36m| [0m[34m|[0m /* 8.271 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.272 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.273 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.274 */            }[0m
+    [36m| [0m[34m|[0m /* 8.275 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.276 */        }[0m
+    [36m| [0m[34m|[0m /* 8.277 */        let tooManyRecords = dnsTestHeader(1u16, 0x8180u16, 0, 2, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.278 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.279 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.280 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.281 */                DnsMessageParser(limits: DnsParserLimits(maximumRecords: 1)).parse(tooManyRecords.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.282 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.283 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.284 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.285 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.286 */                }[0m
+    [36m| [0m[34m|[0m /* 8.287 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.288 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.289 */                }[0m
+    [36m| [0m[34m|[0m /* 8.290 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.291 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.292 */                }[0m
+    [36m| [0m[34m|[0m /* 8.293 */                e[0m
+    [36m| [0m[34m|[0m /* 8.294 */            }[0m
+    [36m| [0m[34m|[0m /* 8.295 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.296 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.297 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.298 */            }[0m
+    [36m| [0m[34m|[0m /* 8.299 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.300 */        }[0m
+    [36m| [0m[34m|[0m /* 8.301 */        let chained = dnsTestHeader(1u16, 0x8180u16, 1, 2, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.302 */        dnsTestAppendQuestion(chained, "chain.example", 1)[0m
+    [36m| [0m[34m|[0m /* 8.303 */        let firstOwner = chained.size[0m
+    [36m| [0m[34m|[0m /* 8.304 */        dnsTestAppendRecord(chained,[0xC0u8, 0x0Cu8], 65000, Array < Byte >())[0m
+    [36m| [0m[34m|[0m /* 8.305 */        dnsTestAppendRecord(chained, dnsTestPointer(firstOwner), 65000, Array < Byte >())[0m
+    [36m| [0m[34m|[0m /* 8.306 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.307 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.308 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.309 */                DnsMessageParser(limits: DnsParserLimits(maximumIndirections: 1)).parse(chained.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.310 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.311 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.312 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.313 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.314 */                }[0m
+    [36m| [0m[34m|[0m /* 8.315 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.316 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.317 */                }[0m
+    [36m| [0m[34m|[0m /* 8.318 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.319 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.320 */                }[0m
+    [36m| [0m[34m|[0m /* 8.321 */                e[0m
+    [36m| [0m[34m|[0m /* 8.322 */            }[0m
+    [36m| [0m[34m|[0m /* 8.323 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.324 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.325 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.326 */            }[0m
+    [36m| [0m[34m|[0m /* 8.327 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.328 */        }[0m
+    [36m| [0m[34m|[0m /* 8.329 */    }[0m
+    [36m| [0m[34m|[0m /* 8.330 */    [0m
+    [36m| [0m[34m|[0m /* 8.331 */    @Attribute[TestCase_32][0m
+    [36m| [0m[34m|[0m /* 8.332 */    func completeParserRejectsTrailingAndTruncatedSectionBytes(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.333 */        let trailing = dnsTestHeader(1u16, 0x8180u16, 0, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.334 */        trailing.add(0u8)[0m
+    [36m| [0m[34m|[0m /* 8.335 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.336 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.337 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.338 */                DnsMessageParser().parse(trailing.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.339 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.340 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.341 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.342 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.343 */                }[0m
+    [36m| [0m[34m|[0m /* 8.344 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.345 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.346 */                }[0m
+    [36m| [0m[34m|[0m /* 8.347 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.348 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.349 */                }[0m
+    [36m| [0m[34m|[0m /* 8.350 */                e[0m
+    [36m| [0m[34m|[0m /* 8.351 */            }[0m
+    [36m| [0m[34m|[0m /* 8.352 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.353 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.354 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.355 */            }[0m
+    [36m| [0m[34m|[0m /* 8.356 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.357 */        }[0m
+    [36m| [0m[34m|[0m /* 8.358 */        let reservedHeader = dnsTestHeader(1u16, 0x8040u16, 0, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.359 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.360 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.361 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.362 */                DnsMessageParser().parse(reservedHeader.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.363 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.364 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.365 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.366 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.367 */                }[0m
+    [36m| [0m[34m|[0m /* 8.368 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.369 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.370 */                }[0m
+    [36m| [0m[34m|[0m /* 8.371 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.372 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.373 */                }[0m
+    [36m| [0m[34m|[0m /* 8.374 */                e[0m
+    [36m| [0m[34m|[0m /* 8.375 */            }[0m
+    [36m| [0m[34m|[0m /* 8.376 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.377 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.378 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.379 */            }[0m
+    [36m| [0m[34m|[0m /* 8.380 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.381 */        }[0m
+    [36m| [0m[34m|[0m /* 8.382 */        let shortQuestion = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.383 */        shortQuestion.add(0u8)[0m
+    [36m| [0m[34m|[0m /* 8.384 */        shortQuestion.add(0u8)[0m
+    [36m| [0m[34m|[0m /* 8.385 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.386 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.387 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.388 */                DnsMessageParser().parse(shortQuestion.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.389 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.390 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.391 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.392 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.393 */                }[0m
+    [36m| [0m[34m|[0m /* 8.394 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.395 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.396 */                }[0m
+    [36m| [0m[34m|[0m /* 8.397 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.398 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.399 */                }[0m
+    [36m| [0m[34m|[0m /* 8.400 */                e[0m
+    [36m| [0m[34m|[0m /* 8.401 */            }[0m
+    [36m| [0m[34m|[0m /* 8.402 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.403 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.404 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.405 */            }[0m
+    [36m| [0m[34m|[0m /* 8.406 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.407 */        }[0m
+    [36m| [0m[34m|[0m /* 8.408 */        let shortRecord = dnsTestHeader(1u16, 0x8180u16, 0, 1, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.409 */        shortRecord.add(0u8)[0m
+    [36m| [0m[34m|[0m /* 8.410 */        dnsTestAppendU16(shortRecord, 1)[0m
+    [36m| [0m[34m|[0m /* 8.411 */        dnsTestAppendU16(shortRecord, 1)[0m
+    [36m| [0m[34m|[0m /* 8.412 */        dnsTestAppendU32(shortRecord, 1u32)[0m
+    [36m| [0m[34m|[0m /* 8.413 */        dnsTestAppendU16(shortRecord, 4)[0m
+    [36m| [0m[34m|[0m /* 8.414 */        shortRecord.add(1u8)[0m
+    [36m| [0m[34m|[0m /* 8.415 */        shortRecord.add(2u8)[0m
+    [36m| [0m[34m|[0m /* 8.416 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.417 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.418 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.419 */                DnsMessageParser().parse(shortRecord.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.420 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.421 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.422 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.423 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.424 */                }[0m
+    [36m| [0m[34m|[0m /* 8.425 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.426 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.427 */                }[0m
+    [36m| [0m[34m|[0m /* 8.428 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.429 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.430 */                }[0m
+    [36m| [0m[34m|[0m /* 8.431 */                e[0m
+    [36m| [0m[34m|[0m /* 8.432 */            }[0m
+    [36m| [0m[34m|[0m /* 8.433 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.434 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.435 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.436 */            }[0m
+    [36m| [0m[34m|[0m /* 8.437 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.438 */        }[0m
+    [36m| [0m[34m|[0m /* 8.439 */    }[0m
+    [36m| [0m[34m|[0m /* 8.440 */    [0m
+    [36m| [0m[34m|[0m /* 8.441 */    @Attribute[TestCase_33][0m
+    [36m| [0m[34m|[0m /* 8.442 */    func typedRdataLengthsAndTxtSegmentsAreExact(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.443 */        for((typeCode, data) in[(1,[1u8, 2u8, 3u8]),(28, Array < Byte >(15, repeat: 0u8)),(16,[4u8, 1u8, 2u8]),(16, Array < Byte >())]) {[0m
+    [36m| [0m[34m|[0m /* 8.444 */            let message = dnsTestHeader(1u16, 0x8180u16, 0, 1, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.445 */            dnsTestAppendRecord(message,[0u8], typeCode, data)[0m
+    [36m| [0m[34m|[0m /* 8.446 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.447 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.448 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.449 */                    DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.450 */                    fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.451 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.452 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.453 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.454 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.455 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.456 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.457 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.458 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.459 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.460 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.461 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.462 */                }[0m
+    [36m| [0m[34m|[0m /* 8.463 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.464 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.465 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.466 */                }[0m
+    [36m| [0m[34m|[0m /* 8.467 */                assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.468 */            }[0m
+    [36m| [0m[34m|[0m /* 8.469 */        }[0m
+    [36m| [0m[34m|[0m /* 8.470 */    }[0m
+    [36m| [0m[34m|[0m /* 8.471 */    [0m
+    [36m| [0m[34m|[0m /* 8.472 */    @Attribute[TestCase_34][0m
+    [36m| [0m[34m|[0m /* 8.473 */    func compressedRdataNamesCannotConsumeNeighboringRecordBytes(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.474 */        let extra = dnsTestHeader(1u16, 0x8180u16, 1, 1, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.475 */        dnsTestAppendQuestion(extra, "escape.example", 1)[0m
+    [36m| [0m[34m|[0m /* 8.476 */        dnsTestAppendRecord(extra,[0xC0u8, 0x0Cu8], 5,[0xC0u8, 0x0Cu8, 0u8])[0m
+    [36m| [0m[34m|[0m /* 8.477 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.478 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.479 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.480 */                DnsMessageParser().parse(extra.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.481 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.482 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.483 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.484 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.485 */                }[0m
+    [36m| [0m[34m|[0m /* 8.486 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.487 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.488 */                }[0m
+    [36m| [0m[34m|[0m /* 8.489 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.490 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.491 */                }[0m
+    [36m| [0m[34m|[0m /* 8.492 */                e[0m
+    [36m| [0m[34m|[0m /* 8.493 */            }[0m
+    [36m| [0m[34m|[0m /* 8.494 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.495 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.496 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.497 */            }[0m
+    [36m| [0m[34m|[0m /* 8.498 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.499 */        }[0m
+    [36m| [0m[34m|[0m /* 8.500 */        let escape = dnsTestHeader(1u16, 0x8180u16, 1, 2, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.501 */        dnsTestAppendQuestion(escape, "escape.example", 1)[0m
+    [36m| [0m[34m|[0m /* 8.502 */        dnsTestAppendRecord(escape,[0xC0u8, 0x0Cu8], 5,[1u8, b'a'])[0m
+    [36m| [0m[34m|[0m /* 8.503 */        dnsTestAppendRecord(escape,[0u8], 1,[1u8, 2u8, 3u8, 4u8])[0m
+    [36m| [0m[34m|[0m /* 8.504 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.505 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.506 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.507 */                DnsMessageParser().parse(escape.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.508 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.509 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.510 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.511 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.512 */                }[0m
+    [36m| [0m[34m|[0m /* 8.513 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.514 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.515 */                }[0m
+    [36m| [0m[34m|[0m /* 8.516 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.517 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.518 */                }[0m
+    [36m| [0m[34m|[0m /* 8.519 */                e[0m
+    [36m| [0m[34m|[0m /* 8.520 */            }[0m
+    [36m| [0m[34m|[0m /* 8.521 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.522 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.523 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.524 */            }[0m
+    [36m| [0m[34m|[0m /* 8.525 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.526 */        }[0m
+    [36m| [0m[34m|[0m /* 8.527 */    }[0m
+    [36m| [0m[34m|[0m /* 8.528 */    [0m
+    [36m| [0m[34m|[0m /* 8.529 */    @Attribute[TestCase_35][0m
+    [36m| [0m[34m|[0m /* 8.530 */    func srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.531 */        let message = dnsTestHeader(1u16, 0x8180u16, 1, 1, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.532 */        dnsTestAppendQuestion(message, "_svc._tcp.example", 33)[0m
+    [36m| [0m[34m|[0m /* 8.533 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 33,[0u8, 1u8, 0u8, 2u8, 0u8, 80u8, 0xC0u8, 0x0Cu8])[0m
+    [36m| [0m[34m|[0m /* 8.534 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.535 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.536 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.537 */                DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.538 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.539 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.540 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.541 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.542 */                }[0m
+    [36m| [0m[34m|[0m /* 8.543 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.544 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.545 */                }[0m
+    [36m| [0m[34m|[0m /* 8.546 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.547 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.548 */                }[0m
+    [36m| [0m[34m|[0m /* 8.549 */                e[0m
+    [36m| [0m[34m|[0m /* 8.550 */            }[0m
+    [36m| [0m[34m|[0m /* 8.551 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.552 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.553 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.554 */            }[0m
+    [36m| [0m[34m|[0m /* 8.555 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.556 */        }[0m
+    [36m| [0m[34m|[0m /* 8.557 */    }[0m
+    [36m| [0m[34m|[0m /* 8.558 */    [0m
+    [36m| [0m[34m|[0m /* 8.559 */    @Attribute[TestCase_36][0m
+    [36m| [0m[34m|[0m /* 8.560 */    func summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.561 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.562 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.563 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.564 */                DnsMessageSummary(1u16, 1, false, questionCount: 0, records: Array < DnsRecord >())[0m
+    [36m| [0m[34m|[0m /* 8.565 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.566 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 8.567 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.568 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.569 */                }[0m
+    [36m| [0m[34m|[0m /* 8.570 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.571 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.572 */                }[0m
+    [36m| [0m[34m|[0m /* 8.573 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.574 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.575 */                }[0m
+    [36m| [0m[34m|[0m /* 8.576 */                e[0m
+    [36m| [0m[34m|[0m /* 8.577 */            }[0m
+    [36m| [0m[34m|[0m /* 8.578 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.579 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.580 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.581 */            }[0m
+    [36m| [0m[34m|[0m /* 8.582 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.583 */        }[0m
+    [36m| [0m[34m|[0m /* 8.584 */    }[0m
+    [36m| [0m[34m|[0m /* 8.585 */    [0m
+    [36m| [0m[34m|[0m /* 8.586 */    @Attribute[TestCase_37][0m
+    [36m| [0m[34m|[0m /* 8.587 */    func additionalOwnerMayReferenceAuthorityNameserverTarget(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.588 */        let message = dnsTestHeader(0x1234u16, 0x8180u16, 1, 1, 1, 1)[0m
+    [36m| [0m[34m|[0m /* 8.589 */        dnsTestAppendQuestion(message, "example.test", 1)[0m
+    [36m| [0m[34m|[0m /* 8.590 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[192u8, 0u8, 2u8, 1u8])[0m
+    [36m| [0m[34m|[0m /* 8.591 */        let nameserverOffset = message.size + 12[0m
+    [36m| [0m[34m|[0m /* 8.592 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 2,[2u8, b'n', b's', 0xC0u8, 0x0Cu8])[0m
+    [36m| [0m[34m|[0m /* 8.593 */        dnsTestAppendRecord(message, dnsTestPointer(nameserverOffset), 1,[192u8, 0u8, 2u8, 53u8])[0m
+    [36m| [0m[34m|[0m /* 8.594 */        let summary = DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.595 */        expectEqual("summary.records[0].data()", "[192u8, 0u8, 2u8, 1u8]", summary.records[0].data(),[192u8, 0u8, 2u8, 1u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.596 */        expectEqual("summary.records[2].name", "\"ns.example.test\"", summary.records[2].name, "ns.example.test", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.597 */        expectEqual("summary.records[2].data()", "[192u8, 0u8, 2u8, 53u8]", summary.records[2].data(),[192u8, 0u8, 2u8, 53u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.598 */    }[0m
+    [36m| [0m[34m|[0m /* 8.599 */    [0m
+    [36m| [0m[34m|[0m /* 8.600 */    @Attribute[TestCase_38][0m
+    [36m| [0m[34m|[0m /* 8.601 */    func additionalOwnerMayReferenceSecondLegacyMailboxName(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.602 */        let message = dnsTestHeader(1u16, 0x8180u16, 1, 0, 1, 1)[0m
+    [36m| [0m[34m|[0m /* 8.603 */        dnsTestAppendQuestion(message, "example.test", 1)[0m
+    [36m| [0m[34m|[0m /* 8.604 */        let mailboxOffset = message.size + 14[0m
+    [36m| [0m[34m|[0m /* 8.605 */        let data =[0xC0u8, 0x0Cu8, 3u8, b'e', b'r', b'r', 0xC0u8, 0x0Cu8][0m
+    [36m| [0m[34m|[0m /* 8.606 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 14, data)[0m
+    [36m| [0m[34m|[0m /* 8.607 */        dnsTestAppendRecord(message, dnsTestPointer(mailboxOffset), 1,[192u8, 0u8, 2u8, 9u8])[0m
+    [36m| [0m[34m|[0m /* 8.608 */        let summary = DnsMessageParser().parse(message.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.609 */        expectEqual("summary.records[0].data()", "data", summary.records[0].data(), data, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.610 */        expectEqual("summary.records[1].name", "\"err.example.test\"", summary.records[1].name, "err.example.test", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.611 */        expectEqual("summary.records[1].data()", "[192u8, 0u8, 2u8, 9u8]", summary.records[1].data(),[192u8, 0u8, 2u8, 9u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.612 */        let missingMailbox = dnsTestHeader(1u16, 0x8180u16, 1, 1, 0, 0)[0m
+    [36m| [0m[34m|[0m /* 8.613 */        dnsTestAppendQuestion(missingMailbox, "example.test", 14)[0m
+    [36m| [0m[34m|[0m /* 8.614 */        dnsTestAppendRecord(missingMailbox,[0xC0u8, 0x0Cu8], 14,[0xC0u8, 0x0Cu8])[0m
+    [36m| [0m[34m|[0m /* 8.615 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.616 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.617 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.618 */                DnsMessageParser().parse(missingMailbox.toArray())[0m
+    [36m| [0m[34m|[0m /* 8.619 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.620 */            } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 8.621 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.622 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.623 */                }[0m
+    [36m| [0m[34m|[0m /* 8.624 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.625 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.626 */                }[0m
+    [36m| [0m[34m|[0m /* 8.627 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.628 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.629 */                }[0m
+    [36m| [0m[34m|[0m /* 8.630 */                e[0m
+    [36m| [0m[34m|[0m /* 8.631 */            }[0m
+    [36m| [0m[34m|[0m /* 8.632 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.633 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.634 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.635 */            }[0m
+    [36m| [0m[34m|[0m /* 8.636 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.637 */        }[0m
+    [36m| [0m[34m|[0m /* 8.638 */    }[0m
+    [36m| [0m[34m|[0m /* 8.639 */    [0m
+    [36m| [0m[34m|[0m /* 8.640 */    init() {[0m
+    [36m| [0m[34m|[0m /* 8.641 */    }[0m
+    [36m| [0m[34m|[0m /* 8.642 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 8.643 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.644 */        [0m
+    [36m| [0m[34m|[0m /* 8.645 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 8.646 */    }[0m
+    [36m| [0m[34m|[0m /* 8.647 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 8.648 */        [0m
+    [36m| [0m[34m|[0m /* 8.649 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 8.650 */        let suiteBuilder = TestSuite.builder("DnsWireParserTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 8.651 */        [0m
+    [36m| [0m[34m|[0m /* 8.652 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.653 */            [0m
+    [36m| [0m[34m|[0m /* 8.654 */            let decodesCompressedTargetsBinaryTxtSoaAndUnknownDataTestFunc = { => decodesCompressedTargetsBinaryTxtSoaAndUnknownData();() }[0m
+    [36m| [0m[34m|[0m /* 8.655 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.656 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.657 */            "decodesCompressedTargetsBinaryTxtSoaAndUnknownData",[0m
+    [36m| [0m[34m|[0m /* 8.658 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.659 */            body: decodesCompressedTargetsBinaryTxtSoaAndUnknownDataTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.660 */            )[0m
+    [36m| [0m[34m|[0m /* 8.661 */            )[0m
+    [36m| [0m[34m|[0m /* 8.662 */            [0m
+    [36m| [0m[34m|[0m /* 8.663 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.664 */        [0m
+    [36m| [0m[34m|[0m /* 8.665 */        [0m
+    [36m| [0m[34m|[0m /* 8.666 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.667 */            [0m
+    [36m| [0m[34m|[0m /* 8.668 */            let recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicitTestFunc = { => recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit();() }[0m
+    [36m| [0m[34m|[0m /* 8.669 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.670 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.671 */            "recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit",[0m
+    [36m| [0m[34m|[0m /* 8.672 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.673 */            body: recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicitTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.674 */            )[0m
+    [36m| [0m[34m|[0m /* 8.675 */            )[0m
+    [36m| [0m[34m|[0m /* 8.676 */            [0m
+    [36m| [0m[34m|[0m /* 8.677 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.678 */        [0m
+    [36m| [0m[34m|[0m /* 8.679 */        [0m
+    [36m| [0m[34m|[0m /* 8.680 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.681 */            [0m
+    [36m| [0m[34m|[0m /* 8.682 */            let summariesAndRecordsOwnParserAndConstructorInputsTestFunc = { => summariesAndRecordsOwnParserAndConstructorInputs();() }[0m
+    [36m| [0m[34m|[0m /* 8.683 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.684 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.685 */            "summariesAndRecordsOwnParserAndConstructorInputs",[0m
+    [36m| [0m[34m|[0m /* 8.686 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.687 */            body: summariesAndRecordsOwnParserAndConstructorInputsTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.688 */            )[0m
+    [36m| [0m[34m|[0m /* 8.689 */            )[0m
+    [36m| [0m[34m|[0m /* 8.690 */            [0m
+    [36m| [0m[34m|[0m /* 8.691 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.692 */        [0m
+    [36m| [0m[34m|[0m /* 8.693 */        [0m
+    [36m| [0m[34m|[0m /* 8.694 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.695 */            [0m
+    [36m| [0m[34m|[0m /* 8.696 */            let parserPreservesQuestionIdentityAndRejectsIncompleteRecordsTestFunc = { => parserPreservesQuestionIdentityAndRejectsIncompleteRecords();() }[0m
+    [36m| [0m[34m|[0m /* 8.697 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.698 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.699 */            "parserPreservesQuestionIdentityAndRejectsIncompleteRecords",[0m
+    [36m| [0m[34m|[0m /* 8.700 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.701 */            body: parserPreservesQuestionIdentityAndRejectsIncompleteRecordsTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.702 */            )[0m
+    [36m| [0m[34m|[0m /* 8.703 */            )[0m
+    [36m| [0m[34m|[0m /* 8.704 */            [0m
+    [36m| [0m[34m|[0m /* 8.705 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.706 */        [0m
+    [36m| [0m[34m|[0m /* 8.707 */        [0m
+    [36m| [0m[34m|[0m /* 8.708 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.709 */            [0m
+    [36m| [0m[34m|[0m /* 8.710 */            let asciiNameProfileRejectsAmbiguousLabelsTestFunc = { => asciiNameProfileRejectsAmbiguousLabels();() }[0m
+    [36m| [0m[34m|[0m /* 8.711 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.712 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.713 */            "asciiNameProfileRejectsAmbiguousLabels",[0m
+    [36m| [0m[34m|[0m /* 8.714 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.715 */            body: asciiNameProfileRejectsAmbiguousLabelsTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.716 */            )[0m
+    [36m| [0m[34m|[0m /* 8.717 */            )[0m
+    [36m| [0m[34m|[0m /* 8.718 */            [0m
+    [36m| [0m[34m|[0m /* 8.719 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.720 */        [0m
+    [36m| [0m[34m|[0m /* 8.721 */        [0m
+    [36m| [0m[34m|[0m /* 8.722 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.723 */            [0m
+    [36m| [0m[34m|[0m /* 8.724 */            let compressionLoopsForwardPointersAndOutOfRangePointersAreRejectedTestFunc = { => compressionLoopsForwardPointersAndOutOfRangePointersAreRejected();() }[0m
+    [36m| [0m[34m|[0m /* 8.725 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.726 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.727 */            "compressionLoopsForwardPointersAndOutOfRangePointersAreRejected",[0m
+    [36m| [0m[34m|[0m /* 8.728 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.729 */            body: compressionLoopsForwardPointersAndOutOfRangePointersAreRejectedTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.730 */            )[0m
+    [36m| [0m[34m|[0m /* 8.731 */            )[0m
+    [36m| [0m[34m|[0m /* 8.732 */            [0m
+    [36m| [0m[34m|[0m /* 8.733 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.734 */        [0m
+    [36m| [0m[34m|[0m /* 8.735 */        [0m
+    [36m| [0m[34m|[0m /* 8.736 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.737 */            [0m
+    [36m| [0m[34m|[0m /* 8.738 */            let expandedNameAndSectionCountsRespectConfiguredBoundsTestFunc = { => expandedNameAndSectionCountsRespectConfiguredBounds();() }[0m
+    [36m| [0m[34m|[0m /* 8.739 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.740 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.741 */            "expandedNameAndSectionCountsRespectConfiguredBounds",[0m
+    [36m| [0m[34m|[0m /* 8.742 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.743 */            body: expandedNameAndSectionCountsRespectConfiguredBoundsTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.744 */            )[0m
+    [36m| [0m[34m|[0m /* 8.745 */            )[0m
+    [36m| [0m[34m|[0m /* 8.746 */            [0m
+    [36m| [0m[34m|[0m /* 8.747 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.748 */        [0m
+    [36m| [0m[34m|[0m /* 8.749 */        [0m
+    [36m| [0m[34m|[0m /* 8.750 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.751 */            [0m
+    [36m| [0m[34m|[0m /* 8.752 */            let completeParserRejectsTrailingAndTruncatedSectionBytesTestFunc = { => completeParserRejectsTrailingAndTruncatedSectionBytes();() }[0m
+    [36m| [0m[34m|[0m /* 8.753 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.754 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.755 */            "completeParserRejectsTrailingAndTruncatedSectionBytes",[0m
+    [36m| [0m[34m|[0m /* 8.756 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.757 */            body: completeParserRejectsTrailingAndTruncatedSectionBytesTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.758 */            )[0m
+    [36m| [0m[34m|[0m /* 8.759 */            )[0m
+    [36m| [0m[34m|[0m /* 8.760 */            [0m
+    [36m| [0m[34m|[0m /* 8.761 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.762 */        [0m
+    [36m| [0m[34m|[0m /* 8.763 */        [0m
+    [36m| [0m[34m|[0m /* 8.764 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.765 */            [0m
+    [36m| [0m[34m|[0m /* 8.766 */            let typedRdataLengthsAndTxtSegmentsAreExactTestFunc = { => typedRdataLengthsAndTxtSegmentsAreExact();() }[0m
+    [36m| [0m[34m|[0m /* 8.767 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.768 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.769 */            "typedRdataLengthsAndTxtSegmentsAreExact",[0m
+    [36m| [0m[34m|[0m /* 8.770 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.771 */            body: typedRdataLengthsAndTxtSegmentsAreExactTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.772 */            )[0m
+    [36m| [0m[34m|[0m /* 8.773 */            )[0m
+    [36m| [0m[34m|[0m /* 8.774 */            [0m
+    [36m| [0m[34m|[0m /* 8.775 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.776 */        [0m
+    [36m| [0m[34m|[0m /* 8.777 */        [0m
+    [36m| [0m[34m|[0m /* 8.778 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.779 */            [0m
+    [36m| [0m[34m|[0m /* 8.780 */            let compressedRdataNamesCannotConsumeNeighboringRecordBytesTestFunc = { => compressedRdataNamesCannotConsumeNeighboringRecordBytes();() }[0m
+    [36m| [0m[34m|[0m /* 8.781 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.782 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.783 */            "compressedRdataNamesCannotConsumeNeighboringRecordBytes",[0m
+    [36m| [0m[34m|[0m /* 8.784 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.785 */            body: compressedRdataNamesCannotConsumeNeighboringRecordBytesTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.786 */            )[0m
+    [36m| [0m[34m|[0m /* 8.787 */            )[0m
+    [36m| [0m[34m|[0m /* 8.788 */            [0m
+    [36m| [0m[34m|[0m /* 8.789 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.790 */        [0m
+    [36m| [0m[34m|[0m /* 8.791 */        [0m
+    [36m| [0m[34m|[0m /* 8.792 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.793 */            [0m
+    [36m| [0m[34m|[0m /* 8.794 */            let srvTargetCompressionIsRejectedEvenWhenPointerIsInBoundsTestFunc = { => srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds();() }[0m
+    [36m| [0m[34m|[0m /* 8.795 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.796 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.797 */            "srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds",[0m
+    [36m| [0m[34m|[0m /* 8.798 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.799 */            body: srvTargetCompressionIsRejectedEvenWhenPointerIsInBoundsTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.800 */            )[0m
+    [36m| [0m[34m|[0m /* 8.801 */            )[0m
+    [36m| [0m[34m|[0m /* 8.802 */            [0m
+    [36m| [0m[34m|[0m /* 8.803 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.804 */        [0m
+    [36m| [0m[34m|[0m /* 8.805 */        [0m
+    [36m| [0m[34m|[0m /* 8.806 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.807 */            [0m
+    [36m| [0m[34m|[0m /* 8.808 */            let summaryConstructorRejectsSectionMetadataThatCouldBlurBoundariesTestFunc = { => summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries();() }[0m
+    [36m| [0m[34m|[0m /* 8.809 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.810 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.811 */            "summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries",[0m
+    [36m| [0m[34m|[0m /* 8.812 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.813 */            body: summaryConstructorRejectsSectionMetadataThatCouldBlurBoundariesTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.814 */            )[0m
+    [36m| [0m[34m|[0m /* 8.815 */            )[0m
+    [36m| [0m[34m|[0m /* 8.816 */            [0m
+    [36m| [0m[34m|[0m /* 8.817 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.818 */        [0m
+    [36m| [0m[34m|[0m /* 8.819 */        [0m
+    [36m| [0m[34m|[0m /* 8.820 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.821 */            [0m
+    [36m| [0m[34m|[0m /* 8.822 */            let additionalOwnerMayReferenceAuthorityNameserverTargetTestFunc = { => additionalOwnerMayReferenceAuthorityNameserverTarget();() }[0m
+    [36m| [0m[34m|[0m /* 8.823 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.824 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.825 */            "additionalOwnerMayReferenceAuthorityNameserverTarget",[0m
+    [36m| [0m[34m|[0m /* 8.826 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.827 */            body: additionalOwnerMayReferenceAuthorityNameserverTargetTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.828 */            )[0m
+    [36m| [0m[34m|[0m /* 8.829 */            )[0m
+    [36m| [0m[34m|[0m /* 8.830 */            [0m
+    [36m| [0m[34m|[0m /* 8.831 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.832 */        [0m
+    [36m| [0m[34m|[0m /* 8.833 */        [0m
+    [36m| [0m[34m|[0m /* 8.834 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.835 */            [0m
+    [36m| [0m[34m|[0m /* 8.836 */            let additionalOwnerMayReferenceSecondLegacyMailboxNameTestFunc = { => additionalOwnerMayReferenceSecondLegacyMailboxName();() }[0m
+    [36m| [0m[34m|[0m /* 8.837 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.838 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.839 */            "additionalOwnerMayReferenceSecondLegacyMailboxName",[0m
+    [36m| [0m[34m|[0m /* 8.840 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.841 */            body: additionalOwnerMayReferenceSecondLegacyMailboxNameTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.842 */            )[0m
+    [36m| [0m[34m|[0m /* 8.843 */            )[0m
+    [36m| [0m[34m|[0m /* 8.844 */            [0m
+    [36m| [0m[34m|[0m /* 8.845 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.846 */        [0m
+    [36m| [0m[34m|[0m /* 8.847 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 8.848 */    }[0m
+    [36m| [0m[34m|[0m /* 8.849 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 8.850 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 8.851 */    }[0m
+    [36m| [0m[34m|[0m /* 8.852 */}[0m
+    [36m| [0m[34m|[0m /* 8.853 */[0m
+    [36m| [0m[34m|[0m /* 8.854 */[0m
+    [36m| [0m[34m|[0m /* 8.855 */interface TestPackageExtension_DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m /* 8.856 */    func registerDnsWireParserTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 8.857 */}[0m
+    [36m| [0m[34m|[0m /* 8.858 */extend TestPackage <: TestPackageExtension_DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m /* 8.859 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 8.860 */    public func registerDnsWireParserTest() {[0m
+    [36m| [0m[34m|[0m /* 8.861 */        registerSuite({ => DnsWireParserTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 8.862 */    }[0m
+    [36m| [0m[34m|[0m /* 8.863 */}[0m
+    [36m| [0m[34m|[0m /* 8.864 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.115 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.116 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.117 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.118 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.119 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.120 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.142 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.143 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.144 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.145 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.146 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.147 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.148 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.149 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.150 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.174 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.175 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.176 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.177 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.178 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.179 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.180 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.181 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.182 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:202:53:
+    [36m| [0m
+[36m202[0m [36m| [0m            @AssertThrows[IllegalArgumentException](DnsResolverConfig(nameservers: [endpoint]))[0m
+    [36m| [0m                                                    [33m^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:156:1:
+    [36m| [0m
+[36m156[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m157[0m [36m| [0m[34m|[0m class DnsResolverPolicyTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m600[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 156.1 */@Attribute[TEST_GENERATED] class DnsResolverPolicyTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 156.2 */    @Attribute[TestCase_13][0m
+    [36m| [0m[34m|[0m /* 156.3 */    func fromSystemParsesTabsCommentsLastSearchAndClampedNdots(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.4 */        let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.5 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.6 */            File.writeTo(path,("# trusted resolver fixture\n" + "nameserver\t192.0.2.53 # primary\n" + "nameserver 010.0.0.1 ; leading zero is not a literal\n" + "nameserver 300.1.1.1\n" + "nameserver 2001:db8::53 ; secondary\n" + "nameserver 2001:db8:::53\n" + "search old.test duplicate.test\n" + "domain\tfinal.test ignored.test # the last directive wins\n" + "options rotate ndots:99 ndots:-1\n").toArray())[0m
+    [36m| [0m[34m|[0m /* 156.7 */            let config = DnsResolverConfig.fromSystem(path: path)[0m
+    [36m| [0m[34m|[0m /* 156.8 */            let servers = config.nameservers[0m
+    [36m| [0m[34m|[0m /* 156.9 */            assertEqual("servers.size", "2", servers.size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.10 */            expectEqual("servers[0].address.toOctets()", "[192u8, 0u8, 2u8, 53u8]", servers[0].address.toOctets(),[192u8, 0u8, 2u8, 53u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.11 */            expectEqual("servers[0].port", "53u16", servers[0].port, 53u16, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.12 */            expectEqual("dnsResolverTestFamilyIs(servers[1].address.family, api.IpAddressFamily.Ipv6)", "true", dnsResolverTestFamilyIs(servers[1].address.family, api.IpAddressFamily.Ipv6), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.13 */            expectEqual("servers[1].port", "53u16", servers[1].port, 53u16, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.14 */            expectEqual("config.searchDomains", "[api.HostName(\"final.test\")]", config.searchDomains,[api.HostName("final.test")], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.15 */            expectEqual("config.ndots", "15", config.ndots, 15, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.16 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.17 */            let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.18 */        }[0m
+    [36m| [0m[34m|[0m /* 156.19 */    }[0m
+    [36m| [0m[34m|[0m /* 156.20 */    [0m
+    [36m| [0m[34m|[0m /* 156.21 */    @Attribute[TestCase_14][0m
+    [36m| [0m[34m|[0m /* 156.22 */    func directConfigRejectsUnsupportedNameserverZonesBeforeQueries(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.23 */        let octets = Array < Byte >(16, repeat: 0u8)[0m
+    [36m| [0m[34m|[0m /* 156.24 */        octets[0] = 0xFEu8[0m
+    [36m| [0m[34m|[0m /* 156.25 */        octets[1] = 0x80u8[0m
+    [36m| [0m[34m|[0m /* 156.26 */        octets[15] = 1u8[0m
+    [36m| [0m[34m|[0m /* 156.27 */        for(zone in["eth0", "4294967296"]) {[0m
+    [36m| [0m[34m|[0m /* 156.28 */            let endpoint = api.SocketEndpoint(api.IpAddress(api.IpAddressFamily.Ipv6, octets, zone: Some(zone)), 53u16)[0m
+    [36m| [0m[34m|[0m /* 156.29 */            try {[0m
+    [36m| [0m[34m|[0m /* 156.30 */                try {[0m
+    [36m| [0m[34m|[0m /* 156.31 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 156.32 */                    DnsResolverConfig(nameservers:[endpoint])[0m
+    [36m| [0m[34m|[0m /* 156.33 */                    fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 156.34 */                } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 156.35 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 156.36 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 156.37 */                    }[0m
+    [36m| [0m[34m|[0m /* 156.38 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 156.39 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 156.40 */                    }[0m
+    [36m| [0m[34m|[0m /* 156.41 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 156.42 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 156.43 */                    }[0m
+    [36m| [0m[34m|[0m /* 156.44 */                    e[0m
+    [36m| [0m[34m|[0m /* 156.45 */                }[0m
+    [36m| [0m[34m|[0m /* 156.46 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 156.47 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 156.48 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 156.49 */                }[0m
+    [36m| [0m[34m|[0m /* 156.50 */                assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 156.51 */            }[0m
+    [36m| [0m[34m|[0m /* 156.52 */        }[0m
+    [36m| [0m[34m|[0m /* 156.53 */    }[0m
+    [36m| [0m[34m|[0m /* 156.54 */    [0m
+    [36m| [0m[34m|[0m /* 156.55 */    @Attribute[TestCase_15][0m
+    [36m| [0m[34m|[0m /* 156.56 */    func systemNameserversRetainOnlySupportedNumericZones(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.57 */        let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.58 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.59 */            File.writeTo(path,("nameserver fe80::1%eth0\n" + "nameserver fe80::2%4294967296\n" + "nameserver fe80::3%7\n" + "nameserver 192.0.2.53\n").toArray())[0m
+    [36m| [0m[34m|[0m /* 156.60 */            let servers = DnsResolverConfig.fromSystem(path: path).nameservers[0m
+    [36m| [0m[34m|[0m /* 156.61 */            assertEqual("servers.size", "2", servers.size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.62 */            expectEqual("servers[0].address.zone", "Some(\"7\")", servers[0].address.zone, Some("7"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.63 */            expectEqual("servers[1].address.toOctets()", "[192u8, 0u8, 2u8, 53u8]", servers[1].address.toOctets(),[192u8, 0u8, 2u8, 53u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.64 */            File.writeTo(path, "nameserver fe80::1%eth0\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 156.65 */            expectEqual("DnsResolverConfig.fromSystem(path: path).nameservers.isEmpty()", "true", DnsResolverConfig.fromSystem(path: path).nameservers.isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.66 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.67 */            let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.68 */        }[0m
+    [36m| [0m[34m|[0m /* 156.69 */    }[0m
+    [36m| [0m[34m|[0m /* 156.70 */    [0m
+    [36m| [0m[34m|[0m /* 156.71 */    @Attribute[TestCase_16][0m
+    [36m| [0m[34m|[0m /* 156.72 */    func configOwnsInputArraysAndReturnsDefensiveCopies(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.73 */        let first = dnsResolverTestLoopback(5301u16)[0m
+    [36m| [0m[34m|[0m /* 156.74 */        let second = dnsResolverTestLoopback(5302u16)[0m
+    [36m| [0m[34m|[0m /* 156.75 */        let nameservers =[first, second][0m
+    [36m| [0m[34m|[0m /* 156.76 */        let searches =[api.HostName("first.test"), api.HostName("second.test")][0m
+    [36m| [0m[34m|[0m /* 156.77 */        let config = DnsResolverConfig(nameservers: nameservers, searchDomains: searches, hostsPath: "")[0m
+    [36m| [0m[34m|[0m /* 156.78 */        nameservers[0] = dnsResolverTestLoopback(5399u16)[0m
+    [36m| [0m[34m|[0m /* 156.79 */        searches[0] = api.HostName("mutated.test")[0m
+    [36m| [0m[34m|[0m /* 156.80 */        expectEqual("config.nameservers[0]", "first", config.nameservers[0], first, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.81 */        expectEqual("config.searchDomains[0]", "api.HostName(\"first.test\")", config.searchDomains[0], api.HostName("first.test"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.82 */        let returnedServers = config.nameservers[0m
+    [36m| [0m[34m|[0m /* 156.83 */        let returnedSearches = config.searchDomains[0m
+    [36m| [0m[34m|[0m /* 156.84 */        returnedServers[0] = dnsResolverTestLoopback(5398u16)[0m
+    [36m| [0m[34m|[0m /* 156.85 */        returnedSearches[0] = api.HostName("returned.test")[0m
+    [36m| [0m[34m|[0m /* 156.86 */        expectEqual("config.nameservers[0]", "first", config.nameservers[0], first, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.87 */        expectEqual("config.nameservers[1]", "second", config.nameservers[1], second, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.88 */        expectEqual("config.searchDomains[0]", "api.HostName(\"first.test\")", config.searchDomains[0], api.HostName("first.test"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.89 */        expectEqual("config.searchDomains[1]", "api.HostName(\"second.test\")", config.searchDomains[1], api.HostName("second.test"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.90 */    }[0m
+    [36m| [0m[34m|[0m /* 156.91 */    [0m
+    [36m| [0m[34m|[0m /* 156.92 */    @Attribute[TestCase_17][0m
+    [36m| [0m[34m|[0m /* 156.93 */    func systemFilesFailClosedWhenMissingOversizedOrNonregular(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.94 */        let missing = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.95 */        let oversized = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.96 */        let directory = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.97 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.98 */            let _ = removeIfExists(missing)[0m
+    [36m| [0m[34m|[0m /* 156.99 */            File.writeTo(oversized, Array < Byte >(1024 * 1024 + 1, repeat: 0u8))[0m
+    [36m| [0m[34m|[0m /* 156.100 */            let _ = removeIfExists(directory)[0m
+    [36m| [0m[34m|[0m /* 156.101 */            Directory.create(directory)[0m
+    [36m| [0m[34m|[0m /* 156.102 */            expectEqual("dnsResolverTestDefaults(DnsResolverConfig.fromSystem(path: missing))", "true", dnsResolverTestDefaults(DnsResolverConfig.fromSystem(path: missing)), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.103 */            expectEqual("dnsResolverTestDefaults(DnsResolverConfig.fromSystem(path: oversized))", "true", dnsResolverTestDefaults(DnsResolverConfig.fromSystem(path: oversized)), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.104 */            expectEqual("dnsResolverTestDefaults(DnsResolverConfig.fromSystem(path: directory))", "true", dnsResolverTestDefaults(DnsResolverConfig.fromSystem(path: directory)), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.105 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.106 */            let _ = removeIfExists(missing)[0m
+    [36m| [0m[34m|[0m /* 156.107 */            let _ = removeIfExists(oversized)[0m
+    [36m| [0m[34m|[0m /* 156.108 */            let _ = removeIfExists(directory, recursive: true)[0m
+    [36m| [0m[34m|[0m /* 156.109 */        }[0m
+    [36m| [0m[34m|[0m /* 156.110 */    }[0m
+    [36m| [0m[34m|[0m /* 156.111 */    [0m
+    [36m| [0m[34m|[0m /* 156.112 */    @Attribute[TestCase_18][0m
+    [36m| [0m[34m|[0m /* 156.113 */    func hostsAliasesFilterFamiliesAndRemainSnapshotted(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.114 */        let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.115 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.116 */            File.writeTo(path,("127.0.0.2 primary-v4 alias-v4 mixed # v4 aliases\n" + "::1 primary-v6 alias-v6 mixed ; v6 aliases\n" + "010.0.0.7 rejected-alias\n").toArray())[0m
+    [36m| [0m[34m|[0m /* 156.117 */            let config = DnsResolverConfig(hostsPath: path)[0m
+    [36m| [0m[34m|[0m /* 156.118 */            let resolver = Resolver(config: config)[0m
+    [36m| [0m[34m|[0m /* 156.119 */            try {[0m
+    [36m| [0m[34m|[0m /* 156.120 */                File.writeTo(path, "127.0.0.9 alias-v4 mixed\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 156.121 */                let ipv4 = resolver.resolve(api.HostName("alias-v4"), options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))[0m
+    [36m| [0m[34m|[0m /* 156.122 */                expectEqual("ipv4.addresses", "[dnsResolverTestIpv4(2u8)]", ipv4.addresses,[dnsResolverTestIpv4(2u8)], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.123 */                expectEqual("ipv4.canonicalHost", "api.HostName(\"alias-v4\")", ipv4.canonicalHost, api.HostName("alias-v4"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.124 */                expectEqual("dnsResolverTestHostsSource(ipv4.source)", "true", dnsResolverTestHostsSource(ipv4.source), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.125 */                expectEqual("ipv4.expiration.isNone()", "true", ipv4.expiration.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.126 */                let ipv6 = resolver.resolve(api.HostName("alias-v6"), options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv6))[0m
+    [36m| [0m[34m|[0m /* 156.127 */                assertEqual("ipv6.addresses.size", "1", ipv6.addresses.size, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.128 */                expectEqual("dnsResolverTestFamilyIs(ipv6.addresses[0].family, api.IpAddressFamily.Ipv6)", "true", dnsResolverTestFamilyIs(ipv6.addresses[0].family, api.IpAddressFamily.Ipv6), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.129 */                let mixedV4 = resolver.resolve(api.HostName("mixed"), options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))[0m
+    [36m| [0m[34m|[0m /* 156.130 */                let mixedV6 = resolver.resolve(api.HostName("mixed"), options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv6))[0m
+    [36m| [0m[34m|[0m /* 156.131 */                expectEqual("mixedV4.addresses", "[dnsResolverTestIpv4(2u8)]", mixedV4.addresses,[dnsResolverTestIpv4(2u8)], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.132 */                assertEqual("mixedV6.addresses.size", "1", mixedV6.addresses.size, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.133 */                expectEqual("dnsResolverTestFamilyIs(mixedV6.addresses[0].family, api.IpAddressFamily.Ipv6)", "true", dnsResolverTestFamilyIs(mixedV6.addresses[0].family, api.IpAddressFamily.Ipv6), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.134 */                let reloaded = Resolver(config: config)[0m
+    [36m| [0m[34m|[0m /* 156.135 */                try {[0m
+    [36m| [0m[34m|[0m /* 156.136 */                    expectEqual("reloaded.resolve(api.HostName(\"alias-v4\")).addresses", "[dnsResolverTestIpv4(9u8)]", reloaded.resolve(api.HostName("alias-v4")).addresses,[dnsResolverTestIpv4(9u8)], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.137 */                } finally {[0m
+    [36m| [0m[34m|[0m /* 156.138 */                    reloaded.close()[0m
+    [36m| [0m[34m|[0m /* 156.139 */                }[0m
+    [36m| [0m[34m|[0m /* 156.140 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 156.141 */                resolver.close()[0m
+    [36m| [0m[34m|[0m /* 156.142 */            }[0m
+    [36m| [0m[34m|[0m /* 156.143 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.144 */            let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.145 */        }[0m
+    [36m| [0m[34m|[0m /* 156.146 */    }[0m
+    [36m| [0m[34m|[0m /* 156.147 */    [0m
+    [36m| [0m[34m|[0m /* 156.148 */    @Attribute[TestCase_19][0m
+    [36m| [0m[34m|[0m /* 156.149 */    func trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.150 */        let server = UdpSocket.bind(dnsResolverTestLoopback(0u16))[0m
+    [36m| [0m[34m|[0m /* 156.151 */        let endpoint = dnsResolverTestEndpoint(server)[0m
+    [36m| [0m[34m|[0m /* 156.152 */        let searchFirst = Resolver(config: DnsResolverConfig(nameservers:[endpoint], searchDomains:[api.HostName("search.test")], ndots: 2, hostsPath: "", attempts: 1))[0m
+    [36m| [0m[34m|[0m /* 156.153 */        let absoluteFirst = Resolver(config: DnsResolverConfig(nameservers:[endpoint], searchDomains:[api.HostName("search.test")], ndots: 1, hostsPath: "", attempts: 1))[0m
+    [36m| [0m[34m|[0m /* 156.154 */        let serving: Future < Array < String >>= spawn { let names = ArrayList < String >()[0m
+    [36m| [0m[34m|[0m /* 156.155 */            for(_ in 0 .. 3) {[0m
+    [36m| [0m[34m|[0m /* 156.156 */                let received = server.receive(512, context: api.OperationContext(deadline: Some(api.Deadline.after(2 * Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.157 */                names.add(DnsMessageParser().parse(received.payload).questions[0].name)[0m
+    [36m| [0m[34m|[0m /* 156.158 */                let header = received.payload.clone()[0m
+    [36m| [0m[34m|[0m /* 156.159 */                header[2] = 0x81u8[0m
+    [36m| [0m[34m|[0m /* 156.160 */                header[3] = 0x80u8[0m
+    [36m| [0m[34m|[0m /* 156.161 */                header[7] = 1u8[0m
+    [36m| [0m[34m|[0m /* 156.162 */                let response = ArrayList < Byte >()[0m
+    [36m| [0m[34m|[0m /* 156.163 */                for(byte in header) {[0m
+    [36m| [0m[34m|[0m /* 156.164 */                    response.add(byte)[0m
+    [36m| [0m[34m|[0m /* 156.165 */                }[0m
+    [36m| [0m[34m|[0m /* 156.166 */                for(byte in[0xC0u8, 0x0Cu8, 0u8, 1u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 4u8, 127u8, 0u8, 0u8, 42u8]) {[0m
+    [36m| [0m[34m|[0m /* 156.167 */                    response.add(byte)[0m
+    [36m| [0m[34m|[0m /* 156.168 */                }[0m
+    [36m| [0m[34m|[0m /* 156.169 */                let _ = server.sendTo(received.source.getOrThrow(), api.ByteSpan(response.toArray()), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.170 */            }[0m
+    [36m| [0m[34m|[0m /* 156.171 */            names.toArray()[0m
+    [36m| [0m[34m|[0m /* 156.172 */        }[0m
+    [36m| [0m[34m|[0m /* 156.173 */        let options = api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4)[0m
+    [36m| [0m[34m|[0m /* 156.174 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.175 */            let expanded = searchFirst.resolve("service", options: options)[0m
+    [36m| [0m[34m|[0m /* 156.176 */            expectEqual("expanded.canonicalHost", "api.HostName(\"service.search.test\")", expanded.canonicalHost, api.HostName("service.search.test"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.177 */            let rooted = searchFirst.resolve("service.", options: options)[0m
+    [36m| [0m[34m|[0m /* 156.178 */            expectEqual("rooted.canonicalHost", "api.HostName(\"service\")", rooted.canonicalHost, api.HostName("service"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.179 */            let absolute = absoluteFirst.resolve("db.prod", options: options)[0m
+    [36m| [0m[34m|[0m /* 156.180 */            expectEqual("absolute.canonicalHost", "api.HostName(\"db.prod\")", absolute.canonicalHost, api.HostName("db.prod"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.181 */            expectEqual("expanded.addresses", "[dnsResolverTestIpv4(42u8)]", expanded.addresses,[dnsResolverTestIpv4(42u8)], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.182 */            expectEqual("serving.get(Duration.second)", "[\"service.search.test\", \"service\", \"db.prod\"]", serving.get(Duration.second),["service.search.test", "service", "db.prod"], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.183 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.184 */            searchFirst.close()[0m
+    [36m| [0m[34m|[0m /* 156.185 */            absoluteFirst.close()[0m
+    [36m| [0m[34m|[0m /* 156.186 */            server.close()[0m
+    [36m| [0m[34m|[0m /* 156.187 */            try {[0m
+    [36m| [0m[34m|[0m /* 156.188 */                let _ = serving.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 156.189 */            } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 156.190 */            }[0m
+    [36m| [0m[34m|[0m /* 156.191 */        }[0m
+    [36m| [0m[34m|[0m /* 156.192 */    }[0m
+    [36m| [0m[34m|[0m /* 156.193 */    [0m
+    [36m| [0m[34m|[0m /* 156.194 */    @Attribute[TestCase_20][0m
+    [36m| [0m[34m|[0m /* 156.195 */    func exactHostsEntryWinsBeforeSearchSuffixDns(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.196 */        let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.197 */        let dnsServer = UdpSocket.bind(dnsResolverTestLoopback(0u16))[0m
+    [36m| [0m[34m|[0m /* 156.198 */        File.writeTo(path, "127.0.0.21 precedence.test\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 156.199 */        let resolver = Resolver(config: DnsResolverConfig(nameservers:[dnsResolverTestEndpoint(dnsServer)], searchDomains:[api.HostName("search.test")], ndots: 2, hostsPath: path, queryTimeout: Duration.second, attempts: 1))[0m
+    [36m| [0m[34m|[0m /* 156.200 */        let serving: Future < Int64 >= spawn { try {[0m
+    [36m| [0m[34m|[0m /* 156.201 */            let received = dnsServer.receive(512, context: api.OperationContext(deadline: Some(api.Deadline.after(200 * Duration.millisecond))))[0m
+    [36m| [0m[34m|[0m /* 156.202 */            let _ = dnsServer.sendTo(received.source.getOrThrow(), api.ByteSpan(dnsResolverTestNxdomain(received.payload)), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.203 */            1[0m
+    [36m| [0m[34m|[0m /* 156.204 */        } catch(error: api.NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 156.205 */            if(dnsResolverTestReceiveTimedOut(error)) {[0m
+    [36m| [0m[34m|[0m /* 156.206 */                0[0m
+    [36m| [0m[34m|[0m /* 156.207 */            }[0m
+    [36m| [0m[34m|[0m /* 156.208 */            else {[0m
+    [36m| [0m[34m|[0m /* 156.209 */                throw error[0m
+    [36m| [0m[34m|[0m /* 156.210 */            }[0m
+    [36m| [0m[34m|[0m /* 156.211 */        }[0m
+    [36m| [0m[34m|[0m /* 156.212 */    }[0m
+    [36m| [0m[34m|[0m /* 156.213 */    try {[0m
+    [36m| [0m[34m|[0m /* 156.214 */        let result = resolver.resolve("precedence.test", options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))[0m
+    [36m| [0m[34m|[0m /* 156.215 */        expectEqual("result.addresses", "[dnsResolverTestIpv4(21u8)]", result.addresses,[dnsResolverTestIpv4(21u8)], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.216 */        expectEqual("result.canonicalHost", "api.HostName(\"precedence.test\")", result.canonicalHost, api.HostName("precedence.test"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.217 */        expectEqual("dnsResolverTestHostsSource(result.source)", "true", dnsResolverTestHostsSource(result.source), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.218 */        expectEqual("serving.get(Duration.second)", "0", serving.get(Duration.second), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.219 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 156.220 */        resolver.close()[0m
+    [36m| [0m[34m|[0m /* 156.221 */        dnsServer.close()[0m
+    [36m| [0m[34m|[0m /* 156.222 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.223 */            let _ = serving.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 156.224 */        } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 156.225 */        }[0m
+    [36m| [0m[34m|[0m /* 156.226 */        let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.227 */    }[0m
+    [36m| [0m[34m|[0m /* 156.228 */}[0m
+    [36m| [0m[34m|[0m /* 156.229 */[0m
+    [36m| [0m[34m|[0m /* 156.230 */@Attribute[TestCase_21][0m
+    [36m| [0m[34m|[0m /* 156.231 */func cancelledExpiredAndClosedCallsRetainPublicResolveClassifications(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.232 */    let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.233 */    try {[0m
+    [36m| [0m[34m|[0m /* 156.234 */        File.writeTo(path, "127.0.0.20 lifecycle.test\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 156.235 */        let resolver = Resolver(config: DnsResolverConfig(hostsPath: path))[0m
+    [36m| [0m[34m|[0m /* 156.236 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.237 */            let cancellation = api.CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 156.238 */            cancellation.cancel()[0m
+    [36m| [0m[34m|[0m /* 156.239 */            let cancelled = dnsResolverTestResolveError({ =>[0m
+    [36m| [0m[34m|[0m /* 156.240 */                let _ = resolver.resolve(api.HostName("lifecycle.test"), context: api.OperationContext(cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 156.241 */            })[0m
+    [36m| [0m[34m|[0m /* 156.242 */            expectEqual("dnsResolverTestResolveErrorIs(cancelled, api.ResolveErrorCode.Cancelled)", "true", dnsResolverTestResolveErrorIs(cancelled, api.ResolveErrorCode.Cancelled), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.243 */            let expired = dnsResolverTestResolveError({ =>[0m
+    [36m| [0m[34m|[0m /* 156.244 */                let _ = resolver.resolve(api.HostName("lifecycle.test"), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.Zero))))[0m
+    [36m| [0m[34m|[0m /* 156.245 */            })[0m
+    [36m| [0m[34m|[0m /* 156.246 */            expectEqual("dnsResolverTestResolveErrorIs(expired, api.ResolveErrorCode.Timeout)", "true", dnsResolverTestResolveErrorIs(expired, api.ResolveErrorCode.Timeout), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.247 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 156.248 */            expectEqual("resolver.isClosed()", "true", resolver.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.249 */            let closed = dnsResolverTestResolveError({ =>[0m
+    [36m| [0m[34m|[0m /* 156.250 */                let _ = resolver.resolve(api.HostName("lifecycle.test"))[0m
+    [36m| [0m[34m|[0m /* 156.251 */            })[0m
+    [36m| [0m[34m|[0m /* 156.252 */            expectEqual("dnsResolverTestResolveErrorIs(closed, api.ResolveErrorCode.Cancelled)", "true", dnsResolverTestResolveErrorIs(closed, api.ResolveErrorCode.Cancelled), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.253 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.254 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 156.255 */        }[0m
+    [36m| [0m[34m|[0m /* 156.256 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 156.257 */        let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.258 */    }[0m
+    [36m| [0m[34m|[0m /* 156.259 */}[0m
+    [36m| [0m[34m|[0m /* 156.260 */[0m
+    [36m| [0m[34m|[0m /* 156.261 */@Attribute[TestCase_22][0m
+    [36m| [0m[34m|[0m /* 156.262 */func connectUsesHostsMappingForANativeListenerExchange(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.263 */    let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.264 */    let listener = TcpListener.bind(dnsResolverTestLoopback(0u16), backlog: 2)[0m
+    [36m| [0m[34m|[0m /* 156.265 */    File.writeTo(path, "127.0.0.1 native-connect.test\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 156.266 */    let resolver = Resolver(config: DnsResolverConfig(hostsPath: path, queryTimeout: 500 * Duration.millisecond))[0m
+    [36m| [0m[34m|[0m /* 156.267 */    let clock = DnsResolverTestClock(MonoTime.now())[0m
+    [36m| [0m[34m|[0m /* 156.268 */    let sink = DnsResolverDeadlineSink(clock)[0m
+    [36m| [0m[34m|[0m /* 156.269 */    let request =[0x10u8, 0x20u8, 0x30u8][0m
+    [36m| [0m[34m|[0m /* 156.270 */    let response =[0xA0u8, 0xB0u8][0m
+    [36m| [0m[34m|[0m /* 156.271 */    let serving: Future < Bool >= spawn { let peer = listener.accept(context: api.OperationContext(deadline: Some(api.Deadline.after(2 * Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.272 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.273 */            let received = Array < Byte >(request.size, repeat: 0u8)[0m
+    [36m| [0m[34m|[0m /* 156.274 */            peer.readExact(api.MutableByteSpan(received), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.275 */            peer.writeAll(api.ByteSpan(response), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.276 */            received == request[0m
+    [36m| [0m[34m|[0m /* 156.277 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 156.278 */            peer.close()[0m
+    [36m| [0m[34m|[0m /* 156.279 */        }[0m
+    [36m| [0m[34m|[0m /* 156.280 */    }[0m
+    [36m| [0m[34m|[0m /* 156.281 */    var connected:?api.DuplexTransport = None < api.DuplexTransport >[0m
+    [36m| [0m[34m|[0m /* 156.282 */    try {[0m
+    [36m| [0m[34m|[0m /* 156.283 */        let transport = resolver.connect(api.HostName("native-connect.test"), listener.localEndpoint.port, attemptDelay: Duration.Zero, context: api.OperationContext(deadline: Some(api.Deadline.after(2 * Duration.second, clock: clock)), eventSink: Some(sink)))[0m
+    [36m| [0m[34m|[0m /* 156.284 */        connected = Some(transport)[0m
+    [36m| [0m[34m|[0m /* 156.285 */        match(transport.info.remoteEndpoint) {[0m
+    [36m| [0m[34m|[0m /* 156.286 */            case Some(endpoint) => expectEqual("endpoint", "listener.localEndpoint", endpoint, listener.localEndpoint, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.287 */            case _ => fail("connected transport did not expose its Internet peer")[0m
+    [36m| [0m[34m|[0m /* 156.288 */        }[0m
+    [36m| [0m[34m|[0m /* 156.289 */        api.writeAll(transport, api.ByteSpan(request), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.290 */        let received = Array < Byte >(response.size, repeat: 0u8)[0m
+    [36m| [0m[34m|[0m /* 156.291 */        api.readExact(transport, api.MutableByteSpan(received), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 156.292 */        expectEqual("received", "response", received, response, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.293 */        expectEqual("serving.get(Duration.second)", "true", serving.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.294 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 156.295 */        match(connected) {[0m
+    [36m| [0m[34m|[0m /* 156.296 */            case Some(transport) => transport.close(api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 156.297 */            case None =>()[0m
+    [36m| [0m[34m|[0m /* 156.298 */        }[0m
+    [36m| [0m[34m|[0m /* 156.299 */        listener.close()[0m
+    [36m| [0m[34m|[0m /* 156.300 */        try {[0m
+    [36m| [0m[34m|[0m /* 156.301 */            let _ = serving.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 156.302 */        } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 156.303 */        }[0m
+    [36m| [0m[34m|[0m /* 156.304 */        resolver.close()[0m
+    [36m| [0m[34m|[0m /* 156.305 */        let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.306 */    }[0m
+    [36m| [0m[34m|[0m /* 156.307 */}[0m
+    [36m| [0m[34m|[0m /* 156.308 */[0m
+    [36m| [0m[34m|[0m /* 156.309 */@Attribute[TestCase_23][0m
+    [36m| [0m[34m|[0m /* 156.310 */func resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission(): Unit {[0m
+    [36m| [0m[34m|[0m /* 156.311 */    let path = dnsResolverTestTempPath()[0m
+    [36m| [0m[34m|[0m /* 156.312 */    let listener = TcpListener.bind(dnsResolverTestLoopback(0u16), backlog: 1)[0m
+    [36m| [0m[34m|[0m /* 156.313 */    File.writeTo(path, "127.0.0.1 deadline-connect.test\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 156.314 */    let resolver = Resolver(config: DnsResolverConfig(hostsPath: path, queryTimeout: 5 * Duration.second))[0m
+    [36m| [0m[34m|[0m /* 156.315 */    let clock = DnsResolverTestClock(MonoTime.now())[0m
+    [36m| [0m[34m|[0m /* 156.316 */    let sink = DnsResolverDeadlineSink(clock)[0m
+    [36m| [0m[34m|[0m /* 156.317 */    try {[0m
+    [36m| [0m[34m|[0m /* 156.318 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 156.319 */            let transport = resolver.connect(api.HostName("deadline-connect.test"), listener.localEndpoint.port, attemptDelay: Duration.Zero, context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second, clock: clock)), eventSink: Some(sink)))[0m
+    [36m| [0m[34m|[0m /* 156.320 */            transport.close(api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 156.321 */            fail("expired total deadline unexpectedly published a connected transport")[0m
+    [36m| [0m[34m|[0m /* 156.322 */        } catch(value: api.NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 156.323 */            value[0m
+    [36m| [0m[34m|[0m /* 156.324 */        }[0m
+    [36m| [0m[34m|[0m /* 156.325 */        [0m
+    [36m| [0m[34m|[0m /* 156.326 */        expectEqual("dnsResolverTestConnectTimeout(error)", "true", dnsResolverTestConnectTimeout(error), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.327 */        expectEqual("sink.dnsCompletions", "1", sink.dnsCompletions, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.328 */        expectEqual("sink.connectStarts", "1", sink.connectStarts, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 156.329 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 156.330 */        resolver.close()[0m
+    [36m| [0m[34m|[0m /* 156.331 */        listener.close()[0m
+    [36m| [0m[34m|[0m /* 156.332 */        let _ = removeIfExists(path)[0m
+    [36m| [0m[34m|[0m /* 156.333 */    }[0m
+    [36m| [0m[34m|[0m /* 156.334 */}[0m
+    [36m| [0m[34m|[0m /* 156.335 */[0m
+    [36m| [0m[34m|[0m /* 156.336 */init() {[0m
+    [36m| [0m[34m|[0m /* 156.337 */}[0m
+    [36m| [0m[34m|[0m /* 156.338 */private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 156.339 */    let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.340 */    [0m
+    [36m| [0m[34m|[0m /* 156.341 */    return configuration[0m
+    [36m| [0m[34m|[0m /* 156.342 */}[0m
+    [36m| [0m[34m|[0m /* 156.343 */public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 156.344 */    [0m
+    [36m| [0m[34m|[0m /* 156.345 */    let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 156.346 */    let suiteBuilder = TestSuite.builder("DnsResolverPolicyTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 156.347 */    [0m
+    [36m| [0m[34m|[0m /* 156.348 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.349 */        [0m
+    [36m| [0m[34m|[0m /* 156.350 */        let fromSystemParsesTabsCommentsLastSearchAndClampedNdotsTestFunc = { => fromSystemParsesTabsCommentsLastSearchAndClampedNdots();() }[0m
+    [36m| [0m[34m|[0m /* 156.351 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.352 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.353 */        "fromSystemParsesTabsCommentsLastSearchAndClampedNdots",[0m
+    [36m| [0m[34m|[0m /* 156.354 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.355 */        body: fromSystemParsesTabsCommentsLastSearchAndClampedNdotsTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.356 */        )[0m
+    [36m| [0m[34m|[0m /* 156.357 */        )[0m
+    [36m| [0m[34m|[0m /* 156.358 */        [0m
+    [36m| [0m[34m|[0m /* 156.359 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.360 */    [0m
+    [36m| [0m[34m|[0m /* 156.361 */    [0m
+    [36m| [0m[34m|[0m /* 156.362 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.363 */        [0m
+    [36m| [0m[34m|[0m /* 156.364 */        let directConfigRejectsUnsupportedNameserverZonesBeforeQueriesTestFunc = { => directConfigRejectsUnsupportedNameserverZonesBeforeQueries();() }[0m
+    [36m| [0m[34m|[0m /* 156.365 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.366 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.367 */        "directConfigRejectsUnsupportedNameserverZonesBeforeQueries",[0m
+    [36m| [0m[34m|[0m /* 156.368 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.369 */        body: directConfigRejectsUnsupportedNameserverZonesBeforeQueriesTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.370 */        )[0m
+    [36m| [0m[34m|[0m /* 156.371 */        )[0m
+    [36m| [0m[34m|[0m /* 156.372 */        [0m
+    [36m| [0m[34m|[0m /* 156.373 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.374 */    [0m
+    [36m| [0m[34m|[0m /* 156.375 */    [0m
+    [36m| [0m[34m|[0m /* 156.376 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.377 */        [0m
+    [36m| [0m[34m|[0m /* 156.378 */        let systemNameserversRetainOnlySupportedNumericZonesTestFunc = { => systemNameserversRetainOnlySupportedNumericZones();() }[0m
+    [36m| [0m[34m|[0m /* 156.379 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.380 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.381 */        "systemNameserversRetainOnlySupportedNumericZones",[0m
+    [36m| [0m[34m|[0m /* 156.382 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.383 */        body: systemNameserversRetainOnlySupportedNumericZonesTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.384 */        )[0m
+    [36m| [0m[34m|[0m /* 156.385 */        )[0m
+    [36m| [0m[34m|[0m /* 156.386 */        [0m
+    [36m| [0m[34m|[0m /* 156.387 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.388 */    [0m
+    [36m| [0m[34m|[0m /* 156.389 */    [0m
+    [36m| [0m[34m|[0m /* 156.390 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.391 */        [0m
+    [36m| [0m[34m|[0m /* 156.392 */        let configOwnsInputArraysAndReturnsDefensiveCopiesTestFunc = { => configOwnsInputArraysAndReturnsDefensiveCopies();() }[0m
+    [36m| [0m[34m|[0m /* 156.393 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.394 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.395 */        "configOwnsInputArraysAndReturnsDefensiveCopies",[0m
+    [36m| [0m[34m|[0m /* 156.396 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.397 */        body: configOwnsInputArraysAndReturnsDefensiveCopiesTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.398 */        )[0m
+    [36m| [0m[34m|[0m /* 156.399 */        )[0m
+    [36m| [0m[34m|[0m /* 156.400 */        [0m
+    [36m| [0m[34m|[0m /* 156.401 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.402 */    [0m
+    [36m| [0m[34m|[0m /* 156.403 */    [0m
+    [36m| [0m[34m|[0m /* 156.404 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.405 */        [0m
+    [36m| [0m[34m|[0m /* 156.406 */        let systemFilesFailClosedWhenMissingOversizedOrNonregularTestFunc = { => systemFilesFailClosedWhenMissingOversizedOrNonregular();() }[0m
+    [36m| [0m[34m|[0m /* 156.407 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.408 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.409 */        "systemFilesFailClosedWhenMissingOversizedOrNonregular",[0m
+    [36m| [0m[34m|[0m /* 156.410 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.411 */        body: systemFilesFailClosedWhenMissingOversizedOrNonregularTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.412 */        )[0m
+    [36m| [0m[34m|[0m /* 156.413 */        )[0m
+    [36m| [0m[34m|[0m /* 156.414 */        [0m
+    [36m| [0m[34m|[0m /* 156.415 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.416 */    [0m
+    [36m| [0m[34m|[0m /* 156.417 */    [0m
+    [36m| [0m[34m|[0m /* 156.418 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.419 */        [0m
+    [36m| [0m[34m|[0m /* 156.420 */        let hostsAliasesFilterFamiliesAndRemainSnapshottedTestFunc = { => hostsAliasesFilterFamiliesAndRemainSnapshotted();() }[0m
+    [36m| [0m[34m|[0m /* 156.421 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.422 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.423 */        "hostsAliasesFilterFamiliesAndRemainSnapshotted",[0m
+    [36m| [0m[34m|[0m /* 156.424 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.425 */        body: hostsAliasesFilterFamiliesAndRemainSnapshottedTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.426 */        )[0m
+    [36m| [0m[34m|[0m /* 156.427 */        )[0m
+    [36m| [0m[34m|[0m /* 156.428 */        [0m
+    [36m| [0m[34m|[0m /* 156.429 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.430 */    [0m
+    [36m| [0m[34m|[0m /* 156.431 */    [0m
+    [36m| [0m[34m|[0m /* 156.432 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.433 */        [0m
+    [36m| [0m[34m|[0m /* 156.434 */        let trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirstTestFunc = { => trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst();() }[0m
+    [36m| [0m[34m|[0m /* 156.435 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.436 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.437 */        "trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst",[0m
+    [36m| [0m[34m|[0m /* 156.438 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.439 */        body: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirstTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.440 */        )[0m
+    [36m| [0m[34m|[0m /* 156.441 */        )[0m
+    [36m| [0m[34m|[0m /* 156.442 */        [0m
+    [36m| [0m[34m|[0m /* 156.443 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.444 */    [0m
+    [36m| [0m[34m|[0m /* 156.445 */    [0m
+    [36m| [0m[34m|[0m /* 156.446 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.447 */        [0m
+    [36m| [0m[34m|[0m /* 156.448 */        let exactHostsEntryWinsBeforeSearchSuffixDnsTestFunc = { => exactHostsEntryWinsBeforeSearchSuffixDns();() }[0m
+    [36m| [0m[34m|[0m /* 156.449 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.450 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.451 */        "exactHostsEntryWinsBeforeSearchSuffixDns",[0m
+    [36m| [0m[34m|[0m /* 156.452 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.453 */        body: exactHostsEntryWinsBeforeSearchSuffixDnsTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.454 */        )[0m
+    [36m| [0m[34m|[0m /* 156.455 */        )[0m
+    [36m| [0m[34m|[0m /* 156.456 */        [0m
+    [36m| [0m[34m|[0m /* 156.457 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.458 */    [0m
+    [36m| [0m[34m|[0m /* 156.459 */    [0m
+    [36m| [0m[34m|[0m /* 156.460 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.461 */        [0m
+    [36m| [0m[34m|[0m /* 156.462 */        let cancelledExpiredAndClosedCallsRetainPublicResolveClassificationsTestFunc = { => cancelledExpiredAndClosedCallsRetainPublicResolveClassifications();() }[0m
+    [36m| [0m[34m|[0m /* 156.463 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.464 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.465 */        "cancelledExpiredAndClosedCallsRetainPublicResolveClassifications",[0m
+    [36m| [0m[34m|[0m /* 156.466 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.467 */        body: cancelledExpiredAndClosedCallsRetainPublicResolveClassificationsTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.468 */        )[0m
+    [36m| [0m[34m|[0m /* 156.469 */        )[0m
+    [36m| [0m[34m|[0m /* 156.470 */        [0m
+    [36m| [0m[34m|[0m /* 156.471 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.472 */    [0m
+    [36m| [0m[34m|[0m /* 156.473 */    [0m
+    [36m| [0m[34m|[0m /* 156.474 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.475 */        [0m
+    [36m| [0m[34m|[0m /* 156.476 */        let connectUsesHostsMappingForANativeListenerExchangeTestFunc = { => connectUsesHostsMappingForANativeListenerExchange();() }[0m
+    [36m| [0m[34m|[0m /* 156.477 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.478 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.479 */        "connectUsesHostsMappingForANativeListenerExchange",[0m
+    [36m| [0m[34m|[0m /* 156.480 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.481 */        body: connectUsesHostsMappingForANativeListenerExchangeTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.482 */        )[0m
+    [36m| [0m[34m|[0m /* 156.483 */        )[0m
+    [36m| [0m[34m|[0m /* 156.484 */        [0m
+    [36m| [0m[34m|[0m /* 156.485 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.486 */    [0m
+    [36m| [0m[34m|[0m /* 156.487 */    [0m
+    [36m| [0m[34m|[0m /* 156.488 */    { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 156.489 */        [0m
+    [36m| [0m[34m|[0m /* 156.490 */        let resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmissionTestFunc = { => resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission();() }[0m
+    [36m| [0m[34m|[0m /* 156.491 */        suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 156.492 */        UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 156.493 */        "resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission",[0m
+    [36m| [0m[34m|[0m /* 156.494 */        configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 156.495 */        body: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmissionTestFunc[0m
+    [36m| [0m[34m|[0m /* 156.496 */        )[0m
+    [36m| [0m[34m|[0m /* 156.497 */        )[0m
+    [36m| [0m[34m|[0m /* 156.498 */        [0m
+    [36m| [0m[34m|[0m /* 156.499 */    }()[0m
+    [36m| [0m[34m|[0m /* 156.500 */    [0m
+    [36m| [0m[34m|[0m /* 156.501 */    return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 156.502 */}[0m
+    [36m| [0m[34m|[0m /* 156.503 */private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 156.504 */    throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 156.505 */}[0m
+    [36m| [0m[34m|[0m /* 156.506 */}[0m
+    [36m| [0m[34m|[0m /* 156.507 */[0m
+    [36m| [0m[34m|[0m /* 156.508 */[0m
+    [36m| [0m[34m|[0m /* 156.509 */interface TestPackageExtension_DnsResolverPolicyTest {[0m
+    [36m| [0m[34m|[0m /* 156.510 */func registerDnsResolverPolicyTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 156.511 */}[0m
+    [36m| [0m[34m|[0m /* 156.512 */extend TestPackage <: TestPackageExtension_DnsResolverPolicyTest {[0m
+    [36m| [0m[34m|[0m /* 156.513 */@Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 156.514 */public func registerDnsResolverPolicyTest() {[0m
+    [36m| [0m[34m|[0m /* 156.515 */    registerSuite({ => DnsResolverPolicyTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 156.516 */}[0m
+    [36m| [0m[34m|[0m /* 156.517 */}[0m
+    [36m| [0m[34m|[0m /* 156.518 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^[0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 156.32 */                    DnsResolverConfig(nameservers:[endpoint])[0m
+    [36m| [0m                                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.206 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.207 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.208 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.209 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.210 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.211 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.212 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.213 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.214 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:242:49:
+    [36m| [0m
+[36m242[0m [36m| [0m        @AssertThrows[IllegalArgumentException](DnsMessageSummary([0m
+    [36m| [0m                                                [33m^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 8.564 */                DnsMessageSummary(1u16, 1, false, questionCount: 0, records: Array < DnsRecord >())[0m
+    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.236 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.237 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.238 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.239 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.240 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.241 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.242 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.243 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.244 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.260 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.261 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.262 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.263 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.264 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.265 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.266 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.267 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.268 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.284 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.285 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.286 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.287 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.288 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.289 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.290 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.291 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.292 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.312 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.313 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.314 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.315 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.316 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.317 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.318 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.319 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.320 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.341 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.342 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.343 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.344 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.345 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.346 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.347 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.348 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.349 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.365 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.366 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.367 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.368 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.369 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.370 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.371 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.372 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.373 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.391 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.392 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.393 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.394 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.395 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.396 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.397 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.398 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.399 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.422 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.423 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.424 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.425 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.426 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.427 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.428 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.429 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.430 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.452 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.453 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.454 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.455 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.456 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.457 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.458 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.459 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.460 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.483 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.484 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.485 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.486 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.487 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.488 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.489 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.490 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.491 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.510 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.511 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.512 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.513 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.514 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.515 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.516 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.517 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.518 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.540 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.541 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.542 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.543 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.544 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.545 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.546 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.547 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.548 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:555:22:
+    [36m| [0m
+[36m555[0m [36m| [0m                case None => ()[0m
+    [36m| [0m                     [33m^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_resolver_test.cj:156:1:
+    [36m| [0m
+[36m156[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m157[0m [36m| [0m[34m|[0m class DnsResolverPolicyTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m600[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 156.297 */            case None =>()[0m
+    [36m| [0m                              [34m^^^^ [0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.621 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.622 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.623 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.624 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.625 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.626 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.627 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.628 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.629 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/src/net/dns_wire_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class DnsWireParserTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m283[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+54 warnings generated, 54 warnings printed.

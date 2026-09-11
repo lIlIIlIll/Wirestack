@@ -1,0 +1,43 @@
+{
+  "findings": [
+    {
+      "title": "Share CNAME traversal state across response messages",
+      "body": "`resolveAddressType` asks `addressAnswer` to traverse each response, but this branch records only the returned terminal target and increments the outer counter once, regardless of how many aliases that response consumed; `addressAnswer` also creates fresh `visited` and `hops` state for every message. A lookup can therefore accept up to 72 aliases under the advertised eight-hop limit, and can miss a loop through an intermediate name from an earlier response. Pass one lookup-wide visited set and remaining-hop budget through response extraction (or return every traversed name/count). The smallest public loopback regression is an eight-CNAME response ending without an address followed by a response containing a ninth CNAME plus its A record: `lookup` must return `SystemFailure`, not the address; a companion two-response case `a -> b -> c`, then `c -> b` plus `b A` must report a loop.",
+      "priority": 2,
+      "confidence": 0.99,
+      "file_path": "src/net/dns_client.cj",
+      "line_start": 358,
+      "line_end": 365
+    },
+    {
+      "title": "Include same-response CNAME TTLs in NXDOMAIN expiry",
+      "body": "The NXDOMAIN branch caches and throws before `addressAnswer` examines the answer section, so a valid NXDOMAIN response containing `alias CNAME target TTL=1` plus an enclosing SOA with a 30-second negative TTL is cached for 30 seconds instead of one. After that alias expires or changes, callers continue receiving stale `NameNotFound`. Extract the CNAME chain and fold its absolute expiration into `chainExpiration` before caching an NXDOMAIN. A minimal public/native UDP regression returns that combined response, waits just over the one-second alias TTL, then serves an A answer on the next lookup; the second lookup must issue a packet and return the new address rather than hit the negative cache.",
+      "priority": 2,
+      "confidence": 0.98,
+      "file_path": "src/net/dns_client.cj",
+      "line_start": 328,
+      "line_end": 332
+    },
+    {
+      "title": "Cache NXDOMAIN independently of the requested record type",
+      "body": "All cache entries use `name|type`, including `DnsNegativeKind.NameNotFound`, although NXDOMAIN denies the owner name for every record type while NODATA alone is type-specific. Consequently an A lookup can cache authoritative NXDOMAIN and an immediate AAAA lookup still sends another DNS request; it can even observe a contradictory result during the retained negative lifetime. Give NXDOMAIN a name-wide cache key while retaining typed keys for positive and NODATA entries. The smallest loopback regression returns one A NXDOMAIN with a relevant SOA, then performs an AAAA lookup before expiry and asserts `NameNotFound` with the server packet count still one.",
+      "priority": 2,
+      "confidence": 0.97,
+      "file_path": "src/net/dns_client.cj",
+      "line_start": 884,
+      "line_end": 886
+    },
+    {
+      "title": "Try the fifteenth suffix when the bare name runs first",
+      "body": "When `dots >= ndots`, the bare host already occupies one candidate, but the search loop still stops at `candidates.size >= 15`; this admits only fourteen suffixes and produces fifteen total candidates even though the policy's bound is sixteen. A configured fifteenth suffix is silently skipped. Make the suffix cutoff depend on whether the original slot is already present, while preserving the sixteen-candidate cap. A minimal public UDP regression configures fifteen unique suffixes with absolute-first ordering, returns NXDOMAIN for the bare name and first fourteen expansions, returns A for the fifteenth, and asserts sixteen exact queries followed by success.",
+      "priority": 2,
+      "confidence": 0.93,
+      "file_path": "src/net/dns_resolver.cj",
+      "line_start": 383,
+      "line_end": 389
+    }
+  ],
+  "overall_correctness": "incorrect",
+  "explanation": "The patch's separate-response absolute TTL accounting, bounded admission/cancellation, resolver ownership, close path, and shared DNS-to-TCP deadline are source-consistent. It is not ready to merge because lookup-wide CNAME state is reset per message, NXDOMAIN expiry and cache scope are wrong in reproducible cases, and absolute-first search drops a reachable suffix.",
+  "confidence": 0.98
+}

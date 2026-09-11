@@ -77,6 +77,7 @@ PUBLIC_PACKAGE_FILES = {
     "wirestack.net": (
         "package.cj", "datagram_socket_core.cj", "tcp_listener.cj", "udp_socket.cj",
         "unix_stream.cj", "unix_listener.cj", "unix_datagram_socket.cj",
+        "dns_wire.cj", "dns_client.cj", "dns_resolver.cj",
     ),
 }
 
