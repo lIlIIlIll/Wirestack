@@ -32,6 +32,8 @@ __pycache__/
 !docs/evidence/M8-001/**/*.json
 !docs/evidence/M8-002/**/*.json
 !docs/evidence/M8-002/**/*.patch
+!docs/evidence/M8-003/**/*.json
+!docs/evidence/M8-003/**/*.patch
 !docs/references/m7-033-ci-toolchain.json
 !docs/evidence/M7-028/*.json
 !docs/evidence/M7-028/linux_x86_64/*.json
@@ -98,6 +100,7 @@ Thumbs.db
 !docs/evidence/M7-029/**/*.log
 !docs/evidence/M8-001/**/*.log
 !docs/evidence/M8-002/**/*.log
+!docs/evidence/M8-003/**/*.log
 *.tmp
 *.prof
 *.trace

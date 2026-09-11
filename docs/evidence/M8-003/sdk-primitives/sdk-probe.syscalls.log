@@ -1,0 +1,20 @@
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 close(3)                        = 0
+3099745 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+3099745 close(3)                        = 0
+3099749 +++ exited with 0 +++
+3099748 +++ exited with 0 +++
+3099747 +++ exited with 0 +++
+3099746 +++ exited with 0 +++
+3099745 +++ exited with 1 +++

@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "python3",
+    "tools/m8_003_native_sockets.py",
+    "--report",
+    "docs/evidence/M8-003/native-sockets.json"
+  ],
+  "duration_ms": 15826.394,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-11T03:52:03.571296Z",
+  "id": "native-socket-consumer",
+  "schema_version": 1,
+  "source_task": "M8-003",
+  "started_at_utc": "2026-09-11T03:51:47.744909Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-003/native-socket-consumer.stderr.log",
+  "stderr_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr_truncated": false,
+  "stdout_excerpt": "{\"binary_digest\": {\"domain\": \"artifact-bytes-v1\", \"sha256\": \"ba61568c7285966fad32903b7a2565c4097b7647929e2f4cd8c667edec835fe9\"}, \"commands\": [{\"argv\": [\"cjc\", \"-v\"], \"exit_code\": 0, \"stderr\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"path\": \"docs/evidence/M8-003/native-sockets/toolchain.stderr.log\"}, \"stdout\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944\"}, \"path\": \"docs/evidence/M8-003/native-sockets/toolchain.stdout.log\"}}, {\"argv\": [\"cjpm\", \"build\"], \"exit_code\": 0, \"stderr\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"78063151ed22fcc4e3a1cba1e750fc2c7ee542d37d5e1044f2df093bfcde0789\"}, \"path\": \"docs/evidence/M8-003/native-sockets/consumer-build.stderr.log\"}, \"stdout\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b\"}, \"path\": \"docs/evidence/M8-003/native-sockets/consumer-build.stdout.log\"}}], \"profiles\": [{\"arbitrary_non_utf8_outgoing_names\": \"BLOCKED_SDK\", \"backpressured_write_timeout\": \"PASS_NON_REPLAYABLE\", \"connected_datagram_send\": \"BLOCKED_SDK_PEER_IDENTITY\", \"connected_peer_filter\": \"kernel rejected unselected peer with errno 1\", \"connected_send_guard\": \"PASS_FAIL_CLOSED\", \"descriptor_creation\": {\"datagram_created\": 68, \"stream_accepted\": 5, \"stream_created\": 70}, \"empty_receive\": \"PASS\", \"empty_send\": \"UNSUPPORTED_BACKEND\", \"incoming_non_utf8_sender\": \"PASS\", \"native_wait_admission\": [{\"native_eagain_before_action\": true, \"operation\": \"sendto\", \"trace_offset\": 2692}, {\"native_eagain_before_action\": true, \"operation\": \"accept4\", \"trace_offset\": 7902}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 40078}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 40752}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 41369}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 41869}], \"pathname_replacement_guard\": \"PASS\", \"profile\": \"pathname\", \"raw_native_io\": \"BLOCKED_NO_ADAPTER\", \"resource_cycles\": 64, \"short_abstract_outgoing_names\": \"BLOCKED_SDK_IDENTITY_PADDING\", \"socket_fds\": {\"after\": [], \"baseline\": []}, \"status\": \"PASS\", \"stderr\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"path\": \"docs/evidence/M8-003/native-sockets/pathname.stderr.log\"}, \"stdout\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"47004a17a2ed2c69008175e6e6259004bf3e15b5920d624b6216e50a5d69956e\"}, \"path\": \"docs/evidence/M8-003/native-sockets/pathname.stdout.log\"}, \"syscalls\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"36039d220611b2c5a818b797f34fe9874e5071d9fee6dcc248d837dcddab2c0d\"}, \"path\": \"docs/evidence/M8-003/native-sockets/pathname.syscalls.log\"}, \"unnamed_datagram_sender\": \"BLOCKED_SDK\"}, {\"arbitrary_non_utf8_outgoing_names\": \"BLOCKED_SDK\", \"backpressured_write_timeout\": \"PASS_NON_REPLAYABLE\", \"connected_datagram_send\": \"BLOCKED_SDK_PEER_IDENTITY\", \"connected_peer_filter\": \"kernel rejected unselected peer with errno 1\", \"connected_send_guard\": \"PASS_FAIL_CLOSED\", \"descriptor_creation\": {\"datagram_created\": 67, \"stream_accepted\": 5, \"stream_created\": 70}, \"empty_receive\": \"PASS\", \"empty_send\": \"UNSUPPORTED_BACKEND\", \"incoming_non_utf8_sender\": \"PASS\", \"native_wait_admission\": [{\"native_eagain_before_action\": true, \"operation\": \"sendto\", \"trace_offset\": 2951}, {\"native_eagain_before_action\": true, \"operation\": \"accept4\", \"trace_offset\": 7833}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 48203}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 48938}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 49617}, {\"native_eagain_before_action\": true, \"operation\": \"recvfrom\", \"trace_offset\": 50251}], \"pathname_replacement_guard\": \"NOT_APPLICABLE\", \"profile\": \"abstract\", \"raw_native_io\": \"BLOCKED_NO_ADAPTER\", \"resource_cycles\": 64, \"short_abstract_outgoing_names\": \"BLOCKED_SDK_IDENTITY_PADDING\", \"socket_fds\": {\"after\": [], \"baseline\": []}, \"status\": \"PASS\", \"stderr\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"path\": \"docs/evidence/M8-003/native-sockets/abstract.stderr.log\"}, \"stdout\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"9aa2fb43c62bd0803e592f875f2b0f43c85e91af029db88aa137228c1df76689\"}, \"path\": \"docs/evidence/M8-003/native-sockets/abstract.stdout.log\"}, \"syscalls\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"8c1cd23300e61fdf25ebe630484b7e670419664e8a697f82fc0d3054baff9c91\"}, \"path\": \"docs/evidence/M8-003/native-sockets/abstract.syscalls.log\"}, \"unnamed_datagram_sender\": \"BLOCKED_SDK\"}], \"schema_version\": 1, \"source_digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"9f15e5a6e3eff1b8477ac8b80b79d4d43ab03669e351b73c5fc23bf1bf4576ba\"}, \"source_task\": \"M8-003\", \"status\": \"PASS\"}\n",
+  "stdout_path": "docs/evidence/M8-003/native-socket-consumer.stdout.log",
+  "stdout_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "b4aa7df416bffc1b1ede0ac73b6c0ec6a2efc962626fdcb258c4566b55daf1f9"
+  },
+  "stdout_truncated": false,
+  "timed_out": false
+}

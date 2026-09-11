@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 198782386 ns, RESULT:
+    TCS: StdNetTransportListenerTest, time elapsed: 91119628 ns, RESULT:
+    [ PASSED ] CASE: listenerRejectsOutOfRangeBacklogBeforeBinding (284876 ns)
+    [ PASSED ] CASE: listenerPreCancelledAndExpiredAcceptsFailFast (200649 ns)
+    [ PASSED ] CASE: listenerDeadlineBoundsBlockedAcceptAndListenerRemainsUsable (38578774 ns)
+    [ PASSED ] CASE: listenerCancellationWakesActiveAcceptAndListenerRemainsUsable (40019180 ns)
+    [ PASSED ] CASE: listenerCloseWakesActiveAcceptWithStructuredErrorAndIsIdempotent (10788617 ns)
+    TCS: M123TransportDiagnosticsTest, time elapsed: 546000 ns, RESULT:
+    [ PASSED ] CASE: stdNetReportsRuntimeEndpointsAndCapabilitiesWithoutGuessingIoBackend (234967 ns)
+    [ PASSED ] CASE: deterministicTransportUsesTheSameProviderNeutralContract (41390 ns)
+    TCS: M127BackgroundFastPathTest, time elapsed: 24153274 ns, RESULT:
+    [ PASSED ] CASE: backgroundAndObservedPathsTransferEquivalentData (159817 ns)
+    [ PASSED ] CASE: backgroundPeerCloseRemainsEof (162190 ns)
+    [ PASSED ] CASE: backgroundLocalCloseRaceRemainsClosed (1258217 ns)
+    [ PASSED ] CASE: backgroundStillRejectsConcurrentReaders (1199341 ns)
+    [ PASSED ] CASE: cancellableAndDeadlineContextsRetainGenericChecks (191897 ns)
+    [ PASSED ] CASE: deadlineTimeoutIsClearedBeforeBackgroundRead (20307166 ns)
+    TCS: Net06CancellationGateTest, time elapsed: 5791334 ns, RESULT:
+    [ PASSED ] CASE: cancelledReadsReleaseSocketsWaitersAndTasks (5444786 ns)
+    TCS: StdNetTransportTest, time elapsed: 74060717 ns, RESULT:
+    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (331568 ns)
+    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (3343274 ns)
+    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (228882 ns)
+    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (236579 ns)
+    [ PASSED ] CASE: emptyOperationsAreImmediate (161536 ns)
+    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (277214 ns)
+    [ PASSED ] CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose (1252056 ns)
+    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1129590 ns)
+    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29145488 ns)
+    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (38406 ns)
+    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (160184 ns)
+    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (30269777 ns)
+    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (1221046 ns)
+    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (1210908 ns)
+    [ PASSED ] CASE: gracefulNativeCloseRemainsGracefulAfterLaterAbort (168371 ns)
+    [ PASSED ] CASE: explicitAbortRemainsNativeOwnerAfterLaterClose (195653 ns)
+    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (165645 ns)
+    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (1201827 ns)
+    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (392734 ns)
+Summary: TOTAL: 50
+    PASSED: 33, SKIPPED: 17, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 206768731 ns, RESULT:
+TP: wirestack.*, time elapsed: 206686671 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 198782386 ns
+Summary: TOTAL: 50
+    PASSED: 33, SKIPPED: 17, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

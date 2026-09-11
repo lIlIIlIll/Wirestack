@@ -1,0 +1,316 @@
+{
+  "schema_version": 1,
+  "task_id": "M8-003",
+  "dependencies": [
+    "M8-002"
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "README.md",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m8-003.json",
+    "docs/api/generated",
+    "docs/evidence/M8-003",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "examples/linux/m8_003",
+    "src/internal/transport_stdnet/package.cj",
+    "src/internal/transport_stdnet/udp_socket.cj",
+    "src/net",
+    "tools/docs/m7_033_docs.py",
+    "tools/m8_003_native_sockets.py",
+    "tools/tasks/M8-003.json",
+    "src/internal/transport_stdnet/net_contract.cj",
+    "src/internal/transport_stdnet/unix_address.cj",
+    "src/internal/transport_stdnet/unix_listener.cj",
+    "src/internal/transport_stdnet/stdnet_transport_test.cj"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "plan-validation",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M8-003/test-plan.md",
+        "--json"
+      ],
+      "timeout_seconds": 30,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "architecture-guard",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--format",
+        "json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "task-contract-validation",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-tasks",
+        "--json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cangjie-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cangjie-build",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "network-contract-tests",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "transport-regression-tests",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/internal/transport_stdnet",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "native-socket-consumer",
+      "argv": [
+        "python3",
+        "tools/m8_003_native_sockets.py",
+        "--report",
+        "docs/evidence/M8-003/native-sockets.json"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "public-api-inventory",
+      "argv": [
+        "python3",
+        "tools/m7_026_linux_api_freeze.py",
+        "--baseline",
+        "docs/api/baselines/wirestack-linux-pre1-m8-003.json",
+        "--report",
+        "docs/evidence/M8-003/api-inventory.json"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "public-api-documentation",
+      "argv": [
+        "scripts/check-docs",
+        "--json",
+        "--output",
+        "docs/evidence/M8-003/docs-report.json"
+      ],
+      "timeout_seconds": 1800,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-full-check",
+      "argv": [
+        "scripts/check"
+      ],
+      "timeout_seconds": 3600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-regression-tests",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.repository.tests.test_repository_tooling",
+        "tools.tests.test_architecture_guard",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_033_docs",
+        "tools.tests.test_m7_linux_task_graph",
+        "-v"
+      ],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M8-003/plan-validation.json",
+    "docs/evidence/M8-003/architecture-guard.json",
+    "docs/evidence/M8-003/task-validation.json",
+    "docs/evidence/M8-003/cangjie-check.json",
+    "docs/evidence/M8-003/cangjie-build.json",
+    "docs/evidence/M8-003/network-tests.json",
+    "docs/evidence/M8-003/transport-tests.json",
+    "docs/evidence/M8-003/native-consumer-command.json",
+    "docs/evidence/M8-003/native-sockets.json",
+    "docs/evidence/M8-003/sdk-primitive-qualification.json",
+    "docs/evidence/M8-003/api-compatibility.json",
+    "docs/evidence/M8-003/api-inventory-command.json",
+    "docs/evidence/M8-003/docs-report.json",
+    "docs/evidence/M8-003/docs-command.json",
+    "docs/evidence/M8-003/full-check.json",
+    "docs/evidence/M8-003/regression-tests.json",
+    "docs/evidence/M8-003/evidence.json",
+    "docs/evidence/M8-003/review.json"
+  ],
+  "timeout_seconds": 9000,
+  "long_running_gate": false,
+  "source_paths": [
+    ".gitignore",
+    "README.md",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m8-003.json",
+    "docs/evidence/M8-003/README.md",
+    "docs/evidence/M8-003/test-plan.md",
+    "docs/evidence/M8-003/workspace-safety-publication.json",
+    "docs/evidence/M8-003/api-inventory.json",
+    "docs/evidence/M8-003/sdk-primitive-qualification.json",
+    "docs/evidence/M8-003/sdk-primitives/unix_sdk_probe.cj",
+    "docs/evidence/M8-003/sdk-primitives/unix_sdk_utf8_probe.cj",
+    "docs/evidence/M8-003/sdk-primitives/unix_path_probe.cj",
+    "docs/evidence/M8-003/sdk-primitives/unix_source_probe.cj",
+    "docs/evidence/M8-003/sdk-primitives/unix_bind_listen_probe.cj",
+    "docs/evidence/M8-003/sdk-primitives/sdk-probe-run.log",
+    "docs/evidence/M8-003/sdk-primitives/sdk-probe.syscalls.log",
+    "docs/evidence/M8-003/sdk-primitives/sdk-daily-probe-run.log",
+    "docs/evidence/M8-003/sdk-primitives/sdk-utf8-probe-run.log",
+    "docs/evidence/M8-003/sdk-primitives/sdk-utf8-probe.syscalls.log",
+    "docs/evidence/M8-003/sdk-primitives/sdk-path-probe-run.log",
+    "docs/evidence/M8-003/sdk-primitives/sdk-source-probe-run.log",
+    "docs/evidence/M8-003/sdk-primitives/bind-listen-probe.log",
+    "docs/evidence/M8-003/sdk-primitives/bind-listen-probe.syscalls.log",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "examples/linux/m8_003/main.cj",
+    "src/internal/transport_stdnet/package.cj",
+    "src/internal/transport_stdnet/net_contract.cj",
+    "src/internal/transport_stdnet/udp_socket.cj",
+    "src/internal/transport_stdnet/unix_address.cj",
+    "src/internal/transport_stdnet/unix_listener.cj",
+    "src/internal/transport_stdnet/stdnet_transport_test.cj",
+    "src/net/package.cj",
+    "src/net/datagram_socket_core.cj",
+    "src/net/udp_socket.cj",
+    "src/net/unix_stream.cj",
+    "src/net/unix_listener.cj",
+    "src/net/unix_datagram_socket.cj",
+    "tools/docs/m7_033_docs.py",
+    "tools/m8_003_native_sockets.py",
+    "docs/evidence/M8-003/review-reproduction/diagnostic-stdnet-test.cj",
+    "docs/evidence/M8-003/review-reproduction/connected-send.patch",
+    "docs/evidence/M8-003/review-reproduction/sdk-connected-send-attempt.patch",
+    "tools/tasks/M8-003.json",
+    "docs/evidence/M8-003/architecture-guard.stderr.log",
+    "docs/evidence/M8-003/architecture-guard.stdout.log",
+    "docs/evidence/M8-003/cangjie-build.stderr.log",
+    "docs/evidence/M8-003/cangjie-build.stdout.log",
+    "docs/evidence/M8-003/cangjie-check.stderr.log",
+    "docs/evidence/M8-003/cangjie-check.stdout.log",
+    "docs/evidence/M8-003/native-socket-consumer.stderr.log",
+    "docs/evidence/M8-003/native-socket-consumer.stdout.log",
+    "docs/evidence/M8-003/native-sockets/abstract.stderr.log",
+    "docs/evidence/M8-003/native-sockets/abstract.stdout.log",
+    "docs/evidence/M8-003/native-sockets/abstract.syscalls.log",
+    "docs/evidence/M8-003/native-sockets/consumer-build.stderr.log",
+    "docs/evidence/M8-003/native-sockets/consumer-build.stdout.log",
+    "docs/evidence/M8-003/native-sockets/pathname.stderr.log",
+    "docs/evidence/M8-003/native-sockets/pathname.stdout.log",
+    "docs/evidence/M8-003/native-sockets/pathname.syscalls.log",
+    "docs/evidence/M8-003/native-sockets/toolchain.stderr.log",
+    "docs/evidence/M8-003/native-sockets/toolchain.stdout.log",
+    "docs/evidence/M8-003/network-contract-tests.stderr.log",
+    "docs/evidence/M8-003/network-contract-tests.stdout.log",
+    "docs/evidence/M8-003/plan-validation.stderr.log",
+    "docs/evidence/M8-003/plan-validation.stdout.log",
+    "docs/evidence/M8-003/public-api-documentation.stderr.log",
+    "docs/evidence/M8-003/public-api-documentation.stdout.log",
+    "docs/evidence/M8-003/public-api-inventory.stderr.log",
+    "docs/evidence/M8-003/public-api-inventory.stdout.log",
+    "docs/evidence/M8-003/repository-full-check.stderr.log",
+    "docs/evidence/M8-003/repository-full-check.stdout.log",
+    "docs/evidence/M8-003/repository-regression-tests.stderr.log",
+    "docs/evidence/M8-003/repository-regression-tests.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.json",
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.json",
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/consumer-build.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/consumer-build.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.syscalls.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/report.json",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/toolchain.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/toolchain.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/consumer-build.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/consumer-build.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.syscalls.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/report.json",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/toolchain.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/toolchain.stdout.log",
+    "docs/evidence/M8-003/review-reproduction/initial-transport.json",
+    "docs/evidence/M8-003/review-reproduction/initial-transport.stderr.log",
+    "docs/evidence/M8-003/review-reproduction/initial-transport.stdout.log",
+    "docs/evidence/M8-003/task-contract-validation.stderr.log",
+    "docs/evidence/M8-003/task-contract-validation.stdout.log",
+    "docs/evidence/M8-003/transport-regression-tests.stderr.log",
+    "docs/evidence/M8-003/transport-regression-tests.stdout.log"
+  ]
+}

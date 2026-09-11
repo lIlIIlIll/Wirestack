@@ -1,0 +1,192 @@
+{
+  "compiler": "1.1.3",
+  "connected_send_sdk_evidence": [
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e284c15ee1a98dc9abdd3be0b32e3149940d8672446b594832384d97ee4eb6fa"
+      },
+      "path": "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/report.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5085c928933f82b5c3d8665de31e4aae370936d16ad67d356c8950083462fac0"
+      },
+      "path": "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.syscalls.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "75c0ac9a45071ba6a8d1d1fde07605a094555ea56b76c0e775b7791d71eefcb3"
+      },
+      "path": "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.stdout.log"
+    }
+  ],
+  "daily_compiler": "1.1.0-alpha.20260829040003",
+  "daily_scope": "Outgoing non-UTF8 abstract-name rejection only; do not infer all pinned-SDK observations were repeated on daily.",
+  "kind": "sdk-primitive-qualification",
+  "meaning": "Observed SDK capabilities and exclusions are classified; blocked native capabilities are not success claims.",
+  "native_evidence": {
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "80b5023bd5106afc64b411e00275e4317e6ab6a2c6aec856cdc9eef39f72591f"
+    },
+    "path": "docs/evidence/M8-003/native-sockets.json"
+  },
+  "observations": [
+    {
+      "capability": "pathname streams and explicitly addressed datagrams",
+      "evidence": "native-sockets.json",
+      "status": "SUPPORTED"
+    },
+    {
+      "capability": "outgoing arbitrary non-UTF8 abstract bytes",
+      "observation": "SockAddr construction calls UnixSocketAddress.toString and rejects invalid Unicode scalar values; observed on pinned and daily SDKs.",
+      "status": "BLOCKED_SDK"
+    },
+    {
+      "capability": "short outgoing abstract names",
+      "observation": "Pinned SDK bind/connect uses sockaddr_un length110, adding significant trailing NUL bytes. Exactly107-byte validUTF8 names interoperate with independent peers.",
+      "status": "BLOCKED_SDK_IDENTITY_PADDING"
+    },
+    {
+      "capability": "incoming named arbitrary abstract bytes",
+      "observation": "Independent Python sender with a short name containing0xFF is received with exact source bytes.",
+      "status": "SUPPORTED"
+    },
+    {
+      "capability": "unbound datagram sender",
+      "observation": "Pinned SDK receives the packet then fails SockAddr conversion with Unsupported socket family0; no packet or source is fabricated.",
+      "status": "BLOCKED_SDK"
+    },
+    {
+      "capability": "empty Unix datagram send",
+      "observation": "SDK rejects it while leaving the socket reusable; adapter reports Unsupported before I/O.",
+      "status": "BLOCKED_SDK"
+    },
+    {
+      "capability": "empty Unix datagram receive",
+      "observation": "Empty packet, exact source and truncated=false verified independently.",
+      "status": "SUPPORTED"
+    },
+    {
+      "capability": "Unix connected send preserving peer identity",
+      "observation": "Both explicit sendTo dispatch and concrete SDK send misdeliver after pathname replacement. Public connected send now fails closed; receive filtering and explicit sendTo are qualified.",
+      "status": "BLOCKED_SDK_PEER_IDENTITY"
+    },
+    {
+      "capability": "pathname automatic unlink",
+      "observation": "Native close releases descriptors but leaves filesystem socket nodes.",
+      "status": "CALLER_OWNED"
+    },
+    {
+      "capability": "raw native I/O",
+      "observation": "IPv4, IPv6, Packet and Netlink open requests return Unsupported; syscall validation rejects any created non-Unix or unsupported socket.",
+      "status": "BLOCKED_NO_ADAPTER"
+    }
+  ],
+  "probe_artifacts": [
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ba097956e392b5a3dfe5588be3f3776ca3ea91e606d82de53b30e99ec22b861f"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/unix_sdk_probe.cj"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5379a75f81d38d0697ae4820c9d7c26a54b86c498b4e4bc701c2069fba30007e"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/unix_sdk_utf8_probe.cj"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "15bc40175f3fb43b2540213d42dae132e64dafc232a9607838600945164eae5d"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/unix_path_probe.cj"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8298212aedddfe404d9d3ffc01369731afdb54a4e8c6002285d1e890ea26c774"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/unix_source_probe.cj"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a91226576b5cbd1fe333084b2812f1fc632332264e06f54e9cee9aed1b76c2ae"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/unix_bind_listen_probe.cj"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "184820af5f09f635aa8167fe65cdc78363641f15d8701e7bed84f81423e5ec50"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-probe-run.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4e42efa7fa73dc87269a63ffd18f999accb4b7b17637e7ab6e9a2340cea1fdaf"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-probe.syscalls.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "807813019eb56f0016d87fbeb983c228551c70075710a9538fc9669957405454"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-daily-probe-run.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f31a65125d0e90346c7c2eb8051025d4f0ce13455f2b1788bdff6a7ec5ae8187"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-utf8-probe-run.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "561fbc541c58540a8a9f26cac9547913307736b16e98d2a64335b0f9b930b88f"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-utf8-probe.syscalls.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "51d97cbd0ac8c8490df742341ed6cafd2126a76f1f1505bbeabc914509393a63"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-path-probe-run.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5344cd64bbce511ba1e2640faa558e1592d1bfa2c18be65ea0c65a838a94d6ac"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/sdk-source-probe-run.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f31a65125d0e90346c7c2eb8051025d4f0ce13455f2b1788bdff6a7ec5ae8187"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/bind-listen-probe.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c08abd943a238094d9646f84eb9c25993d1d81ded5439cf499ca303db69bb974"
+      },
+      "path": "docs/evidence/M8-003/sdk-primitives/bind-listen-probe.syscalls.log"
+    }
+  ],
+  "schema_version": 1,
+  "source_task": "M8-003",
+  "status": "PASS"
+}

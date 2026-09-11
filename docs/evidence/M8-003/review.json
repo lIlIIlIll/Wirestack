@@ -1,0 +1,120 @@
+{
+  "corrections": [
+    {
+      "after": {
+        "iterations": 512,
+        "status": "PASS",
+        "valid_cancellations_without_native_cause": 453
+      },
+      "before": {
+        "iterations": 512,
+        "status": "EXPECTED_FAIL",
+        "valid_cancellations_without_native_cause": 453
+      },
+      "change": "Remove only the incidental cause-presence assertion; retain Cancelled/Never, endpoints, first abort owner, and later-close ownership assertions. Temporary diagnostic loop and print removed from the production test.",
+      "evidence": [
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "168b4c378e89dbceaafef63328ba127b80d859b5d567a22ea5d4da7c4266a334"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/diagnostic-stdnet-test.cj"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "fad53fe288ad6cebb4fed30194ea81de72eb5173ca58044d71317d33afae8085"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/initial-transport.json"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "5a52fc3756159f5e2eedbc3964aec8fcb9c0d095f3ecfbc58ac84dfba1ba432a"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.json"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "0bbdf693686d06fac7f246dda934ae9793a50ecad49c99f57cfb4bfc7ea1788e"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.json"
+        }
+      ],
+      "issue": "Incidental native-cause requirement after lifecycle admission"
+    },
+    {
+      "after": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "80b5023bd5106afc64b411e00275e4317e6ab6a2c6aec856cdc9eef39f72591f"
+        },
+        "path": "docs/evidence/M8-003/native-sockets.json"
+      },
+      "before": "Independent Python replacement peer received the selected packet. Switching to concrete SDK send retained the misdelivery.",
+      "evidence": [
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "bc87ca60f41bcd75e2560a41ccc455d507b59b8705d1290fba4f4b9fdd644da7"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/connected-peer-before/report.json"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "5a9476a40d71f875a5f67154c0475a21813d9155b3193a4963973192a5798dd1"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.syscalls.log"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e284c15ee1a98dc9abdd3be0b32e3149940d8672446b594832384d97ee4eb6fa"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/report.json"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "5085c928933f82b5c3d8665de31e4aae370936d16ad67d356c8950083462fac0"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.syscalls.log"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "eee5ac4cb88d76bb94716c035d49a5dea5370c39430f9a503ec9653d02057b98"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/sdk-connected-send-attempt.patch"
+        },
+        {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "25002c9ab4ece15cf806c56ba56a507dc95e5547882922248a66571bafa2dbad"
+          },
+          "path": "docs/evidence/M8-003/review-reproduction/connected-send.patch"
+        }
+      ],
+      "issue": "Unix connected send can target a replacement pathname",
+      "resolution": "connectedDatagramSend=false; connected send reports Unsupported before native send. Explicit sendTo and native receive filtering remain supported."
+    }
+  ],
+  "kind": "independent-source-review",
+  "meaning": "Findings resolved or classified as explicit SDK capability exclusions, with native proof.",
+  "native_write_timeout": "Replaced an obsolete helper-only timeout test with public backpressured Unix write proof: native EAGAIN, real deadline, Never retryability, native cause and Unix endpoint.",
+  "reviewers": [
+    {
+      "result": "No significant defect; lifecycle admission does not guarantee a native exception cause.",
+      "slice": "Unix stream/listener and shared stream lifecycle"
+    },
+    {
+      "result": "Connected send misdelivery found; concrete SDK send also fails; fail-closed capability guard confirmed as appropriate.",
+      "slice": "Unix/Internet datagram lifecycle and connected-peer behavior"
+    }
+  ],
+  "schema_version": 1,
+  "source_task": "M8-003",
+  "status": "PASS"
+}

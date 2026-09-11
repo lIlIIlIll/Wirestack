@@ -1,10 +1,10 @@
 # 使用 Linux 网络契约
 
-M8-001 在 `wirestack` 提供共享的 Internet/Unix endpoint，在 `wirestack.net` 提供
-生命周期、capability 类型与复用 Transport SPI 的 `TcpStream`。M8-002 增加了基于
-`std.net` 的 Linux 公共 `TcpListener` 和 `UdpSocket`，仍不暴露 SDK socket 或 native
-handle。本页说明这些已经实现的 Internet socket 接口。Unix adapter、DNS 和协议集成
-属于仍待执行的 M8-003 及后续任务。
+`wirestack` 提供共享 Internet/Unix endpoint，`wirestack.net` 提供同步 socket 生命周期、
+capability 和结构化错误。Linux backend 使用公开 `std.net` API，不暴露 SDK socket 或
+native handle。M8-002 提供 `TcpListener`、`TcpStream` 和 `UdpSocket` 的 Internet
+原生证据；M8-003 增加受 SDK 能力限制的 `UnixListener`、`UnixStream` 和
+`UnixDatagramSocket`。DNS 与后续协议集成仍由 M8-004 及后续任务负责。
 
 ## 连接已解析的 TCP endpoint
 
@@ -123,13 +123,38 @@ func forwardOneDatagram(
 `std.net`，因此关闭此 `UdpSocket` 并保留 `Aborted` 所有权。每个 socket 必须在
 `finally` 中调用 `close()`；不要把活动 UDP 取消当成 listener accept 那样的局部取消。
 
+## Unix-domain socket
+
+`UnixListener.bind(endpoint, backlog:, context:)` 绑定命名 Unix endpoint；
+`accept(context:)` 返回 `UnixStream`。也可以用 `UnixStream.connect(endpoint, context:)`
+主动连接。读写、exact/all helper、EOF 后继续写、单读单写并发和终态所有权沿用 TCP
+契约。一次活动 accept 的取消只终止该 waiter，listener 可继续接受连接；
+活动 stream I/O 的取消会关闭 stream。
+
+`UnixDatagramSocket.bind(endpoint, context:)` 提供显式 `sendTo` 和拥有独立 payload 的
+`receive`，可以作为 `DatagramSocket` 传入上面的转发函数。报文上限和截断语义与 UDP
+相同。`connect` 安装内核接收端 peer 过滤，但 **connected `send` 不可用**：
+SDK 自己的 `send` 也会重新解析 Unix 地址。pathname 被替换后，原本针对旧 peer 的
+报文可能误投新 socket。因此 `connectedDatagramSend` 为 false，`send` 显式返回
+`Unsupported`；显式 `sendTo` 仍按调用者提供的目的地址发送，不改变接收过滤。
+
+| 地址或操作 | 当前 Linux backend |
+|---|---|
+| Pathname bind/connect | 支持；close 不删除文件系统节点，调用方负责清理 |
+| Outgoing abstract name | 仅支持恰好 107 字节且为有效 UTF-8 的名称；允许内嵌 NUL |
+| 短或非 UTF-8 outgoing abstract name | `Unsupported`；不补零或改写名称 |
+| Stream 的未命名 peer | 保留 `UnixEndpoint.unnamed()` |
+| Datagram 的命名 sender | 保留实际来源字节，包括短名称和非 UTF-8 abstract bytes |
+| Datagram 的未绑定 sender | SDK 消费报文后无法转换来源地址，操作失败；不伪造来源或恢复报文 |
+| 空 datagram | 接收支持；发送为 `Unsupported`，socket 可继续使用 |
+
 `api.UnixEndpoint.pathname`、`abstractName` 和 `unnamed` 是不同的值。pathname
 拒绝 NUL 字节；abstract name 保留任意字节，包括 NUL。两类地址都由
 `api.NetworkEndpoint` 承载，`api.NetworkException.localEndpoint` 与
 `remoteEndpoint` 使用同一类型，不把 Unix 地址转换为有损字符串。
-能构造地址不代表其 native adapter 已实现。M8-003 负责逐地址形式的原生执行证据。AF_PACKET、
-AF_NETLINK、SOCK_SEQPACKET、ancillary data 以及没有 native adapter 的特权 raw I/O
-不计为成功能力。
+地址值的表示范围大于当前 SDK 的 native 支持范围。AF_PACKET、AF_NETLINK、
+SOCK_SEQPACKET、ancillary data 和特权 raw I/O 不计为成功能力；
+`RawSocket.open` 当前没有 native adapter，所有 modeled domain 均返回 `Unsupported`。
 `RawSocket.open` 必须显式传入 `protocolValue`；IPv6 ICMP 使用
 `RawSocketProtocol.icmpv6()`，不继承 IPv4 的默认协议。
 
@@ -144,17 +169,20 @@ func unixPeer(error: api.NetworkException): ?api.UnixEndpoint {
 }
 ```
 
-`SocketCapabilities` 是 advisory 值，调用结果仍是权威。当前 Linux listener、接受的
-TCP stream 和 UDP socket 报告 `nonBlocking` 与 `closeOnExec`。UDP 还报告
-`broadcast` 与 `multicast`；`halfClose`、`raw`、`ancillaryData` 和
-`zeroLengthDatagramSend` 为 false。`SocketOption` 仍只是类型化值，M8-002 没有增加
-公共 option application 操作。
+## Capability 与验证边界
 
-Unix endpoint 与 raw socket 的 native adapter 仍属于 M8-003，DNS wire parser 和
-resolver policy 属于 M8-004。M8-003 至 M8-007 都保持待执行。M8-002 的 Linux
-IPv4/IPv6 原生结果和任务门禁见[验收记录](../evidence/M8-002/README.md)。
+`SocketCapabilities` 是 advisory 值，调用结果仍是权威。当前 Linux Internet/Unix
+listener、stream 和 datagram socket 报告 `nonBlocking` 与 `closeOnExec`。
+Internet UDP 还报告 `broadcast`、`multicast` 和 `connectedDatagramSend`；
+Unix datagram 的 connected send 为 false。当前 backend 的 `halfClose`、`raw`、
+`ancillaryData` 和 `zeroLengthDatagramSend` 均为 false。`SocketOption` 仍只是类型化值，
+公共 API 尚无 option application 操作。
 
-查看[公共 API 参考](../api/README.md)、[原生 consumer 源码](../../examples/linux/m8_002/main.cj)
-和[对应 runner](../../tools/m8_002_native_sockets.py)。M8-002 的目标公开 API baseline
-是
-[`wirestack-linux-pre1-m8-002.json`](../api/baselines/wirestack-linux-pre1-m8-002.json)。
+Internet 原生结果见 [M8-002 验收记录](../evidence/M8-002/README.md)，Unix 支持范围与
+SDK 限制见 [M8-003 验收记录](../evidence/M8-003/README.md)。
+Unix [consumer](../../examples/linux/m8_003/main.cj) 和
+[runner](../../tools/m8_003_native_sockets.py) 使用独立 Python peer，验证字节、来源、
+原生等待、背压超时、地址替换防护和活动进程中的 descriptor 清理。
+当前公开契约见 [API 参考](../api/README.md) 与
+[`wirestack-linux-pre1-m8-003.json`](../api/baselines/wirestack-linux-pre1-m8-003.json)。
+M8-004 至 M8-007 仍待执行；不能把局部 socket 资格确认视为最终 release 验证。
