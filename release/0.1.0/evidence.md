@@ -13,10 +13,10 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Candidate tree | `1becedac11e248c417f8e455c8db230514884d1a` |
 | Package manifest | 九个 package，版本均为 `0.1.0` |
 | Release graph | `release/release-graph.toml`；status=`release-ready` |
-| Evidence updated | `2026-09-11` |
+| Evidence updated | `2026-09-12` |
 | Local qualification host | Linux Arch `7.2.3-Arch1-3`, x86_64；Intel Core i7-8700 |
 | Release qualification SDK | Cangjie STS `1.1.3`；local path `/home/elliot/cangjie_sdk/sts1.1.3`；当前候选已完成可达的本地验证，正式性能门禁仍有阻断 |
-| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；run [`34596071836`](https://github.com/lIlIIlIll/yjson/actions/runs/34596071836) 失败于 `Seven-library evidence drift` |
+| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；run [`34710721196`](https://github.com/lIlIIlIll/yjson/actions/runs/34710721196) 失败于 `Seven-library evidence drift` |
 
 此前记录的本地编译器 `cjc` SHA-256
 `bc0f32df9c610dcbb05f437552ff57ec6c6e075a54721f46cc9c882a62d2d836`，
@@ -37,7 +37,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
 | Local Linux fresh candidate | PASS | `scripts/ci_fresh_checkout.sh` 在 qvt 候选、STS `1.1.3` 下通过；release tree `292` files，包含 API、cjdoc、九包 rehearsal、Native、sanitizer 和 fuzz-short jobs |
-| Hosted PR CI | **BLOCKING** | run [`34596071836`](https://github.com/lIlIIlIll/yjson/actions/runs/34596071836) 仅 `Seven-library evidence drift` 与其汇总 job 失败；pinned STS、覆盖率、Windows/macOS Pure 及其余 required jobs 通过 |
+| Hosted PR CI | **BLOCKING** | run [`34710721196`](https://github.com/lIlIIlIll/yjson/actions/runs/34710721196) 仅 `Seven-library evidence drift` 与其汇总 job 失败；pinned STS、覆盖率、Windows/macOS Pure 及其余 required jobs 通过 |
 | Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是 `1.1.3` 基线下当前候选的合并后 run |
 | Coverage | PASS (current hosted job) | 当前 PR run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
 | Source-only staging | PASS | 最新 `scripts/ci_fresh_checkout.sh` 在 STS `1.1.3` 下完成仅源码暂存和发布树复制 |
@@ -189,7 +189,7 @@ Native 运行源码闭包 SHA-256 为
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (qvt; STS 1.1.3; fresh checkout jobs passed)
-Hosted PR execution: BLOCKING (run 34596071836 failed Seven-library evidence drift; pinned STS and other required jobs passed)
+Hosted PR execution: BLOCKING (run 34710721196 failed Seven-library evidence drift; pinned STS and other required jobs passed)
 Seven-library evidence freshness: BLOCKING (current formal matrix not run; correctness preflight 7/7 is not formal performance evidence)
 Three-library performance qualification: BLOCKING (remote formal current-candidate matrix not run)
 Pure baseline/candidate qualification: BLOCKING (explicit-CPU diagnostic contains an actual >5% rollback and has no idle qualification)
