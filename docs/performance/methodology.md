@@ -39,12 +39,11 @@ evidence marker。
 
 - 以各独立进程测量值的中位数为主要延迟统计。
 - 耗时比为 `yjson median / peer median`。
-- README 中的代表性结果要求双方变异系数（CV）≤ 5%。
+- README 中的代表性结果只引用 stable 行；双方 CV 超过 5% 的行保留并标为 noisy。
 - 更严格的绝对延迟声明要求 CV ≤ 3%。
-- 未过门槛的行保留并标记为 noisy（波动过大），不发布精确比例。
-- 配对胜负方向可作为探索证据，但必须与稳定比例分开。
+- noisy 行不发布精确比例；配对胜负方向可作为探索证据，但必须与稳定比例分开。
 
-CV 门槛只控制可陈述精度，不是筛选测试用例的工具。
+CV 门槛控制可陈述的精度和明确性能 qualification，不是普通 Release 的筛选条件。
 
 ## 比较边界
 
@@ -75,11 +74,12 @@ candidate。
 
 脚本有两个明确的门禁模式：
 
-- `--gate-mode release` 用于普通 Release。要求所有用例的
-  `candidate/baseline <= 1.05`，双方 CV 均不超过 5%，但不要求 candidate 提升。
-- `--gate-mode optimization` 用于评估一个明确声明的内部优化。除了 Release 模式的回退和稳定性
-  条件外，每个 `--target-case` 还必须达到指定的提升，并在 11 轮中至少赢 5 轮。默认目标提升为
-  5%，可用 `--target-improvement-percent` 显式调整。
+- `--gate-mode release` 用于普通 Release。正式完整结果要求所有用例的
+  `candidate/baseline <= 1.05`；双方 CV 只作为 stable/noisy 元数据，不作为失败条件。
+  不要求 candidate 提升。
+- `--gate-mode optimization` 用于评估一个明确声明的内部优化。除了 Release 模式的回退、
+  双方 CV 不超过 5% 的稳定性条件外，每个 `--target-case` 还必须达到指定的提升，并在
+  11 轮中至少赢 5 轮。默认目标提升为 5%，可用 `--target-improvement-percent` 显式调整。
 
 `--target-case` 和 `--target-improvement-percent` 只能在 optimization 模式使用。没有对外性能承诺
 时，目标用例的提升数字属于方向性或诊断证据，不能成为普通 Release 的额外阻塞条件。
@@ -101,11 +101,13 @@ SHA-256 和长度。脚本在重建前后分别记录源码信息；`--enforce` 
 ## Native 加速检查
 
 Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会冻结引擎。正式检查固定
-11 轮、相同的 CPU 亲和性和 128 MiB 堆内存，并在每轮交替 Pure 与 Native 的执行顺序：
+11 轮、相同的 CPU 亲和性和 128 MiB 堆内存，并在每轮交替 Pure 与 Native 的执行顺序。
+以下是 Native acceleration 性能声明的 qualification 条件，不是普通包 Release 的 CV 门禁：
 
 - 对外宣称加速的读写用例：双方 CV ≤ 5%、`Native/Pure ≤ 0.95`，且 Native 至少赢 6/11；
-- 普通稳定测试用例：双方 CV ≤ 5%、`Native/Pure ≤ 1.05`；
+- 普通负载性能声明：双方 CV ≤ 5%、`Native/Pure ≤ 1.05`；
 - 任一行超过 CV 门槛时，丢弃该批次并完整重跑一次，不按单行挑选样本；
+- 第二批仍 noisy 时保留完整结果，但不得发布该行的精确 Native/Pure 比例或加速声明；
 - 立即重跑时，只有构建源码摘要未变化才能复用可执行文件。
 
 检查结果仅适用于表中列出的测试用例，不能据此推断所有类型化容器、流或 DOM 调用
@@ -123,12 +125,12 @@ Stream 比较只接受调用方持有的 `InputStream` 或 `OutputStream`。解�
 和确定性的 1 到 8192 字节分块，以及保留输出内容和只计数的两种输出流。1 字节分块只用于正确性
 验证。
 
-候选必须同时满足以下条件：
+如需发布 Stream 性能声明，候选必须同时满足以下条件：
 
 - 稳定核心行相对冻结基线不回退超过 5%；
 - 至少两个标准解码用例提升 5%，且候选赢至少 6/11；
 - 复用内部临时缓冲区时，至少两个标准输入的执行速度快于关闭复用时；
-- 所有阻断行双方 CV 不超过 5%。
+- 所有作为该声明依据的阻断行双方 CV 不超过 5%。
 
-完整重跑一次后仍超过 CV 门槛的批次必须保留并标为未通过。变化方向一致但波动过大的行可以说明
-观察方向，不能发布精确比例。
+完整重跑一次后仍超过 CV 门槛的批次必须保留并标为 noisy（波动过大）。noisy 结果可以
+保留方向证据，但不能发布精确比例；它本身不阻断普通包 Release。

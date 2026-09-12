@@ -176,6 +176,43 @@ class PurePerfGatePolicyTest(unittest.TestCase):
         self.assertIsNone(gates["targets_meet_improvement_and_5_of_11_wins"])
         self.assertTrue(gates["passed"])
 
+    def test_release_mode_does_not_require_stability(self) -> None:
+        self.baseline["target"]["cv_percent"] = 20.0
+        self.candidate["ordinary"]["cv_percent"] = 30.0
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "release",
+            (),
+            None,
+        )
+        self.assertFalse(gates["stability_gate_required"])
+        self.assertFalse(gates["both_cv_at_most_5_percent"])
+        self.assertTrue(gates["passed"])
+
+    def test_optimization_mode_still_requires_stability(self) -> None:
+        self.comparisons["target"].update({
+            "improvement_percent": 5.0,
+            "candidate_wins": 5,
+        })
+        self.baseline["target"]["cv_percent"] = 6.0
+        self.candidate["target"]["cv_percent"] = 6.0
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "optimization",
+            ("target",),
+            5.0,
+        )
+        self.assertTrue(gates["stability_gate_required"])
+        self.assertFalse(gates["both_cv_at_most_5_percent"])
+        self.assertFalse(gates["passed"])
+
+
     def test_optimization_mode_requires_target_improvement(self) -> None:
         gates = MODULE.evaluate_gates(
             self.cases,

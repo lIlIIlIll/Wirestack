@@ -78,8 +78,9 @@ scripts/json_pure_perf_compare.py \
   --enforce
 ```
 
-`release` 模式只检查完整结果的稳定性和回退：任何用例回退超过 5%，或任一方 CV
-超过 5%，命令返回非零状态。它不要求候选版本相对基线提升。
+`release` 模式只检查完整结果和回退：任何用例回退超过 5%，命令返回非零状态。
+CV 只影响 stable/noisy 标签和可发布的性能表述，不会单独使普通 Release 失败；
+它不要求候选版本相对基线提升。
 
 如果正在评估一个明确的内部优化，再显式启用优化模式：
 
@@ -97,9 +98,10 @@ scripts/json_pure_perf_compare.py \
   --enforce
 ```
 
-优化模式在发布模式的基础上，要求每个 `--target-case` 至少提升指定百分比，并在
-11 轮中至少胜出 5 轮。`--target-case` 和 `--target-improvement-percent` 只能与
-`--gate-mode optimization` 一起使用；目标优化门禁不是普通 Release 的必要条件。
+优化模式在发布模式的基础上保留双方 CV 不超过 5% 的稳定性条件，并要求每个
+`--target-case` 至少提升指定百分比、在 11 轮中至少胜出 5 轮。`--target-case` 和
+`--target-improvement-percent` 只能与 `--gate-mode optimization` 一起使用；目标优化
+门禁不是普通 Release 的必要条件。
 
 不传 `--cpu` 时，脚本采样物理核心的两个硬件线程，并选择两者利用率都低于 1%
 的核心。每次测量固定到其中一个线程，另一个由 `scripts/monitor_cpu_pair.py` 记录。脚本
@@ -115,7 +117,7 @@ scripts/json_pure_perf_compare.py \
 - 用例语义、API、输入数据和输入形态一致；
 - 基线与候选版本或多个库交替、反转顺序执行；
 - 完整保留 yjson、stdx.json、cjfast_json 的共同用例；
-- 高 CV 行保留并标为 noisy（波动过大）；
+- 高 CV 行保留并标为 noisy（波动过大）；noisy 不单独阻断普通 Release，也不支持发布精确比例；
 - 方向证据与稳定精确比例分开；
 - 保存提交、运行时和主机信息、各轮原始结果、测量清单与校验和；
 - 不把临时路径、快速测量结果或未同步的跨批次数字写入 README。

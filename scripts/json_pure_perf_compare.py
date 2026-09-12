@@ -112,7 +112,7 @@ def parse_args() -> argparse.Namespace:
         "--gate-mode",
         choices=GATE_MODES,
         default="release",
-        help="release checks stability and regressions; optimization also checks targets",
+        help="release checks regressions; optimization also checks stability and targets",
     )
     parser.add_argument("--case", action="append", choices=CASES,
                         help="run only this case; repeat for a diagnostic subset")
@@ -570,6 +570,7 @@ def evaluate_gates(
         and candidate[case]["cv_percent"] <= 5.0
         for case in cases
     )
+    stability_gate_required = gate_mode == "optimization"
     target_passed: bool | None = None
     if gate_mode == "optimization":
         if target_improvement_percent is None:
@@ -583,11 +584,12 @@ def evaluate_gates(
         "gate_mode": gate_mode,
         "all_ratios_at_most_1_05": regression_passed,
         "target_gate_required": gate_mode == "optimization",
+        "stability_gate_required": stability_gate_required,
         "targets_meet_improvement_and_5_of_11_wins": target_passed,
         "both_cv_at_most_5_percent": stability_passed,
         "passed": (
             regression_passed
-            and stability_passed
+            and (not stability_gate_required or stability_passed)
             and target_passed is not False
         ),
     }
