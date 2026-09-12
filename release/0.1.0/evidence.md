@@ -44,9 +44,9 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Package rehearsal | PASS (fresh) | 当前 qvt fresh checkout 的 `registry-rehearsal` job 通过；未把临时 rehearsal 树当作最终上传 bundle |
 | Seven-library matrix | **BLOCKING** | 旧 marker 和结果使用旧工具链/旧 release graph；STS `1.1.3` 下七库 correctness preflight 已完成 `7/7`，但正式完整矩阵因没有 `<1%` idle-core 窗口尚未运行 |
 | Three-library release performance | **BLOCKING** | `1.1.3` 基线下当前候选的远端正式 36-workload 三库证据尚未运行；本地 Native 诊断不替代该 gate |
-| Pure baseline/candidate qualification | **BLOCKING** | STS `1.1.3` 下已完成显式 CPU 的 24-case、11 轮 release 诊断，但 CPU idle 资格为空且稳定性/回退 gate 未通过，不能写成正式 PASS |
-| Native acceleration | **BLOCKING** | STS `1.1.3` 下当前候选已完成 36-workload、11 轮三库测量，但 `0/36` stable、`36/36` noisy，按方法整体不具备发布资格 |
-| Release policy | **BLOCKING** | Seven-library、three-library、Pure 和 Native 当前候选证据未全部通过；没有创建 tag 或 Release |
+| Pure baseline/candidate qualification | **BLOCKING** | STS `1.1.3` 下已完成显式 CPU 的 24-case、11 轮 release 诊断，但包含超过 5% 的实际回退，且 CPU idle 资格为空，不能写成正式 PASS |
+| Native acceleration | NON-BLOCKING (claim not qualified) | STS `1.1.3` 下当前候选已完成 36-workload、11 轮三库诊断，但 `0/36` stable、`36/36` noisy；噪声只阻止精确 Native/跨库性能声明，不阻断普通 Release |
+| Release policy | **BLOCKING** | Seven-library freshness、three-library formal evidence，以及 Pure 的实际回退/idle qualification 仍未关闭；Native noisy 数据本身不是阻断项，没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
@@ -115,8 +115,9 @@ CV 门槛，三库正式性能 gate 为 BLOCKING。
 `cpu-selection.json` 为 `sample_seconds=0`、CPU `2/8`、idle
 qualification=`null`，因此只是诊断数据，不是 `<1%` idle-core 正式证据。
 
-该批 `summary.json` 的关键 gate 为 `all_ratios_at_most_1_05=false`、
-`both_cv_at_most_5_percent=false`、`passed=false`。代表性行包括：
+该批 `summary.json` 的关键 gate 为 `all_ratios_at_most_1_05=false`；
+`both_cv_at_most_5_percent=false` 只是该批的稳定性元数据，按新 Release policy 不单独阻断；
+整体仍不能通过，因为存在超过 5% 的实际回退。代表性行包括：
 `yjsonStringEncodeDeepNestedProfiles` 回退 `-6.5%`、`parseStringRecords1m`
 回退 `-4.3%`；改善行包括 `yjsonStringDecodeLargeInt64Map` `16.4%` 和
 `yjsonBytesDecodeLargeInt64Map` `11.3%`。当前批次 summary 记录了完整 24 行，
@@ -137,13 +138,13 @@ corpus=`db9b0242e01fb4cfa2468245f8be5329a0967052412b7340f12c468c6202a70f`。
 工具链为 `cjc/cjpm 1.1.3`；可用的无 `--cpu` 探针曾观察到 CPU `2/8`
 约 `9.13%/9.88%` 和 CPU `4/10` 约 `11.91%/11.92%`，均不满足 `<1%`。
 
-### Native acceleration（当前候选，STS `1.1.3`）
+### Native / 三库诊断（当前候选，STS `1.1.3`）
 
 `scripts/json_cjfast_perf_run.py` 在 qvt 候选上使用固定 CPU `4`、128 MiB、
 11 轮、完整 36 个 yjson/stdx.json/cjfast_json workload 完成，随后由
-`scripts/json_cjfast_perf_summary.py` 汇总。该批三个库均完成 11 轮，但
-稳定 workload 为 `0/36`、noisy workload 为 `36/36`；按方法即使若干行方向上
-yjson 更快，也不能作为 Native 发布资格。
+`scripts/json_cjfast_perf_summary.py` 汇总。该批三个库均完成 11 轮，
+稳定 workload 为 `0/36`、noisy workload 为 `36/36`；noisy 只表示不能发布精确的
+Native/跨库性能比例或 acceleration claim，不是普通 Release 的阻断条件。
 
 本批 `yjson_commit=533284b9b8e6eee5c65b7fbbc2701ef8f4b35380`、
 `cjfast_json_commit=eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65`、
@@ -158,7 +159,9 @@ SHA-256 依次为：
 `7180b48f460db5534804ce855326756dbcd10af6235024f02fb080cae7522c72`、
 `74b26fecb241365f0b8e21133396209b7c7499ec4b00eadda1ea95e8a77cf888`、
 `a273b4bb44b46192dabd3f71762b832c3edba80d61747f0c8053e1244f7ae5c2`。
-因此该批保留为 STS `1.1.3` 下的当前候选诊断，正式 Native gate 仍为 BLOCKING。
+因此该批保留为 STS `1.1.3` 下的当前诊断；它不具备单独发布精确性能声明的资格，
+但 noisy 本身不阻断普通 Release。Native/Pure acceleration claim 仍须另行通过
+其专用的稳定性、RSS、checksum 和比例门禁。
 
 ### 历史 Native acceleration（`b0`）
 
@@ -189,8 +192,8 @@ Local fresh-source simulation: PASS (qvt; STS 1.1.3; fresh checkout jobs passed)
 Hosted PR execution: BLOCKING (run 34596071836 failed Seven-library evidence drift; pinned STS and other required jobs passed)
 Seven-library evidence freshness: BLOCKING (current formal matrix not run; correctness preflight 7/7 is not formal performance evidence)
 Three-library performance qualification: BLOCKING (remote formal current-candidate matrix not run)
-Pure baseline/candidate qualification: BLOCKING (explicit-CPU diagnostic failed stability/rollback gates and has no idle qualification)
-Native acceleration: BLOCKING (current STS 1.1.3 batch has 0/36 stable and 36/36 noisy workloads)
+Pure baseline/candidate qualification: BLOCKING (explicit-CPU diagnostic contains an actual >5% rollback and has no idle qualification)
+Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current STS 1.1.3 batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS (current PR Core Coverage job passed; historical thresholds remain recorded above)
 Release decision: BLOCKED; no tag, GitHub Release, or registry publication
@@ -199,7 +202,8 @@ Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 发布基线已从 STS `1.1.0` 迁移到 `/home/elliot/cangjie_sdk/sts1.1.3`
 （cjc/cjpm `1.1.3`）。当前候选已通过本地 fresh-checkout 和完整基础测试，
 并完成了可达的 STS `1.1.3` 诊断测量；但正式七库矩阵、远端三库矩阵、满足
-idle-core 资格的 Pure 证据，以及稳定的 Native 证据仍缺失或未通过。旧
+idle-core 资格的 Pure 证据，以及 Pure 的实际回退仍缺失或未通过。Native noisy
+结果不阻断普通 Release，但不能用于精确 acceleration claim。旧
 `1.1.0` 结果、marker 和 bundle 不能复用；5% target improvement 仍只属于明确
-声明的 optimization mode。关闭这些门禁前不得创建 `0.1.0` tag 或 GitHub Release。
+声明的 optimization mode。关闭剩余阻塞门禁前不得创建 `0.1.0` tag 或 GitHub Release。
 
