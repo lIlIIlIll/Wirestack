@@ -42,7 +42,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Coverage | PASS (current hosted job) | 当前 PR run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
 | Source-only staging | PASS | 最新 `scripts/ci_fresh_checkout.sh` 在 STS `1.1.3` 下完成仅源码暂存和发布树复制 |
 | Package rehearsal | PASS (fresh) | 当前 qvt fresh checkout 的 `registry-rehearsal` job 通过；未把临时 rehearsal 树当作最终上传 bundle |
-| Seven-library matrix | **BLOCKING** | 旧 marker 和结果使用旧工具链/旧 release graph；STS `1.1.3` 下七库 correctness preflight 已完成 `7/7`，但正式完整矩阵因没有 `<1%` idle-core 窗口尚未运行 |
+| Seven-library matrix | **BLOCKING** | Archived evidence passes integrity-only checks (checksums, manifests, identities and summaries), but strict freshness fails because measured commit `2758853efe1117c7d2b272abd36cf90de46526f5` used `status=migration` while the current release graph is `status=release-ready`; no qualifying `<1%` idle-core window was available locally to rerun the STS `1.1.3` formal matrix |
 | Three-library release performance | **BLOCKING** | `1.1.3` 基线下当前候选的远端正式 36-workload 三库证据尚未运行；本地 Native 诊断不替代该 gate |
 | Pure baseline/candidate qualification | **BLOCKING** | STS `1.1.3` 下已完成显式 CPU 的 24-case、11 轮 release 诊断，但包含超过 5% 的实际回退，且 CPU idle 资格为空，不能写成正式 PASS |
 | Native acceleration | NON-BLOCKING (claim not qualified) | STS `1.1.3` 下当前候选已完成 36-workload、11 轮三库诊断，但 `0/36` stable、`36/36` noisy；噪声只阻止精确 Native/跨库性能声明，不阻断普通 Release |
@@ -190,7 +190,7 @@ Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (qvt; STS 1.1.3; fresh checkout jobs passed)
 Hosted PR execution: BLOCKING (run 34710721196 failed Seven-library evidence drift; pinned STS and other required jobs passed)
-Seven-library evidence freshness: BLOCKING (current formal matrix not run; correctness preflight 7/7 is not formal performance evidence)
+Seven-library evidence freshness: BLOCKING (archive integrity passes; strict current-candidate identity fails because the measured release graph predates `release-ready`; no qualifying local idle-core window was available for the STS 1.1.3 formal matrix)
 Three-library performance qualification: BLOCKING (remote formal current-candidate matrix not run)
 Pure baseline/candidate qualification: BLOCKING (explicit-CPU diagnostic contains an actual >5% rollback and has no idle qualification)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current STS 1.1.3 batch is noisy; no precise acceleration claim)
