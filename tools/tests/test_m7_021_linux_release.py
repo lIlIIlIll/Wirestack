@@ -20,15 +20,56 @@ class M7021LinuxReleaseTest(unittest.TestCase):
             "cjpm.toml",
             "native/resolver/linux/wirestack_resolver.c",
             "native/resolver/linux/wirestack_resolver.h",
+            "native/http_files/wirestack_http_files.c",
+            "native/http_files/wirestack_http_files.h",
             "native/tls/aws_lc/provider.json",
             "native/tls/aws_lc/wirestack_tls_provider.c",
             "native/tls/aws_lc/wirestack_tls_provider.h",
             "tools/build_linux_resolver.py",
+            "tools/build_linux_http_files.py",
+            "tools/build_native_dependencies.py",
             "tools/build_linux_tls_provider.py",
             "third_party/aws-lc/LICENSE",
             "third_party/aws-lc/NOTICE",
         }
         self.assertTrue(required.issubset(set(release.QUALIFICATION_INPUTS)))
+
+    def test_http_files_manifest_binds_sources_tools_and_archive(self) -> None:
+        archive = b"native archive"
+        payload = {
+            f"{release.HTTP_FILES_PAYLOAD_ROOT}/{release.HTTP_FILES_ARCHIVE}": archive
+        }
+        manifest = {
+            "schema_version": 1,
+            "component": "wirestack-http-files",
+            "abi_version": 1,
+            "private_runtime_abi": False,
+            "build_fingerprint": "a" * 64,
+            "inputs": {
+                "builder_sha256": "b" * 64,
+                "sources": {
+                    "native/http_files/wirestack_http_files.c": "c" * 64,
+                    "native/http_files/wirestack_http_files.h": "d" * 64,
+                },
+                "tools": {
+                    name: {"path": f"/usr/bin/{name}", "version": f"{name} test"}
+                    for name in ("ar", "cc", "ranlib")
+                },
+            },
+            "archive": {
+                "path": release.HTTP_FILES_ARCHIVE,
+                "bytes": len(archive),
+                "sha256": release.artifact_payload_sha256(archive),
+            },
+        }
+        manifest["build_fingerprint"] = release.evidence_digest.text_evidence_bytes_sha256(
+            release.canonical_json(manifest["inputs"])
+        )
+        release.validate_http_files_manifest(manifest, payload)
+        changed = copy.deepcopy(manifest)
+        changed["archive"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(release.ReleaseError, "archive provenance"):
+            release.validate_http_files_manifest(changed, payload)
 
     def test_release_metadata_inventory_is_complete(self) -> None:
         self.assertEqual("Apache-2.0", release.PROJECT_LICENSE_EXPRESSION)
@@ -156,9 +197,24 @@ class M7021LinuxReleaseTest(unittest.TestCase):
     def test_strict_validation_rejects_source_drift(self) -> None:
         report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
         report = json.loads(report_path.read_text(encoding="utf-8"))
-        with mock.patch.object(release, "source_tree_sha256", return_value="0" * 64):
-            with self.assertRaisesRegex(release.ReleaseError, "source tree fingerprint is stale"):
-                release.validate_report(report, release.ROOT)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for relative in release.QUALIFICATION_INPUTS:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture\n", encoding="utf-8")
+            source = root / "src/package.cj"
+            source.parent.mkdir(parents=True)
+            source.write_text("package wirestack\n", encoding="utf-8")
+            report["source_tree_sha256"] = release.source_tree_sha256(root)
+            report["qualification_inputs"] = {
+                relative: release.evidence_digest.text_evidence_sha256(root / relative)
+                for relative in release.QUALIFICATION_INPUTS
+            }
+            release.validate_report(report, root)
+            source.write_text("package wirestack\npublic func changed(): Unit {}\n", encoding="utf-8")
+            with self.assertRaises(release.ReleaseError):
+                release.validate_report(report, root)
 
     def test_structural_validation_accepts_frozen_input_keys_but_rejects_escape(self) -> None:
         report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
