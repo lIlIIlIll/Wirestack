@@ -28,6 +28,10 @@ SELECTED_PROVIDER = select_provider(ROOT)
 TASK_ID = "M7-025"
 SCHEMA_VERSION = 1
 CREATED_UTC = "2026-08-28T00:00:00Z"
+SUPPORTED_RELEASE_SCHEMA_VERSIONS = {1, 2}
+HTTP_FILES_MANIFEST = "target/native/http_files/current/http-files-manifest.json"
+HTTP_FILES_ARCHIVE = "target/native/http_files/current/lib/libwirestack_http_files.a"
+HTTP_FILES_SPDX_ID = "SPDXRef-Package-Wirestack-HttpFiles"
 QUALIFICATION = ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
 PROVIDER_PIN = SELECTED_PROVIDER.manifest_path
 DEFAULT_ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
@@ -135,12 +139,18 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
     try:
         with tarfile.open(path, "r:gz") as archive:
             release_raw = _member_bytes(archive, "/release-manifest.json")
+            release = _json_bytes(release_raw, "release-manifest.json")
             provider_raw = _member_bytes(
                 archive, "/target/native/current/provider-manifest.json"
             )
             resolver_raw = _member_bytes(
                 archive, "/target/native/resolver/current/resolver-manifest.json"
             )
+            http_files_raw: bytes | None = None
+            http_files_archive_raw: bytes | None = None
+            if release.get("schema_version") == 2:
+                http_files_raw = _member_bytes(archive, f"/{HTTP_FILES_MANIFEST}")
+                http_files_archive_raw = _member_bytes(archive, f"/{HTTP_FILES_ARCHIVE}")
             license_files = {
                 relative: _relative_member_bytes(archive, relative)
                 for relative in LICENSE_MEMBERS
@@ -150,11 +160,29 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
     return {
         "artifact_sha256": evidence_digest.artifact_byte_sha256(path),
         "artifact_bytes": path.stat().st_size,
-        "release": _json_bytes(release_raw, "release-manifest.json"),
+        "release": release,
         "provider": _json_bytes(provider_raw, "provider-manifest.json"),
         "provider_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(provider_raw),
         "resolver": _json_bytes(resolver_raw, "resolver-manifest.json"),
         "resolver_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(resolver_raw),
+        "http_files": (
+            _json_bytes(http_files_raw, "http-files-manifest.json")
+            if http_files_raw is not None else None
+        ),
+        "http_files_manifest_sha256": (
+            evidence_digest.text_evidence_bytes_sha256(http_files_raw)
+            if http_files_raw is not None else None
+        ),
+        "http_files_manifest_bytes": (
+            len(http_files_raw) if http_files_raw is not None else None
+        ),
+        "http_files_archive_sha256": (
+            evidence_digest.artifact_bytes_sha256(http_files_archive_raw)
+            if http_files_archive_raw is not None else None
+        ),
+        "http_files_archive_bytes": (
+            len(http_files_archive_raw) if http_files_archive_raw is not None else None
+        ),
         "license_sha256": {
             relative: evidence_digest.text_evidence_bytes_sha256(content)
             for relative, content in license_files.items()
@@ -182,6 +210,17 @@ def _cangjie_version(qualification: Mapping[str, Any]) -> str:
     return value
 
 
+def _release_payload_entry(release: Mapping[str, Any], path: str) -> Mapping[str, Any]:
+    payload = release.get("payload")
+    _require(isinstance(payload, list), "release payload inventory is absent")
+    matches = [
+        entry for entry in payload
+        if isinstance(entry, dict) and entry.get("path") == path
+    ]
+    _require(len(matches) == 1, f"release payload must contain exactly one {path}")
+    return matches[0]
+
+
 def validate_artifact_inputs(
     metadata: Mapping[str, Any],
     qualification: Mapping[str, Any],
@@ -199,7 +238,11 @@ def validate_artifact_inputs(
     release = metadata["release"]
     provider = metadata["provider"]
     resolver = metadata["resolver"]
-    _require(release.get("schema_version") == 1, "release manifest schema is unsupported")
+    release_schema = release.get("schema_version")
+    _require(
+        release_schema in SUPPORTED_RELEASE_SCHEMA_VERSIONS,
+        "release manifest schema is unsupported",
+    )
     _require(release.get("package") == "wirestack", "release package identity is invalid")
     _require(
         evidence_digest.schema_artifact_sha256_equal(
@@ -273,6 +316,84 @@ def validate_artifact_inputs(
         ),
         "embedded resolver archive digest mismatch",
     )
+    if release_schema == 2:
+        http_files = metadata.get("http_files")
+        release_http_files = release.get("httpFiles")
+        _require(isinstance(http_files, dict), "embedded HTTP files manifest is absent")
+        _require(
+            isinstance(release_http_files, dict),
+            "release HTTP files identity is absent",
+        )
+        _require(
+            http_files.get("schema_version") == 1
+            and http_files.get("component") == "wirestack-http-files"
+            and http_files.get("abi_version") == 1
+            and http_files.get("private_runtime_abi") is False,
+            "embedded HTTP files manifest identity is invalid",
+        )
+        http_files_inputs = http_files.get("inputs")
+        _require(
+            isinstance(http_files_inputs, dict)
+            and evidence_digest.schema_text_sha256_equal(
+                http_files.get("build_fingerprint"),
+                evidence_digest.text_evidence_bytes_sha256(
+                    canonical_json(http_files_inputs)
+                ),
+            ),
+            "embedded HTTP files build fingerprint is invalid",
+        )
+        _require(
+            release_http_files.get("component") == http_files.get("component")
+            and release_http_files.get("abi_version") == http_files.get("abi_version")
+            and release_http_files.get("build_fingerprint")
+            == http_files.get("build_fingerprint"),
+            "release and embedded HTTP files identities differ",
+        )
+        _require(
+            evidence_digest.schema_text_sha256_equal(
+                release_http_files.get("manifest_sha256"),
+                metadata.get("http_files_manifest_sha256"),
+            ),
+            "embedded HTTP files manifest digest mismatch",
+        )
+        _require(
+            evidence_digest.schema_artifact_sha256_equal(
+                http_files.get("archive", {}).get("sha256"),
+                metadata.get("http_files_archive_sha256"),
+            )
+            and http_files.get("archive", {}).get("bytes")
+            == metadata.get("http_files_archive_bytes")
+            and evidence_digest.schema_artifact_sha256_equal(
+                release_http_files.get("archive_sha256"),
+                metadata.get("http_files_archive_sha256"),
+            ),
+            "embedded HTTP files archive digest mismatch",
+        )
+        manifest_entry = _release_payload_entry(release, HTTP_FILES_MANIFEST)
+        archive_entry = _release_payload_entry(release, HTTP_FILES_ARCHIVE)
+        _require(
+            manifest_entry.get("bytes") == metadata.get("http_files_manifest_bytes")
+            and evidence_digest.schema_artifact_sha256_equal(
+                manifest_entry.get("sha256"),
+                metadata.get("http_files_manifest_sha256"),
+            )
+            and archive_entry.get("bytes") == metadata.get("http_files_archive_bytes")
+            and evidence_digest.schema_artifact_sha256_equal(
+                archive_entry.get("sha256"),
+                metadata.get("http_files_archive_sha256"),
+            ),
+            "release HTTP files payload inventory is invalid",
+        )
+    else:
+        _require(
+            metadata.get("http_files") is None and release.get("httpFiles") is None,
+            "legacy release schema contains an ambiguous HTTP files component",
+        )
+    qualified_release_schema = artifact.get("release_schema_version")
+    _require(
+        qualified_release_schema is None or qualified_release_schema == release_schema,
+        "qualified release manifest schema differs from the artifact",
+    )
     build_pin = provider.get("build_inputs", {}).get("provider")
     _require(build_pin == provider_pin, "artifact provider pin differs from repository pin")
     _require(
@@ -291,6 +412,29 @@ def fingerprint_inputs(
     release = metadata["release"]
     provider = metadata["provider"]
     resolver = metadata["resolver"]
+    native_components = {
+        "tlsProvider": {
+            "archiveSha256": provider["archive"]["sha256"],
+            "embeddedManifestSha256": metadata["provider_manifest_sha256"],
+            "providerBuildFingerprint": provider["build_fingerprint"],
+            "sourceContentSha256": provider["source"]["content_sha256"],
+        },
+        "resolver": {
+            "archiveSha256": resolver["archive"]["sha256"],
+            "embeddedManifestSha256": metadata["resolver_manifest_sha256"],
+            "buildFingerprint": resolver["build_fingerprint"],
+        },
+    }
+    http_files = metadata.get("http_files")
+    if isinstance(http_files, dict):
+        native_components["httpFiles"] = {
+            "archiveSha256": metadata["http_files_archive_sha256"],
+            "embeddedManifestSha256": metadata["http_files_manifest_sha256"],
+            "buildFingerprint": http_files["build_fingerprint"],
+            "buildInputsSha256": evidence_digest.text_evidence_bytes_sha256(
+                canonical_json(http_files["inputs"])
+            ),
+        }
     return {
         "schemaVersion": SCHEMA_VERSION,
         "package": {"name": "wirestack", "version": release["version"]},
@@ -302,19 +446,7 @@ def fingerprint_inputs(
             "sha256": metadata["artifact_sha256"],
             "payloadSha256": release["payload_sha256"],
         },
-        "nativeComponents": {
-            "tlsProvider": {
-                "archiveSha256": provider["archive"]["sha256"],
-                "embeddedManifestSha256": metadata["provider_manifest_sha256"],
-                "providerBuildFingerprint": provider["build_fingerprint"],
-                "sourceContentSha256": provider["source"]["content_sha256"],
-            },
-            "resolver": {
-                "archiveSha256": resolver["archive"]["sha256"],
-                "embeddedManifestSha256": metadata["resolver_manifest_sha256"],
-                "buildFingerprint": resolver["build_fingerprint"],
-            },
-        },
+        "nativeComponents": native_components,
         "target": {
             **qualification["platform"],
             "triple": _target_triple(qualification),
@@ -343,7 +475,7 @@ def release_provider_manifest(
     release = metadata["release"]
     provider = metadata["provider"]
     resolver = metadata["resolver"]
-    return {
+    manifest = {
         "schemaVersion": SCHEMA_VERSION,
         "taskId": TASK_ID,
         "artifact": {
@@ -394,6 +526,20 @@ def release_provider_manifest(
         "features": FEATURES,
         "runtimeDependencies": qualification["dependency_scan"]["needed"],
     }
+    http_files = metadata.get("http_files")
+    if isinstance(http_files, dict):
+        manifest["httpFiles"] = {
+            "component": http_files["component"],
+            "abiVersion": http_files["abi_version"],
+            "buildFingerprint": http_files["build_fingerprint"],
+            "archive": http_files["archive"],
+            "embeddedManifestSha256": metadata["http_files_manifest_sha256"],
+            "buildInputsSha256": evidence_digest.text_evidence_bytes_sha256(
+                canonical_json(http_files["inputs"])
+            ),
+            "privateRuntimeAbi": http_files["private_runtime_abi"],
+        }
+    return manifest
 
 
 def spdx_document(
@@ -502,6 +648,31 @@ def spdx_document(
             "comment": "Transitive runtime dependency; not bundled in the Wirestack artifact.",
         },
     ]
+    http_files = manifest.get("httpFiles")
+    if isinstance(http_files, dict):
+        packages.insert(
+            3,
+            {
+                "name": "Wirestack native HTTP filesystem bridge",
+                "SPDXID": HTTP_FILES_SPDX_ID,
+                "versionInfo": manifest["package"]["version"],
+                "downloadLocation": "NOASSERTION",
+                "filesAnalyzed": False,
+                "checksums": [
+                    {
+                        "algorithm": "SHA256",
+                        "checksumValue": http_files["archive"]["sha256"],
+                    }
+                ],
+                "licenseConcluded": PROJECT_LICENSE_EXPRESSION,
+                "licenseDeclared": PROJECT_LICENSE_EXPRESSION,
+                "copyrightText": "NOASSERTION",
+                "comment": (
+                    f"build-fingerprint={http_files['buildFingerprint']}; "
+                    f"embedded-manifest-sha256={http_files['embeddedManifestSha256']}"
+                ),
+            },
+        )
     artifact_id = "SPDXRef-Package-Wirestack-Artifact"
     relationships = [
         {
@@ -520,6 +691,14 @@ def spdx_document(
             "relatedSpdxElement": "SPDXRef-Package-Wirestack-Resolver",
         },
     ]
+    if isinstance(http_files, dict):
+        relationships.append(
+            {
+                "spdxElementId": artifact_id,
+                "relationshipType": "CONTAINS",
+                "relatedSpdxElement": HTTP_FILES_SPDX_ID,
+            }
+        )
     for dependency in (
         "SPDXRef-Package-Cangjie-Runtime",
         "SPDXRef-Package-glibc",
@@ -680,6 +859,25 @@ def validate_documents(
     artifact_id = "SPDXRef-Package-Wirestack-Artifact"
     provider_id = provider_spdx_id(provider_pin["provider_id"])
     resolver_id = "SPDXRef-Package-Wirestack-Resolver"
+    http_files = manifest.get("httpFiles")
+    fingerprint_http_files = (
+        fingerprint.get("inputs", {}).get("nativeComponents", {}).get("httpFiles")
+    )
+    _require(
+        (http_files is None and fingerprint_http_files is None)
+        or (isinstance(http_files, dict) and isinstance(fingerprint_http_files, dict)),
+        "HTTP files supply-chain inventory is inconsistent",
+    )
+    qualified_release_schema = qualified_artifact.get("release_schema_version")
+    _require(
+        qualified_release_schema in {None, 1, 2},
+        "qualified release manifest schema is unsupported",
+    )
+    if qualified_release_schema == 2:
+        _require(
+            isinstance(http_files, dict) and isinstance(fingerprint_http_files, dict),
+            "qualified release requires the HTTP files supply-chain inventory",
+        )
     dependency_ids = {
         "SPDXRef-Package-Cangjie-Runtime",
         "SPDXRef-Package-glibc",
@@ -687,6 +885,8 @@ def validate_documents(
         "SPDXRef-Package-libgcc",
     }
     required_package_ids = {artifact_id, provider_id, resolver_id} | dependency_ids
+    if isinstance(http_files, dict):
+        required_package_ids.add(HTTP_FILES_SPDX_ID)
     packages = sbom.get("packages")
     _require(isinstance(packages, list), "SPDX package inventory is absent")
     package_ids = [package.get("SPDXID") for package in packages if isinstance(package, dict)]
@@ -720,6 +920,37 @@ def validate_documents(
         ),
         "SPDX resolver digest mismatch",
     )
+    if isinstance(http_files, dict):
+        _require(
+            http_files.get("component") == "wirestack-http-files"
+            and http_files.get("abiVersion") == 1
+            and http_files.get("privateRuntimeAbi") is False,
+            "HTTP files manifest identity is invalid",
+        )
+        _require(
+            evidence_digest.schema_artifact_sha256_equal(
+                _package_checksum(sbom, HTTP_FILES_SPDX_ID),
+                http_files.get("archive", {}).get("sha256"),
+            ),
+            "SPDX HTTP files digest mismatch",
+        )
+        _require(
+            evidence_digest.schema_artifact_sha256_equal(
+                fingerprint_http_files.get("archiveSha256"),
+                http_files.get("archive", {}).get("sha256"),
+            )
+            and evidence_digest.schema_text_sha256_equal(
+                fingerprint_http_files.get("embeddedManifestSha256"),
+                http_files.get("embeddedManifestSha256"),
+            )
+            and fingerprint_http_files.get("buildFingerprint")
+            == http_files.get("buildFingerprint")
+            and evidence_digest.schema_text_sha256_equal(
+                fingerprint_http_files.get("buildInputsSha256"),
+                http_files.get("buildInputsSha256"),
+            ),
+            "HTTP files fingerprint inputs differ from the manifest",
+        )
     relationships = sbom.get("relationships")
     _require(isinstance(relationships, list), "SPDX relationship inventory is absent")
     relationship_tuples = {
@@ -736,6 +967,10 @@ def validate_documents(
         (artifact_id, "CONTAINS", provider_id),
         (artifact_id, "CONTAINS", resolver_id),
     } | {(artifact_id, "DEPENDS_ON", dependency_id) for dependency_id in dependency_ids}
+    if isinstance(http_files, dict):
+        expected_relationships.add(
+            (artifact_id, "CONTAINS", HTTP_FILES_SPDX_ID)
+        )
     _require(
         relationship_tuples == expected_relationships,
         "SPDX relationships are incomplete or contain unknown entries",

@@ -82,6 +82,18 @@ public class Http1ForwardProxyClient <: Resource {
         }
     }
 
+    public func upgrade(request: HttpRequest,
+        context!: OperationContext = OperationContext.background()): Http1UpgradeExchangeResult {
+        if (request.url.scheme != "http") {
+            throw IllegalArgumentException("HTTP forward proxy upgrade requires an http URL")
+        }
+        let key = HttpConnectionPoolKey(
+            "http", request.url.host, request.url.port, Some(endpoint.identity), "default",
+            "none", "none", "none", "none", "http/1.1"
+        )
+        upgradeHttp1Lease(pool, factory, key, request, context)
+    }
+
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func close(): Unit { pool.close() }
     public func isClosed(): Bool { pool.isClosed() }
@@ -160,6 +172,34 @@ public class Http1HttpsProxyClient <: Resource {
             pool.discard(lease, context: context)
             throw error
         }
+    }
+
+    public func upgrade(request: HttpRequest,
+        proxyAuthorization!: ?String = None<String>,
+        context!: OperationContext = OperationContext.background()): Http1UpgradeExchangeResult {
+        if (request.url.scheme != "https") {
+            throw IllegalArgumentException("HTTPS proxy upgrade requires an https URL")
+        }
+        let authenticated = proxyAuthorization.isSome()
+        let routeIdentity = if (authenticated) {
+            "${endpoint.identity}|authenticated-no-reuse"
+        } else { endpoint.identity }
+        let key = HttpConnectionPoolKey(
+            "https", request.url.host, request.url.port, Some(routeIdentity), "default",
+            handshaker.tlsContextIdentity, handshaker.trustContextIdentity,
+            handshaker.clientIdentity, handshaker.providerIdentity, handshaker.alpnPolicy
+        )
+        let factory = Http1HttpsProxyConnectionFactory(
+            endpoint, routeIdentity, resolver, transportFactory, handshaker, request.url, proxyAuthorization,
+            limits, attemptDelay, continueTimeout
+        )
+        let lease = pool.acquire(key, factory, context: context)
+        try {
+            lease.connection.upgradeTracked(request, context: context, onTerminated: { reusable =>
+                if (reusable && !authenticated) { pool.release(lease, context: context) }
+                else { pool.discard(lease, context: context) }
+            })
+        } catch (error: Exception) { pool.discard(lease, context: context); throw error }
     }
 
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }

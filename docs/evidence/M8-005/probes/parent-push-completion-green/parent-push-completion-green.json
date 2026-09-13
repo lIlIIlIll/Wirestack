@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "PASS",
+  "command": {
+    "id": "parent-push-completion-green",
+    "argv": [
+      "cjpm",
+      "test",
+      "src/internal/http2",
+      "--exclude-tags=Performance",
+      "--parallel",
+      "1",
+      "--filter=Http2ServerPushLifecycleTest.crossOriginPushIsRejectedAndItsResponseIsClosedBeforeAnyOffer",
+      "--no-progress",
+      "--no-color"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T13:31:16.881177Z",
+    "finished_at_utc": "2026-09-13T13:31:27.725023Z",
+    "duration_ms": 10843.849,
+    "stdout_path": "docs/evidence/M8-005/probes/parent-push-completion-green/parent-push-completion-green.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/probes/parent-push-completion-green/parent-push-completion-green.stderr.log",
+    "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 23882751 ns, RESULT:\n    TCS: Http2ServerPushLifecycleTest, time elapsed: 5762839 ns, RESULT:\n    [ PASSED ] CASE: crossOriginPushIsRejectedAndItsResponseIsClosedBeforeAnyOffer (4395432 ns)\nSummary: TOTAL: 175\n    PASSED: 1, SKIPPED: 174, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 31476503 ns, RESULT:\nTP: wirestack.*, time elapsed: 31416000 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.http2, time elapsed: 23882751 ns\nSummary: TOTAL: 175\n    PASSED: 1, SKIPPED: 174, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "stderr_excerpt": "\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/server_connection.cj:411:28:\n    \u001b[36m| \u001b[0m\n\u001b[36m411\u001b[0m \u001b[36m| \u001b[0m            if (slotOwned) { releasePushSlot() }\u001b[0m\n    \u001b[36m| \u001b[0m                           \u001b[33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http1/server_connection.cj:116:23:\n    \u001b[36m| \u001b[0m\n\u001b[36m116\u001b[0m \u001b[36m| \u001b[0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }\u001b[0m\n    \u001b[36m| \u001b[0m                      \u001b[33m^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused import 'wirestack.internal.http_model.*'\n \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/stream_reset_test.cj:7:1:\n  \u001b[36m| \u001b[0m\n\u001b[36m7\u001b[0m \u001b[36m| \u001b[0mimport wirestack.internal.http_model.*\u001b[0m\n  \u001b[36m| \u001b[0m\u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import\u001b[0m\n  \u001b[36m| \u001b[0m\n  \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2fcc335571f2dacf071d5f4bcdfb2bc8290b9b6636770ea92a1bb6a9ae73b403"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "34be12e6a05d3b350b54a9d638e77d89f67c00e4b747a013aa55a11d0d107b9f"
+    }
+  }
+}

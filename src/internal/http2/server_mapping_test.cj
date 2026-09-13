@@ -190,6 +190,49 @@ class Http2ServerMappingTest {
         @Expect(fixture.registry.activeCount, 0)
         @Expect(fixture.flow.activeStreamCount, 0)
     }
+
+    @TestCase
+    func invalidDuplexResponseReleasesPreServeHandoffExactlyOnce(): Unit {
+        let fixture = ServerFixture()
+        let exchange = Http2ServerExchange.open(
+            Http2StreamId(1u32), [
+                HpackHeaderField(":method", "CONNECT"),
+                HpackHeaderField(":authority", "example.com:443")
+            ], false, fixture.registry, fixture.flow, fixture.sink
+        )
+        let duplex = RecordingFailedDuplexHandler()
+        var rejected = false
+        try {
+            let _ = exchange.start(InvalidDuplexServerHandler(duplex)).get(Duration.second)
+        } catch (_: Exception) {
+            rejected = true
+        }
+        @Expect(rejected)
+        @Expect(duplex.failedCalls, 1)
+        exchange.completeOwner()
+    }
+}
+
+private class RecordingFailedDuplexHandler <: Http2DuplexHandler {
+    var failedCalls: Int64 = 0
+
+    public func serve(_: DuplexTransport, _: OperationContext): Unit {
+        throw Exception("invalid duplex response must not be served")
+    }
+
+    public func failed(): Unit { failedCalls++ }
+}
+
+private class InvalidDuplexServerHandler <: Http2ServerHandler {
+    private let duplex: Http2DuplexHandler
+    init(duplex: Http2DuplexHandler) { this.duplex = duplex }
+
+    public func handle(_: Http2ServerRequest, _: OperationContext): Http2ServerResponse {
+        Http2ServerResponse(
+            HttpResponse(403, "Forbidden", ResponseBody.empty()),
+            duplexHandler: Some(duplex)
+        )
+    }
 }
 
 private class EmptyServerHandler <: Http2ServerHandler {

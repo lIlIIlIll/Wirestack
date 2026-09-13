@@ -128,6 +128,31 @@ class Http2ConnectionPoolTest {
     }
 
     @TestCase
+    func drainingConnectionWaitsForNonLocalOwnersBeforeDiscard(): Unit {
+        let pool = Http2ConnectionPool()
+        let factory = PoolFakeFactory(8u32)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        let draining = factory.connection(0)
+        draining.retainOwner()
+        draining.beginDrain()
+        factory.finish(lease)
+        pool.release(lease)
+
+        @Expect(draining.activeStreamCount, 0)
+        @Expect(draining.ownedStreamCount, 1)
+        @Expect(draining.closeCalls.load(), 0)
+        @Expect(pool.snapshot().ownedStreams, 1)
+
+        draining.releaseOwner()
+        let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        @Expect(draining.closeCalls.load(), 1)
+        factory.finish(replacement)
+        pool.release(replacement)
+        pool.close()
+    }
+
+    @TestCase
     func fullBoundedPoolHonorsOneCallerDeadline(): Unit {
         let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(
             maximumConnections: 1,
@@ -257,6 +282,7 @@ private class PoolGatedConnection <: Http2MultiplexedConnection {
     init(gate: PoolAdmissionGate) { this.gate = gate }
 
     public prop activeStreamCount: Int64 { get() { delegate.activeStreamCount } }
+    public prop ownedStreamCount: Int64 { get() { delegate.ownedStreamCount } }
     public prop streamCapacity: UInt32 { get() { delegate.streamCapacity } }
     public prop acceptingNewStreams: Bool { get() { delegate.acceptingNewStreams } }
 
@@ -282,6 +308,7 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
     private let goAway: Http2GoAwayManager
     private let mutex = Mutex()
     private var closed = false
+    private var retainedOwners: Int64 = 0
     let closeCalls = AtomicInt64(0)
     let abortCalls = AtomicInt64(0)
 
@@ -295,6 +322,9 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
     }
 
     public prop activeStreamCount: Int64 { get() { registry.activeLocalCount } }
+    public prop ownedStreamCount: Int64 {
+        get() { registry.activeCount + synchronized(mutex) { retainedOwners } }
+    }
     public prop streamCapacity: UInt32 { get() { registry.peerMaxConcurrentStreams } }
     public prop acceptingNewStreams: Bool {
         get() { synchronized(mutex) { !closed } && goAway.acceptingNewStreams }
@@ -323,6 +353,8 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
     }
 
     func beginDrain(): Unit { let _ = machine.beginDrain() }
+    func retainOwner(): Unit { synchronized(mutex) { retainedOwners++ } }
+    func releaseOwner(): Unit { synchronized(mutex) { retainedOwners-- } }
     func has(id: Http2StreamId): Bool { registry.stream(id).isSome() }
     func finish(id: Http2StreamId): Unit {
         registry.localEnd(id)
