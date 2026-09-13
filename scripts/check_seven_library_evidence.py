@@ -669,7 +669,9 @@ def finite_number(value: object, label: str) -> float:
     return result
 
 
-def canonical_summary_rows(formal_root: pathlib.Path, include_max_cv: bool) -> list[str]:
+def canonical_summary_rows(
+    formal_root: pathlib.Path, include_max_cv: bool, stable_only: bool = False
+) -> list[str]:
     try:
         summary = json.loads((formal_root / "summary.json").read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
@@ -714,9 +716,12 @@ def canonical_summary_rows(formal_root: pathlib.Path, include_max_cv: bool) -> l
             )
             medians.append(f"{median_ns / 1000.0:.3f}")
             cvs.append(cv_percent)
+        max_cv = max(cvs)
+        if stable_only and max_cv > 5.0:
+            continue
         cells = [WORKLOAD_LABELS[workload], *medians]
         if include_max_cv:
-            cells.append(f"{max(cvs):.2f}%")
+            cells.append(f"{max_cv:.2f}%")
         rows.append("| " + " | ".join(cells) + " |")
     return rows
 
@@ -736,7 +741,7 @@ def verify_report_rows(
     root_readme: pathlib.Path,
     result_doc: pathlib.Path,
     result_batch_rows: list[list[str]],
-    readme_batch_rows: list[str] | None,
+    readme_stable_rows: list[str] | None,
 ) -> None:
     result_text = result_doc.read_text(encoding="utf-8")
     label_set = set(WORKLOAD_LABELS.values())
@@ -753,13 +758,13 @@ def verify_report_rows(
                 rows.append(stripped)
         return rows
 
-    if readme_batch_rows is not None:
+    if readme_stable_rows is not None:
         readme_text = root_readme.read_text(encoding="utf-8")
         readme_rows = actual_rows(readme_text, "性能", root_readme)
-        # The README may omit unstable measurements; published rows remain
-        # fail-closed against the formal second batch.
-        if readme_rows and readme_rows != readme_batch_rows:
-            raise EvidenceError("README current performance table differs from formal batch 2")
+        if readme_rows != readme_stable_rows:
+            raise EvidenceError(
+                "README current performance table differs from stable formal rows"
+            )
     for heading, expected in (
         ("第一批", result_batch_rows[0]),
         ("第二批", result_batch_rows[1]),
@@ -1057,7 +1062,7 @@ def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> in
             raise EvidenceError("harness archive omits summarize_full.py")
         identities: list[dict[str, Any]] = []
         result_batch_rows: list[list[str]] = []
-        readme_batch_rows: list[str] | None = None
+        readme_stable_rows: list[str] | None = None
         for index, archive_info in enumerate(marker["formal_archives"]):
             formal_root = safe_extract(
                 evidence / archive_info["file"],
@@ -1070,20 +1075,20 @@ def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> in
                 canonical_summary_rows(formal_root, include_max_cv=True)
             )
             if index == 1:
-                readme_batch_rows = canonical_summary_rows(
-                    formal_root, include_max_cv=False
+                readme_stable_rows = canonical_summary_rows(
+                    formal_root, include_max_cv=False, stable_only=True
                 )
 
         for key in STABLE_METADATA_KEYS:
             if stable_identity(identities[0], key) != stable_identity(identities[1], key):
                 raise EvidenceError(f"formal archive identity mismatch: {key}")
-        if readme_batch_rows is None:
+        if readme_stable_rows is None:
             raise EvidenceError("formal batch 2 is missing")
         verify_report_rows(
             root / "README.md",
             result_doc,
             result_batch_rows,
-            readme_batch_rows if current_schema else None,
+            readme_stable_rows if current_schema else None,
         )
 
     if not integrity_only:
