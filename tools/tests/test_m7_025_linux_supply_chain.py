@@ -14,6 +14,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
+from tools.m7_021_linux_release import artifact_payload_sha256
 from tools import m7_025_linux_supply_chain as supply
 
 
@@ -40,6 +41,8 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 ("nativeComponents", "tlsProvider", "sourceContentSha256"),
                 ("nativeComponents", "resolver", "archiveSha256"),
                 ("nativeComponents", "resolver", "buildFingerprint"),
+                ("nativeComponents", "httpFiles", "archiveSha256"),
+                ("nativeComponents", "httpFiles", "buildInputsSha256"),
             )
             for path in changes:
                 changed = copy.deepcopy(inputs)
@@ -76,7 +79,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 {name: supply.canonical_json(value) for name, value in second.items()},
             )
 
-    def test_project_and_resolver_sbom_packages_use_apache_2_0(self) -> None:
+    def test_project_resolver_and_http_files_sbom_packages_use_apache_2_0(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             artifact, qualification, provider_pin = self.fixture(Path(temporary))
             documents = supply.build_documents(
@@ -89,6 +92,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             for package_id in (
                 "SPDXRef-Package-Wirestack-Artifact",
                 "SPDXRef-Package-Wirestack-Resolver",
+                supply.HTTP_FILES_SPDX_ID,
             ):
                 self.assertEqual("Apache-2.0", packages[package_id]["licenseDeclared"])
                 self.assertEqual("Apache-2.0", packages[package_id]["licenseConcluded"])
@@ -103,6 +107,24 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 supply.SupplyChainError, "release license expression is invalid"
             ):
                 supply.validate_artifact_inputs(metadata, qualification, provider_pin)
+
+    def test_schema_two_requires_http_files_payload_but_schema_one_remains_readable(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact, _qualification, _provider_pin = self.fixture(
+                root / "missing", include_http_payload=False
+            )
+            with self.assertRaisesRegex(
+                supply.SupplyChainError, "http-files-manifest.json"
+            ):
+                supply.artifact_metadata(artifact)
+
+            legacy, qualification, provider_pin = self.fixture(
+                root / "legacy", release_schema=1
+            )
+            metadata = supply.artifact_metadata(legacy)
+            self.assertIsNone(metadata["http_files"])
+            supply.validate_artifact_inputs(metadata, qualification, provider_pin)
 
     def test_main_translates_invalid_license_text_to_controlled_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -134,7 +156,10 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         *,
         license_expression: str = "Apache-2.0",
         license_bytes: bytes = b"project license\n",
+        release_schema: int = 2,
+        include_http_payload: bool = True,
     ):
+        root.mkdir(parents=True, exist_ok=True)
         provider_pin = supply.load_json(supply.PROVIDER_PIN)
         provider = {
             "abiVersion": 1,
@@ -156,14 +181,43 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "private_runtime_abi": False,
             "worker_model": "fixed bounded worker pool",
         }
+        http_archive = b"native HTTP files archive\n"
+        http_files = {
+            "schema_version": 1,
+            "component": "wirestack-http-files",
+            "abi_version": 1,
+            "build_fingerprint": "6" * 64,
+            "inputs": {
+                "builder_sha256": "7" * 64,
+                "sources": {
+                    "native/http_files/wirestack_http_files.c": "8" * 64,
+                    "native/http_files/wirestack_http_files.h": "9" * 64,
+                },
+                "tools": {
+                    "ar": {"path": "/usr/bin/ar", "version": "GNU ar test"},
+                    "cc": {"path": "/usr/bin/cc", "version": "cc test"},
+                    "ranlib": {"path": "/usr/bin/ranlib", "version": "GNU ranlib test"},
+                },
+            },
+            "archive": {
+                "path": "lib/libwirestack_http_files.a",
+                "bytes": len(http_archive),
+                "sha256": evidence_digest.artifact_bytes_sha256(http_archive),
+            },
+            "private_runtime_abi": False,
+        }
+        http_files["build_fingerprint"] = evidence_digest.text_evidence_bytes_sha256(
+            supply.canonical_json(http_files["inputs"])
+        )
         provider_raw = supply.canonical_json(provider)
         resolver_raw = supply.canonical_json(resolver)
+        http_files_raw = supply.canonical_json(http_files)
         try:
             license_sha256 = evidence_digest.text_evidence_bytes_sha256(license_bytes)
         except evidence_digest.DigestError:
             license_sha256 = "0" * 64
         release = {
-            "schema_version": 1,
+            "schema_version": release_schema,
             "package": "wirestack",
             "version": "0.1.0",
             "payload_sha256": "5" * 64,
@@ -196,6 +250,26 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 "libc_version": "2.44",
             },
         }
+        if release_schema == 2:
+            release["httpFiles"] = {
+                "component": http_files["component"],
+                "abi_version": http_files["abi_version"],
+                "build_fingerprint": http_files["build_fingerprint"],
+                "archive_sha256": http_files["archive"]["sha256"],
+                "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(http_files_raw),
+            }
+            release["payload"] = [
+                {
+                    "path": supply.HTTP_FILES_MANIFEST,
+                    "bytes": len(http_files_raw),
+                    "sha256": artifact_payload_sha256(http_files_raw),
+                },
+                {
+                    "path": supply.HTTP_FILES_ARCHIVE,
+                    "bytes": len(http_archive),
+                    "sha256": artifact_payload_sha256(http_archive),
+                },
+            ]
         artifact = root / "wirestack.tar.gz"
         members = {
             "wirestack/release-manifest.json": supply.canonical_json(release),
@@ -206,6 +280,9 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "wirestack/target/native/current/provider-manifest.json": provider_raw,
             "wirestack/target/native/resolver/current/resolver-manifest.json": resolver_raw,
         }
+        if release_schema == 2 and include_http_payload:
+            members[f"wirestack/{supply.HTTP_FILES_MANIFEST}"] = http_files_raw
+            members[f"wirestack/{supply.HTTP_FILES_ARCHIVE}"] = http_archive
         with artifact.open("wb") as raw:
             with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as compressed:
                 with tarfile.open(fileobj=compressed, mode="w") as archive:
@@ -219,6 +296,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 "name": artifact.name,
                 "bytes": artifact.stat().st_size,
                 "sha256": evidence_digest.artifact_byte_sha256(artifact),
+                "release_schema_version": release_schema,
                 "payload_sha256": release["payload_sha256"],
             },
             "runtime": {"providerBuildFingerprint": provider["build_fingerprint"]},

@@ -144,21 +144,34 @@ public class HttpServerRequest {
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let streamCancellation: ?HttpStreamCancellationHandle
+    /** Extended CONNECT protocol; absent for ordinary requests and HTTP/1.1. */
+    public let protocol: ?String
+    /** Validated request authority, including the explicit port when present. */
+    public let authority: String
+    private let pushSender: ?http2.Http2ServerPushSender
+    private let operationContext: OperationContext
+    private let pushCancellation: ?HttpRequestCancellationOperation
 
     init(
         value: http1.Http1ServerRequest,
         requestCancellation: HttpRequestCancellationHandle,
         connectionCancellation: HttpConnectionCancellationHandle,
-        body: ResponseBody
+        body: ResponseBody,
+        context: OperationContext
     ) {
         method = value.head.method
         target = value.head.target
         version = value.head.version
         headers = value.head.headers
+        authority = match (headers.getFirst("host")) { case Some(value) => value; case None => "" }
+        operationContext = context
         this.body = body
         this.requestCancellation = requestCancellation
         this.connectionCancellation = connectionCancellation
         streamCancellation = None<HttpStreamCancellationHandle>
+        protocol = None<String>
+        pushSender = None<http2.Http2ServerPushSender>
+        pushCancellation = None<HttpRequestCancellationOperation>
     }
 
     init(
@@ -166,16 +179,47 @@ public class HttpServerRequest {
         requestCancellation: HttpRequestCancellationHandle,
         connectionCancellation: HttpConnectionCancellationHandle,
         streamCancellation: HttpStreamCancellationHandle,
-        body: ResponseBody
+        body: ResponseBody,
+        cancellation: HttpRequestCancellationOperation
     ) {
         method = value.head.method
         target = value.head.target
         version = HttpVersion.Http2
         headers = value.head.headers
+        authority = value.head.authority
+        operationContext = cancellation.context
+        pushCancellation = Some(cancellation)
         this.body = body
         this.requestCancellation = requestCancellation
         this.connectionCancellation = connectionCancellation
         this.streamCancellation = Some(streamCancellation)
+        protocol = value.head.protocol
+        pushSender = value.pushSender
+    }
+
+    /**
+     * Admits a bounded HTTP/2 push using this request's deadline and cancellation.
+     * @param request Same-origin promised GET request.
+     * @param response Owned pushed response.
+     */
+    public func push(request: HttpRequest, response: HttpServerResponse): Unit {
+        var lifetime: ?Resource = None<Resource>
+        try {
+            if (response.duplexHandler.isSome()) {
+                throw IllegalArgumentException("a pushed response cannot establish a duplex stream")
+            }
+            let sender = match (pushSender) {
+                case Some(value) => value
+                case None => throw IllegalStateException("server push is unavailable for this request")
+            }
+            lifetime = Some(pushCancellation.getOrThrow().retainLifetime())
+            sender.push(request, http2.Http2ServerResponse(response.response, trailer: response.trailer),
+                context: operationContext, lifetime: lifetime)
+        } catch (error: Exception) {
+            if (let Some(value) <- lifetime) { value.close() }
+            try { response.response.close() } catch (_: Exception) {}
+            throw error
+        }
     }
 }
 
@@ -189,15 +233,73 @@ public class HttpServerResponse {
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let trailer: HttpTrailer
+    /** Optional exclusive duplex session, run after successful response commitment. */
+    public let duplexHandler: ?HttpDuplexHandler
 
 /**
  * Wirestack 公开 API：构造并校验该公开值。
+ * @param duplexHandler Exclusive protocol handler invoked after a successful handshake.
  * @param response 处理后的 HTTP 响应。
  * @param trailer 调用方提供的输入值。
  */
-    public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer()) {
+    public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer(),
+        duplexHandler!: ?HttpDuplexHandler = None<HttpDuplexHandler>) {
         this.response = response
         this.trailer = trailer
+        this.duplexHandler = duplexHandler
+    }
+
+    /**
+     * Validates an RFC 6455 or RFC 8441 request and prepares a concrete session.
+     * Compression is never negotiated.
+     * @param request Incoming WebSocket handshake.
+     * @param handler Session handler.
+     * @param subProtocol Selected protocol, which must have been offered by the client.
+     * @param limits Frame, message and close bounds.
+     */
+    public static func webSocket(
+        request: HttpServerRequest,
+        handler: WebSocketHandler,
+        subProtocol!: ?String = None<String>,
+        limits!: WebSocketLimits = WebSocketLimits()
+    ): HttpServerResponse {
+        let versions = request.headers.getAll("sec-websocket-version")
+        if (versions.size != 1 || versions[0] != "13") {
+            throw IllegalArgumentException("WebSocket version 13 is required")
+        }
+        if (let Some(selected) <- subProtocol) {
+            validateWebSocketSubProtocol(selected)
+            var offered = false
+            for (field in request.headers.getAll("sec-websocket-protocol")) {
+                for (token in field.split(",")) {
+                    if (token.trimAscii() == selected) { offered = true }
+                }
+            }
+            if (!offered) { throw IllegalArgumentException("selected WebSocket protocol was not offered") }
+        }
+        let headers = HttpHeaders.builder()
+        if (let Some(selected) <- subProtocol) { headers.add("Sec-WebSocket-Protocol", selected) }
+        let response = match (request.version) {
+            case HttpVersion.Http2 =>
+                if (request.method.value != "CONNECT" || request.protocol != Some("websocket")) {
+                    throw IllegalArgumentException("HTTP/2 WebSocket requires extended CONNECT")
+                }
+                HttpResponse(200, "", ResponseBody.empty(), headers: headers.build(), version: HttpVersion.Http2)
+            case _ =>
+                if (request.method.value != "GET" ||
+                    !http1.headerContainsToken(request.headers, "connection", "upgrade") ||
+                    !http1.headerContainsToken(request.headers, "upgrade", "websocket")) {
+                    throw IllegalArgumentException("HTTP/1.1 WebSocket requires GET and Upgrade")
+                }
+                let keys = request.headers.getAll("sec-websocket-key")
+                if (keys.size != 1) { throw IllegalArgumentException("one WebSocket client key is required") }
+                headers.add("Connection", "Upgrade")
+                headers.add("Upgrade", "websocket")
+                headers.add("Sec-WebSocket-Accept", webSocketAcceptKey(keys[0]))
+                HttpResponse(101, "Switching Protocols", ResponseBody.empty(), headers: headers.build())
+        }
+        HttpServerResponse(response,
+            duplexHandler: Some<HttpDuplexHandler>(WebSocketServerHandler(handler, subProtocol, limits)))
     }
 }
 
@@ -230,6 +332,7 @@ public class HttpServerBuilder {
     private var backlog: Int64 = 128
     private var maximumHttp2Streams: UInt32 = 100u32
     private var tlsConfig: ?HttpServerTlsConfig = None<HttpServerTlsConfig>
+    private var configuredServiceHook: ?HttpServiceHook = None<HttpServiceHook>
 
 /**
  * Wirestack 公开 API：init。
@@ -256,6 +359,15 @@ public class HttpServerBuilder {
  * @param value 参数 value。
  */
     public func tls(value: HttpServerTlsConfig): HttpServerBuilder { tlsConfig = Some(value); this }
+
+    /**
+     * Installs request and pre-commit response interception outside server locks.
+     * @param value Service interceptor shared by HTTP/1.1 and HTTP/2 requests.
+     */
+    public func serviceHook(value: HttpServiceHook): HttpServerBuilder {
+        configuredServiceHook = Some(value)
+        this
+    }
 
 /**
  * Wirestack 公开 API：connectionLimit。
@@ -300,7 +412,10 @@ public class HttpServerBuilder {
             case None => throw IllegalStateException("HTTP server listen endpoint is required")
         }
         let selectedHandler = match (configuredHandler) {
-            case Some(value) => value
+            case Some(value) => match (configuredServiceHook) {
+                case Some(hook) => ServiceHookHandler(value, hook)
+                case None => value
+            }
             case None => throw IllegalStateException("HTTP server handler is required")
         }
         let handshaker = match (tlsConfig) {
@@ -437,12 +552,14 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
             let response = delegate.handle(
                 HttpServerRequest(
                     request, requestCancellation, connectionCancellation,
-                    cancellation.wrapRequestBody(request.body)
+                    cancellation.wrapRequestBody(request.body), cancellation.context
                 ),
                 cancellation.context
             )
             http1.Http1ServerResponse(
-                cancellation.wrap(response.response), trailer: response.trailer
+                if (response.duplexHandler.isSome()) { response.response }
+                else { cancellation.wrap(response.response) }, trailer: response.trailer,
+                duplexHandler: mapHttp1DuplexHandler(response.duplexHandler, cancellation)
             )
         } catch (error: Exception) {
             cancellation.fail()
@@ -478,12 +595,14 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
             let response = delegate.handle(
                 HttpServerRequest(
                     request, requestCancellation, connectionCancellation, streamCancellation,
-                    cancellation.wrapRequestBody(request.body)
+                    cancellation.wrapRequestBody(request.body), cancellation
                 ),
                 cancellation.context
             )
             http2.Http2ServerResponse(
-                cancellation.wrap(response.response), trailer: response.trailer
+                if (response.duplexHandler.isSome()) { response.response }
+                else { cancellation.wrap(response.response) }, trailer: response.trailer,
+                duplexHandler: mapHttp2DuplexHandler(response.duplexHandler, cancellation)
             )
         } catch (error: Exception) {
             cancellation.fail()

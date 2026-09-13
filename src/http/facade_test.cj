@@ -15,6 +15,38 @@ private func publicLoopback(port: UInt16): SocketEndpoint {
 @Test
 class HttpFacadeTest {
     @TestCase
+    func retainedPushContextObservesCancellationAfterParentCompletion(): Unit {
+        let handle = HttpRequestCancellationHandle()
+        let operation = HttpRequestCancellationOperation(OperationContext.background(), Some(handle),
+            None<HttpConnectionCancellationHandle>, None<HttpStreamCancellationHandle>)
+        let first = operation.retainLifetime()
+        let last = operation.retainLifetime()
+        let parent = operation.wrap(HttpResponse(204, "No Content", ResponseBody.empty()))
+        try {
+            parent.close()
+            first.close()
+            first.close()
+            handle.cancel()
+            @Expect(operation.context.isCancellationRequested())
+        } finally { first.close(); last.close(); parent.close() }
+    }
+
+    @TestCase
+    func finishedPushLifetimeDetachesCompletedRequestCancellation(): Unit {
+        let handle = HttpRequestCancellationHandle()
+        let operation = HttpRequestCancellationOperation(OperationContext.background(), Some(handle),
+            None<HttpConnectionCancellationHandle>, None<HttpStreamCancellationHandle>)
+        let lifetime = operation.retainLifetime()
+        let parent = operation.wrap(HttpResponse(204, "No Content", ResponseBody.empty()))
+        try {
+            parent.close()
+            lifetime.close()
+            handle.cancel()
+            @Expect(!operation.context.isCancellationRequested())
+        } finally { lifetime.close(); parent.close() }
+    }
+
+    @TestCase
     func cancellationWrapperPreservesProtocolCompletionPolicy(): Unit {
         let operation = HttpRequestCancellationOperation(
             OperationContext.background(),
@@ -705,6 +737,39 @@ class HttpFacadeTest {
         }
         @Expect(clientClosedRejected)
     }
+
+    @TestCase
+    func followedHttp2RedirectClosesUnclaimedPushBeforeClientTeardown(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicRedirectPushHandler()
+        let server = HttpServer.builder().listen(publicLoopback(0)).handler(handler).tls(serverTls).build()
+        let serving = spawn { server.serve() }
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult([server.localEndpoint.address],
+                HostName("example.com"), ResolverSource.Static)))
+            .tls(clientTls).requestTimeout(30 * Duration.second)
+            .http2Push(Http2PushConfig(SameOriginHttp2PushPolicy(),
+                maximumConcurrentPushes: 1, maximumPendingPushes: 1, maximumPushesPerRequest: 1))
+            .build()
+        try {
+            let response = client.get("https://example.com:${server.localEndpoint.port}/start")
+            try {
+                @Expect(response.status, 200)
+                @Expect(response.version, HttpVersion.Http2)
+                @Expect(readPublicBody(response.body), "done")
+                @Expect(handler.observer.awaitAbandonment())
+            } finally { response.close() }
+        } finally {
+            client.close()
+            clientTls.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))))
+            serving.get(5 * Duration.second)
+            serverTls.close()
+        }
+    }
 }
 
 /** Bounded same-process regression for the M6-025 facade failure sequence. */
@@ -1240,5 +1305,40 @@ private class PublicForwardProxyHandler <: HttpServerHandler {
             200, "OK", ResponseBody.empty(),
             headers: HttpHeaders.builder().add("Content-Length", "0").build()
         ))
+    }
+}
+
+private class PublicRedirectPushHandler <: HttpServerHandler {
+    let observer = PublicRedirectPushObserver()
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        request.body.close()
+        if (request.target == "/start") {
+            request.push(HttpRequest.get("https://${request.authority}/asset"),
+                HttpServerResponse(HttpResponse(200, "OK",
+                    ResponseBody(RequestBody.bytes(Array<Byte>(131072, repeat: b'p')).open(), observer: observer))))
+            return HttpServerResponse(HttpResponse(302, "Found", ResponseBody.empty(),
+                headers: HttpHeaders.builder().add("Location", "/final").build()))
+        }
+        HttpServerResponse(HttpResponse(200, "OK", ResponseBody(RequestBody.string("done").open())))
+    }
+}
+
+private class PublicRedirectPushObserver <: ResponseBodyObserver {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var finished = false
+    private var wasAbandoned = false
+    public func completed(): Unit {
+        synchronized(mutex) { finished = true; changed.notifyAll() }
+    }
+    public func abandoned(): Unit {
+        synchronized(mutex) { finished = true; wasAbandoned = true; changed.notifyAll() }
+    }
+    func awaitAbandonment(): Bool {
+        let deadline = Deadline.after(3 * Duration.second)
+        synchronized(mutex) {
+            while (!finished && !deadline.isExpired()) { changed.wait(timeout: deadline.remaining()) }
+            finished && wasAbandoned
+        }
     }
 }

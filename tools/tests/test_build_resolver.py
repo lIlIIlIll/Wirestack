@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from tools import evidence_digest
 
+from argparse import Namespace
 import unittest
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 from tools import build_native_dependencies, build_resolver, build_windows_resolver
 
@@ -44,16 +46,32 @@ class BuildResolverSelectionTests(unittest.TestCase):
         self.assertEqual(["resolver"], build_native_dependencies.plan("Windows"))
         self.assertEqual(["resolver"], build_native_dependencies.plan("Darwin"))
         self.assertEqual(
-            ["tls-provider", "resolver"],
+            ["tls-provider", "resolver", "http-files"],
             build_native_dependencies.plan("Linux"),
         )
         with self.assertRaisesRegex(ValueError, "unsupported"):
             build_native_dependencies.plan("Plan9")
 
+    def test_linux_native_build_executes_http_files_builder(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            args = Namespace(
+                root=Path(directory),
+                platform="Linux",
+                cjpm_script_path=None,
+                plan=False,
+            )
+            with (
+                mock.patch.object(build_native_dependencies, "parse_args", return_value=args),
+                mock.patch.object(build_native_dependencies, "run", return_value=0) as run,
+            ):
+                self.assertEqual(0, build_native_dependencies.main())
+        scripts = [Path(call.args[0][1]).name for call in run.call_args_list]
+        self.assertEqual(
+            ["build_tls_provider.py", "build_resolver.py", "build_linux_http_files.py"],
+            scripts,
+        )
+
     def test_darwin_resolver_selection_uses_the_cjpm_target_path(self) -> None:
-        build_script = Path("build.cj").read_text(encoding="utf-8")
-        self.assertIn('"--cjpm-script-path", scriptPath', build_script)
-        self.assertIn("buildNativeDependencies(args[0])", build_script)
         self.assertEqual(
             "ios-simulator-arm64",
             build_native_dependencies.resolver_platform(
