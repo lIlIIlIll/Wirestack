@@ -89,6 +89,25 @@ int32_t wirestack_tls_sha256(
     uint64_t size,
     uint8_t out_digest[32]
 );
+/*
+ * Private WebSocket helpers. Base64 output capacities include one trailing
+ * NUL byte; out_size excludes that terminator.
+ */
+int32_t wirestack_tls_websocket_random(uint8_t *output, uint64_t size);
+int32_t wirestack_tls_websocket_base64(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_size
+);
+int32_t wirestack_tls_websocket_sha1_base64(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_size
+);
 int32_t wirestack_tls_certificate_validate_der(
     const uint8_t *input,
     uint64_t size,

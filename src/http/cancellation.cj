@@ -141,14 +141,16 @@ private class HttpHandleCancellationState {
 
 /**
  * Links caller context plus typed handles into one immutable request context.
- * Input registrations are removed on normal body completion, close, error, or
- * as soon as any linked source wins cancellation.
+ * Input registrations remain until the response and retained push workers finish,
+ * or are removed immediately when any linked source wins cancellation.
  */
 internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     private let source = transport.CancellationSource()
     private let mutex = Mutex()
     private var registrations = ArrayList<transport.CancellationRegistration>()
     private var released = false
+    private var responseReleased = false
+    private var retainedLifetimes: Int64 = 0
     internal let context: OperationContext
     internal let connectionCancellation: transport.CancellationToken
 
@@ -182,7 +184,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
                 completeAtDeclaredLength: delegate.completesAtDeclaredLength
             ),
             version: response.version,
-            headers: response.headers
+            headers: response.headers,
+            pushes: response.pushes
         )
     }
 
@@ -201,6 +204,30 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         }
         if (discard) { registration.unregister() }
     }
+
+    internal func retainLifetime(): Resource {
+        synchronized(mutex) {
+            if (released || responseReleased) {
+                if (context.isCancellationRequested()) {
+                    throw transport.NetworkException(
+                        transport.NetworkErrorCategory.Cancelled, transport.NetworkPhase.HttpBody,
+                        transport.NetworkErrorCode.Cancelled, "HTTP request cancelled before push admission",
+                        retryability: transport.Retryability.Never)
+                }
+                throw IllegalStateException("HTTP request cancellation lifetime has ended")
+            }
+            retainedLifetimes++
+        }
+        HttpRequestCancellationLifetime(this)
+    }
+
+    internal func releaseLifetime(): Unit {
+        let finished = synchronized(mutex) {
+            retainedLifetimes--
+            responseReleased && retainedLifetimes == 0
+        }
+        if (finished) { releaseRegistrations() }
+    }
 /**
  * Wirestack 公开 API：completed。
  */
@@ -217,22 +244,45 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
 
     private func cancelAndRelease(): Unit {
         source.cancel()
-        release()
+        releaseRegistrations()
     }
 
     private func release(): Unit {
+        let finished = synchronized(mutex) {
+            if (responseReleased) { return }
+            responseReleased = true
+            retainedLifetimes == 0
+        }
+        if (finished) { releaseRegistrations() }
+    }
+
+    private func releaseRegistrations(): Unit {
         let claimed = synchronized(mutex) {
-            if (released) {
-                ArrayList<transport.CancellationRegistration>()
-            } else {
-                released = true
-                let result = registrations
-                registrations = ArrayList<transport.CancellationRegistration>()
-                result
-            }
+            if (released) { return }
+            released = true
+            let result = registrations
+            registrations = ArrayList<transport.CancellationRegistration>()
+            result
         }
         for (registration in claimed) { registration.unregister() }
     }
+}
+
+private class HttpRequestCancellationLifetime <: Resource {
+    private let operation: HttpRequestCancellationOperation
+    private let mutex = Mutex()
+    private var closed = false
+    init(operation: HttpRequestCancellationOperation) { this.operation = operation }
+    /** Releases this worker's cancellation lifetime exactly once. */
+    public func close(): Unit {
+        synchronized(mutex) {
+            if (closed) { return }
+            closed = true
+        }
+        operation.releaseLifetime()
+    }
+    /** Reports whether this worker has released its retained lifetime. */
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
 }
 
 private class HttpCancellationBodyStream <: HttpBodyStream {
