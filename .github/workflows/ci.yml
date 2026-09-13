@@ -31,10 +31,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang
-      - name: Test failure propagation and candidate wiring
+      - name: Test CI and performance policy wiring
         env:
           YJSON_REQUIRE_UBSAN_PROBE: '1'
-        run: python3 scripts/test_ci_candidate_wiring.py
+        run: |
+          python3 scripts/test_ci_candidate_wiring.py
+          python3 scripts/test_json_pure_perf_compare.py
 
   generated-change-risk:
     name: Generated code change risk

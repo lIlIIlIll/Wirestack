@@ -224,6 +224,7 @@ class CiGateRegressionTests(unittest.TestCase):
         self.assertIn("resolution=pinned-sts", workflow)
         self.assertNotIn("resolution=seven-day-cache-window", workflow)
         self.assertNotIn("Resolve latest complete STS", workflow)
+        self.assertIn("python3 scripts/test_json_pure_perf_compare.py", workflow)
         self.assertIn("needs: [api-docs, ci-required]", workflow)
         self.assertIn("group: pages-main", workflow)
         self.assertIn("if: steps.current.outputs.deploy == 'true'", workflow)
