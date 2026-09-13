@@ -4,7 +4,7 @@ Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在�
 
 当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现和验收。M8-001 已冻结 Wirestack-owned `wirestack.net` 同步网络底座契约；M8-002 已完成基于 `std.net` 的公共 `TcpListener` 和 `UdpSocket`，并通过 Linux IPv4/IPv6 原生验收。M8-003 增加经过 Linux 原生验证的 `UnixListener`、`UnixStream` 和 capability-scoped `UnixDatagramSocket`；短或非 UTF-8 outgoing abstract 名称、Unix connected send 和 raw native I/O 不计为支持能力。当前 backend 不支持发送空 datagram，但必须接收空报文；新增 capability 字段属于需要 consumer 重编译的 pre-1.0 ABI 变更。M8-004 的 DNS parser、wire client 和 resolver policy 已通过十二条 Linux 验收命令，包括 103 项网络测试及 12 个原生场景。
 
-M8-005 增加有界 CookieJar、multipart、Linux FileHandler、显式 HTTP/1.1 Upgrade、无压缩的 HTTP/1.1 和 HTTP/2 WebSocket、有界 HTTP/2 push，以及 connector、pool 和 service hooks。CookieJar 默认检查完整公共后缀规则，并阻止明文响应改写 Secure Cookie；推送响应体保留原请求的取消和绝对 deadline。五个独立安装包 consumer 场景通过，包括 128 KiB push 和文件操作的取消、deadline 分类。三个解析器的有界变异测试通过，multipart 无效元数据的资源清理缺陷已修复。全量仓颉测试为 758 passed、23 skipped、零失败。M8-006 的 TLS context versioning 和 M8-007 的最终发布证据仍需独立验收，不能复用历史报告宣称通过。
+M8-005 增加有界 CookieJar、multipart、Linux FileHandler、显式 HTTP/1.1 Upgrade、无压缩的 HTTP/1.1 和 HTTP/2 WebSocket、有界 HTTP/2 push，以及 connector、pool 和 service hooks。CookieJar 默认检查完整公共后缀规则，并阻止明文响应改写或通过配额淘汰 Secure Cookie；推送响应体保留原请求的取消和绝对 deadline。五个独立安装包 consumer 场景通过，包括 128 KiB push 和文件操作的取消、deadline 分类。三个解析器的有界变异测试通过，multipart 无效元数据的资源清理缺陷已修复。全量仓颉测试为 765 passed、23 skipped、零失败。M8-006 的 TLS context versioning 和 M8-007 的最终发布证据仍需独立验收，不能复用历史报告宣称通过。
 
 AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
 

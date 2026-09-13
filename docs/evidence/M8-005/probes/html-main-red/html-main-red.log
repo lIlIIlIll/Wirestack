@@ -1,0 +1,419 @@
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	﻿2026-09-13T21:17:12.1215281Z Current runner version: '2.337.0'
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1230739Z ##[group]Runner Image Provisioner
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1231260Z Hosted Compute Agent
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1231601Z Version: 20260828.587
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1232006Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1232424Z Build Date: 2026-08-28T16:44:25Z
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1232895Z Worker ID: {4b743f36-e31e-4b63-96d7-4ed1c906190c}
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1233312Z Azure Region: westus3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1233645Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1234698Z ##[group]Operating System
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1235046Z Ubuntu
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1235362Z 24.04.5
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1235704Z LTS
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1236000Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1236331Z ##[group]Runner Image
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1236688Z Image: ubuntu-24.04
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1237060Z Version: 20260907.300.1
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1237780Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260907.300/images/ubuntu/Ubuntu2404-Readme.md
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1238635Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260907.300
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1239233Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1239869Z ##[group]GITHUB_TOKEN Permissions
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1241418Z Contents: read
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1241741Z Metadata: read
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1242128Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1243384Z Secret source: Actions
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1243965Z Cache mode: write
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1244357Z Prepare workflow directory
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1468182Z Prepare all required actions
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.1497210Z Getting action download info
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.4572087Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:12.5425876Z Download action repository 'Zxilly/setup-cangjie@91463316b1c359f216c2ac49e35900f9341c1571' (SHA:91463316b1c359f216c2ac49e35900f9341c1571)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:13.8172727Z Download action repository 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c' (SHA:3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:14.5140444Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:14.6019314Z Download action repository 'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9' (SHA:fc324d3547104276b827a68afc52ff2a11cc49c9)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:14.9060919Z Getting action download info
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.0302909Z Download action repository 'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f' (SHA:bbbca2ddaa5d8feaa63e36b76fdaad77386f024f)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.1676333Z Complete job name: Generate public API docs / cjdoc 0.7.2
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2210464Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2211644Z with:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2259194Z   clean: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2259713Z   fetch-depth: 1
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2260194Z   repository: lIlIIlIll/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2265238Z   token: ***
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2265684Z   ssh-strict: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2266124Z   ssh-user: git
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2266578Z   persist-credentials: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2267142Z   sparse-checkout-cone-mode: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2267676Z   fetch-tags: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2268131Z   show-progress: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2268582Z   lfs: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2268998Z   submodules: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2269467Z   set-safe-directory: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2269990Z   allow-unsafe-pr-checkout: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2271059Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2271464Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2271944Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2272453Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2272911Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2880339Z Syncing repository: lIlIIlIll/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2882108Z ##[group]Getting Git version info
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2882831Z Working directory is '/home/runner/work/Wirestack/Wirestack'
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2884324Z [command]/usr/bin/git version
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2972706Z git version 2.55.0
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2991803Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2997260Z Temporarily overriding HOME='/home/runner/work/_temp/b6081eb9-5c04-4df7-bd71-0d5b100bae46' before making global git config changes
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.2999159Z Adding repository directory to the temporary git global config as a safe directory
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3000813Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Wirestack/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3039841Z Deleting the contents of '/home/runner/work/Wirestack/Wirestack'
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3043414Z ##[group]Determining repository object format
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3045077Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3046226Z ##[group]Initializing the repository
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3047662Z [command]/usr/bin/git init /home/runner/work/Wirestack/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3234034Z hint: Using 'master' as the name for the initial branch. This default branch name
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3236063Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3237813Z hint: to use in all of your new repositories, which will suppress this warning,
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3239271Z hint: call:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3240030Z hint:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3241147Z hint: 	git config --global init.defaultBranch <name>
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3242297Z hint:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3243358Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3245039Z hint: 'development'. The just-created branch can be renamed via this command:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3246416Z hint:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3247192Z hint: 	git branch -m <name>
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3248079Z hint:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3249398Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3251455Z Initialized empty Git repository in /home/runner/work/Wirestack/Wirestack/.git/
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3254697Z [command]/usr/bin/git remote add origin https://github.com/lIlIIlIll/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3307284Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3308478Z ##[group]Disabling automatic garbage collection
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3309538Z [command]/usr/bin/git config --local gc.auto 0
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3329549Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3331130Z ##[group]Setting up auth
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3333361Z Removing SSH command configuration
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3334389Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3365675Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3632117Z Removing HTTP extra header
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3635272Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3661738Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3822038Z Removing includeIf entries pointing to credentials config files
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3825289Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.3852070Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4021347Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4050301Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Wirestack/Wirestack/.git.path /home/runner/work/_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4075051Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Wirestack/Wirestack/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4102892Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4128037Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4151584Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4152328Z ##[group]Fetching the repository
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:15.4155342Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +ca4d750ff7886595d14422fc9161260f6b120269:refs/remotes/origin/main
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9852280Z From https://github.com/lIlIIlIll/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9852925Z  * [new ref]         ca4d750ff7886595d14422fc9161260f6b120269 -> origin/main
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9860085Z [command]/usr/bin/git branch --list --remote origin/main
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9883839Z   origin/main
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9889447Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9910174Z ca4d750ff7886595d14422fc9161260f6b120269
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9921799Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9922294Z ##[group]Determining the checkout info
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9922756Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9923032Z [command]/usr/bin/git sparse-checkout disable
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9956356Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9981198Z ##[group]Checking out the ref
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:16.9983687Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1578537Z Switched to a new branch 'main'
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1581977Z branch 'main' set up to track 'origin/main'.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1599148Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1637870Z [command]/usr/bin/git log -1 --format=%H
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1660952Z ca4d750ff7886595d14422fc9161260f6b120269
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1820787Z ##[group]Run Zxilly/setup-cangjie@91463316b1c359f216c2ac49e35900f9341c1571
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821107Z with:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821248Z   channel: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821386Z   version: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821533Z   cjv-version: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821699Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821833Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1821992Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1822157Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.1822309Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.2459125Z Downloading cjv from https://github.com/Zxilly/cjv/releases/download/v0.2.21/cjv_linux_amd64.tar.gz
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.6964947Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/d7d81e41-6131-4d40-9f63-4c792f360861 -f /home/runner/work/_temp/03337231-4bc4-4a21-9bc8-e9ced2b25bab
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.8138583Z Running cjv install sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:17.8277352Z Fetching SDK version manifest...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:45.9596776Z Extracting...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.1793628Z Toolchain 'sts-1.1.3' installed successfully
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2158337Z Running cjv envsetup --json +sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2304014Z Setting CANGJIE_HOME
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2306140Z Setting LD_LIBRARY_PATH
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2306794Z Adding to PATH: /home/runner/.cjpm/bin
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2307534Z Adding to PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/tools/bin
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2308116Z Adding to PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/bin
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.2318673Z Found cjc at /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/bin/cjc
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3553652Z Cangjie Compiler: 1.1.3 (cjnative)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3555632Z Target: x86_64-unknown-linux-gnu
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3555807Z 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3662443Z ##[group]Run sudo apt-get update
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3662677Z ^[[36;1msudo apt-get update^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3663078Z ^[[36;1msudo apt-get install --yes clang llvm cmake ninja-build^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3695783Z shell: /usr/bin/bash -e {0}
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3695944Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3696056Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3696191Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3696327Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3696572Z   CANGJIE_HOME: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3697254Z   LD_LIBRARY_PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/runtime/lib/linux_x86_64_cjnative:/home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/tools/lib
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.3697824Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.5105499Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.5394775Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.5523893Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.5581641Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.5602420Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.5717862Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.6109393Z Get:7 https://dl.google.com/linux/chrome-stable/deb stable InRelease [2548 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.6422181Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [414 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.6671421Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [463 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.6773846Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1263 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7101739Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [292 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7497891Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [181 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7511983Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1690 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7578364Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7597995Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1544 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7671732Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [354 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7681287Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7691439Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5772 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.7711502Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [12.6 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8121336Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1006 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8163578Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [213 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8180408Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [46.4 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8186044Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1206 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8229478Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8239433Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1445 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8284658Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [336 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:51.8506943Z Get:27 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1413 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:54.9750466Z Fetched 11.3 MB in 1s (12.2 MB/s)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.4125428Z Reading package lists...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.4360961Z Reading package lists...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.5443141Z Building dependency tree...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.5448209Z Reading state information...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6414488Z The following additional packages will be installed:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6419905Z   cmake-data libjsoncpp25 librhash0 llvm-runtime
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6423457Z Suggested packages:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6423697Z   cmake-doc cmake-format elpa-cmake-mode
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6553710Z The following NEW packages will be installed:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6556562Z   clang cmake cmake-data libjsoncpp25 librhash0 llvm llvm-runtime ninja-build
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6681737Z 0 upgraded, 8 newly installed, 0 to remove and 50 not upgraded.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6682112Z Need to get 13.7 MB of archives.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6682446Z After this operation, 49.6 MB of additional disk space will be used.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.6682860Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.7725815Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 clang amd64 1:18.0-59~exp2 [5846 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.8182008Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjsoncpp25 amd64 1.9.5-6build1 [82.8 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:55.9664233Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 librhash0 amd64 1.4.3-3build1 [129 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.0638128Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 cmake-data all 3.28.3-1build7 [2155 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.2815175Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 cmake amd64 3.28.3-1build7 [11.2 MB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.4989673Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 llvm-runtime amd64 1:18.0-59~exp2 [5496 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.5443502Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 llvm amd64 1:18.0-59~exp2 [4146 B]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.5897063Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 ninja-build amd64 1.11.1-2 [129 kB]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7542268Z Fetched 13.7 MB in 1s (14.7 MB/s)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7707025Z Selecting previously unselected package clang.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7937195Z (Reading database ... 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7937450Z (Reading database ... 5%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7937733Z (Reading database ... 10%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7937881Z (Reading database ... 15%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7938051Z (Reading database ... 20%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7938196Z (Reading database ... 25%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7938335Z (Reading database ... 30%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7939949Z (Reading database ... 35%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7940347Z (Reading database ... 40%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7940769Z (Reading database ... 45%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7941108Z (Reading database ... 50%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.7978776Z (Reading database ... 55%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:56.9404323Z (Reading database ... 60%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:57.0976672Z (Reading database ... 65%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:57.2836928Z (Reading database ... 70%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:57.3988348Z (Reading database ... 75%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:57.5994954Z (Reading database ... 80%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:57.7894195Z (Reading database ... 85%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:57.9937129Z (Reading database ... 90%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1461246Z (Reading database ... 95%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1461445Z (Reading database ... 100%
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1461687Z (Reading database ... 201818 files and directories currently installed.)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1494582Z Preparing to unpack .../0-clang_1%3a18.0-59~exp2_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1516737Z Unpacking clang (1:18.0-59~exp2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1714583Z Selecting previously unselected package libjsoncpp25:amd64.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1799780Z Preparing to unpack .../1-libjsoncpp25_1.9.5-6build1_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.1816972Z Unpacking libjsoncpp25:amd64 (1.9.5-6build1) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.2002087Z Selecting previously unselected package librhash0:amd64.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.2088028Z Preparing to unpack .../2-librhash0_1.4.3-3build1_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.2096545Z Unpacking librhash0:amd64 (1.4.3-3build1) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.2406872Z Selecting previously unselected package cmake-data.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.2491914Z Preparing to unpack .../3-cmake-data_3.28.3-1build7_all.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.2758600Z Unpacking cmake-data (3.28.3-1build7) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.7552280Z Selecting previously unselected package cmake.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.7655702Z Preparing to unpack .../4-cmake_3.28.3-1build7_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.7664246Z Unpacking cmake (3.28.3-1build7) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.9827014Z Selecting previously unselected package llvm-runtime:amd64.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.9919952Z Preparing to unpack .../5-llvm-runtime_1%3a18.0-59~exp2_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:58.9928655Z Unpacking llvm-runtime:amd64 (1:18.0-59~exp2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0093899Z Selecting previously unselected package llvm.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0183634Z Preparing to unpack .../6-llvm_1%3a18.0-59~exp2_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0210258Z Unpacking llvm (1:18.0-59~exp2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0473780Z Selecting previously unselected package ninja-build.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0559210Z Preparing to unpack .../7-ninja-build_1.11.1-2_amd64.deb ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0568272Z Unpacking ninja-build (1.11.1-2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.0960819Z Setting up ninja-build (1.11.1-2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1009484Z Setting up clang (1:18.0-59~exp2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1163199Z Setting up llvm-runtime:amd64 (1:18.0-59~exp2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1187083Z Setting up libjsoncpp25:amd64 (1.9.5-6build1) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1210022Z Setting up llvm (1:18.0-59~exp2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1232554Z Setting up librhash0:amd64 (1.4.3-3build1) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1255322Z Setting up cmake-data (3.28.3-1build7) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1308263Z Setting up cmake (3.28.3-1build7) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1333319Z Processing triggers for man-db (2.12.0-4build2) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1352861Z Not building database; man-db/auto-update is not 'true'.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.1364314Z Processing triggers for libc-bin (2.39-0ubuntu8.8) ...
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7592829Z 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593285Z Running kernel seems to be up-to-date.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593485Z 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593544Z No services need to be restarted.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593663Z 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593728Z No containers need to be restarted.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593849Z 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7593927Z No user sessions are running outdated binaries.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7594074Z 
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:17:59.7594208Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3114674Z ##[group]Run actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3114954Z with:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3115119Z   name: m7-033-cjdoc-ca4d750ff7886595d14422fc9161260f6b120269
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3115359Z   path: /home/runner/work/_temp/cjdoc-archive
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3115551Z   merge-multiple: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3115699Z   repository: lIlIIlIll/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3115853Z   run-id: 34783233616
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3133627Z   skip-decompress: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3133792Z   digest-mismatch: error
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3133938Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3134047Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3134178Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3134308Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3134546Z   CANGJIE_HOME: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3135235Z   LD_LIBRARY_PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/runtime/lib/linux_x86_64_cjnative:/home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/tools/lib
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3135788Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.3920529Z Downloading single artifact
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.6433877Z Preparing to download the following artifacts:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:00.6434677Z - m7-033-cjdoc-ca4d750ff7886595d14422fc9161260f6b120269 (ID: 10325841280, Size: 8957156, Expected Digest: sha256:02c06d06dd34eedd9805c5fa3ac3c84151ed54392c60b7c4254bed1933b113c2)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:01.0762449Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/2243c6f3-e34f-439e-ad75-437ad484864a/workflow-job-run-346e09e2-0110-5b7f-aeda-0534d5bf9e11/artifacts/25cf20dd2a494495531ea82b9250a9cf5956d2260cb6cbb55cd934a8cd7d27b4.zip
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:01.0763631Z Starting download of artifact to: /home/runner/work/_temp/cjdoc-archive
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:01.3417769Z (node:2637) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:01.3418629Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0581570Z SHA256 digest of downloaded artifact is 02c06d06dd34eedd9805c5fa3ac3c84151ed54392c60b7c4254bed1933b113c2
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0582157Z Artifact download completed successfully.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0582444Z Total of 1 artifact(s) downloaded
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0584148Z Download artifact has finished successfully
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0672561Z ##[group]Run set -euo pipefail
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0672774Z ^[[36;1mset -euo pipefail^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0672962Z ^[[36;1minstall_dir="$RUNNER_TEMP/cjdoc"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0673158Z ^[[36;1mmkdir -p "$install_dir"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0673427Z ^[[36;1mtar --extract --gzip --file "$RUNNER_TEMP/cjdoc-archive/cjdoc.tar.gz" \^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0673721Z ^[[36;1m  --directory "$install_dir"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0673910Z ^[[36;1mbinary="$install_dir/bin/cjdoc"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0674091Z ^[[36;1mchmod +x "$binary"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0674246Z ^[[36;1mtest -x "$binary"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0674396Z ^[[36;1m"$binary" --version^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0674573Z ^[[36;1mecho "CJDOC_BIN=$binary" >> "$GITHUB_ENV"^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0705205Z shell: /usr/bin/bash -e {0}
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0705356Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0705470Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0705608Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0705748Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0706006Z   CANGJIE_HOME: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0706686Z   LD_LIBRARY_PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/runtime/lib/linux_x86_64_cjnative:/home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/tools/lib
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.0707253Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2492269Z cjdoc 0.7.2
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2532786Z ##[group]Run scripts/check-docs --html --json
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2533012Z ^[[36;1mscripts/check-docs --html --json^[[0m
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2561805Z shell: /usr/bin/bash -e {0}
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2561956Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2562070Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2562208Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2562350Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2562592Z   CANGJIE_HOME: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2563266Z   LD_LIBRARY_PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/runtime/lib/linux_x86_64_cjnative:/home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/tools/lib
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2563885Z   CJDOC_BIN: /home/runner/work/_temp/cjdoc/bin/cjdoc
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:18:02.2564087Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1622024Z {"artifacts": {}, "cjdoc": {"path": "/home/runner/work/_temp/cjdoc/bin/cjdoc", "version": "0.7.2"}, "commands": [{"kind": "check", "package": "wirestack", "returncode": 0, "status": "PASS", "stderr": "documentation coverage: symbols 646/646 (100%), parameters 253/253 (100%)\n", "stderr_truncated": false, "stdout": "", "stdout_truncated": false}, {"kind": "generate", "package": "wirestack", "returncode": 0, "status": "PASS", "stderr": "", "stderr_truncated": false, "stdout": "generated /tmp/wirestack-m7-033-g2v3w_l6/wirestack/output\n", "stdout_truncated": false}, {"kind": "check", "package": "wirestack.http", "returncode": 0, "status": "PASS", "stderr": "documentation coverage: symbols 1048/1048 (100%), parameters 473/473 (100%)\n", "stderr_truncated": false, "stdout": "", "stdout_truncated": false}, {"kind": "generate", "package": "wirestack.http", "returncode": 0, "status": "PASS", "stderr": "", "stderr_truncated": false, "stdout": "generated /tmp/wirestack-m7-033-g2v3w_l6/wirestack-http/output\n", "stdout_truncated": false}, {"kind": "check", "package": "wirestack.tls", "returncode": 0, "status": "PASS", "stderr": "documentation coverage: symbols 800/800 (100%), parameters 298/298 (100%)\n", "stderr_truncated": false, "stdout": "", "stdout_truncated": false}, {"kind": "generate", "package": "wirestack.tls", "returncode": 0, "status": "PASS", "stderr": "", "stderr_truncated": false, "stdout": "generated /tmp/wirestack-m7-033-g2v3w_l6/wirestack-tls/output\n", "stdout_truncated": false}, {"kind": "check", "package": "wirestack.net", "returncode": 0, "status": "PASS", "stderr": "documentation coverage: symbols 887/887 (100%), parameters 424/424 (100%)\n", "stderr_truncated": false, "stdout": "", "stdout_truncated": false}, {"kind": "generate", "package": "wirestack.net", "returncode": 0, "status": "PASS", "stderr": "", "stderr_truncated": false, "stdout": "generated /tmp/wirestack-m7-033-g2v3w_l6/wirestack-net/output\n", "stdout_truncated": false}, {"kind": "check", "package": "combined", "returncode": 0, "status": "PASS", "stderr": "documentation coverage: symbols 1443/1443 (100%), parameters 689/689 (100%)\n", "stderr_truncated": false, "stdout": "", "stdout_truncated": false}, {"kind": "generate", "package": "combined", "returncode": 1, "status": "FAIL", "stderr": "An exception has occurred:\n    Out of memory\n", "stderr_truncated": false, "stdout": "", "stdout_truncated": false}], "expectedCjdoc": "0.7.2", "generatedAtUtc": "2026-09-13T21:18:02.302967Z", "issues": [{"code": "CJDOC_GENERATE", "detail": "combined generation returned a non-zero status"}], "layers": [{"apiEntries": 646, "apiSha256": "69378f9dd90fca54576bed883abea3d309535b09546b422ee5dd93737fd72374", "coverage": {"parameters": {"documented": 253, "percent": 100, "total": 253}, "symbols": {"documented": 646, "percent": 100, "total": 646}}, "coverageSha256": "38c008ed140aa4cc6fb436c854610699a0c9ea71cd233ec71d7ca12b63fdbc28", "declarations": 789, "docsSha256": "66eec7d03245ce99b8a0821a39e9765bc8030cd5cc8c00e68392f6372155f79b", "markdownSha256": "3055a19762b460c1f977ca0ed29a1154c7af8cda9d232351ef2bba0e2b409b45", "package": "wirestack", "status": "PASS"}, {"apiEntries": 1048, "apiSha256": "79421833f69c509b6805251a5f20a48b7216faf94b5c397f2a0942a9aff37a59", "coverage": {"parameters": {"documented": 473, "percent": 100, "total": 473}, "symbols": {"documented": 1048, "percent": 100, "total": 1048}}, "coverageSha256": "f322c080ee70a400b3807aa26879ce64b9357d927cd342af6460e2ae50f46ca7", "declarations": 1713, "docsSha256": "e46c62aaa221e4c83b3a8dba94b26d201f2cc44748839f5bb85ef9848ff76c1a", "markdownSha256": "b90982339ea708b7f7715aac927745b2581b6855195119690f6e0f5582139392", "package": "wirestack.http", "status": "PASS"}, {"apiEntries": 800, "apiSha256": "4afa53d04ea7a23f835be0261fb852cfff645148731570fcdacce8972fc652c8", "coverage": {"parameters": {"documented": 298, "percent": 100, "total": 298}, "symbols": {"documented": 800, "percent": 100, "total": 800}}, "coverageSha256": "1277bdbb3a54bcd4f2263c20a0420046ff2d7e320970035eba67c2f04d457eb6", "declarations": 971, "docsSha256": "a4b6b2eb2fbc3e98cd30ab4aa1701326c79dc4a501a2eb701a96e824ec48feca", "markdownSha256": "f11ae8b6080dd249c5c33562a00732f7bbd35c67e423c0bcfc39ae9935b07646", "package": "wirestack.tls", "status": "PASS"}, {"apiEntries": 887, "apiSha256": "4455b181ac56385d5a90c87e89d00a79c1a6cba4c1be65477590546af59c590f", "coverage": {"parameters": {"documented": 424, "percent": 100, "total": 424}, "symbols": {"documented": 887, "percent": 100, "total": 887}}, "coverageSha256": "28526d2cdda06c477c23509da56bd0cbbabbb346afe9afe5e03fcaefe2a4cdf2", "declarations": 1301, "docsSha256": "ba853352adfb121b5bbacf1c8f0ff93e7f778df3e328e1332484b59cab690f67", "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe", "package": "wirestack.net", "status": "PASS"}], "platform": {"libc": "glibc", "machine": "x86_64", "system": "Linux"}, "schemaVersion": 1, "sourceSha256": {"src/byte_span.cj": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4", "src/cancellation.cj": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d", "src/common.cj": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3", "src/deadline.cj": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4", "src/hostname_verifier.cj": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989", "src/http/cancellation.cj": "8ff94be6a771af4c56dab7dc982fca0a16e6df1da4d1a14303dfc179f9225537", "src/http/client.cj": "97131a36c964f68cbc6697a87a4fd5fe81a5a0d146dee3355b4386a47f97c628", "src/http/cookie.cj": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8", "src/http/duplex.cj": "e81f52f4efbc0b728a1891d67bc0f3a6292af471d16d992b65e2055e44ffac24", "src/http/error.cj": "d88c54a157e02063ab4048c197631daba3642a9618672841e4b98d3a25d275ad", "src/http/file_handler.cj": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74", "src/http/hooks.cj": "0b6016a645fd69bbb8743e5abfed22b4c325286a450587b4ff87b722ef04f2ed", "src/http/multipart.cj": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e", "src/http/package.cj": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0", "src/http/proxy.cj": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d", "src/http/redirect.cj": "e7e9f07fa0bb79299e46c1320b32daf238e702b66fcb8e1368439723d74d96b4", "src/http/resolver.cj": "8c44e5ff6961122d6483c22546a26dab02e8414b88d5e18b954ddcf0b3ff29e4", "src/http/retry.cj": "e889370833f2d5b7df07d4cd13aa3068ab6262e1c2252728cbcc99c788b4199b", "src/http/server.cj": "52ede5995cf2b5ac64948b36334eadd9782cdcaa26e4c2bf3914a85e25cdb529", "src/http/tls.cj": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62", "src/http/upgrade.cj": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73", "src/http/websocket.cj": "1eafd0d9f728592adea31d4397a8173c98d6ad3551ab4ed84d3b77623b787ba7", "src/http/websocket_handshake.cj": "db5d899be8d22022db1e7aed502ad36c3cc5e52d6dbae8dce53112f797276d59", "src/http_body.cj": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe", "src/http_contract.cj": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259", "src/http_message.cj": "4033d25f42135e43f498f11d2b459512dcb7c45bce6e91efaa85b18a053e8ef1", "src/http_model.cj": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c", "src/http_push.cj": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f", "src/http_url.cj": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955", "src/net/datagram_socket_core.cj": "2095e7d3a02c805c3018badf7045b0d76a42a56e101a2e08867f32b676c34ae6", "src/net/dns_client.cj": "a63095f98489b93b83f76cebc878678391d338f9080e15cf2ea7277ff6562622", "src/net/dns_resolver.cj": "65b410bda4ed26d315848f68bdd70b432101153b12e3c5d6dcccd8bea14ec183", "src/net/dns_wire.cj": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0", "src/net/package.cj": "05ee39721856fab3dc82dc4a83baaa0adfd9bb8af4fb38e0af41d4f5cb4430cc", "src/net/tcp_listener.cj": "7735311cd3aa657a3be9a37216cb5a1b404854932ab66480ea78b9f42a2b2b1f", "src/net/udp_socket.cj": "a59cba97d797a3800338f6a8594bfcd0f93456fc926421b2f9bce81149c9546b", "src/net/unix_datagram_socket.cj": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511", "src/net/unix_listener.cj": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967", "src/net/unix_stream.cj": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b", "src/network_error.cj": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5", "src/network_event.cj": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084", "src/operation_context.cj": "523a1c1efaab2f3e6ba0755386460ea504a2caa8ef1453a18134f950c6e1234d", "src/package.cj": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7", "src/private_key_contract.cj": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84", "src/resolver.cj": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23", "src/tls/facade.cj": "7cdea5920f34d68eb670f0ac701bc9003eb9a0b1823d7c27ccc5d2941692bccd", "src/tls/identity.cj": "763b6b5f60e3afaed998a21ea7d1ca2f7db8d016255e670cab5fb96c2dfbd714", "src/tls/package.cj": "dd45ea5dbcb3846376a1621faf38bdf31e4509e99efb2fbe36b4a9bdb1f3c819", "src/tls_contract.cj": "e8d453029bd16914b5f3c7c3b4b44a5e2e16b69233a27f8b06c633b056a54267", "src/transport.cj": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033", "src/trust.cj": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"}, "status": "FAIL", "targetCfg": {"arch": "x86_64", "env": "gnu", "os": "Linux"}, "taskId": "M7-033"}
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1683394Z ##[error]Process completed with exit code 1.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1735071Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1735346Z with:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1735512Z   name: m7-033-docs-ca4d750ff7886595d14422fc9161260f6b120269
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1735735Z   if-no-files-found: error
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1735946Z   path: docs/evidence/M7-033/docs-report.json
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	target/doc/html
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736175Z   compression-level: 6
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736309Z   overwrite: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736442Z   include-hidden-files: false
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736591Z   archive: true
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736702Z env:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736809Z   CANGJIE_CHANNEL: sts
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1736945Z   CANGJIE_VERSION: 1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1737081Z   CJV_VERSION: v0.2.21
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1737310Z   CANGJIE_HOME: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1737994Z   LD_LIBRARY_PATH: /home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/runtime/lib/linux_x86_64_cjnative:/home/runner/work/_temp/setup-cangjie-cjv/toolchains/sts-1.1.3/tools/lib
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1738609Z   CJDOC_BIN: /home/runner/work/_temp/cjdoc/bin/cjdoc
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.1738812Z ##[endgroup]
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.2585828Z Multiple search paths detected. Calculating the least common ancestor of all paths
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.2587091Z The least common ancestor is /home/runner/work/Wirestack/Wirestack. This will be the root directory of the artifact
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.2587872Z With the provided path, there will be 1 file uploaded
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.2590147Z Artifact name is valid!
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.2590423Z Root directory input is valid!
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.5984049Z Uploading artifact: m7-033-docs-ca4d750ff7886595d14422fc9161260f6b120269.zip
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.6008844Z Beginning upload of artifact content to blob storage
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.8404530Z Uploaded bytes 4062
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.8977737Z Finished uploading artifact content to blob storage!
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.8978463Z SHA256 digest of uploaded artifact is ba5a1176e47ff36cae640963fb02ac3db72a77aabfd04b09bf3be927ef3df917
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:22.8978986Z Finalizing artifact upload
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.2793346Z Artifact m7-033-docs-ca4d750ff7886595d14422fc9161260f6b120269 successfully finalized. Artifact ID 10326100379
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.2794057Z Artifact m7-033-docs-ca4d750ff7886595d14422fc9161260f6b120269 has been successfully uploaded! Final size is 4062 bytes. Artifact ID is 10326100379
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.2795334Z Artifact download URL: https://github.com/lIlIIlIll/Wirestack/actions/runs/34783233616/artifacts/10326100379
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.2921238Z Post job cleanup.
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3422099Z [command]/usr/bin/git version
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3459934Z git version 2.55.0
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3491391Z Temporarily overriding HOME='/home/runner/work/_temp/c430f500-98fe-4a13-83dc-37f40b5e0ec8' before making global git config changes
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3492191Z Adding repository directory to the temporary git global config as a safe directory
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3492708Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Wirestack/Wirestack
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3537822Z Removing SSH command configuration
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3538569Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3560290Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3760347Z Removing HTTP extra header
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3765042Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3796519Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3993260Z Removing includeIf entries pointing to credentials config files
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.3998159Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4025538Z includeif.gitdir:/home/runner/work/Wirestack/Wirestack/.git.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4025995Z includeif.gitdir:/home/runner/work/Wirestack/Wirestack/.git/worktrees/*.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4026539Z includeif.gitdir:/github/workspace/.git.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4026967Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4032789Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Wirestack/Wirestack/.git.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4053605Z /home/runner/work/_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4060225Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Wirestack/Wirestack/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-84469a66\-ca50\-4a19\-b321\-8a7b301caa4f\.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4088094Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Wirestack/Wirestack/.git/worktrees/*.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4108118Z /home/runner/work/_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4113589Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Wirestack/Wirestack/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-84469a66\-ca50\-4a19\-b321\-8a7b301caa4f\.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4144368Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4164093Z /github/runner_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4168502Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-84469a66\-ca50\-4a19\-b321\-8a7b301caa4f\.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4194506Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4213953Z /github/runner_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4218252Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-84469a66\-ca50\-4a19\-b321\-8a7b301caa4f\.config
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4245445Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4414692Z Removing credentials config '/home/runner/work/_temp/git-credentials-84469a66-ca50-4a19-b321-8a7b301caa4f.config'
+Generate public API docs / cjdoc 0.7.2	UNKNOWN STEP	2026-09-13T21:20:23.4522866Z Cleaning up orphan processes
+report-docs-status	Require documentation prerequisites to succeed	﻿2026-09-13T21:20:28.9537714Z ##[group]Run test "$CJDOC_RESULT" = success && test "$DOCS_RESULT" = success
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:28.9538905Z ^[[36;1mtest "$CJDOC_RESULT" = success && test "$DOCS_RESULT" = success^[[0m
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0218466Z shell: /usr/bin/bash -e {0}
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0219732Z env:
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0220361Z   CANGJIE_CHANNEL: sts
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0221093Z   CANGJIE_VERSION: 1.1.3
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0221781Z   CJV_VERSION: v0.2.21
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0222462Z   CJDOC_RESULT: success
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0223235Z   DOCS_RESULT: failure
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0223872Z ##[endgroup]
+report-docs-status	Require documentation prerequisites to succeed	2026-09-13T21:20:29.0425239Z ##[error]Process completed with exit code 1.

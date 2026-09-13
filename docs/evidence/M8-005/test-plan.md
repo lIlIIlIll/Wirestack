@@ -77,6 +77,7 @@ Exclusions: WebSocket compression, `ws` or `wss` URL parsing, native `FileHandle
 | S047 | P013 | The graceful-close deadline expires while admitted DATA still lacks stream credit | Close reports DeadlineExceeded, the admitted writer stops, and the affected stream closes without closing its connection |
 | S048 | P013 | END_STREAM is queued behind a stalled PING acknowledgement when close cancellation arrives | Cancellation returns before connection I/O resumes, revokes the queued terminal frame, releases stream ownership, and preserves sibling reuse |
 | S049 | P001 | Cleartext quota flooding followed by a same-name attacker value; all-Secure quota and both storage entrypoints | HTTP insertions evict only non-Secure identities or return false. Secure state survives, and the attacker value cannot replace it. Expiry deletion and HTTPS renewal or eviction remain usable |
+| S050 | P012 | Combined-format HTML generation exhausts memory on main after the prior PR gate passed | Separate processes and output directories retain all required artifacts, full coverage, and usable HTML without raising runtime memory limits |
 
 ## Test-plan matrix
 
@@ -117,6 +118,7 @@ Exclusions: WebSocket compression, `ws` or `wss` URL parsing, native `FileHandle
 | T033 | P013 | S045,S046 | `halfCloseOrdersEndAfterAdmittedFlowControlledWrite` and `gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite`; the same red capture records peer-visible DATA after END_STREAM, and green preserves byte order and sibling progress | PASS |
 | T034 | P013 | S047,S048 | `gracefulCloseDeadlineStopsAdmittedFlowControlledWrite` fails before correction and passes afterward. `queuedHalfCloseCancellationDoesNotWaitForConnectionWriter` is an additional passing cancellation and completion-callback control, not a claimed baseline failure | PASS |
 | T035 | P001 | S049 | [`secure-quota red`](probes/secure-quota-red/secure-quota-red.json) emits the attacker session value and loses protected state. [`green`](probes/secure-quota-green/secure-quota-green.json) passes both controls and the remaining cookie suite | PASS |
+| T036 | P012 | S050 | [`main HTML failure`](probes/html-main-red/html-main-red.json) records OOM. [`split-format proof`](probes/html-split-green/html-split-green.json) records complete artifacts, coverage, 206 pages, browser search and rendered declarations | PASS |
 
 ## Execution and evidence rules
 
