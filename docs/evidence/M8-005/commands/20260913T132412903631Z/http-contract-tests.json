@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "FAIL",
+  "command": {
+    "id": "http-contract-tests",
+    "argv": [
+      "cjpm",
+      "test",
+      "src/http",
+      "--exclude-tags=Performance",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "status": "FAIL",
+    "exit_code": 1,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T13:24:12.903736Z",
+    "finished_at_utc": "2026-09-13T13:24:15.770469Z",
+    "duration_ms": 2866.749,
+    "stdout_path": "docs/evidence/M8-005/commands/20260913T132412903631Z/http-contract-tests.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/commands/20260913T132412903631Z/http-contract-tests.stderr.log",
+    "stdout_excerpt": "",
+    "stderr_excerpt": "\u001b[31merror\u001b[0m: ambiguous use of 'ResponseBodyObserver'\n    \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:1327:45:\n     \u001b[36m| \u001b[0m\n\u001b[36m1327\u001b[0m \u001b[36m| \u001b[0mprivate class PublicRedirectPushObserver <: ResponseBodyObserver {\u001b[0m\n     \u001b[36m| \u001b[0m                                            \u001b[31m^^^^^^^^^^^^^^^^^^^^ \u001b[0m\n     \u001b[36m| \u001b[0m\n     \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: found candidate from implicit imported pacakge 'wirestack.http'\n\u001b[34mnote\u001b[0m: found imported candidate\n  \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0mimport wirestack.ResponseBodyObserver\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ \u001b[0m\n   \u001b[36m| \u001b[0m\n\n\u001b[31merror\u001b[0m: class 'PublicRedirectPushObserver' can only inherit a class or implement interfaces\n    \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:1327:45:\n     \u001b[36m| \u001b[0m\n\u001b[36m1327\u001b[0m \u001b[36m| \u001b[0mprivate class PublicRedirectPushObserver <: ResponseBodyObserver {\u001b[0m\n     \u001b[36m| \u001b[0m                                            \u001b[31m^ \u001b[0m\n     \u001b[36m| \u001b[0m\n\n\u001b[31merror\u001b[0m: mismatched types\n    \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:1319:105:\n     \u001b[36m| \u001b[0m\n\u001b[36m1319\u001b[0m \u001b[36m| \u001b[0m                    ResponseBody(RequestBody.bytes(Array<Byte>(131072, repeat: b'p')).open(), observer: observer))))\u001b[0m\n     \u001b[36m| \u001b[0m                                                                                                        \u001b[31m^^^^^^^^ expected 'Interface-ResponseBodyObserver', found 'Class-PublicRedirectPushObserver'\u001b[0m\n     \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: unused import 'wirestack.ResponseBodyObserver'\n  \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0mimport wirestack.ResponseBodyObserver\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n3 errors generated, 3 errors printed.\n1 warning generated, 1 warning printed.\nError: cjpm test failed\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "281fb60ae1c0d1eaf3c77c2218b6e067b2f9da1e44b784022c4df158bacedd45"
+    }
+  }
+}

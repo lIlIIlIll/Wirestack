@@ -1,0 +1,22 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 2041539148 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 2029168506 ns, RESULT:
+    [ ERROR  ] CASE: encodedHeaderFailureClosesTheConnection (2027323797 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.encodedHeaderFailureClosesTheConnection()(/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:30)
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.asTestSuite.lambda.0.lambda.0()(/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:319)
+Summary: TOTAL: 175
+    PASSED: 0, SKIPPED: 174, ERROR: 1
+    FAILED: 0, listed below:
+            TCS: Http2ClientConnectionTest, CASE: encodedHeaderFailureClosesTheConnection
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2049051442 ns, RESULT:
+TP: wirestack.*, time elapsed: 2048960873 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.http2, time elapsed: 2041539148 ns, RESULT:
+        TCS: Http2ClientConnectionTest, time elapsed: 2029168506 ns, RESULT:
+        [ ERROR  ] CASE: encodedHeaderFailureClosesTheConnection (2027323797 ns)
+Summary: TOTAL: 175
+    PASSED: 0, SKIPPED: 174, ERROR: 1
+    FAILED: 0
+--------------------------------------------------------------------------------------------------

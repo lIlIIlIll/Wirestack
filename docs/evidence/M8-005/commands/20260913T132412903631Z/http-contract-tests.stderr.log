@@ -1,0 +1,39 @@
+[31merror[0m: ambiguous use of 'ResponseBodyObserver'
+    [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:1327:45:
+     [36m| [0m
+[36m1327[0m [36m| [0mprivate class PublicRedirectPushObserver <: ResponseBodyObserver {[0m
+     [36m| [0m                                            [31m^^^^^^^^^^^^^^^^^^^^ [0m
+     [36m| [0m
+     [36m#[0m [0mnote[0m: found candidate from implicit imported pacakge 'wirestack.http'
+[34mnote[0m: found imported candidate
+  [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0mimport wirestack.ResponseBodyObserver[0m
+   [36m| [0m[34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+   [36m| [0m
+
+[31merror[0m: class 'PublicRedirectPushObserver' can only inherit a class or implement interfaces
+    [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:1327:45:
+     [36m| [0m
+[36m1327[0m [36m| [0mprivate class PublicRedirectPushObserver <: ResponseBodyObserver {[0m
+     [36m| [0m                                            [31m^ [0m
+     [36m| [0m
+
+[31merror[0m: mismatched types
+    [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:1319:105:
+     [36m| [0m
+[36m1319[0m [36m| [0m                    ResponseBody(RequestBody.bytes(Array<Byte>(131072, repeat: b'p')).open(), observer: observer))))[0m
+     [36m| [0m                                                                                                        [31m^^^^^^^^ expected 'Interface-ResponseBodyObserver', found 'Class-PublicRedirectPushObserver'[0m
+     [36m| [0m
+
+[33mwarning[0m: unused import 'wirestack.ResponseBodyObserver'
+  [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/facade_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0mimport wirestack.ResponseBodyObserver[0m
+   [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+3 errors generated, 3 errors printed.
+1 warning generated, 1 warning printed.
+Error: cjpm test failed
