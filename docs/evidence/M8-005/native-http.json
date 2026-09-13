@@ -5,7 +5,7 @@
         "cjc",
         "-v"
       ],
-      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication",
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication",
       "exit_code": 0,
       "id": "toolchain",
       "stderr": {
@@ -28,9 +28,9 @@
     {
       "argv": [
         "/usr/bin/python3",
-        "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/tools/build_tls_provider.py"
+        "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/tools/build_tls_provider.py"
       ],
-      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication",
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication",
       "exit_code": 0,
       "id": "tls-native-build",
       "stderr": {
@@ -43,7 +43,7 @@
       "stdout": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "3c5ed03a7293f690b69789f4fa52781836172a29d332c971ab8e5cd6a975ed28"
+          "sha256": "177d934639debc98bd40a4a2ee51c0aa5c77bfb78d12d628c0083cf4f4b5cd04"
         },
         "path": "docs/evidence/M8-005/native-http/tls-native-build.stdout.log"
       },
@@ -53,10 +53,10 @@
     {
       "argv": [
         "/usr/bin/python3",
-        "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/tools/build_linux_resolver.py",
+        "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/tools/build_linux_resolver.py",
         "--quiet"
       ],
-      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication",
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication",
       "exit_code": 0,
       "id": "resolver-native-build",
       "stderr": {
@@ -79,12 +79,12 @@
     {
       "argv": [
         "/usr/bin/python3",
-        "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/tools/build_linux_http_files.py",
+        "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/tools/build_linux_http_files.py",
         "--root",
-        "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication",
+        "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication",
         "--quiet"
       ],
-      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication",
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication",
       "exit_code": 0,
       "id": "http-files-native-build",
       "stderr": {
@@ -110,7 +110,7 @@
         "third_party/public_suffix/generate.py",
         "--check"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/install/wirestack-0.1.0",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/install/wirestack-0.1.0",
       "exit_code": 0,
       "id": "installed-public-suffix",
       "stderr": {
@@ -135,13 +135,13 @@
         "cjpm",
         "build"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/consumer",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer",
       "exit_code": 0,
       "id": "consumer-build",
       "stderr": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "61be2fc1ffbf29b9b7b939fe8bcb8927756f2586b5dff5297c7945157f22e289"
+          "sha256": "7ee624cb0dfe7311f8a4454143d80b980011fbdf75e8fdbb2f5c147ce287a013"
         },
         "path": "docs/evidence/M8-005/native-http/consumer-build.stderr.log"
       },
@@ -157,10 +157,10 @@
     },
     {
       "argv": [
-        "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin/main",
+        "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin/main",
         "cookies-hooks"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin",
       "exit_code": 0,
       "id": "consumer-cookies-hooks",
       "stderr": {
@@ -182,10 +182,10 @@
     },
     {
       "argv": [
-        "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin/main",
+        "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin/main",
         "files-multipart"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin",
       "exit_code": 0,
       "id": "consumer-files-multipart",
       "stderr": {
@@ -207,10 +207,10 @@
     },
     {
       "argv": [
-        "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin/main",
+        "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin/main",
         "upgrade-http1"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin",
       "exit_code": 0,
       "id": "consumer-upgrade-http1",
       "stderr": {
@@ -232,10 +232,10 @@
     },
     {
       "argv": [
-        "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin/main",
+        "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin/main",
         "websocket-http1"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin",
       "exit_code": 0,
       "id": "consumer-websocket-http1",
       "stderr": {
@@ -257,10 +257,10 @@
     },
     {
       "argv": [
-        "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin/main",
+        "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin/main",
         "websocket-http2-push"
       ],
-      "cwd": "/tmp/wirestack-m8-005-installed-amom06w9/consumer/target/release/bin",
+      "cwd": "/tmp/wirestack-m8-005-installed-g5yzy1mg/consumer/target/release/bin",
       "exit_code": 0,
       "id": "consumer-websocket-http2-push",
       "stderr": {
@@ -283,13 +283,13 @@
   ],
   "consumer_binary_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "1c4463be918edc7b55965a0cc32f3f28460423cf842b82323c9ef5cfd5050eef"
+    "sha256": "3c19d24fc87c9fc0c0dc55c503dc6f6d987b1383930c63fb747c5c3e349ccd2b"
   },
   "installation": {
     "checkout_path_dependency": false,
     "consumer_manifest_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "085bc39b729e0508615220a1cbb0d1d5de060e2a2de33c2a39f2dd324e9c978a"
+      "sha256": "2aabd82f8e8921410301d87501cd1c1a4d5b5ea9b7e0f290472b845668919b24"
     },
     "installed_release_manifest_digest": {
       "domain": "text-utf8-lf-v1",
@@ -304,14 +304,14 @@
   "invocation": {
     "argv": [
       "/usr/bin/python3",
-      "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/tools/m8_005_native_http.py",
+      "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/tools/m8_005_native_http.py",
       "--report",
       "docs/evidence/M8-005/native-http.json"
     ],
-    "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication",
+    "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication",
     "offline": false,
-    "output_dir": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/docs/evidence/M8-005/native-http",
-    "report": "/home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/docs/evidence/M8-005/native-http.json"
+    "output_dir": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/docs/evidence/M8-005/native-http",
+    "report": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/docs/evidence/M8-005/native-http.json"
   },
   "limits": {
     "consumer_build_timeout_seconds": 600,

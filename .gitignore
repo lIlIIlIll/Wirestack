@@ -38,6 +38,7 @@ __pycache__/
 !docs/evidence/M8-004/**/*.patch
 !docs/evidence/M8-005/**/*.json
 !docs/evidence/M8-005/**/*.patch
+!docs/evidence/M8-005/**/*.hex
 !docs/references/m7-033-ci-toolchain.json
 !docs/evidence/M7-028/*.json
 !docs/evidence/M7-028/linux_x86_64/*.json
