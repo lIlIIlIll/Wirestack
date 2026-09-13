@@ -1,0 +1,5 @@
+# No product-source overlay was applied for the current seven-library matrix.
+# The yjson input was the clean release candidate commit
+# 4766daa7ac88a5ad0869cfa2dbdb12c63acd0161.
+# External benchmark fixtures used the checked-in
+# benchmarks/full-seven-library/fixture-preflight-overlay.patch.

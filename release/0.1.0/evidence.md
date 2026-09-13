@@ -9,14 +9,15 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Field | Value |
 | --- | --- |
 | Planned release identity | `0.1.0` |
-| Candidate measured commit | `533284b9b8e6eee5c65b7fbbc2701ef8f4b35380` |
-| Candidate tree | `1becedac11e248c417f8e455c8db230514884d1a` |
+| Candidate measured commit | `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161` |
+| Candidate measured tree | `ccbee2fa194180c66374d44852c0122c30b7e9a6` |
 | Package manifest | 九个 package，版本均为 `0.1.0` |
 | Release graph | `release/release-graph.toml`；status=`release-ready` |
-| Evidence updated | `2026-09-12` |
-| Local qualification host | Linux Arch `7.2.3-Arch1-3`, x86_64；Intel Core i7-8700 |
-| Release qualification SDK | Cangjie STS `1.1.3`；local path `/home/elliot/cangjie_sdk/sts1.1.3`；当前候选已完成可达的本地验证，正式性能门禁仍有阻断 |
+| Evidence updated | `2026-09-13` |
+| Formal performance runner | `Server`；Linux x86_64；CPU 1，sibling 49 |
+| Release qualification SDK | Cangjie STS `1.1.3`；正式七库和 Pure 测量均记录 `cjc/cjpm 1.1.3` |
 | Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；run [`34710721196`](https://github.com/lIlIIlIll/yjson/actions/runs/34710721196) 失败于 `Seven-library evidence drift` |
+
 
 此前记录的本地编译器 `cjc` SHA-256
 `bc0f32df9c610dcbb05f437552ff57ec6c6e075a54721f46cc9c882a62d2d836`，
@@ -42,25 +43,29 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Coverage | PASS (current hosted job) | 当前 PR run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
 | Source-only staging | PASS | 最新 `scripts/ci_fresh_checkout.sh` 在 STS `1.1.3` 下完成仅源码暂存和发布树复制 |
 | Package rehearsal | PASS (fresh) | 当前 qvt fresh checkout 的 `registry-rehearsal` job 通过；未把临时 rehearsal 树当作最终上传 bundle |
-| Seven-library matrix | **BLOCKING** | Archived evidence passes integrity-only checks (checksums, manifests, identities and summaries), but strict freshness fails because measured commit `2758853efe1117c7d2b272abd36cf90de46526f5` used `status=migration` while the current release graph is `status=release-ready`; no qualifying `<1%` idle-core window was available locally to rerun the STS `1.1.3` formal matrix |
-| Three-library release performance | **BLOCKING** | `1.1.3` 基线下当前候选的远端正式 36-workload 三库证据尚未运行；本地 Native 诊断不替代该 gate |
-| Pure baseline/candidate qualification | **BLOCKING** | STS `1.1.3` 下已完成显式 CPU 的 24-case、11 轮 release 诊断，但包含超过 5% 的实际回退，且 CPU idle 资格为空，不能写成正式 PASS |
-| Native acceleration | NON-BLOCKING (claim not qualified) | STS `1.1.3` 下当前候选已完成 36-workload、11 轮三库诊断，但 `0/36` stable、`36/36` noisy；噪声只阻止精确 Native/跨库性能声明，不阻断普通 Release |
-| Release policy | **BLOCKING** | Seven-library freshness、three-library formal evidence，以及 Pure 的实际回退/idle qualification 仍未关闭；Native noisy 数据本身不是阻断项，没有创建 tag 或 Release |
+| Seven-library matrix | **PASS (local evidence pending clean-check verification)** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，均完成 CPU 1/sibling 49 idle sample；完整性校验通过，结果页记录 0/10 stable、10/10 noisy |
+| Three-library release performance | **BLOCKING** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵正在运行，结果尚未归档；本地诊断不替代该 gate |
+| Pure baseline/candidate qualification | **PASS** | [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)绑定当前候选，STS `1.1.3` 下 24 case、11 轮、release gate `all_ratios_at_most_1_05=true`；noisy 只限制精确性能声明 |
+| Native acceleration | NON-BLOCKING (claim not qualified) | 当前候选的 Native/三库诊断为 `0/36` stable、`36/36` noisy；噪声只阻止精确 Native/跨库性能声明，不阻断普通 Release |
+| Release policy | **BLOCKING** | Hosted PR CI 仍失败，当前三库正式证据尚未归档；Native noisy 数据本身不是阻断项，没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
 
 ### 候选资产摘要（未上传）
 
-现有资产 bundle 只绑定旧 commit `fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，
-不是当前 `533284b9b8e6eee5c65b7fbbc2701ef8f4b35380` 的发布资产。它保留在本地
-作为历史 rehearsal，未上传；当前候选虽已通过 fresh package rehearsal，仍未在性能
-门禁通过前生成可发布 bundle。
+当前候选的性能复核资料已分别保存在：
 
-历史 bundle 的 `checksums.txt` SHA-256 为
-`3a2b7cfef4623c97c6aa78ff9751b5c726ef5951bc9e6fd336165e1f0f9d690c`；
-其内容和九个 `.cjp` 的摘要不代表当前候选，不能用于 GitHub Release。
+- `benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`：两批七库 raw archive、脚本闭包、身份和 checksum；
+- `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-pure-release-4766daa-r4.tar.gz`：Pure 24-case raw archive。
+
+这些是仓库中的可审计证据，不是 GitHub Release 上传资产。当前候选的九个 `.cjp`、
+`manifest.json`、`environment.json` 和最终 `checksums.txt` 尚未生成；因此不能把上述
+性能归档当作已发布 bundle。
+
+历史 bundle 只绑定旧 commit `fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，
+保留作历史 rehearsal，不能用于当前候选的 GitHub Release。其 `checksums.txt`
+SHA-256 为 `3a2b7cfef4623c97c6aa78ff9751b5c726ef5951bc9e6fd336165e1f0f9d690c`。
 
 
 ## 3. 性能证据
@@ -79,10 +84,12 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 `75.71 us`。这些数字是修复方向的历史本地证据，不是当前 `2758853` 的交替 11 轮
 release qualification；target-only A/B 因 CV 超过 5% 而 exit `1`。
 
-这些历史数字不能与当前七库报告合并或推导跨主机比例。当前七库矩阵已绑定
-`2758853efe1117c7d2b272abd36cf90de46526f5`；三库完整性能资格仍待按当前候选单独完成。
+这些历史数字不能与当前报告合并或推导跨主机比例。当前正式七库矩阵已绑定
+`4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`，完整归档见
+`benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`，严格 freshness
+校验将在证据文件提交后对 clean checkout 执行。
 
-### 三库共同 workload
+### 历史：三库共同 workload（`b0f16eb`）
 
 以下两批数据绑定旧候选 `b0f16eb`，仅作为修复前的历史阻断记录；它们不代表当前
 `13a997c` 的性能资格。
@@ -107,38 +114,24 @@ CV 门槛，三库正式性能 gate 为 BLOCKING。
 ### Pure 基线/候选（当前候选，STS `1.1.3`）
 
 正式 runner `scripts/json_pure_perf_compare.py` 在当前候选
-`533284b9b8e6eee5c65b7fbbc2701ef8f4b35380`、tree
-`1becedac11e248c417f8e455c8db230514884d1a` 上，以
-`175a4b23656ab44d2d139b810e69ac364347297a` 为 baseline，执行了
-24 个实际存在的 case、11 轮、128 MiB、`--gate-mode release`、
-`--rebuild --enforce`。正式结果使用显式 `--cpu 2`，其
-`cpu-selection.json` 为 `sample_seconds=0`、CPU `2/8`、idle
-qualification=`null`，因此只是诊断数据，不是 `<1%` idle-core 正式证据。
+`4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`、tree
+`ccbee2fa194180c66374d44852c0122c30b7e9a6` 上，以
+`175a4b23656ab44d2d139b810e69ac364347297a` 为 baseline，执行 24 个实际
+case、11 轮、128 MiB、`--gate-mode release`、`--rebuild --enforce`。CPU 1
+与 sibling 49 的 30 秒 idle sample 均为 `0.0%`。
 
-该批 `summary.json` 的关键 gate 为 `all_ratios_at_most_1_05=false`；
-`both_cv_at_most_5_percent=false` 只是该批的稳定性元数据，按新 Release policy 不单独阻断；
-整体仍不能通过，因为存在超过 5% 的实际回退。代表性行包括：
-`yjsonStringEncodeDeepNestedProfiles` 回退 `-6.5%`、`parseStringRecords1m`
-回退 `-4.3%`；改善行包括 `yjsonStringDecodeLargeInt64Map` `16.4%` 和
-`yjsonBytesDecodeLargeInt64Map` `11.3%`。当前批次 summary 记录了完整 24 行，
-不把单个改善行写成整体 PASS。
+`summary.json` 的关键 gate 为 `all_ratios_at_most_1_05=true`、`passed=true`；
+`both_cv_at_most_5_percent=false` 只表示部分行 noisy，按 Release policy 不阻断普通
+Release。最大回退为 `yjsonStringEncodePerson` 的 `-3.77%`（ratio `1.038x`），
+最大改善为 `yjsonBytesDecodeLargeInt64Map` 的 `24.26%`（ratio `0.757x`）。
 
-baseline/candidate product source SHA-256 分别为
-`df9108e367363847b0fd59b3c611cc6a3504f4d426152e13479caf3e8b94d7f9` 和
-`6056f53aa56767a69a29685dad1d6b8fadd8c39a7b47ca6ecc60b46f114acb0b`；
-harness=`4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865`，
-runner=`181b6f12b63e4b2975ddeb8be85072e8f577d8cd8f7870b916b374f4b5e758b1`，
-corpus=`db9b0242e01fb4cfa2468245f8be5329a0967052412b7340f12c468c6202a70f`。
-`summary.json` SHA-256 为
-`c3f8ee88d1d47e574e8b5a3eda83e36714f4ae22e8d971dcf1446510feb6819c`，
-`provenance.json` SHA-256 为
-`3469131db051f4d37476761273309aad3abf6bc0f77f35835af79d9e0f9db148`，
-`cpu-selection.json` SHA-256 为
-`45e387ca46ee0da33a6ee02ba3b0aa99d0b488e651d143cce0fca98fb37bc9a5`。
-工具链为 `cjc/cjpm 1.1.3`；可用的无 `--cpu` 探针曾观察到 CPU `2/8`
-约 `9.13%/9.88%` 和 CPU `4/10` 约 `11.91%/11.92%`，均不满足 `<1%`。
+完整 24 行、命令、环境和身份见
+[当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)；
+raw archive 为
+`benchmarks/results/release-performance/2026-09-13-4766daa/yjson-pure-release-4766daa-r4.tar.gz`，
+SHA-256 为 `506504cbe6caf5a87d4c1a699d9855b5ddc4e293fbd15e883487f71a506c2053`。
 
-### Native / 三库诊断（当前候选，STS `1.1.3`）
+### 历史：Native / 三库诊断（旧候选，STS `1.1.3`）
 
 `scripts/json_cjfast_perf_run.py` 在 qvt 候选上使用固定 CPU `4`、128 MiB、
 11 轮、完整 36 个 yjson/stdx.json/cjfast_json workload 完成，随后由
@@ -190,20 +183,19 @@ Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (qvt; STS 1.1.3; fresh checkout jobs passed)
 Hosted PR execution: BLOCKING (run 34710721196 failed Seven-library evidence drift; pinned STS and other required jobs passed)
-Seven-library evidence freshness: BLOCKING (archive integrity passes; strict current-candidate identity fails because the measured release graph predates `release-ready`; no qualifying local idle-core window was available for the STS 1.1.3 formal matrix)
-Three-library performance qualification: BLOCKING (remote formal current-candidate matrix not run)
-Pure baseline/candidate qualification: BLOCKING (explicit-CPU diagnostic contains an actual >5% rollback and has no idle qualification)
-Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current STS 1.1.3 batch is noisy; no precise acceleration claim)
+Seven-library evidence freshness: PENDING FINAL CLEAN-CHECK (current candidate archives and identity are refreshed; strict checker runs after the evidence commit)
+Three-library performance qualification: BLOCKING (remote formal current-candidate matrix is still running)
+Pure baseline/candidate qualification: PASS (STS 1.1.3; 24 cases; 11 rounds; release ratios all at most 1.05)
+Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS (current PR Core Coverage job passed; historical thresholds remain recorded above)
 Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 ```
 
-发布基线已从 STS `1.1.0` 迁移到 `/home/elliot/cangjie_sdk/sts1.1.3`
-（cjc/cjpm `1.1.3`）。当前候选已通过本地 fresh-checkout 和完整基础测试，
-并完成了可达的 STS `1.1.3` 诊断测量；但正式七库矩阵、远端三库矩阵、满足
-idle-core 资格的 Pure 证据，以及 Pure 的实际回退仍缺失或未通过。Native noisy
-结果不阻断普通 Release，但不能用于精确 acceleration claim。旧
-`1.1.0` 结果、marker 和 bundle 不能复用；5% target improvement 仍只属于明确
-声明的 optimization mode。关闭剩余阻塞门禁前不得创建 `0.1.0` tag 或 GitHub Release。
+发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选已通过本地
+fresh-checkout、基础测试、API inventory 和 Pure 普通 Release gate；正式七库证据已
+按当前候选重新归档，严格 freshness 结果待证据提交后执行。远端三库正式矩阵仍在运行，
+Hosted PR run `34710721196` 仍失败，因此合并后的 `main` 工作流、tag、GitHub Release
+和中心包仓库发布都不能执行。Native noisy 结果不阻断普通 Release，但不能用于精确
+acceleration claim；5% target improvement 只属于明确声明的 optimization mode。
 
