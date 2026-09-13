@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "PASS",
+  "command": {
+    "id": "half-close-green",
+    "argv": [
+      "cjpm",
+      "test",
+      "src/internal/http2",
+      "--filter=Http2ClientConnectionTest.*",
+      "--exclude-tags=Performance",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T19:43:44.698025Z",
+    "finished_at_utc": "2026-09-13T19:44:04.462285Z",
+    "duration_ms": 19764.259,
+    "stdout_path": "docs/evidence/M8-005/probes/half-close-green/half-close-green.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/probes/half-close-green/half-close-green.stderr.log",
+    "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 188182067 ns, RESULT:\n    TCS: Http2ClientConnectionTest, time elapsed: 171243545 ns, RESULT:\n    [ PASSED ] CASE: encodedHeaderFailureClosesTheConnection (990734 ns)\n    [ PASSED ] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (2757020 ns)\n    [ PASSED ] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (3239476 ns)\n    [ PASSED ] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (2588468 ns)\n    [ PASSED ] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (659440 ns)\n    [ PASSED ] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (1004446 ns)\n    [ PASSED ] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (2611975 ns)\n    [ PASSED ] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (781713 ns)\n    [ PASSED ] CASE: connectedStreamOutlivesHandshakeCancellationAndUsesOperationContexts (1650873 ns)\n    [ PASSED ] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (4673799 ns)\n    [ PASSED ] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (9043575 ns)\n    [ PASSED ] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (10145701 ns)\n    [ PASSED ] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (109996042 ns)\n    [ PASSED ] CASE: queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (9776873 ns)\n    [ PASSED ] CASE: rejectedConnectReturnsFullResponseAndClosesRequestDirection (2566904 ns)\n    [ PASSED ] CASE: enabledPushAttachesBoundedCallerDrivenResponses (5117456 ns)\nSummary: TOTAL: 182\n    PASSED: 16, SKIPPED: 166, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 195717001 ns, RESULT:\nTP: wirestack.*, time elapsed: 195677074 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.http2, time elapsed: 188182067 ns\nSummary: TOTAL: 182\n    PASSED: 16, SKIPPED: 166, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "stderr_excerpt": "\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/server_connection.cj:411:28:\n    \u001b[36m| \u001b[0m\n\u001b[36m411\u001b[0m \u001b[36m| \u001b[0m            if (slotOwned) { releasePushSlot() }\u001b[0m\n    \u001b[36m| \u001b[0m                           \u001b[33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http1/server_connection.cj:116:23:\n    \u001b[36m| \u001b[0m\n\u001b[36m116\u001b[0m \u001b[36m| \u001b[0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }\u001b[0m\n    \u001b[36m| \u001b[0m                      \u001b[33m^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused import 'wirestack.internal.http_model.*'\n \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/stream_reset_test.cj:7:1:\n  \u001b[36m| \u001b[0m\n\u001b[36m7\u001b[0m \u001b[36m| \u001b[0mimport wirestack.internal.http_model.*\u001b[0m\n  \u001b[36m| \u001b[0m\u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import\u001b[0m\n  \u001b[36m| \u001b[0m\n  \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "554da024e2b4d3340f00c043bd19c2a32dc75dec0550c43f827ac4efe2039286"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "34be12e6a05d3b350b54a9d638e77d89f67c00e4b747a013aa55a11d0d107b9f"
+    }
+  }
+}

@@ -319,11 +319,14 @@ public class HttpResponse <: Resource {
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let body: ResponseBody
+    /** Bounded HTTP/2 pushes associated with this parent response, when enabled. */
+    public let pushes: ?HttpPushSource
 
 /**
  * Wirestack 公开 API：构造并校验该公开值。
  * @param body 调用方提供的输入值。
  * @param headers 调用方提供的输入值。
+ * @param pushes Owned push source; response closure rejects its unclaimed offers.
  * @param reason 描述终止原因的稳定值。
  * @param status 待记录的协议状态码。
  * @param version 调用方提供的输入值。
@@ -333,7 +336,8 @@ public class HttpResponse <: Resource {
         reason: String,
         body: ResponseBody,
         version!: HttpVersion = HttpVersion.Http11,
-        headers!: HttpHeaders = HttpHeaders()
+        headers!: HttpHeaders = HttpHeaders(),
+        pushes!: ?HttpPushSource = None<HttpPushSource>
     ) {
         if (status < 100 || status > 999) {
             throw IllegalArgumentException("HTTP status must be exactly three decimal digits")
@@ -344,16 +348,25 @@ public class HttpResponse <: Resource {
         this.version = version
         this.headers = headers
         this.body = body
+        this.pushes = pushes
     }
 
 /**
  * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
-    public func close(): Unit { body.close() }
+    public func close(): Unit {
+        try { body.close() }
+        finally { if (let Some(source) <- pushes) { source.close() } }
+    }
 /**
  * Wirestack 公开 API：报告资源是否已经关闭。
  */
-    public func isClosed(): Bool { body.isClosed() }
+    public func isClosed(): Bool {
+        body.isClosed() && match (pushes) {
+            case Some(source) => source.isClosed()
+            case None => true
+        }
+    }
 }
 
 private class NoopResponseBodyObserver <: ResponseBodyObserver {

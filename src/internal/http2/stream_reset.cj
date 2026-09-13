@@ -60,12 +60,13 @@ public class Http2StreamResetManager {
         registry: Http2StreamRegistry,
         flow: Http2FlowController,
         writer: Http2WriteScheduler,
-        limits!: Http2Limits = Http2Limits()
+        limits!: Http2Limits = Http2Limits(),
+        additionalStreamListeners!: UInt32 = 0u32
     ) {
         this.registry = registry
         this.flow = flow
         this.writer = writer
-        listenerLimit = Int64(limits.maxConcurrentStreams)
+        listenerLimit = Int64(limits.maxConcurrentStreams) + Int64(additionalStreamListeners)
     }
 
     /** Registers at most one removable wakeup target for one currently active stream. */

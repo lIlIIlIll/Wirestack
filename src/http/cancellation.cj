@@ -141,14 +141,16 @@ private class HttpHandleCancellationState {
 
 /**
  * Links caller context plus typed handles into one immutable request context.
- * Input registrations are removed on normal body completion, close, error, or
- * as soon as any linked source wins cancellation.
+ * Input registrations remain until the response and retained push workers finish,
+ * or are removed immediately when any linked source wins cancellation.
  */
 internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     private let source = transport.CancellationSource()
     private let mutex = Mutex()
     private var registrations = ArrayList<transport.CancellationRegistration>()
     private var released = false
+    private var responseReleased = false
+    private var retainedLifetimes: Int64 = 0
     internal let context: OperationContext
     internal let connectionCancellation: transport.CancellationToken
 
@@ -170,7 +172,19 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     }
 
     internal func wrap(response: HttpResponse): HttpResponse {
-        if (response.body.isFullyConsumed()) { release(); return response }
+        let pushes = match (response.pushes) {
+            case Some(value) =>
+                Some<HttpPushSource>(HttpCancellationPushSource(value, retainLifetime()))
+            case None => None<HttpPushSource>
+        }
+        if (response.body.isFullyConsumed()) {
+            release()
+            if (pushes.isNone()) { return response }
+            return HttpResponse(
+                response.status, response.reason, response.body,
+                version: response.version, headers: response.headers, pushes: pushes
+            )
+        }
         let delegate = response.body
         HttpResponse(
             response.status,
@@ -182,7 +196,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
                 completeAtDeclaredLength: delegate.completesAtDeclaredLength
             ),
             version: response.version,
-            headers: response.headers
+            headers: response.headers,
+            pushes: pushes
         )
     }
 
@@ -201,6 +216,30 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         }
         if (discard) { registration.unregister() }
     }
+
+    internal func retainLifetime(): Resource {
+        synchronized(mutex) {
+            if (released || responseReleased) {
+                if (context.isCancellationRequested()) {
+                    throw transport.NetworkException(
+                        transport.NetworkErrorCategory.Cancelled, transport.NetworkPhase.HttpBody,
+                        transport.NetworkErrorCode.Cancelled, "HTTP request cancelled before push admission",
+                        retryability: transport.Retryability.Never)
+                }
+                throw IllegalStateException("HTTP request cancellation lifetime has ended")
+            }
+            retainedLifetimes++
+        }
+        HttpRequestCancellationLifetime(this)
+    }
+
+    internal func releaseLifetime(): Unit {
+        let finished = synchronized(mutex) {
+            retainedLifetimes--
+            responseReleased && retainedLifetimes == 0
+        }
+        if (finished) { releaseRegistrations() }
+    }
 /**
  * Wirestack 公开 API：completed。
  */
@@ -217,22 +256,169 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
 
     private func cancelAndRelease(): Unit {
         source.cancel()
-        release()
+        releaseRegistrations()
     }
 
     private func release(): Unit {
+        let finished = synchronized(mutex) {
+            if (responseReleased) { return }
+            responseReleased = true
+            retainedLifetimes == 0
+        }
+        if (finished) { releaseRegistrations() }
+    }
+
+    private func releaseRegistrations(): Unit {
         let claimed = synchronized(mutex) {
-            if (released) {
-                ArrayList<transport.CancellationRegistration>()
-            } else {
-                released = true
-                let result = registrations
-                registrations = ArrayList<transport.CancellationRegistration>()
-                result
-            }
+            if (released) { return }
+            released = true
+            let result = registrations
+            registrations = ArrayList<transport.CancellationRegistration>()
+            result
         }
         for (registration in claimed) { registration.unregister() }
     }
+}
+
+private class HttpRequestCancellationLifetime <: Resource {
+    private let operation: HttpRequestCancellationOperation
+    private let mutex = Mutex()
+    private var closed = false
+    init(operation: HttpRequestCancellationOperation) { this.operation = operation }
+    /** Releases this worker's cancellation lifetime exactly once. */
+    public func close(): Unit {
+        synchronized(mutex) {
+            if (closed) { return }
+            closed = true
+        }
+        operation.releaseLifetime()
+    }
+    /** Reports whether this worker has released its retained lifetime. */
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
+}
+
+/**
+ * Retains request cancellation while a push source can still transfer ownership or
+ * any already-transferred pushed body remains live.
+ */
+private class HttpCancellationPushSource <: HttpPushSource {
+    private let delegate: HttpPushSource
+    private let lifetime: Resource
+    private let mutex = Mutex()
+    private var activeReceivers: Int64 = 0
+    private var activeBodies: Int64 = 0
+    private var sourceFinished = false
+    private var lifetimeReleased = false
+
+    init(delegate: HttpPushSource, lifetime: Resource) {
+        this.delegate = delegate
+        this.lifetime = lifetime
+        if (delegate.isClosed()) { finishSource() }
+    }
+
+    /**
+     * Receives one pushed response with its request cancellation lifetime.
+     * @param context Deadline and cancellation that bound offer delivery.
+     * @return The next owned push, or None after source completion.
+     */
+    public func receive(
+        context!: OperationContext = OperationContext.background()
+    ): ?HttpPushedResponse {
+        synchronized(mutex) { activeReceivers++ }
+        let received = try {
+            delegate.receive(context: context)
+        } catch (error: Exception) {
+            finishReceive(delegate.isClosed())
+            throw error
+        }
+        match (received) {
+            case Some(value) =>
+                let owner = claimTransferred(delegate.isClosed())
+                let response = value.response
+                let body = response.body
+                Some(HttpPushedResponse(
+                    value.request,
+                    HttpResponse(
+                        response.status,
+                        response.reason,
+                        ResponseBody(
+                            HttpCancellationBodyStream(body),
+                            observer: owner,
+                            trailerProvider: { => body.trailer },
+                            completeAtDeclaredLength: body.completesAtDeclaredLength
+                        ),
+                        version: response.version,
+                        headers: response.headers,
+                        pushes: response.pushes
+                    )
+                ))
+            case None =>
+                finishReceive(true)
+                None<HttpPushedResponse>
+        }
+    }
+
+    /** Closes unclaimed push ownership without closing transferred bodies. */
+    public func close(): Unit {
+        try { delegate.close() }
+        finally { finishSource() }
+    }
+
+    /** Reports whether the delegated push source is closed. */
+    public func isClosed(): Bool {
+        let closed = delegate.isClosed()
+        if (closed) { finishSource() }
+        closed
+    }
+
+    private func claimTransferred(sourceClosed: Bool): HttpCancellationPushBodyLifetime {
+        synchronized(mutex) {
+            activeReceivers--
+            activeBodies++
+            if (sourceClosed) { sourceFinished = true }
+        }
+        releaseIfFinished()
+        HttpCancellationPushBodyLifetime(this)
+    }
+
+    private func finishReceive(sourceClosed: Bool): Unit {
+        synchronized(mutex) {
+            activeReceivers--
+            if (sourceClosed) { sourceFinished = true }
+        }
+        releaseIfFinished()
+    }
+
+    private func finishSource(): Unit {
+        synchronized(mutex) { sourceFinished = true }
+        releaseIfFinished()
+    }
+
+    func releaseTransferred(): Unit {
+        synchronized(mutex) { activeBodies-- }
+        releaseIfFinished()
+    }
+
+    private func releaseIfFinished(): Unit {
+        let release = synchronized(mutex) {
+            if (lifetimeReleased || !sourceFinished || activeReceivers != 0 || activeBodies != 0) {
+                false
+            } else {
+                lifetimeReleased = true
+                true
+            }
+        }
+        if (release) { lifetime.close() }
+    }
+}
+
+private class HttpCancellationPushBodyLifetime <: ResponseBodyObserver {
+    private let source: HttpCancellationPushSource
+    init(source: HttpCancellationPushSource) { this.source = source }
+    /** Releases cancellation ownership after the transferred body completes. */
+    public func completed(): Unit { source.releaseTransferred() }
+    /** Releases cancellation ownership after the transferred body is abandoned. */
+    public func abandoned(): Unit { source.releaseTransferred() }
 }
 
 private class HttpCancellationBodyStream <: HttpBodyStream {

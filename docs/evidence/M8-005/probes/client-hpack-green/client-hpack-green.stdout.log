@@ -1,0 +1,17 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 13522931 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 2194062 ns, RESULT:
+    [ PASSED ] CASE: encodedHeaderFailureClosesTheConnection (899328 ns)
+Summary: TOTAL: 175
+    PASSED: 1, SKIPPED: 174, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 21480272 ns, RESULT:
+TP: wirestack.*, time elapsed: 21426152 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 13522931 ns
+Summary: TOTAL: 175
+    PASSED: 1, SKIPPED: 174, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

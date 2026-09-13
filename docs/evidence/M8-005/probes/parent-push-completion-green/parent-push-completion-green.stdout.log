@@ -1,0 +1,17 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 23882751 ns, RESULT:
+    TCS: Http2ServerPushLifecycleTest, time elapsed: 5762839 ns, RESULT:
+    [ PASSED ] CASE: crossOriginPushIsRejectedAndItsResponseIsClosedBeforeAnyOffer (4395432 ns)
+Summary: TOTAL: 175
+    PASSED: 1, SKIPPED: 174, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 31476503 ns, RESULT:
+TP: wirestack.*, time elapsed: 31416000 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 23882751 ns
+Summary: TOTAL: 175
+    PASSED: 1, SKIPPED: 174, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

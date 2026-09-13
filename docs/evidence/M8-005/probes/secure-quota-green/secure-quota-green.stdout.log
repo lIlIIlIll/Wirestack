@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 231208599 ns, RESULT:
+    TCS: HttpCookieJarTest, time elapsed: 222567723 ns, RESULT:
+    [ PASSED ] CASE: cookieSerializesStandardMetadataWithoutInventingBrowserPolicy (280170 ns)
+    [ PASSED ] CASE: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries (364609 ns)
+    [ PASSED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (1190520 ns)
+    [ PASSED ] CASE: defaultPathAndPathMatchUseDirectoryAndSlashBoundaries (170698 ns)
+    [ PASSED ] CASE: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity (219653 ns)
+    [ PASSED ] CASE: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection (77347 ns)
+    [ PASSED ] CASE: valuedSecureAttributeCannotLeakCookiesToCleartext (87923 ns)
+    [ PASSED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (427643 ns)
+    [ PASSED ] CASE: cleartextQuotaFloodCannotEvictSecureIdentityAndInstallReplacement (263927 ns)
+    [ PASSED ] CASE: allSecureQuotaRejectsCleartextInsertionsFromBothStorageEntrypoints (158750 ns)
+    [ PASSED ] CASE: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage (125523 ns)
+    [ PASSED ] CASE: capacityHeaderBoundsAndReplacementRemainDeterministic (123786 ns)
+    [ PASSED ] CASE: removalClearAndSnapshotsExposeOnlyLiveImmutableCookies (122746 ns)
+    [ PASSED ] CASE: concurrentStoresAndReadsRemainRaceFreeAndBounded (3274497 ns)
+    [ PASSED ] CASE: boundedSetCookieMutationsPreserveScopeAndHeaderSafety (213159582 ns)
+Summary: TOTAL: 113
+    PASSED: 15, SKIPPED: 98, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 238254714 ns, RESULT:
+TP: wirestack.*, time elapsed: 238155966 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 231208599 ns
+Summary: TOTAL: 113
+    PASSED: 15, SKIPPED: 98, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

@@ -44,6 +44,26 @@ class Http2ClientMappingTest {
     }
 
     @TestCase
+    func connectStreamMappingKeepsBothDataDirectionsOpen(): Unit {
+        let plan = mapHttp2ClientConnectRequest(HttpRequest(
+            HttpMethod("CONNECT"), HttpUrl.parse("https://example.com:8443/")
+        ))
+        @Expect(!plan.endStreamOnHeaders)
+        expectMappingField(plan.initialHeaders, 0, ":method", "CONNECT")
+        expectMappingField(plan.initialHeaders, 1, ":authority", "example.com:8443")
+
+        let extended = mapHttp2ClientConnectRequest(
+            HttpRequest(HttpMethod("CONNECT"), HttpUrl.parse("https://example.com/chat")),
+            protocol: Some("websocket")
+        )
+        expectMappingField(extended.initialHeaders, 1, ":protocol", "websocket")
+        expectMappingField(extended.initialHeaders, 2, ":scheme", "https")
+        expectMappingField(extended.initialHeaders, 3, ":authority", "example.com")
+        expectMappingField(extended.initialHeaders, 4, ":path", "/chat")
+        @Expect(!extended.endStreamOnHeaders)
+    }
+
+    @TestCase
     func requestRejectsAuthorityFramingAndConnectionAmbiguity(): Unit {
         expectMappingError(Http2MessageErrorCode.InvalidHeader, { =>
             let _ = mapHttp2ClientRequest(requestWithHeader("Host", "other.test"))
@@ -295,6 +315,38 @@ class Http2ClientMappingTest {
             let _ = responseSequence().acceptHeaders([
                 HpackHeaderField(":status", "200"), HpackHeaderField("trailer", "content-length")
             ], true)
+        })
+    }
+
+    @TestCase
+    func promisedRequestValidationPrecedesApplicationPolicy(): Unit {
+        let parent = HttpUrl.parse("https://example.com/index")
+        let promised = decodeHttp2PushedRequest([
+            HpackHeaderField(":method", "GET"),
+            HpackHeaderField(":scheme", "https"),
+            HpackHeaderField(":authority", "example.com"),
+            HpackHeaderField(":path", "/asset.css"),
+            HpackHeaderField("accept", "text/css")
+        ], Http2StreamId(2u32), parent)
+        @Expect(promised.method, HttpMethod("GET"))
+        @Expect(promised.url.toString(), "https://example.com/asset.css")
+        @Expect(promised.headers.getFirst("accept"), Some("text/css"))
+
+        expectResponseProtocol({ =>
+            let _ = decodeHttp2PushedRequest([
+                HpackHeaderField(":method", "POST"),
+                HpackHeaderField(":scheme", "https"),
+                HpackHeaderField(":authority", "example.com"),
+                HpackHeaderField(":path", "/asset")
+            ], Http2StreamId(4u32), parent)
+        })
+        expectResponseProtocol({ =>
+            let _ = decodeHttp2PushedRequest([
+                HpackHeaderField(":method", "GET"),
+                HpackHeaderField(":scheme", "https"),
+                HpackHeaderField(":authority", "other.example"),
+                HpackHeaderField(":path", "/asset")
+            ], Http2StreamId(6u32), parent)
         })
     }
 }

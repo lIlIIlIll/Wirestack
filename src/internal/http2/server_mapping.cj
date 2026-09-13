@@ -16,6 +16,7 @@ public class Http2ServerRequestHead {
     public let scheme: ?String
     public let authority: String
     public let headers: HttpHeaders
+    public let protocol: ?String
     public let expectedContentLength: ?Int64
 
     internal init(
@@ -24,7 +25,8 @@ public class Http2ServerRequestHead {
         scheme: ?String,
         authority: String,
         headers: HttpHeaders,
-        expectedContentLength: ?Int64
+        expectedContentLength: ?Int64,
+        protocol!: ?String = None<String>
     ) {
         this.method = method
         this.target = target
@@ -32,7 +34,24 @@ public class Http2ServerRequestHead {
         this.authority = authority
         this.headers = headers
         this.expectedContentLength = expectedContentLength
+        this.protocol = protocol
     }
+}
+
+/** Emits one real PUSH_PROMISE and its response on the associated parent stream. */
+public interface Http2ServerPushSender {
+    func push(
+        request: HttpRequest,
+        response: Http2ServerResponse,
+        context!: OperationContext,
+        lifetime!: ?Resource
+    ): Unit
+}
+
+/** Runs an accepted CONNECT as a stream-scoped duplex session. */
+public interface Http2DuplexHandler {
+    func serve(transport: DuplexTransport, context: OperationContext): Unit
+    func failed(): Unit {}
 }
 
 /** Protocol-neutral server request owned by one HTTP/2 stream exchange. */
@@ -40,18 +59,21 @@ public class Http2ServerRequest <: Resource {
     public let streamId: Http2StreamId
     public let head: Http2ServerRequestHead
     public let body: ResponseBody
+    public let pushSender: ?Http2ServerPushSender
     private let localCancellation: () -> Unit
 
     internal init(
         streamId: Http2StreamId,
         head: Http2ServerRequestHead,
         body: ResponseBody,
+        pushSender!: ?Http2ServerPushSender = None<Http2ServerPushSender>,
         localCancellation!: () -> Unit = { => }
     ) {
         this.streamId = streamId
         this.head = head
         this.body = body
         this.localCancellation = localCancellation
+        this.pushSender = pushSender
     }
 
     /** Requests one local RST_STREAM without exposing the reset manager. */
@@ -63,10 +85,16 @@ public class Http2ServerRequest <: Resource {
 public class Http2ServerResponse {
     public let response: HttpResponse
     public let trailer: HttpTrailer
+    public let duplexHandler: ?Http2DuplexHandler
 
-    public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer()) {
+    public init(
+        response: HttpResponse,
+        trailer!: HttpTrailer = HttpTrailer(),
+        duplexHandler!: ?Http2DuplexHandler = None<Http2DuplexHandler>
+    ) {
         this.response = response
         this.trailer = trailer
+        this.duplexHandler = duplexHandler
     }
 }
 
@@ -91,6 +119,10 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     private var handlerClaimed = false
     private var peerEnded = false
     private var localEnded = false
+    private var resetRegistration: ?Http2StreamResetRegistration = None<Http2StreamResetRegistration>
+    private var duplexTransport: ?Http2StreamTransport = None<Http2StreamTransport>
+    private var ownerComplete = false
+    private let onOwnerTerminated: () -> Unit
 
     private init(
         streamId: Http2StreamId,
@@ -101,7 +133,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         bodyChannel: Http2ServerBodyChannel,
         limits: HttpLimits,
         http2Limits: Http2Limits,
-        peerEnded: Bool
+        peerEnded: Bool,
+        onOwnerTerminated: () -> Unit
     ) {
         this.streamId = streamId
         this.request = request
@@ -112,6 +145,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         this.limits = limits
         this.http2Limits = http2Limits
         this.peerEnded = peerEnded
+        this.onOwnerTerminated = onOwnerTerminated
     }
 
     public static func open(
@@ -125,7 +159,11 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         limits!: HttpLimits = HttpLimits(),
         http2Limits!: Http2Limits = Http2Limits(),
         streamAlreadyOpened!: Bool = false,
-        localCancellation!: () -> Unit = { => }
+        pushSenderFactory!: (Http2ServerRequestHead) -> ?Http2ServerPushSender = {
+            _ => None<Http2ServerPushSender>
+        },
+        localCancellation!: () -> Unit = { => },
+        onOwnerTerminated!: () -> Unit = { => }
     ): Http2ServerExchange {
         if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
         var flowOpened = false
@@ -139,11 +177,13 @@ public class Http2ServerExchange <: Http2StreamResetListener {
             )
             if (endStream) { channel.finish(None<HttpTrailer>) }
             let body = ResponseBody(channel, trailerProvider: { => channel.trailer })
+            let pushSender = pushSenderFactory(head)
             Http2ServerExchange(
                 streamId, Http2ServerRequest(
-                    streamId, head, body, localCancellation: localCancellation
+                    streamId, head, body, pushSender: pushSender,
+                    localCancellation: localCancellation
                 ), registry, flow, sink,
-                channel, limits, http2Limits, endStream
+                channel, limits, http2Limits, endStream, onOwnerTerminated
             )
         } catch (error: Exception) {
             if (flowOpened) { let updates = flow.closeStream(streamId); if (!updates.isEmpty()) { sink.submit(updates) } }
@@ -163,17 +203,80 @@ public class Http2ServerExchange <: Http2StreamResetListener {
             handlerClaimed = true
         }
         spawn {
+            let handled = try {
+                handler.handle(request, context)
+            } catch (error: Exception) {
+                request.close()
+                throw error
+            }
+            if (handled.duplexHandler.isNone()) { request.close() }
             try {
-                let handled = handler.handle(request, context)
                 mapHttp2ServerResponse(
                     streamId, request.head.method, handled, flow,
+                    protocol: request.head.protocol,
                     limits: limits, http2Limits: http2Limits
                 )
-            } finally {
-                request.close()
+            } catch (error: Exception) {
+                if (let Some(duplexHandler) <- handled.duplexHandler) {
+                    try { duplexHandler.failed() } catch (_: Exception) {}
+                }
+                try { request.close() } catch (_: Exception) {}
+                throw error
             }
         }
     }
+    internal func bindReset(registration: Http2StreamResetRegistration): Unit {
+        resetRegistration = Some(registration)
+    }
+
+    /** Transfers request DATA ownership to a stream-scoped transport after a 2xx CONNECT head. */
+    internal func activateDuplex(
+        writer: Http2WriteScheduler,
+        reset: Http2StreamResetManager
+    ): Http2StreamTransport {
+        let transport = Http2StreamTransport(
+            streamId, bodyChannel, registry, flow, writer, reset, http2Limits,
+            { => completeOwner() }
+        )
+        let alreadyPeerEnded = synchronized(mutex) {
+            if (ownerComplete) {
+                throw IllegalStateException("HTTP/2 server exchange already terminated")
+            }
+            if (duplexTransport.isSome()) {
+                throw IllegalStateException("HTTP/2 server duplex transport was already activated")
+            }
+            duplexTransport = Some(transport)
+            peerEnded
+        }
+        if (alreadyPeerEnded) { transport.peerTerminated() }
+        transport
+    }
+
+    /** Releases registry, reset, flow and connection ownership exactly once. */
+    internal func completeOwner(): Unit {
+        let (won, duplexOwned) = synchronized(mutex) {
+            if (ownerComplete) { (false, false) }
+            else { ownerComplete = true; (true, duplexTransport.isSome()) }
+        }
+        if (!won) { return }
+        try { bodyChannel.close() } catch (_: Exception) {}
+        if (let Some(value) <- resetRegistration) { value.unregister() }
+        try {
+            if (duplexOwned && registry.stream(streamId).isSome()) {
+                let _ = registry.reset(
+                    streamId, Http2ErrorCode.Cancel,
+                    "HTTP/2 server duplex ownership terminated"
+                )
+            }
+        } catch (_: Exception) {}
+        let updates = flow.closeStream(streamId)
+        try {
+            if (!updates.isEmpty()) { sink.submit(updates) }
+        } finally {
+            onOwnerTerminated()
+        }
+    }
+
 
     /** Accepts one DATA frame without blocking the connection reader on application consumption. */
     public func acceptData(frame: Http2Frame): Unit {
@@ -210,13 +313,34 @@ public class Http2ServerExchange <: Http2StreamResetListener {
 
     /** Wakes a blocked handler body read after reset cleanup has claimed this stream. */
     public func streamReset(event: Http2StreamResetEvent): Unit {
-        if (event.streamId.value == streamId.value) { bodyChannel.reset(event) }
+        if (event.streamId.value != streamId.value) { return }
+        bodyChannel.reset(event)
+        if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
+            transport.peerTerminated(resetStream: true)
+        } else {
+            completeOwner()
+        }
+    }
+
+    internal func connectionTerminated(completion: Http2ConnectionCompletion): Unit {
+        let event = Http2StreamResetEvent(
+            streamId, completion.code, completion.reason, true
+        )
+        bodyChannel.reset(event)
+        if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
+            transport.peerTerminated(resetStream: true)
+        } else {
+            completeOwner()
+        }
     }
 
     private func finishPeerSide(): Unit {
         synchronized(mutex) { peerEnded = true }
         registry.peerEnd(streamId)
         cleanupFlowIfClosed()
+        if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
+            transport.peerTerminated()
+        }
     }
 
     private func cleanupFlowIfClosed(): Unit {
@@ -227,7 +351,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     }
 }
 
-private class Http2ServerBodyChannel <: HttpBodyStream {
+internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     private let streamId: Http2StreamId
     private let expectedContentLength: ?Int64
     private let flow: Http2FlowController
@@ -321,7 +445,14 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
     }
 
     public func read(destination: Array<Byte>): Int64 {
-        if (destination.isEmpty()) { return 0 }
+        match (readSome(MutableByteSpan(destination), context)) {
+            case ReadResult.Data(count) => count
+            case ReadResult.EndOfStream => 0
+        }
+    }
+
+    public func readSome(destination: MutableByteSpan, context: OperationContext): ReadResult {
+        if (destination.isEmpty()) { return ReadResult.Data(0) }
         let stalledUpdates = flow.flushStalledConnectionReceiveCredit()
         if (!stalledUpdates.isEmpty()) { sink.submit(stalledUpdates) }
         let registration = context.cancellation.register { => wake() }
@@ -341,21 +472,19 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
                         event.code, Http2ErrorScope.Stream(event.streamId), event.reason
                     )
                 }
-                if (applicationClosed) {
-                    throw Http2MessageException(
-                        Http2MessageErrorCode.InvalidMessageSequence, "HTTP/2 request body is closed"
-                    )
-                }
-                if (segments.isEmpty()) { return 0 }
+                if (applicationClosed) { return ReadResult.EndOfStream }
+                if (segments.isEmpty()) { return ReadResult.EndOfStream }
                 let segment = segments[0]
-                let count = min(destination.size, segment.remainingData)
-                for (index in 0..count) { destination[index] = segment.data[segment.offset + index] }
+                let count = min(destination.length, segment.remainingData)
+                for (index in 0..count) {
+                    destination.bytes[destination.offset + index] = segment.data[segment.offset + index]
+                }
                 segment.offset += count
                 let credit = if (segment.remainingData == 0) { segment.remainingFlowBytes } else { count }
                 segment.remainingFlowBytes -= credit
                 if (segment.remainingData == 0) { let _ = segments.remove(at: 0) }
                 if (credit > 0) { updates = flow.consumeReceived(streamId, credit) }
-                count
+                ReadResult.Data(count)
             }
             if (!updates.isEmpty()) { sink.submit(updates) }
             result
@@ -363,6 +492,29 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
             registration.unregister()
         }
     }
+
+    public func awaitEnd(context: OperationContext): Unit {
+        let registration = context.cancellation.register { => wake() }
+        try {
+            synchronized(mutex) {
+                while (!eof && resetEvent.isNone()) {
+                    checkServerBodyContext(context)
+                    match (context.deadline) {
+                        case Some(deadline) => changed.wait(timeout: deadline.remaining())
+                        case None => changed.wait()
+                    }
+                }
+                checkServerBodyContext(context)
+                if (let Some(event) <- resetEvent) {
+                    throw Http2ProtocolException(
+                        event.code, Http2ErrorScope.Stream(event.streamId), event.reason
+                    )
+                }
+            }
+        } finally { registration.unregister() }
+    }
+
+    public func discard(): Unit { close() }
 
     public func close(): Unit {
         var updates = Array<Http2Frame>()
@@ -480,6 +632,7 @@ public class Http2ServerResponsePlan <: Resource {
     private var opened = false
     public let streamId: Http2StreamId
     public let endStreamOnHeaders: Bool
+    public let duplexHandler: ?Http2DuplexHandler
 
     public prop initialHeaders: Array<HpackFieldEncoding> { get() { ownedInitialHeaders.clone() } }
 
@@ -492,7 +645,8 @@ public class Http2ServerResponsePlan <: Resource {
         limits: HttpLimits,
         http2Limits: Http2Limits,
         expectedContentLength: ?Int64,
-        endStreamOnHeaders: Bool
+        endStreamOnHeaders: Bool,
+        duplexHandler!: ?Http2DuplexHandler = None<Http2DuplexHandler>
     ) {
         this.streamId = streamId
         ownedInitialHeaders = initialHeaders.clone()
@@ -503,11 +657,15 @@ public class Http2ServerResponsePlan <: Resource {
         this.http2Limits = http2Limits
         this.expectedContentLength = expectedContentLength
         this.endStreamOnHeaders = endStreamOnHeaders
-        if (endStreamOnHeaders) { response.close() }
+        this.duplexHandler = duplexHandler
+        if (endStreamOnHeaders || duplexHandler.isSome()) { response.close() }
     }
 
     public func openBody(): Http2ServerResponseBody {
         if (endStreamOnHeaders) { throw IllegalStateException("HTTP/2 response ended on initial HEADERS") }
+        if (duplexHandler.isSome()) {
+            throw IllegalStateException("HTTP/2 duplex response has no ordinary body")
+        }
         if (opened) { throw IllegalStateException("HTTP/2 response body already opened") }
         opened = true
         Http2ServerResponseBody(
@@ -641,6 +799,7 @@ public func mapHttp2ServerResponse(
     requestMethod: HttpMethod,
     handled: Http2ServerResponse,
     flow: Http2FlowController,
+    protocol!: ?String = None<String>,
     limits!: HttpLimits = HttpLimits(),
     http2Limits!: Http2Limits = Http2Limits()
 ): Http2ServerResponsePlan {
@@ -651,6 +810,15 @@ public func mapHttp2ServerResponse(
             serverLocalHeaderError("HTTP/2 handler response must be one final status")
         }
         let successfulConnect = requestMethod == HttpMethod("CONNECT") && status >= 200 && status < 300
+        if (handled.duplexHandler.isSome() && !successfulConnect) {
+            serverLocalHeaderError("HTTP/2 duplex handler requires a successful CONNECT response")
+        }
+        if (successfulConnect && handled.duplexHandler.isNone()) {
+            if (protocol.isSome()) {
+                serverLocalHeaderError("HTTP/2 extended CONNECT requires an actual duplex handler")
+            }
+            serverLocalHeaderError("HTTP/2 successful CONNECT requires an actual duplex handler")
+        }
         let bodyless = requestMethod == HttpMethod("HEAD") || status == 204 || status == 205 || status == 304
         let fields = ArrayList<HpackFieldEncoding>()
         fields.add(serverEncoding(":status", "${status}"))
@@ -674,7 +842,7 @@ public func mapHttp2ServerResponse(
         }
         Http2ServerResponsePlan(
             streamId, encoded, response, handled.trailer, flow, limits, http2Limits,
-            expectedLength, bodyless
+            expectedLength, bodyless, duplexHandler: handled.duplexHandler
         )
     } catch (error: Exception) {
         try { response.close() } catch (_: Exception) {}
@@ -723,6 +891,18 @@ private func validateServerResponseBody(
     if (status == 205) {
         if (let Some(value) <- declared) { if (value != 0) { serverLocalContentLengthError() } }
     }
+    if (successfulConnect) {
+        if (body.contentLength != Some(0)) {
+            throw Http2MessageException(
+                Http2MessageErrorCode.BodyLengthMismatch,
+                "HTTP/2 CONNECT duplex response cannot carry an ordinary body"
+            )
+        }
+        if (!trailer.headers.entries.isEmpty()) {
+            serverLocalHeaderError("HTTP/2 CONNECT duplex response cannot carry ordinary trailers")
+        }
+        return
+    }
     if (bodyless) {
         if (requestMethod != HttpMethod("HEAD") && status != 304 && body.contentLength != Some(0)) {
             throw Http2MessageException(Http2MessageErrorCode.BodyLengthMismatch, "HTTP/2 bodyless response has content")
@@ -760,6 +940,7 @@ public func decodeHttp2ServerRequestHead(
     var scheme: ?String = None<String>
     var authority: ?String = None<String>
     var path: ?String = None<String>
+    var protocol: ?String = None<String>
     var sawRegular = false
     let regular = ArrayList<HttpHeader>()
     var host: ?String = None<String>
@@ -784,6 +965,13 @@ public func decodeHttp2ServerRequestHead(
                 case ":path" =>
                     if (path.isSome()) { serverStreamError(streamId, "HTTP/2 request repeats :path") }
                     path = Some(field.value)
+                case ":protocol" =>
+                    if (protocol.isSome()) { serverStreamError(streamId, "HTTP/2 request repeats :protocol") }
+                    let _ = try { HttpMethod(field.value) }
+                    catch (_: IllegalArgumentException) {
+                        serverStreamError(streamId, "HTTP/2 request :protocol is not a valid token")
+                    }
+                    protocol = Some(field.value)
                 case _ => serverStreamError(streamId, "HTTP/2 request contains an unsupported pseudo-header")
             }
         } else {
@@ -826,11 +1014,14 @@ public func decodeHttp2ServerRequestHead(
         }
     }
     let connect = resolvedMethod == HttpMethod("CONNECT")
+    if (protocol.isSome() && !connect) {
+        serverStreamError(streamId, "HTTP/2 :protocol requires CONNECT")
+    }
     let target: String
     let retainedScheme: ?String
-    if (connect) {
+    if (connect && protocol.isNone()) {
         if (scheme.isSome() || path.isSome()) {
-            serverStreamError(streamId, "HTTP/2 CONNECT request forbids :scheme and :path")
+            serverStreamError(streamId, "HTTP/2 ordinary CONNECT forbids :scheme and :path")
         }
         serverValidateConnectAuthority(resolvedAuthority, streamId)
         target = resolvedAuthority
@@ -849,7 +1040,11 @@ public func decodeHttp2ServerRequestHead(
         retainedScheme = Some(resolvedScheme)
     }
     if (let Some(value) <- host) {
-        serverValidateMatchingAuthority(value, resolvedAuthority, if (connect) { "http" } else { scheme.getOrThrow() }, streamId)
+        serverValidateMatchingAuthority(
+            value, resolvedAuthority,
+            if (retainedScheme.isSome()) { retainedScheme.getOrThrow() } else { "http" },
+            streamId
+        )
     }
     try { regular.add(HttpHeader("host", resolvedAuthority)) }
     catch (_: IllegalArgumentException) { serverStreamError(streamId, "HTTP/2 request authority is not a valid Host value") }
@@ -859,7 +1054,10 @@ public func decodeHttp2ServerRequestHead(
     }
     let headers = try { HttpHeaders(entries: regular.toArray(), limits: limits) }
     catch (_: IllegalArgumentException) { serverStreamError(streamId, "HTTP/2 request headers exceed configured limits") }
-    Http2ServerRequestHead(resolvedMethod, target, retainedScheme, resolvedAuthority, headers, contentLength)
+    Http2ServerRequestHead(
+        resolvedMethod, target, retainedScheme, resolvedAuthority, headers, contentLength,
+        protocol: protocol
+    )
 }
 
 private func decodeServerData(frame: Http2Frame, streamId: Http2StreamId): Http2DecodedServerData {
