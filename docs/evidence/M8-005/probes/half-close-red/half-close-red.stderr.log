@@ -1,0 +1,28 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/server_connection.cj:411:28:
+    [36m| [0m
+[36m411[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http1/server_connection.cj:116:23:
+    [36m| [0m
+[36m116[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+Error: cjpm test failed

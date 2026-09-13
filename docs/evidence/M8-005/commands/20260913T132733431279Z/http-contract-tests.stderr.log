@@ -1,0 +1,1750 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.45 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.46 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.47 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 8.1 */@Attribute[TEST_GENERATED] class WebSocketConnectionTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 8.2 */    @Attribute[TestCase_121][0m
+    [36m| [0m[34m|[0m /* 8.3 */    func fragmentedUtf8AndAutomaticPongSurviveOneByteTransportReads(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.4 */        let(clientTransport, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.5 */        let client = WebSocketConnection(clientTransport, WebSocketRole.Client)[0m
+    [36m| [0m[34m|[0m /* 8.6 */        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)[0m
+    [36m| [0m[34m|[0m /* 8.7 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.8 */            client.send(WebSocketFrame(WebSocketOpcode.Text, payload:[0xe4u8, 0xb8u8], finalFragment: false))[0m
+    [36m| [0m[34m|[0m /* 8.9 */            client.send(WebSocketFrame(WebSocketOpcode.Continuation, payload:[0xadu8]))[0m
+    [36m| [0m[34m|[0m /* 8.10 */            let first = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.11 */            let continuation = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.12 */            expectEqual("webSocketTestOpcode(first.opcode, WebSocketOpcode.Text)", "true", webSocketTestOpcode(first.opcode, WebSocketOpcode.Text), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.13 */            expectEqual("! first.finalFragment", "true", ! first.finalFragment, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.14 */            expectEqual("first.payload", "[0xe4u8, 0xb8u8]", first.payload,[0xe4u8, 0xb8u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.15 */            expectEqual("webSocketTestOpcode(continuation.opcode, WebSocketOpcode.Continuation)", "true", webSocketTestOpcode(continuation.opcode, WebSocketOpcode.Continuation), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.16 */            expectEqual("continuation.finalFragment", "true", continuation.finalFragment, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.17 */            expectEqual("continuation.payload", "[0xadu8]", continuation.payload,[0xadu8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.18 */            client.send(WebSocketFrame(WebSocketOpcode.Ping, payload: "probe".toArray()))[0m
+    [36m| [0m[34m|[0m /* 8.19 */            let ping = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.20 */            let pong = client.receive()[0m
+    [36m| [0m[34m|[0m /* 8.21 */            expectEqual("webSocketTestOpcode(ping.opcode, WebSocketOpcode.Ping)", "true", webSocketTestOpcode(ping.opcode, WebSocketOpcode.Ping), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.22 */            expectEqual("ping.payload", "\"probe\".toArray()", ping.payload, "probe".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.23 */            expectEqual("webSocketTestOpcode(pong.opcode, WebSocketOpcode.Pong)", "true", webSocketTestOpcode(pong.opcode, WebSocketOpcode.Pong), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.24 */            expectEqual("pong.payload", "\"probe\".toArray()", pong.payload, "probe".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.25 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.26 */            client.close()[0m
+    [36m| [0m[34m|[0m /* 8.27 */            server.close()[0m
+    [36m| [0m[34m|[0m /* 8.28 */        }[0m
+    [36m| [0m[34m|[0m /* 8.29 */    }[0m
+    [36m| [0m[34m|[0m /* 8.30 */    [0m
+    [36m| [0m[34m|[0m /* 8.31 */    @Attribute[TestCase_122][0m
+    [36m| [0m[34m|[0m /* 8.32 */    func preCancelledSendPerformsNoIoAndLeavesUntouchedSessionHealthy(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.33 */        let(clientTransport, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.34 */        let client = WebSocketConnection(clientTransport, WebSocketRole.Client)[0m
+    [36m| [0m[34m|[0m /* 8.35 */        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)[0m
+    [36m| [0m[34m|[0m /* 8.36 */        let cancellation = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 8.37 */        cancellation.cancel()[0m
+    [36m| [0m[34m|[0m /* 8.38 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.39 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 8.40 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.41 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.42 */                    client.send(WebSocketFrame(WebSocketOpcode.Binary, payload:[1u8]), context: OperationContext(cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 8.43 */                    fail("@AssertThrows: Expected 'WebSocketException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.44 */                } catch(e: WebSocketException) {[0m
+    [36m| [0m[34m|[0m /* 8.45 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.46 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.47 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.48 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.49 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.50 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.51 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.52 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.53 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.54 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.55 */                }[0m
+    [36m| [0m[34m|[0m /* 8.56 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.57 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.58 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.59 */                }[0m
+    [36m| [0m[34m|[0m /* 8.60 */                assertCaughtUnexpectedE("@AssertThrows(WebSocketException)", "WebSocketException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.61 */            }[0m
+    [36m| [0m[34m|[0m /* 8.62 */            [0m
+    [36m| [0m[34m|[0m /* 8.63 */            expectEqual("webSocketTestError(error.code, WebSocketErrorCode.ContextStopped)", "true", webSocketTestError(error.code, WebSocketErrorCode.ContextStopped), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.64 */            expectEqual("! client.isClosed()", "true", ! client.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.65 */            client.send(WebSocketFrame(WebSocketOpcode.Binary, payload:[2u8]))[0m
+    [36m| [0m[34m|[0m /* 8.66 */            let received = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.67 */            expectEqual("webSocketTestOpcode(received.opcode, WebSocketOpcode.Binary)", "true", webSocketTestOpcode(received.opcode, WebSocketOpcode.Binary), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.68 */            expectEqual("received.payload", "[2u8]", received.payload,[2u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.69 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.70 */            client.close()[0m
+    [36m| [0m[34m|[0m /* 8.71 */            server.close()[0m
+    [36m| [0m[34m|[0m /* 8.72 */        }[0m
+    [36m| [0m[34m|[0m /* 8.73 */    }[0m
+    [36m| [0m[34m|[0m /* 8.74 */    [0m
+    [36m| [0m[34m|[0m /* 8.75 */    @Attribute[TestCase_123][0m
+    [36m| [0m[34m|[0m /* 8.76 */    func fragmentedMessageBoundRejectsBeforeWritingAndPreservesProgression(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.77 */        let limits = WebSocketLimits(maximumFrameBytes: 4, maximumMessageBytes: 4, ioBufferBytes: 1, closeTimeout: Duration.second)[0m
+    [36m| [0m[34m|[0m /* 8.78 */        let(clientTransport, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.79 */        let client = WebSocketConnection(clientTransport, WebSocketRole.Client, limits: limits)[0m
+    [36m| [0m[34m|[0m /* 8.80 */        let server = WebSocketConnection(serverTransport, WebSocketRole.Server, limits: limits)[0m
+    [36m| [0m[34m|[0m /* 8.81 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.82 */            client.send(WebSocketFrame(WebSocketOpcode.Binary, payload:[1u8, 2u8, 3u8], finalFragment: false))[0m
+    [36m| [0m[34m|[0m /* 8.83 */            let tooLarge = try {[0m
+    [36m| [0m[34m|[0m /* 8.84 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.85 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.86 */                    client.send(WebSocketFrame(WebSocketOpcode.Continuation, payload:[4u8, 5u8]))[0m
+    [36m| [0m[34m|[0m /* 8.87 */                    fail("@AssertThrows: Expected 'WebSocketException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.88 */                } catch(e: WebSocketException) {[0m
+    [36m| [0m[34m|[0m /* 8.89 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.90 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.91 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.92 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.93 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.94 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.95 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.96 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.97 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.98 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.99 */                }[0m
+    [36m| [0m[34m|[0m /* 8.100 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.101 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.102 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.103 */                }[0m
+    [36m| [0m[34m|[0m /* 8.104 */                assertCaughtUnexpectedE("@AssertThrows(WebSocketException)", "WebSocketException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.105 */            }[0m
+    [36m| [0m[34m|[0m /* 8.106 */            [0m
+    [36m| [0m[34m|[0m /* 8.107 */            expectEqual("webSocketTestError(tooLarge.code, WebSocketErrorCode.MessageTooLarge)", "true", webSocketTestError(tooLarge.code, WebSocketErrorCode.MessageTooLarge), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.108 */            expectEqual("! client.isClosed()", "true", ! client.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.109 */            client.send(WebSocketFrame(WebSocketOpcode.Continuation, payload:[4u8]))[0m
+    [36m| [0m[34m|[0m /* 8.110 */            let first = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.111 */            let continuation = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.112 */            expectEqual("first.payload", "[1u8, 2u8, 3u8]", first.payload,[1u8, 2u8, 3u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.113 */            expectEqual("! first.finalFragment", "true", ! first.finalFragment, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.114 */            expectEqual("continuation.payload", "[4u8]", continuation.payload,[4u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.115 */            expectEqual("continuation.finalFragment", "true", continuation.finalFragment, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.116 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.117 */            client.close()[0m
+    [36m| [0m[34m|[0m /* 8.118 */            server.close()[0m
+    [36m| [0m[34m|[0m /* 8.119 */        }[0m
+    [36m| [0m[34m|[0m /* 8.120 */    }[0m
+    [36m| [0m[34m|[0m /* 8.121 */    [0m
+    [36m| [0m[34m|[0m /* 8.122 */    @Attribute[TestCase_124][0m
+    [36m| [0m[34m|[0m /* 8.123 */    func roleMaskingAndNonCanonicalLengthFailClosedWithProtocolStatus(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.124 */        let(rawClient, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.125 */        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)[0m
+    [36m| [0m[34m|[0m /* 8.126 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.127 */            api.writeAll(rawClient, api.ByteSpan([0x81u8, 0x01u8, b'x']))[0m
+    [36m| [0m[34m|[0m /* 8.128 */            let masking = try {[0m
+    [36m| [0m[34m|[0m /* 8.129 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.130 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.131 */                    server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.132 */                    fail("@AssertThrows: Expected 'WebSocketException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.133 */                } catch(e: WebSocketException) {[0m
+    [36m| [0m[34m|[0m /* 8.134 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.135 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.136 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.137 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.138 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.139 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.140 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.141 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.142 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.143 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.144 */                }[0m
+    [36m| [0m[34m|[0m /* 8.145 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.146 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.147 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.148 */                }[0m
+    [36m| [0m[34m|[0m /* 8.149 */                assertCaughtUnexpectedE("@AssertThrows(WebSocketException)", "WebSocketException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.150 */            }[0m
+    [36m| [0m[34m|[0m /* 8.151 */            [0m
+    [36m| [0m[34m|[0m /* 8.152 */            expectEqual("webSocketTestError(masking.code, WebSocketErrorCode.ProtocolViolation)", "true", webSocketTestError(masking.code, WebSocketErrorCode.ProtocolViolation), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.153 */            expectEqual("masking.closeCode", "Some(1002u16)", masking.closeCode, Some(1002u16), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.154 */            expectEqual("server.isClosed()", "true", server.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.155 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.156 */            rawClient.close()[0m
+    [36m| [0m[34m|[0m /* 8.157 */            server.close()[0m
+    [36m| [0m[34m|[0m /* 8.158 */        }[0m
+    [36m| [0m[34m|[0m /* 8.159 */        let(rawClient2, serverTransport2) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.160 */        let server2 = WebSocketConnection(serverTransport2, WebSocketRole.Server)[0m
+    [36m| [0m[34m|[0m /* 8.161 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.162 */            api.writeAll(rawClient2, api.ByteSpan([0x81u8, 0xfeu8, 0x00u8, 0x01u8, 1u8, 2u8, 3u8, 4u8, b'x' ^ 1u8]))[0m
+    [36m| [0m[34m|[0m /* 8.163 */            let canonical = try {[0m
+    [36m| [0m[34m|[0m /* 8.164 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.165 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.166 */                    server2.receive()[0m
+    [36m| [0m[34m|[0m /* 8.167 */                    fail("@AssertThrows: Expected 'WebSocketException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.168 */                } catch(e: WebSocketException) {[0m
+    [36m| [0m[34m|[0m /* 8.169 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.170 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.171 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.172 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.173 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.174 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.175 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.176 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.177 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.178 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.179 */                }[0m
+    [36m| [0m[34m|[0m /* 8.180 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.181 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.182 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.183 */                }[0m
+    [36m| [0m[34m|[0m /* 8.184 */                assertCaughtUnexpectedE("@AssertThrows(WebSocketException)", "WebSocketException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.185 */            }[0m
+    [36m| [0m[34m|[0m /* 8.186 */            [0m
+    [36m| [0m[34m|[0m /* 8.187 */            expectEqual("webSocketTestError(canonical.code, WebSocketErrorCode.ProtocolViolation)", "true", webSocketTestError(canonical.code, WebSocketErrorCode.ProtocolViolation), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.188 */            expectEqual("canonical.closeCode", "Some(1002u16)", canonical.closeCode, Some(1002u16), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.189 */            expectEqual("server2.isClosed()", "true", server2.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.190 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.191 */            rawClient2.close()[0m
+    [36m| [0m[34m|[0m /* 8.192 */            server2.close()[0m
+    [36m| [0m[34m|[0m /* 8.193 */        }[0m
+    [36m| [0m[34m|[0m /* 8.194 */    }[0m
+    [36m| [0m[34m|[0m /* 8.195 */    [0m
+    [36m| [0m[34m|[0m /* 8.196 */    @Attribute[TestCase_125][0m
+    [36m| [0m[34m|[0m /* 8.197 */    func fragmentedTextRejectsInvalidContinuationAtTheMessageBoundary(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.198 */        let(rawClient, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.199 */        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)[0m
+    [36m| [0m[34m|[0m /* 8.200 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.201 */            api.writeAll(rawClient, api.ByteSpan(webSocketTestMaskedFrame(0x01u8, false,[0xe4u8, 0xb8u8])))[0m
+    [36m| [0m[34m|[0m /* 8.202 */            api.writeAll(rawClient, api.ByteSpan(webSocketTestMaskedFrame(0x00u8, true,[b'A'])))[0m
+    [36m| [0m[34m|[0m /* 8.203 */            let first = server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.204 */            expectEqual("webSocketTestOpcode(first.opcode, WebSocketOpcode.Text)", "true", webSocketTestOpcode(first.opcode, WebSocketOpcode.Text), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.205 */            expectEqual("! first.finalFragment", "true", ! first.finalFragment, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.206 */            let invalid = try {[0m
+    [36m| [0m[34m|[0m /* 8.207 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.208 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.209 */                    server.receive()[0m
+    [36m| [0m[34m|[0m /* 8.210 */                    fail("@AssertThrows: Expected 'WebSocketException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.211 */                } catch(e: WebSocketException) {[0m
+    [36m| [0m[34m|[0m /* 8.212 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.213 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.214 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.215 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.216 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.217 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.218 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.219 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.220 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.221 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.222 */                }[0m
+    [36m| [0m[34m|[0m /* 8.223 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.224 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.225 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.226 */                }[0m
+    [36m| [0m[34m|[0m /* 8.227 */                assertCaughtUnexpectedE("@AssertThrows(WebSocketException)", "WebSocketException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.228 */            }[0m
+    [36m| [0m[34m|[0m /* 8.229 */            [0m
+    [36m| [0m[34m|[0m /* 8.230 */            expectEqual("webSocketTestError(invalid.code, WebSocketErrorCode.InvalidPayload)", "true", webSocketTestError(invalid.code, WebSocketErrorCode.InvalidPayload), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.231 */            expectEqual("invalid.closeCode", "Some(1007u16)", invalid.closeCode, Some(1007u16), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.232 */            expectEqual("server.isClosed()", "true", server.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.233 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.234 */            rawClient.close()[0m
+    [36m| [0m[34m|[0m /* 8.235 */            server.close()[0m
+    [36m| [0m[34m|[0m /* 8.236 */        }[0m
+    [36m| [0m[34m|[0m /* 8.237 */    }[0m
+    [36m| [0m[34m|[0m /* 8.238 */    [0m
+    [36m| [0m[34m|[0m /* 8.239 */    @Attribute[TestCase_126][0m
+    [36m| [0m[34m|[0m /* 8.240 */    func gracefulCloseEchoesStatusAndCompletesBothOwners(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.241 */        let(clientTransport, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 1)[0m
+    [36m| [0m[34m|[0m /* 8.242 */        let client = WebSocketConnection(clientTransport, WebSocketRole.Client)[0m
+    [36m| [0m[34m|[0m /* 8.243 */        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)[0m
+    [36m| [0m[34m|[0m /* 8.244 */        let serverResult: Future < Bool >= spawn { let closeFrame = server.receive(context: OperationContext(deadline: Some(Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 8.245 */            webSocketTestOpcode(closeFrame.opcode, WebSocketOpcode.Close) && server.isClosed()[0m
+    [36m| [0m[34m|[0m /* 8.246 */        }[0m
+    [36m| [0m[34m|[0m /* 8.247 */        client.close(1000u16, "done", context: OperationContext(deadline: Some(Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 8.248 */        expectEqual("client.isClosed()", "true", client.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.249 */        expectEqual("serverResult.get(Duration.second)", "true", serverResult.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.250 */        client.close()[0m
+    [36m| [0m[34m|[0m /* 8.251 */        server.close()[0m
+    [36m| [0m[34m|[0m /* 8.252 */    }[0m
+    [36m| [0m[34m|[0m /* 8.253 */    [0m
+    [36m| [0m[34m|[0m /* 8.254 */    @Attribute[TestCase_127][0m
+    [36m| [0m[34m|[0m /* 8.255 */    func handshakeCryptoMatchesRfcVectorAndReturnsCanonicalFreshKeyShape(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.256 */        expectEqual("webSocketAcceptKey(\"dGhlIHNhbXBsZSBub25jZQ==\")", "\"s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\"", webSocketAcceptKey("dGhlIHNhbXBsZSBub25jZQ=="), "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.257 */        let key = newWebSocketKey()[0m
+    [36m| [0m[34m|[0m /* 8.258 */        let keyBytes = key.toArray()[0m
+    [36m| [0m[34m|[0m /* 8.259 */        expectEqual("keyBytes.size", "24", keyBytes.size, 24, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.260 */        expectEqual("keyBytes[22]", "b\'=\'", keyBytes[22], b'=', isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.261 */        expectEqual("keyBytes[23]", "b\'=\'", keyBytes[23], b'=', isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.262 */        expectEqual("webSocketAcceptKey(key).toArray().size", "28", webSocketAcceptKey(key).toArray().size, 28, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.263 */    }[0m
+    [36m| [0m[34m|[0m /* 8.264 */    [0m
+    [36m| [0m[34m|[0m /* 8.265 */    @Attribute[TestCase_128][0m
+    [36m| [0m[34m|[0m /* 8.266 */    func framePayloadIsOwnedAndCloseInputIsStrict(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.267 */        let source =[1u8, 2u8][0m
+    [36m| [0m[34m|[0m /* 8.268 */        let frame = WebSocketFrame(WebSocketOpcode.Binary, payload: source)[0m
+    [36m| [0m[34m|[0m /* 8.269 */        source[0] = 9u8[0m
+    [36m| [0m[34m|[0m /* 8.270 */        let returned = frame.payload[0m
+    [36m| [0m[34m|[0m /* 8.271 */        returned[1] = 8u8[0m
+    [36m| [0m[34m|[0m /* 8.272 */        expectEqual("frame.payload", "[1u8, 2u8]", frame.payload,[1u8, 2u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.273 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.274 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.275 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.276 */                WebSocketFrame(WebSocketOpcode.Close, payload:[0x03u8])[0m
+    [36m| [0m[34m|[0m /* 8.277 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.278 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 8.279 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.280 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.281 */                }[0m
+    [36m| [0m[34m|[0m /* 8.282 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.283 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.284 */                }[0m
+    [36m| [0m[34m|[0m /* 8.285 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.286 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.287 */                }[0m
+    [36m| [0m[34m|[0m /* 8.288 */                e[0m
+    [36m| [0m[34m|[0m /* 8.289 */            }[0m
+    [36m| [0m[34m|[0m /* 8.290 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.291 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.292 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.293 */            }[0m
+    [36m| [0m[34m|[0m /* 8.294 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.295 */        }[0m
+    [36m| [0m[34m|[0m /* 8.296 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.297 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.298 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.299 */                WebSocketFrame(WebSocketOpcode.Ping, payload: Array < Byte >(126, repeat: 0u8))[0m
+    [36m| [0m[34m|[0m /* 8.300 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.301 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 8.302 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.303 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.304 */                }[0m
+    [36m| [0m[34m|[0m /* 8.305 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.306 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.307 */                }[0m
+    [36m| [0m[34m|[0m /* 8.308 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.309 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.310 */                }[0m
+    [36m| [0m[34m|[0m /* 8.311 */                e[0m
+    [36m| [0m[34m|[0m /* 8.312 */            }[0m
+    [36m| [0m[34m|[0m /* 8.313 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.314 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.315 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.316 */            }[0m
+    [36m| [0m[34m|[0m /* 8.317 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.318 */        }[0m
+    [36m| [0m[34m|[0m /* 8.319 */    }[0m
+    [36m| [0m[34m|[0m /* 8.320 */    [0m
+    [36m| [0m[34m|[0m /* 8.321 */    init() {[0m
+    [36m| [0m[34m|[0m /* 8.322 */    }[0m
+    [36m| [0m[34m|[0m /* 8.323 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 8.324 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.325 */        [0m
+    [36m| [0m[34m|[0m /* 8.326 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 8.327 */    }[0m
+    [36m| [0m[34m|[0m /* 8.328 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 8.329 */        [0m
+    [36m| [0m[34m|[0m /* 8.330 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 8.331 */        let suiteBuilder = TestSuite.builder("WebSocketConnectionTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 8.332 */        [0m
+    [36m| [0m[34m|[0m /* 8.333 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.334 */            [0m
+    [36m| [0m[34m|[0m /* 8.335 */            let fragmentedUtf8AndAutomaticPongSurviveOneByteTransportReadsTestFunc = { => fragmentedUtf8AndAutomaticPongSurviveOneByteTransportReads();() }[0m
+    [36m| [0m[34m|[0m /* 8.336 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.337 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.338 */            "fragmentedUtf8AndAutomaticPongSurviveOneByteTransportReads",[0m
+    [36m| [0m[34m|[0m /* 8.339 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.340 */            body: fragmentedUtf8AndAutomaticPongSurviveOneByteTransportReadsTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.341 */            )[0m
+    [36m| [0m[34m|[0m /* 8.342 */            )[0m
+    [36m| [0m[34m|[0m /* 8.343 */            [0m
+    [36m| [0m[34m|[0m /* 8.344 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.345 */        [0m
+    [36m| [0m[34m|[0m /* 8.346 */        [0m
+    [36m| [0m[34m|[0m /* 8.347 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.348 */            [0m
+    [36m| [0m[34m|[0m /* 8.349 */            let preCancelledSendPerformsNoIoAndLeavesUntouchedSessionHealthyTestFunc = { => preCancelledSendPerformsNoIoAndLeavesUntouchedSessionHealthy();() }[0m
+    [36m| [0m[34m|[0m /* 8.350 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.351 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.352 */            "preCancelledSendPerformsNoIoAndLeavesUntouchedSessionHealthy",[0m
+    [36m| [0m[34m|[0m /* 8.353 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.354 */            body: preCancelledSendPerformsNoIoAndLeavesUntouchedSessionHealthyTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.355 */            )[0m
+    [36m| [0m[34m|[0m /* 8.356 */            )[0m
+    [36m| [0m[34m|[0m /* 8.357 */            [0m
+    [36m| [0m[34m|[0m /* 8.358 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.359 */        [0m
+    [36m| [0m[34m|[0m /* 8.360 */        [0m
+    [36m| [0m[34m|[0m /* 8.361 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.362 */            [0m
+    [36m| [0m[34m|[0m /* 8.363 */            let fragmentedMessageBoundRejectsBeforeWritingAndPreservesProgressionTestFunc = { => fragmentedMessageBoundRejectsBeforeWritingAndPreservesProgression();() }[0m
+    [36m| [0m[34m|[0m /* 8.364 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.365 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.366 */            "fragmentedMessageBoundRejectsBeforeWritingAndPreservesProgression",[0m
+    [36m| [0m[34m|[0m /* 8.367 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.368 */            body: fragmentedMessageBoundRejectsBeforeWritingAndPreservesProgressionTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.369 */            )[0m
+    [36m| [0m[34m|[0m /* 8.370 */            )[0m
+    [36m| [0m[34m|[0m /* 8.371 */            [0m
+    [36m| [0m[34m|[0m /* 8.372 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.373 */        [0m
+    [36m| [0m[34m|[0m /* 8.374 */        [0m
+    [36m| [0m[34m|[0m /* 8.375 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.376 */            [0m
+    [36m| [0m[34m|[0m /* 8.377 */            let roleMaskingAndNonCanonicalLengthFailClosedWithProtocolStatusTestFunc = { => roleMaskingAndNonCanonicalLengthFailClosedWithProtocolStatus();() }[0m
+    [36m| [0m[34m|[0m /* 8.378 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.379 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.380 */            "roleMaskingAndNonCanonicalLengthFailClosedWithProtocolStatus",[0m
+    [36m| [0m[34m|[0m /* 8.381 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.382 */            body: roleMaskingAndNonCanonicalLengthFailClosedWithProtocolStatusTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.383 */            )[0m
+    [36m| [0m[34m|[0m /* 8.384 */            )[0m
+    [36m| [0m[34m|[0m /* 8.385 */            [0m
+    [36m| [0m[34m|[0m /* 8.386 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.387 */        [0m
+    [36m| [0m[34m|[0m /* 8.388 */        [0m
+    [36m| [0m[34m|[0m /* 8.389 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.390 */            [0m
+    [36m| [0m[34m|[0m /* 8.391 */            let fragmentedTextRejectsInvalidContinuationAtTheMessageBoundaryTestFunc = { => fragmentedTextRejectsInvalidContinuationAtTheMessageBoundary();() }[0m
+    [36m| [0m[34m|[0m /* 8.392 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.393 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.394 */            "fragmentedTextRejectsInvalidContinuationAtTheMessageBoundary",[0m
+    [36m| [0m[34m|[0m /* 8.395 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.396 */            body: fragmentedTextRejectsInvalidContinuationAtTheMessageBoundaryTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.397 */            )[0m
+    [36m| [0m[34m|[0m /* 8.398 */            )[0m
+    [36m| [0m[34m|[0m /* 8.399 */            [0m
+    [36m| [0m[34m|[0m /* 8.400 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.401 */        [0m
+    [36m| [0m[34m|[0m /* 8.402 */        [0m
+    [36m| [0m[34m|[0m /* 8.403 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.404 */            [0m
+    [36m| [0m[34m|[0m /* 8.405 */            let gracefulCloseEchoesStatusAndCompletesBothOwnersTestFunc = { => gracefulCloseEchoesStatusAndCompletesBothOwners();() }[0m
+    [36m| [0m[34m|[0m /* 8.406 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.407 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.408 */            "gracefulCloseEchoesStatusAndCompletesBothOwners",[0m
+    [36m| [0m[34m|[0m /* 8.409 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.410 */            body: gracefulCloseEchoesStatusAndCompletesBothOwnersTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.411 */            )[0m
+    [36m| [0m[34m|[0m /* 8.412 */            )[0m
+    [36m| [0m[34m|[0m /* 8.413 */            [0m
+    [36m| [0m[34m|[0m /* 8.414 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.415 */        [0m
+    [36m| [0m[34m|[0m /* 8.416 */        [0m
+    [36m| [0m[34m|[0m /* 8.417 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.418 */            [0m
+    [36m| [0m[34m|[0m /* 8.419 */            let handshakeCryptoMatchesRfcVectorAndReturnsCanonicalFreshKeyShapeTestFunc = { => handshakeCryptoMatchesRfcVectorAndReturnsCanonicalFreshKeyShape();() }[0m
+    [36m| [0m[34m|[0m /* 8.420 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.421 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.422 */            "handshakeCryptoMatchesRfcVectorAndReturnsCanonicalFreshKeyShape",[0m
+    [36m| [0m[34m|[0m /* 8.423 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.424 */            body: handshakeCryptoMatchesRfcVectorAndReturnsCanonicalFreshKeyShapeTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.425 */            )[0m
+    [36m| [0m[34m|[0m /* 8.426 */            )[0m
+    [36m| [0m[34m|[0m /* 8.427 */            [0m
+    [36m| [0m[34m|[0m /* 8.428 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.429 */        [0m
+    [36m| [0m[34m|[0m /* 8.430 */        [0m
+    [36m| [0m[34m|[0m /* 8.431 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.432 */            [0m
+    [36m| [0m[34m|[0m /* 8.433 */            let framePayloadIsOwnedAndCloseInputIsStrictTestFunc = { => framePayloadIsOwnedAndCloseInputIsStrict();() }[0m
+    [36m| [0m[34m|[0m /* 8.434 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.435 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.436 */            "framePayloadIsOwnedAndCloseInputIsStrict",[0m
+    [36m| [0m[34m|[0m /* 8.437 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.438 */            body: framePayloadIsOwnedAndCloseInputIsStrictTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.439 */            )[0m
+    [36m| [0m[34m|[0m /* 8.440 */            )[0m
+    [36m| [0m[34m|[0m /* 8.441 */            [0m
+    [36m| [0m[34m|[0m /* 8.442 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.443 */        [0m
+    [36m| [0m[34m|[0m /* 8.444 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 8.445 */    }[0m
+    [36m| [0m[34m|[0m /* 8.446 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 8.447 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 8.448 */    }[0m
+    [36m| [0m[34m|[0m /* 8.449 */}[0m
+    [36m| [0m[34m|[0m /* 8.450 */[0m
+    [36m| [0m[34m|[0m /* 8.451 */[0m
+    [36m| [0m[34m|[0m /* 8.452 */interface TestPackageExtension_WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m /* 8.453 */    func registerWebSocketConnectionTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 8.454 */}[0m
+    [36m| [0m[34m|[0m /* 8.455 */extend TestPackage <: TestPackageExtension_WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m /* 8.456 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 8.457 */    public func registerWebSocketConnectionTest() {[0m
+    [36m| [0m[34m|[0m /* 8.458 */        registerSuite({ => WebSocketConnectionTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 8.459 */    }[0m
+    [36m| [0m[34m|[0m /* 8.460 */}[0m
+    [36m| [0m[34m|[0m /* 8.461 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.48 */                    if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.49 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.50 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.51 */                    if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.52 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.53 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 7.62 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 7.63 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 7.64 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 7.1 */@Attribute[TEST_GENERATED] class MultipartTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 7.2 */    @Attribute[TestCase_71][0m
+    [36m| [0m[34m|[0m /* 7.3 */    func writerStreamsExactBinaryFramingAndReplaysIndependently(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.4 */        let writer = MultipartWriter("wirestack-boundary").add(MultipartPart("text", "value".toArray(), contentType: "text/plain")).add(MultipartPart("file",[0u8, 255u8, 13u8, 10u8, 1u8], filename: Some("bytes.bin")))[0m
+    [36m| [0m[34m|[0m /* 7.5 */        let body = writer.body(maximumBytes: 4096)[0m
+    [36m| [0m[34m|[0m /* 7.6 */        expectEqual("body.replayability", "BodyReplayability.Replayable", body.replayability, BodyReplayability.Replayable, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.7 */        let first = readMultipartStream(body.open(), 3)[0m
+    [36m| [0m[34m|[0m /* 7.8 */        let second = readMultipartStream(body.open(), 7)[0m
+    [36m| [0m[34m|[0m /* 7.9 */        expectEqual("first", "second", first, second, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.10 */        expectEqual("first", "joinMultipartBytes([\"--wirestack-boundary\\r\\n\".toArray(), \"Content-Disposition: form-data; name=\\\"text\\\"\\r\\n\".toArray(), \"Content-Type: text/plain\\r\\n\\r\\n\".toArray(), \"value\\r\\n\".toArray(), \"--wirestack-boundary\\r\\n\".toArray(), \"Content-Disposition: form-data; name=\\\"file\\\"; filename=\\\"bytes.bin\\\"\\r\\n\".toArray(), \"Content-Type: application/octet-stream\\r\\n\\r\\n\".toArray(),[0u8, 255u8, 13u8, 10u8, 1u8], \"\\r\\n--wirestack-boundary--\\r\\n\".toArray()])", first, joinMultipartBytes(["--wirestack-boundary\r\n".toArray(), "Content-Disposition: form-data; name=\"text\"\r\n".toArray(), "Content-Type: text/plain\r\n\r\n".toArray(), "value\r\n".toArray(), "--wirestack-boundary\r\n".toArray(), "Content-Disposition: form-data; name=\"file\"; filename=\"bytes.bin\"\r\n".toArray(), "Content-Type: application/octet-stream\r\n\r\n".toArray(),[0u8, 255u8, 13u8, 10u8, 1u8], "\r\n--wirestack-boundary--\r\n".toArray()]), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.11 */    }[0m
+    [36m| [0m[34m|[0m /* 7.12 */    [0m
+    [36m| [0m[34m|[0m /* 7.13 */    @Attribute[TestCase_72][0m
+    [36m| [0m[34m|[0m /* 7.14 */    func boundarySeparatorsRoundtripThroughContentTypeAndBody(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.15 */        let writer = MultipartWriter("upload:part/with=separators?").add(MultipartPart("field", "value".toArray()))[0m
+    [36m| [0m[34m|[0m /* 7.16 */        expectEqual("writer.contentType()", "\"multipart/form-data; boundary=\\\"upload:part/with=separators?\\\"\"", writer.contentType(), "multipart/form-data; boundary=\"upload:part/with=separators?\"", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.17 */        let reader = MultipartReader(ResponseBody(writer.body().open()), boundaryFromMultipartContentType(writer.contentType()))[0m
+    [36m| [0m[34m|[0m /* 7.18 */        try {[0m
+    [36m| [0m[34m|[0m /* 7.19 */            let part = reader.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.20 */            expectEqual("readMultipartStream(part.body, 3)", "\"value\".toArray()", readMultipartStream(part.body, 3), "value".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.21 */            part.close()[0m
+    [36m| [0m[34m|[0m /* 7.22 */            expectEqual("reader.next().isNone()", "true", reader.next().isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.23 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 7.24 */            reader.close()[0m
+    [36m| [0m[34m|[0m /* 7.25 */        }[0m
+    [36m| [0m[34m|[0m /* 7.26 */    }[0m
+    [36m| [0m[34m|[0m /* 7.27 */    [0m
+    [36m| [0m[34m|[0m /* 7.28 */    @Attribute[TestCase_73][0m
+    [36m| [0m[34m|[0m /* 7.29 */    func readerPreservesBinaryWhenEveryDelimiterIsSplitAcrossReads(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.30 */        let encoded = joinMultipartBytes(["--b123\r\n".toArray(), "Content-Disposition: form-data; name=\"first\"\r\n\r\n".toArray(),[0u8, 1u8, 13u8, 10u8], "--b123X".toArray(),[255u8], "\r\n--b123\r\n".toArray(), "Content-Disposition: form-data; name=\"second\"; filename=\"x.bin\"\r\n".toArray(), "Content-Type: application/octet-stream\r\n\r\n".toArray(),[9u8, 8u8, 7u8], "\r\n--b123--\r\n".toArray()])[0m
+    [36m| [0m[34m|[0m /* 7.31 */        let response = ResponseBody(SplitMultipartStream(encoded, 1))[0m
+    [36m| [0m[34m|[0m /* 7.32 */        let reader = MultipartReader(response, "b123", limits: MultipartLimits(maximumPartBytes: 1024, maximumBodyBytes: 4096, readBufferBytes: 4))[0m
+    [36m| [0m[34m|[0m /* 7.33 */        let first = reader.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.34 */        expectEqual("first.name", "\"first\"", first.name, "first", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.35 */        expectEqual("first.filename.isNone()", "true", first.filename.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.36 */        expectEqual("readMultipartStream(first.body, 2)", "joinMultipartBytes([[0u8, 1u8, 13u8, 10u8], \"--b123X\".toArray(),[255u8]])", readMultipartStream(first.body, 2), joinMultipartBytes([[0u8, 1u8, 13u8, 10u8], "--b123X".toArray(),[255u8]]), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.37 */        first.close()[0m
+    [36m| [0m[34m|[0m /* 7.38 */        let second = reader.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.39 */        expectEqual("second.name", "\"second\"", second.name, "second", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.40 */        expectEqual("second.filename", "Some(\"x.bin\")", second.filename, Some("x.bin"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.41 */        expectEqual("readMultipartStream(second.body, 2)", "[9u8, 8u8, 7u8]", readMultipartStream(second.body, 2),[9u8, 8u8, 7u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.42 */        second.close()[0m
+    [36m| [0m[34m|[0m /* 7.43 */        expectEqual("reader.next().isNone()", "true", reader.next().isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.44 */        expectEqual("reader.isClosed()", "true", reader.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.45 */    }[0m
+    [36m| [0m[34m|[0m /* 7.46 */    [0m
+    [36m| [0m[34m|[0m /* 7.47 */    @Attribute[TestCase_74][0m
+    [36m| [0m[34m|[0m /* 7.48 */    func closingPartDiscardsOnlyThatPartAndReleasesNextPart(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.49 */        let encoded = MultipartWriter("discard-boundary").add(MultipartPart("discard", Array < Byte >(257, { index =>[0m
+    [36m| [0m[34m|[0m /* 7.50 */            UInt8(index % 251)[0m
+    [36m| [0m[34m|[0m /* 7.51 */        }))).add(MultipartPart("keep", "kept".toArray())).body(maximumBytes: 4096)[0m
+    [36m| [0m[34m|[0m /* 7.52 */        let reader = MultipartReader(ResponseBody(encoded.open()), "discard-boundary", limits: MultipartLimits(maximumPartBytes: 1024, maximumBodyBytes: 4096, readBufferBytes: 8))[0m
+    [36m| [0m[34m|[0m /* 7.53 */        let discarded = reader.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.54 */        let prefix = Array < Byte >(3, repeat: 0u8)[0m
+    [36m| [0m[34m|[0m /* 7.55 */        expectEqual("discarded.body.read(prefix)", "3", discarded.body.read(prefix), 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.56 */        let activeError = try {[0m
+    [36m| [0m[34m|[0m /* 7.57 */            try {[0m
+    [36m| [0m[34m|[0m /* 7.58 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 7.59 */                reader.next()[0m
+    [36m| [0m[34m|[0m /* 7.60 */                fail("@AssertThrows: Expected 'MultipartException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 7.61 */            } catch(e: MultipartException) {[0m
+    [36m| [0m[34m|[0m /* 7.62 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 7.63 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.64 */                }[0m
+    [36m| [0m[34m|[0m /* 7.65 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 7.66 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.67 */                }[0m
+    [36m| [0m[34m|[0m /* 7.68 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.69 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.70 */                }[0m
+    [36m| [0m[34m|[0m /* 7.71 */                e[0m
+    [36m| [0m[34m|[0m /* 7.72 */            }[0m
+    [36m| [0m[34m|[0m /* 7.73 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 7.74 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.75 */                throw e[0m
+    [36m| [0m[34m|[0m /* 7.76 */            }[0m
+    [36m| [0m[34m|[0m /* 7.77 */            assertCaughtUnexpectedE("@AssertThrows(MultipartException)", "MultipartException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 7.78 */        }[0m
+    [36m| [0m[34m|[0m /* 7.79 */        [0m
+    [36m| [0m[34m|[0m /* 7.80 */        expectEqual("activeError.code", "MultipartErrorCode.ActivePart", activeError.code, MultipartErrorCode.ActivePart, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.81 */        discarded.close()[0m
+    [36m| [0m[34m|[0m /* 7.82 */        let kept = reader.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.83 */        expectEqual("readMultipartStream(kept.body, 1)", "\"kept\".toArray()", readMultipartStream(kept.body, 1), "kept".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.84 */        kept.close()[0m
+    [36m| [0m[34m|[0m /* 7.85 */        expectEqual("reader.next().isNone()", "true", reader.next().isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.86 */    }[0m
+    [36m| [0m[34m|[0m /* 7.87 */    [0m
+    [36m| [0m[34m|[0m /* 7.88 */    @Attribute[TestCase_75][0m
+    [36m| [0m[34m|[0m /* 7.89 */    func malformedAndConfiguredLimitsCloseOwnedSource(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.90 */        let malformedResponse = ResponseBody(SplitMultipartStream("--bad\r\nContent-Disposition: form-data; name=\"x\"\r\n\r\npayload".toArray(), 2))[0m
+    [36m| [0m[34m|[0m /* 7.91 */        let malformed = MultipartReader(malformedResponse, "bad", limits: MultipartLimits(maximumPartBytes: 64, maximumBodyBytes: 256, readBufferBytes: 4))[0m
+    [36m| [0m[34m|[0m /* 7.92 */        let part = malformed.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.93 */        try {[0m
+    [36m| [0m[34m|[0m /* 7.94 */            try {[0m
+    [36m| [0m[34m|[0m /* 7.95 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 7.96 */                readMultipartStream(part.body, 3)[0m
+    [36m| [0m[34m|[0m /* 7.97 */                fail("@AssertThrows: Expected 'MultipartException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 7.98 */            } catch(e: MultipartException) {[0m
+    [36m| [0m[34m|[0m /* 7.99 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 7.100 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.101 */                }[0m
+    [36m| [0m[34m|[0m /* 7.102 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 7.103 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.104 */                }[0m
+    [36m| [0m[34m|[0m /* 7.105 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.106 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.107 */                }[0m
+    [36m| [0m[34m|[0m /* 7.108 */                e[0m
+    [36m| [0m[34m|[0m /* 7.109 */            }[0m
+    [36m| [0m[34m|[0m /* 7.110 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 7.111 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.112 */                throw e[0m
+    [36m| [0m[34m|[0m /* 7.113 */            }[0m
+    [36m| [0m[34m|[0m /* 7.114 */            assertCaughtUnexpectedE("@AssertThrows(MultipartException)", "MultipartException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 7.115 */        }[0m
+    [36m| [0m[34m|[0m /* 7.116 */        expectEqual("malformedResponse.isClosed()", "true", malformedResponse.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.117 */        let oversizedResponse = ResponseBody(SplitMultipartStream(Array < Byte >(65, repeat: 1u8), 4))[0m
+    [36m| [0m[34m|[0m /* 7.118 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 7.119 */            try {[0m
+    [36m| [0m[34m|[0m /* 7.120 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 7.121 */                MultipartReader(oversizedResponse, "b", limits: MultipartLimits(maximumPartBytes: 32, maximumBodyBytes: 64, readBufferBytes: 4))[0m
+    [36m| [0m[34m|[0m /* 7.122 */                fail("@AssertThrows: Expected 'MultipartException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 7.123 */            } catch(e: MultipartException) {[0m
+    [36m| [0m[34m|[0m /* 7.124 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 7.125 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.126 */                }[0m
+    [36m| [0m[34m|[0m /* 7.127 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 7.128 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.129 */                }[0m
+    [36m| [0m[34m|[0m /* 7.130 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.131 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.132 */                }[0m
+    [36m| [0m[34m|[0m /* 7.133 */                e[0m
+    [36m| [0m[34m|[0m /* 7.134 */            }[0m
+    [36m| [0m[34m|[0m /* 7.135 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 7.136 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.137 */                throw e[0m
+    [36m| [0m[34m|[0m /* 7.138 */            }[0m
+    [36m| [0m[34m|[0m /* 7.139 */            assertCaughtUnexpectedE("@AssertThrows(MultipartException)", "MultipartException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 7.140 */        }[0m
+    [36m| [0m[34m|[0m /* 7.141 */        [0m
+    [36m| [0m[34m|[0m /* 7.142 */        expectEqual("error.code", "MultipartErrorCode.BodyBytesLimitExceeded", error.code, MultipartErrorCode.BodyBytesLimitExceeded, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.143 */        expectEqual("oversizedResponse.isClosed()", "true", oversizedResponse.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.144 */    }[0m
+    [36m| [0m[34m|[0m /* 7.145 */    [0m
+    [36m| [0m[34m|[0m /* 7.146 */    @Attribute[TestCase_76][0m
+    [36m| [0m[34m|[0m /* 7.147 */    func partCountLimitRejectsBeforeParsingUnboundedAdditionalMetadata(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.148 */        let body = MultipartWriter("count-boundary").add(MultipartPart("one", "1".toArray())).add(MultipartPart("two", "2".toArray())).body(maximumBytes: 4096)[0m
+    [36m| [0m[34m|[0m /* 7.149 */        let reader = MultipartReader(ResponseBody(body.open()), "count-boundary", limits: MultipartLimits(maximumParts: 1, maximumPartBytes: 64, maximumBodyBytes: 4096, readBufferBytes: 4))[0m
+    [36m| [0m[34m|[0m /* 7.150 */        let first = reader.next().getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 7.151 */        expectEqual("readMultipartStream(first.body, 1)", "\"1\".toArray()", readMultipartStream(first.body, 1), "1".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.152 */        first.close()[0m
+    [36m| [0m[34m|[0m /* 7.153 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 7.154 */            try {[0m
+    [36m| [0m[34m|[0m /* 7.155 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 7.156 */                reader.next()[0m
+    [36m| [0m[34m|[0m /* 7.157 */                fail("@AssertThrows: Expected 'MultipartException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 7.158 */            } catch(e: MultipartException) {[0m
+    [36m| [0m[34m|[0m /* 7.159 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 7.160 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.161 */                }[0m
+    [36m| [0m[34m|[0m /* 7.162 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 7.163 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.164 */                }[0m
+    [36m| [0m[34m|[0m /* 7.165 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.166 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 7.167 */                }[0m
+    [36m| [0m[34m|[0m /* 7.168 */                e[0m
+    [36m| [0m[34m|[0m /* 7.169 */            }[0m
+    [36m| [0m[34m|[0m /* 7.170 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 7.171 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.172 */                throw e[0m
+    [36m| [0m[34m|[0m /* 7.173 */            }[0m
+    [36m| [0m[34m|[0m /* 7.174 */            assertCaughtUnexpectedE("@AssertThrows(MultipartException)", "MultipartException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 7.175 */        }[0m
+    [36m| [0m[34m|[0m /* 7.176 */        [0m
+    [36m| [0m[34m|[0m /* 7.177 */        expectEqual("error.code", "MultipartErrorCode.PartLimitExceeded", error.code, MultipartErrorCode.PartLimitExceeded, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.178 */        expectEqual("reader.isClosed()", "true", reader.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.179 */    }[0m
+    [36m| [0m[34m|[0m /* 7.180 */    [0m
+    [36m| [0m[34m|[0m /* 7.181 */    init() {[0m
+    [36m| [0m[34m|[0m /* 7.182 */    }[0m
+    [36m| [0m[34m|[0m /* 7.183 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 7.184 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.185 */        [0m
+    [36m| [0m[34m|[0m /* 7.186 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 7.187 */    }[0m
+    [36m| [0m[34m|[0m /* 7.188 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 7.189 */        [0m
+    [36m| [0m[34m|[0m /* 7.190 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 7.191 */        let suiteBuilder = TestSuite.builder("MultipartTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 7.192 */        [0m
+    [36m| [0m[34m|[0m /* 7.193 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.194 */            [0m
+    [36m| [0m[34m|[0m /* 7.195 */            let writerStreamsExactBinaryFramingAndReplaysIndependentlyTestFunc = { => writerStreamsExactBinaryFramingAndReplaysIndependently();() }[0m
+    [36m| [0m[34m|[0m /* 7.196 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.197 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.198 */            "writerStreamsExactBinaryFramingAndReplaysIndependently",[0m
+    [36m| [0m[34m|[0m /* 7.199 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.200 */            body: writerStreamsExactBinaryFramingAndReplaysIndependentlyTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.201 */            )[0m
+    [36m| [0m[34m|[0m /* 7.202 */            )[0m
+    [36m| [0m[34m|[0m /* 7.203 */            [0m
+    [36m| [0m[34m|[0m /* 7.204 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.205 */        [0m
+    [36m| [0m[34m|[0m /* 7.206 */        [0m
+    [36m| [0m[34m|[0m /* 7.207 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.208 */            [0m
+    [36m| [0m[34m|[0m /* 7.209 */            let boundarySeparatorsRoundtripThroughContentTypeAndBodyTestFunc = { => boundarySeparatorsRoundtripThroughContentTypeAndBody();() }[0m
+    [36m| [0m[34m|[0m /* 7.210 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.211 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.212 */            "boundarySeparatorsRoundtripThroughContentTypeAndBody",[0m
+    [36m| [0m[34m|[0m /* 7.213 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.214 */            body: boundarySeparatorsRoundtripThroughContentTypeAndBodyTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.215 */            )[0m
+    [36m| [0m[34m|[0m /* 7.216 */            )[0m
+    [36m| [0m[34m|[0m /* 7.217 */            [0m
+    [36m| [0m[34m|[0m /* 7.218 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.219 */        [0m
+    [36m| [0m[34m|[0m /* 7.220 */        [0m
+    [36m| [0m[34m|[0m /* 7.221 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.222 */            [0m
+    [36m| [0m[34m|[0m /* 7.223 */            let readerPreservesBinaryWhenEveryDelimiterIsSplitAcrossReadsTestFunc = { => readerPreservesBinaryWhenEveryDelimiterIsSplitAcrossReads();() }[0m
+    [36m| [0m[34m|[0m /* 7.224 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.225 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.226 */            "readerPreservesBinaryWhenEveryDelimiterIsSplitAcrossReads",[0m
+    [36m| [0m[34m|[0m /* 7.227 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.228 */            body: readerPreservesBinaryWhenEveryDelimiterIsSplitAcrossReadsTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.229 */            )[0m
+    [36m| [0m[34m|[0m /* 7.230 */            )[0m
+    [36m| [0m[34m|[0m /* 7.231 */            [0m
+    [36m| [0m[34m|[0m /* 7.232 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.233 */        [0m
+    [36m| [0m[34m|[0m /* 7.234 */        [0m
+    [36m| [0m[34m|[0m /* 7.235 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.236 */            [0m
+    [36m| [0m[34m|[0m /* 7.237 */            let closingPartDiscardsOnlyThatPartAndReleasesNextPartTestFunc = { => closingPartDiscardsOnlyThatPartAndReleasesNextPart();() }[0m
+    [36m| [0m[34m|[0m /* 7.238 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.239 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.240 */            "closingPartDiscardsOnlyThatPartAndReleasesNextPart",[0m
+    [36m| [0m[34m|[0m /* 7.241 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.242 */            body: closingPartDiscardsOnlyThatPartAndReleasesNextPartTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.243 */            )[0m
+    [36m| [0m[34m|[0m /* 7.244 */            )[0m
+    [36m| [0m[34m|[0m /* 7.245 */            [0m
+    [36m| [0m[34m|[0m /* 7.246 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.247 */        [0m
+    [36m| [0m[34m|[0m /* 7.248 */        [0m
+    [36m| [0m[34m|[0m /* 7.249 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.250 */            [0m
+    [36m| [0m[34m|[0m /* 7.251 */            let malformedAndConfiguredLimitsCloseOwnedSourceTestFunc = { => malformedAndConfiguredLimitsCloseOwnedSource();() }[0m
+    [36m| [0m[34m|[0m /* 7.252 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.253 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.254 */            "malformedAndConfiguredLimitsCloseOwnedSource",[0m
+    [36m| [0m[34m|[0m /* 7.255 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.256 */            body: malformedAndConfiguredLimitsCloseOwnedSourceTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.257 */            )[0m
+    [36m| [0m[34m|[0m /* 7.258 */            )[0m
+    [36m| [0m[34m|[0m /* 7.259 */            [0m
+    [36m| [0m[34m|[0m /* 7.260 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.261 */        [0m
+    [36m| [0m[34m|[0m /* 7.262 */        [0m
+    [36m| [0m[34m|[0m /* 7.263 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.264 */            [0m
+    [36m| [0m[34m|[0m /* 7.265 */            let partCountLimitRejectsBeforeParsingUnboundedAdditionalMetadataTestFunc = { => partCountLimitRejectsBeforeParsingUnboundedAdditionalMetadata();() }[0m
+    [36m| [0m[34m|[0m /* 7.266 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.267 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.268 */            "partCountLimitRejectsBeforeParsingUnboundedAdditionalMetadata",[0m
+    [36m| [0m[34m|[0m /* 7.269 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.270 */            body: partCountLimitRejectsBeforeParsingUnboundedAdditionalMetadataTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.271 */            )[0m
+    [36m| [0m[34m|[0m /* 7.272 */            )[0m
+    [36m| [0m[34m|[0m /* 7.273 */            [0m
+    [36m| [0m[34m|[0m /* 7.274 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.275 */        [0m
+    [36m| [0m[34m|[0m /* 7.276 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 7.277 */    }[0m
+    [36m| [0m[34m|[0m /* 7.278 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 7.279 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 7.280 */    }[0m
+    [36m| [0m[34m|[0m /* 7.281 */}[0m
+    [36m| [0m[34m|[0m /* 7.282 */[0m
+    [36m| [0m[34m|[0m /* 7.283 */[0m
+    [36m| [0m[34m|[0m /* 7.284 */interface TestPackageExtension_MultipartTest {[0m
+    [36m| [0m[34m|[0m /* 7.285 */    func registerMultipartTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 7.286 */}[0m
+    [36m| [0m[34m|[0m /* 7.287 */extend TestPackage <: TestPackageExtension_MultipartTest {[0m
+    [36m| [0m[34m|[0m /* 7.288 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 7.289 */    public func registerMultipartTest() {[0m
+    [36m| [0m[34m|[0m /* 7.290 */        registerSuite({ => MultipartTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 7.291 */    }[0m
+    [36m| [0m[34m|[0m /* 7.292 */}[0m
+    [36m| [0m[34m|[0m /* 7.293 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 7.65 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 7.66 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 7.67 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 7.68 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 7.69 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 7.70 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused variable:'context'
+  [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_handshake_test.cj:87:52:
+   [36m| [0m
+[36m87[0m [36m| [0m    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {[0m
+   [36m| [0m                                                   [33m^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 8.86 */                None < IllegalArgumentException >[0m
+   [36m| [0m                          [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 8.1 */@Attribute[TEST_GENERATED] class HttpCookieJarTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 8.2 */    @Attribute[TestCase_15][0m
+    [36m| [0m[34m|[0m /* 8.3 */    func cookieSerializesStandardMetadataWithoutInventingBrowserPolicy(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.4 */        let cookie = Cookie("session", "abc_123", expires: Some(DateTime.ofUTC(year: 2021, month: 6, dayOfMonth: 9, hour: 10, minute: 18, second: 14)), maxAge: Some(60), domain: ".Example.COM", path: "/account", secure: true, httpOnly: true)[0m
+    [36m| [0m[34m|[0m /* 8.5 */        expectEqual("cookie.cookieName", "\"session\"", cookie.cookieName, "session", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.6 */        expectEqual("cookie.cookieValue", "\"abc_123\"", cookie.cookieValue, "abc_123", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.7 */        expectEqual("cookie.domain", "\"example.com\"", cookie.domain, "example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.8 */        expectEqual("cookie.toSetCookieString()", "\"session=abc_123; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=60; \" + \"Domain=example.com; Path=/account; Secure; HttpOnly\"", cookie.toSetCookieString(), "session=abc_123; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=60; " + "Domain=example.com; Path=/account; Secure; HttpOnly", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.9 */    }[0m
+    [36m| [0m[34m|[0m /* 8.10 */    [0m
+    [36m| [0m[34m|[0m /* 8.11 */    @Attribute[TestCase_16][0m
+    [36m| [0m[34m|[0m /* 8.12 */    func hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.13 */        let jar = CookieJar(rejectPublicSuffixes:["com", "co.uk"])[0m
+    [36m| [0m[34m|[0m /* 8.14 */        let origin = HttpUrl.parse("https://app.example.com/account/login")[0m
+    [36m| [0m[34m|[0m /* 8.15 */        expectEqual("jar.acceptSetCookie(\"host=one; Path=/\", origin)", "true", jar.acceptSetCookie("host=one; Path=/", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.16 */        expectEqual("jar.acceptSetCookie(\"domain=two; Domain=.example.com; Path=/\", origin)", "true", jar.acceptSetCookie("domain=two; Domain=.example.com; Path=/", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.17 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://app.example.com/\"))", "\"host=one; domain=two\"", jar.headerFor(HttpUrl.parse("https://app.example.com/")), "host=one; domain=two", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.18 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://deep.app.example.com/\"))", "\"domain=two\"", jar.headerFor(HttpUrl.parse("https://deep.app.example.com/")), "domain=two", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.19 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://example.com/\"))", "\"domain=two\"", jar.headerFor(HttpUrl.parse("https://example.com/")), "domain=two", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.20 */        expectEqual("jar.cookiesFor(HttpUrl.parse(\"https://deep.app.example.com/\")).size", "1", jar.cookiesFor(HttpUrl.parse("https://deep.app.example.com/")).size, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.21 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://notexample.com/\"))", "\"\"", jar.headerFor(HttpUrl.parse("https://notexample.com/")), "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.22 */        expectEqual("! jar.acceptSetCookie(\"foreign=x; Domain=evil.test; Path=/\", origin)", "true", ! jar.acceptSetCookie("foreign=x; Domain=evil.test; Path=/", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.23 */        expectEqual("! jar.acceptSetCookie(\"suffix=x; Domain=com; Path=/\", origin)", "true", ! jar.acceptSetCookie("suffix=x; Domain=com; Path=/", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.24 */        expectEqual("jar.snapshot().size", "2", jar.snapshot().size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.25 */    }[0m
+    [36m| [0m[34m|[0m /* 8.26 */    [0m
+    [36m| [0m[34m|[0m /* 8.27 */    @Attribute[TestCase_17][0m
+    [36m| [0m[34m|[0m /* 8.28 */    func defaultPathAndPathMatchUseDirectoryAndSlashBoundaries(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.29 */        let jar = CookieJar()[0m
+    [36m| [0m[34m|[0m /* 8.30 */        let origin = HttpUrl.parse("https://example.test/docs/Web/index.html?source=cookie")[0m
+    [36m| [0m[34m|[0m /* 8.31 */        expectEqual("jar.acceptSetCookie(\"defaulted=yes\", origin)", "true", jar.acceptSetCookie("defaulted=yes", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.32 */        expectEqual("jar.acceptSetCookie(\"root=yes; Path=/\", origin)", "true", jar.acceptSetCookie("root=yes; Path=/", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.33 */        expectEqual("jar.acceptSetCookie(\"exact=yes; Path=/docs/Web/index.html\", origin)", "true", jar.acceptSetCookie("exact=yes; Path=/docs/Web/index.html", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.34 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://example.test/docs/Web/next\"))", "\"defaulted=yes; root=yes\"", jar.headerFor(HttpUrl.parse("https://example.test/docs/Web/next")), "defaulted=yes; root=yes", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.35 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://example.test/docs/Webish/next\"))", "\"root=yes\"", jar.headerFor(HttpUrl.parse("https://example.test/docs/Webish/next")), "root=yes", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.36 */        expectEqual("jar.headerFor(HttpUrl.parse(\"https://example.test/docs/Web/index.html\"))", "\"exact=yes; defaulted=yes; root=yes\"", jar.headerFor(HttpUrl.parse("https://example.test/docs/Web/index.html")), "exact=yes; defaulted=yes; root=yes", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.37 */    }[0m
+    [36m| [0m[34m|[0m /* 8.38 */    [0m
+    [36m| [0m[34m|[0m /* 8.39 */    @Attribute[TestCase_18][0m
+    [36m| [0m[34m|[0m /* 8.40 */    func maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.41 */        let jar = CookieJar()[0m
+    [36m| [0m[34m|[0m /* 8.42 */        let url = HttpUrl.parse("https://example.test/")[0m
+    [36m| [0m[34m|[0m /* 8.43 */        expectEqual("jar.acceptSetCookie(\"life=alive; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=60; Path=/\", url)", "true", jar.acceptSetCookie("life=alive; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=60; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.44 */        expectEqual("jar.headerFor(url)", "\"life=alive\"", jar.headerFor(url), "life=alive", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.45 */        expectEqual("jar.acceptSetCookie(\"life=gone; Expires=Wed, 09 Jun 2038 10:18:14 GMT; Max-Age=0; Path=/\", url)", "true", jar.acceptSetCookie("life=gone; Expires=Wed, 09 Jun 2038 10:18:14 GMT; Max-Age=0; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.46 */        expectEqual("jar.headerFor(url)", "\"\"", jar.headerFor(url), "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.47 */        expectEqual("jar.acceptSetCookie(\"expired=value; Path=/\", url)", "true", jar.acceptSetCookie("expired=value; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.48 */        expectEqual("jar.acceptSetCookie(\"expired=value; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Path=/\", url)", "true", jar.acceptSetCookie("expired=value; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.49 */        expectEqual("jar.headerFor(url)", "\"\"", jar.headerFor(url), "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.50 */    }[0m
+    [36m| [0m[34m|[0m /* 8.51 */    [0m
+    [36m| [0m[34m|[0m /* 8.52 */    @Attribute[TestCase_19][0m
+    [36m| [0m[34m|[0m /* 8.53 */    func secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.54 */        let jar = CookieJar()[0m
+    [36m| [0m[34m|[0m /* 8.55 */        let secureUrl = HttpUrl.parse("https://example.test/")[0m
+    [36m| [0m[34m|[0m /* 8.56 */        expectEqual("jar.acceptSetCookie(\"secret=x; Secure; HttpOnly; Path=/\", secureUrl)", "true", jar.acceptSetCookie("secret=x; Secure; HttpOnly; Path=/", secureUrl), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.57 */        expectEqual("jar.headerFor(secureUrl)", "\"secret=x\"", jar.headerFor(secureUrl), "secret=x", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.58 */        expectEqual("jar.headerFor(HttpUrl.parse(\"http://example.test/\"))", "\"\"", jar.headerFor(HttpUrl.parse("http://example.test/")), "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.59 */        let snapshot = jar.snapshot()[0m
+    [36m| [0m[34m|[0m /* 8.60 */        expectEqual("snapshot[0].secure", "true", snapshot[0].secure, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.61 */        expectEqual("snapshot[0].httpOnly", "true", snapshot[0].httpOnly, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.62 */    }[0m
+    [36m| [0m[34m|[0m /* 8.63 */    [0m
+    [36m| [0m[34m|[0m /* 8.64 */    @Attribute[TestCase_20][0m
+    [36m| [0m[34m|[0m /* 8.65 */    func valuedSecureAttributeCannotLeakCookiesToCleartext(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.66 */        let jar = CookieJar()[0m
+    [36m| [0m[34m|[0m /* 8.67 */        let origin = HttpUrl.parse("https://example.test/")[0m
+    [36m| [0m[34m|[0m /* 8.68 */        expectEqual("jar.acceptSetCookie(\"secret=x; Secure=1; HttpOnly=; Path=/\", origin)", "true", jar.acceptSetCookie("secret=x; Secure=1; HttpOnly=; Path=/", origin), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.69 */        expectEqual("jar.headerFor(origin)", "\"secret=x\"", jar.headerFor(origin), "secret=x", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.70 */        expectEqual("jar.headerFor(HttpUrl.parse(\"http://example.test/\"))", "\"\"", jar.headerFor(HttpUrl.parse("http://example.test/")), "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.71 */        expectEqual("jar.snapshot()[0].httpOnly", "true", jar.snapshot()[0].httpOnly, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.72 */    }[0m
+    [36m| [0m[34m|[0m /* 8.73 */    [0m
+    [36m| [0m[34m|[0m /* 8.74 */    @Attribute[TestCase_21][0m
+    [36m| [0m[34m|[0m /* 8.75 */    func rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.76 */        let jar = CookieJar()[0m
+    [36m| [0m[34m|[0m /* 8.77 */        let url = HttpUrl.parse("https://example.test/")[0m
+    [36m| [0m[34m|[0m /* 8.78 */        for(value in["safe=x\r\nX-Evil: yes", "bad name=value", "bad=value with space", "bad=quoted; Path=/\u{007f}"]) {[0m
+    [36m| [0m[34m|[0m /* 8.79 */            expectEqual("! jar.acceptSetCookie(value, url)", "true", ! jar.acceptSetCookie(value, url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.80 */        }[0m
+    [36m| [0m[34m|[0m /* 8.81 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.82 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.83 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.84 */                Cookie("bad=name", "value")[0m
+    [36m| [0m[34m|[0m /* 8.85 */                failExpect("@ExpectThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.86 */                None < IllegalArgumentException >[0m
+    [36m| [0m[34m|[0m /* 8.87 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 8.88 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.89 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.90 */                }[0m
+    [36m| [0m[34m|[0m /* 8.91 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.92 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.93 */                }[0m
+    [36m| [0m[34m|[0m /* 8.94 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.95 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.96 */                }[0m
+    [36m| [0m[34m|[0m /* 8.97 */                e[0m
+    [36m| [0m[34m|[0m /* 8.98 */            }[0m
+    [36m| [0m[34m|[0m /* 8.99 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.100 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.101 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.102 */            }[0m
+    [36m| [0m[34m|[0m /* 8.103 */            expectCaughtUnexpectedE("@ExpectThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.104 */            None < IllegalArgumentException >[0m
+    [36m| [0m[34m|[0m /* 8.105 */        }[0m
+    [36m| [0m[34m|[0m /* 8.106 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.107 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.108 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.109 */                Cookie("name", "line\nfeed")[0m
+    [36m| [0m[34m|[0m /* 8.110 */                failExpect("@ExpectThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.111 */                None < IllegalArgumentException >[0m
+    [36m| [0m[34m|[0m /* 8.112 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 8.113 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.114 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.115 */                }[0m
+    [36m| [0m[34m|[0m /* 8.116 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.117 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.118 */                }[0m
+    [36m| [0m[34m|[0m /* 8.119 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.120 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.121 */                }[0m
+    [36m| [0m[34m|[0m /* 8.122 */                e[0m
+    [36m| [0m[34m|[0m /* 8.123 */            }[0m
+    [36m| [0m[34m|[0m /* 8.124 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.125 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.126 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.127 */            }[0m
+    [36m| [0m[34m|[0m /* 8.128 */            expectCaughtUnexpectedE("@ExpectThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.129 */            None < IllegalArgumentException >[0m
+    [36m| [0m[34m|[0m /* 8.130 */        }[0m
+    [36m| [0m[34m|[0m /* 8.131 */        expectEqual("jar.snapshot().isEmpty()", "true", jar.snapshot().isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.132 */    }[0m
+    [36m| [0m[34m|[0m /* 8.133 */    [0m
+    [36m| [0m[34m|[0m /* 8.134 */    @Attribute[TestCase_22][0m
+    [36m| [0m[34m|[0m /* 8.135 */    func capacityHeaderBoundsAndReplacementRemainDeterministic(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.136 */        let url = HttpUrl.parse("https://example.test/deep/page")[0m
+    [36m| [0m[34m|[0m /* 8.137 */        let jar = CookieJar(maximumCookies: 3, maximumHeaderBytes: 18)[0m
+    [36m| [0m[34m|[0m /* 8.138 */        expectEqual("jar.acceptSetCookie(\"old=1; Path=/\", url)", "true", jar.acceptSetCookie("old=1; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.139 */        expectEqual("jar.acceptSetCookie(\"id=root; Path=/\", url)", "true", jar.acceptSetCookie("id=root; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.140 */        expectEqual("jar.acceptSetCookie(\"id=deep; Path=/deep\", url)", "true", jar.acceptSetCookie("id=deep; Path=/deep", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.141 */        expectEqual("jar.acceptSetCookie(\"new=2; Path=/\", url)", "true", jar.acceptSetCookie("new=2; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.142 */        expectEqual("jar.snapshot().size", "3", jar.snapshot().size, 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.143 */        expectEqual("jar.headerFor(url)", "\"id=deep; id=root\"", jar.headerFor(url), "id=deep; id=root", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.144 */        expectEqual("jar.acceptSetCookie(\"id=replaced; Path=/\", url)", "true", jar.acceptSetCookie("id=replaced; Path=/", url), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.145 */        expectEqual("jar.headerFor(url)", "\"id=deep\"", jar.headerFor(url), "id=deep", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.146 */        expectEqual("jar.snapshot().size", "3", jar.snapshot().size, 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.147 */    }[0m
+    [36m| [0m[34m|[0m /* 8.148 */    [0m
+    [36m| [0m[34m|[0m /* 8.149 */    @Attribute[TestCase_23][0m
+    [36m| [0m[34m|[0m /* 8.150 */    func removalClearAndSnapshotsExposeOnlyLiveImmutableCookies(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.151 */        let jar = CookieJar()[0m
+    [36m| [0m[34m|[0m /* 8.152 */        let first = HttpUrl.parse("https://one.test/")[0m
+    [36m| [0m[34m|[0m /* 8.153 */        let second = HttpUrl.parse("https://two.test/")[0m
+    [36m| [0m[34m|[0m /* 8.154 */        expectEqual("jar.acceptSetCookie(\"a=1; Path=/\", first)", "true", jar.acceptSetCookie("a=1; Path=/", first), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.155 */        expectEqual("jar.acceptSetCookie(\"b=2; Path=/\", second)", "true", jar.acceptSetCookie("b=2; Path=/", second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.156 */        let before = jar.snapshot()[0m
+    [36m| [0m[34m|[0m /* 8.157 */        expectEqual("before.size", "2", before.size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.158 */        expectEqual("jar.remove(\"a\", first)", "true", jar.remove("a", first), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.159 */        expectEqual("! jar.remove(\"a\", first)", "true", ! jar.remove("a", first), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.160 */        expectEqual("jar.headerFor(first)", "\"\"", jar.headerFor(first), "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.161 */        expectEqual("jar.headerFor(second)", "\"b=2\"", jar.headerFor(second), "b=2", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.162 */        expectEqual("jar.removeCookies(\"two.test\")", "1", jar.removeCookies("two.test"), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.163 */        expectEqual("jar.snapshot().isEmpty()", "true", jar.snapshot().isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.164 */        expectEqual("jar.acceptSetCookie(\"c=3; Path=/\", first)", "true", jar.acceptSetCookie("c=3; Path=/", first), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.165 */        jar.clear()[0m
+    [36m| [0m[34m|[0m /* 8.166 */        expectEqual("jar.snapshot().isEmpty()", "true", jar.snapshot().isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.167 */        expectEqual("before.size", "2", before.size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.168 */    }[0m
+    [36m| [0m[34m|[0m /* 8.169 */    [0m
+    [36m| [0m[34m|[0m /* 8.170 */    @Attribute[TestCase_24][0m
+    [36m| [0m[34m|[0m /* 8.171 */    func concurrentStoresAndReadsRemainRaceFreeAndBounded(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.172 */        let jar = CookieJar(maximumCookies: 64, maximumHeaderBytes: 8192)[0m
+    [36m| [0m[34m|[0m /* 8.173 */        let url = HttpUrl.parse("https://concurrent.test/")[0m
+    [36m| [0m[34m|[0m /* 8.174 */        let writers = ArrayList < Future < Bool >>()[0m
+    [36m| [0m[34m|[0m /* 8.175 */        for(index in 0 .. 32) {[0m
+    [36m| [0m[34m|[0m /* 8.176 */            let captured = index[0m
+    [36m| [0m[34m|[0m /* 8.177 */            writers.add(spawn { jar.acceptSetCookie("c${captured}=v${captured}; Path=/", url)[0m
+    [36m| [0m[34m|[0m /* 8.178 */            })[0m
+    [36m| [0m[34m|[0m /* 8.179 */        }[0m
+    [36m| [0m[34m|[0m /* 8.180 */        for(writer in writers) {[0m
+    [36m| [0m[34m|[0m /* 8.181 */            expectEqual("writer.get()", "true", writer.get(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.182 */        }[0m
+    [36m| [0m[34m|[0m /* 8.183 */        let readers = ArrayList < Future < String >>()[0m
+    [36m| [0m[34m|[0m /* 8.184 */        for(_ in 0 .. 16) {[0m
+    [36m| [0m[34m|[0m /* 8.185 */            readers.add(spawn { jar.headerFor(url)[0m
+    [36m| [0m[34m|[0m /* 8.186 */            })[0m
+    [36m| [0m[34m|[0m /* 8.187 */        }[0m
+    [36m| [0m[34m|[0m /* 8.188 */        for(reader in readers) {[0m
+    [36m| [0m[34m|[0m /* 8.189 */            let header = reader.get()[0m
+    [36m| [0m[34m|[0m /* 8.190 */            expectEqual("header.contains(\"c0=v0\")", "true", header.contains("c0=v0"), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.191 */            expectEqual("header.contains(\"c31=v31\")", "true", header.contains("c31=v31"), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.192 */        }[0m
+    [36m| [0m[34m|[0m /* 8.193 */        expectEqual("jar.snapshot().size", "32", jar.snapshot().size, 32, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.194 */    }[0m
+    [36m| [0m[34m|[0m /* 8.195 */    [0m
+    [36m| [0m[34m|[0m /* 8.196 */    init() {[0m
+    [36m| [0m[34m|[0m /* 8.197 */    }[0m
+    [36m| [0m[34m|[0m /* 8.198 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 8.199 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.200 */        [0m
+    [36m| [0m[34m|[0m /* 8.201 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 8.202 */    }[0m
+    [36m| [0m[34m|[0m /* 8.203 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 8.204 */        [0m
+    [36m| [0m[34m|[0m /* 8.205 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 8.206 */        let suiteBuilder = TestSuite.builder("HttpCookieJarTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 8.207 */        [0m
+    [36m| [0m[34m|[0m /* 8.208 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.209 */            [0m
+    [36m| [0m[34m|[0m /* 8.210 */            let cookieSerializesStandardMetadataWithoutInventingBrowserPolicyTestFunc = { => cookieSerializesStandardMetadataWithoutInventingBrowserPolicy();() }[0m
+    [36m| [0m[34m|[0m /* 8.211 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.212 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.213 */            "cookieSerializesStandardMetadataWithoutInventingBrowserPolicy",[0m
+    [36m| [0m[34m|[0m /* 8.214 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.215 */            body: cookieSerializesStandardMetadataWithoutInventingBrowserPolicyTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.216 */            )[0m
+    [36m| [0m[34m|[0m /* 8.217 */            )[0m
+    [36m| [0m[34m|[0m /* 8.218 */            [0m
+    [36m| [0m[34m|[0m /* 8.219 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.220 */        [0m
+    [36m| [0m[34m|[0m /* 8.221 */        [0m
+    [36m| [0m[34m|[0m /* 8.222 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.223 */            [0m
+    [36m| [0m[34m|[0m /* 8.224 */            let hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundariesTestFunc = { => hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries();() }[0m
+    [36m| [0m[34m|[0m /* 8.225 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.226 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.227 */            "hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries",[0m
+    [36m| [0m[34m|[0m /* 8.228 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.229 */            body: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundariesTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.230 */            )[0m
+    [36m| [0m[34m|[0m /* 8.231 */            )[0m
+    [36m| [0m[34m|[0m /* 8.232 */            [0m
+    [36m| [0m[34m|[0m /* 8.233 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.234 */        [0m
+    [36m| [0m[34m|[0m /* 8.235 */        [0m
+    [36m| [0m[34m|[0m /* 8.236 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.237 */            [0m
+    [36m| [0m[34m|[0m /* 8.238 */            let defaultPathAndPathMatchUseDirectoryAndSlashBoundariesTestFunc = { => defaultPathAndPathMatchUseDirectoryAndSlashBoundaries();() }[0m
+    [36m| [0m[34m|[0m /* 8.239 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.240 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.241 */            "defaultPathAndPathMatchUseDirectoryAndSlashBoundaries",[0m
+    [36m| [0m[34m|[0m /* 8.242 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.243 */            body: defaultPathAndPathMatchUseDirectoryAndSlashBoundariesTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.244 */            )[0m
+    [36m| [0m[34m|[0m /* 8.245 */            )[0m
+    [36m| [0m[34m|[0m /* 8.246 */            [0m
+    [36m| [0m[34m|[0m /* 8.247 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.248 */        [0m
+    [36m| [0m[34m|[0m /* 8.249 */        [0m
+    [36m| [0m[34m|[0m /* 8.250 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.251 */            [0m
+    [36m| [0m[34m|[0m /* 8.252 */            let maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentityTestFunc = { => maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity();() }[0m
+    [36m| [0m[34m|[0m /* 8.253 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.254 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.255 */            "maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity",[0m
+    [36m| [0m[34m|[0m /* 8.256 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.257 */            body: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentityTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.258 */            )[0m
+    [36m| [0m[34m|[0m /* 8.259 */            )[0m
+    [36m| [0m[34m|[0m /* 8.260 */            [0m
+    [36m| [0m[34m|[0m /* 8.261 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.262 */        [0m
+    [36m| [0m[34m|[0m /* 8.263 */        [0m
+    [36m| [0m[34m|[0m /* 8.264 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.265 */            [0m
+    [36m| [0m[34m|[0m /* 8.266 */            let secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelectionTestFunc = { => secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection();() }[0m
+    [36m| [0m[34m|[0m /* 8.267 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.268 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.269 */            "secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection",[0m
+    [36m| [0m[34m|[0m /* 8.270 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.271 */            body: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelectionTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.272 */            )[0m
+    [36m| [0m[34m|[0m /* 8.273 */            )[0m
+    [36m| [0m[34m|[0m /* 8.274 */            [0m
+    [36m| [0m[34m|[0m /* 8.275 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.276 */        [0m
+    [36m| [0m[34m|[0m /* 8.277 */        [0m
+    [36m| [0m[34m|[0m /* 8.278 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.279 */            [0m
+    [36m| [0m[34m|[0m /* 8.280 */            let valuedSecureAttributeCannotLeakCookiesToCleartextTestFunc = { => valuedSecureAttributeCannotLeakCookiesToCleartext();() }[0m
+    [36m| [0m[34m|[0m /* 8.281 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.282 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.283 */            "valuedSecureAttributeCannotLeakCookiesToCleartext",[0m
+    [36m| [0m[34m|[0m /* 8.284 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.285 */            body: valuedSecureAttributeCannotLeakCookiesToCleartextTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.286 */            )[0m
+    [36m| [0m[34m|[0m /* 8.287 */            )[0m
+    [36m| [0m[34m|[0m /* 8.288 */            [0m
+    [36m| [0m[34m|[0m /* 8.289 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.290 */        [0m
+    [36m| [0m[34m|[0m /* 8.291 */        [0m
+    [36m| [0m[34m|[0m /* 8.292 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.293 */            [0m
+    [36m| [0m[34m|[0m /* 8.294 */            let rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorageTestFunc = { => rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage();() }[0m
+    [36m| [0m[34m|[0m /* 8.295 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.296 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.297 */            "rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage",[0m
+    [36m| [0m[34m|[0m /* 8.298 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.299 */            body: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorageTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.300 */            )[0m
+    [36m| [0m[34m|[0m /* 8.301 */            )[0m
+    [36m| [0m[34m|[0m /* 8.302 */            [0m
+    [36m| [0m[34m|[0m /* 8.303 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.304 */        [0m
+    [36m| [0m[34m|[0m /* 8.305 */        [0m
+    [36m| [0m[34m|[0m /* 8.306 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.307 */            [0m
+    [36m| [0m[34m|[0m /* 8.308 */            let capacityHeaderBoundsAndReplacementRemainDeterministicTestFunc = { => capacityHeaderBoundsAndReplacementRemainDeterministic();() }[0m
+    [36m| [0m[34m|[0m /* 8.309 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.310 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.311 */            "capacityHeaderBoundsAndReplacementRemainDeterministic",[0m
+    [36m| [0m[34m|[0m /* 8.312 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.313 */            body: capacityHeaderBoundsAndReplacementRemainDeterministicTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.314 */            )[0m
+    [36m| [0m[34m|[0m /* 8.315 */            )[0m
+    [36m| [0m[34m|[0m /* 8.316 */            [0m
+    [36m| [0m[34m|[0m /* 8.317 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.318 */        [0m
+    [36m| [0m[34m|[0m /* 8.319 */        [0m
+    [36m| [0m[34m|[0m /* 8.320 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.321 */            [0m
+    [36m| [0m[34m|[0m /* 8.322 */            let removalClearAndSnapshotsExposeOnlyLiveImmutableCookiesTestFunc = { => removalClearAndSnapshotsExposeOnlyLiveImmutableCookies();() }[0m
+    [36m| [0m[34m|[0m /* 8.323 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.324 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.325 */            "removalClearAndSnapshotsExposeOnlyLiveImmutableCookies",[0m
+    [36m| [0m[34m|[0m /* 8.326 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.327 */            body: removalClearAndSnapshotsExposeOnlyLiveImmutableCookiesTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.328 */            )[0m
+    [36m| [0m[34m|[0m /* 8.329 */            )[0m
+    [36m| [0m[34m|[0m /* 8.330 */            [0m
+    [36m| [0m[34m|[0m /* 8.331 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.332 */        [0m
+    [36m| [0m[34m|[0m /* 8.333 */        [0m
+    [36m| [0m[34m|[0m /* 8.334 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.335 */            [0m
+    [36m| [0m[34m|[0m /* 8.336 */            let concurrentStoresAndReadsRemainRaceFreeAndBoundedTestFunc = { => concurrentStoresAndReadsRemainRaceFreeAndBounded();() }[0m
+    [36m| [0m[34m|[0m /* 8.337 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.338 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.339 */            "concurrentStoresAndReadsRemainRaceFreeAndBounded",[0m
+    [36m| [0m[34m|[0m /* 8.340 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.341 */            body: concurrentStoresAndReadsRemainRaceFreeAndBoundedTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.342 */            )[0m
+    [36m| [0m[34m|[0m /* 8.343 */            )[0m
+    [36m| [0m[34m|[0m /* 8.344 */            [0m
+    [36m| [0m[34m|[0m /* 8.345 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.346 */        [0m
+    [36m| [0m[34m|[0m /* 8.347 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 8.348 */    }[0m
+    [36m| [0m[34m|[0m /* 8.349 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 8.350 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 8.351 */    }[0m
+    [36m| [0m[34m|[0m /* 8.352 */}[0m
+    [36m| [0m[34m|[0m /* 8.353 */[0m
+    [36m| [0m[34m|[0m /* 8.354 */[0m
+    [36m| [0m[34m|[0m /* 8.355 */interface TestPackageExtension_HttpCookieJarTest {[0m
+    [36m| [0m[34m|[0m /* 8.356 */    func registerHttpCookieJarTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 8.357 */}[0m
+    [36m| [0m[34m|[0m /* 8.358 */extend TestPackage <: TestPackageExtension_HttpCookieJarTest {[0m
+    [36m| [0m[34m|[0m /* 8.359 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 8.360 */    public func registerHttpCookieJarTest() {[0m
+    [36m| [0m[34m|[0m /* 8.361 */        registerSuite({ => HttpCookieJarTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 8.362 */    }[0m
+    [36m| [0m[34m|[0m /* 8.363 */}[0m
+    [36m| [0m[34m|[0m /* 8.364 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m183[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.89 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.90 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.91 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.92 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.93 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.94 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.95 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.96 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.97 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.99 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.100 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.101 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.102 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.103 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.104 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 8.104 */            None < IllegalArgumentException >[0m
+    [36m| [0m                       [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m183[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.105 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.106 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.107 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 8.111 */                None < IllegalArgumentException >[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m183[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.124 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.125 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.126 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.127 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.128 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.129 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 8.129 */            None < IllegalArgumentException >[0m
+    [36m| [0m                       [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m183[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.130 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.131 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.132 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.134 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.135 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.136 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.137 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.138 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.139 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.140 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.141 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.142 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.159 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.160 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.161 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.162 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.163 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.164 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 7.165 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 7.166 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 7.167 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class MultipartTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m153[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.169 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.170 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.171 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.172 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.173 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.174 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.175 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.176 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.177 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.212 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.213 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.214 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.215 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.216 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.217 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.218 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.219 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 8.220 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-005-publication/src/http/websocket_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m218[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+32 warnings generated, 32 warnings printed.

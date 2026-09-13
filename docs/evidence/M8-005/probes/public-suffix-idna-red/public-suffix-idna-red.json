@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "FAIL",
+  "command": {
+    "id": "public-suffix-idna-red",
+    "argv": [
+      "python3",
+      "-c",
+      "from third_party.public_suffix.generate import parse_snapshot\nraw = ('// VERSION: probe\\n// COMMIT: ' + '0' * 40 + '\\nfa\u00df.test\\n').encode('utf-8')\nactual = parse_snapshot(raw)[2]\nprint({'actual': actual, 'expected': ['xn--fa-hia.test']}, flush=True)\nassert actual == ['xn--fa-hia.test']\n"
+    ],
+    "status": "FAIL",
+    "exit_code": 1,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T16:11:28.609905Z",
+    "finished_at_utc": "2026-09-13T16:11:28.673684Z",
+    "duration_ms": 63.779,
+    "stdout_path": "docs/evidence/M8-005/probes/public-suffix-idna-red/public-suffix-idna-red.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/probes/public-suffix-idna-red/public-suffix-idna-red.stderr.log",
+    "stdout_excerpt": "{'actual': ['fass.test'], 'expected': ['xn--fa-hia.test']}\n",
+    "stderr_excerpt": "Traceback (most recent call last):\n  File \"<string>\", line 5, in <module>\n    assert actual == ['xn--fa-hia.test']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5f2dee04cfaa7ac2776e43f60a318fc4c3025b7e3f366e5fbc19ee830eb38cb4"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "595719c5bcc15f04c0ad7aaa56f9b83b2d5e600c94d3ea3dbdef840288ecc7f6"
+    }
+  }
+}
