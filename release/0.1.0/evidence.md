@@ -43,11 +43,11 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Coverage | PASS (current hosted job) | latest candidate run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
 | Source-only staging | PASS (current hosted) | latest candidate run 的 `registry-rehearsal` 在 enforced source-only candidate 上通过；未把临时 rehearsal 树当作最终上传 bundle |
 | Package rehearsal | PASS (current hosted) | latest candidate run 的 `registry-rehearsal` job 通过；未把临时 rehearsal 树当作最终上传 bundle |
-| Seven-library matrix | **PASS** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，均完成 CPU 1/sibling 49 idle sample；本地 integrity 校验和 hosted strict freshness 均通过，结果页记录 0/10 stable、10/10 noisy |
-| Three-library release performance | **PASS** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；3/36 stable、33/36 noisy，完整 raw archive 和复核结果见[当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md) |
-| Pure baseline/candidate qualification | **PASS** | [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)绑定当前候选，STS `1.1.3` 下 24 case、11 轮、release gate `all_ratios_at_most_1_05=true`；noisy 只限制精确性能声明 |
+| Seven-library matrix | **BLOCKED (RSS missing)** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，CPU 1/sibling 49 idle sample、checksum、identity 和 strict freshness 均通过；但未记录每个测量进程的 peak RSS，未满足发布检查第 4 项 |
+| Three-library release performance | **BLOCKED (RSS missing)** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；3/36 stable、33/36 noisy，完整 raw archive 和复核结果见[当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md)；归档没有 peak RSS |
+| Pure baseline/candidate qualification | **BLOCKED (RSS missing)** | [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)绑定当前候选，STS `1.1.3` 下 24 case、11 轮、release timing gate `all_ratios_at_most_1_05=true`；但 runner 未采集 peak RSS，不能满足发布检查第 4 项 |
 | Native acceleration | NON-BLOCKING (claim not qualified) | 旧 Native diagnostic 为 `0/36` stable、`36/36` noisy；当前三库结果为 `3/36` stable、`33/36` noisy；两者都不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
-| Release policy | **BLOCKING** | 候选侧 API、性能和 PR CI gate 已通过；发布策略仍要求合并到 `main`、合并后 required workflows/Pages 通过，当前没有创建 tag 或 Release |
+| Release policy | **BLOCKING** | API、timing gate 和 PR CI 已通过，但三类性能证据均缺少发布检查要求的 RSS；此外仍要求合并到 `main`、合并后 required workflows/Pages 通过，当前没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
@@ -126,12 +126,12 @@ yjson/stdx.json/cjfast_json 共同 workload 完成 11 轮，workload 顺序逐�
 - `cjfast_json_commit=eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65`。
 - raw archive：
   `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-three-library-release-4766daa-r2.tar.gz`
- ；SHA-256 为 `01cf6df6cbdc20cfbb758b94d705ec9c7c23e5925127c9e4b7c26b7d7a2f6c52`。
+  ；SHA-256 为 `01cf6df6cbdc20cfbb758b94d705ec9c7c23e5925127c9e4b7c26b7d7a2f6c52`。
 
 完整 36 行、summary、manifest、metadata、preflight 和复核命令见
 [当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md)。
-33 行 noisy 只作为方向和复核数据，不发布稳定的精确跨库排名；完整测量满足本次
-普通 Release 的三库证据要求。
+33 行 noisy 只作为方向和复核数据，不发布稳定的精确跨库排名；timing 和完整性检查
+通过，但 runner 未记录 peak RSS，因此当前三库结果不能单独关闭发布性能证据门禁。
 
 ### Pure 基线/候选（当前候选，STS `1.1.3`）
 
@@ -142,10 +142,11 @@ yjson/stdx.json/cjfast_json 共同 workload 完成 11 轮，workload 顺序逐�
 case、11 轮、128 MiB、`--gate-mode release`、`--rebuild --enforce`。CPU 1
 与 sibling 49 的 30 秒 idle sample 均为 `0.0%`。
 
-`summary.json` 的关键 gate 为 `all_ratios_at_most_1_05=true`、`passed=true`；
-`both_cv_at_most_5_percent=false` 只表示部分行 noisy，按 Release policy 不阻断普通
-Release。最大回退为 `yjsonStringEncodePerson` 的 `-3.77%`（ratio `1.038x`），
-最大改善为 `yjsonBytesDecodeLargeInt64Map` 的 `24.26%`（ratio `0.757x`）。
+`summary.json` 的 timing gate 为 `all_ratios_at_most_1_05=true`、`passed=true`；
+`both_cv_at_most_5_percent=false` 只表示部分行 noisy，按普通 Release 的 timing policy
+不阻断回退检查。最大回退为 `yjsonStringEncodePerson` 的 `-3.77%`（ratio `1.038x`），
+最大改善为 `yjsonBytesDecodeLargeInt64Map` 的 `24.26%`（ratio `0.757x`）。但该 runner
+未采集每个进程的 peak RSS，因此不能满足发布检查第 4 项。
 
 完整 24 行、命令、环境和身份见
 [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)；
@@ -206,8 +207,8 @@ Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (historical; current source-only candidate covered by hosted registry rehearsal)
 Hosted PR execution: PASS (run 34777666675; all 28 jobs passed, including strict evidence drift and CI policy tests)
 Seven-library evidence freshness: PASS (hosted run 34777666675 verified current candidate identity, archives, checksums, stable-row policy, and clean-checkout freshness)
-Three-library performance qualification: PASS (36 workloads; 11 rounds; 3 stable and 33 noisy; full archive retained)
-Pure baseline/candidate qualification: PASS (STS 1.1.3; 24 cases; 11 rounds; release ratios all at most 1.05)
+Three-library performance qualification: BLOCKED (timing passed; peak RSS missing from archive)
+Pure baseline/candidate qualification: BLOCKED (timing passed; peak RSS missing from archive)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS (current PR Core Coverage job passed; historical thresholds remain recorded above)
@@ -215,13 +216,15 @@ Release decision: BLOCKED; candidate-side gates pass, but merged-main CI/Pages a
 ```
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选已通过
-基础测试、API inventory、Pure 普通 Release gate、三库完整测量和 Hosted run
+基础测试、API inventory、Pure/三库 timing gate 和 Hosted run
 `34777666675` 的 28 个 PR jobs（含严格 seven-library freshness、CI policy tests、
 Coverage、API docs、Windows/macOS Pure 和 package rehearsal）；宿主 run 的
-registry rehearsal 在 enforced source-only candidate 上通过。rehearsal 已生成九个临时
-`.cjp`，但最终 `manifest.json`、`environment.json`、`checksums.txt` 尚未生成或上传。
-候选侧 gate 已闭合，但发布策略仍要求先合并到 `main`，再等待合并提交的 required
-workflows 和 Pages 通过；因此当前不能创建 tag、GitHub Release 或执行中心包仓库发布。
+registry rehearsal 在 enforced source-only candidate 上通过。性能归档缺少发布检查要求的
+peak RSS，因此性能 qualification 尚未闭合。rehearsal 已生成九个临时 `.cjp`，但最终
+`manifest.json`、`environment.json`、`checksums.txt` 尚未生成或上传。
+候选侧仍有 RSS 性能门禁未闭合，且发布策略要求先合并到 `main`，再等待合并提交的
+required workflows 和 Pages 通过；因此当前不能创建 tag、GitHub Release 或执行中心包
+仓库发布。
 Native noisy 结果不阻断普通 Release，但不能用于精确 acceleration claim；5% target
 improvement 只属于明确声明的 optimization mode。
 
