@@ -24,7 +24,7 @@
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 
-当前 `0.1.0` 候选的七库完整测量见[2026-09-13 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批均为 noisy，不能据此发布稳定的跨库排名。Pure 普通 Release 门禁见[2026-09-13 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`；noisy 仍只限制精确性能声明。
+当前 `0.1.0` 候选的七库完整测量见[2026-09-13 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批均为 noisy，不能据此发布稳定的跨库排名。三库完整测量见[2026-09-13 当前候选三库对比](results/2026-09-13-release-three-library.md)，36 个 workload 均完成 11 轮，其中 3/36 stable、33/36 noisy；noisy 只限制精确性能声明。Pure 普通 Release 门禁见[2026-09-13 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`；noisy 仍只限制精确性能声明。
 
 ## 历史证据
 

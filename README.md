@@ -179,7 +179,7 @@ let name = document.root().member("name").getOrThrow().asString()
 测量使用提交 `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`。
 **两批结果的每一行都至少有一个库的变异系数（CV）超过 5%，因此这些数字仅供查看，不能作为稳定的性能排名。**
 
-完整样本、波动情况和环境见[2026-09-13 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)。
+完整样本、波动情况和环境见[2026-09-13 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-13 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
 测试方法见[性能文档](docs/performance/README.md)。结果只适用于记录中的源码、SDK、CPU 和测试数据。
 
 | Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
