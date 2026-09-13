@@ -1,0 +1,15 @@
+{
+  "name": "publicsuffix/list",
+  "source_url": "https://publicsuffix.org/list/public_suffix_list.dat",
+  "upstream_repository": "https://github.com/publicsuffix/list",
+  "upstream_revision": "3955e3ec29b94c3cca7bd4509c5f14a7c0959e26",
+  "version": "2026-09-08_12-18-37_UTC",
+  "sha256": "4b673689999dbaca60b93fa3e1da5752505ef9717b1c4dc44acbfdafd35679ea",
+  "license": "MPL-2.0",
+  "license_file": "LICENSE.MPL-2.0",
+  "license_url": "https://www.mozilla.org/media/MPL/2.0/index.f75d2927d3c1.txt",
+  "license_sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
+  "generated": [
+    "../../src/http/public_suffix_data.cj"
+  ]
+}

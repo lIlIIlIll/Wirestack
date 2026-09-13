@@ -33,6 +33,7 @@ from tools.evidence_digest import text_evidence_digest
 
 TASK_ID = "M7-033"
 EXPECTED_CJDOC_VERSION = "0.7.2"
+DOCUMENTATION_CFG = {"os": "Linux", "arch": "x86_64", "env": "gnu"}
 DOC_IR_SCHEMA = "cjdoc.doc-ir/8"
 API_SCHEMA = "cjdoc.api-surface/1"
 COVERAGE_SCHEMA = "cjdoc.documentation-coverage/1"
@@ -49,6 +50,7 @@ PUBLIC_ROOT_FILES = (
     "http_contract.cj",
     "http_message.cj",
     "http_model.cj",
+    "http_push.cj",
     "http_url.cj",
     "network_error.cj",
     "network_event.cj",
@@ -64,14 +66,24 @@ PUBLIC_PACKAGE_FILES = {
     "wirestack.http": (
         "cancellation.cj",
         "client.cj",
+        "cookie.cj",
+        "duplex.cj",
         "error.cj",
+        "file_handler.cj",
+        "hooks.cj",
+        "multipart.cj",
         "package.cj",
         "proxy.cj",
+        "public_suffix.cj",
+        "public_suffix_data.cj",
         "redirect.cj",
         "resolver.cj",
         "retry.cj",
         "server.cj",
         "tls.cj",
+        "upgrade.cj",
+        "websocket.cj",
+        "websocket_handshake.cj",
     ),
     "wirestack.tls": ("facade.cj", "identity.cj", "package.cj"),
     "wirestack.net": (
@@ -303,6 +315,8 @@ def _generate(cjdoc: str, project: Path, output: Path, include_html: bool,
         formats.append("html")
     argv = [cjdoc, "generate", "--project", str(project), "--audience", "external",
             "--lint-profile", "strict", "--jobs", "1", "--locale", "zh-CN"]
+    for name, value in DOCUMENTATION_CFG.items():
+        argv.extend(["--cfg", f"{name}={value}"])
     for fmt in formats:
         argv.extend(["--format", fmt])
     argv.extend(["--output", str(output)])
@@ -313,6 +327,8 @@ def _check(cjdoc: str, project: Path, timeout: int) -> dict[str, Any]:
     argv = [cjdoc, "check", "--project", str(project), "--deny-warnings",
             "--lint-profile", "strict", "--min-symbol-coverage", "100",
             "--min-parameter-coverage", "100"]
+    for name, value in DOCUMENTATION_CFG.items():
+        argv.extend(["--cfg", f"{name}={value}"])
     return _run(argv, project, timeout)
 
 
@@ -330,6 +346,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
         "platform": {"system": platform.system(), "machine": platform.machine(),
                       "libc": platform.libc_ver()[0] or "unknown"},
         "expectedCjdoc": EXPECTED_CJDOC_VERSION,
+        "targetCfg": DOCUMENTATION_CFG,
         "layers": [],
         "commands": [],
         "sourceSha256": {},

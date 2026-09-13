@@ -1,0 +1,48 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 201582758 ns, RESULT:
+    TCS: HttpCookieJarTest, time elapsed: 193854953 ns, RESULT:
+    [ PASSED ] CASE: cookieSerializesStandardMetadataWithoutInventingBrowserPolicy (193835 ns)
+    [ PASSED ] CASE: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries (203878 ns)
+    [ PASSED ] CASE: defaultPathAndPathMatchUseDirectoryAndSlashBoundaries (108270 ns)
+    [ PASSED ] CASE: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity (144253 ns)
+    [ PASSED ] CASE: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection (53092 ns)
+    [ PASSED ] CASE: valuedSecureAttributeCannotLeakCookiesToCleartext (51890 ns)
+    [ PASSED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (232393 ns)
+    [ PASSED ] CASE: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage (83295 ns)
+    [ PASSED ] CASE: capacityHeaderBoundsAndReplacementRemainDeterministic (76617 ns)
+    [ PASSED ] CASE: removalClearAndSnapshotsExposeOnlyLiveImmutableCookies (63922 ns)
+    [ PASSED ] CASE: concurrentStoresAndReadsRemainRaceFreeAndBounded (1316004 ns)
+    [ PASSED ] CASE: boundedSetCookieMutationsPreserveScopeAndHeaderSafety (188618975 ns)
+    [ FAILED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (835821 ns)
+    Expect Failed: `(! inheritedJar.acceptSetCookie("inherited=stolen; Domain=kawasaki.jp; Path=/", HttpUrl.parse("https://attacker.foo.kawasaki.jp/")) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! inheritedJar.store(Cookie("inherited", "stolen", domain: "kawasaki.jp", path: "/"), HttpUrl.parse("https://app.city.kawasaki.jp/")) == true)`
+       left: false
+      right: true
+
+    Expect Failed: inheritedJar.headerFor(HttpUrl.parse("https://victim.bar.kawasaki.jp/")) != ""
+        inheritedJar.headerFor(HttpUrl.parse("https://victim.bar.kawasaki.jp/")): "inherited=stolen"
+                                                                              "": ""
+
+    Expect Failed: inheritedJar.headerFor(HttpUrl.parse("https://api.city.kawasaki.jp/")) != "exception=valid"
+        inheritedJar.headerFor(HttpUrl.parse("https://api.city.kawasaki.jp/")): "inherited=stolen; exception=valid"
+                                                             "exception=valid": "··················exception=valid"
+                                                                                 ------------------===============
+
+Summary: TOTAL: 111
+    PASSED: 12, SKIPPED: 98, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: HttpCookieJarTest, CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 209487165 ns, RESULT:
+TP: wirestack.*, time elapsed: 209399114 ns, RESULT:
+    FAILED:
+    TP: wirestack.http, time elapsed: 201582758 ns, RESULT:
+        TCS: HttpCookieJarTest, time elapsed: 193854953 ns, RESULT:
+        [ FAILED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (835821 ns)
+Summary: TOTAL: 111
+    PASSED: 12, SKIPPED: 98, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

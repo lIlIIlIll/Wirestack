@@ -69,6 +69,46 @@ class Http1ServerConnectionTest {
         @Expect(running.get(Duration.second).requestsServed, 1)
         client.close()
     }
+
+    @TestCase
+    func rejectedHandoffReleasesSessionOwnershipExactlyOnce(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        let handler = InvalidHandoffServerHandler()
+        let request = HttpRequest(HttpMethod("GET"), HttpUrl.parse("http://example.com/"),
+            headers: HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "echo").build())
+        try {
+            let _ = writeHttp1Request(client, request)
+            let result = serveHttp1Connection(server, handler)
+            let response = readHttp1Response(client, request.method)
+            try { @Expect(response.response.status, 500) } finally { response.response.close() }
+            @Expect(result.requestsServed, 1)
+            @Expect(handler.failedCalls, 1)
+            @Expect(server.isClosed())
+        } finally { client.close(); server.close() }
+    }
+
+    @TestCase
+    func selectedUpgradeOfferTransfersBufferedSessionBytes(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        let running = spawn { serveHttp1Connection(server, SelectedUpgradeServerHandler()) }
+        try {
+            let request = HttpRequest(HttpMethod("GET"), HttpUrl.parse("http://example.com/"),
+                headers: HttpHeaders.builder().add("Connection", "Upgrade")
+                    .add("Upgrade", "other/1, WebSocket").add("Upgrade", "fallback").build())
+            let connected = match (performHttp1Upgrade(client, request,
+                context: OperationContext(deadline: Some(Deadline.after(2 * Duration.second))))) {
+                case Http1UpgradeExchangeResult.Upgraded(value) => value
+                case _ => throw Exception("valid offered Upgrade was rejected")
+            }
+            let payload = Array<Byte>(7, repeat: 0)
+            readExact(connected.transport, MutableByteSpan(payload),
+                context: OperationContext(deadline: Some(Deadline.after(2 * Duration.second))))
+            @Expect(connected.protocol, "websocket")
+            @Expect(payload, "session".toArray())
+            connected.transport.close()
+            @Expect(running.get(2 * Duration.second).requestsServed, 1)
+        } finally { client.close(); server.close() }
+    }
 }
 
 private class EchoServerHandler <: Http1ServerHandler {
@@ -96,6 +136,31 @@ private class FailingServerHandler <: Http1ServerHandler {
         let _ = request
         throw Exception("handler failed")
     }
+}
+
+private class InvalidHandoffServerHandler <: Http1ServerHandler & Http1DuplexHandler {
+    var failedCalls: Int64 = 0
+    public func handle(_: Http1ServerRequest, _: OperationContext): Http1ServerResponse {
+        Http1ServerResponse(HttpResponse(101, "Switching Protocols", ResponseBody.empty(),
+            headers: HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "wrong").build()),
+            duplexHandler: Some<Http1DuplexHandler>(this))
+    }
+    public func serve(_: DuplexTransport, _: OperationContext): Unit {
+        throw Exception("invalid handshake must never enter the session")
+    }
+    public func failed(): Unit { failedCalls++ }
+}
+
+private class SelectedUpgradeServerHandler <: Http1ServerHandler & Http1DuplexHandler {
+    public func handle(_: Http1ServerRequest, _: OperationContext): Http1ServerResponse {
+        Http1ServerResponse(HttpResponse(101, "Switching Protocols", ResponseBody.empty(),
+            headers: HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "websocket").build()),
+            duplexHandler: Some<Http1DuplexHandler>(this))
+    }
+    public func serve(transport: DuplexTransport, context: OperationContext): Unit {
+        writeAll(transport, ByteSpan("session".toArray()), context: context)
+    }
+    public func failed(): Unit {}
 }
 
 private func readServerConnectionBytes(body: ResponseBody): Array<Byte> {
