@@ -16,7 +16,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Evidence updated | `2026-09-13` |
 | Formal performance runner | `Server`；Linux x86_64；CPU 1，sibling 49 |
 | Release qualification SDK | Cangjie STS `1.1.3`；正式七库、三库和 Pure 测量均记录 `cjc/cjpm 1.1.3` |
-| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；latest candidate run [`34777666675`](https://github.com/lIlIIlIll/yjson/actions/runs/34777666675) 的 28 jobs 全部通过 |
+| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；latest completed candidate run [`34778796451`](https://github.com/lIlIIlIll/yjson/actions/runs/34778796451) 的 28 jobs 全部通过 |
 
 
 此前记录的本地编译器 `cjc` SHA-256
@@ -38,7 +38,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
 | Local Linux fresh candidate | PASS (historical) | `scripts/ci_fresh_checkout.sh` 的 qvt/STS `1.1.3` 结果曾通过；当时 release tree 为 `292` files，早于当前 `297` 项 manifest；当前候选的 source-only、registry rehearsal 和 freshness 由下方 hosted run 覆盖 |
-| Hosted PR CI | **PASS** | latest candidate run [`34777666675`](https://github.com/lIlIIlIll/yjson/actions/runs/34777666675) 的 28 jobs 全部通过，包含 Seven-library evidence drift、pinned STS、覆盖率、Windows/macOS Pure、九包 rehearsal 和其余 required jobs |
+| Hosted PR CI | **PASS** | latest completed candidate run [`34778796451`](https://github.com/lIlIIlIll/yjson/actions/runs/34778796451) 的 28 jobs 全部通过，包含 Seven-library evidence drift、pinned STS、覆盖率、Windows/macOS Pure、九包 rehearsal 和其余 required jobs |
 | Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是 `1.1.3` 基线下当前候选的合并后 run |
 | Coverage | PASS (current hosted job) | latest candidate run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
 | Source-only staging | PASS (current hosted) | latest candidate run 的 `registry-rehearsal` 在 enforced source-only candidate 上通过；未把临时 rehearsal 树当作最终上传 bundle |
@@ -89,7 +89,7 @@ release qualification；target-only A/B 因 CV 超过 5% 而 exit `1`。
 这些历史数字不能与当前报告合并或推导跨主机比例。当前正式七库矩阵已绑定
 `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`，完整归档见
 `benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`；Hosted run
-`34777666675` 已对当前候选通过 strict freshness、checksum、identity 和 summary 校验。
+`34778796451` 已对当前候选通过 strict freshness、checksum、identity 和 summary 校验。
 
 ### 历史：三库共同 workload（`b0f16eb`）
 
@@ -205,19 +205,19 @@ Native 运行源码闭包 SHA-256 为
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (historical; current source-only candidate covered by hosted registry rehearsal)
-Hosted PR execution: PASS (run 34777666675; all 28 jobs passed, including strict evidence drift and CI policy tests)
-Seven-library evidence freshness: PASS (hosted run 34777666675 verified current candidate identity, archives, checksums, stable-row policy, and clean-checkout freshness)
+Hosted PR execution: PASS (run 34778796451; all 28 jobs passed, including strict evidence drift and CI policy tests)
+Seven-library evidence freshness: PASS (hosted run 34778796451 verified current candidate identity, archives, checksums, stable-row policy, and clean-checkout freshness)
 Three-library performance qualification: BLOCKED (timing passed; peak RSS missing from archive)
 Pure baseline/candidate qualification: BLOCKED (timing passed; peak RSS missing from archive)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS (current PR Core Coverage job passed; historical thresholds remain recorded above)
-Release decision: BLOCKED; candidate-side gates pass, but merged-main CI/Pages and final release assets are still pending
+Release decision: BLOCKED; three-library/Pure performance qualification lacks peak RSS, and merged-main CI/Pages plus final release assets are still pending
 ```
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选已通过
 基础测试、API inventory、Pure/三库 timing gate 和 Hosted run
-`34777666675` 的 28 个 PR jobs（含严格 seven-library freshness、CI policy tests、
+`34778796451` 的 28 个 PR jobs（含严格 seven-library freshness、CI policy tests、
 Coverage、API docs、Windows/macOS Pure 和 package rehearsal）；宿主 run 的
 registry rehearsal 在 enforced source-only candidate 上通过。性能归档缺少发布检查要求的
 peak RSS，因此性能 qualification 尚未闭合。rehearsal 已生成九个临时 `.cjp`，但最终
