@@ -259,7 +259,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ppekzgs5/wirestack/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-hmqfgyq4/wirestack/output\n",
       "stdout_truncated": false
     },
     {
@@ -279,7 +279,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ppekzgs5/wirestack-http/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-hmqfgyq4/wirestack-http/output\n",
       "stdout_truncated": false
     },
     {
@@ -299,7 +299,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ppekzgs5/wirestack-tls/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-hmqfgyq4/wirestack-tls/output\n",
       "stdout_truncated": false
     },
     {
@@ -319,7 +319,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ppekzgs5/wirestack-net/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-hmqfgyq4/wirestack-net/output\n",
       "stdout_truncated": false
     },
     {
@@ -339,12 +339,22 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ppekzgs5/combined/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-hmqfgyq4/combined/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate-html",
+      "package": "combined",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated /tmp/wirestack-m7-033-hmqfgyq4/combined/html-output\n",
       "stdout_truncated": false
     }
   ],
   "expectedCjdoc": "0.7.2",
-  "generatedAtUtc": "2026-09-13T20:42:02.931722Z",
+  "generatedAtUtc": "2026-09-13T21:46:30.495289Z",
   "issues": [],
   "layers": [
     {
