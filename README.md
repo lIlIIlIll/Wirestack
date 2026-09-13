@@ -182,19 +182,6 @@ let name = document.root().member("name").getOrThrow().asString()
 完整样本、波动情况和环境见[2026-09-13 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-13 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
 测试方法见[性能文档](docs/performance/README.md)。结果只适用于记录中的源码、SDK、CPU 和测试数据。
 
-| Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Address encode | 0.900 | 3.325 | 3.185 | 3.476 | 2.489 | 0.178 | 0.066 |
-| Address decode | 1.490 | 2.406 | 3.395 | 3.441 | 2.054 | 0.319 | 0.072 |
-| Person encode | 1.700 | 13.254 | 16.956 | 5.425 | 10.415 | 0.564 | 0.267 |
-| Person decode | 6.446 | 21.810 | 26.928 | 21.316 | 15.621 | 1.112 | 0.419 |
-| Large Array encode | 28.847 | 100.328 | 251.520 | 91.904 | 75.840 | 9.042 | 4.162 |
-| Large Array decode | 107.767 | 187.745 | 397.481 | 175.659 | 77.376 | 18.908 | 5.154 |
-| Large Map encode | 6.075 | 130.189 | 179.092 | 130.409 | 129.510 | 1.771 | 1.861 |
-| Large Map decode | 29.717 | 249.920 | 350.483 | 224.512 | 227.156 | 5.323 | 3.943 |
-| Deep Nested encode | 45.090 | 71.863 | 171.648 | 85.786 | 73.728 | 4.549 | 2.475 |
-| Deep Nested decode | 325.770 | 161.899 | 263.682 | 144.555 | 96.069 | 10.454 | 3.400 |
-
 ## 文档
 
 - [文档导航](docs/README.md)
