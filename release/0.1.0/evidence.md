@@ -15,7 +15,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Release graph | `release/release-graph.toml`；status=`release-ready` |
 | Evidence updated | `2026-09-13` |
 | Formal performance runner | `Server`；Linux x86_64；CPU 1，sibling 49 |
-| Release qualification SDK | Cangjie STS `1.1.3`；正式七库和 Pure 测量均记录 `cjc/cjpm 1.1.3` |
+| Release qualification SDK | Cangjie STS `1.1.3`；正式七库、三库和 Pure 测量均记录 `cjc/cjpm 1.1.3` |
 | Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；current run [`34772911383`](https://github.com/lIlIIlIll/yjson/actions/runs/34772911383) 的 28 jobs 全部通过 |
 
 
@@ -44,10 +44,10 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Source-only staging | PASS | 最新 `scripts/ci_fresh_checkout.sh` 在 STS `1.1.3` 下完成仅源码暂存和发布树复制 |
 | Package rehearsal | PASS (fresh) | 当前 qvt fresh checkout 的 `registry-rehearsal` job 通过；未把临时 rehearsal 树当作最终上传 bundle |
 | Seven-library matrix | **PASS** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，均完成 CPU 1/sibling 49 idle sample；本地 integrity 校验和 hosted strict freshness 均通过，结果页记录 0/10 stable、10/10 noisy |
-| Three-library release performance | **BLOCKING** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵正在运行，结果尚未归档；本地诊断不替代该 gate |
+| Three-library release performance | **PASS** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；3/36 stable、33/36 noisy，完整 raw archive 和复核结果见[当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md) |
 | Pure baseline/candidate qualification | **PASS** | [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)绑定当前候选，STS `1.1.3` 下 24 case、11 轮、release gate `all_ratios_at_most_1_05=true`；noisy 只限制精确性能声明 |
-| Native acceleration | NON-BLOCKING (claim not qualified) | 当前候选的 Native/三库诊断为 `0/36` stable、`36/36` noisy；噪声只阻止精确 Native/跨库性能声明，不阻断普通 Release |
-| Release policy | **BLOCKING** | 当前三库正式证据尚未归档；Hosted PR CI 已通过，Native noisy 数据本身不是阻断项，没有创建 tag 或 Release |
+| Native acceleration | NON-BLOCKING (claim not qualified) | 旧 Native diagnostic 为 `0/36` stable、`36/36` noisy；当前三库结果为 `3/36` stable、`33/36` noisy；两者都不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
+| Release policy | **BLOCKING** | 候选侧 API、性能和 PR CI gate 已通过；发布策略仍要求合并到 `main`、合并后 required workflows/Pages 通过，当前没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
@@ -58,6 +58,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 
 - `benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`：两批七库 raw archive、脚本闭包、身份和 checksum；
 - `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-pure-release-4766daa-r4.tar.gz`：Pure 24-case raw archive。
+- `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-three-library-release-4766daa-r2.tar.gz`：三库 36-workload raw archive，SHA-256 为 `01cf6df6cbdc20cfbb758b94d705ec9c7c23e5925127c9e4b7c26b7d7a2f6c52`；
 
 这些是仓库中的可审计证据，不是 GitHub Release 上传资产。包仓库 rehearsal 已在
 `/tmp/yjson-registry-rehearsal-c88d4e/artifacts/` 生成九个 `.cjp`，但该目录是临时
@@ -87,8 +88,8 @@ release qualification；target-only A/B 因 CV 超过 5% 而 exit `1`。
 
 这些历史数字不能与当前报告合并或推导跨主机比例。当前正式七库矩阵已绑定
 `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`，完整归档见
-`benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`，严格 freshness
-校验将在证据文件提交后对 clean checkout 执行。
+`benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`；Hosted run
+`34772911383` 已对当前候选通过 strict freshness、checksum、identity 和 summary 校验。
 
 ### 历史：三库共同 workload（`b0f16eb`）
 
@@ -111,6 +112,26 @@ stdx.json、cjfast_json 共同 workload，11 轮，workload 旋转、偶数轮�
 `77994.667 ns`，Y/C=`1.334x`，yjson 仅赢 `1/11`，yjson CV=`12.79%`。
 该行及其他 noisy 行只保留方向证据，不发布精确比例；由于第二批仍未满足
 CV 门槛，三库正式性能 gate 为 BLOCKING。
+
+### 当前：三库共同 workload（STS `1.1.3`）
+
+正式 runner `scripts/release_performance_compare.sh` 在 Server 的
+`ubuntu2223131`、Linux x86_64、CPU 1、128 MiB 堆上执行当前候选。每个
+yjson/stdx.json/cjfast_json 共同 workload 完成 11 轮，workload 顺序逐轮旋转、
+偶数轮反转，三库顺序逐轮旋转；36/36 workload 完整收集，没有删除 noisy 行。
+
+- Stable：`3/36`；noisy：`33/36`（三库各自 CV 均纳入 stable/noisy 判断）。
+- Cangjie STS `1.1.3`；`cjc/cjpm` 版本和环境记录、每轮 raw report 均在归档中；
+  metadata 的 `sdk_label` 保留为 runner 原值 `unknown`。
+- `cjfast_json_commit=eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65`。
+- raw archive：
+  `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-three-library-release-4766daa-r2.tar.gz`
+ ；SHA-256 为 `01cf6df6cbdc20cfbb758b94d705ec9c7c23e5925127c9e4b7c26b7d7a2f6c52`。
+
+完整 36 行、summary、manifest、metadata、preflight 和复核命令见
+[当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md)。
+33 行 noisy 只作为方向和复核数据，不发布稳定的精确跨库排名；完整测量满足本次
+普通 Release 的三库证据要求。
 
 ### Pure 基线/候选（当前候选，STS `1.1.3`）
 
@@ -185,19 +206,21 @@ Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (qvt; STS 1.1.3; fresh checkout jobs passed)
 Hosted PR execution: PASS (run 34772911383; all 28 jobs passed, including strict evidence drift)
 Seven-library evidence freshness: PASS (hosted run 34772911383 verified current candidate identity, archives, checksums, and clean-checkout freshness)
-Three-library performance qualification: BLOCKING (remote formal current-candidate matrix is still running)
+Three-library performance qualification: PASS (36 workloads; 11 rounds; 3 stable and 33 noisy; full archive retained)
 Pure baseline/candidate qualification: PASS (STS 1.1.3; 24 cases; 11 rounds; release ratios all at most 1.05)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS (current PR Core Coverage job passed; historical thresholds remain recorded above)
-Release decision: BLOCKED; no tag, GitHub Release, or registry publication
+Release decision: BLOCKED; candidate-side gates pass, but merged-main CI/Pages and final release assets are still pending
 ```
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选已通过本地
-fresh-checkout、基础测试、API inventory 和 Pure 普通 Release gate；正式七库证据已
-按当前候选重新归档，Hosted run `34772911383` 的 28 个 PR jobs 已全部通过（含严格
-seven-library freshness、Coverage、API docs、Windows/macOS Pure 和 package rehearsal）。
-远端三库正式矩阵仍在运行，因此合并后的 `main` 工作流、tag、GitHub Release 和中心包仓库
-发布都不能执行。Native noisy 结果不阻断普通 Release，但不能用于精确 acceleration claim；
-5% target improvement 只属于明确声明的 optimization mode。
+fresh-checkout、基础测试、API inventory、Pure 普通 Release gate、三库完整测量和
+Hosted run `34772911383` 的 28 个 PR jobs；seven-library strict freshness 也已由该
+Hosted run 验证。包仓库 rehearsal 已生成九个临时 `.cjp`，但最终 `manifest.json`、
+`environment.json`、`checksums.txt` 尚未生成或上传。
+候选侧 gate 已闭合，但发布策略仍要求先合并到 `main`，再等待合并提交的 required
+workflows 和 Pages 通过；因此当前不能创建 tag、GitHub Release 或执行中心包仓库发布。
+Native noisy 结果不阻断普通 Release，但不能用于精确 acceleration claim；5% target
+improvement 只属于明确声明的 optimization mode。
 
