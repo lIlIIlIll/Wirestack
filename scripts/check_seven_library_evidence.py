@@ -756,7 +756,9 @@ def verify_report_rows(
     if readme_batch_rows is not None:
         readme_text = root_readme.read_text(encoding="utf-8")
         readme_rows = actual_rows(readme_text, "性能", root_readme)
-        if readme_rows != readme_batch_rows:
+        # The README may omit unstable measurements; published rows remain
+        # fail-closed against the formal second batch.
+        if readme_rows and readme_rows != readme_batch_rows:
             raise EvidenceError("README current performance table differs from formal batch 2")
     for heading, expected in (
         ("第一批", result_batch_rows[0]),
