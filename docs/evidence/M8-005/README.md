@@ -1,8 +1,8 @@
 # M8-005 Linux HTTP parity
 
-Status: complete candidate acceptance PASS. `evidence.json` records the source-candidate seal. Publication and merge remain separate gates.
+Status: complete candidate acceptance PASS. `evidence.json` records the source-candidate seal. Publication and main documentation deployment remain separate gates.
 
-The isolated publication checkout starts at merged M8-004 commit `b1368db964d172c4b08ef15f7132b29f7c4b59dd`. The original workspace is not modified. `evidence.json` is the canonical source-candidate and report index.
+The initial HTTP publication started at merged M8-004 commit `b1368db964d172c4b08ef15f7132b29f7c4b59dd`. The documentation stability correction starts at merged M8-005 commit `ca4d750ff7886595d14422fc9161260f6b120269` in an isolated checkout. The original workspace is not modified. `evidence.json` is the canonical source-candidate and report index.
 
 ## Qualified implementation
 
@@ -20,11 +20,11 @@ HTTP/2 encoded header batches remain contiguous through their final CONTINUATION
 
 HTTP/2 CONNECT half-close stops new writes without waiting for connection I/O. An admitted write completes before END_STREAM is queued. Stream ownership remains live until the terminal frame is written or the stream aborts. `close(context)` bounds the drain with the caller's cancellation and deadline.
 
-The [Linux HTTP guide](../../guides/http-parity-linux.md) describes public use and ownership. The [test plan](test-plan.md) maps 13 paths and 49 scenarios to 35 rows.
+The [Linux HTTP guide](../../guides/http-parity-linux.md) describes public use and ownership. The [test plan](test-plan.md) maps 13 paths and 50 scenarios to 36 rows.
 
 ## Executed acceptance
 
-The supported environment is Cangjie STS 1.1.3, cjdoc 0.7.2, and Linux x86_64 glibc. The table records the complete qualification after the secure-quota correction. [task-check.json](task-check.json) records the manifest's exact commands and raw captures. Skipped cases are not counted as passes.
+The supported environment is Cangjie STS 1.1.3, cjdoc 0.7.2, and Linux x86_64 glibc. The table records the complete documentation-stability qualification. [task-check.json](task-check.json) records the manifest's exact commands and raw captures. Skipped cases are not counted as passes.
 
 | Gate | Observed result |
 |---|---|
@@ -59,6 +59,7 @@ The API inventory and installed compile are not binary or forward-compatibility 
 - The upload cases in [the ownership red run](probes/ownership-boundaries-red/ownership-boundaries-red.json) publish `replacement` after cancellation or deadline expiry during `fsync`. The bridge now separates durability from publication and rechecks the original context between them. [The final green run](commands/ownership-final-qualification/upload-commit-boundary.json) verifies all four controls, preserves existing bytes, and leaves no staging files.
 - [The half-close red run](probes/half-close-red/half-close-red.json) reproduces a blocked contextless shutdown, peer-visible DATA after END_STREAM, and a graceful close that discards admitted work instead of observing its deadline. [The green run](probes/half-close-green/half-close-green.json) passes those four cases and a queued-END_STREAM cancellation control while a PING acknowledgement holds the connection writer. Sibling requests remain usable.
 - [The secure-quota red run](probes/secure-quota-red/secure-quota-red.json) evicts a Secure session cookie through cleartext quota flooding, then emits an attacker session value on HTTPS. HTTP insertions now evict only non-Secure identities or return false when no eligible identity remains. [The green run](probes/secure-quota-green/secure-quota-green.json) preserves protected state through both storage entrypoints while retaining expiry deletion and HTTPS renewal or eviction.
+- [The post-merge HTML failure](probes/html-main-red/html-main-red.json) records cjdoc exhausting memory while generating all formats in one process. HTML now runs in a separate process and output directory from JSON, API inventory, coverage, and Markdown. [Split-format generation and browser proof](probes/html-split-green/html-split-green.json) pass with the unchanged runtime limits, 206 HTML pages, complete coverage, working search, and rendered CookieJar declarations.
 
 Additional passing regressions cover reset during push transfer, header-only ownership, cancellation registration retention, bounded admission after parent reset, blocked-worker cleanup, duplex-handler return, valid Upgrade offer lists, and mismatched Upgrade/CONNECT calls before connector I/O. These are passing regression checks, not claims that every case was executed against the pre-fix source.
 
