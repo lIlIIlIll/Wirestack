@@ -16,7 +16,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Evidence updated | `2026-09-13` |
 | Formal performance runner | `Server`；Linux x86_64；CPU 1，sibling 49 |
 | Release qualification SDK | Cangjie STS `1.1.3`；正式七库和 Pure 测量均记录 `cjc/cjpm 1.1.3` |
-| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；run [`34710721196`](https://github.com/lIlIIlIll/yjson/actions/runs/34710721196) 失败于 `Seven-library evidence drift` |
+| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；current run [`34772911383`](https://github.com/lIlIIlIll/yjson/actions/runs/34772911383) 的 28 jobs 全部通过 |
 
 
 此前记录的本地编译器 `cjc` SHA-256
@@ -38,16 +38,16 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
 | Local Linux fresh candidate | PASS | `scripts/ci_fresh_checkout.sh` 在 qvt 候选、STS `1.1.3` 下通过；release tree `292` files，包含 API、cjdoc、九包 rehearsal、Native、sanitizer 和 fuzz-short jobs |
-| Hosted PR CI | **BLOCKING** | run [`34710721196`](https://github.com/lIlIIlIll/yjson/actions/runs/34710721196) 仅 `Seven-library evidence drift` 与其汇总 job 失败；pinned STS、覆盖率、Windows/macOS Pure 及其余 required jobs 通过 |
+| Hosted PR CI | **PASS** | current run [`34772911383`](https://github.com/lIlIIlIll/yjson/actions/runs/34772911383) 的 28 jobs 全部通过，包含 Seven-library evidence drift、pinned STS、覆盖率、Windows/macOS Pure、九包 rehearsal 和其余 required jobs |
 | Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是 `1.1.3` 基线下当前候选的合并后 run |
 | Coverage | PASS (current hosted job) | 当前 PR run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
 | Source-only staging | PASS | 最新 `scripts/ci_fresh_checkout.sh` 在 STS `1.1.3` 下完成仅源码暂存和发布树复制 |
 | Package rehearsal | PASS (fresh) | 当前 qvt fresh checkout 的 `registry-rehearsal` job 通过；未把临时 rehearsal 树当作最终上传 bundle |
-| Seven-library matrix | **PASS (local evidence pending clean-check verification)** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，均完成 CPU 1/sibling 49 idle sample；完整性校验通过，结果页记录 0/10 stable、10/10 noisy |
+| Seven-library matrix | **PASS** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，均完成 CPU 1/sibling 49 idle sample；本地 integrity 校验和 hosted strict freshness 均通过，结果页记录 0/10 stable、10/10 noisy |
 | Three-library release performance | **BLOCKING** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵正在运行，结果尚未归档；本地诊断不替代该 gate |
 | Pure baseline/candidate qualification | **PASS** | [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)绑定当前候选，STS `1.1.3` 下 24 case、11 轮、release gate `all_ratios_at_most_1_05=true`；noisy 只限制精确性能声明 |
 | Native acceleration | NON-BLOCKING (claim not qualified) | 当前候选的 Native/三库诊断为 `0/36` stable、`36/36` noisy；噪声只阻止精确 Native/跨库性能声明，不阻断普通 Release |
-| Release policy | **BLOCKING** | Hosted PR CI 仍失败，当前三库正式证据尚未归档；Native noisy 数据本身不是阻断项，没有创建 tag 或 Release |
+| Release policy | **BLOCKING** | 当前三库正式证据尚未归档；Hosted PR CI 已通过，Native noisy 数据本身不是阻断项，没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
@@ -59,9 +59,10 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 - `benchmarks/results/full-seven-library/2026-09-13-release-4766daa/`：两批七库 raw archive、脚本闭包、身份和 checksum；
 - `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-pure-release-4766daa-r4.tar.gz`：Pure 24-case raw archive。
 
-这些是仓库中的可审计证据，不是 GitHub Release 上传资产。当前候选的九个 `.cjp`、
-`manifest.json`、`environment.json` 和最终 `checksums.txt` 尚未生成；因此不能把上述
-性能归档当作已发布 bundle。
+这些是仓库中的可审计证据，不是 GitHub Release 上传资产。包仓库 rehearsal 已在
+`/tmp/yjson-registry-rehearsal-c88d4e/artifacts/` 生成九个 `.cjp`，但该目录是临时
+rehearsal 输出，不是最终上传 bundle；当前候选的 `manifest.json`、`environment.json`
+和最终 `checksums.txt` 仍未生成，也没有上传 Release assets。
 
 历史 bundle 只绑定旧 commit `fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，
 保留作历史 rehearsal，不能用于当前候选的 GitHub Release。其 `checksums.txt`
@@ -182,8 +183,8 @@ Native 运行源码闭包 SHA-256 为
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (qvt; STS 1.1.3; fresh checkout jobs passed)
-Hosted PR execution: BLOCKING (run 34710721196 failed Seven-library evidence drift; pinned STS and other required jobs passed)
-Seven-library evidence freshness: PENDING FINAL CLEAN-CHECK (current candidate archives and identity are refreshed; strict checker runs after the evidence commit)
+Hosted PR execution: PASS (run 34772911383; all 28 jobs passed, including strict evidence drift)
+Seven-library evidence freshness: PASS (hosted run 34772911383 verified current candidate identity, archives, checksums, and clean-checkout freshness)
 Three-library performance qualification: BLOCKING (remote formal current-candidate matrix is still running)
 Pure baseline/candidate qualification: PASS (STS 1.1.3; 24 cases; 11 rounds; release ratios all at most 1.05)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
@@ -194,8 +195,9 @@ Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选已通过本地
 fresh-checkout、基础测试、API inventory 和 Pure 普通 Release gate；正式七库证据已
-按当前候选重新归档，严格 freshness 结果待证据提交后执行。远端三库正式矩阵仍在运行，
-Hosted PR run `34710721196` 仍失败，因此合并后的 `main` 工作流、tag、GitHub Release
-和中心包仓库发布都不能执行。Native noisy 结果不阻断普通 Release，但不能用于精确
-acceleration claim；5% target improvement 只属于明确声明的 optimization mode。
+按当前候选重新归档，Hosted run `34772911383` 的 28 个 PR jobs 已全部通过（含严格
+seven-library freshness、Coverage、API docs、Windows/macOS Pure 和 package rehearsal）。
+远端三库正式矩阵仍在运行，因此合并后的 `main` 工作流、tag、GitHub Release 和中心包仓库
+发布都不能执行。Native noisy 结果不阻断普通 Release，但不能用于精确 acceleration claim；
+5% target improvement 只属于明确声明的 optimization mode。
 
