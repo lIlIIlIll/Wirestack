@@ -543,6 +543,16 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
         write(self.root / "README.md", "stale link\n")
         with self.assertRaisesRegex(checker.EvidenceError, "does not link"):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
+    def test_readme_table_can_be_omitted_for_unstable_measurements(self) -> None:
+        write(
+            self.root / "README.md",
+            f"[Current]({self.fixture.result_relative})\n\n## 性能\n\n",
+        )
+        self.assertEqual(
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True),
+            2,
+        )
+
 
     def test_readme_number_drift_fails_closed(self) -> None:
         path = self.root / "README.md"
