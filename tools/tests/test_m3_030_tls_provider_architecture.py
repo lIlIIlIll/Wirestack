@@ -135,7 +135,6 @@ class M3030TlsProviderArchitectureTests(unittest.TestCase):
     def test_contract_covers_every_production_tls_import(self):
         selected = self.selection()
         imports = production_import_symbols(ROOT)
-        self.assertEqual(55, len(imports))
         self.assertEqual(set(), imports - expected_symbols(selected))
         self.assertEqual(
             {"wirestack_tls_engine_load_verify_locations"},

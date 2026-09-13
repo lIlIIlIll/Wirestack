@@ -22,6 +22,7 @@
 [target.x86_64-unknown-linux-gnu.ffi.c]
   wirestack_resolver = { path = "./target/native/resolver/current/lib" }
   wirestack_tls_provider = { path = "./target/native/current/lib" }
+  wirestack_http_files = { path = "./target/native/http_files/current/lib" }
 
 [target.x86_64-w64-mingw32]
   link-option = "-lws2_32"

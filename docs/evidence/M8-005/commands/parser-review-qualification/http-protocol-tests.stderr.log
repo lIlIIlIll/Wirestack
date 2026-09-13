@@ -1,0 +1,9 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.

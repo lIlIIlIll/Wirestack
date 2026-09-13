@@ -49,6 +49,10 @@ public class HttpClientBuilder {
     private var configuredRetryPolicy = HttpRetryPolicy()
     private var configuredProxy: ?HttpProxyConfig = None<HttpProxyConfig>
     private var configuredTls: ?HttpClientTlsConfig = None<HttpClientTlsConfig>
+    private var configuredCookieJar: ?CookieJar = None<CookieJar>
+    private var configuredConnector: ?HttpConnector = None<HttpConnector>
+    private var configuredPoolHook: ?HttpConnectionPoolHook = None<HttpConnectionPoolHook>
+    private var configuredPush: ?Http2PushConfig = None<Http2PushConfig>
 
 /**
  * Wirestack 公开 API：init。
@@ -119,6 +123,42 @@ public class HttpClientBuilder {
         this
     }
 
+    /**
+     * Installs a caller-owned jar. Explicit request Cookie headers take precedence over jar selection.
+     * @param value Jar shared by requests, retries and redirects.
+     */
+    public func cookieJar(value: CookieJar): HttpClientBuilder {
+        configuredCookieJar = Some(value)
+        this
+    }
+
+    /**
+     * Replaces DNS-free connection attempts while retaining resolver, route and pool policy.
+     * @param value Caller-owned factory; returned transports transfer to the client.
+     */
+    public func connector(value: HttpConnector): HttpClientBuilder {
+        configuredConnector = Some(value)
+        this
+    }
+
+    /**
+     * Observes actual pool lease transitions without exposing security credentials or body data.
+     * @param value Caller-owned, non-blocking observer.
+     */
+    public func poolHook(value: HttpConnectionPoolHook): HttpClientBuilder {
+        configuredPoolHook = Some(value)
+        this
+    }
+
+    /**
+     * Enables bounded HTTP/2 push acceptance. Omission keeps SETTINGS_ENABLE_PUSH disabled.
+     * @param value Caller-owned policy and delivery limits.
+     */
+    public func http2Push(value: Http2PushConfig): HttpClientBuilder {
+        configuredPush = Some(value)
+        this
+    }
+
 /**
  * Wirestack 公开 API：build。
  */
@@ -138,10 +178,15 @@ public class HttpClientBuilder {
                 directTls = Some(value.createAlpnHandshaker())
                 if (configuredProxy.isSome()) { proxyTls = Some(value.createHandshaker()) }
             }
+            let selectedConnector: transport.TransportFactory = match (configuredConnector) {
+                case Some(value) => value
+                case None => stdnet.StdNetTransportFactory()
+            }
             HttpClient(
                 selected, configuredRequestTimeout, configuredLimits,
                 configuredRedirectPolicy, configuredRetryPolicy, configuredProxy,
-                directTls, proxyTls, ownedSystemResolver
+                directTls, proxyTls, ownedSystemResolver,
+                selectedConnector, configuredCookieJar, configuredPoolHook, configuredPush
             )
         } catch (error: Exception) {
             match (directTls) { case Some(value) => value.close(); case None => () }
@@ -161,7 +206,10 @@ public class HttpClient <: Resource {
     private let redirectPolicy: HttpRedirectPolicy
     private let retryPolicy: HttpRetryPolicy
     private let proxy: ?HttpProxyConfig
-    private let transportFactory = stdnet.StdNetTransportFactory()
+    private let transportFactory: transport.TransportFactory
+    private let cookieJar: ?CookieJar
+    private let poolHook: ?HttpConnectionPoolHook
+    private let pushConfig: ?Http2PushConfig
     private let cleartext: http1.Http1CleartextClient
     private let forwardProxy: ?http1.Http1ForwardProxyClient
     private let mutex = Mutex()
@@ -174,7 +222,11 @@ public class HttpClient <: Resource {
         proxy: ?HttpProxyConfig,
         directTlsHandshaker: ?http1.HttpAlpnTlsHandshaker,
         proxyTlsHandshaker: ?http1.Http1TlsHandshaker,
-        ownedSystemResolver: ?SystemResolver) {
+        ownedSystemResolver: ?SystemResolver,
+        transportFactory: transport.TransportFactory,
+        cookieJar: ?CookieJar,
+        poolHook: ?HttpConnectionPoolHook,
+        pushConfig: ?Http2PushConfig) {
         this.resolver = resolver
         this.ownedSystemResolver = ownedSystemResolver
         this.requestTimeout = requestTimeout
@@ -182,6 +234,10 @@ public class HttpClient <: Resource {
         this.redirectPolicy = redirectPolicy
         this.retryPolicy = retryPolicy
         this.proxy = proxy
+        this.transportFactory = transportFactory
+        this.cookieJar = cookieJar
+        this.poolHook = poolHook
+        this.pushConfig = pushConfig
         cleartext = http1.Http1CleartextClient(resolver, transportFactory, limits: limits)
         forwardProxy = match (proxy) {
             case Some(value) => Some(http1.Http1ForwardProxyClient(
@@ -191,7 +247,7 @@ public class HttpClient <: Resource {
         }
         https = match (directTlsHandshaker) {
             case Some(value) => Some(http1.HttpAutomaticHttpsClient(
-                resolver, transportFactory, value, limits: limits
+                resolver, transportFactory, value, limits: limits, pushConfig: pushConfig
             ))
             case None => None<http1.HttpAutomaticHttpsClient>
         }
@@ -264,6 +320,117 @@ public class HttpClient <: Resource {
         )
     }
 
+    /**
+     * Establishes an uncompressed WebSocket over HTTP/1.1 or negotiated HTTP/2.
+     * Rejected handshakes return an owned response. No redirects or retries replay the handshake.
+     * @param url Absolute HTTP or HTTPS URL of the WebSocket resource.
+     * @param protocols Ordered acceptable subprotocols.
+     * @param headers Additional headers excluding protocol-managed fields.
+     * @param webSocketLimits Session frame, message and close bounds.
+     * @param context Shared handshake deadline and cancellation.
+     */
+    public func connectWebSocket(
+        url: HttpUrl,
+        protocols!: Array<String> = [],
+        headers!: HttpHeaders = HttpHeaders(),
+        webSocketLimits!: WebSocketLimits = WebSocketLimits(),
+        context!: OperationContext = OperationContext.background()
+    ): WebSocketConnectResult {
+        if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
+        let bounded = match (requestTimeout) {
+            case Some(value) => context.shortenDeadline(value)
+            case None => context
+        }
+        let operation = withHttpPoolHook(bounded, poolHook)
+        let handshake = WebSocketHandshake(url, protocols, headers, limits)
+        let h1Request = requestWithCookies(handshake.http1Request, operation)
+        let h2Request = requestWithCookies(handshake.http2Request, operation)
+        let result = executeDuplex(h1Request, h2Request, Some("websocket"), operation)
+        handshake.accept(result, webSocketLimits)
+    }
+
+    /**
+     * Transfers a successful HTTP/1.1 Upgrade or CONNECT connection without replay.
+     * HTTPS may negotiate HTTP/2, where the exchange uses a stream-scoped CONNECT.
+     * @param request Bodyless CONNECT or HTTP/1.1 Upgrade handshake request.
+     * @param protocol Required extended CONNECT protocol offered by Upgrade; absent only for ordinary CONNECT.
+     * @param context Shared operation deadline and cancellation.
+     */
+    public func upgrade(request: HttpRequest, protocol!: ?String = None<String>,
+        context!: OperationContext = OperationContext.background()): HttpUpgradeResult {
+        if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
+        if (request.body.contentLength != Some(0)) {
+            throw IllegalArgumentException("HTTP duplex handshakes require a known empty request body")
+        }
+        match (protocol) {
+            case Some(value) =>
+                let _ = HttpMethod(value)
+                if (request.method == HttpMethod("CONNECT") ||
+                    !http1.headerContainsToken(request.headers, "connection", "upgrade") ||
+                    !http1.headerContainsToken(request.headers, "upgrade", value)) {
+                    throw IllegalArgumentException("an Upgrade protocol requires a matching non-CONNECT Upgrade request")
+                }
+            case None =>
+                if (request.method != HttpMethod("CONNECT")) {
+                    throw IllegalArgumentException("an Upgrade request requires its extended CONNECT protocol")
+                }
+        }
+        let bounded = match (requestTimeout) {
+            case Some(value) => context.shortenDeadline(value)
+            case None => context
+        }
+        let operation = withHttpPoolHook(bounded, poolHook)
+        let outgoing = requestWithCookies(request, operation)
+        let headers = HttpHeaders.builder(limits: limits)
+        for (entry in outgoing.headers.entries) {
+            let name = entry.name.toAsciiLower()
+            if (name != "connection" && name != "upgrade" && name != "host") {
+                headers.add(entry.name, entry.value)
+            }
+        }
+        let h2Request = HttpRequest(HttpMethod("CONNECT"), request.url,
+            headers: headers.build(), body: request.body, retrySafety: request.retrySafety)
+        let result = executeDuplex(outgoing, h2Request, protocol, operation)
+        publicHttpUpgradeResult(result)
+    }
+
+    private func executeDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
+        protocol: ?String, context: OperationContext): http1.HttpDuplexExchangeResult {
+        let route = match (proxy) {
+            case Some(value) => value.routeFor(h1Request.url)
+            case None => HttpProxyRoute.Direct
+        }
+        let result = match ((h1Request.url.scheme, route)) {
+            case ("http", HttpProxyRoute.Direct) =>
+                http1.mapHttp1Upgrade(cleartext.upgrade(
+                    withProxyAuthorization(h1Request, None<String>), context: context))
+            case ("http", HttpProxyRoute.Proxy(value)) =>
+                let authorization = value.authorization(h1Request.url, context)
+                http1.mapHttp1Upgrade(forwardProxy.getOrThrow().upgrade(
+                    withProxyAuthorization(h1Request, authorization), context: context))
+            case ("https", HttpProxyRoute.Direct) =>
+                httpsClient().upgrade(
+                    withProxyAuthorization(h1Request, None<String>),
+                    withProxyAuthorization(h2Request, None<String>),
+                    protocol: protocol, context: context)
+            case ("https", HttpProxyRoute.Proxy(value)) =>
+                let authorization = value.authorization(h1Request.url, context)
+                http1.mapHttp1Upgrade(httpsProxyClient(value).upgrade(
+                    withProxyAuthorization(h1Request, None<String>),
+                    proxyAuthorization: authorization, context: context))
+            case _ => throw IllegalArgumentException("HTTP duplex exchange requires an HTTP or HTTPS URL")
+        }
+        match (result) {
+            case http1.HttpDuplexExchangeResult.Response(response) =>
+                try { captureCookies(response.headers, h1Request.url, context) }
+                catch (error: Exception) { response.close(); throw error }
+            case http1.HttpDuplexExchangeResult.Connected(connection) =>
+                try { captureCookies(connection.headers, h1Request.url, context) }
+                catch (error: Exception) { connection.transport.close(); throw error }
+        }
+        result
+    }
+
 /**
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  * @param cancellation 调用方提供的输入值。
@@ -298,7 +465,7 @@ public class HttpClient <: Resource {
         let cancellation = HttpRequestCancellationOperation(
             bounded, requestCancellation, connectionCancellation, streamCancellation
         )
-        let operation = cancellation.context
+        let operation = withHttpPoolHook(cancellation.context, poolHook)
         try {
             var current = request
             var redirectCount: Int64 = 0
@@ -316,7 +483,8 @@ public class HttpClient <: Resource {
                 }
                 match (next) {
                     case Some(value) =>
-                        let _ = response.body.drain(redirectPolicy.maximumDrainBytes)
+                        try { let _ = response.body.drain(redirectPolicy.maximumDrainBytes) }
+                        finally { response.close() }
                         current = value
                         redirectCount++
                     case None => return cancellation.wrap(response)
@@ -370,13 +538,40 @@ public class HttpClient <: Resource {
         var attempt: Int64 = 1
         while (true) {
             try {
-                return executeOnce(request, operation, trailer, connectionCancellation)
+                let outgoing = requestWithCookies(request, operation)
+                let response = executeOnce(outgoing, operation, trailer, connectionCancellation)
+                try {
+                    captureCookies(response.headers, request.url, operation)
+                } catch (error: Exception) {
+                    response.close()
+                    throw error
+                }
+                return response
             } catch (error: Exception) {
                 if (!retryPolicy.shouldRetry(request, error, attempt, operation)) { throw error }
                 attempt++
             }
         }
         throw Exception("unreachable HTTP retry loop exit")
+    }
+
+    private func requestWithCookies(request: HttpRequest, context: OperationContext): HttpRequest {
+        if (request.headers.getFirst("cookie").isSome()) { return request }
+        let jar = match (cookieJar) { case Some(value) => value; case None => return request }
+        let selected = jar.headerFor(request.url, context: context)
+        if (selected.isEmpty()) { return request }
+        let headers = HttpHeaders.builder(limits: limits)
+        for (entry in request.headers.entries) { headers.add(entry.name, entry.value) }
+        headers.add("Cookie", selected)
+        request.withHeaders(headers.build())
+    }
+
+    private func captureCookies(headers: HttpHeaders, url: HttpUrl, context: OperationContext): Unit {
+        if (let Some(jar) <- cookieJar) {
+            for (value in headers.getAll("set-cookie")) {
+                let _ = jar.acceptSetCookie(value, url, context: context)
+            }
+        }
     }
 
 /**
@@ -413,7 +608,7 @@ public class HttpClient <: Resource {
                         resolver,
                         transportFactory,
                         http1.DefaultHttp1TlsHandshaker.systemDefaultAlpn(),
-                        limits: limits
+                        limits: limits, pushConfig: pushConfig
                     )
                     https = Some(value)
                     value

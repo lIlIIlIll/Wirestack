@@ -35,6 +35,7 @@ public class Http2WriteTicket {
     private let changed = synchronized(mutex) { mutex.condition() }
     private var current = Http2WriteState.Queued
     private var failureReason = ""
+    private var completion: Option<(Http2WriteState) -> Unit> = None<(Http2WriteState) -> Unit>
 
     public prop state: Http2WriteState { get() { synchronized(mutex) { current } } }
     public prop failure: String { get() { synchronized(mutex) { failureReason } } }
@@ -66,24 +67,44 @@ public class Http2WriteTicket {
         }
     }
 
+    /** Retains at most one pending observer and invokes it outside scheduler and ticket locks. */
+    internal func whenTerminal(callback: (Http2WriteState) -> Unit): Unit {
+        let finished = synchronized(mutex) {
+            if (isTerminalWriteState(current)) { Some(current) }
+            else {
+                if (completion.isSome()) {
+                    throw IllegalStateException("HTTP/2 write already has a completion observer")
+                }
+                completion = Some(callback)
+                None<Http2WriteState>
+            }
+        }
+        if (let Some(state) <- finished) { callback(state) }
+    }
+
     internal func markWriting(): Unit { transition(Http2WriteState.Writing) }
     internal func markWritten(): Unit { transition(Http2WriteState.Written) }
     internal func markCancelled(): Unit { transition(Http2WriteState.Cancelled) }
     internal func markFailed(reason: String): Unit {
-        synchronized(mutex) {
-            if (isTerminalWriteState(current)) { return }
-            failureReason = reason
-            current = Http2WriteState.Failed
-            changed.notifyAll()
-        }
+        transition(Http2WriteState.Failed, reason: reason)
     }
 
-    private func transition(next: Http2WriteState): Unit {
-        synchronized(mutex) {
-            if (isTerminalWriteState(current)) { return }
-            current = next
-            changed.notifyAll()
+    private func transition(next: Http2WriteState, reason!: String = ""): Unit {
+        let observer = synchronized(mutex) {
+            if (isTerminalWriteState(current)) { None<(Http2WriteState) -> Unit> }
+            else {
+                current = next
+                failureReason = reason
+                let claimed = if (isTerminalWriteState(next)) {
+                    let value = completion
+                    completion = None<(Http2WriteState) -> Unit>
+                    value
+                } else { None<(Http2WriteState) -> Unit> }
+                changed.notifyAll()
+                claimed
+            }
         }
+        if (let Some(callback) <- observer) { callback(next) }
     }
 
     private func wake(): Unit { synchronized(mutex) { changed.notifyAll() } }
@@ -111,6 +132,7 @@ public class Http2WriteScheduler {
     private var writerRunning = false
     private var controlBurst: Int64 = 0
     private var active: ?Http2QueuedWrite = None<Http2QueuedWrite>
+    private var startedControlBatch: ?Int64 = None<Int64>
     private var maximumQueuedCount: Int64 = 0
     private var maximumQueuedBytes: UInt64 = 0u64
     // 0 = unclaimed, 1 = graceful close in progress, 2 = terminal. Abort may
@@ -151,42 +173,67 @@ public class Http2WriteScheduler {
         try { enqueueOwned(frame, Some(permit)) }
         catch (error: Exception) { let _ = permit.cancel(); throw error }
     }
-
-    /** Atomically admits one non-DATA control sequence, preserving wire contiguity. */
+    /**
+     * Atomically admits one HPACK-bearing control sequence. Admission is
+     * irrevocable because the encoder table has already advanced; the writer
+     * retains the whole batch contiguously through its final CONTINUATION.
+     */
     public func enqueueControlBatch(frames: Array<Http2Frame>): Array<Http2WriteTicket> {
-        if (frames.isEmpty()) { throw IllegalArgumentException("HTTP/2 control batch cannot be empty") }
+        if (frames.isEmpty()) {
+            abort(reason: AbortReason.ProtocolFailure)
+            throw IllegalArgumentException("HTTP/2 control batch cannot be empty")
+        }
         let encoded = ArrayList<Array<Byte>>()
         var totalBytes = 0u64
-        for (frame in frames) {
-            if (isDataFrame(frame.header.frameType)) {
-                throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
+        try {
+            for (frame in frames) {
+                if (isDataFrame(frame.header.frameType)) {
+                    throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
+                }
+                let bytes = serializeHttp2Frame(frame)
+                encoded.add(bytes)
+                totalBytes += UInt64(bytes.size)
             }
-            let bytes = serializeHttp2Frame(frame)
-            encoded.add(bytes)
-            totalBytes += UInt64(bytes.size)
+        } catch (error: Exception) {
+            abort(reason: AbortReason.ProtocolFailure)
+            throw error
         }
-        synchronized(mutex) {
+        let admitted = synchronized(mutex) {
             if (!isSchedulerOpen(schedulerState)) {
                 throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
             }
             if (frames.size > Int64(limits.maxPendingWrites) - queuedCount ||
                 totalBytes > UInt64(limits.maxPendingWriteBytes) -
                     min(queuedBytes, UInt64(limits.maxPendingWriteBytes))) {
-                throw Http2WriteQueueFullException("HTTP/2 control batch reached the pending write limit")
+                None<Array<Http2WriteTicket>>
+            } else {
+                let tickets = ArrayList<Http2WriteTicket>()
+                let batchId = nextId
+                for (index in 0..frames.size) {
+                    let frame = frames[index]
+                    let ticket = Http2WriteTicket(nextId, frame.header.streamId, this)
+                    controls.add(Http2QueuedWrite(
+                        nextId, frame.header.streamId, encoded[index], ticket,
+                        controlBatchId: Some(batchId),
+                        endsControlBatch: index == frames.size - 1
+                    ))
+                    nextId++
+                    queuedCount++
+                    queuedBytes += UInt64(encoded[index].size)
+                    recordQueueHighWaterLocked()
+                    tickets.add(ticket)
+                }
+                changed.notifyAll()
+                Some(tickets.toArray())
             }
-            let tickets = ArrayList<Http2WriteTicket>()
-            for (index in 0..frames.size) {
-                let frame = frames[index]
-                let ticket = Http2WriteTicket(nextId, frame.header.streamId, this)
-                controls.add(Http2QueuedWrite(nextId, frame.header.streamId, encoded[index], ticket))
-                nextId++
-                queuedCount++
-                queuedBytes += UInt64(encoded[index].size)
-                recordQueueHighWaterLocked()
-                tickets.add(ticket)
-            }
-            changed.notifyAll()
-            tickets.toArray()
+        }
+        match (admitted) {
+            case Some(tickets) => tickets
+            case None =>
+                abort(reason: AbortReason.ProtocolFailure)
+                throw Http2WriteQueueFullException(
+                    "HTTP/2 control batch reached the pending write limit"
+                )
         }
     }
 
@@ -379,21 +426,22 @@ public class Http2WriteScheduler {
 
     internal func cancel(id: Int64): Bool {
         let removed = synchronized(mutex) {
-            let item = removeQueuedLocked(id)
-            if (let Some(value) <- item) {
+            let items = removeQueuedGroupLocked(id)
+            for (item in items) {
                 queuedCount -= 1
-                queuedBytes -= UInt64(value.bytes.size)
-                changed.notifyAll()
+                queuedBytes -= UInt64(item.bytes.size)
             }
-            item
+            if (!items.isEmpty()) { changed.notifyAll() }
+            items
         }
-        match (removed) {
-            case Some(item) => item.cancelPermit(); item.ticket.markCancelled(); true
-            case None => false
+        for (item in removed) {
+            item.cancelPermit()
+            item.ticket.markCancelled()
         }
+        !removed.isEmpty()
     }
 
-    /** Cancels every queued frame owned by one reset stream, optionally retaining its RST ticket. */
+    /** Cancels queued stream work except irrevocable admitted HPACK batches and an optional RST ticket. */
     public func cancelStream(
         streamId: Http2StreamId,
         preservingTicketId!: ?Int64 = None<Int64>
@@ -403,7 +451,11 @@ public class Http2WriteScheduler {
             var controlIndex: Int64 = controls.size - 1
             while (controlIndex >= 0) {
                 let item = controls[controlIndex]
-                if (item.streamId.value == streamId.value && !preservesWrite(item, preservingTicketId)) {
+                // Admitted header batches have already mutated the HPACK
+                // encoder. They must reach the peer in full even after reset.
+                if (item.controlBatchId.isNone() &&
+                    item.streamId.value == streamId.value &&
+                    !preservesWrite(item, preservingTicketId)) {
                     claimed.add(controls.remove(at: controlIndex))
                 }
                 controlIndex -= 1
@@ -445,6 +497,9 @@ public class Http2WriteScheduler {
                     writeQueued(value, context)
                     let shouldFail = synchronized(mutex) {
                         active = None<Http2QueuedWrite>
+                        if (value.endsControlBatch) {
+                            startedControlBatch = None<Int64>
+                        }
                         isSchedulerFailed(schedulerState)
                     }
                     if (shouldFail) {
@@ -478,19 +533,32 @@ public class Http2WriteScheduler {
     }
 
     private func selectNextLocked(): Http2QueuedWrite {
-        if (!controls.isEmpty() && (controlBurst < HTTP2_MAX_CONTROL_BURST || dataStreams.isEmpty())) {
+        if (startedControlBatch.isSome()) {
+            if (controls.isEmpty() ||
+                !controls[0].belongsToControlBatch(startedControlBatch.getOrThrow())) {
+                throw IllegalStateException("HTTP/2 control batch lost wire contiguity")
+            }
             controlBurst += 1
             return controls.remove(at: 0)
         }
-        if (!dataStreams.isEmpty()) {
+        let selected = if (!controls.isEmpty() &&
+            (controlBurst < HTTP2_MAX_CONTROL_BURST || dataStreams.isEmpty())) {
+            controlBurst += 1
+            controls.remove(at: 0)
+        } else if (!dataStreams.isEmpty()) {
             controlBurst = 0
             let queue = dataStreams.remove(at: 0)
             let item = queue.items.remove(at: 0)
             if (!queue.items.isEmpty()) { dataStreams.add(queue) }
-            return item
+            item
+        } else {
+            controlBurst += 1
+            controls.remove(at: 0)
         }
-        controlBurst += 1
-        controls.remove(at: 0)
+        if (selected.controlBatchId.isSome() && !selected.endsControlBatch) {
+            startedControlBatch = selected.controlBatchId
+        }
+        selected
     }
 
     private func enqueueDataLocked(item: Http2QueuedWrite): Unit {
@@ -502,9 +570,14 @@ public class Http2WriteScheduler {
         dataStreams.add(queue)
     }
 
-    private func removeQueuedLocked(id: Int64): ?Http2QueuedWrite {
+    private func removeQueuedGroupLocked(id: Int64): Array<Http2QueuedWrite> {
         for (index in 0..controls.size) {
-            if (controls[index].id == id) { return Some(controls.remove(at: index)) }
+            let target = controls[index]
+            if (target.id == id) {
+                // HPACK-bearing control batches are irrevocable once admitted.
+                if (target.controlBatchId.isSome()) { return [] }
+                return [controls.remove(at: index)]
+            }
         }
         for (queueIndex in 0..dataStreams.size) {
             let queue = dataStreams[queueIndex]
@@ -512,11 +585,11 @@ public class Http2WriteScheduler {
                 if (queue.items[itemIndex].id == id) {
                     let item = queue.items.remove(at: itemIndex)
                     if (queue.items.isEmpty()) { let _ = dataStreams.remove(at: queueIndex) }
-                    return Some(item)
+                    return [item]
                 }
             }
         }
-        None<Http2QueuedWrite>
+        []
     }
 
     private func drainQueuedLocked(): Array<Http2QueuedWrite> {
@@ -527,6 +600,7 @@ public class Http2WriteScheduler {
         dataStreams.clear()
         queuedCount = 0
         queuedBytes = 0u64
+        startedControlBatch = None<Int64>
         output.toArray()
     }
 
@@ -577,27 +651,40 @@ public class Http2WriteScheduler {
         }
         if (claimed) { try { transport.abort(reason: Some(reason)) } catch (_: Exception) {} }
     }
-
 }
+
 
 private class Http2QueuedWrite {
     let id: Int64
     let streamId: Http2StreamId
     let bytes: Array<Byte>
     let ticket: Http2WriteTicket
+    let controlBatchId: ?Int64
+    let endsControlBatch: Bool
     private let permit: ?Http2SendPermit
     init(
         id: Int64,
         streamId: Http2StreamId,
         bytes: Array<Byte>,
         ticket: Http2WriteTicket,
-        permit!: ?Http2SendPermit = None<Http2SendPermit>
+        permit!: ?Http2SendPermit = None<Http2SendPermit>,
+        controlBatchId!: ?Int64 = None<Int64>,
+        endsControlBatch!: Bool = false
     ) {
         this.id = id
         this.streamId = streamId
         this.bytes = bytes
         this.ticket = ticket
         this.permit = permit
+        this.controlBatchId = controlBatchId
+        this.endsControlBatch = endsControlBatch
+    }
+
+    func belongsToControlBatch(batchId: Int64): Bool {
+        match (controlBatchId) {
+            case Some(value) => value == batchId
+            case None => false
+        }
     }
 
     func beginPermit(context: OperationContext): Bool {

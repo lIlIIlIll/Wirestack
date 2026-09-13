@@ -30,6 +30,7 @@ public func selectHttpNegotiatedProtocol(value: ?String): HttpNegotiatedProtocol
 /** Pool-facing view of one live HTTP/2 connection. */
 public interface Http2MultiplexedConnection <: Resource {
     prop activeStreamCount: Int64
+    prop ownedStreamCount: Int64
     prop streamCapacity: UInt32
     prop acceptingNewStreams: Bool
     func openStream(listener: Http2GoAwayListener, endStream: Bool): Http2PoolStreamClaim
@@ -64,6 +65,7 @@ public class Http2CorePoolConnection <: Http2MultiplexedConnection {
     }
 
     public prop activeStreamCount: Int64 { get() { registry.activeLocalCount } }
+    public prop ownedStreamCount: Int64 { get() { registry.activeCount } }
     public prop streamCapacity: UInt32 { get() { registry.peerMaxConcurrentStreams } }
     public prop acceptingNewStreams: Bool { get() { goAway.acceptingNewStreams && closer.result.isNone() } }
 
@@ -92,6 +94,15 @@ public interface Http2ExecutableConnection <: Http2MultiplexedConnection {
         connectionCancellation: CancellationToken,
         onTerminated: () -> Unit
     ): HttpResponse
+    func connectClaimed(
+        request: HttpRequest,
+        protocol: ?String,
+        admission: Http2PoolStreamClaim,
+        signal: Http2ClientExecutionSignal,
+        context: OperationContext,
+        connectionCancellation: CancellationToken,
+        onTerminated: () -> Unit
+    ): Http2ConnectResult
 }
 
 /** Keeps HTTP/1 pool policy separate from the protocol-owned HTTP/2 connection. */
@@ -101,6 +112,7 @@ public class Http2ClientPoolConnection <: Http2ExecutableConnection {
     public init(connection: Http2ClientConnection) { this.connection = connection }
 
     public prop activeStreamCount: Int64 { get() { connection.activeStreamCount } }
+    public prop ownedStreamCount: Int64 { get() { connection.ownedStreamCount } }
     public prop streamCapacity: UInt32 { get() { connection.streamCapacity } }
     public prop acceptingNewStreams: Bool { get() { connection.acceptingNewStreams } }
 
@@ -128,6 +140,21 @@ public class Http2ClientPoolConnection <: Http2ExecutableConnection {
         )
     }
 
+
+    public func connectClaimed(
+        request: HttpRequest,
+        protocol: ?String,
+        admission: Http2PoolStreamClaim,
+        signal: Http2ClientExecutionSignal,
+        context: OperationContext,
+        connectionCancellation: CancellationToken,
+        onTerminated: () -> Unit
+    ): Http2ConnectResult {
+        connection.connectAdmitted(
+            request, protocol, admission.stream, admission.registration, signal,
+            context, connectionCancellation, onTerminated
+        )
+    }
     public func close(): Unit { connection.close() }
     public func isClosed(): Bool { connection.isClosed() }
     public func abort(reason!: AbortReason = AbortReason.ApplicationAbort): Unit {
@@ -186,6 +213,7 @@ public class Http2PoolLease {
 public struct Http2ConnectionPoolSnapshot {
     public let connections: Int64
     public let activeStreams: Int64
+    public let ownedStreams: Int64
     public let availableStreamCapacity: Int64
     public let reservations: Int64
     public let waiters: Int64
@@ -194,6 +222,7 @@ public struct Http2ConnectionPoolSnapshot {
     public init(
         connections: Int64,
         activeStreams: Int64,
+        ownedStreams: Int64,
         availableStreamCapacity: Int64,
         reservations: Int64,
         waiters: Int64,
@@ -201,6 +230,7 @@ public struct Http2ConnectionPoolSnapshot {
     ) {
         this.connections = connections
         this.activeStreams = activeStreams
+        this.ownedStreams = ownedStreams
         this.availableStreamCapacity = availableStreamCapacity
         this.reservations = reservations
         this.waiters = waiters
@@ -350,7 +380,7 @@ public class Http2ConnectionPool <: Resource {
                 let entry = entries[index]
                 if (entry.key == lease.key &&
                     (!entry.connection.acceptingNewStreams || entry.connection.isClosed()) &&
-                    entry.connection.activeStreamCount == 0) {
+                    entry.connection.ownedStreamCount == 0) {
                     discard = Some(entries.remove(at: index).connection)
                 }
             }
@@ -362,16 +392,18 @@ public class Http2ConnectionPool <: Resource {
     public func snapshot(): Http2ConnectionPoolSnapshot {
         synchronized(mutex) {
             var active: Int64 = 0
+            var owned: Int64 = 0
             var available: Int64 = 0
             for (entry in entries) {
                 let current = entry.connection.activeStreamCount
                 active += current
+                owned += entry.connection.ownedStreamCount
                 if (entry.connection.acceptingNewStreams && !entry.connection.isClosed()) {
                     available += max(0, Int64(entry.connection.streamCapacity) - current)
                 }
             }
             Http2ConnectionPoolSnapshot(
-                entries.size, active, available, reservations.size, waiters, closed
+                entries.size, active, owned, available, reservations.size, waiters, closed
             )
         }
     }
@@ -449,7 +481,7 @@ public class Http2ConnectionPool <: Resource {
         for (index in 0..entries.size) {
             let connection = entries[index].connection
             if ((!connection.acceptingNewStreams || connection.isClosed()) &&
-                connection.activeStreamCount == 0) { return index }
+                connection.ownedStreamCount == 0) { return index }
         }
         -1
     }

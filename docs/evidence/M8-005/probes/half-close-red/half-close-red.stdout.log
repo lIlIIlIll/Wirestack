@@ -1,0 +1,96 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 7611961400 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 7595823666 ns, RESULT:
+    [ PASSED ] CASE: encodedHeaderFailureClosesTheConnection (930197 ns)
+    [ PASSED ] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (4551533 ns)
+    [ PASSED ] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (3937149 ns)
+    [ PASSED ] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (2077805 ns)
+    [ PASSED ] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (766318 ns)
+    [ PASSED ] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (1407593 ns)
+    [ PASSED ] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (2939350 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (989680 ns)
+    [ PASSED ] CASE: connectedStreamOutlivesHandshakeCancellationAndUsesOperationContexts (2793602 ns)
+    [ PASSED ] CASE: rejectedConnectReturnsFullResponseAndClosesRequestDirection (2572804 ns)
+    [ PASSED ] CASE: enabledPushAttachesBoundedCallerDrivenResponses (5616217 ns)
+    [ ERROR  ] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (1168714379 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:274)
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.asTestSuite.lambda.9.lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:408)
+    STDERR:
+    An exception has occurred:
+    IllegalStateException: HTTP/2 duplex write failed: HTTP/2 write scheduler aborted during an active write
+    An exception has occurred:
+    NetworkException: peer aborted transport
+    	 at wirestack.internal.http2::waitDuplexWrite(wirestack.internal.http2::Http2WriteTicket, wirestack::OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/duplex_stream.cj:234)
+    	 at wirestack.internal.http2::Http2StreamTransport::shutdownWrite(wirestack::OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/duplex_stream.cj:201)
+    	 at wirestack.internal.http2::Http2StreamTransport::shutdown(wirestack::ShutdownDirection)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/duplex_stream.cj:129)
+    	 at wirestack.internal.http2/test::Http2ClientConnectionTest::contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter::lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:271)
+    	 at wirestack.internal.transport::resetOperation(wirestack::NetworkErrorCategory, wirestack::NetworkPhase)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/transport/memory_transport.cj:278)
+    	 at wirestack.internal.transport::MemoryBytePipe::read(wirestack::MutableByteSpan, wirestack::OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/transport/memory_transport.cj:146)
+    	 at wirestack.internal.transport::MemoryTransport::readSome(wirestack::MutableByteSpan, wirestack::OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/transport/memory_transport.cj:66)
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Peer::serve()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1172)
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Fixture::init::lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1085)
+    [ ERROR  ] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (3189805806 ns)
+    REASON: An exception has occurred:NetworkException: HTTP/2 operation deadline exceeded
+	at std.io.IOException.init(std.core.String)(std/io/io_exception.cj:19)
+	at wirestack.NetworkException.init(wirestack.NetworkErrorCategory, wirestack.NetworkPhase, wirestack.NetworkErrorCode, std.core.String, wirestack.Retryability, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>)(<repo-root>-pr-worktrees/M8-005-publication/src/network_error.cj:392)
+	at wirestack.internal.http2.checkClientContext(wirestack.OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:1544)
+	at wirestack.internal.http2.Http2ClientExchange.awaitResponse(wirestack.OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:839)
+	at wirestack.internal.http2.Http2ClientConnection.executeAdmitted(wirestack.HttpRequest, wirestack.internal.http2.Http2ClientRequestPlan, wirestack.internal.http2.Http2StreamStateMachine, wirestack.internal.http2.Http2GoAwayRegistration, wirestack.internal.http2.Http2ClientExecutionSignal, wirestack.OperationContext, wirestack.CancellationToken, () -> Unit)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:312)
+	at wirestack.internal.http2.Http2ClientConnection.execute(wirestack.HttpRequest, wirestack.OperationContext, wirestack.HttpTrailer)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:213)
+	at wirestack.internal.http2/test.HalfCloseHttp2Fixture.siblingBody()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1119)
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.halfCloseOrdersEndAfterAdmittedFlowControlledWrite()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:297)
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.asTestSuite.lambda.10.lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:408)
+    STDERR:
+    An exception has occurred:
+    Exception: HTTP/2 peer received DATA after END_STREAM
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Peer::serve()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1216)
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Fixture::init::lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1085)
+    [ ERROR  ] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (3181464805 ns)
+    REASON: An exception has occurred:NetworkException: HTTP/2 operation deadline exceeded
+	at std.io.IOException.init(std.core.String)(std/io/io_exception.cj:19)
+	at wirestack.NetworkException.init(wirestack.NetworkErrorCategory, wirestack.NetworkPhase, wirestack.NetworkErrorCode, std.core.String, wirestack.Retryability, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>)(<repo-root>-pr-worktrees/M8-005-publication/src/network_error.cj:392)
+	at wirestack.internal.http2.checkClientContext(wirestack.OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:1544)
+	at wirestack.internal.http2.Http2ClientExchange.awaitResponse(wirestack.OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:839)
+	at wirestack.internal.http2.Http2ClientConnection.executeAdmitted(wirestack.HttpRequest, wirestack.internal.http2.Http2ClientRequestPlan, wirestack.internal.http2.Http2StreamStateMachine, wirestack.internal.http2.Http2GoAwayRegistration, wirestack.internal.http2.Http2ClientExecutionSignal, wirestack.OperationContext, wirestack.CancellationToken, () -> Unit)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:312)
+	at wirestack.internal.http2.Http2ClientConnection.execute(wirestack.HttpRequest, wirestack.OperationContext, wirestack.HttpTrailer)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection.cj:213)
+	at wirestack.internal.http2/test.HalfCloseHttp2Fixture.siblingBody()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1119)
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:323)
+	at wirestack.internal.http2/test.Http2ClientConnectionTest.asTestSuite.lambda.11.lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:408)
+    STDERR:
+    An exception has occurred:
+    Exception: HTTP/2 peer received DATA after END_STREAM
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Peer::serve()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1216)
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Fixture::init::lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1085)
+    [ FAILED ] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (23365138 ns)
+    Assert Failed: `(@AssertThrows: Expected 'NetworkException' was not caught.)`
+
+    STDERR:
+    An exception has occurred:
+    NetworkException: peer aborted transport
+    	 at wirestack.internal.transport::resetOperation(wirestack::NetworkErrorCategory, wirestack::NetworkPhase)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/transport/memory_transport.cj:278)
+    	 at wirestack.internal.transport::MemoryBytePipe::read(wirestack::MutableByteSpan, wirestack::OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/transport/memory_transport.cj:146)
+    	 at wirestack.internal.transport::MemoryTransport::readSome(wirestack::MutableByteSpan, wirestack::OperationContext)(<repo-root>-pr-worktrees/M8-005-publication/src/internal/transport/memory_transport.cj:66)
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Peer::serve()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1172)
+    	 at wirestack.internal.http2/test::HalfCloseHttp2Fixture::init::lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:1085)
+Summary: TOTAL: 181
+    PASSED: 11, SKIPPED: 166, ERROR: 3
+    FAILED: 1, listed below:
+            TCS: Http2ClientConnectionTest, CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter
+            TCS: Http2ClientConnectionTest, CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite
+            TCS: Http2ClientConnectionTest, CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite
+            TCS: Http2ClientConnectionTest, CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 7619513023 ns, RESULT:
+TP: wirestack.*, time elapsed: 7619402092 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.http2, time elapsed: 7611961400 ns, RESULT:
+        TCS: Http2ClientConnectionTest, time elapsed: 7595823666 ns, RESULT:
+        [ ERROR  ] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (1168714379 ns)
+        [ ERROR  ] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (3189805806 ns)
+        [ ERROR  ] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (3181464805 ns)
+        [ FAILED ] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (23365138 ns)
+Summary: TOTAL: 181
+    PASSED: 11, SKIPPED: 166, ERROR: 3
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
