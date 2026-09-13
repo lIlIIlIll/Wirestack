@@ -170,6 +170,7 @@ scripts/release_registry_rehearsal.py
 scripts/validate_cangjie_sts.py
 scripts/test_validate_cangjie_sts.py
 scripts/test_ci_candidate_wiring.py
+scripts/test_json_pure_perf_compare.py
 scripts/coverage.sh
 scripts/cjcov_to_lcov.py
 scripts/test_cjcov_to_lcov.py
