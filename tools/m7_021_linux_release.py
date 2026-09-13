@@ -31,6 +31,9 @@ PACKAGE_ROOT = f"wirestack-{VERSION}"
 ARTIFACT_NAME = f"{PACKAGE_ROOT}-linux-x86_64-glibc.tar.gz"
 SMOKE_FIXTURE = ROOT / "tools/release_smoke/main.cj"
 FORBIDDEN_OPENSSL_NAMES = re.compile(r"^lib(?:ssl|crypto)(?:\.so(?:\..*)?)?$", re.IGNORECASE)
+HTTP_FILES_PAYLOAD_ROOT = "target/native/http_files/current"
+HTTP_FILES_MANIFEST_NAME = "http-files-manifest.json"
+HTTP_FILES_ARCHIVE = "lib/libwirestack_http_files.a"
 FORBIDDEN_LOADER_BYTES = (b"libssl.so", b"libcrypto.so")
 EXPECTED_SMOKE_LINES = {
     "HTTPS_CLIENT_SERVER=PASS",
@@ -42,11 +45,18 @@ EXPECTED_SMOKE_LINES = {
     "externalOpenSslDependency=false",
 }
 PROJECT_LICENSE_EXPRESSION = "Apache-2.0"
+PUBLIC_SUFFIX_FILES = (
+    "third_party/public_suffix/LICENSE.MPL-2.0",
+    "third_party/public_suffix/public_suffix_list.dat",
+    "third_party/public_suffix/source.json",
+    "third_party/public_suffix/generate.py",
+)
 RELEASE_METADATA_FILES = (
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
     "third_party/aws-lc/LICENSE",
     "third_party/aws-lc/NOTICE",
+    PUBLIC_SUFFIX_FILES[0],
 )
 QUALIFICATION_INPUTS = (
     "LICENSE",
@@ -56,10 +66,14 @@ QUALIFICATION_INPUTS = (
     "cjpm.toml",
     "docs/planning/implementation-backlog.md",
     "native/resolver/linux/wirestack_resolver.c",
+    "native/http_files/wirestack_http_files.c",
+    "native/http_files/wirestack_http_files.h",
     "native/resolver/linux/wirestack_resolver.h",
     "native/tls/aws_lc/provider.json",
     "native/tls/aws_lc/wirestack_tls_provider.c",
     "native/tls/aws_lc/wirestack_tls_provider.h",
+    "tools/build_linux_http_files.py",
+    "tools/build_native_dependencies.py",
     "tools/build_linux_resolver.py",
     "tools/build_linux_tls_provider.py",
     "tools/build_tls_provider.py",
@@ -70,7 +84,7 @@ QUALIFICATION_INPUTS = (
     "tools/release_smoke/main.cj",
     "third_party/aws-lc/LICENSE",
     "third_party/aws-lc/NOTICE",
-)
+) + PUBLIC_SUFFIX_FILES
 EXCLUDED_PLATFORM_PARTS = {
     ("src", "internal", "platform", "android"),
     ("src", "internal", "platform", "apple"),
@@ -166,6 +180,16 @@ def prepare_native_dependencies(root: Path, *, offline: bool) -> None:
         provider.append("--offline")
     run(provider, cwd=root)
     run([sys.executable, str(root / "tools/build_linux_resolver.py"), "--quiet"], cwd=root)
+    run(
+        [
+            sys.executable,
+            str(root / "tools/build_linux_http_files.py"),
+            "--root",
+            str(root),
+            "--quiet",
+        ],
+        cwd=root,
+    )
 
 
 def _native_payload(root: Path, relative_root: str, current: Path) -> dict[str, bytes]:
@@ -177,10 +201,78 @@ def _native_payload(root: Path, relative_root: str, current: Path) -> dict[str, 
         payload[f"{relative_root}/{relative}"] = path.read_bytes()
     return payload
 
+def validate_http_files_manifest(
+    manifest: Mapping[str, Any],
+    payload: Mapping[str, bytes],
+) -> None:
+    if (
+        manifest.get("schema_version") != 1
+        or manifest.get("component") != "wirestack-http-files"
+        or manifest.get("abi_version") != 1
+        or manifest.get("private_runtime_abi") is not False
+    ):
+        raise ReleaseError("HTTP files native manifest identity is invalid")
+    fingerprint = manifest.get("build_fingerprint")
+    inputs = manifest.get("inputs")
+    if (
+        not isinstance(fingerprint, str)
+        or re.fullmatch(r"[0-9a-f]{64}", fingerprint) is None
+        or not isinstance(inputs, dict)
+    ):
+        raise ReleaseError("HTTP files native build provenance is absent")
+    if not evidence_digest.schema_text_sha256_equal(
+        fingerprint,
+        evidence_digest.text_evidence_bytes_sha256(canonical_json(inputs)),
+    ):
+        raise ReleaseError("HTTP files native build fingerprint does not bind its inputs")
+    expected_sources = {
+        "native/http_files/wirestack_http_files.c",
+        "native/http_files/wirestack_http_files.h",
+    }
+    sources = inputs.get("sources")
+    tools = inputs.get("tools")
+    if (
+        not isinstance(sources, dict)
+        or set(sources) != expected_sources
+        or any(
+            not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
+            for value in sources.values()
+        )
+        or not isinstance(inputs.get("builder_sha256"), str)
+        or re.fullmatch(r"[0-9a-f]{64}", inputs["builder_sha256"]) is None
+        or not isinstance(tools, dict)
+        or set(tools) != {"ar", "cc", "ranlib"}
+        or any(
+            not isinstance(value, dict)
+            or not isinstance(value.get("path"), str)
+            or not value["path"]
+            or not isinstance(value.get("version"), str)
+            or not value["version"]
+            for value in tools.values()
+        )
+    ):
+        raise ReleaseError("HTTP files native source or tool provenance is incomplete")
+    archive = manifest.get("archive")
+    archive_payload_path = f"{HTTP_FILES_PAYLOAD_ROOT}/{HTTP_FILES_ARCHIVE}"
+    if (
+        not isinstance(archive, dict)
+        or archive.get("path") != HTTP_FILES_ARCHIVE
+        or archive_payload_path not in payload
+        or archive.get("bytes") != len(payload[archive_payload_path])
+        or not evidence_digest.schema_artifact_sha256_equal(
+            archive.get("sha256"),
+            artifact_payload_sha256(payload[archive_payload_path]),
+        )
+    ):
+        raise ReleaseError("HTTP files native archive provenance is invalid")
+
 
 def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     payload: dict[str, bytes] = {}
-    for relative in ("cjpm.toml", "cjpm.lock", "README.md", *RELEASE_METADATA_FILES):
+    for relative in (
+        "cjpm.toml", "cjpm.lock", "README.md",
+        *RELEASE_METADATA_FILES, *PUBLIC_SUFFIX_FILES[1:],
+    ):
         path = root / relative
         if not path.is_file():
             raise ReleaseError(f"release input is absent: {relative}")
@@ -190,11 +282,15 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
 
     provider_root = root / "target/native/current"
     resolver_root = root / "target/native/resolver/current"
+    http_files_root = root / HTTP_FILES_PAYLOAD_ROOT
     payload.update(_native_payload(root, "target/native/current", provider_root))
     payload.update(_native_payload(root, "target/native/resolver/current", resolver_root))
+    payload.update(_native_payload(root, HTTP_FILES_PAYLOAD_ROOT, http_files_root))
 
     provider_manifest = load_json(provider_root / "provider-manifest.json")
     resolver_manifest = load_json(resolver_root / "resolver-manifest.json")
+    http_files_manifest = load_json(http_files_root / HTTP_FILES_MANIFEST_NAME)
+    validate_http_files_manifest(http_files_manifest, payload)
     if provider_manifest.get("externalOpenSslDependency") is not False:
         raise ReleaseError("provider manifest does not set externalOpenSslDependency=false")
 
@@ -208,7 +304,7 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     ]
     payload_digest = evidence_digest.text_evidence_bytes_sha256(canonical_json(entries))
     release_manifest: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "package": "wirestack",
         "version": VERSION,
         "target": platform_identity(),
@@ -248,6 +344,15 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
             "archive_sha256": resolver_manifest.get("archive", {}).get("sha256"),
             "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(
                 payload["target/native/resolver/current/resolver-manifest.json"]
+            ),
+        },
+        "httpFiles": {
+            "component": http_files_manifest.get("component"),
+            "abi_version": http_files_manifest.get("abi_version"),
+            "build_fingerprint": http_files_manifest.get("build_fingerprint"),
+            "archive_sha256": http_files_manifest.get("archive", {}).get("sha256"),
+            "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(
+                payload[f"{HTTP_FILES_PAYLOAD_ROOT}/{HTTP_FILES_MANIFEST_NAME}"]
             ),
         },
         "externalOpenSslDependency": False,
@@ -432,6 +537,9 @@ def validate_report(
         or reproducibility.get("digests") != [digest, digest]
     ):
         raise ReleaseError("artifact reproducibility evidence is invalid")
+    release_schema_version = artifact.get("release_schema_version")
+    if release_schema_version is not None and release_schema_version not in {1, 2}:
+        raise ReleaseError("qualification release manifest schema is unsupported")
     source_digest = report.get("source_tree_sha256")
     if not isinstance(source_digest, str) or re.fullmatch(r"[0-9a-f]{64}", source_digest) is None:
         raise ReleaseError("qualification source tree fingerprint is invalid")
@@ -541,6 +649,7 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
             "name": artifact.name,
             "bytes": artifact.stat().st_size,
             "sha256": evidence_digest.artifact_byte_sha256(artifact),
+            "release_schema_version": release_manifest["schema_version"],
             "reproducibility": {
                 "builds": 2,
                 "digests": [first_digest, second_digest],

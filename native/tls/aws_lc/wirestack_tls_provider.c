@@ -3,6 +3,7 @@
 #include <openssl/base.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#include <openssl/evp.h>
 #include <openssl/mem.h>
 #include <openssl/pool.h>
 #include <openssl/rand.h>
@@ -745,6 +746,72 @@ int32_t wirestack_tls_sha256(
     return SHA256(input, (size_t)size, out_digest) == out_digest
         ? WIRESTACK_TLS_PROVIDER_OK
         : WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_websocket_random(uint8_t *output, uint64_t size) {
+    if (size == UINT64_C(0)) {
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (output == NULL || size > (uint64_t)SIZE_MAX) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    return RAND_bytes(output, (size_t)size) == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_RANDOM_FAILED;
+}
+
+int32_t wirestack_tls_websocket_base64(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_size
+) {
+    uint64_t encoded_size;
+    int encoded;
+    if (out_size == NULL || size > (uint64_t)SIZE_MAX ||
+        size > ((uint64_t)(INT_MAX / 4) * UINT64_C(3) - UINT64_C(2)) ||
+        (size != UINT64_C(0) && input == NULL)) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_size = UINT64_C(0);
+    encoded_size = UINT64_C(4) * ((size + UINT64_C(2)) / UINT64_C(3));
+    if (output_capacity < encoded_size + UINT64_C(1) || output == NULL) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    encoded = EVP_EncodeBlock(output, input, (int)size);
+    if (encoded < 0 || (uint64_t)encoded != encoded_size) {
+        return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+    }
+    output[encoded_size] = UINT8_C(0);
+    *out_size = encoded_size;
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_websocket_sha1_base64(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_size
+) {
+    uint8_t digest[SHA_DIGEST_LENGTH];
+    int32_t status;
+    if (size > (uint64_t)SIZE_MAX || (size != UINT64_C(0) && input == NULL)) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    if (SHA1(input, (size_t)size, digest) != digest) {
+        return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+    }
+    status = wirestack_tls_websocket_base64(
+        digest,
+        (uint64_t)sizeof(digest),
+        output,
+        output_capacity,
+        out_size
+    );
+    OPENSSL_cleanse(digest, sizeof(digest));
+    return status;
 }
 
 int32_t wirestack_tls_certificate_validate_der(

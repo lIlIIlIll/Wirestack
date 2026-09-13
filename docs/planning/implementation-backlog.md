@@ -497,9 +497,12 @@ stream/listener and explicitly addressed datagrams, with native evidence in
 `docs/evidence/M8-003/`. Outgoing abstract names are restricted to the supported
 107-byte UTF-8 profile; Unix connected send, unnamed datagram source conversion
 and privileged raw I/O remain explicit SDK/adapter exclusions. M8-004 passes
-all twelve acceptance commands, including 100 network tests and twelve native
-DNS scenarios. M8-005 through M8-007 remain pending and must not inherit these
-socket or DNS qualification claims.
+all twelve acceptance commands, including 103 network tests and twelve native
+DNS scenarios. M8-005 passes all thirteen acceptance commands, including the offline
+PSL check, five installed HTTP consumer modes and 758 passing Cangjie cases
+and 23 skips. It qualifies bounded cookie, multipart/file, Upgrade, WebSocket,
+HTTP/2 push and hook behavior. M8-006 is READY. M8-007 remains pending and must
+not inherit socket, DNS or HTTP qualification as final release evidence.
 
 | ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD/ADR 追踪 | 合并/验收条件 |
 |---|---|---|---:|---|---|---|

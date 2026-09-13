@@ -113,7 +113,8 @@ public class Http2ConnectionReader {
         transport: DuplexTransport,
         machine: Http2ConnectionStateMachine,
         handler: Http2InboundFrameHandler,
-        limits!: Http2Limits = Http2Limits()
+        limits!: Http2Limits = Http2Limits(),
+        additionalStreamListeners!: UInt32 = 0u32
     ) {
         this.transport = transport
         this.machine = machine
@@ -121,7 +122,10 @@ public class Http2ConnectionReader {
         parser = Http2FrameParser(limits: limits)
         // The stream registry owns one connection-level listener in addition
         // to one request listener for every concurrently active stream.
-        terminations = Http2ReaderTerminationRegistry(limits.maxConcurrentStreams, reservedListeners: 1u32)
+        terminations = Http2ReaderTerminationRegistry(
+            limits.maxConcurrentStreams,
+            reservedListeners: 1u32 + additionalStreamListeners
+        )
     }
 
     /** Runs to terminal completion on the caller's task; a second call is rejected forever. */

@@ -240,6 +240,100 @@ class Http2WriteSchedulerTest {
     }
 
     @TestCase
+    func admittedHeaderBatchSurvivesResetDuringPartialFirstWrite(): Unit {
+        let transport = PausingPartialSchedulerTransport()
+        let scheduler = Http2WriteScheduler(transport)
+        let streamId = Http2StreamId(1u32)
+        let tickets = scheduler.enqueueControlBatch([
+            schedulerHeaderPart(streamId, false),
+            schedulerContinuationPart(streamId)
+        ])
+        let writer = spawn { scheduler.run() }
+        try {
+            transport.waitUntilPartialWrite()
+            @Expect(scheduler.cancelStream(streamId), 0)
+            @Expect(!tickets[1].cancel())
+            let ping = scheduler.enqueue(schedulerPing(9u8))
+            scheduler.close()
+            transport.release()
+
+            @Expect(isSchedulerTestClosed(writer.get(Duration.second)))
+            let frames = decodeScheduledFrames(transport.bytes())
+            @Expect(frameCodes(frames), [1u8, 9u8, 6u8])
+            @Expect(isWriteTestWritten(tickets[0].wait()))
+            @Expect(isWriteTestWritten(tickets[1].wait()))
+            @Expect(isWriteTestWritten(ping.wait()))
+        } finally {
+            transport.release()
+            scheduler.abort()
+        }
+    }
+
+    @TestCase
+    func unstartedEncodedHeaderBatchIsIrrevocableAfterAdmission(): Unit {
+        let transport = RecordingSchedulerTransport()
+        let scheduler = Http2WriteScheduler(transport)
+        let streamId = Http2StreamId(1u32)
+        let tickets = scheduler.enqueueControlBatch([
+            schedulerHeaderPart(streamId, false),
+            schedulerContinuationPart(streamId)
+        ])
+
+        @Expect(scheduler.cancelStream(streamId), 0)
+        @Expect(!tickets[0].cancel())
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+        @Expect(frameCodes(decodeScheduledFrames(transport.bytes())), [1u8, 9u8])
+    }
+
+    @TestCase
+    func largeHeaderBatchRemainsContiguousPastControlBurstLimit(): Unit {
+        let transport = RecordingSchedulerTransport()
+        let scheduler = Http2WriteScheduler(
+            transport,
+            limits: Http2Limits(maxPendingWrites: 16u32, maxPendingWriteBytes: 4096u32)
+        )
+        let streamId = Http2StreamId(1u32)
+        let parts = ArrayList<Http2Frame>()
+        parts.add(schedulerHeaderPart(streamId, false))
+        for (index in 0..9) {
+            parts.add(schedulerContinuationPart(streamId, endHeaders: index == 8))
+        }
+        let _ = scheduler.enqueueControlBatch(parts.toArray())
+        let _ = scheduler.enqueue(schedulerData(3u32, 7u8))
+        scheduler.close()
+
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+        let frames = decodeScheduledFrames(transport.bytes())
+        @Expect(frames.size, 11)
+        for (index in 0..10) {
+            @Expect(http2FrameTypeCode(frames[index].header.frameType),
+                if (index == 0) { 1u8 } else { 9u8 })
+        }
+        @Expect(http2FrameTypeCode(frames[10].header.frameType), 0u8)
+    }
+
+    @TestCase
+    func failedHeaderBatchAdmissionTerminatesScheduler(): Unit {
+        let transport = RecordingSchedulerTransport()
+        let scheduler = Http2WriteScheduler(
+            transport,
+            limits: Http2Limits(maxPendingWrites: 1u32, maxPendingWriteBytes: 1024u32)
+        )
+        let queued = scheduler.enqueue(schedulerData(1u32, 1u8))
+        expectWriteQueueFull({ =>
+            let _ = scheduler.enqueueControlBatch([
+                schedulerHeaderPart(Http2StreamId(3u32), false),
+                schedulerContinuationPart(Http2StreamId(3u32))
+            ])
+        })
+
+        @Expect(isSchedulerTestFailed(scheduler.state))
+        @Expect(isWriteTestFailed(queued.wait()))
+        @Expect(transport.abortCalls.load(), 1)
+    }
+
+    @TestCase
     func concurrentHeaderBatchesStayContiguousOnTheWire(): Unit {
         let transport = RecordingSchedulerTransport(maxChunk: 1)
         let scheduler = Http2WriteScheduler(
@@ -282,10 +376,14 @@ private func schedulerHeaderPart(streamId: Http2StreamId, endHeaders: Bool): Htt
     )
 }
 
-private func schedulerContinuationPart(streamId: Http2StreamId): Http2Frame {
+private func schedulerContinuationPart(
+    streamId: Http2StreamId,
+    endHeaders!: Bool = true
+): Http2Frame {
     Http2Frame(
         Http2FrameHeader(
-            1u32, Http2FrameType.Continuation, Http2Flags(raw: 0x04u8), streamId
+            1u32, Http2FrameType.Continuation,
+            Http2Flags(raw: if (endHeaders) { 0x04u8 } else { 0u8 }), streamId
         ),
         [0x84u8]
     )
@@ -347,6 +445,65 @@ private class RecordingSchedulerTransport <: DuplexTransport {
     public func close(): Unit { closed = true }
     public func isClosed(): Bool { closed }
     public func abort(reason!: ?AbortReason): Unit { let _ = reason; closed = true; let _ = abortCalls.fetchAdd(1) }
+    func bytes(): Array<Byte> { synchronized(mutex) { output.toArray() } }
+}
+
+private class PausingPartialSchedulerTransport <: DuplexTransport {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private let output = ArrayList<Byte>()
+    private var calls: Int64 = 0
+    private var partialWritten = false
+    private var released = false
+    private var closed = false
+
+    public prop info: TransportInfo { get() { TransportInfo("http2-partial-scheduler-test") } }
+
+    public func readSome(_: MutableByteSpan, context!: OperationContext): ReadResult {
+        let _ = context
+        ReadResult.EndOfStream
+    }
+
+    public func writeSome(source: ByteSpan, context!: OperationContext): Int64 {
+        let _ = context
+        synchronized(mutex) {
+            calls++
+            if (calls == 1) {
+                output.add(source.bytes[source.offset])
+                partialWritten = true
+                changed.notifyAll()
+                return 1
+            }
+            while (!released) { changed.wait() }
+            for (index in 0..source.length) {
+                output.add(source.bytes[source.offset + index])
+            }
+            source.length
+        }
+    }
+
+    public func shutdown(_: ShutdownDirection): Unit {}
+    public func close(_: OperationContext): Unit { closed = true }
+    public func close(): Unit { closed = true }
+    public func isClosed(): Bool { closed }
+    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
+        let _ = reason
+        synchronized(mutex) { closed = true; released = true; changed.notifyAll() }
+    }
+
+    func waitUntilPartialWrite(): Unit {
+        let deadline = Deadline.after(Duration.second)
+        synchronized(mutex) {
+            while (!partialWritten) {
+                if (deadline.isExpired()) {
+                    throw Exception("HTTP/2 writer did not make a partial batch write")
+                }
+                changed.wait(timeout: deadline.remaining())
+            }
+        }
+    }
+
+    func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
     func bytes(): Array<Byte> { synchronized(mutex) { output.toArray() } }
 }
 

@@ -8,6 +8,7 @@ public enum Http1ClientConnectionState {
     | Ready
     | Exchanging
     | AwaitingBody
+    | Upgraded
     | Closed
     | Failed
 }
@@ -32,6 +33,7 @@ public class Http1ClientConnection <: Resource {
     private let responseReadBuffer = Array<Byte>(16 * 1024, repeat: 0)
     private let mutex = Mutex()
     private var state = Http1ClientConnectionState.Ready
+    private var upgradedObserver: ?ResponseBodyObserver = None<ResponseBodyObserver>
 
     public init(
         transport: DuplexTransport,
@@ -123,27 +125,124 @@ public class Http1ClientConnection <: Resource {
         }
     }
 
+    /** Retains the pool claim until the returned protocol transport terminates. */
+    internal func upgradeTracked(
+        request: HttpRequest,
+        context!: OperationContext = OperationContext.background(),
+        onTerminated!: (Bool) -> Unit = { _ => }
+    ): Http1UpgradeExchangeResult {
+        requireHttp1UpgradeContext(context)
+        synchronized(mutex) {
+            match (state) {
+                case Http1ClientConnectionState.Ready => state = Http1ClientConnectionState.Exchanging
+                case _ => throw Http1ClientConnectionException(state, "HTTP/1 connection is already in use")
+            }
+        }
+        let observer = Http1ConnectionBodyObserver(this, onTerminated)
+        observer.bindCancellation(context.cancellation)
+        try {
+            let result = if (request.method == HttpMethod("CONNECT")) {
+                if (request.body.contentLength != Some(0)) {
+                    throw IllegalArgumentException("CONNECT requires an empty request body")
+                }
+                match (performHttp1Connect(
+                    transport, request.url, headers: request.headers, context: context, limits: limits,
+                    observer: Some<ResponseBodyObserver>(observer), readBuffer: Some(responseReadBuffer)
+                )) {
+                    case Http1ConnectExchangeResult.Tunnel(value) =>
+                        Http1UpgradeExchangeResult.Upgraded(Http1Upgrade(value.responseHead, "CONNECT", value.transport))
+                    case Http1ConnectExchangeResult.Response(value) => Http1UpgradeExchangeResult.Response(value)
+                }
+            } else {
+                performHttp1Upgrade(
+                    transport, request, context: context, limits: limits, targetForm: targetForm,
+                    observer: Some<ResponseBodyObserver>(observer), readBuffer: Some(responseReadBuffer)
+                )
+            }
+            match (result) {
+                case Http1UpgradeExchangeResult.Upgraded(value) =>
+                    requireHttp1UpgradeContext(context)
+                    observer.configure(false)
+                    if (!observer.detachCancellation()) {
+                        value.transport.abort(reason: Some(AbortReason.Cancelled))
+                        throw Http1ClientConnectionException(currentState(), "HTTP handoff was cancelled")
+                    }
+                    let accepted = synchronized(mutex) {
+                        match (state) {
+                            case Http1ClientConnectionState.Exchanging =>
+                                state = Http1ClientConnectionState.Upgraded
+                                upgradedObserver = Some<ResponseBodyObserver>(observer)
+                                true
+                            case _ => false
+                        }
+                    }
+                    if (!accepted) {
+                        value.transport.abort(reason: Some(AbortReason.ApplicationAbort))
+                        throw Http1ClientConnectionException(currentState(), "HTTP connection closed during handoff")
+                    }
+                case Http1UpgradeExchangeResult.Response(value) =>
+                    observer.configure(value.reusableCandidate &&
+                        !headerContainsToken(request.headers, "connection", "close"))
+                    let accepted = synchronized(mutex) {
+                        match (state) {
+                            case Http1ClientConnectionState.Exchanging =>
+                                state = Http1ClientConnectionState.AwaitingBody
+                                true
+                            case _ => false
+                        }
+                    }
+                    if (!accepted) {
+                        value.response.close()
+                        throw Http1ClientConnectionException(currentState(), "HTTP connection closed during rejection")
+                    }
+                    if (value.response.body.contentLength == Some(0)) {
+                        let _ = value.response.body.read(Array<Byte>(1, repeat: 0))
+                    }
+            }
+            result
+        } catch (error: Exception) {
+            observer.executionFailed()
+            failConnection()
+            throw error
+        }
+    }
+
     public func currentState(): Http1ClientConnectionState { synchronized(mutex) { state } }
 
     public func close(): Unit {
-        let shouldClose = synchronized(mutex) {
+        let (shouldClose, observer) = synchronized(mutex) {
             match (state) {
-                case Http1ClientConnectionState.Closed => false
-                case _ => state = Http1ClientConnectionState.Closed; true
+                case Http1ClientConnectionState.Closed => (false, None<ResponseBodyObserver>)
+                case _ =>
+                    state = Http1ClientConnectionState.Closed
+                    let current = upgradedObserver
+                    upgradedObserver = None<ResponseBodyObserver>
+                    (true, current)
             }
         }
-        if (shouldClose) { transport.close(OperationContext.background()) }
+        if (shouldClose) {
+            try { transport.close(OperationContext.background()) }
+            finally { if (let Some(value) <- observer) { value.completed() } }
+        }
     }
 
     /** Immediately wakes the active exchange and prevents this connection from re-entering the pool. */
     public func abort(reason!: AbortReason = AbortReason.ApplicationAbort): Unit {
-        let shouldAbort = synchronized(mutex) {
+        let (shouldAbort, observer) = synchronized(mutex) {
             match (state) {
-                case Http1ClientConnectionState.Closed | Http1ClientConnectionState.Failed => false
-                case _ => state = Http1ClientConnectionState.Failed; true
+                case Http1ClientConnectionState.Closed | Http1ClientConnectionState.Failed =>
+                    (false, None<ResponseBodyObserver>)
+                case _ =>
+                    state = Http1ClientConnectionState.Failed
+                    let current = upgradedObserver
+                    upgradedObserver = None<ResponseBodyObserver>
+                    (true, current)
             }
         }
-        if (shouldAbort) { transport.abort(reason: Some(reason)) }
+        if (shouldAbort) {
+            try { transport.abort(reason: Some(reason)) }
+            finally { if (let Some(value) <- observer) { value.abandoned() } }
+        }
     }
 
     public func isClosed(): Bool {
@@ -161,6 +260,10 @@ public class Http1ClientConnection <: Resource {
                 case Http1ClientConnectionState.AwaitingBody =>
                     if (reusable) { state = Http1ClientConnectionState.Ready; false }
                     else { state = Http1ClientConnectionState.Closed; true }
+                case Http1ClientConnectionState.Upgraded =>
+                    upgradedObserver = None<ResponseBodyObserver>
+                    state = Http1ClientConnectionState.Closed
+                    true
                 case _ => false
             }
         }
@@ -185,6 +288,7 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
     private var reusable = false
     private var terminal = false
     private var cancellation: ?CancellationRegistration = None<CancellationRegistration>
+    private var cancellationAttached = true
 
     init(connection: Http1ClientConnection, onTerminated: (Bool) -> Unit) {
         this.connection = connection
@@ -207,6 +311,17 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
         if (discard) { registration.unregister() }
     }
 
+    func detachCancellation(): Bool {
+        let (accepted, registration) = synchronized(mutex) {
+            cancellationAttached = false
+            let current = cancellation
+            cancellation = None<CancellationRegistration>
+            (!terminal, current)
+        }
+        if (let Some(value) <- registration) { value.unregister() }
+        accepted
+    }
+
     func executionFailed(): Unit {
         let registration = synchronized(mutex) {
             if (terminal) { None<CancellationRegistration> }
@@ -224,7 +339,7 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
     }
 
     private func cancelled(): Unit {
-        let won = claimTerminal()
+        let won = claimTerminal(fromCancellation: true)
         if (!won) { return }
         try { connection.abort(reason: AbortReason.Cancelled) } catch (_: Exception) {}
         onTerminated(false)
@@ -236,10 +351,10 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
         onTerminated(canReuse)
     }
 
-    private func claimTerminal(): Bool {
+    private func claimTerminal(fromCancellation!: Bool = false): Bool {
         var registration = None<CancellationRegistration>
         let won = synchronized(mutex) {
-            if (terminal) { false }
+            if (terminal || (fromCancellation && !cancellationAttached)) { false }
             else { terminal = true; registration = cancellation; true }
         }
         if (let Some(value) <- registration) { value.unregister() }
