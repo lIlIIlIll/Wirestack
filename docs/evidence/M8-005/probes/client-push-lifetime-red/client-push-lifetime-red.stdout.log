@@ -1,0 +1,22 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 3098724665 ns, RESULT:
+    TCS: HttpFacadeTest, time elapsed: 3091653165 ns, RESULT:
+    [ ERROR  ] CASE: requestCancellationOutlivesCompletedParentWhileTransferredPushStalls (3089382716 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.http/test.HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls()(/home/elliot/playground/Wirestack-pr-worktrees/M8-005-security-reviewed-remote/src/http/facade_test.cj:75)
+	at wirestack.http/test.HttpFacadeTest.asTestSuite.lambda.0.lambda.0()(/home/elliot/playground/Wirestack-pr-worktrees/M8-005-security-reviewed-remote/src/http/facade_test.cj:833)
+Summary: TOTAL: 111
+    PASSED: 0, SKIPPED: 110, ERROR: 1
+    FAILED: 0, listed below:
+            TCS: HttpFacadeTest, CASE: requestCancellationOutlivesCompletedParentWhileTransferredPushStalls
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3105820209 ns, RESULT:
+TP: wirestack.*, time elapsed: 3105711652 ns, RESULT:
+    FAILED:
+    TP: wirestack.http, time elapsed: 3098724665 ns, RESULT:
+        TCS: HttpFacadeTest, time elapsed: 3091653165 ns, RESULT:
+        [ ERROR  ] CASE: requestCancellationOutlivesCompletedParentWhileTransferredPushStalls (3089382716 ns)
+Summary: TOTAL: 111
+    PASSED: 0, SKIPPED: 110, ERROR: 1
+    FAILED: 0
+--------------------------------------------------------------------------------------------------

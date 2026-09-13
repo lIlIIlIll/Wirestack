@@ -150,12 +150,14 @@ public func performHttp1Connect(
     target: HttpUrl,
     headers!: HttpHeaders = HttpHeaders(),
     context!: OperationContext = OperationContext.background(),
-    limits!: HttpLimits = HttpLimits()
+    limits!: HttpLimits = HttpLimits(),
+    observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>,
+    readBuffer!: ?Array<Byte> = None<Array<Byte>>
 ): Http1ConnectExchangeResult {
     let request = HttpRequest(HttpMethod("CONNECT"), target, headers: headers)
     try {
         let _ = writeHttp1Request(transport, request, context: context, limits: limits)
-        let reader = Http1ResponseSequenceReader(transport, request.method, limits)
+        let reader = Http1ResponseSequenceReader(transport, request.method, limits, readBuffer: readBuffer)
         let interim = ArrayList<Http1InterimResponse>()
         while (true) {
             let parsed = reader.readNext(context)
@@ -168,7 +170,9 @@ public func performHttp1Connect(
                 match (head.framing) {
                     case Http1BodyFraming.Tunnel =>
                         return Http1ConnectExchangeResult.Tunnel(
-                            Http1Tunnel(head, Http1PrefixedTransport(transport, parsed.remaining))
+                            Http1Tunnel(head, Http1PrefixedTransport(
+                                transport, parsed.remaining, observer: observer
+                            ))
                         )
                     case _ => throw Http1ParseException(
                         Http1ParseErrorCode.InvalidStatus,
@@ -176,9 +180,12 @@ public func performHttp1Connect(
                     )
                 }
             }
-            let observer = Http1ConnectFailureObserver(transport)
+            let selectedObserver = match (observer) {
+                case Some(value) => value
+                case None => Http1ConnectFailureObserver(transport)
+            }
             return Http1ConnectExchangeResult.Response(
-                finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
+                finishResponse(transport, head, parsed.remaining, interim, context, limits, selectedObserver)
             )
         }
         throw Exception("unreachable HTTP/1 CONNECT loop exit")
@@ -193,12 +200,15 @@ public func performHttp1Upgrade(
     transport: DuplexTransport,
     request: HttpRequest,
     context!: OperationContext = OperationContext.background(),
-    limits!: HttpLimits = HttpLimits()
+    limits!: HttpLimits = HttpLimits(),
+    targetForm!: Http1RequestTargetForm = Http1RequestTargetForm.Origin,
+    observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>,
+    readBuffer!: ?Array<Byte> = None<Array<Byte>>
 ): Http1UpgradeExchangeResult {
-    let requestedProtocol = validateUpgradeRequest(request)
+    validateUpgradeRequest(request)
     try {
-        let _ = writeHttp1Request(transport, request, context: context, limits: limits)
-        let reader = Http1ResponseSequenceReader(transport, request.method, limits)
+        let _ = writeHttp1Request(transport, request, context: context, limits: limits, targetForm: targetForm)
+        let reader = Http1ResponseSequenceReader(transport, request.method, limits, readBuffer: readBuffer)
         let interim = ArrayList<Http1InterimResponse>()
         while (true) {
             let parsed = reader.readNext(context)
@@ -208,17 +218,20 @@ public func performHttp1Upgrade(
                 continue
             }
             if (head.status == 101) {
-                let responseProtocol = validateUpgradeResponse(head, requestedProtocol)
+                let responseProtocol = validateUpgradeResponse(head, request.headers)
                 return Http1UpgradeExchangeResult.Upgraded(
                     Http1Upgrade(
                         head, responseProtocol,
-                        Http1PrefixedTransport(transport, parsed.remaining)
+                        Http1PrefixedTransport(transport, parsed.remaining, observer: observer)
                     )
                 )
             }
-            let observer = Http1ConnectFailureObserver(transport)
+            let selectedObserver = match (observer) {
+                case Some(value) => value
+                case None => Http1ConnectFailureObserver(transport)
+            }
             return Http1UpgradeExchangeResult.Response(
-                finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
+                finishResponse(transport, head, parsed.remaining, interim, context, limits, selectedObserver)
             )
         }
         throw Exception("unreachable HTTP/1 Upgrade loop exit")
@@ -228,7 +241,7 @@ public func performHttp1Upgrade(
     }
 }
 
-private func validateUpgradeRequest(request: HttpRequest): String {
+private func validateUpgradeRequest(request: HttpRequest): Unit {
     if (request.method == HttpMethod("CONNECT") || request.body.contentLength != Some(0) ||
         !headerContainsToken(request.headers, "connection", "upgrade")) {
         throw Http1ParseException(
@@ -236,17 +249,26 @@ private func validateUpgradeRequest(request: HttpRequest): String {
             "HTTP/1 Upgrade requires a non-CONNECT empty request with Connection: upgrade"
         )
     }
-    let values = request.headers.getAll("upgrade")
-    if (values.size != 1 || !isUpgradeProtocol(values[0])) {
-        throw Http1ParseException(Http1ParseErrorCode.InvalidHeader, "HTTP/1 Upgrade requires one protocol token")
+    var offered = false
+    for (field in request.headers.getAll("upgrade")) {
+        for (member in field.split(",")) {
+            let protocol = member.trimAscii()
+            if (protocol.isEmpty()) { continue }
+            if (!isUpgradeProtocol(protocol)) {
+                throw Http1ParseException(Http1ParseErrorCode.InvalidHeader, "HTTP/1 Upgrade contains an invalid protocol")
+            }
+            offered = true
+        }
     }
-    values[0]
+    if (!offered) {
+        throw Http1ParseException(Http1ParseErrorCode.InvalidHeader, "HTTP/1 Upgrade requires an offered protocol")
+    }
 }
 
-private func validateUpgradeResponse(head: Http1ResponseHead, requestedProtocol: String): String {
+private func validateUpgradeResponse(head: Http1ResponseHead, requestedHeaders: HttpHeaders): String {
     let values = head.headers.getAll("upgrade")
     if (!headerContainsToken(head.headers, "connection", "upgrade") || values.size != 1 ||
-        !isUpgradeProtocol(values[0]) || values[0].toAsciiLower() != requestedProtocol.toAsciiLower()) {
+        !isUpgradeProtocol(values[0]) || !headerContainsToken(requestedHeaders, "upgrade", values[0])) {
         throw Http1ParseException(
             Http1ParseErrorCode.InvalidHeader,
             "HTTP/1 101 response does not confirm the requested Upgrade protocol"
@@ -255,7 +277,7 @@ private func validateUpgradeResponse(head: Http1ResponseHead, requestedProtocol:
     values[0]
 }
 
-private func isUpgradeProtocol(value: String): Bool {
+internal func isUpgradeProtocol(value: String): Bool {
     let bytes = value.toArray()
     if (bytes.isEmpty()) { return false }
     var slash: Int64 = -1
@@ -288,17 +310,21 @@ private class Http1ConnectFailureObserver <: ResponseBodyObserver {
     }
 }
 
-/** Replays bytes read with the CONNECT response before delegating tunnel I/O. */
-private class Http1PrefixedTransport <: DuplexTransport {
+/** Owns a private parser remainder and releases an optional lease only at terminal transport cleanup. */
+internal class Http1PrefixedTransport <: DuplexTransport {
     private let delegate: DuplexTransport
     private let prefix: Array<Byte>
     private var offset: Int64 = 0
     private let mutex = Mutex()
     private var readActive = false
+    private var terminal = false
+    private let observer: ?ResponseBodyObserver
 
-    init(delegate: DuplexTransport, prefix: Array<Byte>) {
+    init(delegate: DuplexTransport, prefix: Array<Byte>,
+        observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>) {
         this.delegate = delegate
-        this.prefix = prefix.clone()
+        this.prefix = prefix
+        this.observer = observer
     }
 
     public prop info: TransportInfo { get() { delegate.info } }
@@ -319,7 +345,9 @@ private class Http1PrefixedTransport <: DuplexTransport {
                 "CONNECT tunnel read deadline exceeded", retryability: Retryability.Temporary
             )
         }
+        if (delegate.isClosed()) { throw closedUpgradeTransport() }
         synchronized(mutex) {
+            if (terminal) { throw closedUpgradeTransport() }
             if (readActive) {
                 throw NetworkException(
                     NetworkErrorCategory.Read, NetworkPhase.TcpRead, NetworkErrorCode.ConcurrentOperation,
@@ -352,10 +380,60 @@ private class Http1PrefixedTransport <: DuplexTransport {
     ): Int64 { delegate.writeSome(source, context: context) }
 
     public func shutdown(direction: ShutdownDirection): Unit { delegate.shutdown(direction) }
-    public func close(context: OperationContext): Unit { delegate.close(context) }
-    public func close(): Unit { delegate.close() }
-    public func isClosed(): Bool { delegate.isClosed() }
-    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit { delegate.abort(reason: reason) }
+    public func close(context: OperationContext): Unit {
+        if (synchronized(mutex) { terminal }) { return }
+        requireHttp1UpgradeContext(context)
+        if (!claimTerminal()) { return }
+        try {
+            delegate.close(context)
+        } catch (error: Exception) {
+            try { delegate.abort(reason: Some(AbortReason.ApplicationAbort)) } catch (_: Exception) {}
+            if (let Some(value) <- observer) {
+                try { value.abandoned() } catch (_: Exception) {}
+            }
+            throw error
+        }
+        if (let Some(value) <- observer) { value.completed() }
+    }
+
+    public func close(): Unit { close(OperationContext.background()) }
+    public func isClosed(): Bool { synchronized(mutex) { terminal } || delegate.isClosed() }
+
+    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
+        if (!claimTerminal()) { return }
+        try { delegate.abort(reason: reason) }
+        finally {
+            if (let Some(value) <- observer) { value.abandoned() }
+        }
+    }
+
+    private func claimTerminal(): Bool {
+        synchronized(mutex) {
+            if (terminal) { false } else { terminal = true; true }
+        }
+    }
+}
+
+internal func requireHttp1UpgradeContext(context: OperationContext): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled, NetworkPhase.HttpHeaders, NetworkErrorCode.Cancelled,
+            "HTTP protocol handoff cancelled", retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded, NetworkPhase.HttpHeaders, NetworkErrorCode.TimedOut,
+            "HTTP protocol handoff deadline exceeded", retryability: Retryability.Never
+        )
+    }
+}
+
+private func closedUpgradeTransport(): NetworkException {
+    NetworkException(
+        NetworkErrorCategory.Closed, NetworkPhase.TcpRead, NetworkErrorCode.Closed,
+        "upgraded HTTP transport is closed", retryability: Retryability.Never
+    )
 }
 
 private func addInterim(interim: ArrayList<Http1InterimResponse>, head: Http1ResponseHead): Unit {
@@ -415,7 +493,7 @@ private func responseCanReuse(head: Http1ResponseHead): Bool {
     !headerContainsToken(head.headers, "connection", "close")
 }
 
-internal func headerContainsToken(headers: HttpHeaders, name: String, token: String): Bool {
+protected func headerContainsToken(headers: HttpHeaders, name: String, token: String): Bool {
     for (field in headers.getAll(name)) {
         let bytes = field.toArray()
         var start = 0

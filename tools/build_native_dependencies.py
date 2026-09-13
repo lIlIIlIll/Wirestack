@@ -21,7 +21,7 @@ SUPPORTED = {
 
 def plan(system: str) -> list[str]:
     if system == "Linux":
-        return ["tls-provider", "resolver"]
+        return ["tls-provider", "resolver", "http-files"]
     if system == "Windows":
         return ["resolver"]
     if system == "Darwin":
@@ -156,6 +156,19 @@ def main() -> int:
         if os.environ.get("WIRESTACK_RESOLVER_TEST_FIXTURE") == "1":
             resolver.append("--test-fixture")
         status = run(resolver, root=root, env=child_env)
+        if status != 0:
+            return status
+    if "http-files" in steps:
+        status = run(
+            [
+                sys.executable,
+                str(root / "tools" / "build_linux_http_files.py"),
+                "--root", str(root),
+                "--quiet",
+            ],
+            root=root,
+            env=child_env,
+        )
         if status != 0:
             return status
     return 0

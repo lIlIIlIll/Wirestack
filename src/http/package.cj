@@ -74,6 +74,18 @@ public type ResponseBody = api.ResponseBody
  * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public type HttpResponse = api.HttpResponse
+/** Bounded opt-in HTTP/2 push configuration. */
+public type Http2PushConfig = api.Http2PushConfig
+/** Caller-side push acceptance policy. */
+public type Http2PushPolicy = api.Http2PushPolicy
+/** Same-origin push acceptance policy. */
+public type SameOriginHttp2PushPolicy = api.SameOriginHttp2PushPolicy
+/** Explicit push rejection policy. */
+public type DenyHttp2PushPolicy = api.DenyHttp2PushPolicy
+/** Owned promised request and response. */
+public type HttpPushedResponse = api.HttpPushedResponse
+/** Caller-driven bounded push delivery. */
+public type HttpPushSource = api.HttpPushSource
 
 // Provider-neutral network contracts used by the public HTTP facade. These
 // aliases keep std.net and the TLS provider out of public method signatures.

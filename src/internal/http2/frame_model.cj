@@ -12,6 +12,10 @@ public class Http2Limits {
     public let maxConcurrentStreams: UInt32
     public let initialWindowSize: UInt32
     public let maxPendingSettings: UInt32
+    /** Server-side bounds for promised work associated with live parent requests. */
+    public let maxConcurrentPushes: UInt32
+    public let maxPendingPushes: UInt32
+    public let maxPushesPerRequest: UInt32
 
     public init(
         maxFrameSize!: UInt32 = 16384u32,
@@ -23,7 +27,10 @@ public class Http2Limits {
         maxPendingWrites!: UInt32 = 256u32,
         maxConcurrentStreams!: UInt32 = 100u32,
         initialWindowSize!: UInt32 = 65535u32,
-        maxPendingSettings!: UInt32 = 16u32
+        maxPendingSettings!: UInt32 = 16u32,
+        maxConcurrentPushes!: UInt32 = 8u32,
+        maxPendingPushes!: UInt32 = 8u32,
+        maxPushesPerRequest!: UInt32 = 8u32
     ) {
         if (maxFrameSize < 16384u32 || maxFrameSize > 16777215u32) {
             throw IllegalArgumentException("HTTP/2 max frame size must be in [16384, 16777215]")
@@ -35,6 +42,12 @@ public class Http2Limits {
         requirePositive(maxPendingWrites, "pending writes")
         requirePositive(maxConcurrentStreams, "concurrent streams")
         requirePositive(maxPendingSettings, "pending settings")
+        requirePositive(maxConcurrentPushes, "concurrent pushes")
+        requirePositive(maxPendingPushes, "pending pushes")
+        requirePositive(maxPushesPerRequest, "pushes per request")
+        if (maxPendingPushes > maxConcurrentPushes || maxPushesPerRequest > maxConcurrentPushes) {
+            throw IllegalArgumentException("HTTP/2 push limits must not exceed concurrent pushes")
+        }
         if (initialWindowSize > 2147483647u32) {
             throw IllegalArgumentException("HTTP/2 initial window must fit 31 bits")
         }
@@ -48,6 +61,9 @@ public class Http2Limits {
         this.maxConcurrentStreams = maxConcurrentStreams
         this.initialWindowSize = initialWindowSize
         this.maxPendingSettings = maxPendingSettings
+        this.maxConcurrentPushes = maxConcurrentPushes
+        this.maxPendingPushes = maxPendingPushes
+        this.maxPushesPerRequest = maxPushesPerRequest
     }
 }
 
@@ -216,6 +232,7 @@ public enum Http2SettingId {
     | InitialWindowSize
     | MaxFrameSize
     | MaxHeaderListSize
+    | EnableConnectProtocol
     | Unknown(UInt16)
 }
 
@@ -227,6 +244,7 @@ public func http2SettingIdFromWire(identifier: UInt16): Http2SettingId {
         case 4u16 => Http2SettingId.InitialWindowSize
         case 5u16 => Http2SettingId.MaxFrameSize
         case 6u16 => Http2SettingId.MaxHeaderListSize
+        case 8u16 => Http2SettingId.EnableConnectProtocol
         case value => Http2SettingId.Unknown(value)
     }
 }
@@ -239,6 +257,7 @@ public func http2SettingIdToWire(identifier: Http2SettingId): UInt16 {
         case Http2SettingId.InitialWindowSize => 4u16
         case Http2SettingId.MaxFrameSize => 5u16
         case Http2SettingId.MaxHeaderListSize => 6u16
+        case Http2SettingId.EnableConnectProtocol => 8u16
         case Http2SettingId.Unknown(value) => value
     }
 }
@@ -287,6 +306,10 @@ private func validateHttp2Setting(identifier: Http2SettingId, value: UInt32): Un
     match (identifier) {
         case Http2SettingId.EnablePush =>
             if (value > 1u32) { protocolError("HTTP/2 ENABLE_PUSH must be zero or one") }
+        case Http2SettingId.EnableConnectProtocol =>
+            if (value > 1u32) {
+                protocolError("HTTP/2 ENABLE_CONNECT_PROTOCOL must be zero or one")
+            }
         case Http2SettingId.InitialWindowSize =>
             if (value > 2147483647u32) {
                 throw Http2ProtocolException(

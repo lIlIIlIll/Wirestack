@@ -49,6 +49,21 @@ CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --html --json
 
 详细流程见 [Linux HTTP 指南](../guides/http1-linux.md)。
 
+`HttpClient.builder()` 可配置 `CookieJar`、`HttpConnector`、
+`HttpConnectionPoolHook` 和 `Http2PushConfig`。显式 `Cookie` header 优先于 jar；
+pool hook 的异常不改变请求或连接租约的结果。`HttpServiceHook` 通过 server builder
+注册，失败时走服务端既有 handler-failure 路径。
+
+`upgrade` 和 `connectWebSocket` 返回已移交的双向连接或普通拒绝响应。拒绝响应仍由
+调用方消费或关闭。`connectWebSocket` 接受 `http`、`https` URL，通过 HTTP/1.1
+Upgrade 或 HTTP/2 extended CONNECT 建立不带压缩的 `WebSocketConnection`。
+HTTP/2 push 默认关闭；启用后通过父响应的 `pushes` 接收独立拥有 body 的
+`HttpPushedResponse`。
+
+`MultipartWriter` 和 `MultipartReader` 提供有界流式 multipart 编解码。
+`FileHandler` 的无符号链接路径解析和原子无覆盖上传只在 Linux x86_64 GNU 目标提供。
+接口用法、资源所有权和明确排除项见 [Linux HTTP 扩展指南](../guides/http-parity-linux.md)。
+
 ## `wirestack.net`
 
 `wirestack.net` 使用 Wirestack 的 endpoint、span、结构化错误和 `OperationContext`，
