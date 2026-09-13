@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "PASS",
+  "browser": "Chrome/152.0.7977.82",
+  "served_origin": "http://127.0.0.1:8765",
+  "overview_title": "wirestack API \u6587\u6863",
+  "query": "CookieJar",
+  "search_results": [
+    "wirestack.http.CookieJar \u2014 class",
+    "wirestack.http.HttpClientBuilder.cookieJar \u2014 function",
+    "wirestack.http.CookieJar.acceptSetCookie \u2014 function",
+    "wirestack.http.CookieJar.clear \u2014 function",
+    "wirestack.http.CookieJar.cookiesFor \u2014 function",
+    "wirestack.http.CookieJar.headerFor \u2014 function",
+    "wirestack.http.CookieJar.init \u2014 constructor",
+    "wirestack.http.CookieJar.maximumCookies \u2014 variable",
+    "wirestack.http.CookieJar.maximumHeaderBytes \u2014 variable",
+    "wirestack.http.CookieJar.rejectPublicSuffixes \u2014 property",
+    "wirestack.http.CookieJar.remove \u2014 function",
+    "wirestack.http.CookieJar.removeCookies \u2014 function",
+    "wirestack.http.CookieJar.snapshot \u2014 function",
+    "wirestack.http.CookieJar.store \u2014 function"
+  ],
+  "selected_path": "/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a436f6f6b69654a61722367302829.html",
+  "selected_title": "wirestack.http.CookieJar",
+  "html_sha256": "8498a2082940841c99681682668967cf21fe13ecd8aec4b3090348917c9cb70d",
+  "search_sha256": "e94ab4d51885e9f8f02459f0576ebb3b8398a0cb256727580abf20b0908813b4",
+  "html_pages": 206,
+  "visual_confirmation": "Rendered CookieJar title, declaration, package navigation and overview are visible; search returns the class and its public members and follows the class result."
+}

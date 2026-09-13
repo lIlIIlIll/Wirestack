@@ -223,8 +223,9 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             callback()
         self.assertEqual(code, caught.exception.code)
 
-    def test_repository_core_audit_rejects_legacy_dependency_evidence(self) -> None:
-        self.assert_code("DEPENDENCY_EVIDENCE", lambda: adoption.audit_core(ROOT))
+    def test_repository_core_audit_rejects_unqualified_historical_evidence(self) -> None:
+        with self.assertRaises(adoption.AdoptionError):
+            adoption.audit_core(ROOT)
 
     def test_dependency_evidence_rejects_source_and_native_report_drift(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -356,10 +357,16 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             evidence_path.parent.mkdir(parents=True, exist_ok=True)
             report_paths = adoption.RETAINED_EVIDENCE
             reports = []
+            fixture_reports = adoption.expected_m3_030_reports(root)
             for relative in report_paths:
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(ROOT / relative, path)
+                if path.name in fixture_reports:
+                    path.write_text(
+                        json.dumps(fixture_reports[path.name]), encoding="utf-8"
+                    )
+                else:
+                    shutil.copy2(ROOT / relative, path)
                 reports.append({"path": relative, "source_task": "M3-030",
                                 "acceptance_status": "PASS",
                                 "sha256": evidence_digest.text_evidence_sha256(path)})
@@ -396,7 +403,9 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
-            shutil.copy2(ROOT / "docs/evidence/M3-030/release-validation.json", release_path)
+            release_path.write_text(
+                json.dumps(fixture_reports["release-validation.json"]), encoding="utf-8"
+            )
             release_entry["sha256"] = evidence_digest.text_evidence_sha256(release_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             abi_path = root / "docs/evidence/M3-030/native-abi-report.json"
@@ -412,7 +421,9 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
-            shutil.copy2(ROOT / "docs/evidence/M3-030/native-abi-report.json", abi_path)
+            abi_path.write_text(
+                json.dumps(fixture_reports["native-abi-report.json"]), encoding="utf-8"
+            )
             abi_entry["sha256"] = evidence_digest.text_evidence_sha256(abi_path)
             task_check_path = root / "docs/evidence/M3-030/task-check.json"
             task_check = json.loads(task_check_path.read_text(encoding="utf-8"))
