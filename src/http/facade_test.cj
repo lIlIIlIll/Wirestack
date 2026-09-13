@@ -15,6 +15,98 @@ private func publicLoopback(port: UInt16): SocketEndpoint {
 @Test
 class HttpFacadeTest {
     @TestCase
+    func requestCancellationOutlivesCompletedParentWhileTransferredPushStalls(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicPushCancellationHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(8u32)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], HostName("example.com"), ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(10 * Duration.second)
+            .http2Push(Http2PushConfig(
+                SameOriginHttp2PushPolicy(),
+                maximumConcurrentPushes: 1,
+                maximumPendingPushes: 1,
+                maximumPushesPerRequest: 1
+            ))
+            .build()
+        let requestCancellation = HttpRequestCancellationHandle()
+        var parent: ?HttpResponse = None<HttpResponse>
+        var pushed: ?HttpPushedResponse = None<HttpPushedResponse>
+        var sibling: ?HttpResponse = None<HttpResponse>
+        try {
+            let parentResponse = client.getControlled(
+                "https://example.com:${server.localEndpoint.port}/push-parent",
+                HttpCancellationHandles(request: Some(requestCancellation))
+            )
+            parent = Some(parentResponse)
+            @Expect(parentResponse.version, HttpVersion.Http2)
+            @Expect(parentResponse.body.read(Array<Byte>(1, repeat: 0u8)), 0)
+            @Expect(parentResponse.body.isFullyConsumed())
+
+            let pushedResponse = parentResponse.pushes.getOrThrow().receive(
+                context: OperationContext(
+                    deadline: Some(Deadline.after(3 * Duration.second))
+                )
+            ).getOrThrow()
+            pushed = Some(pushedResponse)
+            @Expect(pushedResponse.request.url.requestTarget, "/stalled-asset")
+            handler.stalled.waitUntilReadStarts()
+            parentResponse.close()
+            parent = None<HttpResponse>
+            @Expect(!pushedResponse.isClosed())
+
+            let siblingResponse = client.get(
+                "https://example.com:${server.localEndpoint.port}/sibling"
+            )
+            sibling = Some(siblingResponse)
+            let stalledRead = spawn { publicBodyReadWasCancelled(pushedResponse.response.body) }
+            @Expect(requestCancellation.cancel())
+            @Expect(stalledRead.get(3 * Duration.second))
+            @Expect(pushedResponse.isClosed())
+            @Expect(readPublicBody(siblingResponse.body), "ok")
+            siblingResponse.close()
+            sibling = None<HttpResponse>
+            // Reset cannot interrupt application code already inside a body read.
+            handler.stalled.releaseRead()
+            @Expect(handler.stalled.waitUntilClosed())
+
+            pushedResponse.close()
+            pushed = None<HttpPushedResponse>
+            let after = client.get(
+                "https://example.com:${server.localEndpoint.port}/sibling"
+            )
+            try { @Expect(readPublicBody(after.body), "ok") }
+            finally { after.close() }
+        } finally {
+            handler.stalled.releaseRead()
+            if (let Some(value) <- pushed) { value.close() }
+            if (let Some(value) <- sibling) { value.close() }
+            if (let Some(value) <- parent) { value.close() }
+            client.close()
+            clientTls.close()
+            if (!server.isClosed()) {
+                let result = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                @Expect(result.activeAtReturn, 0)
+                serving.get(5 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
+    @TestCase
     func cancellationWrapperPreservesProtocolCompletionPolicy(): Unit {
         let operation = HttpRequestCancellationOperation(
             OperationContext.background(),
@@ -705,6 +797,39 @@ class HttpFacadeTest {
         }
         @Expect(clientClosedRejected)
     }
+
+    @TestCase
+    func followedHttp2RedirectClosesUnclaimedPushBeforeClientTeardown(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicRedirectPushHandler()
+        let server = HttpServer.builder().listen(publicLoopback(0)).handler(handler).tls(serverTls).build()
+        let serving = spawn { server.serve() }
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult([server.localEndpoint.address],
+                HostName("example.com"), ResolverSource.Static)))
+            .tls(clientTls).requestTimeout(30 * Duration.second)
+            .http2Push(Http2PushConfig(SameOriginHttp2PushPolicy(),
+                maximumConcurrentPushes: 1, maximumPendingPushes: 1, maximumPushesPerRequest: 1))
+            .build()
+        try {
+            let response = client.get("https://example.com:${server.localEndpoint.port}/start")
+            try {
+                @Expect(response.status, 200)
+                @Expect(response.version, HttpVersion.Http2)
+                @Expect(readPublicBody(response.body), "done")
+                @Expect(handler.observer.awaitAbandonment())
+            } finally { response.close() }
+        } finally {
+            client.close()
+            clientTls.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))))
+            serving.get(5 * Duration.second)
+            serverTls.close()
+        }
+    }
 }
 
 /** Bounded same-process regression for the M6-025 facade failure sequence. */
@@ -1119,6 +1244,102 @@ private func decodePublicTlsBase64(value: String): Array<Byte> {
     output.toArray()
 }
 
+private class PublicPushCancellationHandler <: HttpServerHandler {
+    let stalled = PublicStalledPushBody()
+
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        request.body.close()
+        if (request.target == "/push-parent") {
+            request.push(
+                HttpRequest.get("https://${request.authority}/stalled-asset"),
+                HttpServerResponse(HttpResponse(
+                    200,
+                    "OK",
+                    ResponseBody(stalled)
+                ))
+            )
+            return HttpServerResponse(HttpResponse(
+                204,
+                "No Content",
+                ResponseBody.empty()
+            ))
+        }
+        @Expect(request.target, "/sibling")
+        HttpServerResponse(HttpResponse(
+            200,
+            "OK",
+            ResponseBody(RequestBody.string("ok").open()),
+            headers: HttpHeaders.builder().add("Content-Length", "2").build()
+        ))
+    }
+}
+
+private class PublicStalledPushBody <: HttpBodyStream {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var readStarted = false
+    private var closed = false
+    private var released = false
+
+    public prop contentLength: ?Int64 { get() { None<Int64> } }
+
+    public func read(destination: Array<Byte>): Int64 {
+        if (destination.isEmpty()) { return 0 }
+        let deadline = Deadline.after(10 * Duration.second)
+        synchronized(mutex) {
+            readStarted = true
+            changed.notifyAll()
+            while (!closed && !released && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+            if (closed) {
+                throw HttpBodyException(HttpBodyErrorCode.Closed, "stalled pushed response closed")
+            }
+            if (!released) {
+                throw IllegalStateException("stalled pushed response was not released")
+            }
+            0
+        }
+    }
+
+    public func close(): Unit {
+        synchronized(mutex) {
+            if (closed) { return }
+            closed = true
+            changed.notifyAll()
+        }
+    }
+
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
+
+    func releaseRead(): Unit {
+        synchronized(mutex) {
+            released = true
+            changed.notifyAll()
+        }
+    }
+
+    func waitUntilReadStarts(): Unit {
+        let deadline = Deadline.after(3 * Duration.second)
+        synchronized(mutex) {
+            while (!readStarted && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+            if (!readStarted) { @Fail("pushed response body did not reach its stalled read") }
+        }
+    }
+
+    func waitUntilClosed(): Bool {
+        let deadline = Deadline.after(3 * Duration.second)
+        synchronized(mutex) {
+            while (!closed && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+            closed
+        }
+    }
+}
+
 private class PublicEmptyHandler <: HttpServerHandler {
     public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
         let _ = context
@@ -1240,5 +1461,40 @@ private class PublicForwardProxyHandler <: HttpServerHandler {
             200, "OK", ResponseBody.empty(),
             headers: HttpHeaders.builder().add("Content-Length", "0").build()
         ))
+    }
+}
+
+private class PublicRedirectPushHandler <: HttpServerHandler {
+    let observer = PublicRedirectPushObserver()
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        request.body.close()
+        if (request.target == "/start") {
+            request.push(HttpRequest.get("https://${request.authority}/asset"),
+                HttpServerResponse(HttpResponse(200, "OK",
+                    ResponseBody(RequestBody.bytes(Array<Byte>(131072, repeat: b'p')).open(), observer: observer))))
+            return HttpServerResponse(HttpResponse(302, "Found", ResponseBody.empty(),
+                headers: HttpHeaders.builder().add("Location", "/final").build()))
+        }
+        HttpServerResponse(HttpResponse(200, "OK", ResponseBody(RequestBody.string("done").open())))
+    }
+}
+
+private class PublicRedirectPushObserver <: ResponseBodyObserver {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var finished = false
+    private var wasAbandoned = false
+    public func completed(): Unit {
+        synchronized(mutex) { finished = true; changed.notifyAll() }
+    }
+    public func abandoned(): Unit {
+        synchronized(mutex) { finished = true; wasAbandoned = true; changed.notifyAll() }
+    }
+    func awaitAbandonment(): Bool {
+        let deadline = Deadline.after(3 * Duration.second)
+        synchronized(mutex) {
+            while (!finished && !deadline.isExpired()) { changed.wait(timeout: deadline.remaining()) }
+            finished && wasAbandoned
+        }
     }
 }

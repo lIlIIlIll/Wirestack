@@ -311,6 +311,14 @@ public class Http1HttpsClient <: Resource {
         }
     }
 
+    public func upgrade(request: HttpRequest,
+        context!: OperationContext = OperationContext.background()): Http1UpgradeExchangeResult {
+        if (request.url.scheme != "https") {
+            throw IllegalArgumentException("HTTPS HTTP/1 upgrade requires an https URL")
+        }
+        upgradeHttp1Lease(pool, factory, tlsPoolKey(request.url, handshaker), request, context)
+    }
+
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func close(): Unit { pool.close(); handshaker.close() }
     public func isClosed(): Bool { pool.isClosed() }
@@ -388,6 +396,7 @@ private class AutomaticTlsNegotiator {
     private let limits: HttpLimits
     private let http2Limits: Http2Limits
     private let continueTimeout: Duration
+    private let pushConfig: ?Http2PushConfig
 
     init(
         connector: HappyEyeballsConnector,
@@ -395,9 +404,11 @@ private class AutomaticTlsNegotiator {
         cache: HttpProtocolCache,
         limits: HttpLimits,
         http2Limits: Http2Limits,
-        continueTimeout: Duration
+        continueTimeout: Duration,
+        pushConfig: ?Http2PushConfig
     ) {
         this.connector = connector
+        this.pushConfig = pushConfig
         this.handshaker = handshaker
         this.cache = cache
         this.limits = limits
@@ -415,7 +426,8 @@ private class AutomaticTlsNegotiator {
                 cache.put(key, CachedHttpProtocol.Http2)
                 try {
                     Http2ClientPoolConnection(Http2ClientConnection.connect(
-                        negotiated.transport, context: context, limits: limits, http2Limits: http2Limits
+                        negotiated.transport, context: context, limits: limits,
+                        http2Limits: http2Limits, pushConfig: pushConfig
                     ))
                 } catch (error: Exception) {
                     negotiated.transport.abort(reason: Some(AbortReason.ProtocolFailure))
@@ -443,7 +455,8 @@ private class AutomaticTlsNegotiator {
                             negotiated.transport,
                             context: context,
                             limits: limits,
-                            http2Limits: http2Limits
+                            http2Limits: http2Limits,
+                            pushConfig: pushConfig
                         )
                     ))
                 } catch (error: Http2NegotiatedException) {
@@ -510,7 +523,8 @@ public class HttpAutomaticHttpsClient <: Resource {
         limits!: HttpLimits = HttpLimits(),
         http2Limits!: Http2Limits = Http2Limits(),
         attemptDelay!: Duration = 250 * Duration.millisecond,
-        continueTimeout!: Duration = Duration.second
+        continueTimeout!: Duration = Duration.second,
+        pushConfig!: ?Http2PushConfig = None<Http2PushConfig>
     ) {
         this.handshaker = handshaker
         this.limits = limits
@@ -520,7 +534,7 @@ public class HttpAutomaticHttpsClient <: Resource {
         cache = HttpProtocolCache(h1PoolConfig.maximumConnections + h2PoolConfig.maximumConnections)
         let negotiator = AutomaticTlsNegotiator(
             HappyEyeballsConnector(resolver, transportFactory, attemptDelay: attemptDelay),
-            handshaker, cache, limits, http2Limits, continueTimeout
+            handshaker, cache, limits, http2Limits, continueTimeout, pushConfig
         )
         h1Factory = AutomaticHttp1Factory(negotiator)
         h2Factory = AutomaticHttp2Factory(negotiator)
@@ -556,6 +570,79 @@ public class HttpAutomaticHttpsClient <: Resource {
                     }
                 }
         }
+    }
+
+    /** Negotiates a duplex exchange without replaying a committed handshake. */
+    public func upgrade(
+        http1Request: HttpRequest,
+        http2Request: HttpRequest,
+        protocol!: ?String = None<String>,
+        context!: OperationContext = OperationContext.background(),
+        connectionCancellation!: CancellationToken = CancellationToken.none()
+    ): HttpDuplexExchangeResult {
+        if (http1Request.url.scheme != "https" || http2Request.url.toString() != http1Request.url.toString()) {
+            throw IllegalArgumentException("duplex protocol requests must share an HTTPS origin and target")
+        }
+        let key = automaticTlsPoolKey(http1Request.url, handshaker)
+        match (cache.get(key)) {
+            case Some(CachedHttpProtocol.Http11) =>
+                try {
+                    upgradeHttp1Claim(h1Pool.acquire(key, h1Factory, context: context), http1Request, context)
+                } catch (switched: Http2NegotiatedException) {
+                    let signal = Http2ClientExecutionSignal()
+                    let lease = try {
+                        h2Pool.adopt(key, switched.connection, signal, context: context, endStream: false)
+                    } catch (error: Exception) { switched.connection.close(); throw error }
+                    upgradeHttp2Claim(lease, signal, http2Request, protocol, context, connectionCancellation)
+                }
+            case _ =>
+                try {
+                    let signal = Http2ClientExecutionSignal()
+                    let lease = h2Pool.acquire(key, signal, h2Factory, context: context, endStream: false)
+                    upgradeHttp2Claim(lease, signal, http2Request, protocol, context, connectionCancellation)
+                } catch (fallback: Http11NegotiatedException) {
+                    let lease = match (fallback.connection) {
+                        case Some(connection) =>
+                            try { h1Pool.adopt(key, connection, context: context) }
+                            catch (error: Exception) { connection.close(); throw error }
+                        case None => h1Pool.acquire(key, h1Factory, context: context)
+                    }
+                    upgradeHttp1Claim(lease, http1Request, context)
+                }
+        }
+    }
+
+    private func upgradeHttp1Claim(
+        lease: Http1PoolLease, request: HttpRequest, context: OperationContext
+    ): HttpDuplexExchangeResult {
+        try {
+            mapHttp1Upgrade(lease.connection.upgradeTracked(
+                request, context: context, onTerminated: { reusable =>
+                    if (reusable) { h1Pool.release(lease, context: context) }
+                    else { h1Pool.discard(lease, context: context) }
+                }
+            ))
+        } catch (error: Exception) { h1Pool.discard(lease, context: context); throw error }
+    }
+
+    private func upgradeHttp2Claim(
+        lease: Http2PoolLease,
+        signal: Http2ClientExecutionSignal,
+        request: HttpRequest,
+        protocol: ?String,
+        context: OperationContext,
+        connectionCancellation: CancellationToken
+    ): HttpDuplexExchangeResult {
+        try {
+            let executable = match (lease.connection) {
+                case value: Http2ExecutableConnection => value
+                case _ => throw IllegalStateException("HTTP/2 pool returned a non-executable connection")
+            }
+            mapHttp2Connect(executable.connectClaimed(
+                request, protocol, lease.admission, signal, context, connectionCancellation,
+                { => h2Pool.release(lease) }
+            ))
+        } catch (error: Exception) { h2Pool.release(lease); throw error }
     }
 
     public func h1Snapshot(): Http1ConnectionPoolSnapshot { h1Pool.snapshot() }

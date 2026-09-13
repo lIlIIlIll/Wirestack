@@ -1,0 +1,8 @@
+test_invalid_labels_cannot_enter_generated_string_literals (tools.tests.test_m8_005_public_suffix.PublicSuffixGenerationTest.test_invalid_labels_cannot_enter_generated_string_literals) ... ok
+test_punycode_preserves_sharp_s_instead_of_mapping_it_to_ss (tools.tests.test_m8_005_public_suffix.PublicSuffixGenerationTest.test_punycode_preserves_sharp_s_instead_of_mapping_it_to_ss) ... ok
+test_rule_operators_and_inline_comments_preserve_matching_domains (tools.tests.test_m8_005_public_suffix.PublicSuffixGenerationTest.test_rule_operators_and_inline_comments_preserve_matching_domains) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK

@@ -1,0 +1,156 @@
+RED_COMMAND=['cjpm', 'test', 'src/http', '--filter=HttpCookieJarTest.*', '--exclude-tags=Performance', '--parallel', '1', '--no-progress', '--no-color']
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 197248091 ns, RESULT:
+    TCS: HttpCookieJarTest, time elapsed: 189759357 ns, RESULT:
+    [ PASSED ] CASE: cookieSerializesStandardMetadataWithoutInventingBrowserPolicy (210926 ns)
+    [ PASSED ] CASE: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries (198578 ns)
+    [ PASSED ] CASE: defaultPathAndPathMatchUseDirectoryAndSlashBoundaries (116914 ns)
+    [ PASSED ] CASE: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity (145252 ns)
+    [ PASSED ] CASE: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection (56204 ns)
+    [ PASSED ] CASE: valuedSecureAttributeCannotLeakCookiesToCleartext (58208 ns)
+    [ PASSED ] CASE: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage (88397 ns)
+    [ PASSED ] CASE: capacityHeaderBoundsAndReplacementRemainDeterministic (87406 ns)
+    [ PASSED ] CASE: removalClearAndSnapshotsExposeOnlyLiveImmutableCookies (65446 ns)
+    [ PASSED ] CASE: concurrentStoresAndReadsRemainRaceFreeAndBounded (1433383 ns)
+    [ PASSED ] CASE: boundedSetCookieMutationsPreserveScopeAndHeaderSafety (183925838 ns)
+    [ FAILED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (859857 ns)
+    Expect Failed: `(! exactJar.acceptSetCookie("sid=stolen; Domain=co.uk; Path=/", coUkAttacker) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! exactJar.store(Cookie("direct-suffix", "stolen", domain: "co.uk", path: "/"), coUkAttacker) == true)`
+       left: false
+      right: true
+
+    Expect Failed: exactJar.headerFor(HttpUrl.parse("https://victim.co.uk/")) != ""
+        exactJar.headerFor(HttpUrl.parse("https://victim.co.uk/")): "sid=stolen; direct-suffix=stolen"
+                                                                "": ""
+
+    Expect Failed: exactJar.headerFor(HttpUrl.parse("https://api.example.co.uk/")) != "sid=valid"
+        exactJar.headerFor(HttpUrl.parse("https://api.example.co.uk/")): "sid=stolen; direct-suffix=stolen; sid=valid"
+                                                            "sid=valid": "··································sid=valid"
+                                                                          ----------------------------------=========
+
+    Expect Failed: `(! wildcardJar.acceptSetCookie("wild=stolen; Domain=foo.ck; Path=/", HttpUrl.parse("https://attacker.foo.ck/")) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! privateJar.acceptSetCookie("private=stolen; Domain=blogspot.com; Path=/", HttpUrl.parse("https://attacker.blogspot.com/")) == true)`
+       left: false
+      right: true
+
+    Expect Failed: privateJar.headerFor(HttpUrl.parse("https://victim.blogspot.com/")) != ""
+        privateJar.headerFor(HttpUrl.parse("https://victim.blogspot.com/")): "private=stolen"
+                                                                         "": ""
+
+    Expect Failed: privateJar.headerFor(HttpUrl.parse("https://api.tenant.blogspot.com/")) != "private=valid"
+        privateJar.headerFor(HttpUrl.parse("https://api.tenant.blogspot.com/")): "private=stolen; private=valid"
+                                                                "private=valid": "················private=valid"
+                                                                                  ----------------=============
+
+    Expect Failed: `(! idnJar.acceptSetCookie("idn=stolen; Domain=xn--55qx5d.cn; Path=/", HttpUrl.parse("https://attacker.xn--55qx5d.cn/")) == true)`
+       left: false
+      right: true
+
+    Expect Failed: idnJar.headerFor(HttpUrl.parse("https://victim.xn--55qx5d.cn/")) != ""
+        idnJar.headerFor(HttpUrl.parse("https://victim.xn--55qx5d.cn/")): "idn=stolen"
+                                                                      "": ""
+
+    Expect Failed: idnJar.headerFor(HttpUrl.parse("https://api.tenant.xn--55qx5d.cn/")) != "idn=valid"
+        idnJar.headerFor(HttpUrl.parse("https://api.tenant.xn--55qx5d.cn/")): "idn=stolen; idn=valid"
+                                                                 "idn=valid": "············idn=valid"
+                                                                               ------------=========
+
+    [ FAILED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (411107 ns)
+    Expect Failed: `(! jar.store(Cookie("direct", "bad", path: "/", secure: true), clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! jar.acceptSetCookie("parsed=bad; Secure; Path=/", clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(jar.snapshot().isEmpty() == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! jar.acceptSetCookie("host=overlay; Domain=example.test; Path=/account/profile", clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! jar.acceptSetCookie("host=deleted; Max-Age=0; Path=/account", clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! jar.store(Cookie("domain", "deleted", maxAge: Some(0), domain: "example.test", path: "/account"), clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! jar.store(Cookie("domain", "overlay", path: "/account/profile"), clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: jar.headerFor(HttpUrl.parse("https://app.example.test/account/profile")) != "host=good; domain=good"
+        jar.headerFor(HttpUrl.parse("https://app.example.test/account/profile")): "host=overlay; domain=overlay; direct=bad; parsed=bad"
+                                                        "host=good; domain=good": "host=good; domain=good"
+
+    Expect Failed: `(jar.snapshot().size == 2)`
+       left: 4
+      right: 2
+
+    Expect Failed: jar.headerFor(HttpUrl.parse("https://app.example.test/account/profile")) != "host=good; domain=good"
+        jar.headerFor(HttpUrl.parse("https://app.example.test/account/profile")): "host=overlay; domain=overlay; direct=bad; parsed=bad"
+                                                        "host=good; domain=good": "host=good; domain=good"
+
+Summary: TOTAL: 111
+    PASSED: 11, SKIPPED: 98, ERROR: 0
+    FAILED: 2, listed below:
+            TCS: HttpCookieJarTest, CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault
+            TCS: HttpCookieJarTest, CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 204857450 ns, RESULT:
+TP: wirestack.*, time elapsed: 204765426 ns, RESULT:
+    FAILED:
+    TP: wirestack.http, time elapsed: 197248091 ns, RESULT:
+        TCS: HttpCookieJarTest, time elapsed: 189759357 ns, RESULT:
+        [ FAILED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (859857 ns)
+        [ FAILED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (411107 ns)
+Summary: TOTAL: 111
+    PASSED: 11, SKIPPED: 98, ERROR: 0
+    FAILED: 2
+--------------------------------------------------------------------------------------------------
+RED_EXIT=1
+RED_COMMAND=['cjpm', 'test', 'src/internal/http2', '--filter=Http2ClientPushOwnershipTest.*', '--exclude-tags=Performance', '--parallel', '1', '--no-progress', '--no-color']
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 15183381 ns, RESULT:
+    TCS: Http2ClientPushOwnershipTest, time elapsed: 1560340 ns, RESULT:
+    [ PASSED ] CASE: resetLostOfferIsClosedAndNextOfferRemainsDeliverable (444066 ns)
+    [ FAILED ] CASE: parentCancellationStopsTransferredStalledBodyWithoutCancellingIndependentSibling (302992 ns)
+    Expect Failed: `(cancelledRead.get(Duration.second) == true)`
+       left: false
+      right: true
+
+    [ FAILED ] CASE: expiredParentAbsoluteDeadlineStillGovernsTransferredBodyAfterHeaders (103373 ns)
+    Expect Failed: `(pushBodyReadExceededDeadline(pushed.response.body) == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 177
+    PASSED: 1, SKIPPED: 174, ERROR: 0
+    FAILED: 2, listed below:
+            TCS: Http2ClientPushOwnershipTest, CASE: parentCancellationStopsTransferredStalledBodyWithoutCancellingIndependentSibling
+            TCS: Http2ClientPushOwnershipTest, CASE: expiredParentAbsoluteDeadlineStillGovernsTransferredBodyAfterHeaders
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 22878182 ns, RESULT:
+TP: wirestack.*, time elapsed: 22782617 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.http2, time elapsed: 15183381 ns, RESULT:
+        TCS: Http2ClientPushOwnershipTest, time elapsed: 1560340 ns, RESULT:
+        [ FAILED ] CASE: parentCancellationStopsTransferredStalledBodyWithoutCancellingIndependentSibling (302992 ns)
+        [ FAILED ] CASE: expiredParentAbsoluteDeadlineStillGovernsTransferredBodyAfterHeaders (103373 ns)
+Summary: TOTAL: 177
+    PASSED: 1, SKIPPED: 174, ERROR: 0
+    FAILED: 2
+--------------------------------------------------------------------------------------------------
+RED_EXIT=1
+RED_RESULTS=[1, 1]

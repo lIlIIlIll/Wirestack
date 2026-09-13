@@ -1,0 +1,29 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 214208868 ns, RESULT:
+    TCS: HttpCookieJarTest, time elapsed: 207373296 ns, RESULT:
+    [ PASSED ] CASE: cookieSerializesStandardMetadataWithoutInventingBrowserPolicy (221465 ns)
+    [ PASSED ] CASE: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries (251325 ns)
+    [ PASSED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (1327368 ns)
+    [ PASSED ] CASE: defaultPathAndPathMatchUseDirectoryAndSlashBoundaries (123686 ns)
+    [ PASSED ] CASE: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity (143098 ns)
+    [ PASSED ] CASE: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection (86188 ns)
+    [ PASSED ] CASE: valuedSecureAttributeCannotLeakCookiesToCleartext (81163 ns)
+    [ PASSED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (435115 ns)
+    [ PASSED ] CASE: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage (132409 ns)
+    [ PASSED ] CASE: capacityHeaderBoundsAndReplacementRemainDeterministic (124044 ns)
+    [ PASSED ] CASE: removalClearAndSnapshotsExposeOnlyLiveImmutableCookies (102422 ns)
+    [ PASSED ] CASE: concurrentStoresAndReadsRemainRaceFreeAndBounded (1467011 ns)
+    [ PASSED ] CASE: boundedSetCookieMutationsPreserveScopeAndHeaderSafety (200886353 ns)
+Summary: TOTAL: 111
+    PASSED: 13, SKIPPED: 98, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 222050976 ns, RESULT:
+TP: wirestack.*, time elapsed: 221955490 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 214208868 ns
+Summary: TOTAL: 111
+    PASSED: 13, SKIPPED: 98, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
