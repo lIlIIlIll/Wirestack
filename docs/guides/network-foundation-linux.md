@@ -4,7 +4,7 @@
 capability 和结构化错误。Linux backend 使用公开 `std.net` API，不暴露 SDK socket 或
 native handle。M8-002 提供 `TcpListener`、`TcpStream` 和 `UdpSocket` 的 Internet
 原生证据；M8-003 增加受 SDK 能力限制的 `UnixListener`、`UnixStream` 和
-`UnixDatagramSocket`。DNS 与后续协议集成仍由 M8-004 及后续任务负责。
+`UnixDatagramSocket`。M8-004 增加经过 Linux 验收的 DNS wire client 与 resolver policy；后续协议集成属于 M8-005 及后续任务。
 
 ## 连接已解析的 TCP endpoint
 
@@ -169,6 +169,80 @@ func unixPeer(error: api.NetworkException): ?api.UnixEndpoint {
 }
 ```
 
+## DNS 解析与连接
+
+`DnsClient` 使用 `DnsResolverConfig.nameservers` 中的已解析 endpoint 发送 UDP DNS 查询。
+响应必须匹配服务器、transaction ID、question、class 和 type；合法截断响应在同一个
+`OperationContext` 下改用 TCP。`query(name, recordType, context:)` 返回有界
+`DnsMessageSummary`；`lookup(host, options:, context:)` 返回请求 family 的地址。
+公开摘要构造器在复制数组前检查每个 section 的 16-bit 数量范围，并将 resource record
+总数限制为 65,535。无效数量抛出 `IllegalArgumentException`。
+没有配置 nameserver 时，地址查询使用已有的有界 system resolver；它不伪造 DNS TTL。
+该路径把已经选定的 DNS 名称作为绝对名称交给系统，不再应用系统 search 后缀。
+因此显式根点与手动展开的 search 候选在 system fallback 中仍保持原意。
+`Any` 查询中，某个地址族的 `TemporaryFailure` 或 `SystemFailure` 不会丢弃另一个
+地址族的可用地址。收集到 `maxResults` 个地址后停止查询其他地址族，不让无法返回的
+额外结果消耗预算。在达到容量前，取消、超时和跨地址族 canonical name 冲突仍会终止查询。
+关闭 `DnsClient` 导致排队或活跃请求终止时，错误为 `Cancelled`；关闭后发起的
+新请求返回 `SystemFailure`。
+DNS transport 错误保留已有的本地和远端 endpoint、native code 和 cause。
+底层 receive 错误没有远端 endpoint 时，顶层 `ResolveException` 使用本次选择的 nameserver。
+`SERVFAIL` 和 `REFUSED` 重试耗尽时，错误保留最后响应的 nameserver。
+匹配但格式损坏的 UDP 响应、重复 TC 的 TCP 响应等协议错误也保留所选 nameserver 和 cause。
+实时 NXDOMAIN（含 CNAME）和 NODATA 错误保留响应的 nameserver；地址族汇总不丢弃
+这些错误的 endpoint。真正的负缓存命中不声称发生了新的远端响应。
+未支持的 RCODE 和 CNAME 解释错误同样保留响应服务器；解释阶段统一应用已有的
+context 错误映射。NXDOMAIN 是 name-wide 结果，无论是否带有可缓存的 SOA，
+都会立即结束当前 DNS 名称的跨地址族查询，不采用其他地址族的结果。
+缺少 SOA 时不建立负缓存；之后独立发起的查询仍可访问服务器。
+跨地址族 canonical name 冲突也保留本次实时响应的服务器，即使另一个地址族来自缓存。
+若两族都来自缓存，则不附加声称有新响应的 endpoint。
+每次尝试按剩余总预算和尚未执行的服务器尝试次数分配子 Deadline，UDP 与对应的
+TCP fallback 共用该子 Deadline。静默服务器不会独占全部预算。子 Deadline 不会延长
+总 Deadline；活跃取消或总预算耗尽立即终止，不进入下一次尝试。
+
+`Resolver` 将标准点分十进制 IPv4 字面量直接作为 `ResolverSource.Static` 返回，不应用 hosts/search/DNS；
+仍检查取消和 Deadline。请求的 family 不匹配时返回 `NoData`，不会转为 DNS 查询。
+system fallback 支持 253 字节的规范 DNS 名称；native 输入上限为 254 字节，
+包含提交绝对名称时追加的根点。
+
+`Resolver(config:, dns:)` 在构造时读取 hosts 快照。精确 hosts 名称优先于 DNS；
+DNS 候选按 `searchDomains` 和 `ndots` 排序。需要保留末尾根点时使用
+`resolve(String, options:, context:)`，因为 `HostName` 已规范化并移除末尾点。
+`DnsResolverConfig.fromSystem(path:)` 支持 Linux resolv.conf 的 nameserver、
+search/domain 和 ndots；不实现完整 NSS 配置。配置路径必须是可信的本地普通文件。
+IPv6 nameserver 的 zone 只接受 `UInt32` 数字 scope ID。`fromSystem` 忽略接口名称
+和超出范围的 zone；直接构造 `DnsResolverConfig` 则抛出 `IllegalArgumentException`，
+不会进入无效 endpoint 的重试。没有可用 nameserver 时，地址查询仍可使用有界 system resolver。
+nameserver 的数字 zone 会去除前导零；scope ID 0 规范化为无 zone，
+与 native receive 返回的 endpoint 身份保持一致。
+系统配置在去重前规范化 scope，八个 nameserver 的容量只由不同的 endpoint 占用；
+等价的数字拼写不会挤掉后续的不同服务器。
+hosts 快照同样忽略接口名称和超出 `UInt32` 范围的 zone，保留数字 zone 和无 zone 地址。
+数字 scope 与 nameserver 一样规范化，等价拼写不会重复占用 `maxResults` 的地址名额。
+
+正缓存使用整个 CNAME 链最早的绝对过期时间。负缓存要求相关父域的 SOA，并受
+SOA TTL、MINIMUM、已经过的 CNAME 寿命和 `maximumCacheTtl` 限制。零 TTL、
+缺失或无关 SOA 不会成为可复用缓存。`cacheCapacity` 限制缓存条目数。
+每次有效 NXDOMAIN 都清理同名的旧地址族缓存，即使没有 SOA 或负缓存寿命已为零。
+只有尚未过期的可缓存负响应才会插入负缓存项。
+CNAME 链的 NXDOMAIN 还会清理已遍历目标、经过的别名以及以这些名称为最终 canonical host
+的旧正缓存。已有目标 NXDOMAIN 缓存仍按原来的绝对过期时间保留，不延长寿命。
+
+`Resolver.connect(host, port, options:, attemptDelay:, context:)` 复用 Happy Eyeballs，
+DNS 和所有 TCP attempt 消耗同一个绝对 Deadline。返回 transport 归调用者所有；
+关闭 resolver 不关闭已经返回的连接。resolver 拥有传入的可选 `DnsClient`，
+关闭时也会关闭它；不要将该 client 当作独立共享资源。
+采用现有 client 时可使用 `Resolver(config: client.config, dns: Some(client))`。
+配置必须按值一致；不一致时在读取 hosts 或接管 client 前抛出 `IllegalArgumentException`，
+client 仍归调用者所有，避免同一次 DNS 操作使用两个不同的超时和 nameserver 配置。
+`queryTimeout` 只限制 DNS 解析，不会额外缩短 TCP attempt 的调用者 Deadline。
+
+可复现的本地 UDP/TCP DNS peer、取消、缓存和服务字节交换见
+[原生 consumer](../../examples/linux/m8_004/native_dns.cj)、
+[runner](../../tools/m8_004_native_dns.py) 和
+[M8-004 记录](../evidence/M8-004/README.md)。这些证据不代表 DNSSEC 或加密 DNS 支持。
+
 ## Capability 与验证边界
 
 `SocketCapabilities` 是 advisory 值，调用结果仍是权威。当前 Linux Internet/Unix
@@ -184,5 +258,5 @@ Unix [consumer](../../examples/linux/m8_003/main.cj) 和
 [runner](../../tools/m8_003_native_sockets.py) 使用独立 Python peer，验证字节、来源、
 原生等待、背压超时、地址替换防护和活动进程中的 descriptor 清理。
 当前公开契约见 [API 参考](../api/README.md) 与
-[`wirestack-linux-pre1-m8-003.json`](../api/baselines/wirestack-linux-pre1-m8-003.json)。
-M8-004 至 M8-007 仍待执行；不能把局部 socket 资格确认视为最终 release 验证。
+[`wirestack-linux-pre1-m8-004.json`](../api/baselines/wirestack-linux-pre1-m8-004.json)。
+M8-004 的十二条 Linux 验收命令均已通过。M8-005 至 M8-007 仍待执行；局部资格确认不等于最终 release 验证。
