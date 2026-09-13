@@ -212,7 +212,7 @@ Pure baseline/candidate qualification: BLOCKED (timing passed; peak RSS missing 
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS (current PR Core Coverage job passed; historical thresholds remain recorded above)
-Release decision: BLOCKED; three-library/Pure performance qualification lacks peak RSS, and merged-main CI/Pages plus final release assets are still pending
+Release decision: BLOCKED; seven-library, three-library and Pure performance qualification lack peak RSS, and merged-main CI/Pages plus final release assets are still pending
 ```
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选已通过
