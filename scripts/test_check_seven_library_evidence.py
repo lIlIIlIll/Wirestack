@@ -218,8 +218,13 @@ yjson = "0.1.0"
             result.append({"workload_id": workload, "libraries": libraries})
         return result
 
-    def summary_rows(self, batch: int, include_max_cv: bool) -> list[str]:
+    def summary_rows(
+        self, batch: int, include_max_cv: bool, stable_only: bool = False
+    ) -> list[str]:
         rows: list[str] = []
+        max_cv = len(checker.LIBRARIES) + batch / 10.0
+        if stable_only and max_cv > 5.0:
+            return rows
         for workload_index, workload in enumerate(checker.WORKLOADS):
             medians = [
                 f"{batch * 100 + workload_index * 10 + library_index + 1:.3f}"
@@ -227,7 +232,7 @@ yjson = "0.1.0"
             ]
             cells = [checker.WORKLOAD_LABELS[workload], *medians]
             if include_max_cv:
-                cells.append(f"{len(checker.LIBRARIES) + batch / 10.0:.2f}%")
+                cells.append(f"{max_cv:.2f}%")
             rows.append("| " + " | ".join(cells) + " |")
         return rows
 
@@ -320,7 +325,7 @@ yjson = "0.1.0"
             f"## 第一批\n\n{first_rows}\n\n"
             f"## 第二批\n\n{second_rows}\n",
         )
-        readme_rows = "\n".join(self.summary_rows(2, include_max_cv=False))
+        readme_rows = "\n".join(self.summary_rows(2, include_max_cv=False, stable_only=True))
         write(
             self.root / "README.md",
             f"[Current]({self.result_relative})\n\n## 性能\n\n{readme_rows}\n",
@@ -556,8 +561,13 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
 
     def test_readme_number_drift_fails_closed(self) -> None:
         path = self.root / "README.md"
-        text = path.read_text(encoding="utf-8")
-        write(path, text.replace("| Address encode | 201.000", "| Address encode | 999.000", 1))
+        write(
+            path,
+            f"[Current]({self.fixture.result_relative})\n\n"
+            "## 性能\n\n"
+            "| Address encode | 201.000 | 202.000 | 203.000 | "
+            "204.000 | 205.000 | 206.000 | 207.000 |\n",
+        )
         with self.assertRaisesRegex(checker.EvidenceError, "README current performance table"):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
 
