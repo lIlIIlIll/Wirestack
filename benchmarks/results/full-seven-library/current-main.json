@@ -1,38 +1,38 @@
 {
   "candidate": {
-    "identity_sha256": "e204758265d647f271040d96fa043ea2b795a411f811b1ecaa5858878b819b57",
+    "identity_sha256": "1e2e2d91e0500c8851fa26c579f36ba247a2511b6ea4b918d3bdd6a145c71267",
     "lockstep_manifests_sha256": "4eb82f14fac080702ac2515da9094f4c24c5721cb0cd7c85f3aae55414b3cddb",
     "package_version": "0.1.0",
-    "release_graph_sha256": "1ade7e6101ade9a9f28b54f503bb765fdab447091f35a8a3803fdb0876ba897c",
+    "release_graph_sha256": "43b1c43d5a9c12128aa9acedf3e148d531a7a623e24c24d3734dee22bfa96bfc",
     "root_lock_sha256": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0",
     "root_manifest_sha256": "3814815364bc0b40a5c5107269807c7a5c1766bb0054c5329521c4d424fcb259"
   },
   "checksum_files": [
-    "formal-main-11-1.tar.gz",
-    "formal-main-11-2.tar.gz",
+    "formal-release-11-1.tar.gz",
+    "formal-release-11-2.tar.gz",
     "harness-source.tar.gz",
     "json4cj-source.tar.gz",
-    "optimal-api-overlay-main.patch",
+    "measured-overlay-none.patch",
     "source-identity.json"
   ],
   "effective_harness_sha256": "4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865",
-  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-10-main-008e50b",
+  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-13-release-4766daa",
   "formal_archives": [
     {
-      "file": "formal-main-11-1.tar.gz",
-      "root": "formal-main-11-1"
+      "file": "formal-release-11-1.tar.gz",
+      "root": "formal-release-11-1"
     },
     {
-      "file": "formal-main-11-2.tar.gz",
-      "root": "formal-main-11-2"
+      "file": "formal-release-11-2.tar.gz",
+      "root": "formal-release-11-2"
     }
   ],
   "harness_archive": {
     "file": "harness-source.tar.gz",
     "root": "harness"
   },
-  "measured_commit": "2758853efe1117c7d2b272abd36cf90de46526f5",
+  "measured_commit": "4766daa7ac88a5ad0869cfa2dbdb12c63acd0161",
   "product_source_sha256": "6056f53aa56767a69a29685dad1d6b8fadd8c39a7b47ca6ecc60b46f114acb0b",
-  "result_doc": "docs/performance/results/2026-09-10-main-seven-library.md",
+  "result_doc": "docs/performance/results/2026-09-13-release-seven-library.md",
   "schema_version": 2
 }
