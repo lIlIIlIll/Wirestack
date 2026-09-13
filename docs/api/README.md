@@ -116,7 +116,20 @@ M8-002 与 M8-003 分别增加 `SocketCapabilities.zeroLengthDatagramSend` 和
 和构造函数 ABI 已改变，消费者必须重新编译。新 baseline 匹配不代表旧二进制兼容，
 见 [M8-003 兼容性分类](../evidence/M8-003/api-compatibility.json)。
 
-完整 DNS、HTTP parity、TLS context versioning 和最终发布证据仍属于 M8-004 至 M8-007。
+M8-004 增加 `DnsRecordType`、`DnsQuestion`、`DnsRecord`、`DnsMessageSummary`、
+`DnsParserLimits`、`DnsMessageParser`、`DnsResolverConfig`、`DnsClient` 和 `Resolver`。
+parser 保留记录顺序与原始 RDATA，验证已知名称压缩边界；支持 A、AAAA、CNAME、
+SRV、TXT、MX、PTR 和 SOA，其余类型保留为 `Unknown(code)`。
+`DnsClient.query` 使用 UDP 和有界 TCP 截断回退；`lookup` 只使用相关 answer 地址，
+不把 authority/additional 中的 glue 当作结果。正负缓存受绝对 TTL 和条目上限限制。
+
+`wirestack.net.Resolver` 实现共享 `wirestack.Resolver` 接口，并提供保留末尾根点的
+String overload 和共享 DNS/TCP Deadline 的 `connect`。hosts 是构造时快照；
+关闭 resolver 会关闭其拥有的 client，但不关闭已返回的 transport。具体配置、
+search/ndots、所有权和原生验证见 [DNS 使用指南](../guides/network-foundation-linux.md#dns-解析与连接)。
+
+M8-004 的 Linux 验收门禁已通过，源码候选与证据摘要由任务的 `evidence.json` 绑定。
+HTTP parity、TLS context versioning 和最终发布证据属于 M8-005 至 M8-007，不能从当前 DNS 验证推导其完成状态。
 
 ## `wirestack.tls`
 
