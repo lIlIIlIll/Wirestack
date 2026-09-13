@@ -90,6 +90,9 @@ public class Http2ConnectionStateMachine {
     public prop completion: ?Http2ConnectionCompletion { get() { synchronized(mutex) { terminalState } } }
     public prop completionCount: Int64 { get() { synchronized(mutex) { terminalTransitions } } }
     public prop peerSettings: Http2SettingsSnapshot { get() { synchronized(mutex) { settingsState.peer } } }
+    public prop localSettings: Http2SettingsSnapshot {
+        get() { synchronized(mutex) { settingsState.advertisedLocal } }
+    }
     public prop remoteGoAway: ?Http2GoAway { get() { synchronized(mutex) { remoteGoAwayState } } }
 
     public init(role: Http2ConnectionRole, limits!: Http2Limits = Http2Limits()) {
@@ -187,6 +190,14 @@ public class Http2ConnectionStateMachine {
             registry.openLocal(endStream: endStream)
         }
     }
+    /** Atomically reserves a local server-push stream while admission is open. */
+    public func reserveLocalStream(registry: Http2StreamRegistry): Http2StreamStateMachine {
+        synchronized(mutex) {
+            requireOpenForNewStreamLocked()
+            registry.reserveLocal()
+        }
+    }
+
 
     /** Atomically admits a peer stream only before local or remote draining starts. */
     public func openPeerStream(
@@ -199,6 +210,17 @@ public class Http2ConnectionStateMachine {
             registry.openPeer(streamId, endStream: endStream)
         }
     }
+    /** Atomically consumes a peer-promised stream id while admission is open. */
+    public func reservePeerStream(
+        registry: Http2StreamRegistry,
+        streamId: Http2StreamId
+    ): Http2StreamStateMachine {
+        synchronized(mutex) {
+            requireOpenForNewStreamLocked()
+            registry.reservePeer(streamId)
+        }
+    }
+
 
     /** Starts or narrows graceful drain and returns the corresponding GOAWAY. */
     public func beginDrain(

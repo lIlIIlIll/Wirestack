@@ -72,6 +72,7 @@ public class Http2SendPermit {
  */
 public class Http2FlowController {
     private let limits: Http2Limits
+    private let maximumStreamCount: Int64
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let streams = ArrayList<Http2FlowStream>()
@@ -107,7 +108,16 @@ public class Http2FlowController {
         }
     }
 
-    public init(limits!: Http2Limits = Http2Limits()) { this.limits = limits }
+    public init(
+        limits!: Http2Limits = Http2Limits(),
+        maximumStreams!: UInt32 = limits.maxConcurrentStreams
+    ) {
+        if (maximumStreams < limits.maxConcurrentStreams) {
+            throw IllegalArgumentException("HTTP/2 total flow stream capacity cannot reduce local admission")
+        }
+        this.limits = limits
+        maximumStreamCount = Int64(maximumStreams)
+    }
 
     public func openStream(streamId: Http2StreamId): Unit {
         if (!streamId.isStream()) { throw IllegalArgumentException("HTTP/2 flow stream id must be non-zero") }
@@ -116,8 +126,8 @@ public class Http2FlowController {
             if (findFlowStreamLocked(streamId).isSome()) {
                 throw IllegalStateException("HTTP/2 flow stream is already open")
             }
-            if (streams.size >= Int64(limits.maxConcurrentStreams)) {
-                throw Http2StreamLimitException("HTTP/2 flow stream limit reached")
+            if (streams.size >= maximumStreamCount) {
+                throw Http2StreamLimitException("HTTP/2 total owned flow stream limit reached")
             }
             streams.add(Http2FlowStream(streamId, sendInitialStreamWindow, receiveInitialStreamWindow))
         }

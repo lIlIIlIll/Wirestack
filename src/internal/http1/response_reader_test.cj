@@ -19,7 +19,8 @@ class Http1ResponseReaderTest {
             request.target == "/chat"
         }
         let request = HttpRequest.get("http://example.com/chat").withHeaders(
-            HttpHeaders.builder().add("Connection", "keep-alive, Upgrade").add("Upgrade", "websocket").build()
+            HttpHeaders.builder().add("Connection", "keep-alive, Upgrade")
+                .add("Upgrade", "other/1, WebSocket").add("Upgrade", "fallback").build()
         )
         let exchanged = performHttp1Upgrade(client, request)
         let upgraded = match (exchanged) {

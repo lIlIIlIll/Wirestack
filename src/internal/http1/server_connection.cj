@@ -7,15 +7,25 @@ import wirestack.internal.transport.*
 public class Http1ServerResponse {
     public let response: HttpResponse
     public let trailer: HttpTrailer
+    public let duplexHandler: ?Http1DuplexHandler
 
-    public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer()) {
+    public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer(),
+        duplexHandler!: ?Http1DuplexHandler = None<Http1DuplexHandler>) {
         this.response = response
         this.trailer = trailer
+        this.duplexHandler = duplexHandler
     }
 }
 
 public interface Http1ServerHandler {
     func handle(request: Http1ServerRequest, context: OperationContext): Http1ServerResponse
+}
+
+/** Runs after a validated protocol-switch response has been committed. */
+public interface Http1DuplexHandler {
+    func serve(transport: DuplexTransport, context: OperationContext): Unit
+    /** Releases pre-session ownership when response validation or commitment fails. */
+    func failed(): Unit {}
 }
 
 public struct Http1ServerConnectionResult {
@@ -50,6 +60,8 @@ public func serveHttp1Connection(
     var served: Int64 = 0
     var unread = false
     var tunnel = false
+    var tunnelRemainder = Array<Byte>()
+    var pendingHandoff = None<Http1DuplexHandler>
     let requestReadBuffer = Array<Byte>(16 * 1024, repeat: 0)
     try {
         while (served < maximumRequests) {
@@ -60,14 +72,17 @@ public func serveHttp1Connection(
             var produced: ?Http1ServerResponse = None<Http1ServerResponse>
             try {
                 produced = Some(handler.handle(request, context))
+                pendingHandoff = produced.getOrThrow().duplexHandler
+                validateServerHandoff(request, produced.getOrThrow())
             } catch (error: Exception) {
                 request.close()
+                if (let Some(value) <- produced) { value.response.close() }
                 writeServerFailure(transport, request.head.method, context, limits)
                 served += 1
                 return Http1ServerConnectionResult(served, true, None<DuplexTransport>)
             }
 
-            let requestConsumed = request.body.isFullyConsumed()
+            let requestConsumed = request.body.isFullyConsumed() || request.body.contentLength == Some(0)
             request.close()
             let output = produced.getOrThrow()
             let evidence = writeHttp1Response(
@@ -76,8 +91,16 @@ public func serveHttp1Connection(
             )
             served += 1
             unread = !requestConsumed
+            if (let Some(handoff) <- output.duplexHandler) {
+                let upgraded = Http1PrefixedTransport(transport, request.upgradeRemainder)
+                pendingHandoff = None<Http1DuplexHandler>
+                try { handoff.serve(upgraded, context) }
+                finally { upgraded.close() }
+                return Http1ServerConnectionResult(served, false, None<DuplexTransport>)
+            }
             tunnel = evidence.tunnelEstablished
-            if (unread || tunnel || evidence.mustClose ||
+            if (tunnel) { tunnelRemainder = request.upgradeRemainder }
+            if (unread || tunnel || !request.upgradeRemainder.isEmpty() || evidence.mustClose ||
                 headerContainsToken(request.head.headers, "connection", "close") ||
                 headerContainsToken(output.response.headers, "connection", "close")) {
                 break
@@ -85,11 +108,16 @@ public func serveHttp1Connection(
         }
         Http1ServerConnectionResult(
             served, unread,
-            if (tunnel) { Some<DuplexTransport>(transport) } else { None<DuplexTransport> }
+            if (tunnel) {
+                Some<DuplexTransport>(Http1PrefixedTransport(transport, tunnelRemainder))
+            } else { None<DuplexTransport> }
         )
     } finally {
-        // A successful CONNECT hands ownership to a future explicit tunnel API.
-        if (!tunnel) { transport.close() }
+        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }
+        finally {
+            // Only the explicit low-level CONNECT result transfers ownership beyond this call.
+            if (!tunnel) { transport.close() }
+        }
     }
 }
 
@@ -101,4 +129,30 @@ private func writeServerFailure(transport: DuplexTransport, method: HttpMethod,
             .add("Content-Length", "0").add("Connection", "close").build()
     )
     let _ = writeHttp1Response(transport, method, response, context: context, limits: limits)
+}
+
+private func validateServerHandoff(request: Http1ServerRequest, output: Http1ServerResponse): Unit {
+    let status = output.response.status
+    if (output.duplexHandler.isNone()) {
+        if (status == 101) { throw IllegalArgumentException("101 response requires a protocol handler") }
+        return
+    }
+    if (request.body.contentLength != Some(0) || output.response.body.contentLength != Some(0) ||
+        !output.trailer.headers.entries.isEmpty()) {
+        throw IllegalArgumentException("HTTP protocol handoff requires empty HTTP bodies and no trailer")
+    }
+    if (request.head.method == HttpMethod("CONNECT")) {
+        if (status < 200 || status >= 300) {
+            throw IllegalArgumentException("CONNECT handoff requires a successful response")
+        }
+        return
+    }
+    let selected = output.response.headers.getAll("upgrade")
+    if (status != 101 || selected.size != 1 ||
+        !isUpgradeProtocol(selected[0]) ||
+        !headerContainsToken(request.head.headers, "upgrade", selected[0]) ||
+        !headerContainsToken(request.head.headers, "connection", "upgrade") ||
+        !headerContainsToken(output.response.headers, "connection", "upgrade")) {
+        throw IllegalArgumentException("HTTP protocol handoff does not confirm the requested Upgrade")
+    }
 }

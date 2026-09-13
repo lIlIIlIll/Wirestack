@@ -146,6 +146,23 @@ class Http2SettingsTest {
     }
 
     @TestCase
+    func clientPushAdvertisementUsesItsOwnFiniteAdmissionBound(): Unit {
+        let limits = Http2Limits(maxConcurrentStreams: 7u32)
+        let enabled = initialHttp2Settings(
+            Http2ConnectionRole.Client, limits,
+            enablePush: true, maximumConcurrentStreams: 3u32
+        )
+        @Expect(hasSetting(enabled, Http2SettingId.EnablePush, 1u32))
+        @Expect(hasSetting(enabled, Http2SettingId.MaxConcurrentStreams, 3u32))
+
+        let capped = initialHttp2Settings(
+            Http2ConnectionRole.Client, limits,
+            enablePush: true, maximumConcurrentStreams: 99u32
+        )
+        @Expect(hasSetting(capped, Http2SettingId.MaxConcurrentStreams, 7u32))
+    }
+
+    @TestCase
     func serverEnablePushSettingIsRejectedInBothDirections(): Unit {
         let server = Http2SettingsState(Http2ConnectionRole.Server)
         var sendRejected = false

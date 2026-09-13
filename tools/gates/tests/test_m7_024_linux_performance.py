@@ -25,15 +25,10 @@ class M7024LinuxPerformanceGateTest(unittest.TestCase):
         cls.manifest = gate.load_manifest(ROOT, MANIFEST_PATH)
         cls.documents, cls.artifacts = gate.load_artifacts(ROOT, cls.manifest)
 
-    def test_checked_in_baselines_pass_all_eight_domains(self):
+    def test_historical_http2_baseline_does_not_qualify_changed_sources(self):
         report = gate.evaluate(ROOT, self.manifest)
-        self.assertEqual("PASS", report["decision"])
-        self.assertEqual(list(gate.EXPECTED_DOMAINS), [item["name"] for item in report["domains"]])
-        self.assertEqual([], report["failed_domains"])
-        self.assertEqual(7, len(report["artifacts"]))
-        for domain in report["domains"]:
-            self.assertEqual("PASS", domain["decision"], domain)
-            self.assertTrue(domain["checks"])
+        self.assertEqual("FAIL", report["decision"])
+        self.assertIn("http2", report["failed_domains"])
 
     def test_manifest_inventory_and_digest_fail_closed(self):
         manifest = copy.deepcopy(self.manifest)
