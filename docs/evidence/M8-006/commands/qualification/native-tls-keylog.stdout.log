@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "profile": "keylog",
+  "scenarios": 5,
+  "report": "<repo-root>-pr-worktrees/M8-006-tls/docs/evidence/M8-006/native-keylog.json"
+}

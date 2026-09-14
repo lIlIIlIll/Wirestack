@@ -40,6 +40,14 @@ public enum TlsCapability {
  * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | NetworkBinding
+/**
+ * External private-key decryption backed by a caller-owned service.
+ */
+    | ExternalDecryptor
+/**
+ * Explicit test-build TLS key logging.
+ */
+    | KeyLog
 }
 
 /**
@@ -116,6 +124,10 @@ public enum TlsContextErrorCode {
  * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | UnsupportedCapability
+/**
+ * A hook is invalid for the selected TLS role or identity.
+ */
+    | InvalidHook
 }
 
 /**
@@ -151,6 +163,115 @@ public class TlsContextException <: Exception {
  * Wirestack 公开 API：getClassName。
  */
     protected override func getClassName(): String { "TlsContextException" }
+}
+
+/**
+ * One bounded RSA ciphertext supplied to an external private-key decryptor.
+ *
+ * `algorithm` is deliberately restricted to `RSA_RAW`: the callback returns
+ * the raw RSA private-operation block while the TLS provider owns PKCS#1
+ * validation and removal.
+ */
+public struct ExternalDecryptionRequest {
+    /** The provider-neutral algorithm identifier; always `RSA_RAW`. */
+    public let algorithm: String
+    private let ciphertext: Array<Byte>
+
+    /**
+     * Creates an engine-owned request.
+     * @param algorithm Must be exactly `RSA_RAW`.
+     * @param ciphertext RSA ciphertext containing 1..1024 bytes.
+     */
+    public init(algorithm: String, ciphertext: Array<Byte>) {
+        if (algorithm != "RSA_RAW" || ciphertext.isEmpty() || ciphertext.size > 1024) {
+            throw TlsContextException(
+                TlsContextErrorCode.InvalidHook,
+                "external decryption requires RSA_RAW ciphertext containing 1..1024 bytes"
+            )
+        }
+        this.algorithm = algorithm
+        this.ciphertext = ciphertext.clone()
+    }
+
+    /** Returns an owned copy of the ciphertext. */
+    public func ciphertextBytes(): Array<Byte> { ciphertext.clone() }
+}
+
+/**
+ * Caller-owned, thread-safe service for an external RSA private operation.
+ *
+ * The TLS engine passes the exact handshake `OperationContext`. A successful
+ * callback transfers ownership of its returned array to Wirestack: it must
+ * contain exactly `request.ciphertextBytes().size` raw-RSA block bytes and the
+ * callback must not retain, reuse, or mutate it. Wirestack zeroes that array
+ * after native completion on every path.
+ */
+public interface ExternalDecryptor {
+    /**
+     * Performs one bounded raw RSA private operation.
+     * @param request Validated `RSA_RAW` ciphertext.
+     * @param context The caller's exact handshake operation context.
+     */
+    func decrypt(request: ExternalDecryptionRequest, context: OperationContext): Array<Byte>
+}
+
+/**
+ * One owned, bounded NSS key-log record for an explicit test build.
+ *
+ * The label is an ASCII token of 1..128 uppercase letters, decimal digits, or
+ * underscores. `clientRandom` is exactly 32 bytes and `secret` is 1..64 bytes.
+ */
+public struct TlsKeyLogLine {
+    /** NSS-compatible key-log label. */
+    public let label: String
+    private let clientRandom: Array<Byte>
+    private let secret: Array<Byte>
+
+    /**
+     * Creates a validated key-log record and copies both byte arrays.
+     * @param label Bounded NSS-compatible ASCII label.
+     * @param clientRandom Exact 32-byte TLS client random.
+     * @param secret Secret containing 1..64 bytes.
+     */
+    public init(label: String, clientRandom: Array<Byte>, secret: Array<Byte>) {
+        let labelBytes = label.toArray()
+        var validLabel = !labelBytes.isEmpty() && labelBytes.size <= 128
+        for (value in labelBytes) {
+            if (!((value >= b'A' && value <= b'Z') ||
+                (value >= b'0' && value <= b'9') || value == b'_')) {
+                validLabel = false
+            }
+        }
+        if (!validLabel || clientRandom.size != 32 || secret.isEmpty() || secret.size > 64) {
+            throw TlsContextException(
+                TlsContextErrorCode.InvalidHook,
+                "TLS key-log line requires an NSS label, 32-byte random, and 1..64-byte secret"
+            )
+        }
+        this.label = label
+        this.clientRandom = clientRandom.clone()
+        this.secret = secret.clone()
+    }
+
+    /** Returns an owned client-random copy. */
+    public func clientRandomBytes(): Array<Byte> { clientRandom.clone() }
+    /** Returns an owned secret copy. */
+    public func secretBytes(): Array<Byte> { secret.clone() }
+}
+
+/**
+ * Caller-owned, thread-safe sink available only in explicit test-keylog builds.
+ *
+ * Wirestack passes the exact handshake `OperationContext`. The sink must copy
+ * data it retains and must not log outside the explicitly enabled context.
+ */
+public interface KeyLogSink {
+    /**
+     * Receives one validated key-log record.
+     * @param line Bounded, owned key-log data.
+     * @param context The caller's exact handshake operation context.
+     */
+    func emit(line: TlsKeyLogLine, context: OperationContext): Unit
 }
 
 /**
