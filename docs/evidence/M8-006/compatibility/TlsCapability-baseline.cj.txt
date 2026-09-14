@@ -1,0 +1,29 @@
+public enum TlsCapability {
+    ClientCertificate
+    | CustomRoots
+    | HardwareKeys
+    | Http2
+    | NetworkBinding
+    | ServerMode
+    | SystemTrust
+    | Tls12
+    | Tls13
+}
+
+func accepts(value: TlsCapability): Bool {
+    match (value) {
+        case TlsCapability.ClientCertificate => true
+        case TlsCapability.CustomRoots => true
+        case TlsCapability.HardwareKeys => true
+        case TlsCapability.Http2 => true
+        case TlsCapability.NetworkBinding => true
+        case TlsCapability.ServerMode => true
+        case TlsCapability.SystemTrust => true
+        case TlsCapability.Tls12 => true
+        case TlsCapability.Tls13 => true
+    }
+}
+
+main(): Int64 {
+    if (accepts(TlsCapability.ClientCertificate)) { 0 } else { 1 }
+}

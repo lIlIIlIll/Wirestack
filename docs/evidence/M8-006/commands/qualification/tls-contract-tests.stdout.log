@@ -1,0 +1,27 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.tls, time elapsed: 100024632 ns, RESULT:
+    TCS: PublicTlsFacadeTest, time elapsed: 76338969 ns, RESULT:
+    [ PASSED ] CASE: clientBuilderRejectsReversedVersionRangeBeforeTransportIo (43481662 ns)
+    [ PASSED ] CASE: serverBuilderRequiresAnIdentityBeforeTransportIo (7649352 ns)
+    [ PASSED ] CASE: clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities (8168044 ns)
+    [ PASSED ] CASE: preCancelledHandshakeConsumesAndAbortsTheTransport (15766394 ns)
+    TCS: TlsM8006ContractTest, time elapsed: 8196429 ns, RESULT:
+    [ PASSED ] CASE: externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned (53848 ns)
+    [ PASSED ] CASE: keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets (70707 ns)
+    [ PASSED ] CASE: clientContextRejectsExternalDecryptionBeforeHandshake (7692601 ns)
+    TCS: TlsRuntimeTest, time elapsed: 15314866 ns, RESULT:
+    [ PASSED ] CASE: reportsHandleFreeLinuxProviderAndBuildIdentity (7483449 ns)
+    [ PASSED ] CASE: returnsDefensiveCopiesOfRuntimeInventories (7491923 ns)
+Summary: TOTAL: 9
+    PASSED: 9, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 108533524 ns, RESULT:
+TP: wirestack.*, time elapsed: 108427171 ns, RESULT:
+    PASSED:
+    TP: wirestack.tls, time elapsed: 100024632 ns
+Summary: TOTAL: 9
+    PASSED: 9, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

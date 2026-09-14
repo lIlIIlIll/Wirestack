@@ -287,12 +287,35 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     payload.update(_native_payload(root, "target/native/resolver/current", resolver_root))
     payload.update(_native_payload(root, HTTP_FILES_PAYLOAD_ROOT, http_files_root))
 
-    provider_manifest = load_json(provider_root / "provider-manifest.json")
+    try:
+        provider_manifest = json.loads(payload["target/native/current/provider-manifest.json"])
+    except (KeyError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ReleaseError("TLS provider manifest is absent or invalid in the release payload") from error
+    if not isinstance(provider_manifest, dict):
+        raise ReleaseError("TLS provider manifest must be a JSON object")
     resolver_manifest = load_json(resolver_root / "resolver-manifest.json")
     http_files_manifest = load_json(http_files_root / HTTP_FILES_MANIFEST_NAME)
     validate_http_files_manifest(http_files_manifest, payload)
+    provider_archive = provider_manifest.get("archive")
+    provider_archive_bytes = payload.get("target/native/current/lib/libwirestack_tls_provider.a")
+    if (
+        not isinstance(provider_archive, dict)
+        or provider_archive.get("name") != "libwirestack_tls_provider.a"
+        or provider_archive_bytes is None
+        or provider_archive.get("bytes") != len(provider_archive_bytes)
+        or not evidence_digest.schema_artifact_sha256_equal(
+            provider_archive.get("sha256"),
+            artifact_payload_sha256(provider_archive_bytes),
+        )
+    ):
+        raise ReleaseError("TLS provider native archive provenance is invalid")
     if provider_manifest.get("externalOpenSslDependency") is not False:
         raise ReleaseError("provider manifest does not set externalOpenSslDependency=false")
+    if (
+        provider_manifest.get("test_only_key_log", False) is not False
+        or "key-log" in provider_manifest.get("capabilities", [])
+    ):
+        raise ReleaseError("test-only TLS key logging cannot enter a release artifact")
 
     entries = [
         {
