@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 YJSON_BENCH_DIR = ROOT / "packages" / "benchmarks"
 YJSON_SOURCE = YJSON_BENCH_DIR / "src" / "bench_json_comprehensive.cj"
 CJFAST_ADAPTER = ROOT / "benchmarks" / "cjfast_json" / "cjfast_comprehensive_bench.cj"
+YJSON_BINARY = YJSON_BENCH_DIR / "target/release/unittest_bin/yjson_benchmarks"
 BENCH_METHOD_RE = re.compile(r"@Bench\s+func\s+([A-Za-z_][A-Za-z0-9_]*)", re.MULTILINE)
 
 RSS_RE = re.compile(
@@ -72,6 +73,14 @@ def source_digest(root: Path) -> str:
         digest.update(b"\0")
         digest.update(path.read_bytes())
         digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def file_digest(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
     return digest.hexdigest()
 
 
@@ -133,28 +142,24 @@ def library_order(round_id: int) -> tuple[str, str, str]:
 
 def cangjie_command(
     cpu: int,
-    suite: str,
+    binary: Path,
     source_case: str,
     report_path: Path,
     round_id: int,
 ) -> list[str]:
-    """Build a timed command selecting exactly one Cangjie benchmark case."""
+    """Build a timed command for one prebuilt Cangjie benchmark case."""
     return [
         "taskset",
         "-c",
         str(cpu),
-        "cjpm",
-        "bench",
-        "--skip-build",
+        str(binary),
+        "--bench",
         "--no-color",
-        "--filter",
-        f"{suite}.{source_case}",
-        "--report-path",
-        str(report_path),
-        "--report-format",
-        "csv-raw",
-        "--random-seed",
-        str(round_id),
+        "--no-progress",
+        f"--filter=*.{source_case}",
+        f"--report-path={report_path}",
+        "--report-format=csv-raw",
+        f"--random-seed={round_id}",
     ]
 
 
@@ -188,10 +193,22 @@ def build_benchmark_package(
     return completed.returncode
 
 
-def suite_for(library: str) -> str:
+def binary_path_for(library: str, cjfast_work_dir: Path) -> Path:
     if library in {"yjson", "stdx_json"}:
-        return "ComprehensiveJsonCompareBenchmarks"
-    return "CjFastJsonComprehensiveBenchmarks"
+        return YJSON_BINARY
+    return cjfast_work_dir / "target/release/unittest_bin/fastjson.bench"
+
+
+def runtime_environment(env: dict[str, str]) -> dict[str, str]:
+    command_env = env.copy()
+    dynamic_stdx = command_env.get("CANGJIE_STDX_PATH")
+    if not dynamic_stdx:
+        raise ValueError("CANGJIE_STDX_PATH is required for direct benchmark execution")
+    current = command_env.get("LD_LIBRARY_PATH", "")
+    command_env["LD_LIBRARY_PATH"] = (
+        f"{dynamic_stdx}:{current}" if current else dynamic_stdx
+    )
+    return command_env
 
 
 def build_cwd_for(library: str, cjfast_work_dir: Path) -> Path:
@@ -248,7 +265,7 @@ def main() -> int:
         "runs": args.runs,
         "timing_build_policy": (
             "both Cangjie benchmark packages are built with cjpm bench --no-run "
-            "before timed --skip-build samples"
+            "before GNU time wraps the prebuilt benchmark executables"
         ),
         "schedule": "workload rotation; even rounds reversed; three-library order rotates by round",
         "workload_count": len(workloads),
@@ -270,9 +287,6 @@ def main() -> int:
         "ld_preload": env.get("LD_PRELOAD", ""),
         "cangjie_stdx_path": env.get("CANGJIE_STDX_PATH", ""),
     }
-    (output / "metadata.json").write_text(
-        json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
 
     for build_key, build_cwd in (
         ("yjson", YJSON_BENCH_DIR),
@@ -288,6 +302,30 @@ def main() -> int:
                 file=sys.stderr,
             )
             return build_status
+    binary_paths = {
+        library: binary_path_for(library, cjfast_work_dir)
+        for library in ("yjson", "stdx_json", "cjfast_json")
+    }
+    missing_binaries = [
+        f"{library}: {path}"
+        for library, path in binary_paths.items()
+        if not path.is_file() or not os.access(path, os.X_OK)
+    ]
+    if missing_binaries:
+        print(
+            "built benchmark executable missing after unmeasured build: "
+            + ", ".join(missing_binaries),
+            file=sys.stderr,
+        )
+        return 2
+    metadata["cangjie_binaries"] = {
+        library: {"path": str(path), "sha256": file_digest(path)}
+        for library, path in binary_paths.items()
+    }
+    (output / "metadata.json").write_text(
+        json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
 
     manifest_path = output / "manifest.csv"
     with manifest_path.open("w", newline="", encoding="utf-8") as manifest:
@@ -315,19 +353,26 @@ def main() -> int:
                         f"run-{round_id:02d}-workload-{workload_position:02d}-{library}.log"
                     )
                     cwd = build_cwd_for(library, cjfast_work_dir)
-                    command = cangjie_command(
-                        args.cpu,
-                        suite_for(library),
-                        source_case,
-                        report_path,
-                        round_id,
-                    )
-                    load_before = os.getloadavg()[0]
+                    if library in {"yjson", "stdx_json", "cjfast_json"}:
+                        binary = binary_path_for(library, cjfast_work_dir)
+                        command = cangjie_command(
+                            args.cpu, binary, source_case, report_path, round_id
+                        )
+                    else:
+                        command = java_command(
+                            args.cpu, source_case, report_path / "jmh.json"
+                        )
+                    before = os.getloadavg()[0]
                     started = time.monotonic()
+                    command_env = (
+                        runtime_environment(env)
+                        if library in {"yjson", "stdx_json", "cjfast_json"}
+                        else env.copy()
+                    )
                     completed = subprocess.run(
                         [time_binary, "-v", "-o", str(rss_path), *command],
                         cwd=cwd,
-                        env=env,
+                        env=command_env,
                         capture_output=True,
                         text=True,
                     )
