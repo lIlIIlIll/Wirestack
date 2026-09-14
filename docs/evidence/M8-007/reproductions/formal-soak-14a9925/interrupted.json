@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "INCOMPLETE",
+  "requested_duration_seconds": 86400,
+  "frozen_revision": "14a9925dd78ded4f5d99eb8aa70c34f676404f3c",
+  "readiness_observed": true,
+  "supervisor_exit_code": 143,
+  "supervisor_uptime": "17m50s",
+  "last_complete_sample_elapsed_ms": 900020,
+  "last_complete_sample_cycles": 8670,
+  "terminal_record_observed": false,
+  "reason": "Stopped after confirmed unbounded archive materialization finding; no duration or acceptance credit transfers to the replacement run.",
+  "review_comment": "https://github.com/lIlIIlIll/Wirestack/pull/164#discussion_r4003101167",
+  "files": [
+    {
+      "path": "docs/evidence/M8-007/reproductions/formal-soak-14a9925/frozen-candidate.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bf9b9433611609b6c00c26b605eb833965deb5b733559facdc1a1d1fe6dec993"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/reproductions/formal-soak-14a9925/workload.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1e649db90718117743b89e9c23932dcc52a93d76525ac9d160f411c2f31c9f4e"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/reproductions/formal-soak-14a9925/command/final-candidate-soak.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "112b2226d44db5c21e9e02de9c46783a7c98e54e7546149d5935c1320832c883"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/reproductions/formal-soak-14a9925/command/final-candidate-soak.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

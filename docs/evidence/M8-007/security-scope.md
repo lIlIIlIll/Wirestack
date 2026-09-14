@@ -6,6 +6,8 @@ This package requests a current-source security review of the Linux x86_64 glibc
 
 Remote peers control network input. Applications choose endpoints, trust policy, credentials, extension hooks, and resource limits. Build-time provider selection and SDK installation are trusted local inputs. The reviewer must distinguish a malformed remote message from a caller-supplied local policy.
 
+Repository administrators control release policy. Other collaborators are outside the release-approval authority. Archive metadata and payload must pass the bounded reader before installation.
+
 The public packages are `wirestack`, `wirestack.net`, `wirestack.tls`, and `wirestack.http`. Protocol state machines and provider bindings remain internal. Review the [threat model](../../security/threat-model.md) against the current source rather than treating an older release report as current proof.
 
 The review must cover supply chain, certificate identity, private keys, TLS protocol behavior, lifecycle and cancellation, DNS and proxy routing, HTTP/1 request smuggling, HTTP/2 and HPACK, resource bounds, pool isolation, sensitive data, native C ABI behavior, Linux platform assumptions, and release evidence.
@@ -21,6 +23,8 @@ Inspect `native/tls/aws_lc/wirestack_tls_provider.c`, its header and ABI contrac
 Inspect the DNS parser and resolver policy, HTTP/1 framing, HTTP/2 frame processing and HPACK, cookies and public suffix handling, multipart input, and WebSocket framing. Check malformed lengths, duplicate or conflicting fields, compression state, stream ownership, cancellation, and bounded retained state.
 
 The fresh parser campaign uses `tools/gates/campaigns/m7-023-linux-fuzz.json`. M8-007 binds its execution to the qualification, all Cangjie source and test files, and the native build. Its ten targets do not imply exhaustive fuzz coverage of every public API or protocol extension.
+
+The release archive reader limits each member to 8 MiB, decompressed bytes and expanded payload to 64 MiB each, and tar member headers to 4,096. PAX and GNU long-name or long-link records have an 8 KiB limit before metadata expansion. Global and effective per-member PAX dictionaries permit at most 128 fields. GNU sparse formats are rejected before their maps expand. Logical member sizes are checked again before extraction. These input limits are not a measured Python heap ceiling.
 
 ## Keys, trust, and sensitive data
 
@@ -47,6 +51,18 @@ The soak measures pool callbacks, response closure, application and server Futur
 `reproductions/measured-owner-preflight.json` retains the failed initial measurement gate. That gate incorrectly required every sampled weak sentinel to be absent and used a socket-growth limit as an absolute wrapper-count limit. It is diagnostic evidence, not a passing preflight or formal soak.
 
 `reproductions/measured-owner-preflight-60s-growth.json` retains a second failed preflight on the registration-corrected artifact. Its weak cancellation series ranged from one to six, but the final median exceeded the initial median by three against the unchanged limit of two. Workload, process, heap, and terminal cleanup checks passed. A 600-second measurement uses the same limits and sampling interval, with larger median windows; it does not replace or relabel the failed short run.
+
+`archive-review-controls.json` binds seven archive rejection cases to baseline `14a9925dd78ded4f5d99eb8aa70c34f676404f3c`, the corrected reader, and digest-checked command output. The suite accepts an exact 8 MiB member and 128 cumulative PAX fields, rejects the next field, and rejects all four GNU sparse encodings. A separate allocation probe records the cumulative-metadata growth in the first correction and its early rejection after the field limit.
+
+The first formal run used that baseline and stopped after the archive finding. `reproductions/formal-soak-14a9925/interrupted.json` retains its frozen inputs and partial workload output as `INCOMPLETE`. It supplies no formal duration credit.
+
+## Signing authority
+
+Review the attestation workflow and `tools/m8_007_signing_authorization.py` against `linux_x86_64/signing-authorization.json`. The live policy restricts signing-tag creation to repository administrators and blocks tag updates and deletion. Both workflow jobs require the protected `m8-007-release` environment and the sole release-owner reviewer. Self-review is allowed for that owner; administrator bypass is disabled.
+
+The pre-soak policy captures no approved SHA. An explicit post-soak approval selects a committed full SHA, narrows the deployment policy to its exact signing tag, and sets the protected environment variable. Runtime checks and checkout use that SHA. Final verification takes its expected SHA from the separate approval record, not the hosted report.
+
+`hosted-source-controls.json` reproduces source substitution, omitted signing or formal files, removed committed inputs, and weakened task contracts. Corrected verification rejects all six controls. Cryptographic verification is stubbed successful where the test isolates source selection or archival acceptance. The frozen and approved task blobs allow only additive `source_paths`; signed qualification inputs retain byte identity. No non-administrator enforcement probe was run because no such credential is available.
 
 ## Release evidence and environment
 

@@ -20,9 +20,21 @@ jobs:
   stage-frozen-artifact:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: github.repository == 'lIlIIlIll/Wirestack' && github.ref_protected && github.ref_type == 'tag' && startsWith(github.ref_name, 'm8-007-signing-')
+    environment: m8-007-release
     permissions:
-      contents: write
+      contents: read
     steps:
+      - name: Require the independently approved signing source
+        env:
+          APPROVED_SIGNING_SHA: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
+        run: |
+          if [ -z "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_SHA" != "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_REF" != "refs/tags/m8-007-signing-$APPROVED_SIGNING_SHA" ]; then
+            echo "ref and source must exactly match the independent signing approval" >&2
+            exit 1
+          fi
       - name: Download and verify the frozen draft release asset
         run: |
           mkdir -p dist/m8-007
@@ -48,15 +60,28 @@ jobs:
     needs: stage-frozen-artifact
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: github.repository == 'lIlIIlIll/Wirestack' && github.ref_protected && github.ref_type == 'tag' && startsWith(github.ref_name, 'm8-007-signing-')
+    environment: m8-007-release
     permissions:
       contents: read
       id-token: write
       attestations: write
       artifact-metadata: write
     steps:
-      - name: Check out the dispatched source revision
+      - name: Require the independently approved signing source
+        env:
+          APPROVED_SIGNING_SHA: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
+        run: |
+          if [ -z "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_SHA" != "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_REF" != "refs/tags/m8-007-signing-$APPROVED_SIGNING_SHA" ]; then
+            echo "ref and source must exactly match the independent signing approval" >&2
+            exit 1
+          fi
+      - name: Check out the independently approved source revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
           persist-credentials: false
           fetch-depth: 0
       - name: Receive the frozen artifact
@@ -94,8 +119,9 @@ jobs:
           cp "$SBOM_BUNDLE" build/m8-007/signatures/sbom.sigstore.json
           cp "$MANIFEST_BUNDLE" build/m8-007/signatures/release-manifest.sigstore.json
           python3 tools/m8_007_final_release.py verify-signatures \
-            --commit "$GITHUB_SHA" --directory build/m8-007/signatures
+            --commit "$APPROVED_SIGNING_SHA" --directory build/m8-007/signatures
         env:
+          APPROVED_SIGNING_SHA: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
           GH_TOKEN: ${{ github.token }}
           ARTIFACT_BUNDLE: ${{ steps.artifact.outputs.bundle-path }}
           SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}

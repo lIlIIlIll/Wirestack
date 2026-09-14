@@ -1,0 +1,25 @@
+{
+  "status": "REPRODUCED",
+  "source_task": "M8-007",
+  "source_snapshot": "docs/evidence/M8-007/reproductions/archive-metadata-before.py.txt",
+  "observations": [
+    {
+      "blocks": 20,
+      "decoded_bytes": 103424,
+      "peak_traced_bytes": 1948229,
+      "rejection": "release manifest is absent or invalid in the release payload"
+    },
+    {
+      "blocks": 40,
+      "decoded_bytes": 205824,
+      "peak_traced_bytes": 5696912,
+      "rejection": "release manifest is absent or invalid in the release payload"
+    },
+    {
+      "blocks": 80,
+      "decoded_bytes": 410624,
+      "peak_traced_bytes": 20081071,
+      "rejection": "release manifest is absent or invalid in the release payload"
+    }
+  ]
+}
