@@ -16,22 +16,22 @@
     "source-identity.json"
   ],
   "effective_harness_sha256": "4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865",
-  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-14-release-7436598",
+  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-14-release-4c2432c",
   "formal_archives": [
     {
       "file": "formal-release-11-1.tar.gz",
-      "root": "formal-release-11-1"
+      "root": "formal-final-r5-11-1"
     },
     {
       "file": "formal-release-11-2.tar.gz",
-      "root": "formal-release-11-2"
+      "root": "formal-final-r5-11-2"
     }
   ],
   "harness_archive": {
     "file": "harness-source.tar.gz",
     "root": "harness"
   },
-  "measured_commit": "7436598b6cd22084ea990832b07d972aeae26e1b",
+  "measured_commit": "4c2432c80688581dd28afa8bc4a7ec0bdf4858cf",
   "product_source_sha256": "b0120df219570213b3a61a7876349efeabd2bb9bf92a8fb4eea3066e25d11edf",
   "result_doc": "docs/performance/results/2026-09-13-release-seven-library.md",
   "schema_version": 2
