@@ -1,6 +1,10 @@
 # 2026-09-13 `0.1.0` 候选七库 JSON benchmark 证据
 
-本目录保存当前 `0.1.0` release candidate `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161` 在 Cangjie STS `1.1.3` 下的两批完整测量。每批覆盖 10 个 encode/decode workload、7 个库和 11 个独立进程轮次，共 770 个测量单元。两批均在 `ubuntu2223131` 的 CPU 1（sibling 49）上完成 30 秒 idle-core 采样；两批 10/10 workload 均为 noisy，但完整数据不因 CV 被删除。
+本目录保存当前 `0.1.0` release candidate `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161` 在 Cangjie STS `1.1.3` 下的两批 timing 测量。每批覆盖 10 个 encode/decode workload、7 个库和 11 个独立进程轮次，共 770 个测量单元。两批均在 `ubuntu2223131` 的 CPU 1（sibling 49）上完成 30 秒 idle-core 采样；两批 10/10 workload 均为 noisy，但完整数据不因 CV 被删除。
+
+该目录中的现有归档生成于 RSS sidecar 接入之前；它们保留为 timing/history
+参考，不能作为当前 release performance qualification。更新后的 runner 会在
+manifest 写入 `max_rss_kb`/`rss_path`，并在 summary 阶段校验每个 sidecar。
 
 完整解释、两批表格和运行环境见[当前候选七库结果](../../../../docs/performance/results/2026-09-13-release-seven-library.md)。
 

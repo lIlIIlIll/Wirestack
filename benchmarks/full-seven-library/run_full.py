@@ -15,6 +15,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -120,6 +121,32 @@ PREFLIGHT_FIXTURES = (
     "cjfast-json/src/bench/cjfast_comprehensive_bench.cj",
     "harness/java/src/main/java/bench/OptimalJsonBench.java",
 )
+
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
+
+
+def find_time_binary() -> str:
+    path = shutil.which("time", path="/usr/bin:/bin")
+    if path:
+        return path
+    raise SystemExit(
+        "GNU time (/usr/bin/time) is required for RSS capture; install the 'time' package"
+    )
+
+
+def parse_max_rss(path: Path) -> int:
+    matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    if len(matches) != 1:
+        raise ValueError(
+            f"expected one GNU time RSS value in {path}, found {len(matches)}"
+        )
+    value = int(matches[0])
+    if value <= 0:
+        raise ValueError(f"GNU time RSS value must be positive in {path}")
+    return value
 
 
 def source_digest(root: Path) -> str:
@@ -323,9 +350,12 @@ def metadata(
     env: dict[str, str],
     runs: int,
     cpu: int,
+    time_binary: str,
 ) -> dict[str, object]:
     stdx_static = stdx_sdk_root / "linux_x86_64_cjnative/static/stdx"
     return {
+        "time_binary": time_binary,
+        "rss_unit": "kbytes",
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
         "host": platform.node(),
         "platform": platform.platform(),
@@ -449,6 +479,7 @@ def main(argv: list[str] | None = None) -> int:
     env = os.environ.copy()
     env["cjHeapSize"] = "128MB"
     env["LC_ALL"] = "C"
+    time_binary = find_time_binary()
     try:
         cpu_selection = json.loads(
             (workspace / "cpu-selection.json").read_text(encoding="utf-8")
@@ -470,7 +501,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         run_metadata = metadata(
-            workspace, stdx_sdk_root, cpu_selection, env, args.runs, args.cpu
+            workspace, stdx_sdk_root, cpu_selection, env, args.runs, args.cpu, time_binary
         )
     except (OSError, subprocess.CalledProcessError) as error:
         parser.error(f"cannot capture benchmark provenance: {error}")
@@ -489,9 +520,11 @@ def main(argv: list[str] | None = None) -> int:
         "payload",
         "source_case",
         "elapsed_seconds",
+        "max_rss_kb",
         "load1_before",
         "load1_after",
         "report_path",
+        "rss_path",
         "log_path",
     ]
     with (output / "manifest.csv").open("w", newline="", encoding="utf-8") as stream:
@@ -505,6 +538,7 @@ def main(argv: list[str] | None = None) -> int:
                 for library_position, library in enumerate(order(LIBRARIES, round_id), 1):
                     report_dir = raw / f"run-{round_id:02d}" / workload_id / library
                     report_dir.mkdir(parents=True)
+                    rss_path = report_dir / "time-rss.txt"
                     log_path = logs / f"run-{round_id:02d}-{workload_id}-{library}.log"
                     if library in CANGJIE:
                         relative_cwd, suite, prefix = CANGJIE[library]
@@ -526,7 +560,7 @@ def main(argv: list[str] | None = None) -> int:
                     if library == "cangjieJSON":
                         command_env["CANGJIE_STDX_PATH"] = str(stdx_sdk_root)
                     result = subprocess.run(
-                        command,
+                        [time_binary, "-v", "-o", str(rss_path), *command],
                         cwd=cwd,
                         env=command_env,
                         text=True,
@@ -544,6 +578,16 @@ def main(argv: list[str] | None = None) -> int:
                             flush=True,
                         )
                         return result.returncode
+                    try:
+                        max_rss_kb = parse_max_rss(rss_path)
+                    except (OSError, UnicodeError, ValueError) as error:
+                        print(
+                            f"FAILED RSS capture round={round_id} workload={workload_id} "
+                            f"library={library}: {error}",
+                            file=sys.stderr,
+                            flush=True,
+                        )
+                        return 2
                     try:
                         validate_report(library, report_dir, source_case)
                     except (OSError, UnicodeError, ValueError) as error:
@@ -569,9 +613,11 @@ def main(argv: list[str] | None = None) -> int:
                             "payload": payload,
                             "source_case": source_case,
                             "elapsed_seconds": f"{elapsed:.6f}",
+                            "max_rss_kb": max_rss_kb,
                             "load1_before": f"{before:.3f}",
                             "load1_after": f"{after:.3f}",
                             "report_path": report_dir.relative_to(output),
+                            "rss_path": rss_path.relative_to(output),
                             "log_path": log_path.relative_to(output),
                         }
                     )

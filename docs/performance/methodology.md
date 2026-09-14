@@ -55,6 +55,10 @@ CV 门槛控制可陈述的精度和明确性能 qualification，不是普通 Re
 - 跨运行时的结果只描述所测 API 和用例，不代表产品整体。
 - 延迟、吞吐量、内存分配、常驻内存（RSS）和峰值内存分别测量和陈述。
 
+七库、三库和 Pure runner 使用固定的 GNU `time -v -o` sidecar 采集每个独立进程的
+`Maximum resident set size (kbytes)`；manifest 中的 `max_rss_kb` 必须与 sidecar
+唯一匹配，汇总脚本拒绝缺失、重复、越界或不一致的 RSS 记录。
+
 ## 决定是否保留优化
 
 评估优化时，必须检查目标测试用例、相关测试用例和完整结果表。确认存在性能回退且未明确

@@ -187,6 +187,8 @@ yjson = "0.1.0"
             "schedule": "rotating and reversed",
             "jmh": "fixture",
             "cangjie_bench": "fixture",
+            "time_binary": "/usr/bin/time",
+            "rss_unit": "kbytes",
             "api_policy": "fastest semantically equivalent public typed API",
             "canonical_decode_payload_bytes": {"Address": 47},
             "versions": {
@@ -237,7 +239,13 @@ yjson = "0.1.0"
         return rows
 
     def _write_formal_archive(
-        self, archive: dict[str, str], batch: int, **metadata_overrides: object
+        self,
+        archive: dict[str, str],
+        batch: int,
+        *,
+        recorded_rss: int = 123,
+        sidecar_rss: int = 123,
+        **metadata_overrides: object,
     ) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = pathlib.Path(temporary) / archive["root"]
@@ -249,11 +257,20 @@ yjson = "0.1.0"
             )
             with (root / "manifest.csv").open("w", newline="", encoding="utf-8") as stream:
                 writer = csv.writer(stream)
-                writer.writerow(("round", "workload_id", "library"))
+                writer.writerow(
+                    ("round", "workload_id", "library", "max_rss_kb", "rss_path")
+                )
                 for round_number in range(1, 12):
                     for workload in checker.WORKLOADS:
                         for library in checker.LIBRARIES:
-                            writer.writerow((round_number, workload, library))
+                            rss_path = (
+                                f"rss/{round_number}/{workload}/{library}/time-rss.txt"
+                            )
+                            writer.writerow((round_number, workload, library, recorded_rss, rss_path))
+                            write(
+                                root / rss_path,
+                                f"Maximum resident set size (kbytes): {sidecar_rss}\n",
+                            )
             write(root / "summary.json", json.dumps(self.summary(batch), indent=2) + "\n")
             write(root / "summary.csv", "fixture\n")
             write(root / "summary.md", "fixture\n")
@@ -302,10 +319,22 @@ yjson = "0.1.0"
         lines = [f"{checker.sha256(self.evidence / name)}  {name}" for name in names]
         write(self.evidence / "checksums.txt", "\n".join(lines) + "\n")
 
-    def write_evidence(self, second_metadata: dict[str, object] | None = None) -> None:
+    def write_evidence(
+        self,
+        second_metadata: dict[str, object] | None = None,
+        *,
+        second_recorded_rss: int = 123,
+        second_sidecar_rss: int = 123,
+    ) -> None:
         self.evidence.mkdir(parents=True, exist_ok=True)
         self._write_formal_archive(self.formal[0], 1)
-        self._write_formal_archive(self.formal[1], 2, **(second_metadata or {}))
+        self._write_formal_archive(
+            self.formal[1],
+            2,
+            recorded_rss=second_recorded_rss,
+            sidecar_rss=second_sidecar_rss,
+            **(second_metadata or {}),
+        )
         self._write_harness_archive()
         evidence_to_result = pathlib.PurePosixPath(
             os.path.relpath(self.result, self.evidence)
@@ -501,6 +530,11 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
     def test_two_batches_must_share_stable_identity(self) -> None:
         self.fixture.write_evidence(second_metadata={"api_policy": "different API"})
         with self.assertRaisesRegex(checker.EvidenceError, "identity mismatch: api_policy"):
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
+
+    def test_manifest_rss_must_match_sidecar(self) -> None:
+        self.fixture.write_evidence(second_recorded_rss=124)
+        with self.assertRaisesRegex(checker.EvidenceError, "manifest RSS differs from sidecar"):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
 
     def test_two_batches_allow_lscpu_scaling_drift(self) -> None:

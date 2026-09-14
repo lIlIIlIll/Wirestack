@@ -27,6 +27,11 @@ def load_module(name: str, path: pathlib.Path):
 
 
 SUMMARY = load_module("full_seven_library_summary", HARNESS / "summarize_full.py")
+
+CJFAST_SUMMARY = load_module(
+    "json_cjfast_perf_summary",
+    ROOT / "scripts/json_cjfast_perf_summary.py",
+)
 RUNNER = load_module("full_seven_library_runner", HARNESS / "run_full.py")
 
 
@@ -63,6 +68,50 @@ class RunnerSelectionTest(unittest.TestCase):
             7, "jacksonDecodePerson", pathlib.Path("/tmp/report/jmh.json")
         )
         self.assertIn(r"^bench\.OptimalJsonBench\.jacksonDecodePerson$", command)
+
+
+class RssCaptureTest(unittest.TestCase):
+    def test_gnu_time_rss_sidecar_is_parsed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text(
+                "\tMaximum resident set size (kbytes): 321\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(RUNNER.parse_max_rss(path), 321)
+
+    def test_missing_gnu_time_rss_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text("Elapsed (wall clock) time: 1.0\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "expected one GNU time RSS"):
+                RUNNER.parse_max_rss(path)
+
+
+class CjfastSummaryRssTest(unittest.TestCase):
+    def test_rss_sidecar_is_bound_to_result_root(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            path = root / "rss/time-rss.txt"
+            path.parent.mkdir()
+            path.write_text(
+                "\tMaximum resident set size (kbytes): 654\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                CJFAST_SUMMARY.load_max_rss(root, "rss/time-rss.txt"),
+                654,
+            )
+            with self.assertRaisesRegex(ValueError, "unsafe RSS path"):
+                CJFAST_SUMMARY.load_max_rss(root, "/tmp/time-rss.txt")
+
+    def test_summary_preserves_peak_rss(self) -> None:
+        result = CJFAST_SUMMARY.summarize(
+            {1: [10.0], 2: [12.0]},
+            {1: 100, 2: 120},
+        )
+        self.assertEqual(result["median_rss_kb"], 110)
+        self.assertEqual(result["max_rss_kb"], 120)
 
 
 class FixturePreflightContractTest(unittest.TestCase):
@@ -245,9 +294,22 @@ class ManifestContaminationTest(unittest.TestCase):
                             "payload": f"canonical-{workload}",
                             "source_case": self.source_case(workload, library),
                             "report_path": f"raw/{round_number}/{workload}/{library}",
+                            "max_rss_kb": "123",
+                            "rss_path": f"raw/{round_number}/{workload}/{library}/time-rss.txt",
                         }
                     )
         return rows
+
+    @staticmethod
+    def materialize_rss(root: pathlib.Path, rows: list[dict[str, str]]) -> None:
+        for row in rows:
+            path = root / row["rss_path"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                "\tMaximum resident set size (kbytes): "
+                f"{row['max_rss_kb']}\n",
+                encoding="utf-8",
+            )
 
     @staticmethod
     def inventory(expected_case: str, extras: tuple[str, ...] = ()) -> dict[str, object]:
@@ -277,18 +339,25 @@ class ManifestContaminationTest(unittest.TestCase):
                 extras = ("yjsonStringDecodeLargeProfileArrayValue",)
             return SUMMARY.values_for_expected_case(self.inventory(expected, extras), expected)
 
-        with self.assertRaisesRegex(ValueError, r"22/770 benchmark cells"):
-            SUMMARY.collect_samples(pathlib.Path("/unused"), rows, loader=load)
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            self.materialize_rss(root, rows)
+            with self.assertRaisesRegex(ValueError, r"22/770 benchmark cells"):
+                SUMMARY.collect_samples(root, rows, loader=load)
 
     def test_two_manifest_cells_cannot_share_one_report(self) -> None:
         rows = self.rows()[:2]
         rows[1]["report_path"] = rows[0]["report_path"]
+        rows[1]["rss_path"] = rows[0]["rss_path"]
 
         def load(_root: pathlib.Path, _row: dict[str, str]) -> list[float]:
             return [100.0]
 
-        with self.assertRaisesRegex(ValueError, "report_path .* is shared"):
-            SUMMARY.collect_samples(pathlib.Path("/unused"), rows, loader=load)
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            self.materialize_rss(root, rows)
+            with self.assertRaisesRegex(ValueError, "report_path .* is shared"):
+                SUMMARY.collect_samples(root, rows, loader=load)
 
 
 if __name__ == "__main__":

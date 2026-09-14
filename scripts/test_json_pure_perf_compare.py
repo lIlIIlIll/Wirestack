@@ -16,6 +16,37 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
+class RssCaptureTest(unittest.TestCase):
+    def test_gnu_time_rss_sidecar_is_parsed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text(
+                "\tMaximum resident set size (kbytes): 456\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(MODULE.parse_max_rss(path), 456)
+
+    def test_duplicate_gnu_time_rss_values_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text(
+                "Maximum resident set size (kbytes): 456\n"
+                "Maximum resident set size (kbytes): 457\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "expected one GNU time RSS"):
+                MODULE.parse_max_rss(path)
+
+    def test_summary_preserves_rss_inventory_and_peak(self) -> None:
+        result = MODULE.summarize(
+            {"case": [10.0, 12.0, 11.0]},
+            {"case": [100, 140, 120]},
+        )
+        self.assertEqual(result["case"]["rss_kb"], [100, 140, 120])
+        self.assertEqual(result["case"]["median_rss_kb"], 120)
+        self.assertEqual(result["case"]["max_rss_kb"], 140)
+
+
 class PurePerfProvenanceTest(unittest.TestCase):
     def make_tree(self, root: pathlib.Path) -> None:
         files = {
