@@ -93,28 +93,44 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
-def build_request(root: Path = ROOT) -> dict[str, Any]:
-    package = safe_path(root, PACKAGE_PATH)
+def build_request(
+    root: Path = ROOT,
+    *,
+    task_id: str = TASK_ID,
+    package_path: str = PACKAGE_PATH,
+    report_path: str = "docs/evidence/M7-029/independent-review.json",
+) -> dict[str, Any]:
+    package = safe_path(root, package_path)
+    safe_path(root, report_path, must_exist=False)
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": task_id,
         "platform": PROFILE,
-        "packagePath": PACKAGE_PATH,
+        "packagePath": package_path,
         "packageSha256": evidence_digest.text_evidence_sha256(package),
         "compatibilityPolicy": COMPATIBILITY_POLICY,
         "requiredScope": sorted(REQUIRED_SCOPE),
         "requiredMethods": sorted(REQUIRED_METHODS),
-        "reportPath": "docs/evidence/M7-029/independent-review.json",
+        "reportPath": report_path,
         "status": "AWAITING_INDEPENDENT_REVIEW",
     }
 
 
-def validate_request(root: Path, request: Mapping[str, Any]) -> None:
+def validate_request(
+    root: Path,
+    request: Mapping[str, Any],
+    *,
+    task_id: str = TASK_ID,
+    package_path: str = PACKAGE_PATH,
+    report_path: str = "docs/evidence/M7-029/independent-review.json",
+) -> None:
     exact_keys(request, {
         "schemaVersion", "taskId", "platform", "packagePath", "packageSha256",
         "compatibilityPolicy", "requiredScope", "requiredMethods", "reportPath", "status",
     }, "request")
-    require(request == build_request(root), "REQUEST_STALE", "review request does not match current package")
+    require(request == build_request(
+        root, task_id=task_id, package_path=package_path, report_path=report_path
+    ), "REQUEST_STALE", "review request does not match current package")
 
 
 def nonempty(value: Any, code: str, where: str) -> str:
@@ -181,13 +197,15 @@ def validate_finding(root: Path, value: Mapping[str, Any], position: int) -> tup
     return finding_id, status
 
 
-def validate_review(root: Path, request: Mapping[str, Any], review: Mapping[str, Any]) -> dict[str, Any]:
+def validate_review(
+    root: Path, request: Mapping[str, Any], review: Mapping[str, Any], *, task_id: str = TASK_ID
+) -> dict[str, Any]:
     exact_keys(review, {
         "schemaVersion", "taskId", "target", "reviewer", "scope", "methods",
         "compatibilityPolicy", "findings", "conclusion",
     }, "review")
     require(review["schemaVersion"] == SCHEMA_VERSION, "SCHEMA_VERSION", str(review["schemaVersion"]))
-    require(review["taskId"] == TASK_ID, "TASK_ID", str(review["taskId"]))
+    require(review["taskId"] == task_id == request.get("taskId"), "TASK_ID", str(review["taskId"]))
     require(review["compatibilityPolicy"] == COMPATIBILITY_POLICY, "COMPATIBILITY_GATE", str(review["compatibilityPolicy"]))
     require(review["conclusion"] == "PASS", "REVIEW_NOT_PASS", str(review["conclusion"]))
 
@@ -260,8 +278,8 @@ def string_values(value: Any):
 def build_report(request: Mapping[str, Any], summary: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
-        "source_task": TASK_ID,
+        "taskId": request["taskId"],
+        "source_task": request["taskId"],
         "platform": PROFILE,
         "status": "PASS",
         "decision": "PASS",
@@ -298,13 +316,25 @@ def atomic_json(path: Path, value: Mapping[str, Any], replace: Callable[[Path, P
             temporary.unlink()
 
 
-def validate(root: Path, request_path: Path, review_path: Path) -> dict[str, Any]:
+def validate(
+    root: Path,
+    request_path: Path,
+    review_path: Path,
+    *,
+    task_id: str = TASK_ID,
+    package_path: str = PACKAGE_PATH,
+) -> dict[str, Any]:
     request = load_json(request_path)
-    validate_request(root, request)
+    resolved_review = review_path.resolve()
+    require(root.resolve() in resolved_review.parents, "PATH_ESCAPE", str(review_path))
+    validate_request(
+        root, request, task_id=task_id, package_path=package_path,
+        report_path=resolved_review.relative_to(root.resolve()).as_posix(),
+    )
     if not review_path.is_file():
         raise IndependentReviewError("REVIEW_REQUIRED", str(review_path))
     review = load_json(review_path)
-    return build_report(request, validate_review(root, request, review))
+    return build_report(request, validate_review(root, request, review, task_id=task_id))
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:

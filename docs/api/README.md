@@ -299,8 +299,9 @@ RSA raw decrypt 和 test-only key logging。对应的 13 个 release 场景与 5
 
 ## 稳定性和所有权
 
-[M8-006 inventory](baselines/wirestack-linux-pre1-m8-006.json) 记录当前公开契约，共
+[M8-007 inventory](baselines/wirestack-linux-pre1-m8-007.json) 记录最终候选的公开契约，共
 324 个 declaration 和 114 个 resolved alias。
+[M8-006 snapshot](baselines/wirestack-linux-pre1-m8-006.json)、
 [M8-004 snapshot](baselines/wirestack-linux-pre1-m8-004.json)、
 [M8-003 snapshot](baselines/wirestack-linux-pre1-m8-003.json)、
 [M8-002 snapshot](baselines/wirestack-linux-pre1-m8-002.json)、
@@ -319,11 +320,11 @@ RSA raw decrypt 和 test-only key logging。对应的 13 个 release 场景与 5
 校验当前 API inventory：
 
 ```sh
-scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-linux-pre1-m8-006.json
+scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-linux-pre1-m8-007.json
 ```
 
 该 baseline 当前精确匹配，但它只证明 source inventory。它不证明二进制、未来版本或运行时
-语义兼容。M8-006 的源码和资格报告由任务证据清单绑定。
+语义兼容。最终发布状态见 [M8-007 验收记录](../evidence/M8-007/README.md)。
 
 M8-006 为 `TlsCapability` 增加 `ExternalDecryptor`、`KeyLog`，为 `TlsContextErrorCode`
 增加 `InvalidHook`。旧的穷尽匹配需要补充分支；当前 Cangjie context 布局也有变化。
