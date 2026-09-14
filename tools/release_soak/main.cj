@@ -2,6 +2,7 @@ package wirestack_m7_022_soak
 
 import std.collection.ArrayList
 import std.convert.*
+import std.env.getStdOut
 import std.runtime.*
 import std.sync.*
 import std.time.MonoTime
@@ -258,9 +259,15 @@ private func runConnectionCancellation(client: HttpClient, url: String, readyUrl
         let (_, errors) = consumeEvents(response.body, 2)
         let started = MonoTime.now()
         requireSoak(handle.cancel() && !handle.cancel(), "idempotent connection cancellation")
+        let cancellationReturned = MonoTime.now()
         requireSoak(bodyIsCancelled(response.body), "typed connection cancellation")
         let latency = (MonoTime.now() - started).toNanoseconds()
-        requireSoak(latency <= SOAK_CANCEL_LIMIT_NS, "connection cancellation latency")
+        if (latency > SOAK_CANCEL_LIMIT_NS) {
+            let callbackNs = (cancellationReturned - started).toNanoseconds()
+            throw IllegalStateException(
+                "M7-022 connection cancellation latency: totalNs=${latency} callbackNs=${callbackNs}"
+            )
+        }
         stats.maxCancelLatencyNs = max(stats.maxCancelLatencyNs, latency)
         stats.sequenceErrors += errors
         stats.connectionCancels += 1
@@ -359,6 +366,11 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
             sleep(idleMilliseconds * Duration.millisecond)
             stats.idlePhases += 1
             stats.cycles += 1
+            if (stats.cycles == 1) {
+                let readyElapsedMs = (MonoTime.now() - started).toNanoseconds() / 1000000
+                println("SOAK_READY cycles=${stats.cycles} elapsedMs=${readyElapsedMs}")
+                getStdOut().flush()
+            }
             let elapsed = MonoTime.now() - started
             if (elapsed >= nextSample) {
                 printSample(sampleIndex, started, stats)

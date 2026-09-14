@@ -1,0 +1,33 @@
+SOAK_READY cycles=1 elapsedMs=126
+M7022_SAMPLE index=0 elapsedMs=2015 usedHeapBytes=4001792 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=20 h1Requests=25 h2Requests=64 sseEvents=160
+M7022_SAMPLE index=1 elapsedMs=4026 usedHeapBytes=4198400 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=40 h1Requests=50 h2Requests=126 sseEvents=320
+M7022_SAMPLE index=2 elapsedMs=6052 usedHeapBytes=4804608 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=60 h1Requests=75 h2Requests=189 sseEvents=480
+M7022_SAMPLE index=3 elapsedMs=8056 usedHeapBytes=3907584 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=80 h1Requests=100 h2Requests=251 sseEvents=640
+M7022_SAMPLE index=4 elapsedMs=10078 usedHeapBytes=5120000 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=100 h1Requests=125 h2Requests=314 sseEvents=800
+M7022_SAMPLE index=5 elapsedMs=12007 usedHeapBytes=4198400 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=119 h1Requests=149 h2Requests=373 sseEvents=952
+M7022_SAMPLE index=6 elapsedMs=14080 usedHeapBytes=5160960 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=139 h1Requests=174 h2Requests=436 sseEvents=1112
+M7022_SAMPLE index=7 elapsedMs=16002 usedHeapBytes=4435968 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=158 h1Requests=198 h2Requests=495 sseEvents=1264
+M7022_SAMPLE index=8 elapsedMs=18063 usedHeapBytes=4706304 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=178 h1Requests=223 h2Requests=558 sseEvents=1424
+M7022_SAMPLE index=9 elapsedMs=20029 usedHeapBytes=3956736 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=198 h1Requests=248 h2Requests=620 sseEvents=1584
+M7022_SAMPLE index=10 elapsedMs=22041 usedHeapBytes=4866048 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=218 h1Requests=273 h2Requests=683 sseEvents=1744
+M7022_SAMPLE index=11 elapsedMs=24104 usedHeapBytes=4362240 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=239 h1Requests=299 h2Requests=748 sseEvents=1912
+M7022_SAMPLE index=12 elapsedMs=26035 usedHeapBytes=5763072 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=258 h1Requests=323 h2Requests=808 sseEvents=2064
+M7022_SAMPLE index=13 elapsedMs=28027 usedHeapBytes=4059136 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=278 h1Requests=348 h2Requests=870 sseEvents=2224
+M7022_SAMPLE index=14 elapsedMs=30060 usedHeapBytes=4677632 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=298 h1Requests=373 h2Requests=933 sseEvents=2384
+M7022_SAMPLE index=15 elapsedMs=32054 usedHeapBytes=4452352 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=318 h1Requests=398 h2Requests=995 sseEvents=2544
+M7022_SAMPLE index=16 elapsedMs=34069 usedHeapBytes=6160384 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=338 h1Requests=423 h2Requests=1058 sseEvents=2704
+M7022_SAMPLE index=17 elapsedMs=36076 usedHeapBytes=4612096 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=358 h1Requests=448 h2Requests=1120 sseEvents=2864
+M7022_SAMPLE index=18 elapsedMs=38025 usedHeapBytes=4399104 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=377 h1Requests=472 h2Requests=1180 sseEvents=3016
+M7022_SAMPLE index=19 elapsedMs=40019 usedHeapBytes=4456448 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=397 h1Requests=497 h2Requests=1242 sseEvents=3176
+M7022_SAMPLE index=20 elapsedMs=42086 usedHeapBytes=4583424 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=417 h1Requests=522 h2Requests=1305 sseEvents=3336
+M7022_SAMPLE index=21 elapsedMs=44003 usedHeapBytes=6660096 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=436 h1Requests=545 h2Requests=1364 sseEvents=3488
+M7022_SAMPLE index=22 elapsedMs=46006 usedHeapBytes=4128768 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=456 h1Requests=570 h2Requests=1426 sseEvents=3648
+M7022_SAMPLE index=23 elapsedMs=48039 usedHeapBytes=5640192 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=476 h1Requests=595 h2Requests=1489 sseEvents=3808
+M7022_SAMPLE index=24 elapsedMs=50114 usedHeapBytes=4251648 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=497 h1Requests=622 h2Requests=1555 sseEvents=3976
+M7022_SAMPLE index=25 elapsedMs=52022 usedHeapBytes=5140480 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=516 h1Requests=645 h2Requests=1614 sseEvents=4128
+M7022_SAMPLE index=26 elapsedMs=54031 usedHeapBytes=4304896 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=536 h1Requests=670 h2Requests=1676 sseEvents=4288
+M7022_SAMPLE index=27 elapsedMs=56060 usedHeapBytes=5349376 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=556 h1Requests=695 h2Requests=1739 sseEvents=4448
+M7022_SAMPLE index=28 elapsedMs=58069 usedHeapBytes=4423680 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=576 h1Requests=720 h2Requests=1801 sseEvents=4608
+M7022_SAMPLE index=29 elapsedMs=60003 usedHeapBytes=4947968 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=595 h1Requests=744 h2Requests=1861 sseEvents=4760
+M7022_SAMPLE index=30 elapsedMs=60004 usedHeapBytes=4947968 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=595 h1Requests=744 h2Requests=1861 sseEvents=4760
+M7022_RESULT durationSeconds=60 elapsedMs=60008 cycles=595 activePhases=595 idlePhases=595 connects=226 h1Requests=744 h2Requests=1861 h2MultiplexBatches=595 sseH1Events=2380 sseH2Events=2380 requestCancels=595 streamResets=595 connectionCancels=75 reconnects=75 spawnedTasks=1190 joinedTasks=1190 sequenceErrors=0 maxCancelLatencyNs=1764459 activeWaiters=0 activeBuffers=0 backgroundTasks=0 serverTasks=0

@@ -68,6 +68,22 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         self.assertEqual(3, len(samples))
         self.assertEqual(8, result["cycles"])
 
+    def test_readiness_requires_one_marker_after_a_complete_cycle(self) -> None:
+        marker = "SOAK_READY cycles=1 elapsedMs=25"
+        self.assertEqual(
+            {"cycles": 1, "elapsedMs": 25},
+            gate.readiness_from_output(f"startup\n{marker}\n"),
+        )
+        for output, code in (
+            ("startup only\n", "SOAK_READY_COUNT"),
+            (marker + "\n" + marker + "\n", "SOAK_READY_COUNT"),
+            ("SOAK_READY cycles=0 elapsedMs=25\n", "SOAK_READY_INVALID"),
+        ):
+            with self.subTest(code=code):
+                with self.assertRaises(gate.SoakError) as caught:
+                    gate.readiness_from_output(output)
+                self.assertEqual(code, caught.exception.code)
+
     def test_marker_parser_rejects_missing_duplicate_reordered_unknown_and_skipped(self) -> None:
         valid = "\n".join([self.sample(0, 1000, 1), self.result()])
         variants = (
@@ -181,6 +197,55 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
                 _, actual = gate.load_qualified_artifact(root, qualification, artifact)
             self.assertEqual(digest, actual)
 
+    def test_private_candidate_copy_is_pinned_and_original_drift_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact = root / "candidate.tar.gz"
+            artifact.write_bytes(b"candidate-v1")
+            captured = gate.capture_input_identity(artifact, artifact=True)
+            private = root / "private" / "candidate.tar.gz"
+            copied = gate.copy_verified_input(
+                artifact,
+                private,
+                captured,
+                artifact=True,
+                drift_code="ARTIFACT_DRIFT",
+            )
+            self.assertEqual("artifact-bytes-v1", copied["digest"]["domain"])
+            artifact.write_bytes(b"candidate-v2")
+            gate.require_input_identity(
+                private,
+                copied,
+                artifact=True,
+                drift_code="PRIVATE_ARTIFACT_DRIFT",
+            )
+            with self.assertRaises(gate.SoakError) as caught:
+                gate.require_input_identity(
+                    artifact,
+                    captured,
+                    artifact=True,
+                    drift_code="ARTIFACT_DRIFT",
+                )
+            self.assertEqual("ARTIFACT_DRIFT", caught.exception.code)
+
+    def test_text_input_drift_is_rejected_in_the_text_evidence_domain(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            qualification = Path(directory) / "qualification.json"
+            qualification.write_text('{"decision":"PASS"}\n', encoding="utf-8")
+            captured = gate.capture_input_identity(
+                qualification, artifact=False
+            )
+            self.assertEqual("text-utf8-lf-v1", captured["digest"]["domain"])
+            qualification.write_text('{"decision":"FAIL"}\n', encoding="utf-8")
+            with self.assertRaises(gate.SoakError) as caught:
+                gate.require_input_identity(
+                    qualification,
+                    captured,
+                    artifact=False,
+                    drift_code="QUALIFICATION_DRIFT",
+                )
+            self.assertEqual("QUALIFICATION_DRIFT", caught.exception.code)
+
     def test_internal_import_and_package_drift_fail_closed(self) -> None:
         source = "package wirestack_m7_022_soak\nimport wirestack.http.*\n"
         gate.validate_consumer_sources(source, "package wirestack_m7_022_soak\n")
@@ -280,6 +345,12 @@ except gate.SoakError as error:
             path = Path(directory) / "output.log"
             path.write_text("a" * 100 + "tail")
             self.assertEqual("aaaaaatail", gate.bounded_tail(path, 10))
+
+    def test_successful_build_retains_complete_output(self) -> None:
+        output = "build-line\n" * (gate.MAX_CAPTURE_BYTES // 4)
+        completed = subprocess.CompletedProcess(["cjpm", "build"], 0, stdout=output)
+        with mock.patch.object(gate.subprocess, "run", return_value=completed):
+            self.assertEqual(output, gate.run_build(["cjpm", "build"], gate.ROOT))
 
     def test_terminate_process_group_stops_running_child(self) -> None:
         process = subprocess.Popen(

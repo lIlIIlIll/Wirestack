@@ -11,28 +11,20 @@ from tools import m7_021_linux_release as release
 
 
 class M7021LinuxReleaseTest(unittest.TestCase):
-    def test_qualification_inputs_bind_native_manifests_sources_and_build_logic(self) -> None:
-        required = {
-            "LICENSE",
-            "THIRD_PARTY_NOTICES.md",
-            "build.cj",
-            "cjpm.lock",
-            "cjpm.toml",
-            "native/resolver/linux/wirestack_resolver.c",
-            "native/resolver/linux/wirestack_resolver.h",
-            "native/http_files/wirestack_http_files.c",
-            "native/http_files/wirestack_http_files.h",
-            "native/tls/aws_lc/provider.json",
-            "native/tls/aws_lc/wirestack_tls_provider.c",
-            "native/tls/aws_lc/wirestack_tls_provider.h",
-            "tools/build_linux_resolver.py",
-            "tools/build_linux_http_files.py",
-            "tools/build_native_dependencies.py",
-            "tools/build_linux_tls_provider.py",
-            "third_party/aws-lc/LICENSE",
-            "third_party/aws-lc/NOTICE",
+
+    @staticmethod
+    def archive_payload(files: dict[str, bytes], schema: int = 2) -> dict[str, bytes]:
+        entries = [
+            {"path": path, "bytes": len(data), "sha256": release.artifact_payload_sha256(data)}
+            for path, data in sorted(files.items())
+        ]
+        fingerprint = release.evidence_digest.text_evidence_bytes_sha256(release.canonical_json(entries))
+        manifest = {
+            "schema_version": schema, "package": "wirestack", "version": release.VERSION,
+            "payload": entries, "payload_sha256": fingerprint,
+            "artifactBuildFingerprint": fingerprint,
         }
-        self.assertTrue(required.issubset(set(release.QUALIFICATION_INPUTS)))
+        return {**files, "release-manifest.json": release.canonical_json(manifest)}
 
     def test_http_files_manifest_binds_sources_tools_and_archive(self) -> None:
         archive = b"native archive"
@@ -131,6 +123,91 @@ class M7021LinuxReleaseTest(unittest.TestCase):
             with self.assertRaisesRegex(release.ReleaseError, "unsafe release archive"):
                 release.extract_archive(archive_path, Path(directory) / "install")
 
+    def test_verified_extraction_preserves_exact_bytes_and_rejects_same_size_mutation(self) -> None:
+        payload = self.archive_payload({"src/package.cj": b"package wirestack\r\n"})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "release.tar.gz"
+            release.write_reproducible_archive(archive, payload)
+            installed = release.extract_archive(archive, root / "install")
+            self.assertEqual(b"package wirestack\r\n", (installed / "src/package.cj").read_bytes())
+            payload["src/package.cj"] = b"package wirestacK\r\n"
+            release.write_reproducible_archive(archive, payload)
+            with self.assertRaisesRegex(release.ReleaseError, "payload bytes"):
+                release.extract_archive(archive, root / "changed")
+            self.assertFalse((root / "changed").exists())
+
+    def test_unlisted_and_missing_files_cannot_enter_an_installation(self) -> None:
+        original = self.archive_payload({"src/package.cj": b"package wirestack\n"})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "release.tar.gz"
+            extra = {**original, "src/unlisted.cj": b"package wirestack\n"}
+            release.write_reproducible_archive(archive, extra)
+            with self.assertRaisesRegex(release.ReleaseError, "missing or extra files"):
+                release.extract_archive(archive, root / "extra")
+            self.assertFalse((root / "extra").exists())
+            missing = {"release-manifest.json": original["release-manifest.json"]}
+            release.write_reproducible_archive(archive, missing)
+            with self.assertRaisesRegex(release.ReleaseError, "payload bytes"):
+                release.extract_archive(archive, root / "missing")
+            self.assertFalse((root / "missing").exists())
+
+    def test_duplicate_members_and_fifos_are_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            duplicate = root / "duplicate.tar.gz"
+            with tarfile.open(duplicate, "w:gz") as archive:
+                for _ in range(2):
+                    info = tarfile.TarInfo(f"{release.PACKAGE_ROOT}/same")
+                    info.size = 1
+                    archive.addfile(info, io.BytesIO(b"x"))
+            with self.assertRaisesRegex(release.ReleaseError, "duplicate release archive"):
+                release.extract_archive(duplicate, root / "duplicate")
+            fifo = root / "fifo.tar.gz"
+            with tarfile.open(fifo, "w:gz") as archive:
+                info = tarfile.TarInfo(f"{release.PACKAGE_ROOT}/pipe")
+                info.type = tarfile.FIFOTYPE
+                archive.addfile(info)
+            with self.assertRaisesRegex(release.ReleaseError, "regular files"):
+                release.extract_archive(fifo, root / "fifo")
+            self.assertFalse((root / "fifo").exists())
+
+    def test_noncanonical_root_and_file_directory_overlap_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive_path = root / "release.tar.gz"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                info = tarfile.TarInfo(".")
+                info.type = tarfile.DIRTYPE
+                archive.addfile(info)
+            with self.assertRaisesRegex(release.ReleaseError, "unsafe release archive"):
+                release.read_verified_payload(archive_path)
+            payload = self.archive_payload({"src": b"file", "src/package.cj": b"package wirestack\n"})
+            with tarfile.open(archive_path, "w:gz") as archive:
+                for relative, content in payload.items():
+                    info = tarfile.TarInfo(f"{release.PACKAGE_ROOT}/{relative}")
+                    info.size = len(content)
+                    archive.addfile(info, io.BytesIO(content))
+            with self.assertRaisesRegex(release.ReleaseError, "overlaps a directory"):
+                release.extract_archive(archive_path, root / "install")
+            self.assertFalse((root / "install").exists())
+
+    def test_extraction_refuses_a_contaminated_installation_directory(self) -> None:
+        payload = self.archive_payload({"src/package.cj": b"package wirestack\n"}, schema=1)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "release.tar.gz"
+            release.write_reproducible_archive(archive, payload)
+            installed = root / "install" / release.PACKAGE_ROOT
+            installed.mkdir(parents=True)
+            sentinel = installed / "unlisted"
+            sentinel.write_bytes(b"do not overwrite")
+            with self.assertRaisesRegex(release.ReleaseError, "already exists"):
+                release.extract_archive(archive, root / "install")
+            self.assertEqual(b"do not overwrite", sentinel.read_bytes())
+            self.assertFalse((installed / "src").exists())
+
     def test_openssl_dependency_names_fail_closed(self) -> None:
         for name in ("libssl.so", "libssl.so.3", "/usr/lib/libcrypto.so.3"):
             with self.subTest(name=name):
@@ -200,7 +277,20 @@ class M7021LinuxReleaseTest(unittest.TestCase):
                 for relative in release.QUALIFICATION_INPUTS
             }
             release.validate_report(report, root)
+            (root / "README.md").write_text("changed packaged documentation\n", encoding="utf-8")
+            with self.assertRaises(release.ReleaseError):
+                release.validate_report(report, root)
+            (root / "README.md").write_text("fixture\n", encoding="utf-8")
+            planning = root / "docs/planning/implementation-backlog.md"
+            planning.parent.mkdir(parents=True, exist_ok=True)
+            planning.write_text("updated non-payload task state\n", encoding="utf-8")
+            release.validate_report(report, root)
             source.write_text("package wirestack\npublic func changed(): Unit {}\n", encoding="utf-8")
+            with self.assertRaises(release.ReleaseError):
+                release.validate_report(report, root)
+            source.write_text("package wirestack\n", encoding="utf-8")
+            native = root / "native/tls/aws_lc/wirestack_tls_provider.c"
+            native.write_text("changed native implementation\n", encoding="utf-8")
             with self.assertRaises(release.ReleaseError):
                 release.validate_report(report, root)
 

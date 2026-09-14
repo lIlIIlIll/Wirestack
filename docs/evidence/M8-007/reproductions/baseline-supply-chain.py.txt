@@ -13,6 +13,7 @@ import argparse
 import json
 import re
 import sys
+import tarfile
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -21,10 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools import m7_021_linux_release
 from tools.tls_provider.selection import select_provider
-
-PUBLIC_SUFFIX_FILES = m7_021_linux_release.PUBLIC_SUFFIX_FILES
+from tools.m7_021_linux_release import PUBLIC_SUFFIX_FILES
 
 SELECTED_PROVIDER = select_provider(ROOT)
 TASK_ID = "M7-025"
@@ -102,10 +101,30 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
-def _payload_bytes(payload: Mapping[str, bytes], relative: str) -> bytes:
-    content = payload.get(relative)
-    _require(isinstance(content, bytes), f"artifact must contain exactly one {relative}")
-    return content
+def _member_bytes(archive: tarfile.TarFile, suffix: str) -> bytes:
+    matches = [member for member in archive.getmembers() if member.name.endswith(suffix)]
+    _require(len(matches) == 1, f"artifact must contain exactly one {suffix}")
+    member = matches[0]
+    _require(member.isfile(), f"artifact member is not a file: {member.name}")
+    _require(member.size <= 8 * 1024 * 1024, f"artifact metadata is too large: {member.name}")
+    stream = archive.extractfile(member)
+    _require(stream is not None, f"cannot read artifact member: {member.name}")
+    return stream.read()
+
+
+def _relative_member_bytes(archive: tarfile.TarFile, relative: str) -> bytes:
+    matches = [
+        member
+        for member in archive.getmembers()
+        if "/" in member.name and member.name.split("/", 1)[1] == relative
+    ]
+    _require(len(matches) == 1, f"artifact must contain exactly one {relative}")
+    member = matches[0]
+    _require(member.isfile(), f"artifact member is not a file: {member.name}")
+    _require(member.size <= 8 * 1024 * 1024, f"artifact metadata is too large: {member.name}")
+    stream = archive.extractfile(member)
+    _require(stream is not None, f"cannot read artifact member: {member.name}")
+    return stream.read()
 
 
 def _json_bytes(value: bytes, name: str) -> dict[str, Any]:
@@ -120,78 +139,43 @@ def _json_bytes(value: bytes, name: str) -> dict[str, Any]:
 def artifact_metadata(path: Path) -> dict[str, Any]:
     _require(path.is_file(), f"release artifact is absent: {path}")
     try:
-        payload, release = m7_021_linux_release.read_verified_payload(path)
-    except (OSError, m7_021_linux_release.ReleaseError) as error:
+        with tarfile.open(path, "r:gz") as archive:
+            release_raw = _member_bytes(archive, "/release-manifest.json")
+            release = _json_bytes(release_raw, "release-manifest.json")
+            provider_raw = _member_bytes(
+                archive, "/target/native/current/provider-manifest.json"
+            )
+            resolver_raw = _member_bytes(
+                archive, "/target/native/resolver/current/resolver-manifest.json"
+            )
+            http_files_raw: bytes | None = None
+            http_files_archive_raw: bytes | None = None
+            public_suffix_files: dict[str, bytes] = {}
+            if release.get("schema_version") == 2:
+                http_files_raw = _member_bytes(archive, f"/{HTTP_FILES_MANIFEST}")
+                http_files_archive_raw = _member_bytes(archive, f"/{HTTP_FILES_ARCHIVE}")
+                public_suffix_files = {
+                    relative: _relative_member_bytes(archive, relative)
+                    for relative in PUBLIC_SUFFIX_FILES
+                }
+            license_files = {
+                relative: _relative_member_bytes(archive, relative)
+                for relative in LICENSE_MEMBERS
+            }
+            if public_suffix_files:
+                license_files[PUBLIC_SUFFIX_FILES[0]] = public_suffix_files[PUBLIC_SUFFIX_FILES[0]]
+    except (OSError, tarfile.TarError) as error:
         raise SupplyChainError(f"cannot inspect release artifact: {error}") from error
-
-    provider_manifest_path = "target/native/current/provider-manifest.json"
-    resolver_manifest_path = "target/native/resolver/current/resolver-manifest.json"
-    provider_raw = _payload_bytes(payload, provider_manifest_path)
-    resolver_raw = _payload_bytes(payload, resolver_manifest_path)
-    provider = _json_bytes(provider_raw, provider_manifest_path)
-    resolver = _json_bytes(resolver_raw, resolver_manifest_path)
-
-    provider_archive_manifest = provider.get("archive")
-    _require(isinstance(provider_archive_manifest, dict), "provider archive identity is absent")
-    provider_archive_name = provider_archive_manifest.get("name")
-    _require(
-        provider_archive_name == "libwirestack_tls_provider.a",
-        "provider archive name is invalid",
-    )
-    provider_archive_raw = _payload_bytes(
-        payload, f"target/native/current/lib/{provider_archive_name}"
-    )
-    provider_archive = {
-        "name": provider_archive_name,
-        "bytes": len(provider_archive_raw),
-        "sha256": evidence_digest.artifact_bytes_sha256(provider_archive_raw),
-    }
-
-    resolver_archive_manifest = resolver.get("archive")
-    _require(isinstance(resolver_archive_manifest, dict), "resolver archive identity is absent")
-    resolver_archive_path = resolver_archive_manifest.get("path")
-    _require(
-        resolver_archive_path == "lib/libwirestack_resolver.a",
-        "resolver archive path is invalid",
-    )
-    resolver_archive_raw = _payload_bytes(
-        payload, f"target/native/resolver/current/{resolver_archive_path}"
-    )
-    resolver_archive = {
-        "path": resolver_archive_path,
-        "bytes": len(resolver_archive_raw),
-        "sha256": evidence_digest.artifact_bytes_sha256(resolver_archive_raw),
-    }
-
-    http_files_raw: bytes | None = None
-    http_files_archive_raw: bytes | None = None
-    public_suffix_files: dict[str, bytes] = {}
-    if release.get("schema_version") == 2:
-        http_files_raw = _payload_bytes(payload, HTTP_FILES_MANIFEST)
-        http_files_archive_raw = _payload_bytes(payload, HTTP_FILES_ARCHIVE)
-        public_suffix_files = {
-            relative: _payload_bytes(payload, relative)
-            for relative in PUBLIC_SUFFIX_FILES
-        }
-    license_files = {
-        relative: _payload_bytes(payload, relative)
-        for relative in LICENSE_MEMBERS
-    }
-    if public_suffix_files:
-        license_files[PUBLIC_SUFFIX_FILES[0]] = public_suffix_files[PUBLIC_SUFFIX_FILES[0]]
-
     return {
         "artifact_sha256": evidence_digest.artifact_byte_sha256(path),
         "artifact_bytes": path.stat().st_size,
         "release": release,
-        "provider": provider,
+        "provider": _json_bytes(provider_raw, "provider-manifest.json"),
         "provider_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(provider_raw),
-        "provider_archive": provider_archive,
-        "resolver": resolver,
+        "resolver": _json_bytes(resolver_raw, "resolver-manifest.json"),
         "resolver_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(resolver_raw),
-        "resolver_archive": resolver_archive,
         "http_files": (
-            _json_bytes(http_files_raw, HTTP_FILES_MANIFEST)
+            _json_bytes(http_files_raw, "http-files-manifest.json")
             if http_files_raw is not None else None
         ),
         "http_files_manifest_sha256": (
@@ -244,6 +228,17 @@ def _cangjie_version(qualification: Mapping[str, Any]) -> str:
     value = cjc[0].removeprefix(prefix).split(" ", 1)[0]
     _require(bool(value), "qualification compiler version is empty")
     return value
+
+
+def _release_payload_entry(release: Mapping[str, Any], path: str) -> Mapping[str, Any]:
+    payload = release.get("payload")
+    _require(isinstance(payload, list), "release payload inventory is absent")
+    matches = [
+        entry for entry in payload
+        if isinstance(entry, dict) and entry.get("path") == path
+    ]
+    _require(len(matches) == 1, f"release payload must contain exactly one {path}")
+    return matches[0]
 
 
 def validate_artifact_inputs(
@@ -326,20 +321,11 @@ def validate_artifact_inputs(
         ),
         "embedded provider manifest digest mismatch",
     )
-    provider_archive = provider.get("archive")
-    actual_provider_archive = metadata["provider_archive"]
     _require(
-        isinstance(provider_archive, dict)
-        and provider_archive.get("name") == "libwirestack_tls_provider.a"
-        and provider_archive.get("name") == actual_provider_archive["name"]
-        and provider_archive.get("bytes") == actual_provider_archive["bytes"]
-        and evidence_digest.schema_artifact_sha256_equal(
-            provider_archive.get("sha256"), actual_provider_archive["sha256"],
-        )
-        and evidence_digest.schema_artifact_sha256_equal(
-            release_provider.get("archive_sha256"), actual_provider_archive["sha256"],
+        evidence_digest.schema_artifact_sha256_equal(
+            release_provider.get("archive_sha256"), provider.get("archive", {}).get("sha256"),
         ),
-        "embedded provider archive identity mismatch",
+        "embedded provider archive digest mismatch",
     )
     _require(
         evidence_digest.schema_text_sha256_equal(
@@ -347,19 +333,11 @@ def validate_artifact_inputs(
         ),
         "embedded resolver manifest digest mismatch",
     )
-    resolver_archive = resolver.get("archive")
-    actual_resolver_archive = metadata["resolver_archive"]
     _require(
-        isinstance(resolver_archive, dict)
-        and resolver_archive.get("path") == "lib/libwirestack_resolver.a"
-        and resolver_archive.get("path") == actual_resolver_archive["path"]
-        and evidence_digest.schema_artifact_sha256_equal(
-            resolver_archive.get("sha256"), actual_resolver_archive["sha256"],
-        )
-        and evidence_digest.schema_artifact_sha256_equal(
-            release_resolver.get("archive_sha256"), actual_resolver_archive["sha256"],
+        evidence_digest.schema_artifact_sha256_equal(
+            release_resolver.get("archive_sha256"), resolver.get("archive", {}).get("sha256"),
         ),
-        "embedded resolver archive identity mismatch",
+        "embedded resolver archive digest mismatch",
     )
     if release_schema == 2:
         http_files = metadata.get("http_files")
@@ -414,6 +392,21 @@ def validate_artifact_inputs(
             ),
             "embedded HTTP files archive digest mismatch",
         )
+        manifest_entry = _release_payload_entry(release, HTTP_FILES_MANIFEST)
+        archive_entry = _release_payload_entry(release, HTTP_FILES_ARCHIVE)
+        _require(
+            manifest_entry.get("bytes") == metadata.get("http_files_manifest_bytes")
+            and evidence_digest.schema_artifact_sha256_equal(
+                manifest_entry.get("sha256"),
+                metadata.get("http_files_manifest_sha256"),
+            )
+            and archive_entry.get("bytes") == metadata.get("http_files_archive_bytes")
+            and evidence_digest.schema_artifact_sha256_equal(
+                archive_entry.get("sha256"),
+                metadata.get("http_files_archive_sha256"),
+            ),
+            "release HTTP files payload inventory is invalid",
+        )
         public_suffix = metadata.get("public_suffix")
         _require(isinstance(public_suffix, dict), "public suffix source identity is absent")
         _require(
@@ -438,6 +431,14 @@ def validate_artifact_inputs(
             ),
             "public suffix license digest mismatch",
         )
+        for relative in PUBLIC_SUFFIX_FILES:
+            entry = _release_payload_entry(release, relative)
+            actual = suffix_payload[relative]
+            _require(
+                entry.get("bytes") == actual["bytes"]
+                and evidence_digest.schema_artifact_sha256_equal(entry.get("sha256"), actual["sha256"]),
+                f"public suffix payload inventory is invalid: {relative}",
+            )
     else:
         _require(
             metadata.get("http_files") is None and release.get("httpFiles") is None,
@@ -468,17 +469,13 @@ def fingerprint_inputs(
     resolver = metadata["resolver"]
     native_components = {
         "tlsProvider": {
-            "archiveName": metadata["provider_archive"]["name"],
-            "archiveBytes": metadata["provider_archive"]["bytes"],
-            "archiveSha256": metadata["provider_archive"]["sha256"],
+            "archiveSha256": provider["archive"]["sha256"],
             "embeddedManifestSha256": metadata["provider_manifest_sha256"],
             "providerBuildFingerprint": provider["build_fingerprint"],
             "sourceContentSha256": provider["source"]["content_sha256"],
         },
         "resolver": {
-            "archivePath": metadata["resolver_archive"]["path"],
-            "archiveBytes": metadata["resolver_archive"]["bytes"],
-            "archiveSha256": metadata["resolver_archive"]["sha256"],
+            "archiveSha256": resolver["archive"]["sha256"],
             "embeddedManifestSha256": metadata["resolver_manifest_sha256"],
             "buildFingerprint": resolver["build_fingerprint"],
         },
@@ -493,7 +490,7 @@ def fingerprint_inputs(
                 canonical_json(http_files["inputs"])
             ),
         }
-    inputs = {
+    return {
         "schemaVersion": SCHEMA_VERSION,
         "package": {"name": "wirestack", "version": release["version"]},
         "license": {
@@ -523,32 +520,19 @@ def fingerprint_inputs(
             "sha256": generator_sha256,
         },
     }
-    public_suffix = metadata.get("public_suffix")
-    if isinstance(public_suffix, dict):
-        inputs["publicSuffix"] = {
-            "name": public_suffix["name"],
-            "upstreamRepository": public_suffix["upstream_repository"],
-            "upstreamRevision": public_suffix["upstream_revision"],
-            "sha256": public_suffix["sha256"],
-            "licenseExpression": public_suffix["license"],
-            "licenseSha256": public_suffix["license_sha256"],
-        }
-    return inputs
 
 
 def release_provider_manifest(
     metadata: Mapping[str, Any],
     qualification: Mapping[str, Any],
     build_fingerprint: str,
-    *,
-    task_id: str,
 ) -> dict[str, Any]:
     release = metadata["release"]
     provider = metadata["provider"]
     resolver = metadata["resolver"]
     manifest = {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": task_id,
+        "taskId": TASK_ID,
         "artifact": {
             "name": qualification["artifact"]["name"],
             "bytes": metadata["artifact_bytes"],
@@ -570,7 +554,7 @@ def release_provider_manifest(
             "securityPatchLevel": provider["patchLevel"],
             "licenseExpression": provider["build_inputs"]["provider"]["license_expression"],
             "source": provider["build_inputs"]["provider"]["source"],
-            "archive": metadata["provider_archive"],
+            "archive": provider["archive"],
             "embeddedManifestSha256": metadata["provider_manifest_sha256"],
             "externalOpenSslDependency": False,
             "runtimeLoaderLibraryStrings": [],
@@ -589,7 +573,7 @@ def release_provider_manifest(
         "resolver": {
             "backend": resolver["worker_model"],
             "buildFingerprint": resolver["build_fingerprint"],
-            "archive": metadata["resolver_archive"],
+            "archive": resolver["archive"],
             "embeddedManifestSha256": metadata["resolver_manifest_sha256"],
             "privateRuntimeAbi": resolver["private_runtime_abi"],
         },
@@ -617,9 +601,6 @@ def spdx_document(
     metadata: Mapping[str, Any],
     qualification: Mapping[str, Any],
     manifest: Mapping[str, Any],
-    *,
-    task_id: str,
-    created_utc: str,
 ) -> dict[str, Any]:
     artifact = manifest["artifact"]
     provider = manifest["provider"]
@@ -657,12 +638,10 @@ def spdx_document(
             "copyrightText": "NOASSERTION",
             "externalRefs": [
                 {
-                    "referenceCategory": "OTHER",
-                    "referenceType": "vcs",
-                    "referenceLocator": (
-                        "git+" + provider["source"]["url"] + "@"
-                        + provider["source"]["commit"]
-                    ),
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceType": "purl",
+                    "referenceLocator": provider["source"]["url"] +
+                        "@" + provider["source"]["commit"],
                 }
             ],
         },
@@ -825,8 +804,8 @@ def spdx_document(
             f"{manifest['package']['version']}/{artifact['sha256']}"
         ),
         "creationInfo": {
-            "created": created_utc,
-            "creators": [f"Tool: Wirestack {task_id} supply-chain generator"],
+            "created": CREATED_UTC,
+            "creators": ["Tool: Wirestack M7-025 supply-chain generator"],
         },
         "documentDescribes": [artifact_id],
         "packages": packages,
@@ -840,8 +819,6 @@ def build_documents(
     provider_pin: Mapping[str, Any],
     *,
     generator_sha256: str,
-    task_id: str = TASK_ID,
-    created_utc: str = CREATED_UTC,
 ) -> dict[str, dict[str, Any]]:
     metadata = artifact_metadata(artifact_path)
     validate_artifact_inputs(metadata, qualification, provider_pin)
@@ -849,21 +826,13 @@ def build_documents(
     fingerprint = evidence_digest.text_evidence_bytes_sha256(canonical_json(inputs))
     fingerprint_document = {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": task_id,
+        "taskId": TASK_ID,
         "algorithm": "SHA-256",
         "buildFingerprint": fingerprint,
         "inputs": inputs,
     }
-    manifest = release_provider_manifest(
-        metadata, qualification, fingerprint, task_id=task_id
-    )
-    sbom = spdx_document(
-        metadata,
-        qualification,
-        manifest,
-        task_id=task_id,
-        created_utc=created_utc,
-    )
+    manifest = release_provider_manifest(metadata, qualification, fingerprint)
+    sbom = spdx_document(metadata, qualification, manifest)
     documents: dict[str, dict[str, Any]] = {
         "provider-manifest.json": manifest,
         "sbom.spdx.json": sbom,
@@ -878,14 +847,14 @@ def build_documents(
     }
     documents["bundle.json"] = {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": task_id,
+        "taskId": TASK_ID,
         "decision": "PASS",
         "artifact": manifest["artifact"],
         "buildFingerprint": fingerprint,
         "documents": file_digests,
         "unsigned": True,
         "nonClaims": [
-            "Artifact and sidecar signatures are a separate release gate.",
+            "M7-030 owns signatures for the artifact and sidecars.",
             "This bundle applies only to Linux x86_64 glibc.",
             "Cangjie runtime and system libraries are dependencies, not bundled payloads.",
             "Wirestack does not depend on runtime or std source changes; upstream changes are optional future work.",
@@ -901,28 +870,18 @@ def write_documents(documents: Mapping[str, Mapping[str, Any]], output: Path) ->
         (output / name).write_bytes(canonical_json(documents[name]))
 
 
-def _spdx_package(
-    sbom: Mapping[str, Any], package_id: str
-) -> Mapping[str, Any]:
+def _package_checksum(sbom: Mapping[str, Any], package_id: str) -> str:
     packages = sbom.get("packages")
     _require(isinstance(packages, list), "SPDX package inventory is absent")
     for package in packages:
         if isinstance(package, dict) and package.get("SPDXID") == package_id:
-            return package
+            checksums = package.get("checksums")
+            _require(
+                isinstance(checksums, list) and len(checksums) == 1,
+                f"SPDX checksum is absent for {package_id}",
+            )
+            return checksums[0].get("checksumValue", "")
     raise SupplyChainError(f"SPDX package is absent: {package_id}")
-
-
-def _package_checksum(sbom: Mapping[str, Any], package_id: str) -> str:
-    package = _spdx_package(sbom, package_id)
-    checksums = package.get("checksums")
-    _require(
-        isinstance(checksums, list)
-        and len(checksums) == 1
-        and isinstance(checksums[0], dict)
-        and checksums[0].get("algorithm") == "SHA256",
-        f"SPDX SHA256 checksum is absent for {package_id}",
-    )
-    return checksums[0].get("checksumValue", "")
 
 
 def validate_documents(
@@ -932,8 +891,6 @@ def validate_documents(
     qualification_path: Path = QUALIFICATION,
     provider_pin_path: Path = PROVIDER_PIN,
     generator_path: Path | None = None,
-    task_id: str = TASK_ID,
-    created_utc: str = CREATED_UTC,
 ) -> dict[str, Any]:
     generator = generator_path or Path(__file__)
     qualification = load_json(qualification_path)
@@ -943,20 +900,9 @@ def validate_documents(
     sbom = documents["sbom.spdx.json"]
     fingerprint = documents["build-fingerprint.json"]
     bundle = documents["bundle.json"]
-    _require(manifest.get("taskId") == task_id, "provider manifest task identity is invalid")
-    _require(fingerprint.get("taskId") == task_id, "fingerprint task identity is invalid")
-    _require(
-        bundle.get("taskId") == task_id and bundle.get("decision") == "PASS",
-        "bundle decision is invalid",
-    )
-    _require(
-        sbom.get("creationInfo")
-        == {
-            "created": created_utc,
-            "creators": [f"Tool: Wirestack {task_id} supply-chain generator"],
-        },
-        "SPDX creation metadata is invalid",
-    )
+    _require(manifest.get("taskId") == TASK_ID, "provider manifest task identity is invalid")
+    _require(fingerprint.get("taskId") == TASK_ID, "fingerprint task identity is invalid")
+    _require(bundle.get("taskId") == TASK_ID and bundle.get("decision") == "PASS", "bundle decision is invalid")
     expected_fingerprint = evidence_digest.text_evidence_bytes_sha256(
         canonical_json(fingerprint.get("inputs"))
     )
@@ -999,7 +945,6 @@ def validate_documents(
     fingerprint_http_files = (
         fingerprint.get("inputs", {}).get("nativeComponents", {}).get("httpFiles")
     )
-    fingerprint_public_suffix = fingerprint.get("inputs", {}).get("publicSuffix")
     _require(
         (http_files is None and fingerprint_http_files is None)
         or (isinstance(http_files, dict) and isinstance(fingerprint_http_files, dict)),
@@ -1012,15 +957,8 @@ def validate_documents(
     )
     if qualified_release_schema == 2:
         _require(
-            isinstance(http_files, dict)
-            and isinstance(fingerprint_http_files, dict)
-            and isinstance(fingerprint_public_suffix, dict),
-            "qualified release requires the HTTP files and public suffix supply-chain inventories",
-        )
-    elif qualified_release_schema == 1:
-        _require(
-            fingerprint_public_suffix is None,
-            "legacy release contains an ambiguous public suffix supply-chain inventory",
+            isinstance(http_files, dict) and isinstance(fingerprint_http_files, dict),
+            "qualified release requires the HTTP files supply-chain inventory",
         )
     dependency_ids = {
         "SPDXRef-Package-Cangjie-Runtime",
@@ -1031,8 +969,6 @@ def validate_documents(
     required_package_ids = {artifact_id, provider_id, resolver_id} | dependency_ids
     if isinstance(http_files, dict):
         required_package_ids.add(HTTP_FILES_SPDX_ID)
-    if isinstance(fingerprint_public_suffix, dict):
-        required_package_ids.add(PUBLIC_SUFFIX_SPDX_ID)
     packages = sbom.get("packages")
     _require(isinstance(packages, list), "SPDX package inventory is absent")
     package_ids = [package.get("SPDXID") for package in packages if isinstance(package, dict)]
@@ -1059,60 +995,12 @@ def validate_documents(
         ),
         "SPDX provider digest mismatch",
     )
-    provider_source = provider.get("source", {})
-    _require(
-        _spdx_package(sbom, provider_id).get("externalRefs")
-        == [
-            {
-                "referenceCategory": "OTHER",
-                "referenceType": "vcs",
-                "referenceLocator": (
-                    "git+" + provider_source.get("url", "") + "@"
-                    + provider_source.get("commit", "")
-                ),
-            }
-        ],
-        "SPDX provider source reference is invalid",
-    )
     _require(
         evidence_digest.schema_artifact_sha256_equal(
             _package_checksum(sbom, resolver_id),
             manifest.get("resolver", {}).get("archive", {}).get("sha256"),
         ),
         "SPDX resolver digest mismatch",
-    )
-    native_components = fingerprint.get("inputs", {}).get("nativeComponents", {})
-    fingerprint_provider = native_components.get("tlsProvider", {})
-    fingerprint_resolver = native_components.get("resolver", {})
-    provider_archive = provider.get("archive", {})
-    resolver_archive = manifest.get("resolver", {}).get("archive", {})
-    _require(
-        fingerprint_provider.get("archiveName") == provider_archive.get("name")
-        and fingerprint_provider.get("archiveBytes") == provider_archive.get("bytes")
-        and evidence_digest.schema_artifact_sha256_equal(
-            fingerprint_provider.get("archiveSha256"), provider_archive.get("sha256"),
-        )
-        and evidence_digest.schema_text_sha256_equal(
-            fingerprint_provider.get("embeddedManifestSha256"),
-            provider.get("embeddedManifestSha256"),
-        )
-        and fingerprint_provider.get("providerBuildFingerprint")
-        == provider.get("providerBuildFingerprint"),
-        "provider archive fingerprint inputs differ from the manifest",
-    )
-    _require(
-        fingerprint_resolver.get("archivePath") == resolver_archive.get("path")
-        and fingerprint_resolver.get("archiveBytes") == resolver_archive.get("bytes")
-        and evidence_digest.schema_artifact_sha256_equal(
-            fingerprint_resolver.get("archiveSha256"), resolver_archive.get("sha256"),
-        )
-        and evidence_digest.schema_text_sha256_equal(
-            fingerprint_resolver.get("embeddedManifestSha256"),
-            manifest.get("resolver", {}).get("embeddedManifestSha256"),
-        )
-        and fingerprint_resolver.get("buildFingerprint")
-        == manifest.get("resolver", {}).get("buildFingerprint"),
-        "resolver archive fingerprint inputs differ from the manifest",
     )
     if isinstance(http_files, dict):
         _require(
@@ -1145,30 +1033,6 @@ def validate_documents(
             ),
             "HTTP files fingerprint inputs differ from the manifest",
         )
-    if isinstance(fingerprint_public_suffix, dict):
-        public_suffix_package = _spdx_package(sbom, PUBLIC_SUFFIX_SPDX_ID)
-        _require(
-            public_suffix_package.get("name") == "Public Suffix List"
-            and public_suffix_package.get("versionInfo")
-            == fingerprint_public_suffix.get("upstreamRevision")
-            and public_suffix_package.get("downloadLocation")
-            == (
-                fingerprint_public_suffix.get("upstreamRepository", "")
-                + "/raw/"
-                + fingerprint_public_suffix.get("upstreamRevision", "")
-                + "/public_suffix_list.dat"
-            )
-            and public_suffix_package.get("licenseDeclared") == "MPL-2.0"
-            and public_suffix_package.get("licenseConcluded") == "MPL-2.0"
-            and public_suffix_package.get("primaryPackagePurpose") == "SOURCE"
-            and fingerprint_public_suffix.get("name") == "publicsuffix/list"
-            and fingerprint_public_suffix.get("licenseExpression") == "MPL-2.0"
-            and evidence_digest.schema_artifact_sha256_equal(
-                _package_checksum(sbom, PUBLIC_SUFFIX_SPDX_ID),
-                fingerprint_public_suffix.get("sha256"),
-            ),
-            "SPDX public suffix package is invalid",
-        )
     relationships = sbom.get("relationships")
     _require(isinstance(relationships, list), "SPDX relationship inventory is absent")
     relationship_tuples = {
@@ -1188,10 +1052,6 @@ def validate_documents(
     if isinstance(http_files, dict):
         expected_relationships.add(
             (artifact_id, "CONTAINS", HTTP_FILES_SPDX_ID)
-        )
-    if isinstance(fingerprint_public_suffix, dict):
-        expected_relationships.add(
-            (artifact_id, "CONTAINS", PUBLIC_SUFFIX_SPDX_ID)
         )
     _require(
         relationship_tuples == expected_relationships,
@@ -1216,8 +1076,6 @@ def validate_documents(
             qualification,
             provider_pin,
             generator_sha256=evidence_digest.text_evidence_sha256(generator),
-            task_id=task_id,
-            created_utc=created_utc,
         )
         for name in OUTPUT_NAMES:
             _require(documents[name] == expected_documents[name], f"committed {name} is stale")

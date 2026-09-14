@@ -34,7 +34,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
     def valid_report(request: dict) -> dict:
         return {
             "schemaVersion": 1,
-            "taskId": "M7-029",
+            "taskId": request["taskId"],
             "target": {
                 "packagePath": request["packagePath"],
                 "packageSha256": request["packageSha256"],
@@ -61,6 +61,46 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         summary = review.validate_review(root, request, self.valid_report(request))
         self.assertEqual(0, summary["findingCount"])
+
+    def test_final_review_rejects_historical_task_and_changed_package(self) -> None:
+        temporary, root, historical_request = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        package_relative = "docs/evidence/M8-007/security-index.json"
+        report_relative = "docs/evidence/M8-007/independent-review.json"
+        package = root / package_relative
+        package.parent.mkdir(parents=True)
+        package.write_text('{"candidate":"new"}\n')
+        request = review.build_request(
+            root, task_id="M8-007", package_path=package_relative, report_path=report_relative
+        )
+        request_path = package.parent / "review-request.json"
+        report_path = root / report_relative
+        review.atomic_json(request_path, request)
+        review.atomic_json(report_path, self.valid_report(historical_request))
+        with self.assertRaises(review.IndependentReviewError) as caught:
+            review.validate(
+                root, request_path, report_path, task_id="M8-007", package_path=package_relative
+            )
+        self.assertEqual("TASK_ID", caught.exception.code)
+        review.atomic_json(report_path, self.valid_report(request))
+        self.assertEqual("PASS", review.validate(
+            root, request_path, report_path, task_id="M8-007", package_path=package_relative
+        )["decision"])
+        package.write_text('{"candidate":"changed after review"}\n')
+        with self.assertRaises(review.IndependentReviewError) as caught:
+            review.validate(
+                root, request_path, report_path, task_id="M8-007", package_path=package_relative
+            )
+        self.assertEqual("REQUEST_STALE", caught.exception.code)
+
+    def test_review_path_outside_package_root_is_a_controlled_failure(self) -> None:
+        temporary, root, request = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        request_path = root / "request.json"
+        review.atomic_json(request_path, request)
+        with self.assertRaises(review.IndependentReviewError) as caught:
+            review.validate(root, request_path, root.parent / "outside-review.json")
+        self.assertEqual("PATH_ESCAPE", caught.exception.code)
 
     def test_prepare_cli_returns_structured_invalid_utf8_failure(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-m7-029-utf8-") as directory:
@@ -289,6 +329,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         temporary, root, request = self.fixture()
         self.addCleanup(temporary.cleanup)
         request_path = root / "request.json"
+        request["reportPath"] = "missing-review.json"
         review.atomic_json(request_path, request)
         with self.assertRaises(review.IndependentReviewError) as caught:
             review.validate(root, request_path, root / "missing-review.json")
