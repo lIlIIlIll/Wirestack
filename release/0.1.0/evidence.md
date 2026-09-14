@@ -45,7 +45,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Package rehearsal | PASS (current hosted) | current run [`34835614043`](https://github.com/lIlIIlIll/yjson/actions/runs/34835614043) 的 `registry-rehearsal` job 通过 |
 | Seven-library matrix | **PASS (RSS-complete)** | 当前候选两批 STS `1.1.3` 归档各含 770/770 单元；CPU 3/sibling 51 idle sample、checksum、identity、summary 和 770 个 RSS sidecar 均通过，见 `benchmarks/results/full-seven-library/2026-09-14-release-7436598/` |
 | Three-library release performance | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；1/36 stable、35/36 noisy，构建与 timed sample 分离，完整 raw archive 与每个进程 peak RSS 均保留；archive SHA-256 为 `c3e3dca387bd4869c1f183fef000427dce95cb5433b07c97510a86dd69ffd490` |
-| Pure baseline/candidate qualification | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 下 24 case、11 轮，`all_ratios_at_most_1_05=true`、`passed=true`；每个进程 peak RSS 均保留；archive SHA-256 为 `4c8c28bd4822ee5d3d0937df2f47f1f0f88bc378c94564ec46560db86edd9cb3` |
+| Pure baseline/candidate qualification | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 下 24 case、11 轮，`all_ratios_at_most_1_05=true`、`passed=true`；每个进程 peak RSS 均保留，归档包含 `checksums.txt` inventory；archive SHA-256 为 `4cccd194b00d8810f263f466f2ca9e56d5daccd67732b40627ef064c7e466e5f` |
 | Native acceleration | NON-BLOCKING (claim not qualified) | 当前三库结果为 `1/36` stable、`35/36` noisy；该结果不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
 | Release policy | **BLOCKING** | 当前三类性能证据和 hosted PR CI 已完成；仍要求 PR 合并到 `main`、合并后 required workflows/Pages 通过；当前没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
@@ -57,7 +57,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 当前候选的性能复核资料已分别保存在：
 
 - `benchmarks/results/full-seven-library/2026-09-14-release-7436598/`：两批 RSS-complete 七库 raw archive、sidecar、脚本闭包、身份和 checksum；
-- `benchmarks/results/release-performance/2026-09-14-7436598/yjson-pure-release-7436598-r1.tar.gz`：Pure 24-case RSS-complete raw archive，SHA-256 为 `4c8c28bd4822ee5d3d0937df2f47f1f0f88bc378c94564ec46560db86edd9cb3`；
+- `benchmarks/results/release-performance/2026-09-14-7436598/yjson-pure-release-7436598-r1.tar.gz`：Pure 24-case RSS-complete raw archive，含 `checksums.txt` inventory，SHA-256 为 `4cccd194b00d8810f263f466f2ca9e56d5daccd67732b40627ef064c7e466e5f`；
 - `benchmarks/results/release-performance/2026-09-14-774e89e/yjson-three-library-release-774e89e-r1.tar.gz`：修正 exact-case filter、build-only RSS 后的三库 36-workload RSS-complete raw archive，SHA-256 为 `c3e3dca387bd4869c1f183fef000427dce95cb5433b07c97510a86dd69ffd490`；
 
 这些是仓库中的可审计证据，不是 GitHub Release 上传资产。七库证据目录另以
@@ -162,7 +162,8 @@ GNU `/usr/bin/time -v` 已为 24 × 11 × 2 个进程记录 peak RSS，summary �
 [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)；
 RSS-complete raw archive 为
 `benchmarks/results/release-performance/2026-09-14-7436598/yjson-pure-release-7436598-r1.tar.gz`，
-SHA-256 为 `4c8c28bd4822ee5d3d0937df2f47f1f0f88bc378c94564ec46560db86edd9cb3`。
+SHA-256 为 `4cccd194b00d8810f263f466f2ca9e56d5daccd67732b40627ef064c7e466e5f`；归档内
+`checksums.txt` 对 2119 个 regular files 的清单校验通过。
 
 ### 历史：Native / 三库诊断（旧候选，STS `1.1.3`）
 

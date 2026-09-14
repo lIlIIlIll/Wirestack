@@ -66,7 +66,7 @@ sidecar 逐项对应。CPU 2 与 sibling 50 先经过 30 秒 idle sample，利�
 | SDK | Cangjie STS `1.1.3`；`cjc`/`cjpm` `1.1.3` |
 | Heap | `128MB` |
 | GNU time | `/usr/bin/time`; RSS unit `kbytes` |
-| Archive SHA-256 | `4c8c28bd4822ee5d3d0937df2f47f1f0f88bc378c94564ec46560db86edd9cb3` |
+| Archive SHA-256 | `4cccd194b00d8810f263f466f2ca9e56d5daccd67732b40627ef064c7e466e5f` |
 
 ## 复核
 
