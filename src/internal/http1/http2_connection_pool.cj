@@ -299,28 +299,35 @@ public class Http2ConnectionPool <: Resource {
                                     reservationOutstanding = false
                                     changed.notifyAll()
                                 }
-                                closeHttp2Quietly(created)
+                                abortUnpublishedHttp2(created)
                                 continue
                             } catch (error: Exception) {
-                                closeHttp2Quietly(created)
+                                abortUnpublishedHttp2(created)
                                 throw error
                             }
-                            let accepted = synchronized(mutex) {
-                                removeHttp2Reservation(key)
-                                reservationOutstanding = false
-                                if (closed || !created.acceptingNewStreams) {
-                                    changed.notifyAll()
-                                    false
-                                } else {
-                                    entries.add(Http2PoolEntry(id, key, created))
-                                    changed.notifyAll()
-                                    true
+                            let (accepted, poolWasClosed) = try {
+                                synchronized(mutex) {
+                                    removeHttp2Reservation(key)
+                                    reservationOutstanding = false
+                                    let rejectedByClose = closed
+                                    if (rejectedByClose || !created.acceptingNewStreams) {
+                                        changed.notifyAll()
+                                        (false, rejectedByClose)
+                                    } else {
+                                        entries.add(Http2PoolEntry(id, key, created))
+                                        changed.notifyAll()
+                                        (true, false)
+                                    }
                                 }
+                            } catch (error: Exception) {
+                                admission.registration.unregister()
+                                abortUnpublishedHttp2(created)
+                                throw error
                             }
                             if (!accepted) {
                                 admission.registration.unregister()
-                                closeHttp2Quietly(created)
-                                if (closed) { throw http2PoolClosed() }
+                                abortUnpublishedHttp2(created)
+                                if (poolWasClosed) { throw http2PoolClosed() }
                                 continue
                             }
                             return Http2PoolLease(id, key, created, admission)
@@ -531,6 +538,11 @@ public class Http2ConnectionPool <: Resource {
 
 private func closeHttp2Quietly(connection: Http2MultiplexedConnection): Unit {
     try { connection.close() } catch (_: Exception) { connection.abort(reason: AbortReason.ApplicationAbort) }
+}
+
+/** Unpublished connections have no owner that can complete a graceful stream drain. */
+private func abortUnpublishedHttp2(connection: Http2MultiplexedConnection): Unit {
+    connection.abort(reason: AbortReason.ApplicationAbort)
 }
 
 private func http2PoolClosed(): NetworkException {

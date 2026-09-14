@@ -56,16 +56,21 @@ RESULT_PREFIX = "M7022_RESULT "
 READY_PREFIX = "SOAK_READY "
 READY_FIELDS = {"cycles", "elapsedMs"}
 SAMPLE_FIELDS = {
-    "index", "elapsedMs", "usedHeapBytes", "activeWaiters", "activeBuffers",
-    "backgroundTasks", "cycles", "h1Requests", "h2Requests", "sseEvents",
+    "index", "elapsedMs", "usedHeapBytes", "activePoolLeases",
+    "activeResponseOwners", "activeApplicationTasks", "activeTransportIo",
+    "retainedTransports", "retainedCancellations", "serverServeTasks", "cycles",
+    "h1Requests", "h2Requests", "sseEvents",
 }
 RESULT_FIELDS = {
     "durationSeconds", "elapsedMs", "cycles", "activePhases", "idlePhases",
     "connects", "h1Requests", "h2Requests", "h2MultiplexBatches", "sseH1Events",
     "sseH2Events", "requestCancels", "streamResets", "connectionCancels",
     "reconnects", "spawnedTasks", "joinedTasks", "sequenceErrors",
-    "maxCancelLatencyNs", "activeWaiters", "activeBuffers", "backgroundTasks",
-    "serverTasks",
+    "maxCancelLatencyNs", "activePoolLeases", "activeResponseOwners",
+    "activeApplicationTasks", "activeTransportIo", "retainedTransports",
+    "retainedCancellations",
+    "serverServeTasks", "serverConnections", "clientsClosed", "serversClosed",
+    "tlsConfigsClosed", "poolAcquires", "poolReleases", "poolSequenceErrors",
 }
 SOURCE = ROOT / "tools/release_soak/main.cj"
 FIXTURE = ROOT / "examples/linux/m7_027/fixtures.cj"
@@ -623,6 +628,9 @@ def resource_trend(
     }
 
 
+MAX_WEAK_OWNER_GROWTH = 2
+
+
 def application_trend(
     samples: Sequence[Mapping[str, int]], *, minimum_samples: int
 ) -> dict[str, Any]:
@@ -637,19 +645,56 @@ def application_trend(
         MAX_HEAP_GROWTH_BYTES,
         count_metric=False,
     )
-    owners_ok = all(
-        sample["activeWaiters"] == 0
-        and sample["activeBuffers"] == 0
-        and sample["backgroundTasks"] == 2
+    retained_transports = metric_trend(
+        [int(sample["retainedTransports"]) for sample in samples],
+        MAX_WEAK_OWNER_GROWTH,
+        count_metric=True,
+    )
+    retained_cancellations = metric_trend(
+        [int(sample["retainedCancellations"]) for sample in samples],
+        MAX_WEAK_OWNER_GROWTH,
+        count_metric=True,
+    )
+    transport_io = metric_trend(
+        [int(sample["activeTransportIo"]) for sample in samples],
+        RESOURCE_LIMITS["socket_count"],
+        count_metric=True,
+    )
+    application_owners_ok = all(
+        sample["activePoolLeases"] == 0
+        and sample["activeResponseOwners"] == 0
+        and sample["activeApplicationTasks"] == 0
+        and sample["serverServeTasks"] == 2
         for sample in samples
     )
+    transport_owners_observed = all(
+        sample["retainedTransports"] >= 0
+        and sample["retainedCancellations"] >= 0
+        and sample["activeTransportIo"] >= 0
+        for sample in samples
+    ) and any(sample["retainedTransports"] > 0 for sample in samples) and any(
+        sample["activeTransportIo"] > 0 for sample in samples
+    )
     progress_ok = samples[-1]["cycles"] > samples[0]["cycles"]
+    passed = (
+        heap["decision"] == "PASS"
+        and retained_transports["decision"] == "PASS"
+        and retained_cancellations["decision"] == "PASS"
+        and transport_io["decision"] == "PASS"
+        and application_owners_ok
+        and transport_owners_observed
+        and progress_ok
+    )
     return {
-        "decision": "PASS" if heap["decision"] == "PASS" and owners_ok and progress_ok else "FAIL",
+        "decision": "PASS" if passed else "FAIL",
         "sample_count": len(samples),
         "minimum_samples": minimum_samples,
         "heavy_gc_heap": heap,
-        "bounded_application_owners": owners_ok,
+        "retained_transport_owners": retained_transports,
+        "retained_cancellation_sentinels": retained_cancellations,
+        "in_flight_transport_io": transport_io,
+        "bounded_application_owners": application_owners_ok,
+        "transport_owners_observed": transport_owners_observed,
         "workload_progress": progress_ok,
     }
 
@@ -680,12 +725,33 @@ def validate_workload(
             result["connectionCancels"] > 0
             and result["connectionCancels"] == result["reconnects"]
         ),
-        "task_join": result["spawnedTasks"] == result["joinedTasks"],
+        "task_join": (
+            result["spawnedTasks"] == result["joinedTasks"]
+            and result["activeApplicationTasks"] == 0
+        ),
         "sequence_integrity": result["sequenceErrors"] == 0,
         "cancellation_latency": result["maxCancelLatencyNs"] <= MAX_CANCEL_NS,
-        "terminal_owners": all(
+        "pool_owner_balance": (
+            result["poolAcquires"] > 0
+            and result["poolAcquires"] == result["poolReleases"]
+            and result["poolSequenceErrors"] == 0
+        ),
+        "terminal_application_owners": all(
             result[name] == 0
-            for name in ("activeWaiters", "activeBuffers", "backgroundTasks", "serverTasks")
+            for name in (
+                "activePoolLeases", "activeResponseOwners",
+                "activeApplicationTasks", "serverServeTasks", "serverConnections",
+            )
+        ),
+        "terminal_transport_owners": (
+            result["activeTransportIo"] == 0
+            and result["retainedTransports"] == 0
+            and result["retainedCancellations"] == 0
+        ),
+        "terminal_resources_closed": (
+            result["clientsClosed"] == 2
+            and result["serversClosed"] == 2
+            and result["tlsConfigsClosed"] == 2
         ),
     }
     return checks
@@ -849,8 +915,8 @@ def execute(
                 ROOT, private_qualification_path, private_artifact
             )
             if (
-                copied_artifact["digest"]["sha256"] != artifact_digest
-                or identities["artifact"]["digest"]["sha256"] != artifact_digest
+                not evidence_digest.schema_artifact_sha256_equal(copied_artifact["digest"]["sha256"], artifact_digest)
+                or not evidence_digest.schema_artifact_sha256_equal(identities["artifact"]["digest"]["sha256"], artifact_digest)
             ):
                 raise SoakError(
                     "ARTIFACT_DIGEST",
@@ -1120,16 +1186,44 @@ def execute(
         "resources": {
             "process_tree": {"trend": process_trend, "samples": sampler.samples},
             "application": {"trend": app_trend, "samples": application_samples},
+            "ownership_scopes": {
+                "application_owned": {
+                    "pool_leases": "actual HttpConnectionPoolHook acquire/release callbacks",
+                    "controlled_responses": "HttpResponse.isClosed observed through weak response references",
+                    "cancellation_links": (
+                        "typed cancellation handles retained while weak event-sink sentinels "
+                        "prove response-owned callback graphs were released"
+                    ),
+                    "tasks": "actual Future.tryGet samples and terminal Future.get joins",
+                    "servers": "HttpServer shutdown activeAtReturn, isClosed, and serve Future joins",
+                },
+                "runtime_wide": {
+                    "protocol_workers": (
+                        "custom-connector transport in-flight I/O and post-close weak reachability "
+                        "while the child remains alive"
+                    ),
+                    "process_tree": (
+                        "RSS, descriptors, timerfds, processes, and threads are complementary "
+                        "runtime-wide trends, not substitutes for in-process owner cleanup"
+                    ),
+                },
+            },
             "coverage": {
                 "rss": "process-tree VmRSS",
                 "fd": "process-tree file descriptors",
-                "socket": "process-tree socket descriptors",
+                "socket": "process-tree socket descriptors plus weak transport reachability",
                 "timer": "process-tree timerfd descriptors",
-                "waiter": "zero application-owned waiters between cycles and at terminal",
-                "buffer": "zero application-owned buffers between cycles and at terminal",
-                "gc_root": "heavy-GC used heap steady-state trend",
-                "task": "joined spawned tasks plus bounded server tasks and thread trend",
-                "thread": "process-tree thread count",
+                "waiter": (
+                    "application Future, pool-lease, and in-flight transport I/O observations; "
+                    "no runtime-wide waiter inventory is claimed"
+                ),
+                "buffer": (
+                    "runtime-wide heavy-GC heap trend; no per-buffer public inventory exists"
+                ),
+                "gc_root": "heavy-GC used heap and weak-reference owner observations",
+                "task": "workload and serve Future state with terminal joins",
+                "callback": "weak cancellation sentinels rooted by retained typed handles",
+                "thread": "process-tree thread trend, reported only as runtime-wide evidence",
             },
         },
         "raw_log": {

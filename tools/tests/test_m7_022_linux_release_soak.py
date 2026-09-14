@@ -19,9 +19,13 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             "index": index,
             "elapsedMs": elapsed,
             "usedHeapBytes": 1000,
-            "activeWaiters": 0,
-            "activeBuffers": 0,
-            "backgroundTasks": 2,
+            "activePoolLeases": 0,
+            "activeResponseOwners": 0,
+            "activeApplicationTasks": 0,
+            "activeTransportIo": 1,
+            "retainedTransports": 2,
+            "retainedCancellations": 0,
+            "serverServeTasks": 2,
             "cycles": cycles,
             "h1Requests": cycles,
             "h2Requests": cycles * 5,
@@ -50,10 +54,20 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             "joinedTasks": 32,
             "sequenceErrors": 0,
             "maxCancelLatencyNs": 1_000_000,
-            "activeWaiters": 0,
-            "activeBuffers": 0,
-            "backgroundTasks": 0,
-            "serverTasks": 0,
+            "activePoolLeases": 0,
+            "activeResponseOwners": 0,
+            "activeApplicationTasks": 0,
+            "activeTransportIo": 0,
+            "retainedTransports": 0,
+            "retainedCancellations": 0,
+            "serverServeTasks": 0,
+            "serverConnections": 0,
+            "clientsClosed": 2,
+            "serversClosed": 2,
+            "tlsConfigsClosed": 2,
+            "poolAcquires": 80,
+            "poolReleases": 80,
+            "poolSequenceErrors": 0,
         }
         return gate.RESULT_PREFIX + " ".join(f"{key}={value}" for key, value in values.items())
 
@@ -108,6 +122,21 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
                 with self.assertRaises(gate.SoakError):
                     gate.parse_output(value)
 
+
+    def test_old_literal_owner_evidence_schema_is_rejected(self) -> None:
+        old_sample = self.sample(0, 1000, 1).replace(
+            "activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 "
+            "activeTransportIo=1 retainedTransports=2 retainedCancellations=0 "
+            "serverServeTasks=2",
+            "activeWaiters=0 activeBuffers=0 backgroundTasks=2",
+        )
+        old_result = self.result().split(" activePoolLeases=", 1)[0] + (
+            " activeWaiters=0 activeBuffers=0 backgroundTasks=0 serverTasks=0"
+        )
+        with self.assertRaises(gate.SoakError) as caught:
+            gate.parse_output(old_sample + "\n" + old_result)
+        self.assertEqual("MARKER_FIELDS", caught.exception.code)
+
     def test_metric_trend_accepts_limit_and_rejects_growth_or_monotonic_count(self) -> None:
         equality = gate.metric_trend([0, 0, 0, 0, 0, 2, 2, 2, 2, 2], 2, count_metric=False)
         self.assertEqual("PASS", equality["decision"])
@@ -139,15 +168,39 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         self.assertEqual("PASS", gate.resource_trend(samples, minimum_samples=5)["decision"])
         application = [{
             "usedHeapBytes": 1000,
-            "activeWaiters": 0,
-            "activeBuffers": 0,
-            "backgroundTasks": 2,
+            "activePoolLeases": 0,
+            "activeResponseOwners": 0,
+            "activeApplicationTasks": 0,
+            "activeTransportIo": 1,
+            "retainedTransports": 2,
+            "retainedCancellations": 0,
+            "serverServeTasks": 2,
             "cycles": index,
         } for index in range(10)]
         self.assertEqual(
             "PASS", gate.application_trend(application, minimum_samples=5)["decision"]
         )
-        application[-1]["activeBuffers"] = 1
+        application[-1]["activeResponseOwners"] = 1
+        self.assertEqual(
+            "FAIL", gate.application_trend(application, minimum_samples=5)["decision"]
+        )
+        application[-1]["activeResponseOwners"] = 0
+        for sample, transports, cancellations in zip(
+            application, [1, 3, 2, 4, 2, 3, 1, 2, 3, 1], [2, 4, 3, 5, 1, 3, 2, 4, 1, 2]
+        ):
+            sample["retainedTransports"] = transports
+            sample["retainedCancellations"] = cancellations
+        self.assertEqual(
+            "PASS", gate.application_trend(application, minimum_samples=5)["decision"]
+        )
+        for index, sample in enumerate(application):
+            sample["retainedTransports"] = index + 2
+        self.assertEqual(
+            "FAIL", gate.application_trend(application, minimum_samples=5)["decision"]
+        )
+        for index, sample in enumerate(application):
+            sample["retainedTransports"] = 2
+            sample["retainedCancellations"] = index
         self.assertEqual(
             "FAIL", gate.application_trend(application, minimum_samples=5)["decision"]
         )
@@ -157,8 +210,20 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         checks = gate.validate_workload(result, 10, 10_000)
         self.assertTrue(all(checks.values()))
         self.assertFalse(gate.validate_workload(result, gate.FORMAL_SECONDS, 10_000)["requested_duration"])
-        result["backgroundTasks"] = 1
-        self.assertFalse(gate.validate_workload(result, 10, 10_000)["terminal_owners"])
+        result["retainedTransports"] = 1
+        self.assertFalse(
+            gate.validate_workload(result, 10, 10_000)["terminal_transport_owners"]
+        )
+        result["retainedTransports"] = 0
+        result["retainedCancellations"] = 1
+        self.assertFalse(
+            gate.validate_workload(result, 10, 10_000)["terminal_transport_owners"]
+        )
+        result["retainedCancellations"] = 0
+        result["poolReleases"] -= 1
+        self.assertFalse(
+            gate.validate_workload(result, 10, 10_000)["pool_owner_balance"]
+        )
 
     def test_platform_rejects_other_os_cpu_and_musl(self) -> None:
         for values, code in (

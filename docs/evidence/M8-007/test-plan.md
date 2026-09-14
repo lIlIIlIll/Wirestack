@@ -21,12 +21,20 @@ Failures reject qualification. Package extraction must not publish unsafe member
 | P007 | Current independent review or historical/stale review | Package digest, reviewer declaration, methods, scope, and findings | Reachable | Process isolation is not external human independence |
 | P008 | Correct signatures or changed subject, source, or workflow | GitHub attestation verification and signed qualification inputs | Hosted signing path | Three authenticated subjects are required |
 | P009 | Real committed candidate or uncommitted/changed input | Commit lookup and canonical blob comparison | Reachable | The exact formal command is checked against the commit |
+| P010 | Fixed request Content-Length at or above configured limit | Admission before body read or handler dispatch | Reachable | Exact boundary remains accepted |
+| P011 | Completed nonreusable HTTPS response with silent TLS peer | Completion, cancellation unlink, and transport disposal | Reachable | Automatic disposal cannot start an unbounded peer-close wait |
+| P012 | Pool closes after new H2 stream admission but before publication | Reservation, registration, stream and connection cleanup | Reachable race | No request executor owns the rejected stream |
+| P013 | Bounded TLS close while background I/O holds a pump lock | Deadline/cancellation admission and terminal cleanup | Reachable race | Context checks must precede or interrupt waiting |
+| P014 | Live versus released soak resource owners | Actual owner observations and terminal joins | Reachable | Literal zero values are not resource evidence |
+| P015 | Already-cancelled close token invokes a throwing abort callback | Registration failure enters terminal cleanup | Reachable error path | Close admission must not retain the TLS engine |
 
 ## Input domains and state
 
 Archive members include regular files, directories, duplicate names, traversal names, links, and missing or extra inventory entries. Native inputs include each required component, omitted provenance, and same-size archive mutation. API and documentation inputs include unchanged content, changed content, and planning-only changes.
 
 The soak duration domain includes preflights below 86,400 seconds and the exact formal duration. Cancellation latency must stay within the existing 50,000,000-nanosecond bound. Resource trends require the maintained sample minimums. The process must finish, join admitted tasks, and release its application-owned resources.
+
+Weak-reference liveness depends on GC reclamation, so sampled weak transport and cancellation-sentinel counts use bounded-growth and monotonicity checks. Active leases, responses, and application tasks must be zero at idle checkpoints. All observed active and weak owners must be zero at terminal cleanup.
 
 The formal run owns its private candidate copies, installed consumer, native process group, logs, and resource sampler. Readiness is observed after a completed workload cycle. A second invocation cannot replace an active run. A failed or interrupted run retains diagnostic evidence and cannot be sealed as PASS.
 
@@ -44,6 +52,12 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | S008 | Current or stale independent review | Validated current review package | P007 | Accept only the current declared review | Package target matches; required scope and methods exist; unresolved blocking findings reject acceptance | error,normal | P0 |
 | S009 | Signed subjects or modified qualification | Completed local gates | P008 | Authenticate the artifact, SBOM, and qualified manifest | Exact repository, workflow, source digest, subject bytes, and signatures verify | normal,error | P0 |
 | S010 | Missing candidate commit or changed committed input | Formal run admission | P009 | Reject false source provenance | Each execution input matches its committed blob; the formal command matches the committed task definition | error,regression | P0 |
+| S011 | Content-Length equal to limit or one byte above it | Head received; body withheld | P010 | Accept boundary; reject oversized request before consumption | Assert exact body at boundary and structured rejection above it | boundary,regression | P0 |
+| S012 | Complete Connection: close HTTPS response; peer withholds close_notify | Request owns body and pool lease | P011 | Complete or cancel without a new unbounded graceful wait | Assert consumer operation terminates and disposal ownership is released | regression | P0 |
+| S013 | Pool close interleaved after new stream admission | Created connection not yet published | P012 | Reject acquisition and release all unpublished ownership | Assert bounded acquisition failure and zero retained stream owners/reservations | regression | P0 |
+| S014 | Deadline expiry or cancellation during close behind active I/O | Another operation holds the pump admission resource | P013 | Honor the close context and perform terminal cleanup | Assert close terminates, old I/O wakes, and engine cleanup completes once | boundary,regression | P0 |
+| S015 | Retained terminal owner, growing weak-owner series, or old literal sample schema | Soak sampling or terminal validation | P014 | Refuse unsupported ownership PASS | Assert live observations, bounded trends, and rejection of invalid terminal or schema evidence | regression | P0 |
+| S016 | Already-cancelled token and throwing transport abort | TLS connection handshaken; close not yet registered | P015 | Propagate the failure and release the engine | Assert terminal connection, one transport disposal, and exactly one engine release | error,regression | P0 |
 
 ## Test-plan matrix
 
@@ -59,6 +73,12 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | T008 | S008 | P007 | Fresh process-isolated review and review validators | Current source review accepted | Actual reviewer-authored report, exact package binding, required methods and scope | strengthened |
 | T009 | S009 | P008 | Hosted signing and local signature verification | Three authenticated subjects | Modified qualification invalidates the signed manifest; wrong workflow or source digest fails | minimal,boundary |
 | T010 | S010 | P009 | Frozen-candidate verification | Reject missing or changed committed inputs | Candidate lookup, source blob digests, and formal command equality | boundary |
+| T011 | S011 | P010 | HTTP1 server-reader boundary and oversized-head cases | Pre-fix rejection test fails; corrected reader passes | Assert exact accepted body and rejection before reading oversized body | boundary |
+| T012 | S012 | P011 | HTTP1 completion regression with withheld graceful shutdown | Operation does not outlive its completion/cancellation budget | Assert bounded consumer completion and released ownership | strengthened |
+| T013 | S013 | P012 | Gated H2 creation-versus-pool-close race | Unpublished connection and stream are disposed | Assert acquisition termination and empty active/owned stream state | strengthened |
+| T014 | S014 | P013 | Active TLS I/O plus bounded or cancelled close | Both terminal cleanup and old I/O finish | Assert context outcome and safe teardown under controlled ordering | strengthened |
+| T015 | S015 | P014 | Ownership-observation negative controls and real preflight | No literal schema, growing weak-owner series, or retained terminal owners pass | Assert observed owner state, terminal joins, and strict schema rejection | strengthened |
+| T016 | S016 | P015 | `cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows` | Intermediate implementation fails; corrected TLS suite passes | Assert registration failure cannot abandon admitted cleanup; retain negative source and raw logs | strengthened |
 
 ## Feedback and gaps
 

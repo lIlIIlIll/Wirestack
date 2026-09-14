@@ -139,7 +139,7 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
         "provider archive name is invalid",
     )
     provider_archive_raw = _payload_bytes(
-        payload, f"target/native/current/lib/{provider_archive_name}"
+        payload, "target/native/current/lib/libwirestack_tls_provider.a"
     )
     provider_archive = {
         "name": provider_archive_name,
@@ -155,7 +155,7 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
         "resolver archive path is invalid",
     )
     resolver_archive_raw = _payload_bytes(
-        payload, f"target/native/resolver/current/{resolver_archive_path}"
+        payload, "target/native/resolver/current/lib/libwirestack_resolver.a"
     )
     resolver_archive = {
         "path": resolver_archive_path,

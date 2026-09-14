@@ -255,21 +255,28 @@ public class Http1ClientConnection <: Resource {
     }
 
     internal func bodyTerminated(reusable: Bool, abandoned: Bool): Unit {
-        let closeTransport = synchronized(mutex) {
+        let (closeTransport, abortTransport) = synchronized(mutex) {
             match (state) {
                 case Http1ClientConnectionState.AwaitingBody =>
-                    if (reusable) { state = Http1ClientConnectionState.Ready; false }
-                    else { state = Http1ClientConnectionState.Closed; true }
+                    if (reusable) {
+                        state = Http1ClientConnectionState.Ready
+                        (false, false)
+                    } else {
+                        // Automatic disposal has no graceful-shutdown owner. Abort promptly rather
+                        // than waiting for a nonreusable TLS peer to send close_notify.
+                        state = Http1ClientConnectionState.Closed
+                        (true, true)
+                    }
                 case Http1ClientConnectionState.Upgraded =>
                     upgradedObserver = None<ResponseBodyObserver>
                     state = Http1ClientConnectionState.Closed
-                    true
-                case _ => false
+                    (true, abandoned)
+                case _ => (false, false)
             }
         }
         if (closeTransport) {
             try {
-                if (abandoned) { transport.abort(reason: Some(AbortReason.ApplicationAbort)) }
+                if (abortTransport) { transport.abort(reason: Some(AbortReason.ApplicationAbort)) }
                 else { transport.close(OperationContext.background()) }
             } catch (_: Exception) {}
         }

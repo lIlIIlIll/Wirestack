@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "command": {
+    "id": "architecture-guard",
+    "argv": [
+      "python3",
+      "tools/architecture_guard.py",
+      "--format",
+      "json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-14T06:47:25.009115Z",
+    "finished_at_utc": "2026-09-14T06:47:29.826804Z",
+    "duration_ms": 4817.697,
+    "stdout_path": "docs/evidence/M8-007/commands/20260914T064724/architecture-guard.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260914T064724/architecture-guard.stderr.log",
+    "stdout_excerpt": "{\n  \"kind\": \"architecture-guard\",\n  \"ok\": true,\n  \"root\": \"/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release\",\n  \"schema_version\": 1,\n  \"status\": \"PASS\",\n  \"violation_count\": 0,\n  \"violations\": []\n}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1278b59d91f01f5bb82d611f4abb653a36de81d130edc3a8d4e360e68d83eab0"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

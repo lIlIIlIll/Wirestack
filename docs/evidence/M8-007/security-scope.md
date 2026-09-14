@@ -34,6 +34,20 @@ Trace shared cancellation and total deadlines through connection establishment, 
 
 Review pool partitioning and ownership across origins, TLS contexts, proxy configuration, and application hooks. A successful local example does not prove isolation under adversarial reuse or cancellation races.
 
+## Review regression evidence
+
+`runtime-review-controls.json` binds the complete HTTP/1 and TLS test suites to their source files and captured output. The baseline reproduces the oversized fixed-length request, nonreusable TLS response completion, unpublished HTTP/2 admission, and three TLS pump deadline/cancellation cases. The corrected suites must pass, including concurrent close/abort disposal.
+
+The intermediate TLS correction also admitted close before registering cancellation outside its cleanup block. `reproductions/tls-close-registration-before.json` and the adjacent source snapshot retain the failure when an already-cancelled token invokes a throwing transport abort. The current runtime verifier requires that exact negative case and its successful execution in the corrected TLS suite.
+
+`soak-owner-controls.json` demonstrates that the baseline accepted the historical literal-owner log and that the current parser rejects that schema. Its corrected suite also rejects growing weak-owner series, active response ownership at idle checkpoints, unbalanced pool leases, and retained terminal transport or cancellation owners.
+
+The soak measures pool callbacks, response closure, application and server Futures, wrapped transport I/O, weak transport references, and weak cancellation sentinels rooted by retained typed handles. Weak-reference liveness is not an active-registration count: [eager cleanup does not guarantee immediate reclamation](https://955work.icu/dev/std/std/ref/ref_package_api/ref_package_enums.html#eager). Weak-owner series therefore use growth and monotonicity gates; active application owners must be zero at checkpoints, and terminal owners must be zero before the process exits. Process and heap trends complement these observations rather than replacing them.
+
+`reproductions/measured-owner-preflight.json` retains the failed initial measurement gate. That gate incorrectly required every sampled weak sentinel to be absent and used a socket-growth limit as an absolute wrapper-count limit. It is diagnostic evidence, not a passing preflight or formal soak.
+
+`reproductions/measured-owner-preflight-60s-growth.json` retains a second failed preflight on the registration-corrected artifact. Its weak cancellation series ranged from one to six, but the final median exceeded the initial median by three against the unchanged limit of two. Workload, process, heap, and terminal cleanup checks passed. A 600-second measurement uses the same limits and sampling interval, with larger median windows; it does not replace or relabel the failed short run.
+
 ## Release evidence and environment
 
 `qualification.json` identifies the actual compiler, package manager, platform, artifact bytes, complete installed-consumer build output, and dynamic dependency scan. `api-inventory.json` is a current declaration inventory, not a promise of compatibility with a previous binary release. The SPDX SBOM and native manifests describe the same artifact.

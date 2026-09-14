@@ -1,0 +1,89 @@
+import argparse
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools import evidence_digest as digest
+from tools.repository import repository_tooling as repository
+
+EVIDENCE = ROOT / 'docs/evidence/M8-007'
+SOURCE = 'tools/m7_022_linux_release_soak.py'
+TEST = 'tools/tests/test_m7_022_linux_release_soak.py'
+OLD_LOG = EVIDENCE / 'reproductions/soak-preflight.log'
+
+
+def record(path):
+    return {'path': path.relative_to(ROOT).as_posix(), 'digest': digest.text_evidence_digest(path).to_json()}
+
+
+def baseline_control(revision):
+    from tools.tests import test_m7_022_linux_release_soak as tests
+    original = subprocess.check_output(['git', 'cat-file', 'blob', f'{revision}:{SOURCE}'], cwd=ROOT)
+    with tempfile.TemporaryDirectory(prefix='m8-007-owner-baseline-') as temporary:
+        path = Path(temporary) / 'baseline.py'
+        path.write_bytes(original)
+        spec = importlib.util.spec_from_file_location('m8_owner_baseline', path)
+        baseline = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = baseline
+        spec.loader.exec_module(baseline)
+        samples, terminal = baseline.parse_output(OLD_LOG.read_text())
+        accepted = bool(samples) and all(baseline.validate_workload(terminal, 60, terminal['elapsedMs']).values())
+        tests.gate = baseline
+        suite = unittest.TestSuite([tests.M7022LinuxReleaseSoakTest('test_old_literal_owner_evidence_schema_is_rejected')])
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        print(json.dumps({'old_literal_log_accepted': accepted, 'tests_run': result.testsRun,
+                          'failures': len(result.failures), 'errors': len(result.errors),
+                          'baseline_source_digest': digest.text_evidence_digest_bytes(original).to_json()}))
+        return 1 if accepted and result.testsRun == 1 and len(result.failures) == 1 and not result.errors else 2
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', required=True)
+    parser.add_argument('--phase', choices=['before'])
+    args = parser.parse_args()
+    if args.phase:
+        return baseline_control(args.baseline)
+    directory = EVIDENCE / 'commands/soak-owner-controls' / str(time.time_ns())
+    directory.mkdir(parents=True)
+    commands = {}
+    for phase, argv in (
+        ('before', ['python3', str(Path(__file__).relative_to(ROOT)), '--baseline', args.baseline, '--phase', 'before']),
+        ('after', ['python3', '-m', 'unittest', '-v', 'tools.tests.test_m7_022_linux_release_soak']),
+    ):
+        command = {'id': phase, 'argv': argv, 'timeout_seconds': 120, 'long_running': False, 'gate': 'task'}
+        commands[phase] = repository.run_command(ROOT, command, directory)
+        for stream in ('stdout', 'stderr'):
+            commands[phase][f'{stream}_digest'] = record(ROOT / commands[phase][f'{stream}_path'])['digest']
+    before_data = json.loads((ROOT / commands['before']['stdout_path']).read_text())
+    preflight_path = EVIDENCE / 'reproductions/measured-owner-preflight-corrected.json'
+    preflight = json.loads(preflight_path.read_text())
+    checks = {
+        'baseline_accepts_literal_owners': before_data['old_literal_log_accepted'],
+        'baseline_regression_fails': commands['before']['exit_code'] == 1 and before_data['failures'] == 1 and before_data['errors'] == 0,
+        'corrected_owner_suite_passes': commands['after']['exit_code'] == 0,
+        'commands_complete': all(not command['timed_out'] for command in commands.values()),
+        'measured_owner_preflight_passes': preflight['preflight_status'] == 'PASS' and preflight['process']['exit_code'] == 0 and not preflight['process']['timed_out'],
+    }
+    report = {
+        'source_task': 'M8-007', 'status': 'PASS' if all(checks.values()) else 'FAIL',
+        'baseline_revision': args.baseline, 'baseline_source_digest': before_data['baseline_source_digest'],
+        'driver': record(Path(__file__)), 'historical_log': record(OLD_LOG),
+        'runtime_preflight': record(preflight_path),
+        'source_inputs': {path: digest.text_evidence_digest(ROOT / path).to_json() for path in (SOURCE, TEST, 'tools/release_soak/main.cj')},
+        'before': commands['before'], 'after': commands['after'], 'checks': checks,
+    }
+    (EVIDENCE / 'soak-owner-controls.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({'status': report['status'], 'checks': checks}))
+    return 0 if report['status'] == 'PASS' else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

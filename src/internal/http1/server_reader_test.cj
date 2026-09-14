@@ -17,12 +17,40 @@ class Http1ServerRequestReaderTest {
             body: RequestBody.bytes("data".toArray())
         )
         let written: Future<Unit> = spawn { let _ = writeHttp1Request(client, request) }
-        let incoming = readHttp1ServerRequest(server)
+        let incoming = readHttp1ServerRequest(server, limits: HttpLimits(maxBodyBytes: 4))
         @Expect(incoming.head.target, "/upload")
         @Expect(readServerBody(incoming.body), "data")
         written.get(Duration.second)
         client.close()
         server.close()
+    }
+
+    @TestCase
+    func rejectsOversizedFixedRequestBeforeReadingItsBody(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048)
+        try {
+            let request = HttpRequest(
+                HttpMethod("POST"), HttpUrl.parse("http://example.com/upload"),
+                headers: HttpHeaders.builder().add("Content-Length", "5").add("Expect", "100-continue").build(),
+                body: RequestBody.bytes("large".toArray())
+            )
+            let writer = Http1RequestWriter(request)
+            let _ = writer.writeHead(client)
+            var rejected = false
+            try {
+                let incoming = readHttp1ServerRequest(server, limits: HttpLimits(maxBodyBytes: 4))
+                incoming.close()
+            } catch (error: Http1ParseException) {
+                match (error.code) {
+                    case Http1ParseErrorCode.InvalidHeader => rejected = true
+                    case _ => ()
+                }
+            }
+            @Expect(rejected)
+        } finally {
+            client.close()
+            server.close()
+        }
     }
 
     @TestCase
