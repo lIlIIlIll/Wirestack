@@ -1,11 +1,11 @@
 {
   "candidate": {
-    "identity_sha256": "1e2e2d91e0500c8851fa26c579f36ba247a2511b6ea4b918d3bdd6a145c71267",
-    "lockstep_manifests_sha256": "4eb82f14fac080702ac2515da9094f4c24c5721cb0cd7c85f3aae55414b3cddb",
     "package_version": "0.1.0",
-    "release_graph_sha256": "43b1c43d5a9c12128aa9acedf3e148d531a7a623e24c24d3734dee22bfa96bfc",
+    "root_manifest_sha256": "3814815364bc0b40a5c5107269807c7a5c1766bb0054c5329521c4d424fcb259",
     "root_lock_sha256": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0",
-    "root_manifest_sha256": "3814815364bc0b40a5c5107269807c7a5c1766bb0054c5329521c4d424fcb259"
+    "release_graph_sha256": "43b1c43d5a9c12128aa9acedf3e148d531a7a623e24c24d3734dee22bfa96bfc",
+    "lockstep_manifests_sha256": "4eb82f14fac080702ac2515da9094f4c24c5721cb0cd7c85f3aae55414b3cddb",
+    "identity_sha256": "00bfbb6e4929e2152c44c96b08177c18bf2705001557d741fe3cb410b08238be"
   },
   "checksum_files": [
     "formal-release-11-1.tar.gz",
@@ -16,7 +16,7 @@
     "source-identity.json"
   ],
   "effective_harness_sha256": "4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865",
-  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-13-release-4766daa",
+  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-14-release-7436598",
   "formal_archives": [
     {
       "file": "formal-release-11-1.tar.gz",
@@ -31,8 +31,8 @@
     "file": "harness-source.tar.gz",
     "root": "harness"
   },
-  "measured_commit": "4766daa7ac88a5ad0869cfa2dbdb12c63acd0161",
-  "product_source_sha256": "6056f53aa56767a69a29685dad1d6b8fadd8c39a7b47ca6ecc60b46f114acb0b",
+  "measured_commit": "7436598b6cd22084ea990832b07d972aeae26e1b",
+  "product_source_sha256": "b0120df219570213b3a61a7876349efeabd2bb9bf92a8fb4eea3066e25d11edf",
   "result_doc": "docs/performance/results/2026-09-13-release-seven-library.md",
   "schema_version": 2
 }

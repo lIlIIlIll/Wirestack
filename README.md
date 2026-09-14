@@ -175,11 +175,11 @@ let name = document.root().member("name").getOrThrow().asString()
 
 ## 性能
 
-下面是 2026-09-13 当前 `0.1.0` 候选七库对比第二批的 11 轮中位数，单位为 µs/op，越小越好。
-测量使用提交 `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`。
+下面是 2026-09-14 当前 `0.1.0` 候选七库对比第二批的 11 轮中位数，单位为 µs/op，越小越好。
+测量使用提交 `7436598b6cd22084ea990832b07d972aeae26e1b`；每个进程同时记录了 peak RSS。
 **两批结果的每一行都至少有一个库的变异系数（CV）超过 5%，因此这些数字仅供查看，不能作为稳定的性能排名。**
 
-完整样本、波动情况和环境见[2026-09-13 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-13 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
+完整样本、波动、RSS 和环境见[2026-09-14 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-14 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
 测试方法见[性能文档](docs/performance/README.md)。结果只适用于记录中的源码、SDK、CPU 和测试数据。
 
 ## 文档

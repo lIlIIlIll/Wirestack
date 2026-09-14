@@ -24,7 +24,7 @@
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 
-当前 `0.1.0` 候选的七库 timing 测量见[2026-09-13 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批均为 noisy，且现有归档尚缺 RSS。三库 timing 测量见[2026-09-13 当前候选三库对比](results/2026-09-13-release-three-library.md)，36 个 workload 均完成 11 轮，其中 3/36 stable、33/36 noisy；现有归档尚缺 RSS。Pure 普通 Release timing 门禁见[2026-09-13 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`；现有归档尚缺 RSS，三类结果都不能替代正式性能验收。
+当前 `0.1.0` 候选的七库 RSS-complete 测量见[2026-09-14 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批各完成 770/770 单元，10/10 workload noisy，所有进程均保留 peak RSS sidecar。三库 RSS-complete 测量见[2026-09-14 当前候选三库对比](results/2026-09-13-release-three-library.md)，36/36 workload 完成 11 轮，0/36 stable、36/36 noisy。Pure 普通 Release timing/RSS 门禁见[2026-09-14 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`，gate `passed=true`；三类结果都绑定 STS `1.1.3` 和当前 measured candidate。
 
 ## 历史证据
 
