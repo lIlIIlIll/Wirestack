@@ -211,7 +211,7 @@ def cangjie_binary(workspace: Path, library: str) -> Path:
 
 
 def cangjie_runtime_environment(
-    env: dict[str, str], stdx_sdk_root: Path
+    env: dict[str, str], stdx_sdk_root: Path, cwd: Path
 ) -> dict[str, str]:
     command_env = env.copy()
     dynamic_stdx = (
@@ -219,10 +219,17 @@ def cangjie_runtime_environment(
         if stdx_sdk_root.name == "stdx"
         else stdx_sdk_root / "linux_x86_64_cjnative/dynamic/stdx"
     )
+    library_paths = [str(dynamic_stdx)]
+    for runtime_dir in (
+        cwd / "target/release/cjjson",
+        cwd / "target/release/fastjson",
+    ):
+        if runtime_dir.is_dir():
+            library_paths.append(str(runtime_dir))
     current = command_env.get("LD_LIBRARY_PATH", "")
-    command_env["LD_LIBRARY_PATH"] = (
-        f"{dynamic_stdx}:{current}" if current else str(dynamic_stdx)
-    )
+    if current:
+        library_paths.append(current)
+    command_env["LD_LIBRARY_PATH"] = ":".join(library_paths)
     return command_env
 
 
@@ -370,7 +377,7 @@ def run_correctness_preflight(
             report.mkdir(parents=True)
             command = java_command(cpu, source_case, report / "jmh.json")
         command_env = (
-            cangjie_runtime_environment(env, stdx_sdk_root)
+            cangjie_runtime_environment(env, stdx_sdk_root, cwd)
             if library in CANGJIE
             else env.copy()
         )
@@ -405,6 +412,9 @@ def metadata(
     time_binary: str,
 ) -> dict[str, object]:
     stdx_static = stdx_sdk_root / "linux_x86_64_cjnative/static/stdx"
+    yjson_commit = env.get("YJSON_RELEASE_COMMIT") or capture(
+        ["git", "rev-parse", "HEAD"], workspace / "repo", env
+    )
     return {
         "time_binary": time_binary,
         "rss_unit": "kbytes",
@@ -441,9 +451,7 @@ def metadata(
             "ArrayList<HashMap<String, ArrayList<ProfileRecord>>>": 1929,
         },
         "versions": {
-            "yjson_commit": capture(
-                ["git", "rev-parse", "HEAD"], workspace / "repo", env
-            ),
+            "yjson_commit": yjson_commit,
             "cangjieJSON_branch_commit": "910fd9c61858f33b242a0076c22b2e06c8073511",
             "cjfast_json_commit": capture(
                 ["git", "rev-parse", "HEAD"], workspace / "cjfast-json", env
@@ -615,7 +623,7 @@ def main(argv: list[str] | None = None) -> int:
                     before = os.getloadavg()[0]
                     started = time.monotonic()
                     command_env = (
-                        cangjie_runtime_environment(env, stdx_sdk_root)
+                        cangjie_runtime_environment(env, stdx_sdk_root, cwd)
                         if library in CANGJIE
                         else env.copy()
                     )
