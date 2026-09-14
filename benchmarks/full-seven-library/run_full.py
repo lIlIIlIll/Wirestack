@@ -415,7 +415,17 @@ def metadata(
     yjson_commit = env.get("YJSON_RELEASE_COMMIT") or capture(
         ["git", "rev-parse", "HEAD"], workspace / "repo", env
     )
+    provenance = {
+        key: env[key]
+        for key in (
+            "product_source_sha256",
+            "effective_harness_sha256",
+            "measured_overlay_sha256",
+        )
+        if env.get(key)
+    }
     return {
+        **provenance,
         "time_binary": time_binary,
         "rss_unit": "kbytes",
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
