@@ -44,9 +44,9 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Source-only staging | PASS (historical) | 上一次候选 run 的 `registry-rehearsal` 在 enforced source-only candidate 上通过；当前 RSS/API-doc checkpoint 尚未执行 hosted fresh-candidate |
 | Package rehearsal | PASS (historical) | 上一次候选 run 的 `registry-rehearsal` job 通过；当前 RSS/API-doc checkpoint 尚未执行 hosted rehearsal |
 | Seven-library matrix | **PASS (RSS-complete)** | 当前候选两批 STS `1.1.3` 归档各含 770/770 单元；CPU 3/sibling 51 idle sample、checksum、identity、summary 和 770 个 RSS sidecar 均通过，见 `benchmarks/results/full-seven-library/2026-09-14-release-7436598/` |
-| Three-library release performance | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；0/36 stable、36/36 noisy，完整 raw archive 与每个进程 peak RSS 均保留；archive SHA-256 为 `2233f1b9be0339e99886703a3684d14dd0a8d641cc80639250c3d3af404a0eef` |
+| Three-library release performance | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；1/36 stable、35/36 noisy，构建与 timed sample 分离，完整 raw archive 与每个进程 peak RSS 均保留；archive SHA-256 为 `c3e3dca387bd4869c1f183fef000427dce95cb5433b07c97510a86dd69ffd490` |
 | Pure baseline/candidate qualification | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 下 24 case、11 轮，`all_ratios_at_most_1_05=true`、`passed=true`；每个进程 peak RSS 均保留；archive SHA-256 为 `4c8c28bd4822ee5d3d0937df2f47f1f0f88bc378c94564ec46560db86edd9cb3` |
-| Native acceleration | NON-BLOCKING (claim not qualified) | 当前三库结果为 `0/36` stable、`36/36` noisy；该结果不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
+| Native acceleration | NON-BLOCKING (claim not qualified) | 当前三库结果为 `1/36` stable、`35/36` noisy；该结果不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
 | Release policy | **BLOCKING** | 当前三类性能证据已完成 RSS qualification，但仍要求当前候选 hosted CI、合并到 `main`、合并后 required workflows/Pages 通过；当前没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
@@ -58,7 +58,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 
 - `benchmarks/results/full-seven-library/2026-09-14-release-7436598/`：两批 RSS-complete 七库 raw archive、sidecar、脚本闭包、身份和 checksum；
 - `benchmarks/results/release-performance/2026-09-14-7436598/yjson-pure-release-7436598-r1.tar.gz`：Pure 24-case RSS-complete raw archive，SHA-256 为 `4c8c28bd4822ee5d3d0937df2f47f1f0f88bc378c94564ec46560db86edd9cb3`；
-- `benchmarks/results/release-performance/2026-09-14-7436598/yjson-three-library-release-7436598-r1.tar.gz`：三库 36-workload RSS-complete raw archive，SHA-256 为 `2233f1b9be0339e99886703a3684d14dd0a8d641cc80639250c3d3af404a0eef`；
+- `benchmarks/results/release-performance/2026-09-14-774e89e/yjson-three-library-release-774e89e-r1.tar.gz`：修正 exact-case filter、build-only RSS 后的三库 36-workload RSS-complete raw archive，SHA-256 为 `c3e3dca387bd4869c1f183fef000427dce95cb5433b07c97510a86dd69ffd490`；
 
 这些是仓库中的可审计证据，不是 GitHub Release 上传资产。七库证据目录另以
 `checksums.txt` 绑定 formal archive、harness source、json4cj source、overlay 记录和
@@ -117,23 +117,28 @@ stdx.json、cjfast_json 共同 workload，11 轮，workload 旋转、偶数轮�
 ### 当前：三库共同 workload（STS `1.1.3`）
 
 正式 runner `scripts/release_performance_compare.sh` 在 `Server` 的
-`ubuntu2223131`、Linux x86_64、CPU 3、128 MiB 堆上执行当前候选。每个
+`ubuntu2223131`、Linux x86_64、CPU 3、128 MiB 堆上执行 runner/source-stage 提交
+`774e89e577028b2daf2632c965ee35ebe49b10b4`。每个
 yjson/stdx.json/cjfast_json 共同 workload 完成 11 轮，workload 顺序逐轮旋转、
 偶数轮反转，三库顺序逐轮旋转；36/36 workload 完整收集，没有删除 noisy 行。
 
-- Stable：`0/36`；noisy：`36/36`（三库各自 CV 均纳入 stable/noisy 判断）。
+- Stable：`1/36`；noisy：`35/36`（三库各自 CV 均纳入 stable/noisy 判断）。
+- runner 为每个库传入 `suite.source_case` 的精确 filter；summary 只汇总 CSV 中
+  `Case == manifest.source_case` 的行，不会混入同前缀的 `*BatchGuard` 等额外 case。
 - Cangjie STS `1.1.3`；`cjc/cjpm` 版本和环境、每轮 raw report 与每个进程 peak RSS
   sidecar 均在归档中；metadata 的 `sdk_label` 保留为 runner 原值 `unknown`。
+- 两个 Cangjie benchmark package 先用 `cjpm bench --no-run --no-color` 构建；
+  timed sample 只执行 `cjpm bench --skip-build`。构建日志未纳入 RSS 计时。
 - `cjfast_json_commit=eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65`。
-- RSS sidecar 使用 GNU `/usr/bin/time -v`，summary 记录的最大单进程 RSS 为
-  `1049728 kbytes`。
+- RSS sidecar 使用 GNU `/usr/bin/time -v`，summary 记录的最大 timed process RSS 为
+  `339188 kbytes`。
 - raw archive：
-  `benchmarks/results/release-performance/2026-09-14-7436598/yjson-three-library-release-7436598-r1.tar.gz`
-  ；SHA-256 为 `2233f1b9be0339e99886703a3684d14dd0a8d641cc80639250c3d3af404a0eef`。
+  `benchmarks/results/release-performance/2026-09-14-774e89e/yjson-three-library-release-774e89e-r1.tar.gz`
+  ；SHA-256 为 `c3e3dca387bd4869c1f183fef000427dce95cb5433b07c97510a86dd69ffd490`。
 
 完整 36 行、summary、manifest、metadata、preflight、RSS sidecar 和复核命令见
 [当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md)。
-36 行 noisy 只作为方向和复核数据，不发布稳定的精确跨库排名；timing、RSS 和完整性检查
+35 行 noisy 只作为方向和复核数据，不发布稳定的精确跨库排名；timing、RSS 和完整性检查
 均通过，当前三库结果已满足本项性能证据的采集要求。
 
 ### Pure 基线/候选（当前候选，STS `1.1.3`）
@@ -212,9 +217,9 @@ Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (historical; current source-only candidate still needs hosted registry rehearsal)
 Hosted PR execution: NOT RUN for current RSS/API-doc checkpoint (rerun required after push)
 Seven-library evidence freshness: PASS (two 770/770 RSS-complete archives; current marker schema v2)
-Three-library performance qualification: PASS (36/36 workloads; 11 rounds; RSS-complete archive)
+Three-library performance qualification: PASS (36/36 workloads; 11 rounds; 1 stable / 35 noisy; exact-case and RSS-complete archive)
 Pure baseline/candidate qualification: PASS (24 cases; 11 rounds; release ratio gate and RSS-complete archive)
-Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current three-library batch is noisy; no precise acceleration claim)
+Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current three-library batch has 1 stable and 35 noisy workloads; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
 Coverage: PASS historically (previous PR Core Coverage job passed; current checkpoint has no hosted result)
 Release decision: BLOCKED; current hosted PR CI, merge to main, post-merge workflows/Pages, and final release assets are still pending
