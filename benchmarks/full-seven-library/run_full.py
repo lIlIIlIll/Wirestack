@@ -415,14 +415,15 @@ def metadata(
     yjson_commit = env.get("YJSON_RELEASE_COMMIT") or capture(
         ["git", "rev-parse", "HEAD"], workspace / "repo", env
     )
+    provenance_env = {
+        "product_source_sha256": "YJSON_PRODUCT_SOURCE_SHA256",
+        "effective_harness_sha256": "YJSON_EFFECTIVE_HARNESS_SHA256",
+        "measured_overlay_sha256": "YJSON_MEASURED_OVERLAY_SHA256",
+    }
     provenance = {
-        key: env[key]
-        for key in (
-            "product_source_sha256",
-            "effective_harness_sha256",
-            "measured_overlay_sha256",
-        )
-        if env.get(key)
+        key: env[environment_key]
+        for key, environment_key in provenance_env.items()
+        if env.get(environment_key)
     }
     return {
         **provenance,
