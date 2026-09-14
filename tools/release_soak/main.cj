@@ -12,6 +12,8 @@ import wirestack.net as net
 import wirestack.http.*
 
 private const SOAK_CANCEL_LIMIT_NS: Int64 = 50 * 1000 * 1000
+private const SOAK_CANCELLATION_PROBE_LIMIT: Int64 = 1024
+private const SOAK_TRANSPORT_PROBE_LIMIT: Int64 = 1024
 
 private class SoakStats {
     var cycles: Int64 = 0
@@ -77,13 +79,26 @@ private class SoakTransportOwners <: HttpConnector {
         endpoint: SocketEndpoint,
         context: OperationContext
     ): api.DuplexTransport {
+        if (synchronized(mutex) { references.size >= SOAK_TRANSPORT_PROBE_LIMIT }) {
+            let _ = retainedTransportCount()
+        }
+        synchronized(mutex) {
+            requireSoak(references.size < SOAK_TRANSPORT_PROBE_LIMIT, "transport probe capacity exceeded")
+        }
         let transport = SoakObservedTransport(
             net.TcpStream.connect(endpoint, context: context), this
         )
-        synchronized(mutex) {
-            references.add(WeakRef<SoakObservedTransport>(transport, CleanupPolicy.EAGER))
+        var retained = false
+        try {
+            synchronized(mutex) {
+                requireSoak(references.size < SOAK_TRANSPORT_PROBE_LIMIT, "transport probe capacity exceeded")
+                references.add(WeakRef<SoakObservedTransport>(transport, CleanupPolicy.EAGER))
+                retained = true
+            }
+            transport
+        } finally {
+            if (!retained) { transport.abort() }
         }
-        transport
     }
 
     func beginIo(): Unit { synchronized(mutex) { activeIo += 1 } }
@@ -202,7 +217,20 @@ private class SoakControlledResponseOwner {
         handleState: () -> Bool,
         sentinel: SoakCancellationSentinel
     ): Unit {
+        if (synchronized(mutex) { cancellationProbes.size >= SOAK_CANCELLATION_PROBE_LIMIT }) {
+            let deadline = Deadline.after(2 * Duration.second)
+            while (true) {
+                gc(heavy: true)
+                if (retainedCancellationCount() < SOAK_CANCELLATION_PROBE_LIMIT) { break }
+                if (deadline.isExpired()) { break }
+                sleep(Duration.millisecond)
+            }
+        }
         synchronized(mutex) {
+            requireSoak(
+                cancellationProbes.size < SOAK_CANCELLATION_PROBE_LIMIT,
+                "cancellation probe capacity exceeded"
+            )
             match (latest) {
                 case Some(reference) =>
                     match (reference.value) {
@@ -381,8 +409,8 @@ private func readyControlled(
     let response = client.getControlled(
         url, HttpCancellationHandles(request: Some(handle)), context: context
     )
-    owner.claim(response, { => handle.isCancellationRequested }, sentinel)
     try {
+        owner.claim(response, { => handle.isCancellationRequested }, sentinel)
         response.status == 200 && response.version == version &&
             readBody(response.body) == "ok"
     } finally {
@@ -468,8 +496,8 @@ private func runSseCancellation(
     } else {
         { => requestHandle.isCancellationRequested }
     }
-    owner.claim(response, retainedHandle, sentinel)
     try {
+        owner.claim(response, retainedHandle, sentinel)
         requireSoak(response.version == version, "SSE protocol")
         let (events, errors) = consumeEvents(response.body, 4)
         let started = MonoTime.now()
@@ -515,8 +543,8 @@ private func runConnectionCancellation(
     let response = client.getControlled(
         url, HttpCancellationHandles(connection: Some(handle)), context: context
     )
-    owner.claim(response, { => handle.isCancellationRequested }, sentinel)
     try {
+        owner.claim(response, { => handle.isCancellationRequested }, sentinel)
         requireSoak(response.version == HttpVersion.Http2, "connection cancellation protocol")
         let (_, errors) = consumeEvents(response.body, 2)
         let started = MonoTime.now()

@@ -56,6 +56,14 @@ The soak measures pool callbacks, response closure, application and server Futur
 
 The first formal run used that baseline and stopped after the archive finding. `reproductions/formal-soak-14a9925/interrupted.json` retains its frozen inputs and partial workload output as `INCOMPLETE`. It supplies no formal duration credit.
 
+`build-output-controls.json` binds three real compiler-process controls to `8a6039051dd46e5c42c57f7debbe748ae52c266d` and the corrected capture. Success and failure retain at most 16 KiB in a report or exception while streaming complete decoded diagnostics to the parent stderr log. The invalid-UTF-8 case also checks the encoded excerpt bound after replacement-character expansion.
+
+Cancellation and transport observation tables each permit at most 1,024 references, independently of sampling frequency. Cancellation admission may collect and recheck for up to two seconds, then rejects excess live ownership. Transport admission prunes reclaimed references and rejects a full table before connecting; a concurrent admission failure aborts the newly created transport. Neither path evicts a live reference to preserve a passing measurement.
+
+`reproductions/owner-registry-before.json` and `owner-registry-after.json` bind the baseline and corrected source, shared fixture, derived consumer, artifact, SDK invocation, and raw commands. The consumer adds a read-only synchronized slot observer. It exercises 4,096 claims without sampling and full tables with 1,024 strongly retained cancellation sentinels or closed transports. `blackBox` keeps those intended roots observable through the checks. Earlier single-GC and weak-observer attempts remain diagnostic records, not claims of an SDK defect or sufficient proof of table occupancy.
+
+The bounded-owner preflight completed 600 seconds with a 60-second application sampling interval, 5,909 cycles, maximum cancellation latency 6.133638 milliseconds, and zero terminal owners. It passed the existing latency and resource thresholds on `1.3.0-alpha.20260911010036`, selected through `$HOME/cangjie_sdk/daily`. It supplies no formal duration credit.
+
 ## Signing authority
 
 Review the attestation workflow and `tools/m8_007_signing_authorization.py` against `linux_x86_64/signing-authorization.json`. The live policy restricts signing-tag creation to repository administrators and blocks tag updates and deletion. Both workflow jobs require the protected `m8-007-release` environment and the sole release-owner reviewer. Self-review is allowed for that owner; administrator bypass is disabled.

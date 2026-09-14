@@ -32,6 +32,9 @@ Failures reject qualification. Package extraction must not publish unsafe member
 | P018 | Hosted source matches or differs from independently approved source | Approval record and exact signer/source digest comparison | Reachable error path | Hosted metadata cannot choose the trusted revision |
 | P019 | Frozen, signing, and final task contracts differ | Complete committed task comparison permits added source paths only | Reachable error path | Commands and required reports cannot be weakened |
 | P020 | Generated proof exists locally but is absent from the seal inventory | Nine raw formal/signing inputs must be declared | Reachable error path | Workflow retention is not repository evidence |
+| P021 | Successful or failed compiler emits large or invalid-UTF-8 diagnostics | File-backed capture and encoded excerpt limit | Reachable | Complete decoded raw logs remain available |
+| P022 | Cancellation registry fills between samples | Reclamation, bounded admission wait, and live-reference preservation | Reachable | Sampling cannot be the only capacity control |
+| P023 | Transport observation table is full before or during connect | Admission check and cleanup of a rejected new transport | Reachable | Closed but strongly retained wrappers cannot be evicted |
 
 ## Input domains and state
 
@@ -44,6 +47,8 @@ Signing inputs include missing approval, alternative reviewers, unprotected refs
 The soak duration domain includes preflights below 86,400 seconds and the exact formal duration. Cancellation latency must stay within the existing 50,000,000-nanosecond bound. Resource trends require the maintained sample minimums. The process must finish, join admitted tasks, and release its application-owned resources.
 
 Weak-reference liveness depends on GC reclamation, so sampled weak transport and cancellation-sentinel counts use bounded-growth and monotonicity checks. Active leases, responses, and application tasks must be zero at idle checkpoints. All observed active and weak owners must be zero at terminal cleanup.
+
+Compiler diagnostics cover success and failure above 2 MiB, plus invalid UTF-8 whose replacement characters expand the encoded excerpt. Cancellation controls cover 4,096 claims without sampling and 1,024 strongly retained sentinels. Transport controls hold 1,024 closed native wrappers strongly and attempt one extra connection. Capacity rejection must not discard live references; the real preflight uses 60-second application sampling.
 
 The formal run owns its private candidate copies, installed consumer, native process group, logs, and resource sampler. Readiness is observed after a completed workload cycle. A second invocation cannot replace an active run. A failed or interrupted run retains diagnostic evidence and cannot be sealed as PASS.
 
@@ -71,6 +76,9 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | S018 | Missing or conflicting signing authority | Pre-soak policy with no approved SHA | P008,P017 | Require protected refs and sole owner approval | Reject alternative reviewers and stale policy inputs; bind the exact source and tag before signing | normal,error | P0 |
 | S019 | Hosted report selects a different source | Independent approval names another SHA | P008,P018 | Reject the hosted source | Even a successful verification result for the wrong source cannot satisfy approval | error,regression | P0 |
 | S020 | Missing archival files, removed inputs, or changed gate fields | A real frozen or signing task exists | P019,P020 | Reject incomplete publication | Require raw formal/signing inputs and preserve every prior task obligation while accepting added proof paths | error,regression | P0 |
+| S021 | Large successful, failed, or invalid-UTF-8 compiler output | Build capture starts | P021 | Bound report memory without losing decoded raw diagnostics | Excerpt is at most 16 KiB; terminal marker and complete decoded capture remain; failure stays a failure | boundary,regression | P0 |
+| S022 | More claims than registry capacity between samples | No sample-triggered collection | P022 | Keep at most 1,024 slots and reject excess live ownership | Observe peak slots during 4,096 claims; retain all 1,024 live sentinels when extra admission fails | boundary,regression | P0 |
+| S023 | Full transport observation table | 1,024 closed wrappers remain strongly reachable | P023 | Reject an extra transport without evicting an existing reference | Observe rejection and all 1,024 retained wrappers; complete fixture shutdown | boundary,regression | P0 |
 
 ## Test-plan matrix
 
@@ -96,6 +104,9 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | T018 | S018 | P008,P017 | Policy capture, authorization regressions, and actual post-soak owner approval | Only the approved signing source proceeds | Active API-recorded policy, sole reviewer, immutable signing tags, and exact environment/source binding | strengthened,platform |
 | T019 | S019 | P008,P018 | `hosted-source-controls.py.txt` with successful cryptographic verification stubbed | Baseline fails; corrected source rejects substitution | Bind the exact negative/positive unit outcome to source, test, driver, and raw logs; real signatures remain T009 | boundary |
 | T020 | S019,S020 | P018,P019,P020 | Publication controls and additive-proof acceptance regression | Baseline accepts omissions or weakened contracts; corrected source rejects them | Bind six negative/positive control outcomes and preserve a valid additive transition | strengthened |
+| T021 | S021 | P021 | `build-output-controls.py.txt` against `8a603905` and corrected source | Three baseline failures and three corrected passes | Bind exact test outcomes, full decoded logs, source, driver, and the encoded excerpt limit | strengthened |
+| T022 | S022 | P022 | `owner-registry-probe.py.txt` in stale and live modes | Baseline exceeds capacity; correction bounds or rejects admission | Canonically derive the consumer; keep intended roots live; verify raw peak-slot and retained-owner observations | strengthened,platform |
+| T023 | S023 | P023 | Native transport mode and 600-second preflight with 60-second application sampling | Full-table rejection without live-reference eviction; real workload meets unchanged gates | Bind native execution and raw observations; require terminal cleanup and existing trend and latency limits | strengthened,platform |
 
 ## Feedback and gaps
 
@@ -104,3 +115,5 @@ The baseline and fixed control reports retain the SBOM and resolver-archive regr
 The 600-second diagnostic is a preflight. It does not close T007. Hosted signatures and independent review require their own executed evidence. No line, branch, or mutation-adequacy percentage is claimed by this plan. Other platforms and compatibility with a previous binary release remain outside scope.
 
 The interrupted formal run on `14a9925` remains `INCOMPLETE` and does not close T007. Its frozen inputs and partial workload output are retained under `reproductions/formal-soak-14a9925`.
+
+The bounded-owner preflight passed with 60-second application sampling, 5,909 cycles, and zero terminal owners; T007 remains open. The transport control exercises full-table rejection before connection. The concurrent post-connect admission-abort branch has no controlled race reproduction.

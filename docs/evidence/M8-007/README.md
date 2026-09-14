@@ -27,11 +27,15 @@ The [runtime controls](runtime-review-controls.json) reproduce all six targeted 
 
 The [registration failure control](reproductions/tls-close-registration-before.json) records a seventh regression in the intermediate TLS correction. An already-cancelled token invoked a throwing abort callback before cleanup began, leaving the engine unreleased. The archived source and failing test output preserve that failure; the corrected complete TLS suite passes the same case.
 
-The [owner controls](soak-owner-controls.json) reproduce acceptance of the old literal-owner schema, reject it with the corrected parser, and exercise weak-owner growth and terminal cleanup. The [current measured preflight](reproductions/measured-owner-preflight-corrected.json) records actual cycles, cancellation latency, resource trends, and terminal owners for the current artifact. It is not formal 24-hour evidence. The [review scope](security-scope.md#review-regression-evidence) explains retained failures and the distinction between weak-reference liveness and active ownership.
+The [owner controls](soak-owner-controls.json) reproduce acceptance of the old literal-owner schema, reject it with the corrected parser, and exercise weak-owner growth and terminal cleanup. The [600-second bounded-owner preflight](reproductions/bounded-owner-preflight-600s.json) passed on the current artifact with 60-second application sampling: 5,909 cycles, maximum cancellation latency 6.133638 milliseconds, and zero terminal owners. It is not formal 24-hour evidence. The [review scope](security-scope.md#review-regression-evidence) distinguishes weak-reference liveness from active ownership.
 
 The [API command failure](reproductions/public-api-inventory-before-refresh.json) records an acceptance-command mismatch: the M7-032 validator received an M7-026-format release baseline. `verify-api` now validates the task's release baseline and report while retaining the existing public-alias ownership checks.
 
 The [archive controls](archive-review-controls.json) reproduce seven failures on `14a9925dd78ded4f5d99eb8aa70c34f676404f3c` and pass with the bounded reader. They cover the 8 MiB member boundary, aggregate payload, decoded bytes, PAX metadata, member-header count, cumulative metadata fields, and sparse encodings. Rejected extraction does not create an installation.
+
+The [compiler-output controls](build-output-controls.json) reproduce three failures on `8a6039051dd46e5c42c57f7debbe748ae52c266d` and pass with file-backed capture. Report and exception excerpts retain at most 16 KiB of UTF-8 text. The complete decoded diagnostics stream to the captured parent stderr; invalid UTF-8 is replaced rather than claimed byte-preserved.
+
+The registry controls compare [the baseline](reproductions/owner-registry-before.json) with [the correction](reproductions/owner-registry-after.json). Across 4,096 cancellation claims without sampling, peak registry slots fall from 4,096 to 1,024. With 1,024 strongly retained cancellation sentinels or closed transports, an extra admission is rejected without dropping live references. The derived consumer adds only a read-only slot observer; the production workload has no such diagnostic method.
 
 The first formal run was stopped after the archive review. Its [interrupted capture](reproductions/formal-soak-14a9925/interrupted.json) is `INCOMPLETE`. Its elapsed time does not count toward the replacement candidate's 86,400 seconds.
 
@@ -41,7 +45,7 @@ The later `linux_x86_64/signing-approval.json` records the owner's independently
 
 ## Local commands
 
-Use the configured Cangjie SDK and pinned native provider source on Linux x86_64 glibc. Run these commands from the repository root.
+Use `$HOME/cangjie_sdk/daily` and the pinned native provider source on Linux x86_64 glibc. Run these commands from the repository root. A toolchain change requires fresh native and installation qualification; an older report does not qualify the new outputs.
 
 ```sh
 python3 tools/m8_007_final_release.py prepare

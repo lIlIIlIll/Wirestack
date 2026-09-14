@@ -68,11 +68,23 @@ HOSTED_SOURCE_CASES = (
     "test_verify_all_rejects_removed_approved_source_input",
     "test_frozen_command_rejects_weakened_release_contract",
 )
+INSTRUMENTATION_BASELINE = "8a6039051dd46e5c42c57f7debbe748ae52c266d"
+BUILD_OUTPUT_CONTROLS = EVIDENCE.parent / "build-output-controls.json"
+BUILD_OUTPUT_DRIVER = "docs/evidence/M8-007/reproductions/build-output-controls.py.txt"
+BUILD_OUTPUT_CASES = (
+    "test_successful_build_bounds_report_and_preserves_raw_diagnostics",
+    "test_failed_build_bounds_error_and_preserves_raw_diagnostics",
+    "test_build_excerpt_byte_bound_survives_invalid_utf8",
+)
+OWNER_REGISTRY_DRIVER = "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt"
+OWNER_REGISTRY_PROBE = "docs/evidence/M8-007/reproductions/owner-registry-probe.cj.txt"
+OWNER_REGISTRY_BEFORE = EVIDENCE.parent / "reproductions/owner-registry-before.json"
+OWNER_REGISTRY_AFTER = EVIDENCE.parent / "reproductions/owner-registry-after.json"
 RUNTIME_CONTROLS = EVIDENCE.parent / "runtime-review-controls.json"
 RUNTIME_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/runtime-review-controls.py.txt"
 OWNER_CONTROLS = EVIDENCE.parent / "soak-owner-controls.json"
 OWNER_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt"
-OWNER_PREFLIGHT = EVIDENCE.parent / "reproductions/measured-owner-preflight-corrected.json"
+OWNER_PREFLIGHT = EVIDENCE.parent / "reproductions/bounded-owner-preflight-600s.json"
 SOAK_REPORT = EVIDENCE / "soak.json"
 SECURITY_INDEX = EVIDENCE / "security-index.json"
 SECURITY_PACKAGE = EVIDENCE / "security-package.json"
@@ -97,6 +109,9 @@ EVIDENCE_INPUTS = tuple(
         ("hosted-source-regressions", HOSTED_SOURCE_CONTROLS),
         ("signing-authorization", ROOT / authorization.POLICY_RELATIVE),
         ("soak-owner-regressions", OWNER_CONTROLS),
+        ("compiler-output-regressions", BUILD_OUTPUT_CONTROLS),
+        ("owner-registry-negative-controls", OWNER_REGISTRY_BEFORE),
+        ("owner-registry-corrected-controls", OWNER_REGISTRY_AFTER),
     )
 ) + tuple(
     (topic, TASK_ID, path.relative_to(ROOT).as_posix(), "CURRENT_BOUND_INPUT", False)
@@ -116,6 +131,10 @@ INPUTS = (
     ARCHIVE_CONTROL_TESTS,
     RUNTIME_CONTROL_DRIVER,
     OWNER_CONTROL_DRIVER,
+    BUILD_OUTPUT_DRIVER,
+    OWNER_REGISTRY_DRIVER,
+    OWNER_REGISTRY_PROBE,
+    "tools/tests/test_m7_022_linux_release_soak.py",
     "tools/m8_007_signing_authorization.py",
     "tools/tests/test_m8_007_signing_authorization.py",
     "tools/m7_022_linux_release_soak.py",
@@ -436,6 +455,116 @@ def verify_hosted_source_controls() -> dict:
     return {"source_task": TASK_ID, "status": "PASS", "files": files}
 
 
+def verify_build_output_controls() -> dict:
+    report = release.load_json(BUILD_OUTPUT_CONTROLS)
+    require(report.get("source_task") == TASK_ID and report.get("status") == "PASS",
+            "compiler output controls did not pass")
+    require(report.get("baseline_revision") == INSTRUMENTATION_BASELINE, "compiler output baseline changed")
+    require(report.get("driver") == record(ROOT / BUILD_OUTPUT_DRIVER), "compiler output driver changed")
+    source = "tools/m7_022_linux_release_soak.py"
+    tests = "tools/tests/test_m7_022_linux_release_soak.py"
+    require(report.get("baseline_source_digest") == repository._source_digest_at_commit(
+        ROOT, INSTRUMENTATION_BASELINE, source
+    ).to_json(), "compiler output baseline blob changed")
+    inputs = {path: record(ROOT / path)["digest"] for path in (source, tests)}
+    require(report.get("source_inputs") == inputs and report.get("cases") == list(BUILD_OUTPUT_CASES),
+            "compiler output control inputs changed")
+    files = [record(BUILD_OUTPUT_CONTROLS), record(ROOT / BUILD_OUTPUT_DRIVER),
+             record(ROOT / source), record(ROOT / tests)]
+    for phase, status, exit_code in (("before", "FAIL", 1), ("after", "ok", 0)):
+        command = report[phase]
+        argv = (["python3", BUILD_OUTPUT_DRIVER, "--baseline", INSTRUMENTATION_BASELINE, "--phase", "before"]
+                if phase == "before" else ["python3", "-m", "unittest", "-v", *(
+                    f"tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.{case}"
+                    for case in BUILD_OUTPUT_CASES
+                )])
+        duration = command.get("duration_ms")
+        require(command.get("id") == phase and command.get("argv") == argv
+                and command.get("exit_code") == exit_code and command.get("timed_out") is False
+                and command.get("status") == ("FAIL" if phase == "before" else "PASS")
+                and type(duration) in (int, float) and 0 <= duration <= PYTHON_CONTROL_TIMEOUT_SECONDS * 1000,
+                f"compiler output {phase} command changed")
+        output, captured = _control_logs(command, "build-output-controls")
+        require(PYTHON_CONTROL_CASE.findall(output["stdout"] + output["stderr"])
+                == [(case, status) for case in BUILD_OUTPUT_CASES],
+                f"compiler output {phase} raw cases changed")
+        files.extend(captured)
+    return {"source_task": TASK_ID, "status": "PASS", "files": files}
+
+
+def owner_registry_probe_source(source: str) -> str:
+    entry = "main(args: Array<String>): Int64 {"
+    owner = "private class SoakControlledResponseOwner {"
+    require(source.count(entry) == 1 and source.count(owner) == 1, "owner probe source shape changed")
+    source = source.replace(entry, "private func originalSoakMain(args: Array<String>): Int64 {", 1)
+    source = source.replace(owner, owner + "\n    func observedProbeSlots(): Int64 { synchronized(mutex) { cancellationProbes.size } }\n", 1)
+    return source + "\n" + (ROOT / OWNER_REGISTRY_PROBE).read_text()
+
+
+def verify_owner_registry_controls() -> dict:
+    source = "tools/release_soak/main.cj"
+    baseline = subprocess.check_output(
+        ["git", "cat-file", "blob", f"{INSTRUMENTATION_BASELINE}:{source}"], cwd=ROOT, timeout=10
+    ).decode("utf-8")
+    files = [record(ROOT / source), record(ROOT / OWNER_REGISTRY_DRIVER), record(ROOT / OWNER_REGISTRY_PROBE)]
+    directory = (EVIDENCE.parent / "commands/owner-registry-controls").resolve()
+    for phase, path in (("before", OWNER_REGISTRY_BEFORE), ("after", OWNER_REGISTRY_AFTER)):
+        report = release.load_json(path)
+        require(report.get("source_task") == TASK_ID and report.get("status") == "PASS"
+                and report.get("phase") == phase and report.get("baseline_revision") == INSTRUMENTATION_BASELINE,
+                f"owner registry {phase} control did not pass")
+        require(report.get("driver") == record(ROOT / OWNER_REGISTRY_DRIVER)
+                and report.get("probe") == record(ROOT / OWNER_REGISTRY_PROBE),
+                "owner registry reproduction changed")
+        original = baseline if phase == "before" else (ROOT / source).read_text()
+        require(report.get("source_digest") == digest.text_evidence_digest_bytes(original.encode("utf-8")).to_json(),
+                f"owner registry {phase} source changed")
+        require(digest.schema_artifact_sha256_equal(report.get("artifact_sha256"), digest.artifact_byte_digest(ARTIFACT).sha256),
+                "owner registry artifact changed")
+        derived = (ROOT / report["derived_source"]["path"]).resolve()
+        require(derived.is_relative_to(directory) and report["derived_source"] == record(derived)
+                and derived.read_text() == owner_registry_probe_source(original), "owner registry derived consumer changed")
+        files.extend((record(path), record(derived)))
+        commands = report["commands"]
+        require(set(commands) == {"build", "stale", "live", "transports"}, "owner registry command inventory changed")
+        prefix = commands["build"]["argv"][:3]
+        require(len(prefix) == 3 and Path(prefix[0]).name == "codex_cangjie_env"
+                and prefix[1] == "--sdk-root" and Path(prefix[2]).parts[-2:] == ("cangjie_sdk", "daily"),
+                "owner registry SDK invocation changed")
+        for mode, command in commands.items():
+            argv, duration = command.get("argv"), command.get("duration_ms")
+            expected_exit = 0 if mode == "build" or phase == "after" else 1
+            require(isinstance(argv, list) and len(argv) == 5 and argv[:3] == prefix
+                    and command.get("exit_code") == expected_exit
+                    and type(duration) in (int, float) and 0 <= duration <= 600_000,
+                    f"owner registry {phase}/{mode} command changed")
+            require(argv[3:] == ["cjpm", "build"] if mode == "build" else
+                    argv[4] == mode and Path(argv[3]).parts[-5:] == ("consumer", "target", "release", "bin", "main"),
+                    "owner registry executable changed")
+            capture = {f"{stream}_{field}": command[stream][field]
+                       for stream in ("stdout", "stderr") for field in ("path", "digest")}
+            output, captured = _control_logs(capture, "owner-registry-controls")
+            files.extend(captured)
+            if mode == "build":
+                continue
+            lines = [line for line in output["stdout"].splitlines() if line.startswith(f"OWNER_PROBE mode={mode} ")]
+            require(len(lines) == 1, "owner registry observation is absent or duplicated")
+            observed = dict(token.split("=", 1) for token in lines[0].split()[1:])
+            require(report["observations"].get(mode) == observed, "owner registry report differs from its raw observation")
+            if mode == "stale":
+                peak = int(observed["peakSlots"])
+                require(observed["claims"] == "4096" and observed["limit"] == "1024"
+                        and (peak > 1024 if phase == "before" else 0 <= peak <= 1024),
+                        "owner registry capacity control changed")
+            else:
+                held = "sentinels" if mode == "live" else "held"
+                retained = int(observed["retained"])
+                require(observed[held] == "1024" and observed["rejected"] == ("false" if phase == "before" else "true")
+                        and (retained >= 1024 if phase == "before" else retained == 1024),
+                        "owner registry live-owner control changed")
+    return {"source_task": TASK_ID, "status": "PASS", "files": files}
+
+
 def verify_runtime_controls() -> dict:
     report = release.load_json(RUNTIME_CONTROLS)
     require(report.get("source_task") == TASK_ID and report.get("status") == "PASS", "runtime review controls did not pass")
@@ -526,7 +655,7 @@ def verify_owner_controls() -> dict:
     require(digest.artifact_byte_sha256_equal(live["artifact"]["digest"], digest.artifact_byte_digest(ARTIFACT).to_json()), "owner preflight used different artifact bytes")
     for name, path in (("consumer", soak.SOURCE), ("fixture", soak.FIXTURE), ("driver", soak.DRIVER)):
         require(digest.text_evidence_sha256_equal(live["source"][f"{name}_digest"], record(path)["digest"]), f"owner preflight {name} changed")
-    raw_path = EVIDENCE.parent / "reproductions/measured-owner-preflight-corrected.log"
+    raw_path = OWNER_PREFLIGHT.with_suffix(".log")
     raw = record(raw_path)
     require(live["raw_log"]["path"] == raw["path"] and digest.text_evidence_sha256_equal(live["raw_log"]["digest"], raw["digest"]), "owner preflight raw log changed")
     samples, terminal = soak.parse_output(raw_path.read_text())
@@ -561,6 +690,8 @@ def prepare_security() -> dict:
     verify_owner_controls()
     verify_archive_controls()
     verify_hosted_source_controls()
+    verify_build_output_controls()
+    verify_owner_registry_controls()
     authorization.verify_policy(ROOT)
     index = security.build_index(ROOT, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
     write_json(SECURITY_INDEX, index)
@@ -581,6 +712,8 @@ def verify_review() -> dict:
     verify_owner_controls()
     verify_archive_controls()
     verify_hosted_source_controls()
+    verify_build_output_controls()
+    verify_owner_registry_controls()
     authorization.verify_policy(ROOT)
     security.validate(ROOT, SECURITY_INDEX, SECURITY_PACKAGE, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
     return review.validate(ROOT, REVIEW_REQUEST, REVIEW, task_id=TASK_ID, package_path=SECURITY_INDEX.relative_to(ROOT).as_posix())
@@ -593,6 +726,8 @@ def frozen_source_paths() -> list[str]:
     paths.update(item["path"] for item in verify_owner_controls()["files"])
     paths.update(item["path"] for item in verify_archive_controls()["files"])
     paths.update(item["path"] for item in verify_hosted_source_controls()["files"])
+    paths.update(item["path"] for item in verify_build_output_controls()["files"])
+    paths.update(item["path"] for item in verify_owner_registry_controls()["files"])
     paths.update(item["path"] for item in authorization.verify_policy(ROOT)["files"])
     paths.add(authorization.POLICY_RELATIVE)
     paths.update(path.relative_to(ROOT).as_posix() for path in (

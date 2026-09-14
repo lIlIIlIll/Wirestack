@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from tools import evidence_digest
 
+from contextlib import redirect_stderr
 import json
 import subprocess
 import sys
@@ -411,11 +412,58 @@ except gate.SoakError as error:
             path.write_text("a" * 100 + "tail")
             self.assertEqual("aaaaaatail", gate.bounded_tail(path, 10))
 
-    def test_successful_build_retains_complete_output(self) -> None:
-        output = "build-line\n" * (gate.MAX_CAPTURE_BYTES // 4)
-        completed = subprocess.CompletedProcess(["cjpm", "build"], 0, stdout=output)
-        with mock.patch.object(gate.subprocess, "run", return_value=completed):
-            self.assertEqual(output, gate.run_build(["cjpm", "build"], gate.ROOT))
+    def test_successful_build_bounds_report_and_preserves_raw_diagnostics(self) -> None:
+        command = [
+            sys.executable, "-c",
+            "import os; os.write(2, b'first diagnostic\\n'); "
+            "[os.write(2, b'x' * 8192) for _ in range(256)]; "
+            "os.write(2, b'last diagnostic\\n')",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "diagnostics.log"
+            with log.open("w", encoding="utf-8") as stream, redirect_stderr(stream):
+                output = gate.run_build(command, root)
+            self.assertLessEqual(len(output.encode("utf-8")), gate.MAX_CAPTURE_BYTES)
+            self.assertTrue(output.endswith("last diagnostic\n"))
+            self.assertEqual(2_097_185, log.stat().st_size)
+            with log.open("r", encoding="utf-8") as stream:
+                self.assertEqual("first diagnostic\n", stream.readline())
+            self.assertTrue(gate.bounded_tail(log).endswith("last diagnostic\n"))
+
+    def test_failed_build_bounds_error_and_preserves_raw_diagnostics(self) -> None:
+        command = [
+            sys.executable, "-c",
+            "import os, sys; "
+            "[os.write(2, b'x' * 8192) for _ in range(256)]; "
+            "os.write(2, b'build rejected\\n'); sys.exit(7)",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "diagnostics.log"
+            with log.open("w", encoding="utf-8") as stream, redirect_stderr(stream):
+                with self.assertRaises(gate.SoakError) as caught:
+                    gate.run_build(command, root)
+            self.assertEqual("BUILD_FAILED", caught.exception.code)
+            self.assertLessEqual(
+                len(caught.exception.detail.encode("utf-8")), gate.MAX_CAPTURE_BYTES
+            )
+            self.assertTrue(caught.exception.detail.endswith("build rejected\n"))
+            self.assertEqual(2_097_167, log.stat().st_size)
+
+    def test_build_excerpt_byte_bound_survives_invalid_utf8(self) -> None:
+        command = [
+            sys.executable, "-c",
+            "import os; os.write(2, b'\\xff' * 16384 + b'final diagnostic\\n')",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "diagnostics.log"
+            with log.open("w", encoding="utf-8") as stream, redirect_stderr(stream):
+                output = gate.run_build(command, root)
+            self.assertLessEqual(len(output.encode("utf-8")), gate.MAX_CAPTURE_BYTES)
+            self.assertTrue(output.endswith("final diagnostic\n"))
+            self.assertEqual(16_384, log.read_text().count("\ufffd"))
 
     def test_terminate_process_group_stops_running_child(self) -> None:
         process = subprocess.Popen(
