@@ -54,6 +54,10 @@ ARCHIVE_KEYS = {"file", "root"}
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}\Z")
 PACKAGE_VERSION_RE = re.compile(r"0\.[1-9][0-9]*\.[0-9]+\Z")
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
 MARKDOWN_LINK_RE = re.compile(r"\]\(([^\s)]+)(?:\s+[^)]*)?\)")
 HTML_HREF_RE = re.compile(r"\bhref=[\"']([^\"']+)[\"']")
 LIBRARIES = (
@@ -112,6 +116,8 @@ STABLE_METADATA_KEYS = (
     "product_source_sha256",
     "effective_harness_sha256",
     "measured_overlay_sha256",
+    "time_binary",
+    "rss_unit",
 )
 
 
@@ -200,6 +206,21 @@ def repo_path(
     except ValueError as error:
         raise EvidenceError(f"{label} escapes the repository: {value!r}") from error
     return candidate
+
+
+def parse_max_rss(path: pathlib.Path) -> int:
+    try:
+        matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, UnicodeError) as error:
+        raise EvidenceError(f"cannot read RSS sidecar {path}: {error}") from error
+    if len(matches) != 1:
+        raise EvidenceError(
+            f"expected one GNU time RSS value in {path}, found {len(matches)}"
+        )
+    value = int(matches[0])
+    if value <= 0:
+        raise EvidenceError(f"GNU time RSS value must be positive in {path}")
+    return value
 
 
 def basename(value: object, label: str, suffix: str | None = None) -> str:
@@ -586,7 +607,7 @@ def read_metadata_and_validate(
             rows = list(csv.DictReader(stream))
     except (OSError, UnicodeError, csv.Error) as error:
         raise EvidenceError(f"cannot read manifest for {root.name}: {error}") from error
-    required_columns = {"round", "workload_id", "library"}
+    required_columns = {"round", "workload_id", "library", "max_rss_kb", "rss_path"}
     if not rows or not required_columns.issubset(rows[0]):
         raise EvidenceError(f"manifest columns are incomplete in {root.name}")
     cells = {(row["round"], row["workload_id"], row["library"]) for row in rows}
@@ -597,6 +618,29 @@ def read_metadata_and_validate(
             f"expected exact 770-cell matrix in {root.name}; "
             f"rows={len(rows)}, unique={len(cells)}, missing={missing}, unexpected={unexpected}"
         )
+    seen_rss: dict[pathlib.Path, tuple[str, str, str]] = {}
+    for row in rows:
+        cell = (row["round"], row["workload_id"], row["library"])
+        rss_path = repo_path(root, row["rss_path"], f"manifest rss_path in {root.name}")
+        previous = seen_rss.get(rss_path)
+        if previous is not None:
+            raise EvidenceError(
+                f"manifest rss_path is shared by {previous} and {cell} in {root.name}"
+            )
+        seen_rss[rss_path] = cell
+        try:
+            recorded_rss = int(row["max_rss_kb"])
+        except (TypeError, ValueError) as error:
+            raise EvidenceError(
+                f"invalid manifest max_rss_kb in {root.name}: {row['max_rss_kb']!r}"
+            ) from error
+        if recorded_rss <= 0:
+            raise EvidenceError(f"manifest max_rss_kb must be positive in {root.name}")
+        measured_rss = parse_max_rss(rss_path)
+        if recorded_rss != measured_rss:
+            raise EvidenceError(
+                f"manifest RSS differs from sidecar in {root.name}: {cell}"
+            )
     return metadata
 
 

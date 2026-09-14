@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -24,6 +25,32 @@ YJSON_BENCH_DIR = ROOT / "packages" / "benchmarks"
 YJSON_SOURCE = YJSON_BENCH_DIR / "src" / "bench_json_comprehensive.cj"
 CJFAST_ADAPTER = ROOT / "benchmarks" / "cjfast_json" / "cjfast_comprehensive_bench.cj"
 BENCH_METHOD_RE = re.compile(r"@Bench\s+func\s+([A-Za-z_][A-Za-z0-9_]*)", re.MULTILINE)
+
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
+
+
+def find_time_binary() -> str:
+    path = shutil.which("time", path="/usr/bin:/bin")
+    if path:
+        return path
+    raise SystemExit(
+        "GNU time (/usr/bin/time) is required for RSS capture; install the 'time' package"
+    )
+
+
+def parse_max_rss(path: Path) -> int:
+    matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    if len(matches) != 1:
+        raise ValueError(
+            f"expected one GNU time RSS value in {path}, found {len(matches)}"
+        )
+    value = int(matches[0])
+    if value <= 0:
+        raise ValueError(f"GNU time RSS value must be positive in {path}")
+    return value
 
 
 def run_text(command: list[str], cwd: Path, env: dict[str, str]) -> str:
@@ -140,8 +167,11 @@ def main() -> int:
     env = os.environ.copy()
     env["cjHeapSize"] = args.heap
     env["LC_ALL"] = "C"
+    time_binary = find_time_binary()
 
     metadata = {
+        "time_binary": time_binary,
+        "rss_unit": "kbytes",
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
         "host": platform.node(),
         "platform": platform.platform(),
@@ -177,7 +207,8 @@ def main() -> int:
         writer = csv.DictWriter(manifest, fieldnames=(
             "round", "workload_position", "library_position", "library", "workload",
             "scenario", "operation", "payload", "input_kind", "source_case",
-            "elapsed_seconds", "load1_before", "load1_after", "report_path", "log_path",
+            "elapsed_seconds", "max_rss_kb", "load1_before", "load1_after",
+            "report_path", "rss_path", "log_path",
         ))
         writer.writeheader()
         built_packages = {"yjson": False, "cjfast_json": False}
@@ -191,6 +222,8 @@ def main() -> int:
                         raw_dir / f"run-{round_id:02d}" /
                         f"workload-{workload_position:02d}-{library}"
                     )
+                    report_path.mkdir(parents=True, exist_ok=True)
+                    rss_path = report_path / "time-rss.txt"
                     log_path = (
                         log_dir /
                         f"run-{round_id:02d}-workload-{workload_position:02d}-{library}.log"
@@ -212,7 +245,13 @@ def main() -> int:
                     ])
                     load_before = os.getloadavg()[0]
                     started = time.monotonic()
-                    completed = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True)
+                    completed = subprocess.run(
+                        [time_binary, "-v", "-o", str(rss_path), *command],
+                        cwd=cwd,
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                    )
                     elapsed = time.monotonic() - started
                     load_after = os.getloadavg()[0]
                     log_path.write_text(completed.stdout + completed.stderr, encoding="utf-8")
@@ -222,6 +261,15 @@ def main() -> int:
                             f"library={library}; see {log_path}", file=sys.stderr,
                         )
                         return completed.returncode
+                    try:
+                        max_rss_kb = parse_max_rss(rss_path)
+                    except (OSError, UnicodeError, ValueError) as error:
+                        print(
+                            f"benchmark RSS capture failed: round={round_id} "
+                            f"workload={workload['workload']} library={library}: {error}",
+                            file=sys.stderr,
+                        )
+                        return 2
                     built_packages[build_key] = True
                     if not list(report_path.rglob("bench-*.csv")):
                         print(
@@ -242,9 +290,11 @@ def main() -> int:
                         "input_kind": workload["input_kind"],
                         "source_case": source_case,
                         "elapsed_seconds": f"{elapsed:.6f}",
+                        "max_rss_kb": max_rss_kb,
                         "load1_before": f"{load_before:.3f}",
                         "load1_after": f"{load_after:.3f}",
                         "report_path": report_path.relative_to(output),
+                        "rss_path": rss_path.relative_to(output),
                         "log_path": log_path.relative_to(output),
                     })
                     manifest.flush()

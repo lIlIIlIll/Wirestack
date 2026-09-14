@@ -2,6 +2,10 @@
 
 本页记录 [`current-main.json`](../../../benchmarks/results/full-seven-library/current-main.json) 指向的 typed JSON benchmark。两批测量均绑定到提交 `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161`，对应当前 `0.1.0` release candidate 的 clean tree。完整原始证据、脚本和 checksum 见[证据目录](../../../benchmarks/results/full-seven-library/2026-09-13-release-4766daa/README.md)。
 
+该归档生成于当前 runner 增加 peak RSS sidecar 之前；下方 timing 表仅是历史 noisy
+快照，不能替代发布检查要求的 RSS qualification。更新后的七库 runner/summary 已要求
+每个进程的 RSS sidecar，必须在合格 Server 上重新完成两批测量。
+
 ## 先看 workload
 
 Encode 从已经构造好的 typed value 生成紧凑 JSON 字符串。Decode 从 canonical JSON 字符串恢复相同的 typed 类型。表中的 payload bytes 是 decode 输入的 UTF-8 大小。

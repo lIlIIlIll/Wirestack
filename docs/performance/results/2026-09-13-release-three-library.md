@@ -6,6 +6,10 @@
 `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-three-library-release-4766daa-r2.tar.gz`。
 该归档不是 GitHub Release 上传资产。[发布证据](../../../release/0.1.0/evidence.md)记录整体 gate 状态。
 
+该归档生成于当前 runner 增加 peak RSS sidecar 之前；下方 timing 结果不构成完整的
+发布 performance qualification。更新后的 runner/summary 已要求每个进程的 RSS sidecar，
+必须在合格 Server 上重新生成归档。
+
 ## 结果状态
 
 每个 workload/library 组合完成 11 个独立进程轮次；workload 顺序逐轮旋转，偶数轮反转，

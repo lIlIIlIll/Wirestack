@@ -108,8 +108,9 @@ scripts/json_pure_perf_compare.py \
 将堆内存固定为 128 MiB，并在奇偶轮反转基线与候选版本的执行顺序。
 
 成功运行会生成 `provenance.json`、`summary.json`、`summary.md`、`cpu-selection.json`、两侧
-构建日志、CPU 监控 CSV，以及每轮原始性能报告和日志。来源记录包含共同测试程序的
-摘要、两侧源码和可执行文件的版本与摘要、工具链、语料与调用参数。`--enforce` 固定要求 11 轮、
+构建日志、CPU 监控 CSV、每个进程的 GNU `time -v` RSS sidecar，以及每轮原始性能报告和日志。
+manifest 同时记录 `max_rss_kb` 和对应的 `rss_path`；来源记录包含共同测试程序的摘要、
+两侧源码和可执行文件的版本与摘要、工具链、语料与调用参数。`--enforce` 固定要求 11 轮、
 `--rebuild` 和无未提交修改的源码树。
 
 ## 发布结果要求

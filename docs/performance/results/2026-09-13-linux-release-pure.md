@@ -2,6 +2,10 @@
 
 本页记录当前候选 `4766daa7ac88a5ad0869cfa2dbdb12c63acd0161` 与 release baseline `175a4b23656ab44d2d139b810e69ac364347297a` 的 Pure A/B 测量。完整 raw report、每轮日志、源码身份、工具链、CPU 采样和 checksum 保存在 `benchmarks/results/release-performance/2026-09-13-4766daa/yjson-pure-release-4766daa-r4.tar.gz`。
 
+该归档生成于当前 runner 增加 peak RSS sidecar 之前；下方 timing gate 仅是历史延迟
+结果，不能替代发布检查要求的 RSS qualification。必须在合格 Server 上用更新后的 runner
+重新生成归档后，才能更新本页的发布状态。
+
 ## Gate 结论
 
 Runner `scripts/json_pure_perf_compare.py` 在 Cangjie STS `1.1.3` 下以 `--rebuild --enforce` 执行 24 个实际 case、11 轮、128 MiB heap、`--gate-mode release`。CPU 1 与 sibling 49 先经过 30 秒 idle sample，利用率均为 `0.0%`，满足正式 idle-core 条件。

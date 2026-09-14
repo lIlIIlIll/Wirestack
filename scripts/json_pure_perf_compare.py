@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import platform
+import re
 import shutil
 import statistics
 import subprocess
@@ -86,6 +87,32 @@ CASES = (
 )
 GATE_MODES = ("release", "optimization")
 DEFAULT_TARGET_IMPROVEMENT_PERCENT = 5.0
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
+
+
+def find_time_binary() -> str:
+    path = shutil.which("time", path="/usr/bin:/bin")
+    if path:
+        return path
+    raise SystemExit(
+        "GNU time (/usr/bin/time) is required for RSS capture; install the 'time' package"
+    )
+
+
+def parse_max_rss(path: pathlib.Path) -> int:
+    matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    if len(matches) != 1:
+        raise ValueError(
+            f"expected one GNU time RSS value in {path}, found {len(matches)}"
+        )
+    value = int(matches[0])
+    if value <= 0:
+        raise ValueError(f"GNU time RSS value must be positive in {path}")
+    return value
+
 
 
 def parse_args() -> argparse.Namespace:
@@ -486,20 +513,29 @@ def run_variant(
     cpu: int,
     round_number: int,
     case: str,
-) -> float:
+    time_binary: str,
+) -> tuple[float, int]:
     report = output / f"round-{round_number:02d}-{case}-{name}"
+    rss_path = output / f"round-{round_number:02d}-{case}-{name}.rss.txt"
     log = output / f"round-{round_number:02d}-{case}-{name}.log"
     env = os.environ.copy()
     env["cjHeapSize"] = "128MB"
     env["YJSON_CROSSLANG_CORPUS_DIR"] = str(corpus)
+    env["LC_ALL"] = "C"
     command = [
         "taskset", "-c", str(cpu), str(binary(root)),
         "--bench", "--no-color", "--no-progress",
         f"--filter=*.{case}", f"--report-path={report}",
     ]
     with log.open("w", encoding="utf-8") as stream:
-        subprocess.run(command, env=env, stdout=stream, stderr=subprocess.STDOUT, check=True)
-    return read_case_report(report, case)
+        subprocess.run(
+            [time_binary, "-v", "-o", str(rss_path), *command],
+            env=env,
+            stdout=stream,
+            stderr=subprocess.STDOUT,
+            check=True,
+        )
+    return read_case_report(report, case), parse_max_rss(rss_path)
 
 
 def read_case_report(report: pathlib.Path, case: str) -> float:
@@ -514,14 +550,25 @@ def read_case_report(report: pathlib.Path, case: str) -> float:
     return values[0]
 
 
-def summarize(samples: dict[str, list[float]]) -> dict[str, dict[str, float]]:
-    result: dict[str, dict[str, float]] = {}
+def summarize(
+    samples: dict[str, list[float]],
+    rss_samples: dict[str, list[int]],
+) -> dict[str, dict[str, object]]:
+    if set(samples) != set(rss_samples):
+        raise ValueError("timing and RSS case inventories differ")
+    result: dict[str, dict[str, object]] = {}
     for case, values in samples.items():
+        rss_values = rss_samples[case]
+        if len(values) != len(rss_values):
+            raise ValueError(f"timing and RSS run counts differ for {case}")
         mean = statistics.mean(values)
         result[case] = {
             "median_ns": statistics.median(values),
             "mean_ns": mean,
             "cv_percent": 0.0 if mean == 0.0 else statistics.stdev(values) / mean * 100.0,
+            "rss_kb": rss_values,
+            "median_rss_kb": statistics.median(rss_values),
+            "max_rss_kb": max(rss_values),
         }
     return result
 
@@ -600,8 +647,9 @@ def write_markdown(summary: dict[str, object], path: pathlib.Path) -> None:
     candidate = summary["candidate"]
     comparisons = summary["comparisons"]
     lines = [
-        "| Case | Baseline median | Candidate median | C/B | Improvement | Wins | Baseline CV | Candidate CV |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Case | Baseline median | Candidate median | C/B | Improvement | Wins | Baseline CV | Candidate CV | "
+        "Baseline max RSS KB | Candidate max RSS KB |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for case in summary["cases"]:
         base = baseline[case]
@@ -611,7 +659,8 @@ def write_markdown(summary: dict[str, object], path: pathlib.Path) -> None:
             f"| `{case}` | {base['median_ns'] / 1000.0:.3f} us | "
             f"{cand['median_ns'] / 1000.0:.3f} us | {item['ratio']:.3f}x | "
             f"{item['improvement_percent']:.1f}% | {item['candidate_wins']}/{summary['rounds']} | "
-            f"{base['cv_percent']:.2f}% | {cand['cv_percent']:.2f}% |"
+            f"{base['cv_percent']:.2f}% | {cand['cv_percent']:.2f}% | "
+            f"{base['max_rss_kb']:.0f} | {cand['max_rss_kb']:.0f} |"
         )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -656,6 +705,7 @@ def main() -> int:
         "person.json", "records-64k.json", "records-1m.json"
     )]
     corpus_manifest = files_manifest(args.corpus, corpus_paths)
+    time_binary = find_time_binary()
     toolchain = toolchain_identity()
     args.output.mkdir(parents=True, exist_ok=False)
     if args.rebuild:
@@ -674,6 +724,8 @@ def main() -> int:
         "candidate": artifact_identity(args.candidate),
     }
     provenance = {
+        "time_binary": time_binary,
+        "rss_unit": "kbytes",
         "runner": {
             "path": str(pathlib.Path(__file__).resolve()),
             "sha256": sha256_file(pathlib.Path(__file__).resolve()),
@@ -714,6 +766,10 @@ def main() -> int:
         monitor_script = pathlib.Path(__file__).with_name("monitor_cpu_pair.py")
         if monitor_script.is_file():
             monitor = subprocess.Popen([str(monitor_script), f"{cpu},{sibling}", str(monitor_path)])
+    raw_rss = {
+        name: {case: [] for case in cases}
+        for name in ("baseline", "candidate")
+    }
     raw = {
         name: {case: [] for case in cases}
         for name in ("baseline", "candidate")
@@ -724,15 +780,17 @@ def main() -> int:
             for case in cases:
                 for name in order:
                     root = args.baseline if name == "baseline" else args.candidate
-                    raw[name][case].append(run_variant(
-                        name, root, args.corpus, args.output, cpu, round_number, case
-                    ))
+                    elapsed, max_rss_kb = run_variant(
+                        name, root, args.corpus, args.output, cpu, round_number, case, time_binary
+                    )
+                    raw[name][case].append(elapsed)
+                    raw_rss[name][case].append(max_rss_kb)
     finally:
         if monitor is not None:
             monitor.terminate()
             monitor.wait()
-    baseline = summarize(raw["baseline"])
-    candidate = summarize(raw["candidate"])
+    baseline = summarize(raw["baseline"], raw_rss["baseline"])
+    candidate = summarize(raw["candidate"], raw_rss["candidate"])
     comparisons: dict[str, dict[str, float | int]] = {}
     for case in cases:
         base = baseline[case]["median_ns"]
@@ -756,6 +814,7 @@ def main() -> int:
         "target_cases": list(target_cases),
         "target_improvement_percent": target_improvement_percent,
         "raw_median_ns": raw,
+        "raw_max_rss_kb": raw_rss,
         "baseline": baseline,
         "candidate": candidate,
         "comparisons": comparisons,
