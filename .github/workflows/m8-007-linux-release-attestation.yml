@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FROZEN_ARTIFACT_TAG: m8-007-frozen-artifact-4441dbe6
-  FROZEN_ARTIFACT_SHA256: 4441dbe6670e64804b44b941d2894c4945cb3b8e886d9f9fb9a11854c280adc0
+  FROZEN_ARTIFACT_TAG: m8-007-frozen-artifact-c7aab6a6
+  FROZEN_ARTIFACT_SHA256: c7aab6a634f6aa2fbe8b13d072ffd41b8570db883204d782766dd94d07de58fc
 
 jobs:
   stage-frozen-artifact:

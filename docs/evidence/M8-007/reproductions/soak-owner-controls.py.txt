@@ -11,6 +11,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 from tools import evidence_digest as digest
+from tools import m8_007_final_release as final
 from tools.repository import repository_tooling as repository
 
 EVIDENCE = ROOT / 'docs/evidence/M8-007'
@@ -63,7 +64,7 @@ def main():
         for stream in ('stdout', 'stderr'):
             commands[phase][f'{stream}_digest'] = record(ROOT / commands[phase][f'{stream}_path'])['digest']
     before_data = json.loads((ROOT / commands['before']['stdout_path']).read_text())
-    preflight_path = EVIDENCE / 'reproductions/measured-owner-preflight-corrected.json'
+    preflight_path = final.OWNER_PREFLIGHT
     preflight = json.loads(preflight_path.read_text())
     checks = {
         'baseline_accepts_literal_owners': before_data['old_literal_log_accepted'],

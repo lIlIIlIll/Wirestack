@@ -1,0 +1,39 @@
+test_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics) ... FAIL
+test_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics) ... FAIL
+test_build_excerpt_byte_bound_survives_invalid_utf8 (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8) ... FAIL
+
+======================================================================
+FAIL: test_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_022_linux_release_soak.py", line 427, in test_successful_build_bounds_report_and_preserves_raw_diagnostics
+    self.assertLessEqual(len(output.encode("utf-8")), gate.MAX_CAPTURE_BYTES)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2097185 not less than or equal to 16384
+
+======================================================================
+FAIL: test_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_022_linux_release_soak.py", line 448, in test_failed_build_bounds_error_and_preserves_raw_diagnostics
+    self.assertLessEqual(
+    ~~~~~~~~~~~~~~~~~~~~^
+        len(caught.exception.detail.encode("utf-8")), gate.MAX_CAPTURE_BYTES
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 2097167 not less than or equal to 16384
+
+======================================================================
+FAIL: test_build_excerpt_byte_bound_survives_invalid_utf8 (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_022_linux_release_soak.py", line 464, in test_build_excerpt_byte_bound_survives_invalid_utf8
+    self.assertLessEqual(len(output.encode("utf-8")), gate.MAX_CAPTURE_BYTES)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 49169 not less than or equal to 16384
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.048s
+
+FAILED (failures=3)

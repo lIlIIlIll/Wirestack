@@ -350,17 +350,27 @@ def consumer_manifest(installed: Path) -> str:
 
 
 def run_build(command: Sequence[str], cwd: Path, timeout: float = 600) -> str:
-    try:
-        result = subprocess.run(
-            list(command), cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            text=True, errors="replace", timeout=timeout, check=False,
-        )
-    except subprocess.TimeoutExpired as error:
-        raise SoakError("BUILD_TIMEOUT", "clean consumer build timed out") from error
-    output = result.stdout
-    if result.returncode != 0:
-        raise SoakError("BUILD_FAILED", output)
-    return output
+    with tempfile.TemporaryDirectory(prefix="wirestack-build-output-") as directory:
+        log = Path(directory) / "build.log"
+        try:
+            with log.open("wb") as stream:
+                result = subprocess.run(
+                    list(command), cwd=cwd, stdout=stream, stderr=subprocess.STDOUT,
+                    timeout=timeout, check=False,
+                )
+        except subprocess.TimeoutExpired as error:
+            raise SoakError("BUILD_TIMEOUT", "clean consumer build timed out") from error
+        finally:
+            with log.open("r", encoding="utf-8", errors="replace") as stream:
+                shutil.copyfileobj(stream, sys.stderr)
+        output = bounded_tail(log)
+        if not output.isascii():
+            output = output.encode("utf-8")[-MAX_CAPTURE_BYTES:].decode(
+                "utf-8", errors="ignore"
+            )
+        if result.returncode != 0:
+            raise SoakError("BUILD_FAILED", output)
+        return output
 
 
 def descendants(root_pid: int) -> set[int]:

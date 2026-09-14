@@ -15,18 +15,18 @@
     "path": "docs/evidence/M8-007/docs-report.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f8e9002d9fa56ce94120db6dfd42a10fecfe7e7db0ebfb8462c7609697484d88"
+      "sha256": "fb67782d019a2775e30e1bff8bfed007e978669fc01a8c2dd6e7d2095ef73452"
     }
   },
   "screenshot": {
     "path": "docs/evidence/M8-007/docs-close.webp.hex",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "1b376741eb7112904190ef3a45dfa659f18d0148746fdbf1de6e2c4520cb15fb"
+      "sha256": "0082204c0833b714bee9eb3658b760014ee8a16e6275e9963fe3fa6ae96d2067"
     }
   },
   "decoded_image_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "8841a54dea28b1eb1549bf919029d28106e931494e80f4ce57e76cdacf77f559"
+    "sha256": "1c507423b3e7cc67fef709c97a702c48b98e4c1f2cc6ba1c3c63172c74bca466"
   }
 }

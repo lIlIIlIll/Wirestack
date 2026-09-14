@@ -17,18 +17,18 @@
     "exit_code": 0,
     "timed_out": false,
     "error_code": null,
-    "started_at_utc": "2026-09-14T11:59:07.059641Z",
-    "finished_at_utc": "2026-09-14T11:59:07.223808Z",
-    "duration_ms": 164.195,
-    "stdout_path": "docs/evidence/M8-007/commands/20260914T115907/plan-validation.stdout.log",
-    "stderr_path": "docs/evidence/M8-007/commands/20260914T115907/plan-validation.stderr.log",
-    "stdout_excerpt": "{\"counts\": {\"paths\": 20, \"scenarios\": 20, \"tests\": 20}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+    "started_at_utc": "2026-09-14T14:10:25.449092Z",
+    "finished_at_utc": "2026-09-14T14:10:25.562913Z",
+    "duration_ms": 113.826,
+    "stdout_path": "docs/evidence/M8-007/commands/20260914T141025/plan-validation.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260914T141025/plan-validation.stderr.log",
+    "stdout_excerpt": "{\"counts\": {\"paths\": 23, \"scenarios\": 23, \"tests\": 23}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
     "stderr_excerpt": "",
     "stdout_truncated": false,
     "stderr_truncated": false,
     "stdout_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "08f6db8d6acce1a6f5b59e1767fe39bc6c3c6500b41cc38bb594e487746816e5"
+      "sha256": "fc582b4f311118c575b3673fb61a7f39223f3750a4b1a2fa8605f53ed1ae4941"
     },
     "stderr_digest": {
       "domain": "text-utf8-lf-v1",

@@ -1,0 +1,112 @@
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools import evidence_digest as digest
+from tools import m7_021_linux_release as release
+from tools import m7_022_linux_release_soak as soak
+from tools import m8_007_final_release as final
+
+EVIDENCE = ROOT / 'docs/evidence/M8-007'
+SOURCE = 'tools/release_soak/main.cj'
+PROBE = Path(__file__).with_name('owner-registry-probe.cj.txt')
+ENVIRONMENT = ['/home/elliot/.codex/scripts/codex_cangjie_env', '--sdk-root', str(Path.home() / 'cangjie_sdk/daily')]
+MODES = ('stale', 'live', 'transports')
+
+
+def record(path):
+    return {'path': path.relative_to(ROOT).as_posix(), 'digest': digest.text_evidence_digest(path).to_json()}
+
+
+def run(argv, cwd, directory, name):
+    stdout = directory / (name + '.stdout.log')
+    stderr = directory / (name + '.stderr.log')
+    started = time.monotonic()
+    with stdout.open('wb') as out, stderr.open('wb') as err:
+        result = subprocess.run(argv, cwd=cwd, stdout=out, stderr=err, timeout=600, check=False)
+    return {'argv': argv, 'exit_code': result.returncode, 'duration_ms': (time.monotonic() - started) * 1000,
+            'stdout': record(stdout), 'stderr': record(stderr)}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--phase', choices=['before', 'after'], required=True)
+    parser.add_argument('--baseline', required=True)
+    args = parser.parse_args()
+    original = (subprocess.check_output(['git', 'cat-file', 'blob', f'{args.baseline}:{SOURCE}'], cwd=ROOT)
+                if args.phase == 'before' else (ROOT / SOURCE).read_bytes())
+    source = final.owner_registry_probe_source(original.decode('utf-8'))
+    directory = EVIDENCE / 'commands/owner-registry-controls' / str(time.time_ns())
+    directory.mkdir(parents=True)
+    derived = directory / 'consumer.cj.txt'
+    derived.write_text(source)
+    with final.ARTIFACT.open('rb') as stream:
+        artifact_sha = hashlib.file_digest(stream, 'sha256').hexdigest()
+    if artifact_sha != json.loads(final.QUALIFICATION.read_text())['artifact']['sha256']:
+        raise RuntimeError('Owner controls require the qualified frozen artifact')
+    commands = {}
+    with tempfile.TemporaryDirectory(prefix='wirestack-owner-registry-') as temporary:
+        work = Path(temporary)
+        installed = release.extract_archive(final.ARTIFACT, work / 'install')
+        consumer = work / 'consumer'
+        (consumer / 'src').mkdir(parents=True)
+        (consumer / 'cjpm.toml').write_text(soak.consumer_manifest(installed))
+        (consumer / 'src/main.cj').write_text(source)
+        fixture = soak.FIXTURE.read_text().replace(
+            'package wirestack_m7_027_examples', 'package wirestack_m7_022_soak', 1
+        )
+        soak.validate_consumer_sources(source, fixture)
+        (consumer / 'src/fixtures.cj').write_text(fixture)
+        commands['build'] = run(ENVIRONMENT + ['cjpm', 'build'], consumer, directory, 'build')
+        if commands['build']['exit_code'] == 0:
+            binary = consumer / 'target/release/bin/main'
+            for mode in MODES:
+                commands[mode] = run(ENVIRONMENT + [str(binary), mode], consumer, directory, mode)
+    expected = 1 if args.phase == 'before' else 0
+    passed = commands['build']['exit_code'] == 0 and all(
+        commands.get(mode, {}).get('exit_code') == expected for mode in MODES
+    )
+    observations = {}
+    for mode in MODES:
+        if mode not in commands:
+            continue
+        lines = (ROOT / commands[mode]['stdout']['path']).read_text().splitlines()
+        markers = [line for line in lines if line.startswith('OWNER_PROBE mode=' + mode + ' ')]
+        if len(markers) == 1:
+            observations[mode] = dict(token.split('=', 1) for token in markers[0].split()[1:])
+    try:
+        stale = observations['stale']
+        observed_bounds = int(stale['claims']) == 4096 and int(stale['limit']) == 1024
+        retained = int(stale['peakSlots'])
+        observed_bounds &= retained > 1024 if args.phase == 'before' else 0 <= retained <= 1024
+        for mode, held in (('live', 'sentinels'), ('transports', 'held')):
+            observed = observations[mode]
+            observed_bounds &= int(observed[held]) == 1024
+            observed_bounds &= observed['rejected'] == ('false' if args.phase == 'before' else 'true')
+            observed_bounds &= (int(observed['retained']) >= 1024 if args.phase == 'before'
+                                else int(observed['retained']) == 1024)
+    except (KeyError, ValueError):
+        observed_bounds = False
+    passed &= observed_bounds
+    report = {'source_task': 'M8-007', 'phase': args.phase, 'status': 'PASS' if passed else 'FAIL',
+              'baseline_revision': args.baseline, 'artifact_sha256': artifact_sha,
+              'source_digest': digest.text_evidence_digest_bytes(original).to_json(),
+              'driver': record(Path(__file__)), 'probe': record(PROBE), 'derived_source': record(derived),
+              'instrumentation': 'Read-only synchronized registry occupancy counter in the throwaway derived consumer only.',
+              'commands': commands, 'observations': observations, 'observed_bounds': observed_bounds}
+    output = EVIDENCE / 'reproductions' / ('owner-registry-' + args.phase + '.json')
+    output.write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({'status': report['status'], 'phase': args.phase,
+                      'exits': {name: command['exit_code'] for name, command in commands.items()}}))
+    return 0 if passed else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
