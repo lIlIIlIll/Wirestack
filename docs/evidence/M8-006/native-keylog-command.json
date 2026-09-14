@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-006",
+  "status": "PASS",
+  "command": {
+    "id": "native-tls-keylog",
+    "argv": [
+      "python3",
+      "tools/m8_006_native_tls.py",
+      "--profile",
+      "keylog",
+      "--offline"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-14T00:58:39.143345Z",
+    "finished_at_utc": "2026-09-14T00:59:32.585562Z",
+    "duration_ms": 53442.229,
+    "stdout_path": "docs/evidence/M8-006/commands/qualification/native-tls-keylog.stdout.log",
+    "stderr_path": "docs/evidence/M8-006/commands/qualification/native-tls-keylog.stderr.log",
+    "stdout_excerpt": "{\n  \"status\": \"PASS\",\n  \"profile\": \"keylog\",\n  \"scenarios\": 5,\n  \"report\": \"<repo-root>-pr-worktrees/M8-006-tls/docs/evidence/M8-006/native-keylog.json\"\n}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05c8e1eaaff22793c485ef16f00d2ab1695abf65a01895dd2d472a5ef2a3e4ae"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

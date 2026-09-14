@@ -1,0 +1,9 @@
+[31merror[0m: non-exhaustive patterns
+  [36m==>[0m /tmp/wirestack-m8-006-compat-ynhh2we9/TlsContextErrorCode-candidate.cj:11:12:
+   [36m| [0m
+[36m11[0m [36m| [0m    match (value) {[0m
+   [36m| [0m           [31m^^^^^ the selector is of type 'Enum-TlsContextErrorCode'[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: InvalidHook is not covered
+
+1 error generated, 1 error printed.

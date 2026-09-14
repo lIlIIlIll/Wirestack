@@ -18,6 +18,8 @@ private let CAP_HTTP2: UInt64 = 1u64 << 5
 private let CAP_EXTERNAL_SIGNER: UInt64 = 1u64 << 6
 private let CAP_SESSION_RESUMPTION: UInt64 = 1u64 << 7
 private let CAP_SECURE_RANDOM: UInt64 = 1u64 << 8
+private let CAP_EXTERNAL_DECRYPTOR: UInt64 = 1u64 << 9
+private let CAP_KEY_LOG: UInt64 = 1u64 << 10
 
 foreign func wirestack_tls_provider_abi_version(): UInt32
 foreign func wirestack_tls_provider_create(outHandle: CPointer<UInt64>): Int32
@@ -47,6 +49,8 @@ public enum TlsProviderCapability {
     | ExternalSigner
     | SessionResumption
     | SecureRandom
+    | ExternalDecryptor
+    | KeyLog
 }
 
 public enum TlsProviderErrorCode {
@@ -89,6 +93,8 @@ private func capabilityMask(capability: TlsProviderCapability): UInt64 {
         case TlsProviderCapability.ExternalSigner => CAP_EXTERNAL_SIGNER
         case TlsProviderCapability.SessionResumption => CAP_SESSION_RESUMPTION
         case TlsProviderCapability.SecureRandom => CAP_SECURE_RANDOM
+        case TlsProviderCapability.ExternalDecryptor => CAP_EXTERNAL_DECRYPTOR
+        case TlsProviderCapability.KeyLog => CAP_KEY_LOG
     }
 }
 
@@ -324,6 +330,12 @@ public class NativeTlsProvider <: TlsProvider {
             if (providerManifest.supports(TlsProviderCapability.SessionResumption)) {
                 flags.add("session-resumption")
             }
+            if (providerManifest.supports(TlsProviderCapability.ExternalDecryptor)) {
+                flags.add("external-decryptor")
+            }
+            if (providerManifest.supports(TlsProviderCapability.KeyLog)) {
+                flags.add("test-only-key-log")
+            }
             TlsRuntimeSnapshot(
                 providerManifest,
                 target,
@@ -446,6 +458,7 @@ public class NativeTlsProvider <: TlsProvider {
                 if (let Some(identity) <- context.identity) {
                     engine.configureLocalIdentity(identity)
                 }
+                engine.configureHandshakeHooks(context.externalDecryptor, context.keyLogSink)
                 engine.configureSessionStore(
                     sessionStore,
                     clientSessionKey(context, referenceIdentity, resolvedSystemTrust)
@@ -498,6 +511,7 @@ public class NativeTlsProvider <: TlsProvider {
             try {
                 engine.configureLocalIdentity(context.identity)
                 engine.configureAlpn(context.alpnProtocols())
+                engine.configureHandshakeHooks(context.externalDecryptor, context.keyLogSink)
                 engine.configureClientAuthentication(
                     context.clientAuthentication,
                     context.clientTrust,

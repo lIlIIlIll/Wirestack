@@ -1,0 +1,22 @@
+public enum TlsContextErrorCode {
+    InvalidAlpn
+    | InvalidHook
+    | InvalidVersionRange
+    | MissingIdentity
+    | MissingTrust
+    | UnsupportedCapability
+}
+
+func accepts(value: TlsContextErrorCode): Bool {
+    match (value) {
+        case TlsContextErrorCode.InvalidAlpn => true
+        case TlsContextErrorCode.InvalidVersionRange => true
+        case TlsContextErrorCode.MissingIdentity => true
+        case TlsContextErrorCode.MissingTrust => true
+        case TlsContextErrorCode.UnsupportedCapability => true
+    }
+}
+
+main(): Int64 {
+    if (accepts(TlsContextErrorCode.InvalidAlpn)) { 0 } else { 1 }
+}

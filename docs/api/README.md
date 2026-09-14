@@ -144,39 +144,188 @@ String overload 和共享 DNS/TCP Deadline 的 `connect`。hosts 是构造时快
 search/ndots、所有权和原生验证见 [DNS 使用指南](../guides/network-foundation-linux.md#dns-解析与连接)。
 
 M8-004 的 Linux 验收门禁已通过，源码候选与证据摘要由任务的 `evidence.json` 绑定。
-HTTP parity、TLS context versioning 和最终发布证据属于 M8-005 至 M8-007，不能从当前 DNS 验证推导其完成状态。
+M8-005 的 HTTP parity 与 M8-006 的 TLS context/hooks 均已完成 Linux 验收，包含
+原生 provider、完整仓库、严格 HTML 文档与浏览器验证。源码候选和报告由各自的
+`evidence.json` 绑定；这些结果不能替代 M8-007 的最终 artifact 与 soak 证据。
 
 ## `wirestack.tls`
 
-当 TLS 包裹调用方拥有的 `DuplexTransport` 时，使用 `TlsClientContext` 或
-`TlsServerContext`。context 构建后不可变，也不会暴露 AWS-LC handle。信任策略、
-reference identity、本地身份、外部签名和 transport 所有权都是独立的类型化契约。
+`TlsClientContext` 和 `TlsServerContext` 是不可变、可并发共享的 Linux TLS 配置。每次成功
+`build()` 都分配一个进程内唯一、非零的 `UInt64` `contextVersion`。该值不是持久 ID，
+也不能跨进程比较。它只用于隔离当前进程的可恢复 session 和 ticket。
 
-`TlsRuntime.info()` 返回只读的 provider/build 诊断，展示构建期选择，不会运行时选择
-或替换 provider。
+builder 保留不可变证书链，在 `build()` 时复制 PKCS#8 和公钥元数据。外部 signer service 保留为调用方
+拥有的线程安全引用。关闭原始 `PrivateKeyRef` 会清零其中可导出的内容，但不会使已构建
+context 失效。context 不公开 provider 或 native handle。
+
+context store 的公开签名如下：
+
+```cj
+public class TlsClientContextStore
+public init(initial: TlsClientContext)
+public func snapshot(): TlsClientContext
+public func replace(value: TlsClientContext): UInt64
+public func handshake(
+    transport: DuplexTransport,
+    serverName: HostName,
+    context!: OperationContext = OperationContext.background()
+): TlsConnection
+public func handshake(
+    transport: DuplexTransport,
+    referenceIdentity: ReferenceIdentity,
+    serverName!: ?HostName = None<HostName>,
+    context!: OperationContext = OperationContext.background()
+): TlsConnection
+
+public class TlsServerContextStore
+public init(initial: TlsServerContext)
+public func snapshot(): TlsServerContext
+public func replace(value: TlsServerContext): UInt64
+public func handshake(
+    transport: DuplexTransport,
+    context!: OperationContext = OperationContext.background()
+): TlsConnection
+```
+
+`replace` 是原子替换，只改变之后加载 snapshot 的握手。已开始的握手和已返回的
+`TlsConnection` 保留原 context。新版本的首次连接执行完整握手，后续连接只能恢复该版本
+自己的 session。session key 还按 server identity、ALPN、trust、client identity、
+provider 和 TLS security policy 分区。
+
+`TlsListener` 拥有传入的 `TransportListener`。store-backed 构造在 transport accept
+之后、TLS 握手之前读取一次 server context。`accept` 将同一个 `OperationContext` 用于
+accept 和握手。关闭 `TlsListener` 会关闭其 listener，但不会关闭已经返回的 connection。
+
+```cj
+public init(listener: TransportListener, context: TlsServerContext)
+public init(listener: TransportListener, contextStore: TlsServerContextStore)
+public func accept(
+    context!: OperationContext = OperationContext.background()
+): TlsConnection
+public func close(): Unit
+public func isClosed(): Bool
+```
+
+外部私钥服务通过以下公开契约接入：
+
+```cj
+public interface ExternalSigner {
+    func supportedAlgorithms(): Array<TlsSignatureAlgorithm>
+    func sign(
+        request: ExternalSignatureRequest,
+        context: OperationContext
+    ): Array<Byte>
+}
+
+public struct ExternalDecryptionRequest
+public init(algorithm: String, ciphertext: Array<Byte>)
+public let algorithm: String
+public func ciphertextBytes(): Array<Byte>
+
+public interface ExternalDecryptor {
+    func decrypt(
+        request: ExternalDecryptionRequest,
+        context: OperationContext
+    ): Array<Byte>
+}
+
+public static func externalSigner(
+    referenceIdentity: String,
+    subjectPublicKeyInfoDer: Array<Byte>,
+    signer: ExternalSigner
+): PrivateKeyRef
+
+public static func systemHandle(
+    platform: String,
+    alias: String,
+    subjectPublicKeyInfoDer: Array<Byte>,
+    signer: ExternalSigner,
+    hardwareBacked!: Bool = true
+): PrivateKeyRef
+
+public func withExternalDecryptor(
+    decryptor: ExternalDecryptor
+): TlsServerContextBuilder
+```
+
+`ExternalSigner` 和 `ExternalDecryptor` 收到握手调用方传入的同一个 `OperationContext`，
+包括绝对 Deadline、cancellation token 和 trace。Wirestack 在调用用户代码前释放 engine
+锁，返回后再取得锁并提交结果。该规则不表示 Wirestack 能抢占一个正在阻塞的同步回调；
+回调实现必须检查 context 并及时返回。
+
+`ExternalDecryptor` 只适用于 server context，而且 identity 必须使用兼容 RSA 证书的
+external signer 或 system signer。支持的 RSA modulus 对应 1 至 1,024 字节的 raw
+private-operation block。builder 在握手前拒绝 client role、缺失 provider capability、
+PKCS#8 identity、非 RSA identity 和不匹配的证书公钥。请求的 `algorithm` 必须恰好为
+`"RSA_RAW"`，ciphertext 必须是该 modulus 的完整 block，长度为 1 至 1,024 字节。返回
+数组的长度必须与 ciphertext 完全相同。返回成功后数组所有权转给 Wirestack；
+decryptor 不得保留、复用或修改它。Wirestack 在 native completion 的所有路径清零数组。
+admission 使用 `TlsContextException.code` 的 `InvalidHook` 或 `UnsupportedCapability`，
+并在适用时通过 `capability` 返回 `TlsCapability.ExternalDecryptor`。握手期 callback
+取消、Deadline、用户异常和错误长度分别保留 typed TLS 失败，不依赖错误文本判断。
+
+`KeyLogSink` 的签名如下：
+
+```cj
+public struct TlsKeyLogLine
+public init(label: String, clientRandom: Array<Byte>, secret: Array<Byte>)
+public let label: String
+public func clientRandomBytes(): Array<Byte>
+public func secretBytes(): Array<Byte>
+
+public interface KeyLogSink {
+    func emit(line: TlsKeyLogLine, context: OperationContext): Unit
+}
+
+public func withKeyLogSink(sink: KeyLogSink): TlsClientContextBuilder
+public func withKeyLogSink(sink: KeyLogSink): TlsServerContextBuilder
+```
+
+`TlsKeyLogLine` 包含 TLS traffic secret。label 是 1 至 128 字节的 NSS token，只能包含
+大写 ASCII 字母、数字和下划线。client random 恰好 32 字节，secret 是 1 至 64 字节。
+构造器复制输入，getter 返回 owned copy。sink 必须复制需要保留的数据，并安全清零临时
+secret。
+
+`KeyLogSink` 只在显式 test-keylog provider build 中可用。生产 provider 在编译时排除
+secret logging capability，context builder 会以 `TlsCapability.KeyLog` 拒绝配置。
+测试 provider 必须使用独立的 native output directory，不能覆盖默认 release output。
+release collector 同时检查 `test_only_key_log` 和 `key-log` capability，并拒绝打包。
+
+完整且已通过 installed-consumer 编译的示例是
+[`examples/linux/m8_006/native_tls.cj`](../../examples/linux/m8_006/native_tls.cj)。
+它覆盖 context replacement、TLS 1.2/1.3 version-local resumption、external signer、
+RSA raw decrypt 和 test-only key logging。对应的 13 个 release 场景与 5 个 keylog
+场景见 [M8-006 资格记录](../evidence/M8-006/README.md)。
 
 ## 稳定性和所有权
 
-[M8-003 inventory](baselines/wirestack-linux-pre1-m8-003.json) 记录当前公开契约。
+[M8-006 inventory](baselines/wirestack-linux-pre1-m8-006.json) 记录当前公开契约，共
+324 个 declaration 和 114 个 resolved alias。
+[M8-004 snapshot](baselines/wirestack-linux-pre1-m8-004.json)、
+[M8-003 snapshot](baselines/wirestack-linux-pre1-m8-003.json)、
 [M8-002 snapshot](baselines/wirestack-linux-pre1-m8-002.json)、
 [M7-032 snapshot](baselines/wirestack-linux-pre1-m7-032.json) 和
 [M7-026 snapshot](baselines/wirestack-linux-v0.json) 保留为历史证据，不是当前兼容性目标。
 1.0 之前，Wirestack 不承诺实验性 API 的 source、API、ABI 或语义兼容。
 
 - 包装 transport 会把它的使用权转交给 TLS connection；
+- 握手创建或执行失败会 abort 已转交的 transport；
 - `close` 和 `abort` 幂等；
 - 一个 read 和一个 write 可以并行，同方向重叠会失败；
 - 子任务可以缩短 deadline，但不能延长；
 - custom roots 不会关闭 reference-identity 校验；
 - HTTP 4xx/5xx 是 response，不是 transport exception。
 
-完整的 public-only 可运行 consumer 位于
-[`examples/linux/m7_027`](../../examples/linux/m7_027/)。源码声明是精确签名参考。
-
 校验当前 API inventory：
 
 ```sh
-scripts/check-m7-032-public-api --json
+scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-linux-pre1-m8-006.json
 ```
 
-该门禁校验公开所有权，并拒绝指向 internal package 的 alias。
+该 baseline 当前精确匹配，但它只证明 source inventory。它不证明二进制、未来版本或运行时
+语义兼容。M8-006 的源码和资格报告由任务证据清单绑定。
+
+M8-006 为 `TlsCapability` 增加 `ExternalDecryptor`、`KeyLog`，为 `TlsContextErrorCode`
+增加 `InvalidHook`。旧的穷尽匹配需要补充分支；当前 Cangjie context 布局也有变化。
+请重编译 consumer，不要混用旧二进制和新库。[兼容性报告](../evidence/M8-006/compatibility.json)
+保留两个旧 client 在 baseline 上编译运行成功、在新增 enum 分支后编译失败的最小证明。

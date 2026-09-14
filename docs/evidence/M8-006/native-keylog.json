@@ -1,0 +1,826 @@
+{
+  "schema_version": 1,
+  "kind": "native-tls-context-hooks",
+  "source_task": "M8-006",
+  "status": "PASS",
+  "profile": "linux-x86_64-glibc-keylog",
+  "key_log_release_qualified": false,
+  "commands": [
+    {
+      "id": "toolchain",
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/toolchain.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/toolchain.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "release-provider-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_tls_provider.py",
+        "--offline"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 1800,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/release-provider-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "928e0fed4078c0d9ad07e79ea642bc044115a9b67a3922458ead48d75d040974"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/release-provider-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "resolver-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_linux_resolver.py",
+        "--quiet"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/resolver-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/resolver-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "http-files-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_linux_http_files.py",
+        "--root",
+        "<repo-root>-pr-worktrees/M8-006-tls",
+        "--quiet"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/http-files-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/http-files-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "test-only-keylog-provider-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_linux_tls_provider.py",
+        "--enable-test-keylog",
+        "--out-dir",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/test-provider",
+        "--offline"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 1800,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/test-only-keylog-provider-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "92a28a04c7c1cb5134f10e01d221e1e5a05ac550cc72bf05759b6090ab0722dc"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/test-only-keylog-provider-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "02e4f73364ade50efb8b225bc373618143b37908ed6b9b1213a3d5907866fd23"
+        }
+      }
+    },
+    {
+      "id": "consumer-build",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "81c959b9ed98e4cf2c35fcf85561ffbb6814acc0b0b929e849d36637e7730fc1"
+        }
+      }
+    },
+    {
+      "id": "fixture-certificate",
+      "argv": [
+        "/usr/bin/openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-keyout",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.pem",
+        "-out",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.pem",
+        "-subj",
+        "/CN=example.com",
+        "-addext",
+        "subjectAltName=DNS:example.com",
+        "-days",
+        "2"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0de101d74b675fbac5ebbb320ccf7c8610615c22397fc372089274edb2d95c2e"
+        }
+      }
+    },
+    {
+      "id": "fixture-certificate-der",
+      "argv": [
+        "/usr/bin/openssl",
+        "x509",
+        "-in",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-certificate-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-certificate-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "fixture-key-der",
+      "argv": [
+        "/usr/bin/openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-key-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-key-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "fixture-spki",
+      "argv": [
+        "/usr/bin/openssl",
+        "pkey",
+        "-in",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.pem",
+        "-pubout",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-spki.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/fixture-spki.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "provider-boundary-compile",
+      "argv": [
+        "/usr/lib/llvm15/bin/clang",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I/tmp/wirestack-m8-006-keylog-3xttpwf5/test-provider/current/include",
+        "-c",
+        "<repo-root>-pr-worktrees/M8-006-tls/native/tls/aws_lc/tests/m8_006_keylog_boundary.c",
+        "-o",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/m8_006_keylog_boundary.o"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 60,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/provider-boundary-compile.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/provider-boundary-compile.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "provider-boundary-link",
+      "argv": [
+        "/usr/lib/llvm15/bin/clang++",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/m8_006_keylog_boundary.o",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/test-provider/current/lib/libwirestack_tls_provider.a",
+        "-pthread",
+        "-ldl",
+        "-lm",
+        "-o",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/m8_006_keylog_boundary"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 60,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/provider-boundary-link.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/provider-boundary-link.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "provider-boundary-run",
+      "argv": [
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/m8_006_keylog_boundary",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/provider-boundary-run.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0c01dc6605eae7ebc12a23bac1018fc2bd1fffeaf804aa642d67c5a65bee4ece"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/provider-boundary-run.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-keylog12-ok",
+      "argv": [
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin/main",
+        "keylog12-ok",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog12-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a2b0de8966e7ab0bec8e4c5bd9ef13ce3c9c7ff1b628c2d39f39ef7b5d7cdf22"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog12-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-keylog13-ok",
+      "argv": [
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin/main",
+        "keylog13-ok",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "298cb9147009296c6c7de515d1f950165d9c6dbe7e3f73476e003799ef91953b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-keylog13-throw",
+      "argv": [
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin/main",
+        "keylog13-throw",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-throw.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "678024d1b9c29c0368ba3b270c65d2decfff3cb08a07a91ff5ad88545cc56f78"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-throw.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-keylog13-cancel",
+      "argv": [
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin/main",
+        "keylog13-cancel",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0b308b1fdfe31fdcace7a4f22e3224b125ffa3d0d937667b358c46f832703b0b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-keylog13-deadline",
+      "argv": [
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin/main",
+        "keylog13-deadline",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/certificate.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/key.der",
+        "/tmp/wirestack-m8-006-keylog-3xttpwf5/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-keylog-3xttpwf5/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-deadline.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1aa8d830adb28e9a7c3aecdc3a25f36afe42a94a3ba8642fd1f0d4f9da4ddeb8"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-deadline.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "mode": "keylog12-ok",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_keylog12-ok=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog12-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a2b0de8966e7ab0bec8e4c5bd9ef13ce3c9c7ff1b628c2d39f39ef7b5d7cdf22"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog12-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "keylog13-ok",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_keylog13-ok=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "298cb9147009296c6c7de515d1f950165d9c6dbe7e3f73476e003799ef91953b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "keylog13-throw",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_keylog13-throw=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-throw.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "678024d1b9c29c0368ba3b270c65d2decfff3cb08a07a91ff5ad88545cc56f78"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-throw.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "keylog13-cancel",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_keylog13-cancel=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0b308b1fdfe31fdcace7a4f22e3224b125ffa3d0d937667b358c46f832703b0b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "keylog13-deadline",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_keylog13-deadline=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-deadline.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1aa8d830adb28e9a7c3aecdc3a25f36afe42a94a3ba8642fd1f0d4f9da4ddeb8"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-keylog/consumer-keylog13-deadline.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "a7b45037ca5f3a22a8eb74538174f659110ca2c77e67cd36089c0f0b65ea6b99"
+  },
+  "generated_at_utc": "2026-09-14T00:58:39.220477+00:00",
+  "installation": {
+    "method": "fresh archive extracted outside source checkout",
+    "archive_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9a347a8e6ff4076b5b42ebf16ccad356622097f0bcfaf2231f8297c38ac84833"
+    },
+    "archive_retained": false,
+    "source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40fa830bcff55aee60756aec3fb8c1b82829517eca92724eb1256fda9028ca06"
+    },
+    "checkout_path_dependency": false,
+    "test_only_provider_overlay": true,
+    "consumer_manifest_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "325605ca9ff097d6a44b623cc78995e41b746f7031c2bead99885969f9d21a76"
+    }
+  },
+  "test_only_provider": {
+    "abiVersion": 1,
+    "archive": {
+      "bytes": 8087078,
+      "name": "libwirestack_tls_provider.a",
+      "sha256": "b2b934be43605f6b731c1b53b5cc04a71b31407cd403a2c0e02c4a19b1a2baa1"
+    },
+    "backend": "aws-lc-static",
+    "build_fingerprint": "b4169c7a54c7e419bfea8655402a899ca3b0bd7ce57c22fda92c191a98487cab",
+    "build_inputs": {
+      "abi_contract_sha256": "09b0d582ac3345bbb120a593220bda1046bad5b26350f3d6e864f76bfece9d30",
+      "builder_sha256": "98f15142646222112c37aeb4fbe5408848f1141388e3a1635f2d2eec0926934a",
+      "provider": {
+        "abi": {
+          "backend": "aws-lc-static",
+          "header": "native/tls/aws_lc/wirestack_tls_provider.h",
+          "name": "wirestack_tls_provider",
+          "version": 1
+        },
+        "capabilities": [
+          "customRoots",
+          "clientCert",
+          "server",
+          "tls12",
+          "tls13",
+          "http2",
+          "externalSigner",
+          "external-decryptor",
+          "sessionResumption",
+          "secureRandom"
+        ],
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DBUILD_SHARED_LIBS=OFF",
+          "-DBUILD_TESTING=OFF",
+          "-DBUILD_TOOL=OFF",
+          "-DDISABLE_GO=ON",
+          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+        ],
+        "license_expression": "Apache-2.0 OR ISC",
+        "patches": [],
+        "provider_id": "aws-lc",
+        "provider_version": "5.5.0",
+        "schema_version": 1,
+        "source": {
+          "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+          "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+          "kind": "git",
+          "tag": "v5.5.0",
+          "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+          "url": "https://github.com/aws/aws-lc.git"
+        }
+      },
+      "shim": {
+        "header_sha256": "89bfa537e931d670712aeaeef65a484c9060f25dff9468164cd0c21d04310c68",
+        "source_sha256": "9e62e56accb050a77b553e72e07c23f9180cbf7e5a1aadb8541a6c7cfe2f5358"
+      },
+      "target": {
+        "architecture": "x86_64",
+        "libc": "glibc",
+        "libc_version": "2.44",
+        "os": "linux"
+      },
+      "test_only_key_log": true,
+      "tools": {
+        "ar": "/usr/lib/llvm15/bin/llvm-ar",
+        "ar_version": "LLVM (http://llvm.org/):",
+        "cc": "/usr/lib/llvm15/bin/clang",
+        "cc_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+        "cmake": "/usr/bin/cmake",
+        "cmake_version": "cmake version 4.4.3",
+        "cxx": "/usr/lib/llvm15/bin/clang++",
+        "cxx_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+        "ranlib": "/usr/lib/llvm15/bin/llvm-ranlib",
+        "ranlib_version": "LLVM (http://llvm.org/):"
+      }
+    },
+    "capabilities": [
+      "customRoots",
+      "clientCert",
+      "server",
+      "tls12",
+      "tls13",
+      "http2",
+      "externalSigner",
+      "external-decryptor",
+      "sessionResumption",
+      "secureRandom",
+      "key-log"
+    ],
+    "externalOpenSslDependency": false,
+    "patchLevel": "abi-1;patches=none",
+    "providerFingerprint": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+    "providerId": "aws-lc",
+    "providerVersion": "5.5.0",
+    "runtimeLoaderLibraryStrings": [],
+    "schema_version": 1,
+    "source": {
+      "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+      "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+      "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+    },
+    "target": {
+      "architecture": "x86_64",
+      "libc": "glibc",
+      "libc_version": "2.44",
+      "os": "linux"
+    },
+    "test_only_key_log": true
+  },
+  "test_only_release_rejection": {
+    "status": "PASS",
+    "error": "test-only TLS key logging cannot enter a release artifact"
+  },
+  "consumer_binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "5d55bb6f18c62ea9276ba761d4bf9fbdda54f8e6468b3368c62f27c062804b28"
+  },
+  "provider_boundary": {
+    "status": "PASS",
+    "marker": "M8_006_KEYLOG_PROVIDER_BOUNDARY=PASS",
+    "source": {
+      "path": "native/tls/aws_lc/tests/m8_006_keylog_boundary.c",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9af3daaf4dfe34fcf149b7193be761099dde34e06faa5494a626ebff5538fcfd"
+      }
+    },
+    "stdout": {
+      "path": "docs/evidence/M8-006/native-keylog/provider-boundary-run.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0c01dc6605eae7ebc12a23bac1018fc2bd1fffeaf804aa642d67c5a65bee4ece"
+      }
+    },
+    "stderr": {
+      "path": "docs/evidence/M8-006/native-keylog/provider-boundary-run.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "bounds": {
+      "maximum_certificate_bytes": 262144,
+      "maximum_private_key_bytes": 65536,
+      "maximum_server_name_bytes": 253,
+      "transfer_chunk_bytes": 16384,
+      "maximum_handshake_steps": 256,
+      "maximum_handshake_ciphertext_bytes": 1048576,
+      "maximum_key_log_records": 16,
+      "maximum_key_log_record_bytes": 512
+    }
+  }
+}

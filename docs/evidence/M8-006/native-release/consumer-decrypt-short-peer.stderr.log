@@ -1,0 +1,5 @@
+Connecting to 127.0.0.1
+depth=0 CN=example.com
+verify return:1
+write:errno=104
+409781CCCA7F0000:error:0A000197:SSL routines:SSL_shutdown:shutdown while in init:ssl/ssl_lib.c:2804:
