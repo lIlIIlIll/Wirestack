@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "command": {
+    "id": "parser-fuzz-verification",
+    "argv": [
+      "python3",
+      "tools/m8_007_final_release.py",
+      "verify-fuzz"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-14T07:13:43.390295Z",
+    "finished_at_utc": "2026-09-14T07:13:43.604187Z",
+    "duration_ms": 213.9,
+    "stdout_path": "docs/evidence/M8-007/commands/20260914T071340/parser-fuzz-verification.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260914T071340/parser-fuzz-verification.stderr.log",
+    "stdout_excerpt": "{\"decision\": \"PASS\", \"evidence\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"b0e9254da515922b9b427221be9404f4cfe8e459aea518882206c683a43f3b9f\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/fuzz-report.json\"}, \"source_task\": \"M8-007\", \"targets\": 10}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40dc07cb8ab57a2d8ab659d598a778666b661f849508eaf80002756cac1a63ca"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

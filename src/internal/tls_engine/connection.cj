@@ -25,6 +25,7 @@ public class TlsConnection <: DuplexTransport {
     private var writeActive = false
     private var engineReleased = false
     private var closeStarted = false
+    private var closeActive = false
     private var abortStarted = false
     private var terminalEvidence = None<TlsClosureEvidence>
 
@@ -106,7 +107,7 @@ public class TlsConnection <: DuplexTransport {
             abort(reason: Some(AbortReason.ProtocolFailure))
             throw error
         } finally {
-            synchronized(lifecycleMutex) { readActive = false }
+            finishRead()
         }
     }
 
@@ -124,7 +125,7 @@ public class TlsConnection <: DuplexTransport {
             abort(reason: Some(AbortReason.ProtocolFailure))
             throw error
         } finally {
-            synchronized(lifecycleMutex) { writeActive = false }
+            finishWrite()
         }
     }
 
@@ -146,6 +147,7 @@ public class TlsConnection <: DuplexTransport {
                     lifecycle = TlsConnectionState.Closing
                     if (!closeStarted) {
                         closeStarted = true
+                        closeActive = true
                         true
                     } else {
                         false
@@ -156,25 +158,53 @@ public class TlsConnection <: DuplexTransport {
         if (!performClose) {
             return
         }
+        var registration = None<api.CancellationRegistration>
         try {
             try {
-                pump.shutdown(engine, transport, context: context)
-                recordEvidence(TlsClosureEvidence.CloseNotify)
-            } catch (error: NetworkException) {
-                recordTruncation(error)
-                throw error
-            }
-        } finally {
-            try {
-                transport.close(context)
-            } finally {
-                releaseEngineOnce()
-                synchronized(lifecycleMutex) {
-                    match (lifecycle) {
-                        case TlsConnectionState.Closing => lifecycle = TlsConnectionState.Closed
-                        case _ => ()
+                try {
+                    registration = Some(context.cancellation.register {
+                        => abort(reason: Some(AbortReason.Cancelled))
+                    })
+                    pump.shutdown(engine, transport, context: context)
+                    recordEvidence(TlsClosureEvidence.CloseNotify)
+                } catch (error: NetworkException) {
+                    recordTruncation(error)
+                    let closedByAbort = match (error.code) {
+                        case NetworkErrorCode.Closed => synchronized(lifecycleMutex) {
+                            match (lifecycle) {
+                                case TlsConnectionState.Aborted => true
+                                case _ => false
+                            }
+                        }
+                        case _ => false
+                    }
+                    if (!closedByAbort) { throw error }
+                    if (context.isCancellationRequested()) {
+                        throw TlsEngineException(TlsEngineErrorCode.HandshakeCancelled, "TLS close was cancelled")
+                    }
+                    if (context.isDeadlineExceeded()) {
+                        throw TlsEngineException(TlsEngineErrorCode.HandshakeTimeout, "TLS close deadline exceeded")
                     }
                 }
+            } finally {
+                pump.requestTerminal()
+                try {
+                    transport.close(context)
+                } finally {
+                    synchronized(lifecycleMutex) {
+                        closeActive = false
+                        match (lifecycle) {
+                            case TlsConnectionState.Closing => lifecycle = TlsConnectionState.Closed
+                            case _ => ()
+                        }
+                    }
+                    releaseEngineIfIdle()
+                }
+            }
+        } finally {
+            match (registration) {
+                case Some(value) => value.unregister()
+                case None => ()
             }
         }
     }
@@ -201,8 +231,9 @@ public class TlsConnection <: DuplexTransport {
             }
         }
         if (performAbort) {
+            pump.requestTerminal()
             try { transport.abort(reason: reason) }
-            finally { releaseEngineOnce() }
+            finally { releaseEngineIfIdle() }
         }
     }
 
@@ -260,13 +291,32 @@ public class TlsConnection <: DuplexTransport {
         }
     }
 
-    private func releaseEngineOnce(): Unit {
+    private func finishRead(): Unit {
+        synchronized(lifecycleMutex) { readActive = false }
+        releaseEngineIfIdle()
+    }
+
+    private func finishWrite(): Unit {
+        synchronized(lifecycleMutex) { writeActive = false }
+        releaseEngineIfIdle()
+    }
+
+    /**
+     * Claims engine destruction only after every connection-owned pump caller
+     * has left. Terminal transport cleanup wakes blocked I/O; the last caller
+     * then performs the one exact engine release instead of racing engine use.
+     */
+    private func releaseEngineIfIdle(): Unit {
         let release = synchronized(lifecycleMutex) {
-            if (engineReleased) {
-                false
-            } else {
+            let terminal = match (lifecycle) {
+                case TlsConnectionState.Closed | TlsConnectionState.Aborted => true
+                case _ => false
+            }
+            if (!engineReleased && terminal && !readActive && !writeActive && !closeActive) {
                 engineReleased = true
                 true
+            } else {
+                false
             }
         }
         if (release) {

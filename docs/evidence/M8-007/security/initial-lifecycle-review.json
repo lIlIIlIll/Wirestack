@@ -1,0 +1,343 @@
+{
+  "coverage_summary": "Completed read-only lifecycle audit of the release worktree: four actionable findings, comprising three runtime defects and one evidence-integrity defect. Covered requiredScope lifecycle-cancellation, pool-isolation, linux-platform, and lifecycle resource-bounds; also inspected soak release-evidence consumers. Examined StdNetTransport read/write/connect/close/abort and OperationGate, TCP accept, Unix accept worker ownership and address conversion, UDP direction gates and close ownership; CancellationState registration/fanout; TlsConnection handshake/read/write/close/abort/releaseEngineOnce, NativeTlsEngine.close and TlsEnginePump scratch/serialization/shutdown; Http1ClientConnection body completion and cancellation, H1/H2 pool acquire/adopt/release/close, pool keys, TLS/proxy pipeline ownership, public retained push cancellation, H2 GOAWAY registration, stream drain, exchange cancellation and reader terminal fanout, server shutdown accounting; all soak workload/cancellation/sample/terminal functions and collector owner checks. No cross-origin or authenticated-proxy reuse defect survived the inspected controls. The existing 50ms cancellation bound was not changed. No builds, tests, validation commands, payloads, network calls or edits were performed. This is process-isolated review within the same assistant/provider ecosystem, not external human independence. The announced tooling refresh means integration must bind findings to the refreshed candidate and packet; this result does not admit the old packet or claim the formal 86400-second soak or hosted signatures passed.",
+  "findings": [
+    {
+      "rule_id": "M8-LIFECYCLE-001",
+      "title": "HTTP/1 TLS body completion drops the request budget and can hang indefinitely",
+      "summary": "A TLS peer can return a complete HTTP/1 response with Connection: close and keep TCP open without close_notify. The final body read synchronously invokes completion. The HTTP/1 observer unregisters cancellation, marks the connection Closed, and calls transport.close with a background context. TLS shutdown waits indefinitely beyond the request deadline. A later HTTP/1 abort is suppressed in Closed state.",
+      "severity": "high",
+      "confidence": "high",
+      "category": "lifecycle-cancellation",
+      "locations": [
+        {
+          "path": "src/internal/http1/client_connection.cj",
+          "start_line": 270,
+          "end_line": 274,
+          "role": "Context-free TLS cleanup"
+        },
+        {
+          "path": "src/internal/http1/client_connection.cj",
+          "start_line": 354,
+          "end_line": 360,
+          "role": "Cancellation detached"
+        },
+        {
+          "path": "src/internal/http1/response_reader.cj",
+          "start_line": 488,
+          "end_line": 493,
+          "role": "Remote-controlled reuse decision"
+        },
+        {
+          "path": "src/http_message.cj",
+          "start_line": 212,
+          "end_line": 214,
+          "role": "Synchronous final-read completion"
+        },
+        {
+          "path": "src/internal/tls_engine/engine.cj",
+          "start_line": 2217,
+          "end_line": 2224,
+          "role": "Peer-close wait"
+        },
+        {
+          "path": "src/internal/http1/client_connection.cj",
+          "start_line": 230,
+          "end_line": 239,
+          "role": "Late abort suppressed"
+        }
+      ],
+      "cwe": [
+        "CWE-400",
+        "CWE-772"
+      ],
+      "evidence": [
+        {
+          "label": "Trigger and ordering",
+          "explanation": "responseCanReuse rejects a peer's Connection: close. Completion calls observer.finish, then claimTerminal unregisters cancellation before bodyTerminated marks Closed and starts transport.close with OperationContext.background().",
+          "excerpt": "else { transport.close(OperationContext.background()) }"
+        },
+        {
+          "label": "No remaining request interrupt",
+          "explanation": "TlsConnection.close invokes pump.shutdown before underlying socket close. WantRead waits for peer close_notify. The HTTP/1 observer is already terminal and its abort method ignores Closed state, so request cancellation cannot break the new background operation."
+        }
+      ],
+      "optionalProperties": {
+        "kind": "runtime",
+        "requiredScope": [
+          "lifecycle-cancellation",
+          "resource-bounds"
+        ],
+        "preconditions": "HTTPS negotiates HTTP/1.1; peer completes a Connection: close response but withholds TLS close_notify and keeps TCP open.",
+        "impact": "Request worker, TLS state, descriptor and pool lease can remain alive indefinitely beyond request timeout. A zero-length response can block get itself through client_connection.cj:117-119.",
+        "verification": "Static source trace only; not executed."
+      }
+    },
+    {
+      "rule_id": "M8-LIFECYCLE-002",
+      "title": "H2 pool shutdown race strands an unpublished stream in graceful close",
+      "summary": "Acquire opens a stream before checking whether the pool closed during creation. Rejection unregisters only the GOAWAY listener, then invokes context-free graceful connection.close. The stream remains in the registry, but executeClaimed never runs and its HEADERS were never sent. Graceful drain can wait indefinitely while the peer keeps the connection open.",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "lifecycle-cancellation",
+      "locations": [
+        {
+          "path": "src/internal/http1/http2_connection_pool.cj",
+          "start_line": 320,
+          "end_line": 326,
+          "role": "Rejected stream lacks rollback"
+        },
+        {
+          "path": "src/internal/http1/http2_connection_pool.cj",
+          "start_line": 293,
+          "end_line": 300,
+          "role": "Stream admitted before acceptance"
+        },
+        {
+          "path": "src/internal/http1/http2_connection_pool.cj",
+          "start_line": 532,
+          "end_line": 534,
+          "role": "Context-free graceful cleanup"
+        },
+        {
+          "path": "src/internal/http2/goaway.cj",
+          "start_line": 235,
+          "end_line": 240,
+          "role": "Listener-only unregister"
+        },
+        {
+          "path": "src/internal/http2/health_close.cj",
+          "start_line": 279,
+          "end_line": 285,
+          "role": "Wait for active stream drain"
+        },
+        {
+          "path": "src/internal/http2/stream_lifecycle.cj",
+          "start_line": 345,
+          "end_line": 354,
+          "role": "Background wait predicate"
+        }
+      ],
+      "cwe": [
+        "CWE-667",
+        "CWE-772"
+      ],
+      "evidence": [
+        {
+          "label": "Race ordering",
+          "explanation": "A reserves and creates a connection. B closes the pool before A's acceptance check. The new connection is absent from entries, so B does not abort it. A opens a stream, observes closed, unregisters the listener and calls closeHttp2Quietly."
+        },
+        {
+          "label": "No owner can finish the stream",
+          "explanation": "GOAWAY.unregister removes only its listener, not registry or flow state. The adapter close calls closer.close with a background context. The request executor is reached only after acquire returns, so it cannot finish or reset the unpublished stream."
+        }
+      ],
+      "optionalProperties": {
+        "kind": "runtime",
+        "requiredScope": [
+          "lifecycle-cancellation",
+          "pool-isolation",
+          "resource-bounds"
+        ],
+        "preconditions": "Client close races new H2 acquisition; peer keeps the connection open after local GOAWAY.",
+        "impact": "Acquisition can outlive its deadline/cancellation and client.close, retaining stream, descriptor and reader/writer tasks.",
+        "verification": "Static race trace only; not executed."
+      }
+    },
+    {
+      "rule_id": "M8-LIFECYCLE-003",
+      "title": "TLS close deadline cannot interrupt a pump mutex held by an existing read",
+      "summary": "An active background TLS read holds transportReadMutex across blocking socket I/O. Concurrent close accepts a bounded context, but shutdown enters an ordinary synchronized mutex before checking that context. Once shutdown needs peer input, it can wait indefinitely for the active reader's lock. The underlying transport is closed only after shutdown exits.",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "lifecycle-cancellation",
+      "locations": [
+        {
+          "path": "src/internal/tls_engine/engine.cj",
+          "start_line": 2270,
+          "end_line": 2278,
+          "role": "Lock held across I/O, context checked after acquisition"
+        },
+        {
+          "path": "src/internal/tls_engine/connection.cj",
+          "start_line": 159,
+          "end_line": 168,
+          "role": "Shutdown precedes cleanup"
+        },
+        {
+          "path": "src/internal/tls_engine/engine.cj",
+          "start_line": 2217,
+          "end_line": 2224,
+          "role": "Close requests peer input"
+        },
+        {
+          "path": "src/internal/transport_stdnet/package.cj",
+          "start_line": 242,
+          "end_line": 250,
+          "role": "Unbounded background socket read"
+        },
+        {
+          "path": "src/internal/tls_engine/connection.cj",
+          "start_line": 153,
+          "end_line": 158,
+          "role": "Concurrent close returns without upgrading"
+        }
+      ],
+      "cwe": [
+        "CWE-667",
+        "CWE-400"
+      ],
+      "evidence": [
+        {
+          "label": "Blocking lock owner",
+          "explanation": "receiveCiphertext locks transportReadMutex around transport.readSome. Background socket reads have no cancellation callback or timeout."
+        },
+        {
+          "label": "Close budget applied too late",
+          "explanation": "Concurrent close does not exclude readActive. Its shutdown receiveCiphertext checks the close context only after acquiring the mutex. Expiry or cancellation cannot interrupt that lock acquisition; socket close is in the finally after shutdown."
+        },
+        {
+          "label": "Nearby escape does not honor supplied context",
+          "explanation": "A separate explicit abort can close the underlying socket, but the close context does not trigger it. A second close in Closing state returns immediately rather than upgrading or joining the pending cleanup."
+        }
+      ],
+      "optionalProperties": {
+        "kind": "runtime",
+        "requiredScope": [
+          "lifecycle-cancellation",
+          "linux-platform",
+          "resource-bounds"
+        ],
+        "preconditions": "A TLS read uses a background or longer-lived context against a silent peer; another task calls close with a shorter deadline or cancellable context.",
+        "impact": "Bounded close can hang and retain resources beyond its supplied deadline.",
+        "verification": "Static race trace only; not executed. No 50ms threshold relaxation proposed."
+      }
+    },
+    {
+      "rule_id": "M8-LIFECYCLE-004",
+      "title": "Soak resource-owner checks accept hard-coded counts rather than observations",
+      "summary": "Every sample prints activeWaiters=0 and activeBuffers=0; terminal output prints all owner counts as literal zero. Task arithmetic counts manually tracked multiplex futures plus two serve futures, excluding internal protocol workers and callbacks. The collector promotes these values to bounded_application_owners and terminal_owners. This is an evidence-integrity defect, not an assertion that a formal soak ran.",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "release-evidence",
+      "locations": [
+        {
+          "path": "tools/release_soak/main.cj",
+          "start_line": 300,
+          "end_line": 305,
+          "role": "Constant sample resource counts"
+        },
+        {
+          "path": "tools/release_soak/main.cj",
+          "start_line": 411,
+          "end_line": 415,
+          "role": "Constant terminal owner counts"
+        },
+        {
+          "path": "tools/m7_022_linux_release_soak.py",
+          "start_line": 640,
+          "end_line": 648,
+          "role": "Sample owner gate"
+        },
+        {
+          "path": "tools/m7_022_linux_release_soak.py",
+          "start_line": 683,
+          "end_line": 689,
+          "role": "Terminal owner gate"
+        },
+        {
+          "path": "src/internal/http2/client_connection.cj",
+          "start_line": 170,
+          "end_line": 173,
+          "role": "Uncounted protocol workers"
+        }
+      ],
+      "cwe": [
+        "CWE-693"
+      ],
+      "evidence": [
+        {
+          "label": "Literal counts",
+          "explanation": "Resource counts are string constants, not owner queries.",
+          "excerpt": "\"backgroundTasks=0 serverTasks=0\""
+        },
+        {
+          "label": "Partial task accounting",
+          "explanation": "runMultiplex counts two request futures. H2 connect spawns reader/writer workers whose futures are discarded and absent from these counters."
+        },
+        {
+          "label": "Gate does not establish its claim",
+          "explanation": "Collector application_trend and validate_workload accept the constants as bounded and terminal owner evidence. Heavy-GC heap trends and server activeAtReturn checks are genuine separate observations but do not establish waiter, buffer, retained callback or protocol worker termination."
+        }
+      ],
+      "optionalProperties": {
+        "kind": "evidence-integrity",
+        "requiredScope": [
+          "resource-bounds",
+          "lifecycle-cancellation",
+          "release-evidence"
+        ],
+        "preconditions": "A soak execution reaches sampling/final output even if internal owners linger.",
+        "impact": "Resource-owner gates can pass without observing the resources they purport to qualify.",
+        "verification": "Source audit only. Formal soak and hosted signatures remain unrun. Collector locations were inspected before Main's announced tooling refresh; integration owner must bind refreshed tooling independently."
+      }
+    }
+  ],
+  "reviewed_paths": [
+    "docs/evidence/M8-007/security-scope.md",
+    "docs/evidence/M8-007/linux_x86_64/review-request.json",
+    "src/cancellation.cj",
+    "src/internal/transport/cancellation.cj",
+    "src/internal/transport_stdnet/package.cj",
+    "src/internal/transport_stdnet/udp_socket.cj",
+    "src/internal/transport_stdnet/unix_listener.cj",
+    "src/internal/transport_stdnet/unix_address.cj",
+    "src/internal/tls_engine/connection.cj",
+    "src/internal/tls_engine/engine.cj",
+    "src/http/cancellation.cj",
+    "src/http/client.cj",
+    "src/http/server.cj",
+    "src/http_message.cj",
+    "src/http_body.cj",
+    "src/internal/http_model/body.cj",
+    "src/internal/http1/client_connection.cj",
+    "src/internal/http1/connection_pool.cj",
+    "src/internal/http1/http2_connection_pool.cj",
+    "src/internal/http1/pool_key.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/tls_client_pipeline.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/server.cj",
+    "src/internal/http2/client_connection.cj",
+    "src/internal/http2/goaway.cj",
+    "src/internal/http2/health_close.cj",
+    "src/internal/http2/stream_lifecycle.cj",
+    "src/internal/http2/reader_loop.cj",
+    "tools/release_soak/main.cj",
+    "tools/m7_022_linux_release_soak.py"
+  ],
+  "deferred": [
+    {
+      "reason": "The assigned src/internal/http_protocol directory does not exist. Reviewed actual HTTP lifecycle implementations in http1/http2/http_model and public ownership wrappers instead.",
+      "paths": [
+        "src/internal/http_protocol"
+      ]
+    },
+    {
+      "reason": "Source-only review by instruction. No timing or scheduling observations, SDK socket-close behavior experiments, descriptor census, resource measurement, native binary verification or exploit execution. Formal soak and hosted-signature gates are explicitly outside this result."
+    },
+    {
+      "reason": "Read lifecycle sections rather than claiming complete parser/cryptographic/native ABI coverage of every listed file. TLS cryptography/native provider and protocol parser review belong to sibling slices.",
+      "paths": [
+        "src/internal/tls_engine/engine.cj",
+        "src/internal/http2/client_connection.cj"
+      ]
+    },
+    {
+      "reason": "Main announced refreshed tooling, candidate and security inputs during review. Runtime .cj source is reported unchanged by Main; this result is not a digest verification or a finalized review report for the refreshed packet.",
+      "paths": [
+        "docs/evidence/M8-007/linux_x86_64/review-request.json",
+        "tools/m7_022_linux_release_soak.py"
+      ]
+    }
+  ]
+}

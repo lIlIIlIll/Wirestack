@@ -3,9 +3,12 @@ package wirestack_m7_022_soak
 import std.collection.ArrayList
 import std.convert.*
 import std.env.getStdOut
+import std.ref.*
 import std.runtime.*
 import std.sync.*
 import std.time.MonoTime
+import wirestack as api
+import wirestack.net as net
 import wirestack.http.*
 
 private const SOAK_CANCEL_LIMIT_NS: Int64 = 50 * 1000 * 1000
@@ -28,6 +31,218 @@ private class SoakStats {
     var joinedTasks: Int64 = 0
     var sequenceErrors: Int64 = 0
     var maxCancelLatencyNs: Int64 = 0
+}
+
+private class SoakPoolOwners <: HttpConnectionPoolHook {
+    private let mutex = Mutex()
+    private var active: Int64 = 0
+    private var acquiredCount: Int64 = 0
+    private var releasedCount: Int64 = 0
+    private var sequenceErrors: Int64 = 0
+
+    public func acquired(event: NetworkEvent, context: OperationContext): Unit {
+        let _ = context
+        if (event.connectionId.isNone()) { return }
+        synchronized(mutex) {
+            active += 1
+            acquiredCount += 1
+        }
+    }
+
+    public func released(event: NetworkEvent, context: OperationContext): Unit {
+        let _ = event
+        let _ = context
+        synchronized(mutex) {
+            if (active == 0) {
+                sequenceErrors += 1
+            } else {
+                active -= 1
+            }
+            releasedCount += 1
+        }
+    }
+
+    prop activeLeases: Int64 { get() { synchronized(mutex) { active } } }
+    prop acquisitions: Int64 { get() { synchronized(mutex) { acquiredCount } } }
+    prop releases: Int64 { get() { synchronized(mutex) { releasedCount } } }
+    prop errors: Int64 { get() { synchronized(mutex) { sequenceErrors } } }
+}
+
+private class SoakTransportOwners <: HttpConnector {
+    private let mutex = Mutex()
+    private var references = ArrayList<WeakRef<SoakObservedTransport>>()
+    private var activeIo: Int64 = 0
+
+    public func connect(
+        endpoint: SocketEndpoint,
+        context: OperationContext
+    ): api.DuplexTransport {
+        let transport = SoakObservedTransport(
+            net.TcpStream.connect(endpoint, context: context), this
+        )
+        synchronized(mutex) {
+            references.add(WeakRef<SoakObservedTransport>(transport, CleanupPolicy.EAGER))
+        }
+        transport
+    }
+
+    func beginIo(): Unit { synchronized(mutex) { activeIo += 1 } }
+    func endIo(): Unit { synchronized(mutex) { activeIo -= 1 } }
+
+    prop inFlightIo: Int64 { get() { synchronized(mutex) { activeIo } } }
+
+    func retainedTransportCount(): Int64 {
+        synchronized(mutex) {
+            let retained = ArrayList<WeakRef<SoakObservedTransport>>()
+            for (reference in references) {
+                if (reference.value.isSome()) { retained.add(reference) }
+            }
+            references = retained
+            retained.size
+        }
+    }
+}
+
+private class SoakObservedTransport <: api.DuplexTransport {
+    private let delegate: api.DuplexTransport
+    private let owners: SoakTransportOwners
+
+    init(delegate: api.DuplexTransport, owners: SoakTransportOwners) {
+        this.delegate = delegate
+        this.owners = owners
+    }
+
+    public prop info: api.TransportInfo { get() { delegate.info } }
+
+    public func readSome(
+        destination: api.MutableByteSpan,
+        context!: api.OperationContext = api.OperationContext.background()
+    ): api.ReadResult {
+        owners.beginIo()
+        try { delegate.readSome(destination, context: context) }
+        finally { owners.endIo() }
+    }
+
+    public func writeSome(
+        source: api.ByteSpan,
+        context!: api.OperationContext = api.OperationContext.background()
+    ): Int64 {
+        owners.beginIo()
+        try { delegate.writeSome(source, context: context) }
+        finally { owners.endIo() }
+    }
+
+    public func shutdown(direction: api.ShutdownDirection): Unit {
+        delegate.shutdown(direction)
+    }
+
+    public func close(context: api.OperationContext): Unit {
+        delegate.close(context)
+    }
+
+    public func close(): Unit { delegate.close() }
+
+    public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit {
+        delegate.abort(reason: reason)
+    }
+
+    public func isClosed(): Bool { delegate.isClosed() }
+}
+
+private class SoakTaskOwners {
+    private var first: ?Future<Bool> = None<Future<Bool>>
+    private var second: ?Future<Bool> = None<Future<Bool>>
+
+    func start(client: HttpClient, url: String): Unit {
+        requireSoak(activeCount == 0, "previous multiplex futures joined")
+        first = Some(spawn { ready(client, url, HttpVersion.Http2) })
+        second = Some(spawn { ready(client, url, HttpVersion.Http2) })
+    }
+
+    func joinFirst(): Bool { first.getOrThrow().get(10 * Duration.second) }
+    func joinSecond(): Bool { second.getOrThrow().get(10 * Duration.second) }
+
+    prop activeCount: Int64 {
+        get() {
+            var result: Int64 = 0
+            match (first) {
+                case Some(value) => if (value.tryGet().isNone()) { result += 1 }
+                case None => ()
+            }
+            match (second) {
+                case Some(value) => if (value.tryGet().isNone()) { result += 1 }
+                case None => ()
+            }
+            result
+        }
+    }
+}
+
+private class SoakCancellationSentinel <: NetworkEventSink {
+    public func emit(event: NetworkEvent): Unit { let _ = event }
+}
+
+private class SoakCancellationProbe {
+    let handleState: () -> Bool
+    let sentinel: WeakRef<SoakCancellationSentinel>
+
+    init(handleState: () -> Bool, sentinel: SoakCancellationSentinel) {
+        this.handleState = handleState
+        this.sentinel = WeakRef<SoakCancellationSentinel>(sentinel, CleanupPolicy.EAGER)
+    }
+}
+
+private class SoakControlledResponseOwner {
+    private let mutex = Mutex()
+    private var latest: ?WeakRef<HttpResponse> = None<WeakRef<HttpResponse>>
+    private var cancellationProbes = ArrayList<SoakCancellationProbe>()
+
+    func claim(
+        response: HttpResponse,
+        handleState: () -> Bool,
+        sentinel: SoakCancellationSentinel
+    ): Unit {
+        synchronized(mutex) {
+            match (latest) {
+                case Some(reference) =>
+                    match (reference.value) {
+                        case Some(value) =>
+                            requireSoak(value.isClosed(), "previous controlled response released")
+                        case None => ()
+                    }
+                case None => ()
+            }
+            latest = Some(WeakRef<HttpResponse>(response, CleanupPolicy.EAGER))
+            cancellationProbes.add(SoakCancellationProbe(handleState, sentinel))
+        }
+    }
+
+    prop activeCount: Int64 {
+        get() {
+            synchronized(mutex) {
+                match (latest) {
+                    case Some(reference) =>
+                        match (reference.value) {
+                            case Some(value) => if (value.isClosed()) { 0 } else { 1 }
+                            case None => 0
+                        }
+                    case None => 0
+                }
+            }
+        }
+    }
+
+    func retainedCancellationCount(): Int64 {
+        synchronized(mutex) {
+            let retained = ArrayList<SoakCancellationProbe>()
+            for (probe in cancellationProbes) {
+                let _ = probe.handleState()
+                if (probe.sentinel.value.isSome()) { retained.add(probe) }
+            }
+            cancellationProbes = retained
+            retained.size
+        }
+    }
 }
 
 private class SoakHandler <: HttpServerHandler {
@@ -144,6 +359,7 @@ private func requireSoak(condition: Bool, label: String): Unit {
 
 private func readBody(body: ResponseBody): String {
     let output = ArrayList<Byte>()
+
     let buffer = Array<Byte>(64, repeat: 0u8)
     while (true) {
         let count = body.read(buffer)
@@ -153,6 +369,28 @@ private func readBody(body: ResponseBody): String {
     String.fromUtf8(output.toArray())
 }
 
+private func readyControlled(
+    client: HttpClient,
+    url: String,
+    version: HttpVersion,
+    owner: SoakControlledResponseOwner
+): Bool {
+    let handle = HttpRequestCancellationHandle()
+    let sentinel = SoakCancellationSentinel()
+    let context = OperationContext(eventSink: Some<NetworkEventSink>(sentinel))
+    let response = client.getControlled(
+        url, HttpCancellationHandles(request: Some(handle)), context: context
+    )
+    owner.claim(response, { => handle.isCancellationRequested }, sentinel)
+    try {
+        response.status == 200 && response.version == version &&
+            readBody(response.body) == "ok"
+    } finally {
+        response.close()
+        requireSoak(owner.activeCount == 0, "controlled ready response released")
+    }
+}
+
 private func ready(client: HttpClient, url: String, version: HttpVersion): Bool {
     let response = client.get(url)
     try {
@@ -160,13 +398,17 @@ private func ready(client: HttpClient, url: String, version: HttpVersion): Bool 
     } finally { response.close() }
 }
 
-private func runMultiplex(client: HttpClient, url: String, stats: SoakStats): Unit {
+private func runMultiplex(
+    client: HttpClient,
+    url: String,
+    stats: SoakStats,
+    owners: SoakTaskOwners
+): Unit {
     stats.spawnedTasks += 2
-    let first: Future<Bool> = spawn { ready(client, url, HttpVersion.Http2) }
-    let second: Future<Bool> = spawn { ready(client, url, HttpVersion.Http2) }
-    requireSoak(first.get(10 * Duration.second), "first H2 sibling")
+    owners.start(client, url)
+    requireSoak(owners.joinFirst(), "first H2 sibling")
     stats.joinedTasks += 1
-    requireSoak(second.get(10 * Duration.second), "second H2 sibling")
+    requireSoak(owners.joinSecond(), "second H2 sibling")
     stats.joinedTasks += 1
     stats.h2Requests += 2
     stats.h2MultiplexBatches += 1
@@ -208,7 +450,8 @@ private func runSseCancellation(
     client: HttpClient,
     url: String,
     version: HttpVersion,
-    stats: SoakStats
+    stats: SoakStats,
+    owner: SoakControlledResponseOwner
 ): Unit {
     let requestHandle = HttpRequestCancellationHandle()
     let streamHandle = HttpStreamCancellationHandle()
@@ -217,7 +460,15 @@ private func runSseCancellation(
     } else {
         HttpCancellationHandles(request: Some(requestHandle))
     }
-    let response = client.getControlled(url, handles)
+    let sentinel = SoakCancellationSentinel()
+    let context = OperationContext(eventSink: Some<NetworkEventSink>(sentinel))
+    let response = client.getControlled(url, handles, context: context)
+    let retainedHandle: () -> Bool = if (version == HttpVersion.Http2) {
+        { => streamHandle.isCancellationRequested }
+    } else {
+        { => requestHandle.isCancellationRequested }
+    }
+    owner.claim(response, retainedHandle, sentinel)
     try {
         requireSoak(response.version == version, "SSE protocol")
         let (events, errors) = consumeEvents(response.body, 4)
@@ -245,15 +496,26 @@ private func runSseCancellation(
             stats.sseH1Events += events
             stats.requestCancels += 1
         }
-    } finally { response.close() }
+    } finally {
+        response.close()
+        requireSoak(owner.activeCount == 0, "controlled SSE response released")
+    }
 }
 
-private func runConnectionCancellation(client: HttpClient, url: String, readyUrl: String,
-    stats: SoakStats): Unit {
+private func runConnectionCancellation(
+    client: HttpClient,
+    url: String,
+    readyUrl: String,
+    stats: SoakStats,
+    owner: SoakControlledResponseOwner
+): Unit {
     let handle = HttpConnectionCancellationHandle()
+    let sentinel = SoakCancellationSentinel()
+    let context = OperationContext(eventSink: Some<NetworkEventSink>(sentinel))
     let response = client.getControlled(
-        url, HttpCancellationHandles(connection: Some(handle))
+        url, HttpCancellationHandles(connection: Some(handle)), context: context
     )
+    owner.claim(response, { => handle.isCancellationRequested }, sentinel)
     try {
         requireSoak(response.version == HttpVersion.Http2, "connection cancellation protocol")
         let (_, errors) = consumeEvents(response.body, 2)
@@ -271,17 +533,27 @@ private func runConnectionCancellation(client: HttpClient, url: String, readyUrl
         stats.maxCancelLatencyNs = max(stats.maxCancelLatencyNs, latency)
         stats.sequenceErrors += errors
         stats.connectionCancels += 1
-    } finally { response.close() }
+    } finally {
+        response.close()
+        requireSoak(owner.activeCount == 0, "controlled connection response released")
+    }
     requireSoak(ready(client, readyUrl, HttpVersion.Http2), "reconnect after cancellation")
     stats.h2Requests += 1
     stats.reconnects += 1
     stats.connects += 1
 }
 
-private func runConnectionChurn(endpoint: SocketEndpoint, stats: SoakStats): Unit {
+private func runConnectionChurn(
+    endpoint: SocketEndpoint,
+    stats: SoakStats,
+    poolOwners: SoakPoolOwners,
+    transportOwners: SoakTransportOwners
+): Unit {
     let host = HostName("h1-soak.test")
     let client = HttpClient.builder()
         .resolver(StaticResolver(ResolveResult([endpoint.address], host, ResolverSource.Static)))
+        .poolHook(poolOwners)
+        .connector(transportOwners)
         .requestTimeout(5 * Duration.second)
         .build()
     try {
@@ -294,13 +566,60 @@ private func runConnectionChurn(endpoint: SocketEndpoint, stats: SoakStats): Uni
     } finally { client.close() }
 }
 
-private func printSample(index: Int64, started: MonoTime, stats: SoakStats): Unit {
+private func activeServerTasks(
+    first: Future<Unit>,
+    second: Future<Unit>
+): Int64 {
+    let firstActive: Int64 = if (first.tryGet().isNone()) { 1 } else { 0 }
+    let secondActive: Int64 = if (second.tryGet().isNone()) { 1 } else { 0 }
+    firstActive + secondActive
+}
+
+private func awaitTerminalOwners(
+    transports: SoakTransportOwners,
+    responses: SoakControlledResponseOwner,
+    deadline: Deadline
+): (Int64, Int64, Int64) {
+    while (true) {
+        gc(heavy: true)
+        let activeIo = transports.inFlightIo
+        let retainedTransports = transports.retainedTransportCount()
+        let retainedCancellations = responses.retainedCancellationCount()
+        if (activeIo == 0 && retainedTransports == 0 && retainedCancellations == 0) {
+            return (activeIo, retainedTransports, retainedCancellations)
+        }
+        if (deadline.isExpired()) {
+            return (activeIo, retainedTransports, retainedCancellations)
+        }
+        sleep(Duration.millisecond)
+    }
+    throw Exception("unreachable terminal-owner wait")
+}
+
+private func printSample(
+    index: Int64,
+    started: MonoTime,
+    stats: SoakStats,
+    poolOwners: SoakPoolOwners,
+    responseOwner: SoakControlledResponseOwner,
+    taskOwners: SoakTaskOwners,
+    transportOwners: SoakTransportOwners,
+    h1Serving: Future<Unit>,
+    h2Serving: Future<Unit>
+): Unit {
     gc(heavy: true)
+    let retainedTransports = transportOwners.retainedTransportCount()
+    let retainedCancellations = responseOwner.retainedCancellationCount()
     let elapsedMs = (MonoTime.now() - started).toNanoseconds() / 1000000
     println(
         "M7022_SAMPLE index=${index} elapsedMs=${elapsedMs} " +
-        "usedHeapBytes=${getUsedHeapSize()} activeWaiters=0 activeBuffers=0 " +
-        "backgroundTasks=${stats.spawnedTasks - stats.joinedTasks + 2} " +
+        "usedHeapBytes=${getUsedHeapSize()} activePoolLeases=${poolOwners.activeLeases} " +
+        "activeResponseOwners=${responseOwner.activeCount} " +
+        "activeApplicationTasks=${taskOwners.activeCount} " +
+        "activeTransportIo=${transportOwners.inFlightIo} " +
+        "retainedTransports=${retainedTransports} " +
+        "retainedCancellations=${retainedCancellations} " +
+        "serverServeTasks=${activeServerTasks(h1Serving, h2Serving)} " +
         "cycles=${stats.cycles} h1Requests=${stats.h1Requests} " +
         "h2Requests=${stats.h2Requests} sseEvents=${stats.sseH1Events + stats.sseH2Events}"
     )
@@ -323,10 +642,16 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
     let h2Serving: Future<Unit> = spawn { h2Server.serve() }
     let h1Host = HostName("h1-soak.test")
     let h2Host = HostName("example.com")
+    let transportOwners = SoakTransportOwners()
+    let poolOwners = SoakPoolOwners()
+    let responseOwner = SoakControlledResponseOwner()
+    let taskOwners = SoakTaskOwners()
     let h1Client = HttpClient.builder()
         .resolver(StaticResolver(ResolveResult(
             [h1Server.localEndpoint.address], h1Host, ResolverSource.Static
         )))
+        .connector(transportOwners)
+        .poolHook(poolOwners)
         .requestTimeout(5 * Duration.second)
         .build()
     let clientTls = HttpClientTlsConfig([certificate])
@@ -335,6 +660,8 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
             [h2Server.localEndpoint.address], h2Host, ResolverSource.Static
         )))
         .tls(clientTls)
+        .connector(transportOwners)
+        .poolHook(poolOwners)
         .requestTimeout(5 * Duration.second)
         .build()
     let h1Ready = "http://h1-soak.test:${h1Server.localEndpoint.port}/ready"
@@ -349,18 +676,32 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
     let sampleInterval = sampleMilliseconds * Duration.millisecond
     var nextSample = sampleInterval
     var sampleIndex: Int64 = 0
+    var serverConnectionsAtReturn: Int64 = -1
     try {
         while ((MonoTime.now() - started) < requiredDuration) {
             requireSoak(ready(h1Client, h1Ready, HttpVersion.Http11), "pooled H1 request")
             stats.h1Requests += 1
-            runMultiplex(h2Client, h2Ready, stats)
-            runSseCancellation(h1Client, h1Events, HttpVersion.Http11, stats)
-            runSseCancellation(h2Client, h2Events, HttpVersion.Http2, stats)
-            requireSoak(ready(h2Client, h2Ready, HttpVersion.Http2), "H2 sibling after reset")
+            runMultiplex(h2Client, h2Ready, stats, taskOwners)
+            runSseCancellation(
+                h1Client, h1Events, HttpVersion.Http11, stats, responseOwner
+            )
+            runSseCancellation(
+                h2Client, h2Events, HttpVersion.Http2, stats, responseOwner
+            )
+            requireSoak(
+                readyControlled(h2Client, h2Ready, HttpVersion.Http2, responseOwner),
+                "H2 sibling after reset"
+            )
             stats.h2Requests += 1
-            if (stats.cycles % 4 == 0) { runConnectionChurn(h1Server.localEndpoint, stats) }
+            if (stats.cycles % 4 == 0) {
+                runConnectionChurn(
+                    h1Server.localEndpoint, stats, poolOwners, transportOwners
+                )
+            }
             if (stats.cycles % 8 == 0) {
-                runConnectionCancellation(h2Client, h2Events, h2Ready, stats)
+                runConnectionCancellation(
+                    h2Client, h2Events, h2Ready, stats, responseOwner
+                )
             }
             stats.activePhases += 1
             sleep(idleMilliseconds * Duration.millisecond)
@@ -373,26 +714,38 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
             }
             let elapsed = MonoTime.now() - started
             if (elapsed >= nextSample) {
-                printSample(sampleIndex, started, stats)
+                printSample(
+                    sampleIndex, started, stats, poolOwners, responseOwner, taskOwners,
+                    transportOwners, h1Serving, h2Serving
+                )
                 sampleIndex += 1
                 nextSample += sampleInterval
             }
         }
-        printSample(sampleIndex, started, stats)
+        printSample(
+            sampleIndex, started, stats, poolOwners, responseOwner, taskOwners,
+            transportOwners, h1Serving, h2Serving
+        )
     } finally {
+        let shutdownDeadline = Deadline.after(10 * Duration.second)
+        let shutdownContext = OperationContext(deadline: Some(shutdownDeadline))
         h1Client.close()
         h2Client.close()
-        let shutdownContext = OperationContext(
-            deadline: Some(Deadline.after(10 * Duration.second))
-        )
         let h1Shutdown = h1Server.shutdown(context: shutdownContext)
         let h2Shutdown = h2Server.shutdown(context: shutdownContext)
+        serverConnectionsAtReturn = h1Shutdown.activeAtReturn + h2Shutdown.activeAtReturn
         requireSoak(h1Shutdown.activeAtReturn == 0, "H1 shutdown cleanup")
         requireSoak(h2Shutdown.activeAtReturn == 0, "H2 shutdown cleanup")
         h1Serving.get(10 * Duration.second)
         h2Serving.get(10 * Duration.second)
         clientTls.close()
         serverTls.close()
+        let (activeIo, retainedTransports, retainedCancellations) = awaitTerminalOwners(
+            transportOwners, responseOwner, shutdownDeadline
+        )
+        requireSoak(activeIo == 0, "terminal transport I/O owners")
+        requireSoak(retainedTransports == 0, "terminal retained transports")
+        requireSoak(retainedCancellations == 0, "terminal retained cancellations")
     }
     let elapsedMs = (MonoTime.now() - started).toNanoseconds() / 1000000
     requireSoak(stats.cycles > 0, "workload cycles")
@@ -401,6 +754,32 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
     requireSoak(stats.requestCancels == stats.cycles, "H1 cancellation count")
     requireSoak(stats.streamResets == stats.cycles, "H2 reset count")
     requireSoak(stats.connectionCancels == stats.reconnects, "connection recovery count")
+    let applicationTasks = taskOwners.activeCount
+    let serverTasks = activeServerTasks(h1Serving, h2Serving)
+    let activePoolLeases = poolOwners.activeLeases
+    let activeResponseOwners = responseOwner.activeCount
+    let activeTransportIo = transportOwners.inFlightIo
+    let retainedTransports = transportOwners.retainedTransportCount()
+    let retainedCancellations = responseOwner.retainedCancellationCount()
+    let clientsClosed: Int64 = (if (h1Client.isClosed()) { 1 } else { 0 }) +
+        (if (h2Client.isClosed()) { 1 } else { 0 })
+    let serversClosed: Int64 = (if (h1Server.isClosed()) { 1 } else { 0 }) +
+        (if (h2Server.isClosed()) { 1 } else { 0 })
+    let tlsConfigsClosed: Int64 = (if (clientTls.isClosed()) { 1 } else { 0 }) +
+        (if (serverTls.isClosed()) { 1 } else { 0 })
+    requireSoak(applicationTasks == 0, "terminal application task owners")
+    requireSoak(serverTasks == 0, "terminal server task owners")
+    requireSoak(activePoolLeases == 0, "terminal pool lease owners")
+    requireSoak(activeResponseOwners == 0, "terminal controlled response owners")
+    requireSoak(activeTransportIo == 0, "terminal transport I/O owners")
+    requireSoak(retainedTransports == 0, "terminal retained transport owners")
+    requireSoak(retainedCancellations == 0, "terminal retained cancellation owners")
+    requireSoak(poolOwners.errors == 0, "pool owner event sequence")
+    requireSoak(poolOwners.acquisitions == poolOwners.releases, "pool leases released")
+    requireSoak(serverConnectionsAtReturn == 0, "terminal server connections")
+    requireSoak(clientsClosed == 2, "clients closed")
+    requireSoak(serversClosed == 2, "servers closed")
+    requireSoak(tlsConfigsClosed == 2, "TLS configurations closed")
     println(
         "M7022_RESULT durationSeconds=${durationSeconds} elapsedMs=${elapsedMs} " +
         "cycles=${stats.cycles} activePhases=${stats.activePhases} idlePhases=${stats.idlePhases} " +
@@ -410,8 +789,15 @@ private func runSoak(durationSeconds: Int64, sampleMilliseconds: Int64,
         "streamResets=${stats.streamResets} connectionCancels=${stats.connectionCancels} " +
         "reconnects=${stats.reconnects} spawnedTasks=${stats.spawnedTasks} " +
         "joinedTasks=${stats.joinedTasks} sequenceErrors=${stats.sequenceErrors} " +
-        "maxCancelLatencyNs=${stats.maxCancelLatencyNs} activeWaiters=0 activeBuffers=0 " +
-        "backgroundTasks=0 serverTasks=0"
+        "maxCancelLatencyNs=${stats.maxCancelLatencyNs} " +
+        "activePoolLeases=${activePoolLeases} activeResponseOwners=${activeResponseOwners} " +
+        "activeApplicationTasks=${applicationTasks} activeTransportIo=${activeTransportIo} " +
+        "retainedTransports=${retainedTransports} " +
+        "retainedCancellations=${retainedCancellations} serverServeTasks=${serverTasks} " +
+        "serverConnections=${serverConnectionsAtReturn} clientsClosed=${clientsClosed} " +
+        "serversClosed=${serversClosed} tlsConfigsClosed=${tlsConfigsClosed} " +
+        "poolAcquires=${poolOwners.acquisitions} poolReleases=${poolOwners.releases} " +
+        "poolSequenceErrors=${poolOwners.errors}"
     )
 }
 

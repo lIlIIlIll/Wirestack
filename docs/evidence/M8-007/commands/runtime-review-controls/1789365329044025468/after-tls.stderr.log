@@ -1,0 +1,634 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.29 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.30 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.31 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 8.1 */@Attribute[TEST_GENERATED] class TlsM8006ContextTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 8.2 */    @Attribute[TestCase_67][0m
+    [36m| [0m[34m|[0m /* 8.3 */    func sessionPartitionsRetainOnlyTheMatchingContextVersion(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.4 */        let first = TlsSessionKey("server", "h2", "trust", "client", "provider", "12-13", contextVersion: 41u64)[0m
+    [36m| [0m[34m|[0m /* 8.5 */        let replacement = TlsSessionKey("server", "h2", "trust", "client", "provider", "12-13", contextVersion: 42u64)[0m
+    [36m| [0m[34m|[0m /* 8.6 */        expectEqual("! first.sameAs(replacement)", "true", ! first.sameAs(replacement), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.7 */        let store = TlsSessionStore()[0m
+    [36m| [0m[34m|[0m /* 8.8 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.9 */            store.put(first,[7u8, 8u8], 60u64, false)[0m
+    [36m| [0m[34m|[0m /* 8.10 */            expectEqual("store.take(replacement).isNone()", "true", store.take(replacement).isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.11 */            expectEqual("store.take(first).getOrThrow()", "[7u8, 8u8]", store.take(first).getOrThrow(),[7u8, 8u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.12 */            expectEqual("store.take(first).getOrThrow()", "[7u8, 8u8]", store.take(first).getOrThrow(),[7u8, 8u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.13 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.14 */            store.close()[0m
+    [36m| [0m[34m|[0m /* 8.15 */        }[0m
+    [36m| [0m[34m|[0m /* 8.16 */    }[0m
+    [36m| [0m[34m|[0m /* 8.17 */    [0m
+    [36m| [0m[34m|[0m /* 8.18 */    @Attribute[TestCase_68][0m
+    [36m| [0m[34m|[0m /* 8.19 */    func decryptorRequiresProviderCapabilityAndRsaExternalIdentity(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.20 */        let decryptor = M8006InternalDecryptor()[0m
+    [36m| [0m[34m|[0m /* 8.21 */        let fileIdentity = tlsTestLocalIdentity()[0m
+    [36m| [0m[34m|[0m /* 8.22 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.23 */            let wrongIdentity = try {[0m
+    [36m| [0m[34m|[0m /* 8.24 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.25 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.26 */                    TlsServerContext.builder(m8006Manifest(), m8006Capabilities()).identity(fileIdentity).withExternalDecryptor(decryptor).build()[0m
+    [36m| [0m[34m|[0m /* 8.27 */                    fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.28 */                } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 8.29 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.30 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.31 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.32 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.33 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.34 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.35 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.36 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.37 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.38 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.39 */                }[0m
+    [36m| [0m[34m|[0m /* 8.40 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.41 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.42 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.43 */                }[0m
+    [36m| [0m[34m|[0m /* 8.44 */                assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.45 */            }[0m
+    [36m| [0m[34m|[0m /* 8.46 */            [0m
+    [36m| [0m[34m|[0m /* 8.47 */            match(wrongIdentity.code) {[0m
+    [36m| [0m[34m|[0m /* 8.48 */                case TlsContextErrorCode.InvalidHook =>()[0m
+    [36m| [0m[34m|[0m /* 8.49 */                case _ => fail("file-backed decryptor did not fail with InvalidHook")[0m
+    [36m| [0m[34m|[0m /* 8.50 */            }[0m
+    [36m| [0m[34m|[0m /* 8.51 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.52 */            fileIdentity.privateKeyRef.close()[0m
+    [36m| [0m[34m|[0m /* 8.53 */        }[0m
+    [36m| [0m[34m|[0m /* 8.54 */        let externalKey = PrivateKeyRef.externalSigner("m8-006-rsa", tlsTestSubjectPublicKeyInfoDer(), M8006RsaSigner())[0m
+    [36m| [0m[34m|[0m /* 8.55 */        let externalIdentity = LocalIdentity(CertificateChain([DerCertificate(tlsTestCertificateDer())]), externalKey)[0m
+    [36m| [0m[34m|[0m /* 8.56 */        try {[0m
+    [36m| [0m[34m|[0m /* 8.57 */            let withoutCapability = m8006Manifest(bits: 0x1ffu64)[0m
+    [36m| [0m[34m|[0m /* 8.58 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 8.59 */                try {[0m
+    [36m| [0m[34m|[0m /* 8.60 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.61 */                    TlsServerContext.builder(withoutCapability, TlsCapabilities.fromProvider(withoutCapability)).identity(externalIdentity).withExternalDecryptor(decryptor).build()[0m
+    [36m| [0m[34m|[0m /* 8.62 */                    fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.63 */                } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 8.64 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.65 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.66 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.67 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.68 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.69 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.70 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.71 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 8.72 */                    }[0m
+    [36m| [0m[34m|[0m /* 8.73 */                    e[0m
+    [36m| [0m[34m|[0m /* 8.74 */                }[0m
+    [36m| [0m[34m|[0m /* 8.75 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.76 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.77 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.78 */                }[0m
+    [36m| [0m[34m|[0m /* 8.79 */                assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.80 */            }[0m
+    [36m| [0m[34m|[0m /* 8.81 */            [0m
+    [36m| [0m[34m|[0m /* 8.82 */            let rejected = match(error.capability) {[0m
+    [36m| [0m[34m|[0m /* 8.83 */                case Some(value) => match(value) {[0m
+    [36m| [0m[34m|[0m /* 8.84 */                    case TlsCapability.ExternalDecryptor => true[0m
+    [36m| [0m[34m|[0m /* 8.85 */                    case _ => false[0m
+    [36m| [0m[34m|[0m /* 8.86 */                }[0m
+    [36m| [0m[34m|[0m /* 8.87 */                case None => false[0m
+    [36m| [0m[34m|[0m /* 8.88 */            }[0m
+    [36m| [0m[34m|[0m /* 8.89 */            expectEqual("rejected", "true", rejected, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.90 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 8.91 */            externalKey.close()[0m
+    [36m| [0m[34m|[0m /* 8.92 */        }[0m
+    [36m| [0m[34m|[0m /* 8.93 */    }[0m
+    [36m| [0m[34m|[0m /* 8.94 */    [0m
+    [36m| [0m[34m|[0m /* 8.95 */    @Attribute[TestCase_69][0m
+    [36m| [0m[34m|[0m /* 8.96 */    func keyLogSinkRequiresExplicitProviderCapability(): Unit {[0m
+    [36m| [0m[34m|[0m /* 8.97 */        let withoutKeyLog = m8006Manifest(bits: 0x3ffu64)[0m
+    [36m| [0m[34m|[0m /* 8.98 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 8.99 */            try {[0m
+    [36m| [0m[34m|[0m /* 8.100 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 8.101 */                TlsClientContext.builder(withoutKeyLog, TlsCapabilities.fromProvider(withoutKeyLog)).trust(m8006Trust()).withKeyLogSink(M8006KeyLogSink()).build()[0m
+    [36m| [0m[34m|[0m /* 8.102 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 8.103 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 8.104 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 8.105 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.106 */                }[0m
+    [36m| [0m[34m|[0m /* 8.107 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 8.108 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.109 */                }[0m
+    [36m| [0m[34m|[0m /* 8.110 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.111 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 8.112 */                }[0m
+    [36m| [0m[34m|[0m /* 8.113 */                e[0m
+    [36m| [0m[34m|[0m /* 8.114 */            }[0m
+    [36m| [0m[34m|[0m /* 8.115 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 8.116 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 8.117 */                throw e[0m
+    [36m| [0m[34m|[0m /* 8.118 */            }[0m
+    [36m| [0m[34m|[0m /* 8.119 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 8.120 */        }[0m
+    [36m| [0m[34m|[0m /* 8.121 */        [0m
+    [36m| [0m[34m|[0m /* 8.122 */        let rejected = match(error.capability) {[0m
+    [36m| [0m[34m|[0m /* 8.123 */            case Some(value) => match(value) {[0m
+    [36m| [0m[34m|[0m /* 8.124 */                case TlsCapability.KeyLog => true[0m
+    [36m| [0m[34m|[0m /* 8.125 */                case _ => false[0m
+    [36m| [0m[34m|[0m /* 8.126 */            }[0m
+    [36m| [0m[34m|[0m /* 8.127 */            case None => false[0m
+    [36m| [0m[34m|[0m /* 8.128 */        }[0m
+    [36m| [0m[34m|[0m /* 8.129 */        expectEqual("rejected", "true", rejected, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 8.130 */    }[0m
+    [36m| [0m[34m|[0m /* 8.131 */    [0m
+    [36m| [0m[34m|[0m /* 8.132 */    init() {[0m
+    [36m| [0m[34m|[0m /* 8.133 */    }[0m
+    [36m| [0m[34m|[0m /* 8.134 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 8.135 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.136 */        [0m
+    [36m| [0m[34m|[0m /* 8.137 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 8.138 */    }[0m
+    [36m| [0m[34m|[0m /* 8.139 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 8.140 */        [0m
+    [36m| [0m[34m|[0m /* 8.141 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 8.142 */        let suiteBuilder = TestSuite.builder("TlsM8006ContextTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 8.143 */        [0m
+    [36m| [0m[34m|[0m /* 8.144 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.145 */            [0m
+    [36m| [0m[34m|[0m /* 8.146 */            let sessionPartitionsRetainOnlyTheMatchingContextVersionTestFunc = { => sessionPartitionsRetainOnlyTheMatchingContextVersion();() }[0m
+    [36m| [0m[34m|[0m /* 8.147 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.148 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.149 */            "sessionPartitionsRetainOnlyTheMatchingContextVersion",[0m
+    [36m| [0m[34m|[0m /* 8.150 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.151 */            body: sessionPartitionsRetainOnlyTheMatchingContextVersionTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.152 */            )[0m
+    [36m| [0m[34m|[0m /* 8.153 */            )[0m
+    [36m| [0m[34m|[0m /* 8.154 */            [0m
+    [36m| [0m[34m|[0m /* 8.155 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.156 */        [0m
+    [36m| [0m[34m|[0m /* 8.157 */        [0m
+    [36m| [0m[34m|[0m /* 8.158 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.159 */            [0m
+    [36m| [0m[34m|[0m /* 8.160 */            let decryptorRequiresProviderCapabilityAndRsaExternalIdentityTestFunc = { => decryptorRequiresProviderCapabilityAndRsaExternalIdentity();() }[0m
+    [36m| [0m[34m|[0m /* 8.161 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.162 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.163 */            "decryptorRequiresProviderCapabilityAndRsaExternalIdentity",[0m
+    [36m| [0m[34m|[0m /* 8.164 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.165 */            body: decryptorRequiresProviderCapabilityAndRsaExternalIdentityTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.166 */            )[0m
+    [36m| [0m[34m|[0m /* 8.167 */            )[0m
+    [36m| [0m[34m|[0m /* 8.168 */            [0m
+    [36m| [0m[34m|[0m /* 8.169 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.170 */        [0m
+    [36m| [0m[34m|[0m /* 8.171 */        [0m
+    [36m| [0m[34m|[0m /* 8.172 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 8.173 */            [0m
+    [36m| [0m[34m|[0m /* 8.174 */            let keyLogSinkRequiresExplicitProviderCapabilityTestFunc = { => keyLogSinkRequiresExplicitProviderCapability();() }[0m
+    [36m| [0m[34m|[0m /* 8.175 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 8.176 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 8.177 */            "keyLogSinkRequiresExplicitProviderCapability",[0m
+    [36m| [0m[34m|[0m /* 8.178 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 8.179 */            body: keyLogSinkRequiresExplicitProviderCapabilityTestFunc[0m
+    [36m| [0m[34m|[0m /* 8.180 */            )[0m
+    [36m| [0m[34m|[0m /* 8.181 */            )[0m
+    [36m| [0m[34m|[0m /* 8.182 */            [0m
+    [36m| [0m[34m|[0m /* 8.183 */        }()[0m
+    [36m| [0m[34m|[0m /* 8.184 */        [0m
+    [36m| [0m[34m|[0m /* 8.185 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 8.186 */    }[0m
+    [36m| [0m[34m|[0m /* 8.187 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 8.188 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 8.189 */    }[0m
+    [36m| [0m[34m|[0m /* 8.190 */}[0m
+    [36m| [0m[34m|[0m /* 8.191 */[0m
+    [36m| [0m[34m|[0m /* 8.192 */[0m
+    [36m| [0m[34m|[0m /* 8.193 */interface TestPackageExtension_TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m /* 8.194 */    func registerTlsM8006ContextTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 8.195 */}[0m
+    [36m| [0m[34m|[0m /* 8.196 */extend TestPackage <: TestPackageExtension_TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m /* 8.197 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 8.198 */    public func registerTlsM8006ContextTest() {[0m
+    [36m| [0m[34m|[0m /* 8.199 */        registerSuite({ => TlsM8006ContextTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 8.200 */    }[0m
+    [36m| [0m[34m|[0m /* 8.201 */}[0m
+    [36m| [0m[34m|[0m /* 8.202 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 10.29 */                    None < TlsProviderException >[0m
+   [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 10.1 */@Attribute[TEST_GENERATED] class TlsProviderSubstitutionTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 10.2 */    @Attribute[TestCase_71][0m
+    [36m| [0m[34m|[0m /* 10.3 */    func testProviderUsesTheProductionFactoryContract(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.4 */        let provider = TestTlsProviderFactory("test-one").create()[0m
+    [36m| [0m[34m|[0m /* 10.5 */        try {[0m
+    [36m| [0m[34m|[0m /* 10.6 */            expectEqual("provider.manifest().providerId", "\"wirestack-test\"", provider.manifest().providerId, "wirestack-test", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.7 */            expectEqual("provider.manifest().fingerprint", "\"test-one\"", provider.manifest().fingerprint, "test-one", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.8 */            expectEqual("provider.capabilities().supports(TlsCapability.Tls13)", "true", provider.capabilities().supports(TlsCapability.Tls13), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.9 */            let context = TlsClientContext.builder(provider.manifest(), provider.capabilities()).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(tlsTestCertificateDer())]))).build()[0m
+    [36m| [0m[34m|[0m /* 10.10 */            let engine = provider.createClientEngine(context, ReferenceIdentity.Dns(HostName("example.com")), serverName: None < HostName >)[0m
+    [36m| [0m[34m|[0m /* 10.11 */            expectEqual("isComplete(engine.handshakeStep())", "true", isComplete(engine.handshakeStep()), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.12 */            engine.close()[0m
+    [36m| [0m[34m|[0m /* 10.13 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 10.14 */            provider.close()[0m
+    [36m| [0m[34m|[0m /* 10.15 */        }[0m
+    [36m| [0m[34m|[0m /* 10.16 */    }[0m
+    [36m| [0m[34m|[0m /* 10.17 */    [0m
+    [36m| [0m[34m|[0m /* 10.18 */    @Attribute[TestCase_72][0m
+    [36m| [0m[34m|[0m /* 10.19 */    func objectsFromDifferentProviderInstancesCannotMix(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.20 */        let first = TestTlsProvider("first")[0m
+    [36m| [0m[34m|[0m /* 10.21 */        let second = TestTlsProvider("second")[0m
+    [36m| [0m[34m|[0m /* 10.22 */        try {[0m
+    [36m| [0m[34m|[0m /* 10.23 */            let context = TlsClientContext.builder(first.manifest(), first.capabilities()).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(tlsTestCertificateDer())]))).build()[0m
+    [36m| [0m[34m|[0m /* 10.24 */            try {[0m
+    [36m| [0m[34m|[0m /* 10.25 */                try {[0m
+    [36m| [0m[34m|[0m /* 10.26 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 10.27 */                    second.createClientEngine(context, ReferenceIdentity.Dns(HostName("example.com")), serverName: None < HostName >)[0m
+    [36m| [0m[34m|[0m /* 10.28 */                    failExpect("@ExpectThrows: Expected 'TlsProviderException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 10.29 */                    None < TlsProviderException >[0m
+    [36m| [0m[34m|[0m /* 10.30 */                } catch(e: TlsProviderException) {[0m
+    [36m| [0m[34m|[0m /* 10.31 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 10.32 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 10.33 */                    }[0m
+    [36m| [0m[34m|[0m /* 10.34 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 10.35 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 10.36 */                    }[0m
+    [36m| [0m[34m|[0m /* 10.37 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 10.38 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 10.39 */                    }[0m
+    [36m| [0m[34m|[0m /* 10.40 */                    e[0m
+    [36m| [0m[34m|[0m /* 10.41 */                }[0m
+    [36m| [0m[34m|[0m /* 10.42 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 10.43 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 10.44 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 10.45 */                }[0m
+    [36m| [0m[34m|[0m /* 10.46 */                expectCaughtUnexpectedE("@ExpectThrows(TlsProviderException)", "TlsProviderException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 10.47 */                None < TlsProviderException >[0m
+    [36m| [0m[34m|[0m /* 10.48 */            }[0m
+    [36m| [0m[34m|[0m /* 10.49 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 10.50 */            first.close()[0m
+    [36m| [0m[34m|[0m /* 10.51 */            second.close()[0m
+    [36m| [0m[34m|[0m /* 10.52 */        }[0m
+    [36m| [0m[34m|[0m /* 10.53 */    }[0m
+    [36m| [0m[34m|[0m /* 10.54 */    [0m
+    [36m| [0m[34m|[0m /* 10.55 */    @Attribute[TestCase_73][0m
+    [36m| [0m[34m|[0m /* 10.56 */    func activeEngineRetainsProviderUntilItCloses(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.57 */        let provider = TestTlsProvider("lifetime")[0m
+    [36m| [0m[34m|[0m /* 10.58 */        let engine = provider.createEngine(TlsEngineRole.Client, TlsSecurityPolicy.forProfile(TlsSecurityProfile.Modern))[0m
+    [36m| [0m[34m|[0m /* 10.59 */        provider.close()[0m
+    [36m| [0m[34m|[0m /* 10.60 */        expectEqual("provider.closeRequested()", "true", provider.closeRequested(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.61 */        expectEqual("! provider.resourcesReleased()", "true", ! provider.resourcesReleased(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.62 */        expectEqual("isComplete(engine.handshakeStep())", "true", isComplete(engine.handshakeStep()), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.63 */        engine.close()[0m
+    [36m| [0m[34m|[0m /* 10.64 */        expectEqual("provider.resourcesReleased()", "true", provider.resourcesReleased(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.65 */        engine.close()[0m
+    [36m| [0m[34m|[0m /* 10.66 */        expectEqual("provider.resourcesReleased()", "true", provider.resourcesReleased(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.67 */    }[0m
+    [36m| [0m[34m|[0m /* 10.68 */    [0m
+    [36m| [0m[34m|[0m /* 10.69 */    init() {[0m
+    [36m| [0m[34m|[0m /* 10.70 */    }[0m
+    [36m| [0m[34m|[0m /* 10.71 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 10.72 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.73 */        [0m
+    [36m| [0m[34m|[0m /* 10.74 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 10.75 */    }[0m
+    [36m| [0m[34m|[0m /* 10.76 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 10.77 */        [0m
+    [36m| [0m[34m|[0m /* 10.78 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 10.79 */        let suiteBuilder = TestSuite.builder("TlsProviderSubstitutionTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 10.80 */        [0m
+    [36m| [0m[34m|[0m /* 10.81 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.82 */            [0m
+    [36m| [0m[34m|[0m /* 10.83 */            let testProviderUsesTheProductionFactoryContractTestFunc = { => testProviderUsesTheProductionFactoryContract();() }[0m
+    [36m| [0m[34m|[0m /* 10.84 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.85 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.86 */            "testProviderUsesTheProductionFactoryContract",[0m
+    [36m| [0m[34m|[0m /* 10.87 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.88 */            body: testProviderUsesTheProductionFactoryContractTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.89 */            )[0m
+    [36m| [0m[34m|[0m /* 10.90 */            )[0m
+    [36m| [0m[34m|[0m /* 10.91 */            [0m
+    [36m| [0m[34m|[0m /* 10.92 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.93 */        [0m
+    [36m| [0m[34m|[0m /* 10.94 */        [0m
+    [36m| [0m[34m|[0m /* 10.95 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.96 */            [0m
+    [36m| [0m[34m|[0m /* 10.97 */            let objectsFromDifferentProviderInstancesCannotMixTestFunc = { => objectsFromDifferentProviderInstancesCannotMix();() }[0m
+    [36m| [0m[34m|[0m /* 10.98 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.99 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.100 */            "objectsFromDifferentProviderInstancesCannotMix",[0m
+    [36m| [0m[34m|[0m /* 10.101 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.102 */            body: objectsFromDifferentProviderInstancesCannotMixTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.103 */            )[0m
+    [36m| [0m[34m|[0m /* 10.104 */            )[0m
+    [36m| [0m[34m|[0m /* 10.105 */            [0m
+    [36m| [0m[34m|[0m /* 10.106 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.107 */        [0m
+    [36m| [0m[34m|[0m /* 10.108 */        [0m
+    [36m| [0m[34m|[0m /* 10.109 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.110 */            [0m
+    [36m| [0m[34m|[0m /* 10.111 */            let activeEngineRetainsProviderUntilItClosesTestFunc = { => activeEngineRetainsProviderUntilItCloses();() }[0m
+    [36m| [0m[34m|[0m /* 10.112 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.113 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.114 */            "activeEngineRetainsProviderUntilItCloses",[0m
+    [36m| [0m[34m|[0m /* 10.115 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.116 */            body: activeEngineRetainsProviderUntilItClosesTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.117 */            )[0m
+    [36m| [0m[34m|[0m /* 10.118 */            )[0m
+    [36m| [0m[34m|[0m /* 10.119 */            [0m
+    [36m| [0m[34m|[0m /* 10.120 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.121 */        [0m
+    [36m| [0m[34m|[0m /* 10.122 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 10.123 */    }[0m
+    [36m| [0m[34m|[0m /* 10.124 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 10.125 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 10.126 */    }[0m
+    [36m| [0m[34m|[0m /* 10.127 */}[0m
+    [36m| [0m[34m|[0m /* 10.128 */[0m
+    [36m| [0m[34m|[0m /* 10.129 */[0m
+    [36m| [0m[34m|[0m /* 10.130 */interface TestPackageExtension_TlsProviderSubstitutionTest {[0m
+    [36m| [0m[34m|[0m /* 10.131 */    func registerTlsProviderSubstitutionTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 10.132 */}[0m
+    [36m| [0m[34m|[0m /* 10.133 */extend TestPackage <: TestPackageExtension_TlsProviderSubstitutionTest {[0m
+    [36m| [0m[34m|[0m /* 10.134 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 10.135 */    public func registerTlsProviderSubstitutionTest() {[0m
+    [36m| [0m[34m|[0m /* 10.136 */        registerSuite({ => TlsProviderSubstitutionTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 10.137 */    }[0m
+    [36m| [0m[34m|[0m /* 10.138 */}[0m
+    [36m| [0m[34m|[0m /* 10.139 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.32 */                    if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.33 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.34 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 10.31 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 10.32 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 10.33 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.35 */                    if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.36 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.37 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 10.34 */                    if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 10.35 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 10.36 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 10.37 */                    if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 10.38 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 10.39 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 10.47 */                None < TlsProviderException >[0m
+   [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.64 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.65 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.66 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.67 */                    if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.68 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.69 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 8.70 */                    if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 8.71 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 8.72 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.104 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.105 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.106 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.107 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.108 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.109 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 8.110 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 8.111 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 8.112 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m9[0m   [36m| [0m[34m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m104[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused variable:'serverName'
+   [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:141:9:
+    [36m| [0m
+[36m141[0m [36m| [0m        serverName!: ?HostName[0m
+    [36m| [0m        [33m^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+15 warnings generated, 15 warnings printed.

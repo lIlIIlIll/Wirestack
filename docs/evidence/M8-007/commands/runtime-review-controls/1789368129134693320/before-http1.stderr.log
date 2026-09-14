@@ -1,0 +1,10 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo-root>/src/internal/http1/server_connection.cj:116:23:
+    [36m| [0m
+[36m116[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+Error: cjpm test failed

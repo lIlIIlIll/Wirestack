@@ -25,6 +25,7 @@ from tools import m7_026_linux_api_freeze as api
 from tools import m7_028_security_review_package as security
 from tools import m7_029_independent_security_review as review
 from tools import m7_030_linux_release as signing
+from tools import m7_032_public_api_inventory as public_api
 from tools.gates import m7_023_linux_fuzz as fuzz
 from tools.repository import repository_tooling as repository
 
@@ -40,6 +41,11 @@ SUPPLY = EVIDENCE / "supply-chain"
 LICENSE_REPORT = EVIDENCE / "licenses.json"
 CORE_REPORT = EVIDENCE / "release-core.json"
 FUZZ_REPORT = EVIDENCE / "fuzz-report.json"
+RUNTIME_CONTROLS = EVIDENCE.parent / "runtime-review-controls.json"
+RUNTIME_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/runtime-review-controls.py.txt"
+OWNER_CONTROLS = EVIDENCE.parent / "soak-owner-controls.json"
+OWNER_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt"
+OWNER_PREFLIGHT = EVIDENCE.parent / "reproductions/measured-owner-preflight-corrected.json"
 SOAK_REPORT = EVIDENCE / "soak.json"
 SECURITY_INDEX = EVIDENCE / "security-index.json"
 SECURITY_PACKAGE = EVIDENCE / "security-package.json"
@@ -59,24 +65,29 @@ EVIDENCE_INPUTS = tuple(
         ("fuzz", FUZZ_REPORT), ("public-api", API_REPORT),
         ("installation", QUALIFICATION), ("artifact-audit", CORE_REPORT),
         ("licenses", LICENSE_REPORT), ("supply-chain-validation", SUPPLY / "bundle.json"),
+        ("runtime-regressions", RUNTIME_CONTROLS),
+        ("soak-owner-regressions", OWNER_CONTROLS),
     )
 ) + tuple(
-    (topic, TASK_ID, (SUPPLY / filename).relative_to(ROOT).as_posix(), "CURRENT_BOUND_INPUT", False)
-    for topic, filename in (
-        ("sbom", "sbom.spdx.json"), ("provider-manifest", "provider-manifest.json"),
-        ("build-fingerprint", "build-fingerprint.json"),
+    (topic, TASK_ID, path.relative_to(ROOT).as_posix(), "CURRENT_BOUND_INPUT", False)
+    for topic, path in (
+        ("sbom", SUPPLY / "sbom.spdx.json"), ("provider-manifest", SUPPLY / "provider-manifest.json"),
+        ("build-fingerprint", SUPPLY / "build-fingerprint.json"),
     )
 )
 FROZEN_CANDIDATE = EVIDENCE / "frozen-candidate.json"
 SOAK_COMMAND = EVIDENCE / "soak-command.json"
 INPUTS = (
     "tools/m8_007_final_release.py",
+    RUNTIME_CONTROL_DRIVER,
+    OWNER_CONTROL_DRIVER,
     "tools/m7_022_linux_release_soak.py",
     "tools/m7_025_linux_supply_chain.py",
     "tools/m7_026_linux_api_freeze.py",
     "tools/m7_028_security_review_package.py",
     "tools/m7_029_independent_security_review.py",
     "tools/m7_030_linux_release.py",
+    "tools/m7_032_public_api_inventory.py",
     "tools/release_soak/main.cj",
     "tools/evidence_digest.py",
     "tools/gates/m7_023_linux_fuzz.py",
@@ -176,16 +187,21 @@ def prepare() -> dict:
     return result
 
 
+def verify_api() -> dict:
+    public_api.build_inventory(ROOT)
+    return api.validate(ROOT, BASELINE, API_REPORT, task_id=TASK_ID)
+
+
 def verify_core(*, check_report: bool = True) -> dict:
     qualification = release.load_json(QUALIFICATION)
     release.validate_report(qualification, ROOT)
     require(qualification.get("source_task") == TASK_ID, "historical qualification cannot qualify M8-007")
     require(qualification.get("final_release_inputs") == source_inputs(), "final qualification tooling changed")
     require(qualification.get("native_rebuild") == record(NATIVE_BUILD), "native build evidence changed")
-    require(digest.artifact_byte_sha256(ARTIFACT) == qualification["artifact"]["sha256"], "qualified artifact changed")
+    require(digest.schema_artifact_sha256_equal(digest.artifact_byte_sha256(ARTIFACT), qualification["artifact"]["sha256"]), "qualified artifact changed")
     payload, manifest = release.read_verified_payload(ARTIFACT)
     native = validate_native(payload)
-    api.validate(ROOT, BASELINE, API_REPORT, task_id=TASK_ID)
+    verify_api()
     supply.validate_documents(SUPPLY, artifact_path=ARTIFACT, qualification_path=QUALIFICATION, task_id=TASK_ID, created_utc=created_utc(native))
     require(release.load_json(LICENSE_REPORT) == license_report(payload), "license evidence changed")
     result = {
@@ -205,7 +221,7 @@ def download_artifact() -> dict:
     expected = release.load_json(QUALIFICATION)["artifact"]
     if ARTIFACT.is_file():
         require(ARTIFACT.stat().st_size == expected["bytes"] and
-                digest.artifact_byte_sha256(ARTIFACT) == expected["sha256"],
+                digest.schema_artifact_sha256_equal(digest.artifact_byte_sha256(ARTIFACT), expected["sha256"]),
                 "existing artifact differs from frozen qualification")
         return {"source_task": TASK_ID, "decision": "PASS", "mode": "verified-existing-artifact"}
     ARTIFACT.parent.mkdir(parents=True, exist_ok=True)
@@ -219,7 +235,7 @@ def download_artifact() -> dict:
         require(completed.returncode == 0, f"frozen artifact download failed: {completed.stderr}")
         downloaded = directory / ARTIFACT.name
         require(downloaded.stat().st_size == expected["bytes"] and
-                digest.artifact_byte_sha256(downloaded) == expected["sha256"],
+                digest.schema_artifact_sha256_equal(digest.artifact_byte_sha256(downloaded), expected["sha256"]),
                 "downloaded artifact differs from frozen qualification")
         downloaded.replace(ARTIFACT)
     return {"source_task": TASK_ID, "decision": "PASS", "mode": "downloaded-and-verified-artifact"}
@@ -263,8 +279,8 @@ def verify_fuzz() -> dict:
     require(result.get("final_release_inputs") == fuzz_inputs(), "fuzz qualification inputs changed")
     manifest, targets = fuzz.load_manifest(ROOT, ROOT / "tools/gates/campaigns/m7-023-linux-fuzz.json")
     require(result["manifest"] == "tools/gates/campaigns/m7-023-linux-fuzz.json" and
-            result["manifest_sha256"] == digest.text_evidence_sha256(ROOT / result["manifest"]), "fuzz manifest changed")
-    require(result["source_sha256"] == fuzz.source_fingerprint(ROOT), "fuzz parser sources changed")
+            digest.schema_text_sha256_equal(result["manifest_sha256"], digest.text_evidence_sha256(ROOT / result["manifest"])), "fuzz manifest changed")
+    require(digest.schema_text_sha256_equal(result["source_sha256"], fuzz.source_fingerprint(ROOT)), "fuzz parser sources changed")
     require(result["gate_id"] == manifest["gate_id"] and result["profile"] == manifest["profile"] and
             result["corpus_version"] == manifest["corpus_version"], "fuzz campaign identity changed")
     require(result["mode"] == "campaign" and len(result["targets"]) == len(targets), "fuzz campaign is incomplete")
@@ -275,9 +291,142 @@ def verify_fuzz() -> dict:
     return {"source_task": TASK_ID, "decision": "PASS", "targets": len(targets), "evidence": record(FUZZ_REPORT)}
 
 
+def _control_logs(command: dict, family: str) -> tuple[dict[str, str], list[dict]]:
+    output, files = {}, []
+    directory = (EVIDENCE.parent / "commands" / family).resolve()
+    for stream in ("stdout", "stderr"):
+        path = (ROOT / command[f"{stream}_path"]).resolve()
+        require(path.is_relative_to(directory), "control log escaped its capture directory")
+        captured = record(path)
+        require(digest.text_evidence_sha256_equal(captured["digest"], command[f"{stream}_digest"]), f"control log changed: {path}")
+        files.append(captured)
+        output[stream] = path.read_text()
+    return output, files
+
+
+def verify_runtime_controls() -> dict:
+    report = release.load_json(RUNTIME_CONTROLS)
+    require(report.get("source_task") == TASK_ID and report.get("status") == "PASS", "runtime review controls did not pass")
+    require(report.get("driver") == record(ROOT / RUNTIME_CONTROL_DRIVER), "runtime control driver changed")
+    require(digest.schema_text_sha256_equal(report["fixed_source_sha256"], release.source_tree_sha256(ROOT)), "runtime regression sources changed")
+    expected_sources = {
+        "src/internal/http1/server_reader.cj", "src/internal/http1/server_reader_test.cj",
+        "src/internal/http1/client_connection.cj", "src/internal/http1/tls_client_pipeline_test.cj",
+        "src/internal/http1/http2_connection_pool.cj", "src/internal/http1/http2_connection_pool_test.cj",
+        "src/internal/tls_engine/connection.cj", "src/internal/tls_engine/connection_test.cj",
+        "src/internal/tls_engine/engine.cj",
+    }
+    require(set(report["source_inputs"]) == expected_sources, "runtime control source inventory changed")
+    for relative, expected in report["source_inputs"].items():
+        require(digest.text_evidence_sha256_equal(record(ROOT / relative)["digest"], expected), f"runtime test input changed: {relative}")
+    expected_failures = {
+        "http1": {
+            "rejectsOversizedFixedRequestBeforeReadingItsBody",
+            "zeroLengthConnectionCloseDoesNotWaitForTlsPeerShutdown",
+            "closeRacingUnpublishedAdmissionReleasesConnectionOwners",
+        },
+        "tls": {
+            "closeDeadlineExpiresWhileAnExistingBackgroundReadOwnsPumpAdmission",
+            "closeCancellationInterruptsAnExistingBackgroundReadWithinTheBound",
+            "closeCancellationDoesNotWaitBehindAnExistingCiphertextWrite",
+        },
+    }
+    files = [record(RUNTIME_CONTROLS), record(ROOT / RUNTIME_CONTROL_DRIVER)]
+    for phase in ("before", "after"):
+        require(set(report[phase]) == set(expected_failures), f"runtime {phase} suite inventory changed")
+        for name, expected in expected_failures.items():
+            command = report[phase][name]
+            package = "http1" if name == "http1" else "tls_engine"
+            argv = ["cjpm", "test", f"src/internal/{package}", "--exclude-tags=Performance",
+                    "--parallel", "1", "--no-progress", "--no-color"]
+            require(command["argv"] == argv and not command["timed_out"], f"runtime {phase} command changed: {name}")
+            require(command["exit_code"] == (1 if phase == "before" else 0), f"runtime {phase} command failed: {name}")
+            output, captured = _control_logs(command, "runtime-review-controls")
+            files.extend(captured)
+            cases = {case: status for status, case in re.findall(r"^\s*\[\s*(\w+)\s*\]\s+CASE:\s+(\w+)", output["stdout"] + output["stderr"], re.MULTILINE)}
+            failures = {case for case, status in cases.items() if status not in {"PASSED", "SKIPPED"}}
+            if phase == "before":
+                require(failures == expected, f"runtime baseline did not reproduce the exact findings: {name}")
+            else:
+                required = expected | ({"cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows"} if name == "tls" else set())
+                require(not failures and all(cases.get(case) == "PASSED" for case in required), f"runtime correction did not pass: {name}")
+    registration_report = EVIDENCE.parent / "reproductions/tls-close-registration-before.json"
+    registration_snapshot = EVIDENCE.parent / "reproductions/tls-close-registration-before.cj.txt"
+    registration = release.load_json(registration_report)
+    registration_case = "cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows"
+    require(registration.get("status") == "FAIL" and registration.get("failure_case") == registration_case,
+            "TLS registration negative control changed")
+    require(registration.get("production_snapshot_path") == registration_snapshot.relative_to(ROOT).as_posix(),
+            "TLS registration negative source snapshot changed")
+    command = registration["command"]
+    require(command["argv"] == ["cjpm", "test", "src/internal/tls_engine", "--exclude-tags=Performance",
+                               "--parallel", "1", "--no-progress", "--no-color"]
+            and command["exit_code"] == 1 and not command["timed_out"],
+            "TLS registration negative command changed")
+    output, captured = _control_logs(command, "")
+    cases = {case: status for status, case in re.findall(r"^\s*\[\s*(\w+)\s*\]\s+CASE:\s+(\w+)", output["stdout"] + output["stderr"], re.MULTILINE)}
+    require({case for case, status in cases.items() if status not in {"PASSED", "SKIPPED"}} == {registration_case},
+            "TLS registration negative control did not reproduce the exact failure")
+    files.extend([record(registration_report), record(registration_snapshot), *captured])
+    return {"source_task": TASK_ID, "status": "PASS", "files": files}
+
+
+def verify_owner_controls() -> dict:
+    report = release.load_json(OWNER_CONTROLS)
+    require(report.get("source_task") == TASK_ID and report.get("status") == "PASS", "soak owner controls did not pass")
+    require(report["driver"] == record(ROOT / OWNER_CONTROL_DRIVER), "soak owner control driver changed")
+    require(report["historical_log"] == record(EVIDENCE.parent / "reproductions/soak-preflight.log"), "historical owner log changed")
+    require(report["baseline_revision"] == release.load_json(RUNTIME_CONTROLS)["baseline_commit"], "owner controls use a different baseline")
+    expected_sources = {
+        "tools/m7_022_linux_release_soak.py", "tools/release_soak/main.cj",
+        "tools/tests/test_m7_022_linux_release_soak.py",
+    }
+    require(set(report["source_inputs"]) == expected_sources, "owner control source inventory changed")
+    for relative, expected in report["source_inputs"].items():
+        require(digest.text_evidence_sha256_equal(record(ROOT / relative)["digest"], expected), f"owner control input changed: {relative}")
+    files = [record(OWNER_CONTROLS), report["driver"], report["historical_log"]]
+    live = release.load_json(OWNER_PREFLIGHT)
+    require(report["runtime_preflight"] == record(OWNER_PREFLIGHT), "owner controls reference a different live preflight")
+    require(live["source_task"] == TASK_ID and live["preflight_status"] == "PASS", "measured-owner preflight did not pass")
+    require(live["process"]["exit_code"] == 0 and not live["process"]["timed_out"], "measured-owner process did not complete")
+    duration = live["parameters"]["duration_seconds"]
+    require(60 <= duration < soak.FORMAL_SECONDS, "owner preflight duration is not a separate short run")
+    require(digest.artifact_byte_sha256_equal(live["artifact"]["digest"], digest.artifact_byte_digest(ARTIFACT).to_json()), "owner preflight used different artifact bytes")
+    for name, path in (("consumer", soak.SOURCE), ("fixture", soak.FIXTURE), ("driver", soak.DRIVER)):
+        require(digest.text_evidence_sha256_equal(live["source"][f"{name}_digest"], record(path)["digest"]), f"owner preflight {name} changed")
+    raw_path = EVIDENCE.parent / "reproductions/measured-owner-preflight-corrected.log"
+    raw = record(raw_path)
+    require(live["raw_log"]["path"] == raw["path"] and digest.text_evidence_sha256_equal(live["raw_log"]["digest"], raw["digest"]), "owner preflight raw log changed")
+    samples, terminal = soak.parse_output(raw_path.read_text())
+    require(all(soak.validate_workload(terminal, duration, live["process"]["wall_elapsed_ms"]).values()), "owner preflight workload failed")
+    require(soak.application_trend(samples, minimum_samples=5)["decision"] == "PASS", "owner preflight application trend failed")
+    require(soak.resource_trend(live["resources"]["process_tree"]["samples"], minimum_samples=5)["decision"] == "PASS", "owner preflight process trend failed")
+    files.extend((record(OWNER_PREFLIGHT), raw))
+    for phase in ("before", "after"):
+        command = report[phase]
+        argv = (
+            ["python3", OWNER_CONTROL_DRIVER, "--baseline", report["baseline_revision"], "--phase", "before"]
+            if phase == "before" else
+            ["python3", "-m", "unittest", "-v", "tools.tests.test_m7_022_linux_release_soak"]
+        )
+        require(command["argv"] == argv and not command["timed_out"], f"owner {phase} command changed")
+        require(command["exit_code"] == (1 if phase == "before" else 0), f"owner {phase} control failed")
+        output, captured = _control_logs(command, "soak-owner-controls")
+        files.extend(captured)
+        if phase == "before":
+            observed = json.loads(output["stdout"])
+            require(observed["old_literal_log_accepted"] is True and observed["tests_run"] == 1 and observed["failures"] == 1 and observed["errors"] == 0, "baseline did not reproduce literal owner acceptance")
+            require(digest.text_evidence_sha256_equal(observed["baseline_source_digest"], report["baseline_source_digest"]), "owner baseline digest changed")
+        else:
+            require(re.search(r"^test_old_literal_owner_evidence_schema_is_rejected .* \.\.\. ok$", output["stderr"], re.MULTILINE) is not None, "corrected literal-owner regression was not exercised")
+    return {"source_task": TASK_ID, "status": "PASS", "files": files}
+
+
 def prepare_security() -> dict:
     verify_core()
     verify_fuzz()
+    verify_runtime_controls()
+    verify_owner_controls()
     index = security.build_index(ROOT, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
     write_json(SECURITY_INDEX, index)
     package = security.validate(ROOT, SECURITY_INDEX, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
@@ -293,6 +442,8 @@ def prepare_security() -> dict:
 def verify_review() -> dict:
     verify_core()
     verify_fuzz()
+    verify_runtime_controls()
+    verify_owner_controls()
     security.validate(ROOT, SECURITY_INDEX, SECURITY_PACKAGE, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
     return review.validate(ROOT, REVIEW_REQUEST, REVIEW, task_id=TASK_ID, package_path=SECURITY_INDEX.relative_to(ROOT).as_posix())
 
@@ -300,6 +451,8 @@ def verify_review() -> dict:
 def frozen_source_paths() -> list[str]:
     paths = set(INPUTS) | set(release.QUALIFICATION_INPUTS)
     paths.update(path.relative_to(ROOT).as_posix() for path in (ROOT / "src").rglob("*.cj"))
+    paths.update(item["path"] for item in verify_runtime_controls()["files"])
+    paths.update(item["path"] for item in verify_owner_controls()["files"])
     paths.update(path.relative_to(ROOT).as_posix() for path in (
         soak.FIXTURE, QUALIFICATION, CORE_REPORT, NATIVE_BUILD, BASELINE, API_REPORT,
         LICENSE_REPORT, FUZZ_REPORT, SECURITY_INDEX, SECURITY_PACKAGE,
@@ -466,6 +619,8 @@ def main(argv: list[str] | None = None) -> int:
             result = prepare()
         elif args == ["verify-core"]:
             result = verify_core()
+        elif args == ["verify-api"]:
+            result = verify_api()
         elif args == ["download-artifact"]:
             result = download_artifact()
         elif args == ["verify-fuzz"]:
@@ -505,10 +660,10 @@ def main(argv: list[str] | None = None) -> int:
                 *args[1:],
             ], task_id=TASK_ID)
         else:
-            raise release.ReleaseError("usage: m8_007_final_release.py {prepare|download-artifact|verify-core|fuzz|verify-fuzz|prepare-security|review-report|run-soak-gate --revision SHA|soak [options]|verify-soak|signing-manifest|verify-signatures --commit SHA --directory PATH|verify-all}")
+            raise release.ReleaseError("usage: m8_007_final_release.py {prepare|download-artifact|verify-core|verify-api|fuzz|verify-fuzz|prepare-security|review-report|run-soak-gate --revision SHA|soak [options]|verify-soak|signing-manifest|verify-signatures --commit SHA --directory PATH|verify-all}")
         print(json.dumps(result, sort_keys=True))
         return 0
-    except (release.ReleaseError, supply.SupplyChainError, api.ApiFreezeError, security.ReviewPackageError, review.IndependentReviewError, signing.ReleaseError, soak.SoakError, repository.ContractError, OSError, ValueError, KeyError, subprocess.TimeoutExpired) as error:
+    except (release.ReleaseError, supply.SupplyChainError, api.ApiFreezeError, public_api.PublicApiInventoryError, security.ReviewPackageError, review.IndependentReviewError, signing.ReleaseError, soak.SoakError, repository.ContractError, OSError, ValueError, KeyError, subprocess.TimeoutExpired) as error:
         print(json.dumps({"source_task": TASK_ID, "decision": "FAIL", "error": str(error)}))
         return 1
 
