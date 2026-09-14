@@ -157,6 +157,20 @@ class CjfastSummaryRssTest(unittest.TestCase):
         self.assertNotIn("cjpm", command)
         self.assertNotIn("--skip-build", command)
 
+    def test_direct_runtime_includes_cjfast_package_libraries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            runtime_dir = root / "target/release/fastjson"
+            runtime_dir.mkdir(parents=True)
+            command_env = CJFAST_RUNNER.runtime_environment(
+                {"CANGJIE_STDX_PATH": "/sdk", "LD_LIBRARY_PATH": "/old"},
+                root,
+            )
+            self.assertEqual(
+                command_env["LD_LIBRARY_PATH"],
+                f"/sdk:{runtime_dir}:/old",
+            )
+
     def test_build_command_is_unmeasured_and_does_not_select_a_case(self) -> None:
         command = CJFAST_RUNNER.build_command(3)
         self.assertIn("--no-run", command)

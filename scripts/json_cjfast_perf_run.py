@@ -199,15 +199,21 @@ def binary_path_for(library: str, cjfast_work_dir: Path) -> Path:
     return cjfast_work_dir / "target/release/unittest_bin/fastjson.bench"
 
 
-def runtime_environment(env: dict[str, str]) -> dict[str, str]:
+def runtime_environment(
+    env: dict[str, str], cjfast_work_dir: Path
+) -> dict[str, str]:
     command_env = env.copy()
     dynamic_stdx = command_env.get("CANGJIE_STDX_PATH")
     if not dynamic_stdx:
         raise ValueError("CANGJIE_STDX_PATH is required for direct benchmark execution")
+    library_paths = [dynamic_stdx]
+    runtime_dir = cjfast_work_dir / "target/release/fastjson"
+    if runtime_dir.is_dir():
+        library_paths.append(str(runtime_dir))
     current = command_env.get("LD_LIBRARY_PATH", "")
-    command_env["LD_LIBRARY_PATH"] = (
-        f"{dynamic_stdx}:{current}" if current else dynamic_stdx
-    )
+    if current:
+        library_paths.append(current)
+    command_env["LD_LIBRARY_PATH"] = ":".join(library_paths)
     return command_env
 
 
@@ -362,10 +368,10 @@ def main() -> int:
                         command = java_command(
                             args.cpu, source_case, report_path / "jmh.json"
                         )
-                    before = os.getloadavg()[0]
+                    load_before = os.getloadavg()[0]
                     started = time.monotonic()
                     command_env = (
-                        runtime_environment(env)
+                        runtime_environment(env, cjfast_work_dir)
                         if library in {"yjson", "stdx_json", "cjfast_json"}
                         else env.copy()
                     )
