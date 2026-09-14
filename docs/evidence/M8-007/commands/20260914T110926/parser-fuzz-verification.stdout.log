@@ -1,0 +1,1 @@
+{"decision": "PASS", "evidence": {"digest": {"domain": "text-utf8-lf-v1", "sha256": "93f3da6ce7db30b97e01bd3faf069a23925dcbd5edd57995c19edfbd79dcdfae"}, "path": "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"}, "source_task": "M8-007", "targets": 10}

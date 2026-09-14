@@ -27,10 +27,19 @@ Failures reject qualification. Package extraction must not publish unsafe member
 | P013 | Bounded TLS close while background I/O holds a pump lock | Deadline/cancellation admission and terminal cleanup | Reachable race | Context checks must precede or interrupt waiting |
 | P014 | Live versus released soak resource owners | Actual owner observations and terminal joins | Reachable | Literal zero values are not resource evidence |
 | P015 | Already-cancelled close token invokes a throwing abort callback | Registration failure enters terminal cleanup | Reachable error path | Close admission must not retain the TLS engine |
+| P016 | Oversized member, sparse expansion, metadata, or header count | Header and decoded-byte budgets precede materialization; logical sizes precede extraction | Reachable error paths | An accepted digest does not waive resource limits |
+| P017 | Protected signing ref and explicit owner approval | Tag rules, environment reviewer, exact deployment policy, and approved SHA | Hosted release path | No non-administrator credential is available for a denial probe |
+| P018 | Hosted source matches or differs from independently approved source | Approval record and exact signer/source digest comparison | Reachable error path | Hosted metadata cannot choose the trusted revision |
+| P019 | Frozen, signing, and final task contracts differ | Complete committed task comparison permits added source paths only | Reachable error path | Commands and required reports cannot be weakened |
+| P020 | Generated proof exists locally but is absent from the seal inventory | Nine raw formal/signing inputs must be declared | Reachable error path | Workflow retention is not repository evidence |
 
 ## Input domains and state
 
 Archive members include regular files, directories, duplicate names, traversal names, links, and missing or extra inventory entries. Native inputs include each required component, omitted provenance, and same-size archive mutation. API and documentation inputs include unchanged content, changed content, and planning-only changes.
+
+Archive resource boundaries include an 8 MiB member and one extra byte, aggregate payload above 64 MiB, decoded headers and padding, oversized PAX metadata, and excessive member headers. Cumulative PAX fields cover 128 and 129. GNU sparse formats cover legacy, 0.0, 0.1, and 1.0 encodings.
+
+Signing inputs include missing approval, alternative reviewers, unprotected refs, a different hosted source SHA, and the exact approved signing tag. Policy capture precedes the soak; actual source approval follows formal completion.
 
 The soak duration domain includes preflights below 86,400 seconds and the exact formal duration. Cancellation latency must stay within the existing 50,000,000-nanosecond bound. Resource trends require the maintained sample minimums. The process must finish, join admitted tasks, and release its application-owned resources.
 
@@ -58,6 +67,10 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | S014 | Deadline expiry or cancellation during close behind active I/O | Another operation holds the pump admission resource | P013 | Honor the close context and perform terminal cleanup | Assert close terminates, old I/O wakes, and engine cleanup completes once | boundary,regression | P0 |
 | S015 | Retained terminal owner, growing weak-owner series, or old literal sample schema | Soak sampling or terminal validation | P014 | Refuse unsupported ownership PASS | Assert live observations, bounded trends, and rejection of invalid terminal or schema evidence | regression | P0 |
 | S016 | Already-cancelled token and throwing transport abort | TLS connection handshaken; close not yet registered | P015 | Propagate the failure and release the engine | Assert terminal connection, one transport disposal, and exactly one engine release | error,regression | P0 |
+| S017 | Archive exceeds a resource budget | Empty extraction destination | P002,P016 | Reject before publishing an installation | Accept the exact member boundary; reject excess member bytes, sparse expansion, decoded bytes, metadata, and header count | boundary,error,regression | P0 |
+| S018 | Missing or conflicting signing authority | Pre-soak policy with no approved SHA | P008,P017 | Require protected refs and sole owner approval | Reject alternative reviewers and stale policy inputs; bind the exact source and tag before signing | normal,error | P0 |
+| S019 | Hosted report selects a different source | Independent approval names another SHA | P008,P018 | Reject the hosted source | Even a successful verification result for the wrong source cannot satisfy approval | error,regression | P0 |
+| S020 | Missing archival files, removed inputs, or changed gate fields | A real frozen or signing task exists | P019,P020 | Reject incomplete publication | Require raw formal/signing inputs and preserve every prior task obligation while accepting added proof paths | error,regression | P0 |
 
 ## Test-plan matrix
 
@@ -79,9 +92,15 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | T014 | S014 | P013 | Active TLS I/O plus bounded or cancelled close | Both terminal cleanup and old I/O finish | Assert context outcome and safe teardown under controlled ordering | strengthened |
 | T015 | S015 | P014 | Ownership-observation negative controls and real preflight | No literal schema, growing weak-owner series, or retained terminal owners pass | Assert observed owner state, terminal joins, and strict schema rejection | strengthened |
 | T016 | S016 | P015 | `cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows` | Intermediate implementation fails; corrected TLS suite passes | Assert registration failure cannot abandon admitted cleanup; retain negative source and raw logs | strengthened |
+| T017 | S017 | P002,P016 | `archive-review-controls.py.txt` against `14a9925` and corrected source | Seven baseline failures and seven corrected passes | Reparse exact raw test outcomes and bind driver, source, tests, commands, and digests | strengthened |
+| T018 | S018 | P008,P017 | Policy capture, authorization regressions, and actual post-soak owner approval | Only the approved signing source proceeds | Active API-recorded policy, sole reviewer, immutable signing tags, and exact environment/source binding | strengthened,platform |
+| T019 | S019 | P008,P018 | `hosted-source-controls.py.txt` with successful cryptographic verification stubbed | Baseline fails; corrected source rejects substitution | Bind the exact negative/positive unit outcome to source, test, driver, and raw logs; real signatures remain T009 | boundary |
+| T020 | S019,S020 | P018,P019,P020 | Publication controls and additive-proof acceptance regression | Baseline accepts omissions or weakened contracts; corrected source rejects them | Bind six negative/positive control outcomes and preserve a valid additive transition | strengthened |
 
 ## Feedback and gaps
 
 The baseline and fixed control reports retain the SBOM and resolver-archive regressions. The integrated release tooling log records the observed Python regression results. Current parser-campaign results are recorded in `linux_x86_64/fuzz-report.json`; the final wrapper binds the campaign to the final qualification.
 
 The 600-second diagnostic is a preflight. It does not close T007. Hosted signatures and independent review require their own executed evidence. No line, branch, or mutation-adequacy percentage is claimed by this plan. Other platforms and compatibility with a previous binary release remain outside scope.
+
+The interrupted formal run on `14a9925` remains `INCOMPLETE` and does not close T007. Its frozen inputs and partial workload output are retained under `reproductions/formal-soak-14a9925`.

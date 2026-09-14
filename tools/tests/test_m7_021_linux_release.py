@@ -123,6 +123,112 @@ class M7021LinuxReleaseTest(unittest.TestCase):
             with self.assertRaisesRegex(release.ReleaseError, "unsafe release archive"):
                 release.extract_archive(archive_path, Path(directory) / "install")
 
+    def test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte(self) -> None:
+        boundary = b"x" * (8 * 1024 * 1024)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "release.tar.gz"
+            release.write_reproducible_archive(archive, self.archive_payload({"large.bin": boundary}))
+            payload, _ = release.read_verified_payload(archive)
+            self.assertEqual(boundary, payload["large.bin"])
+            release.write_reproducible_archive(archive, self.archive_payload({"large.bin": boundary + b"x"}))
+            with self.assertRaises(release.ReleaseError):
+                release.extract_archive(archive, root / "install")
+            self.assertFalse((root / "install").exists())
+
+    def test_archive_rejects_aggregate_payload_over_limit(self) -> None:
+        block = b"\0" * (8 * 1024 * 1024)
+        payload = self.archive_payload({f"part-{index}.bin": block for index in range(9)})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "release.tar.gz"
+            release.write_reproducible_archive(archive, payload)
+            with self.assertRaises(release.ReleaseError):
+                release.extract_archive(archive, root / "install")
+            self.assertFalse((root / "install").exists())
+
+    def test_archive_budget_includes_serialized_headers_and_padding(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / "release.tar.gz"
+            release.write_reproducible_archive(archive, self.archive_payload({"small.bin": b"x"}))
+            with mock.patch.object(release, "MAX_ARCHIVE_BYTES", 8192, create=True):
+                with self.assertRaises(release.ReleaseError):
+                    release.read_verified_payload(archive)
+
+    def test_archive_rejects_oversized_pax_metadata(self) -> None:
+        payload = self.archive_payload({"small.bin": b"x"})
+        with tempfile.TemporaryDirectory() as directory:
+            archive_path = Path(directory) / "release.tar.gz"
+            with tarfile.open(archive_path, "w:gz", pax_headers={"comment": "x" * 8193}) as archive:
+                for relative, content in payload.items():
+                    info = tarfile.TarInfo(f"{release.PACKAGE_ROOT}/{relative}")
+                    info.size = len(content)
+                    archive.addfile(info, io.BytesIO(content))
+            with self.assertRaises(release.ReleaseError):
+                release.read_verified_payload(archive_path)
+
+    def test_archive_bounds_cumulative_global_pax_fields(self) -> None:
+        payload = self.archive_payload({"empty.bin": b""})
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "release.tar.gz"
+            for count in (128, 129):
+                with tarfile.open(path, "w:gz") as archive:
+                    for start in range(0, count, 64):
+                        fields = {f"custom-{index}": "x" for index in range(start, min(start + 64, count))}
+                        raw = tarfile.TarInfo.create_pax_global_header(fields)
+                        header = tarfile.TarInfo.frombuf(raw[:512], "utf-8", "strict")
+                        archive.addfile(header, io.BytesIO(raw[512:]))
+                    for relative, content in payload.items():
+                        info = tarfile.TarInfo(f"{release.PACKAGE_ROOT}/{relative}")
+                        info.size = len(content)
+                        archive.addfile(info, io.BytesIO(content))
+                if count == 128:
+                    actual, _ = release.read_verified_payload(path)
+                    self.assertEqual(payload, actual)
+                else:
+                    with self.assertRaises(release.ReleaseError):
+                        release.read_verified_payload(path)
+
+    def test_archive_rejects_sparse_encodings_before_map_expansion(self) -> None:
+        payload = self.archive_payload({"empty.bin": b""})
+        encodings = (
+            {"GNU.sparse.major": "1", "GNU.sparse.minor": "0", "GNU.sparse.realsize": "0"},
+            {"GNU.sparse.map": "0,0", "GNU.sparse.size": "0"},
+            {"GNU.sparse.size": "0", "GNU.sparse.offset": "0", "GNU.sparse.numbytes": "0"},
+            None,
+        )
+        accepted = []
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "release.tar.gz"
+            for fields in encodings:
+                with tarfile.open(path, "w:gz", format=tarfile.GNU_FORMAT if fields is None else tarfile.PAX_FORMAT) as archive:
+                    for relative, content in payload.items():
+                        info = tarfile.TarInfo(f"{release.PACKAGE_ROOT}/{relative}")
+                        if relative == "empty.bin":
+                            if fields is None:
+                                info.type = tarfile.GNUTYPE_SPARSE
+                            else:
+                                info.pax_headers = fields
+                                if "GNU.sparse.major" in fields:
+                                    content = b"1\n0\n0\n".ljust(512, b"\0")
+                        info.size = len(content)
+                        archive.addfile(info, io.BytesIO(content))
+                try:
+                    release.read_verified_payload(path)
+                except release.ReleaseError:
+                    pass
+                else:
+                    accepted.append(fields)
+        self.assertEqual([], accepted)
+
+    def test_archive_rejects_excessive_member_headers(self) -> None:
+        payload = self.archive_payload({f"empty-{index}": b"" for index in range(4097)})
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / "release.tar.gz"
+            release.write_reproducible_archive(archive, payload)
+            with self.assertRaises(release.ReleaseError):
+                release.read_verified_payload(archive)
+
     def test_verified_extraction_preserves_exact_bytes_and_rejects_same_size_mutation(self) -> None:
         payload = self.archive_payload({"src/package.cj": b"package wirestack\r\n"})
         with tempfile.TemporaryDirectory() as directory:

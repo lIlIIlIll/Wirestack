@@ -1,0 +1,21 @@
+import gzip,json,sys,tarfile,tempfile,tracemalloc
+from pathlib import Path
+from tools import m7_021_linux_release as release
+for blocks in (20,40,80):
+ with tempfile.TemporaryDirectory() as directory:
+  path=Path(directory)/"probe.tar.gz"
+  decoded=0
+  with gzip.open(path,"wb") as compressed:
+   for block in range(blocks):
+    headers={f"custom{block:03d}_{index:03d}":"x" for index in range(200)}
+    raw=tarfile.TarInfo.create_pax_global_header(headers)
+    assert len(raw)-512 <= release.MAX_ARCHIVE_METADATA_BYTES
+    compressed.write(raw);decoded+=len(raw)
+    member=tarfile.TarInfo(f"{release.PACKAGE_ROOT}/empty-{block}")
+    raw=member.tobuf();compressed.write(raw);decoded+=len(raw)
+   compressed.write(b"\0"*1024);decoded+=1024
+  tracemalloc.start()
+  try:release.read_verified_payload(path)
+  except release.ReleaseError as error:message=str(error)
+  peak=tracemalloc.get_traced_memory()[1];tracemalloc.stop()
+  print(json.dumps({"blocks":blocks,"decoded_bytes":decoded,"peak_traced_bytes":peak,"rejection":message}),flush=True)

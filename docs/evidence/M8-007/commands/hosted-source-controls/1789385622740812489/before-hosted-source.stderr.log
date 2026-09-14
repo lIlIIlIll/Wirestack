@@ -1,0 +1,55 @@
+test_verify_all_rejects_hosted_revision_not_independently_approved (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_hosted_revision_not_independently_approved) ... FAIL
+test_verify_all_rejects_unarchived_signing_inputs (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_unarchived_signing_inputs) ... FAIL
+test_verify_all_rejects_weakened_approved_task (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_weakened_approved_task) ... FAIL
+test_verify_all_rejects_removed_approved_source_input (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_removed_approved_source_input) ... FAIL
+test_frozen_command_rejects_weakened_release_contract (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_frozen_command_rejects_weakened_release_contract) ... FAIL
+
+======================================================================
+FAIL: test_verify_all_rejects_hosted_revision_not_independently_approved (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_hosted_revision_not_independently_approved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m8_007_final_release.py", line 29, in test_verify_all_rejects_hosted_revision_not_independently_approved
+    self.assertEqual(1, final_release.main(["verify-all"]))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_verify_all_rejects_unarchived_signing_inputs (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_unarchived_signing_inputs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m8_007_final_release.py", line 75, in test_verify_all_rejects_unarchived_signing_inputs
+    self.assertEqual(1, status)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_verify_all_rejects_weakened_approved_task (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_weakened_approved_task)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m8_007_final_release.py", line 82, in test_verify_all_rejects_weakened_approved_task
+    self.assertEqual(1, status)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_verify_all_rejects_removed_approved_source_input (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_removed_approved_source_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m8_007_final_release.py", line 89, in test_verify_all_rejects_removed_approved_source_input
+    self.assertEqual(1, status)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_frozen_command_rejects_weakened_release_contract (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_frozen_command_rejects_weakened_release_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m8_007_final_release.py", line 42, in test_frozen_command_rejects_weakened_release_contract
+    with self.assertRaises(final_release.release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.008s
+
+FAILED (failures=5)

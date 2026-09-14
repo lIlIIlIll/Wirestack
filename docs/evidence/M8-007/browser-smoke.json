@@ -1,7 +1,7 @@
 {
   "url": "http://127.0.0.1:18707/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a636c6173733a546c73436f6e6e656374696f6e2367302829.html#symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a546c73436f6e6e656374696f6e3a3a66756e6374696f6e3a636c6f7365236730284f7065726174696f6e436f6e7465787429",
   "title": "wirestack.tls.TlsConnection",
-  "search": "TlsConnection",
+  "search": "TlsConnection.close",
   "target": "wirestack.tls.TlsConnection.close\n\nfunctionpublicsemantic: partial Owner: wirestack.tls.TlsConnection \u00b7 src/tls/facade.cj:610:5\n\n\u7b7e\u540d\npublic func close(context: OperationContext): Unit\n\u29c9\n\u6982\u89c8\n\nWirestack \u516c\u5f00 API\uff1a\u5173\u95ed\u8d44\u6e90\u5e76\u5524\u9192\u6b63\u5728\u7b49\u5f85\u7684\u64cd\u4f5c\u3002\n\n\u53c2\u6570\ncontext\n:OperationContext\n\n\u63a7\u5236\u672c\u6b21\u64cd\u4f5c\u7684\u622a\u6b62\u65f6\u95f4\u3001\u53d6\u6d88\u548c\u8ffd\u8e2a\u8303\u56f4\u3002",
   "source_task": "M8-007",
   "status": "PASS",
@@ -15,18 +15,18 @@
     "path": "docs/evidence/M8-007/docs-report.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "edc81225cb931463684612a6ebf65c63e15683ed36b9001337831da15cc9ba8c"
+      "sha256": "f8e9002d9fa56ce94120db6dfd42a10fecfe7e7db0ebfb8462c7609697484d88"
     }
   },
   "screenshot": {
     "path": "docs/evidence/M8-007/docs-close.webp.hex",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "19294d336af143bbaeede8ea84ce271a0c8fed17b026fb545def7e49e7ab7a3d"
+      "sha256": "1b376741eb7112904190ef3a45dfa659f18d0148746fdbf1de6e2c4520cb15fb"
     }
   },
   "decoded_image_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "dfbee48b087474d2f7222ece72f8eff5c4947f6a26cf7ce8dc1433e7f5beb41a"
+    "sha256": "8841a54dea28b1eb1549bf919029d28106e931494e80f4ce57e76cdacf77f559"
   }
 }

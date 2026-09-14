@@ -26,6 +26,7 @@ from tools import m7_028_security_review_package as security
 from tools import m7_029_independent_security_review as review
 from tools import m7_030_linux_release as signing
 from tools import m7_032_public_api_inventory as public_api
+from tools import m8_007_signing_authorization as authorization
 from tools.gates import m7_023_linux_fuzz as fuzz
 from tools.repository import repository_tooling as repository
 
@@ -41,6 +42,32 @@ SUPPLY = EVIDENCE / "supply-chain"
 LICENSE_REPORT = EVIDENCE / "licenses.json"
 CORE_REPORT = EVIDENCE / "release-core.json"
 FUZZ_REPORT = EVIDENCE / "fuzz-report.json"
+ARCHIVE_CONTROLS = EVIDENCE.parent / "archive-review-controls.json"
+ARCHIVE_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/archive-review-controls.py.txt"
+ARCHIVE_CONTROL_SOURCE = "tools/m7_021_linux_release.py"
+ARCHIVE_CONTROL_TESTS = "tools/tests/test_m7_021_linux_release.py"
+REVIEW_BASELINE_REVISION = "14a9925dd78ded4f5d99eb8aa70c34f676404f3c"
+PYTHON_CONTROL_TIMEOUT_SECONDS = 120
+ARCHIVE_CASES = (
+    "test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte",
+    "test_archive_rejects_aggregate_payload_over_limit",
+    "test_archive_budget_includes_serialized_headers_and_padding",
+    "test_archive_rejects_oversized_pax_metadata",
+    "test_archive_rejects_excessive_member_headers",
+    "test_archive_bounds_cumulative_global_pax_fields",
+    "test_archive_rejects_sparse_encodings_before_map_expansion",
+)
+PYTHON_CONTROL_CASE = re.compile(r"^(test_\w+) \([^\n]+\) \.\.\. (ok|FAIL|ERROR)$", re.MULTILINE)
+HOSTED_SOURCE_CONTROLS = EVIDENCE.parent / "hosted-source-controls.json"
+HOSTED_SOURCE_DRIVER = "docs/evidence/M8-007/reproductions/hosted-source-controls.py.txt"
+HOSTED_SOURCE_CASES = (
+    "test_verify_all_rejects_hosted_revision_not_independently_approved",
+    "test_verify_all_rejects_unarchived_signing_inputs",
+    "test_verify_all_rejects_unarchived_formal_inputs",
+    "test_verify_all_rejects_weakened_approved_task",
+    "test_verify_all_rejects_removed_approved_source_input",
+    "test_frozen_command_rejects_weakened_release_contract",
+)
 RUNTIME_CONTROLS = EVIDENCE.parent / "runtime-review-controls.json"
 RUNTIME_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/runtime-review-controls.py.txt"
 OWNER_CONTROLS = EVIDENCE.parent / "soak-owner-controls.json"
@@ -66,6 +93,9 @@ EVIDENCE_INPUTS = tuple(
         ("installation", QUALIFICATION), ("artifact-audit", CORE_REPORT),
         ("licenses", LICENSE_REPORT), ("supply-chain-validation", SUPPLY / "bundle.json"),
         ("runtime-regressions", RUNTIME_CONTROLS),
+        ("archive-resource-regressions", ARCHIVE_CONTROLS),
+        ("hosted-source-regressions", HOSTED_SOURCE_CONTROLS),
+        ("signing-authorization", ROOT / authorization.POLICY_RELATIVE),
         ("soak-owner-regressions", OWNER_CONTROLS),
     )
 ) + tuple(
@@ -79,8 +109,15 @@ FROZEN_CANDIDATE = EVIDENCE / "frozen-candidate.json"
 SOAK_COMMAND = EVIDENCE / "soak-command.json"
 INPUTS = (
     "tools/m8_007_final_release.py",
+    "tools/tests/test_m8_007_final_release.py",
+    ARCHIVE_CONTROL_DRIVER,
+    HOSTED_SOURCE_DRIVER,
+    ARCHIVE_CONTROL_SOURCE,
+    ARCHIVE_CONTROL_TESTS,
     RUNTIME_CONTROL_DRIVER,
     OWNER_CONTROL_DRIVER,
+    "tools/m8_007_signing_authorization.py",
+    "tools/tests/test_m8_007_signing_authorization.py",
     "tools/m7_022_linux_release_soak.py",
     "tools/m7_025_linux_supply_chain.py",
     "tools/m7_026_linux_api_freeze.py",
@@ -304,6 +341,101 @@ def _control_logs(command: dict, family: str) -> tuple[dict[str, str], list[dict
     return output, files
 
 
+def verify_archive_controls() -> dict:
+    report = release.load_json(ARCHIVE_CONTROLS)
+    require(
+        report.get("schema_version") == 1
+        and report.get("source_task") == TASK_ID
+        and report.get("status") == "PASS",
+        "archive review controls did not pass",
+    )
+    require(report.get("driver") == record(ROOT / ARCHIVE_CONTROL_DRIVER),
+            "archive control driver changed")
+    require(report.get("baseline_revision") == REVIEW_BASELINE_REVISION,
+            "archive controls use a different baseline")
+    baseline_source = {
+        "path": ARCHIVE_CONTROL_SOURCE,
+        "digest": repository._source_digest_at_commit(
+            ROOT, REVIEW_BASELINE_REVISION, ARCHIVE_CONTROL_SOURCE
+        ).to_json(),
+    }
+    require(report.get("baseline_source") == baseline_source,
+            "archive baseline source does not match the preserved candidate blob")
+    expected_sources = {
+        relative: record(ROOT / relative)
+        for relative in (ARCHIVE_CONTROL_SOURCE, ARCHIVE_CONTROL_TESTS)
+    }
+    require(report.get("source_records") == expected_sources,
+            "archive control source inventory changed")
+    require(report.get("expected_cases") == list(ARCHIVE_CASES),
+            "archive control case inventory changed")
+    argv = ["python3", "-m", "unittest", "-v", *(
+        f"tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.{case}"
+        for case in ARCHIVE_CASES
+    )]
+    files = [
+        record(ARCHIVE_CONTROLS),
+        record(ROOT / ARCHIVE_CONTROL_DRIVER),
+        *expected_sources.values(),
+    ]
+    for phase, case_status, exit_code in (("before", "FAIL", 1), ("after", "ok", 0)):
+        command = report[phase]
+        duration = command.get("duration_ms")
+        require(
+            command.get("id") == f"{phase}-archive"
+            and command.get("status") == ("FAIL" if phase == "before" else "PASS")
+            and command.get("argv") == argv
+            and command.get("exit_code") == exit_code
+            and command.get("timed_out") is False
+            and type(duration) in (int, float)
+            and 0 <= duration <= PYTHON_CONTROL_TIMEOUT_SECONDS * 1000,
+            f"archive {phase} command changed",
+        )
+        output, captured = _control_logs(command, "archive-review-controls")
+        matches = PYTHON_CONTROL_CASE.findall(output["stdout"] + output["stderr"])
+        observed = dict(matches)
+        expected = {case: case_status for case in ARCHIVE_CASES}
+        require(len(matches) == len(ARCHIVE_CASES) and observed == expected,
+                f"archive {phase} raw cases changed")
+        require(command.get("observed_cases") == observed,
+                f"archive {phase} reported cases differ from raw logs")
+        files.extend(captured)
+    return {"source_task": TASK_ID, "status": "PASS", "files": files}
+
+
+def verify_hosted_source_controls() -> dict:
+    report = release.load_json(HOSTED_SOURCE_CONTROLS)
+    require(report.get("schema_version") == 1 and report.get("source_task") == TASK_ID
+            and report.get("status") == "PASS", "hosted source controls did not pass")
+    require(report.get("driver") == record(ROOT / HOSTED_SOURCE_DRIVER), "hosted source driver changed")
+    require(report.get("baseline_revision") == REVIEW_BASELINE_REVISION, "hosted source baseline changed")
+    production = "tools/m8_007_final_release.py"
+    baseline = {
+        "path": production,
+        "digest": repository._source_digest_at_commit(ROOT, REVIEW_BASELINE_REVISION, production).to_json(),
+    }
+    require(report.get("baseline_source") == baseline, "hosted source baseline blob changed")
+    sources = {path: record(ROOT / path) for path in (production, "tools/tests/test_m8_007_final_release.py")}
+    require(report.get("source_records") == sources, "hosted source control inputs changed")
+    require(report.get("expected_cases") == list(HOSTED_SOURCE_CASES), "hosted source case inventory changed")
+    files = [record(HOSTED_SOURCE_CONTROLS), record(ROOT / HOSTED_SOURCE_DRIVER), *sources.values()]
+    for phase, status, exit_code in (("before", "FAIL", 1), ("after", "ok", 0)):
+        command = report[phase]
+        argv = ["python3", HOSTED_SOURCE_DRIVER, "--baseline", REVIEW_BASELINE_REVISION, "--phase", phase]
+        duration = command.get("duration_ms")
+        require(command.get("id") == f"{phase}-hosted-source" and command.get("argv") == argv
+                and command.get("status") == ("FAIL" if phase == "before" else "PASS")
+                and command.get("exit_code") == exit_code and command.get("timed_out") is False
+                and type(duration) in (int, float) and 0 <= duration <= PYTHON_CONTROL_TIMEOUT_SECONDS * 1000,
+                f"hosted source {phase} command changed")
+        output, captured = _control_logs(command, "hosted-source-controls")
+        cases = PYTHON_CONTROL_CASE.findall(output["stdout"] + output["stderr"])
+        require(cases == [(case, status) for case in HOSTED_SOURCE_CASES] and command.get("observed_cases") == dict(cases),
+                f"hosted source {phase} raw outcome changed")
+        files.extend(captured)
+    return {"source_task": TASK_ID, "status": "PASS", "files": files}
+
+
 def verify_runtime_controls() -> dict:
     report = release.load_json(RUNTIME_CONTROLS)
     require(report.get("source_task") == TASK_ID and report.get("status") == "PASS", "runtime review controls did not pass")
@@ -427,6 +559,9 @@ def prepare_security() -> dict:
     verify_fuzz()
     verify_runtime_controls()
     verify_owner_controls()
+    verify_archive_controls()
+    verify_hosted_source_controls()
+    authorization.verify_policy(ROOT)
     index = security.build_index(ROOT, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
     write_json(SECURITY_INDEX, index)
     package = security.validate(ROOT, SECURITY_INDEX, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
@@ -444,6 +579,9 @@ def verify_review() -> dict:
     verify_fuzz()
     verify_runtime_controls()
     verify_owner_controls()
+    verify_archive_controls()
+    verify_hosted_source_controls()
+    authorization.verify_policy(ROOT)
     security.validate(ROOT, SECURITY_INDEX, SECURITY_PACKAGE, task_id=TASK_ID, document_inputs=DOCUMENT_INPUTS, evidence_inputs=EVIDENCE_INPUTS)
     return review.validate(ROOT, REVIEW_REQUEST, REVIEW, task_id=TASK_ID, package_path=SECURITY_INDEX.relative_to(ROOT).as_posix())
 
@@ -453,6 +591,10 @@ def frozen_source_paths() -> list[str]:
     paths.update(path.relative_to(ROOT).as_posix() for path in (ROOT / "src").rglob("*.cj"))
     paths.update(item["path"] for item in verify_runtime_controls()["files"])
     paths.update(item["path"] for item in verify_owner_controls()["files"])
+    paths.update(item["path"] for item in verify_archive_controls()["files"])
+    paths.update(item["path"] for item in verify_hosted_source_controls()["files"])
+    paths.update(item["path"] for item in authorization.verify_policy(ROOT)["files"])
+    paths.add(authorization.POLICY_RELATIVE)
     paths.update(path.relative_to(ROOT).as_posix() for path in (
         soak.FIXTURE, QUALIFICATION, CORE_REPORT, NATIVE_BUILD, BASELINE, API_REPORT,
         LICENSE_REPORT, FUZZ_REPORT, SECURITY_INDEX, SECURITY_PACKAGE,
@@ -466,18 +608,32 @@ def frozen_source_paths() -> list[str]:
     return sorted(paths)
 
 
-def frozen_command(revision: str) -> dict:
-    relative = "tools/tasks/M8-007.json"
-    task = repository.load_task(ROOT / relative, ROOT)
-    current = [item for item in task["acceptance_commands"] if item["id"] == "final-candidate-soak"]
+def _committed_task(revision: str) -> dict:
     stored = subprocess.run(
-        ["git", "cat-file", "blob", f"{revision}:{relative}"], cwd=ROOT,
+        ["git", "cat-file", "blob", f"{revision}:tools/tasks/M8-007.json"], cwd=ROOT,
         text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10,
     )
-    require(stored.returncode == 0, "frozen candidate has no task manifest")
-    original = [item for item in json.loads(stored.stdout)["acceptance_commands"] if item["id"] == "final-candidate-soak"]
-    require(len(current) == 1 and current == original, "formal soak command differs from committed candidate")
-    return current[0]
+    require(stored.returncode == 0, "committed release task is unavailable")
+    task = json.loads(stored.stdout)
+    require(isinstance(task, dict) and isinstance(task.get("source_paths"), list),
+            "committed release task is invalid")
+    return task
+
+
+def _verify_task_extension(current: dict, original: dict) -> set[str]:
+    sources = set(current["source_paths"])
+    require(set(original["source_paths"]) <= sources, "release task removed a committed source input")
+    require(current == {**original, "source_paths": current["source_paths"]},
+            "release task contract changed outside additive source inputs")
+    return sources
+
+
+def frozen_command(revision: str) -> dict:
+    task = repository.load_task(ROOT / "tools/tasks/M8-007.json", ROOT)
+    _verify_task_extension(task, _committed_task(revision))
+    commands = [item for item in task["acceptance_commands"] if item["id"] == "final-candidate-soak"]
+    require(len(commands) == 1, "formal soak command is absent or duplicated")
+    return commands[0]
 
 
 def capture_frozen_candidate(revision: str) -> dict:
@@ -572,7 +728,8 @@ def signing_manifest() -> dict:
         ARTIFACT, SUPPLY, task_id=TASK_ID, workflow=WORKFLOW, root=ROOT,
         qualified_inputs=(QUALIFICATION, CORE_REPORT, BASELINE, API_REPORT, LICENSE_REPORT,
                           FUZZ_REPORT, SOAK_REPORT, SECURITY_INDEX, SECURITY_PACKAGE,
-                          REVIEW_REQUEST, REVIEW, REVIEW_REPORT, FROZEN_CANDIDATE, SOAK_COMMAND),
+                          REVIEW_REQUEST, REVIEW, REVIEW_REPORT, FROZEN_CANDIDATE, SOAK_COMMAND,
+                          ROOT / authorization.POLICY_RELATIVE),
     )
 
 
@@ -646,7 +803,23 @@ def main(argv: list[str] | None = None) -> int:
         elif args == ["verify-all"]:
             hosted = release.load_json(SIGNATURES / "github-attestation.json")
             require(hosted.get("source_task") == TASK_ID and hosted.get("decision") == "PASS", "hosted signature evidence is absent")
-            result = verify_signatures(SIGNATURES, hosted["source_revision"], save=False)
+            expected_commit = authorization.approved_source_commit(ROOT)
+            require(hosted.get("source_revision") == expected_commit,
+                    "hosted signature source revision differs from independently approved source")
+            task = repository.load_task(ROOT / "tools/tasks/M8-007.json", ROOT)
+            sources = _verify_task_extension(task, _committed_task(expected_commit))
+            generated_inputs = {
+                (EVIDENCE / name).relative_to(ROOT).as_posix()
+                for name in (
+                    "frozen-candidate.json", "soak.json", "soak.log",
+                    "commands/formal-soak/final-candidate-soak.stdout.log",
+                    "commands/formal-soak/final-candidate-soak.stderr.log",
+                    "signatures/release-manifest.json", "signatures/artifact.sigstore.json",
+                    "signatures/sbom.sigstore.json", "signatures/release-manifest.sigstore.json",
+                )
+            }
+            require(generated_inputs <= sources, "release task must archive every generated soak and signing input")
+            result = verify_signatures(SIGNATURES, expected_commit, save=False)
         elif args and args[0] == "run-soak-gate":
             parser = argparse.ArgumentParser()
             parser.add_argument("--revision", required=True)

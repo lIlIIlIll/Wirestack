@@ -22,13 +22,22 @@ import sys
 import tarfile
 import tempfile
 from pathlib import Path, PurePosixPath
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, BinaryIO, Iterable, Mapping, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "0.1.0"
 PACKAGE_ROOT = f"wirestack-{VERSION}"
 ARTIFACT_NAME = f"{PACKAGE_ROOT}-linux-x86_64-glibc.tar.gz"
+MAX_ARCHIVE_MEMBER_BYTES = 8 * 1024 * 1024
+MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
+MAX_ARCHIVE_MEMBERS = 4096
+MAX_ARCHIVE_METADATA_BYTES = 8192
+MAX_ARCHIVE_PAX_FIELDS = 128
+ARCHIVE_METADATA_TYPES = (
+    tarfile.XHDTYPE, tarfile.XGLTYPE, tarfile.SOLARIS_XHDTYPE,
+    tarfile.GNUTYPE_LONGNAME, tarfile.GNUTYPE_LONGLINK,
+)
 SMOKE_FIXTURE = ROOT / "tools/release_smoke/main.cj"
 FORBIDDEN_OPENSSL_NAMES = re.compile(r"^lib(?:ssl|crypto)(?:\.so(?:\..*)?)?$", re.IGNORECASE)
 HTTP_FILES_PAYLOAD_ROOT = "target/native/http_files/current"
@@ -451,13 +460,63 @@ def write_reproducible_archive(path: Path, payload: Mapping[str, bytes]) -> None
                     archive.addfile(info, io.BytesIO(content))
 
 
+class _BoundedArchiveReader:
+    def __init__(self, stream: BinaryIO) -> None:
+        self._stream = stream
+        self._remaining = MAX_ARCHIVE_BYTES
+
+    def read(self, size: int = -1) -> bytes:
+        limit = self._remaining + 1
+        content = self._stream.read(limit if size < 0 else min(size, limit))
+        if len(content) > self._remaining:
+            raise ReleaseError("release archive exceeds the decompressed byte limit")
+        self._remaining -= len(content)
+        return content
+
+
 def read_verified_payload(path: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
-    """Capture regular archive files and verify their complete declared inventory."""
+    """Bound archive decoding and verify the complete regular-file inventory."""
+    header_count = 0
+
+    class LimitedTarInfo(tarfile.TarInfo):
+        def _proc_member(self, archive: tarfile.TarFile) -> tarfile.TarInfo:
+            if self.type == tarfile.GNUTYPE_SPARSE:
+                raise ReleaseError("release archive does not support sparse files")
+            if len(archive.pax_headers) > MAX_ARCHIVE_PAX_FIELDS:
+                raise ReleaseError("release archive exceeds the cumulative PAX field limit")
+            # Check raw headers before tarfile expands PAX/GNU metadata.
+            nonlocal header_count
+            header_count += 1
+            if header_count > MAX_ARCHIVE_MEMBERS:
+                raise ReleaseError("release archive exceeds the member header limit")
+            limit = MAX_ARCHIVE_METADATA_BYTES if self.type in ARCHIVE_METADATA_TYPES else MAX_ARCHIVE_MEMBER_BYTES
+            if not 0 <= self.size <= limit:
+                raise ReleaseError(f"release archive member exceeds the {limit}-byte limit: {self.name}")
+            return super()._proc_member(archive)
+
+        def _apply_pax_info(self, pax_headers: dict, encoding: str, errors: str) -> None:
+            if len(pax_headers) > MAX_ARCHIVE_PAX_FIELDS:
+                raise ReleaseError("release archive exceeds the effective PAX field limit")
+            super()._apply_pax_info(pax_headers, encoding, errors)
+
+        def _proc_gnusparse_00(self, next: tarfile.TarInfo, raw_headers: list) -> None:
+            raise ReleaseError("release archive does not support sparse files")
+
+        def _proc_gnusparse_01(self, next: tarfile.TarInfo, pax_headers: dict) -> None:
+            raise ReleaseError("release archive does not support sparse files")
+
+        def _proc_gnusparse_10(self, next: tarfile.TarInfo, pax_headers: dict, archive: tarfile.TarFile) -> None:
+            raise ReleaseError("release archive does not support sparse files")
+
+    expanded_bytes = 0
     payload: dict[str, bytes] = {}
     names: set[str] = set()
     try:
-        with tarfile.open(path, mode="r:gz") as archive:
-            for member in archive.getmembers():
+        with (
+            gzip.open(path, "rb") as decoded,
+            tarfile.open(fileobj=_BoundedArchiveReader(decoded), mode="r|", tarinfo=LimitedTarInfo) as archive,
+        ):
+            for member in archive:
                 name = member.name
                 if member.isdir() and name.endswith("/"):
                     name = name[:-1]
@@ -476,16 +535,26 @@ def read_verified_payload(path: Path) -> tuple[dict[str, bytes], dict[str, Any]]
                 if name in names:
                     raise ReleaseError(f"duplicate release archive member: {name}")
                 names.add(name)
+                if not 0 <= member.size <= MAX_ARCHIVE_MEMBER_BYTES:
+                    raise ReleaseError(f"release archive member exceeds the byte limit: {name}")
                 if member.isdir():
+                    if member.size:
+                        raise ReleaseError(f"release archive directory contains payload bytes: {name}")
                     continue
                 if not member.isfile() or len(parsed.parts) < 2:
                     raise ReleaseError(f"release archive requires regular files: {name}")
+                expanded_bytes += member.size
+                if expanded_bytes > MAX_ARCHIVE_BYTES:
+                    raise ReleaseError("release archive exceeds the expanded payload byte limit")
                 stream = archive.extractfile(member)
                 if stream is None:
                     raise ReleaseError(f"release archive member cannot be read: {name}")
                 with stream:
-                    payload[parsed.relative_to(PACKAGE_ROOT).as_posix()] = stream.read()
-    except (OSError, tarfile.TarError) as error:
+                    content = stream.read(member.size + 1)
+                if len(content) != member.size:
+                    raise ReleaseError(f"release archive member length differs from its header: {name}")
+                payload[parsed.relative_to(PACKAGE_ROOT).as_posix()] = content
+    except (OSError, tarfile.TarError, RecursionError) as error:
         raise ReleaseError(f"cannot read release archive: {error}") from error
     file_names = {f"{PACKAGE_ROOT}/{relative}" for relative in payload}
     for name in names:

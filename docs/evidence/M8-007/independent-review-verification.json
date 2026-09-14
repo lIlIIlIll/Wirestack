@@ -13,18 +13,18 @@
     "exit_code": 0,
     "timed_out": false,
     "error_code": null,
-    "started_at_utc": "2026-09-14T07:27:06.587511Z",
-    "finished_at_utc": "2026-09-14T07:27:09.503893Z",
-    "duration_ms": 2916.383,
-    "stdout_path": "docs/evidence/M8-007/commands/20260914T072706/independent-review-verification.stdout.log",
-    "stderr_path": "docs/evidence/M8-007/commands/20260914T072706/independent-review-verification.stderr.log",
-    "stdout_excerpt": "{\"acceptance_status\": \"PASS\", \"checks\": {\"compatibilityGate\": \"DISABLED_PRE_1_0\", \"independentReviewerAttestation\": \"PASS\", \"requiredMethods\": \"PASS\", \"requiredScope\": \"PASS\", \"skippedAsPass\": false, \"unresolvedHighCritical\": 0}, \"compatibilityPolicy\": \"NO_BACKWARD_COMPATIBILITY_PRE_1_0\", \"decision\": \"PASS\", \"findingCount\": 5, \"findingStatuses\": {\"Fixed\": 5}, \"nonClaims\": [\"Schema validation records the reviewer's declared review mode and independence attestation; it cannot prove those facts by itself.\"], \"packageSha256\": \"b06af39e6a0bd9813ed1f3b99e8813f2f70d25c1bb8e7f38565201d5a30b63c3\", \"platform\": \"linux-x86_64-glibc\", \"schemaVersion\": 1, \"source_task\": \"M8-007\", \"status\": \"PASS\", \"taskId\": \"M8-007\"}\n",
+    "started_at_utc": "2026-09-14T12:04:53.809306Z",
+    "finished_at_utc": "2026-09-14T12:05:00.664205Z",
+    "duration_ms": 6854.902,
+    "stdout_path": "docs/evidence/M8-007/commands/20260914T120453/independent-review-verification.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260914T120453/independent-review-verification.stderr.log",
+    "stdout_excerpt": "{\"acceptance_status\": \"PASS\", \"checks\": {\"compatibilityGate\": \"DISABLED_PRE_1_0\", \"independentReviewerAttestation\": \"PASS\", \"requiredMethods\": \"PASS\", \"requiredScope\": \"PASS\", \"skippedAsPass\": false, \"unresolvedHighCritical\": 0}, \"compatibilityPolicy\": \"NO_BACKWARD_COMPATIBILITY_PRE_1_0\", \"decision\": \"PASS\", \"findingCount\": 9, \"findingStatuses\": {\"Fixed\": 9}, \"nonClaims\": [\"Schema validation records the reviewer's declared review mode and independence attestation; it cannot prove those facts by itself.\"], \"packageSha256\": \"9df9a7dfcf1bd6197ae3e03c33c892aafc8eb2329b3600abbb8907ae0145629f\", \"platform\": \"linux-x86_64-glibc\", \"schemaVersion\": 1, \"source_task\": \"M8-007\", \"status\": \"PASS\", \"taskId\": \"M8-007\"}\n",
     "stderr_excerpt": "",
     "stdout_truncated": false,
     "stderr_truncated": false,
     "stdout_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "98606d6e606cea4eafed5046dcee6f45d038be55af502cd091bf04b6f517a4c9"
+      "sha256": "28b2c5a775f3a63cd81bb86467ff1edfa236f02683dde590f370a2f220a6dfb2"
     },
     "stderr_digest": {
       "domain": "text-utf8-lf-v1",

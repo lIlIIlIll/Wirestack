@@ -1,0 +1,55 @@
+test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte) ... FAIL
+test_archive_rejects_aggregate_payload_over_limit (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_aggregate_payload_over_limit) ... FAIL
+test_archive_budget_includes_serialized_headers_and_padding (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_budget_includes_serialized_headers_and_padding) ... FAIL
+test_archive_rejects_oversized_pax_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_oversized_pax_metadata) ... FAIL
+test_archive_rejects_excessive_member_headers (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_excessive_member_headers) ... FAIL
+
+======================================================================
+FAIL: test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_021_linux_release.py", line 135, in test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_aggregate_payload_over_limit (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_aggregate_payload_over_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_021_linux_release.py", line 154, in test_archive_rejects_aggregate_payload_over_limit
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_budget_includes_serialized_headers_and_padding (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_budget_includes_serialized_headers_and_padding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_021_linux_release.py", line 163, in test_archive_budget_includes_serialized_headers_and_padding
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_oversized_pax_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_oversized_pax_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_021_linux_release.py", line 175, in test_archive_rejects_oversized_pax_metadata
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_excessive_member_headers (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_excessive_member_headers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_021_linux_release.py", line 183, in test_archive_rejects_excessive_member_headers
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.153s
+
+FAILED (failures=5)
