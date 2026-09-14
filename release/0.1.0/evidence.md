@@ -37,7 +37,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | --- | --- | --- |
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
-| Local Linux fresh candidate | PASS (current staging) | clean clone at candidate `14f46dfdde68c2ca61bff5060877aba103311d6d` passed the default strict evidence check；`release_temp_tree.py --enforce-clean` copied `303` files；hosted registry rehearsal also passed |
+| Local Linux fresh candidate | PASS (current staging) | clean clone at candidate `e3fd4c211ffc644f2923eefd77fb2f257f516018` passed the default strict evidence check；`release_temp_tree.py --enforce-clean` copied `304` files；hosted registry rehearsal also passed |
 | Hosted PR CI | **PASS (current)** | run [`34856978268`](https://github.com/lIlIIlIll/yjson/actions/runs/34856978268) at `4c2432c8` completed all 28 jobs successfully，包括 API Documentation、Core Coverage、registry rehearsal 和 CI Required |
 | Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是当前候选的合并后 run |
 | Coverage | PASS (current hosted) | current run [`34856978268`](https://github.com/lIlIIlIll/yjson/actions/runs/34856978268) 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
@@ -215,7 +215,7 @@ Native 运行源码闭包 SHA-256 为
 ```text
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
-Local fresh-source simulation: PASS (current clean clone; strict evidence check and 303-file release staging passed)
+Local fresh-source simulation: PASS (clean clone e3fd4c2; strict evidence check and 304-file release staging passed)
 Hosted PR execution: PASS (run 34856978268 at 4c2432c8; all 28 jobs passed)
 Seven-library evidence freshness: PASS (two 770/770 RSS-complete archives; current marker schema v2; batch stability 1/10 and 2/10)
 Three-library performance qualification: PASS (36/36 workloads; 11 rounds; 7 stable / 29 noisy; direct executable timing; exact-case and RSS-complete archive)
@@ -229,7 +229,7 @@ Release decision: BLOCKED; PR remains open with merge state BLOCKED; merge to ma
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选的七库、三库和
 Pure 证据已在合格 `Server` 上使用 GNU `/usr/bin/time -v` 完成 peak RSS 采集，并在
 归档、sidecar、summary 和 checksum 中闭合。clean clone 的 strict evidence check 和
-`release_temp_tree.py --enforce-clean`（303 files）通过；hosted run [`34837511754`](https://github.com/lIlIIlIll/yjson/actions/runs/34837511754) 的 28 个 PR jobs 也全部通过。
+`release_temp_tree.py --enforce-clean`（304 files）通过；hosted run [`34856978268`](https://github.com/lIlIIlIll/yjson/actions/runs/34856978268) 的 28 个 PR jobs 也全部通过。
 rehearsal 已生成九个临时 `.cjp`，但最终 `manifest.json`、`environment.json`、
 `checksums.txt` 尚未生成或上传。
 发布策略仍要求先合并到 `main`，再等待合并提交的 required workflows 和 Pages 通过；
