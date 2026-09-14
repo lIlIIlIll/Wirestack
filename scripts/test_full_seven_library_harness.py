@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for exact seven-library benchmark Case binding."""
+"""Regression tests for exact benchmark Case and RSS binding."""
 
 from __future__ import annotations
 
@@ -33,6 +33,11 @@ CJFAST_SUMMARY = load_module(
     ROOT / "scripts/json_cjfast_perf_summary.py",
 )
 RUNNER = load_module("full_seven_library_runner", HARNESS / "run_full.py")
+
+CJFAST_RUNNER = load_module(
+    "json_cjfast_perf_run",
+    ROOT / "scripts/json_cjfast_perf_run.py",
+)
 
 
 def write_cangjie_csv(
@@ -112,6 +117,55 @@ class CjfastSummaryRssTest(unittest.TestCase):
         )
         self.assertEqual(result["median_rss_kb"], 110)
         self.assertEqual(result["max_rss_kb"], 120)
+
+    def test_load_report_filters_prefix_colliding_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            write_cangjie_csv(
+                root / "bench-suite.csv",
+                [
+                    ("exactCase", 1, 2000.0, "ns", "Duration"),
+                    ("exactCaseBatchGuard", 1, 8000.0, "ns", "Duration"),
+                ],
+            )
+            self.assertEqual(
+                CJFAST_SUMMARY.load_report(root, "exactCase"),
+                [2000.0],
+            )
+
+    def test_load_report_requires_the_manifest_case(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            write_cangjie_csv(
+                root / "bench-suite.csv",
+                [("exactCaseBatchGuard", 1, 8000.0, "ns", "Duration")],
+            )
+            with self.assertRaisesRegex(ValueError, "no duration samples found for Case"):
+                CJFAST_SUMMARY.load_report(root, "exactCase")
+
+
+class CjfastRunnerPolicyTest(unittest.TestCase):
+    def test_timed_command_uses_exact_case_and_skip_build(self) -> None:
+        command = CJFAST_RUNNER.cangjie_command(
+            3,
+            "ComprehensiveJsonCompareBenchmarks",
+            "yjsonStringDecodePrettyPerson",
+            pathlib.Path("/tmp/report"),
+            1,
+        )
+        selected = command[command.index("--filter") + 1]
+        self.assertEqual(
+            selected,
+            "ComprehensiveJsonCompareBenchmarks.yjsonStringDecodePrettyPerson",
+        )
+        self.assertIn("--skip-build", command)
+        self.assertNotIn("*", selected)
+
+    def test_build_command_is_unmeasured_and_does_not_select_a_case(self) -> None:
+        command = CJFAST_RUNNER.build_command(3)
+        self.assertIn("--no-run", command)
+        self.assertNotIn("--filter", command)
+        self.assertNotIn("/usr/bin/time", command)
 
 
 class FixturePreflightContractTest(unittest.TestCase):
