@@ -24,7 +24,7 @@
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 
-当前 `0.1.0` 候选的七库 RSS-complete 测量见[2026-09-14 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批各完成 770/770 单元，10/10 workload noisy，所有进程均保留 peak RSS sidecar。三库 RSS-complete 测量见[2026-09-14 当前候选三库对比](results/2026-09-13-release-three-library.md)，36/36 workload 完成 11 轮，1/36 stable、35/36 noisy；runner 使用精确 benchmark case filter，先完成 `cjpm bench --no-run` 构建，再以 `--skip-build` 计时并保留每个进程的 RSS sidecar。Pure 普通 Release timing/RSS 门禁见[2026-09-14 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`，gate `passed=true`；三类结果都绑定 STS `1.1.3` 和当前 measured candidate。
+当前 `0.1.0` 候选的七库 RSS-complete 测量见[2026-09-14 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批各完成 770/770 单元，第一批 1/10 stable、9/10 noisy，第二批 2/10 stable、8/10 noisy，所有进程均保留 peak RSS sidecar。Cangjie timing 在未计时的 `cjpm bench --no-run` 构建后直接执行 prebuilt benchmark executable，GNU time 不包围构建步骤。三库 RSS-complete 测量见[2026-09-14 当前候选三库对比](results/2026-09-13-release-three-library.md)，36/36 workload 完成 11 轮；三库 direct executable timing 与稳定/noisy 统计见结果页。Pure 普通 Release timing/RSS 门禁见[2026-09-14 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`，gate `passed=true`；三类结果都绑定 STS `1.1.3` 和当前 measured candidate。
 
 ## 历史证据
 
