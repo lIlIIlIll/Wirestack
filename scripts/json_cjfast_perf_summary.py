@@ -57,11 +57,13 @@ def percentile(values: list[float], fraction: float) -> float:
     return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
-def load_report(path: Path) -> list[float]:
+def load_report(path: Path, source_case: str) -> list[float]:
     values: list[float] = []
     for report in sorted(path.rglob("bench-*.csv")):
         with report.open(newline="", encoding="utf-8") as stream:
             for row in csv.DictReader(stream):
+                if row.get("Case") != source_case:
+                    continue
                 batch_size = int(row["BatchSize"])
                 if batch_size <= 0 or row.get("Measurement") != "Duration":
                     continue
@@ -70,7 +72,7 @@ def load_report(path: Path) -> list[float]:
                     raise ValueError(f"unsupported duration unit {row['Unit']!r} in {report}")
                 values.append(float(row["Duration"]) * scale / batch_size)
     if not values:
-        raise ValueError(f"no duration samples found below {path}")
+        raise ValueError(f"no duration samples found for Case {source_case!r} below {path}")
     return values
 
 
@@ -150,7 +152,9 @@ def analyze(root: Path, min_runs: int) -> list[dict[str, object]]:
                 raise ValueError(
                     f"manifest RSS differs from sidecar: {workload}/{library}/round {round_id}"
                 )
-            samples[(workload, library)][round_id] = load_report(root / row["report_path"])
+            samples[(workload, library)][round_id] = load_report(
+                root / row["report_path"], row["source_case"]
+            )
             rss_samples[(workload, library)][round_id] = measured_rss
             metadata[workload] = {
                 "scenario": row["scenario"],

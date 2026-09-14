@@ -131,6 +131,74 @@ def library_order(round_id: int) -> tuple[str, str, str]:
     offset = (round_id - 1) % len(libraries)
     return libraries[offset:] + libraries[:offset]
 
+def cangjie_command(
+    cpu: int,
+    suite: str,
+    source_case: str,
+    report_path: Path,
+    round_id: int,
+) -> list[str]:
+    """Build a timed command selecting exactly one Cangjie benchmark case."""
+    return [
+        "taskset",
+        "-c",
+        str(cpu),
+        "cjpm",
+        "bench",
+        "--skip-build",
+        "--no-color",
+        "--filter",
+        f"{suite}.{source_case}",
+        "--report-path",
+        str(report_path),
+        "--report-format",
+        "csv-raw",
+        "--random-seed",
+        str(round_id),
+    ]
+
+
+def build_command(cpu: int) -> list[str]:
+    """Build a benchmark package without running a measured case."""
+    return [
+        "taskset",
+        "-c",
+        str(cpu),
+        "cjpm",
+        "bench",
+        "--no-run",
+        "--no-color",
+    ]
+
+
+def build_benchmark_package(
+    cwd: Path,
+    env: dict[str, str],
+    cpu: int,
+    log_path: Path,
+) -> int:
+    completed = subprocess.run(
+        build_command(cpu),
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    log_path.write_text(completed.stdout + completed.stderr, encoding="utf-8")
+    return completed.returncode
+
+
+def suite_for(library: str) -> str:
+    if library in {"yjson", "stdx_json"}:
+        return "ComprehensiveJsonCompareBenchmarks"
+    return "CjFastJsonComprehensiveBenchmarks"
+
+
+def build_cwd_for(library: str, cjfast_work_dir: Path) -> Path:
+    if library in {"yjson", "stdx_json"}:
+        return YJSON_BENCH_DIR
+    return cjfast_work_dir
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -178,6 +246,10 @@ def main() -> int:
         "cpu": args.cpu,
         "heap": args.heap,
         "runs": args.runs,
+        "timing_build_policy": (
+            "both Cangjie benchmark packages are built with cjpm bench --no-run "
+            "before timed --skip-build samples"
+        ),
         "schedule": "workload rotation; even rounds reversed; three-library order rotates by round",
         "workload_count": len(workloads),
         "workloads": workloads,
@@ -202,6 +274,21 @@ def main() -> int:
         json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
+    for build_key, build_cwd in (
+        ("yjson", YJSON_BENCH_DIR),
+        ("cjfast_json", cjfast_work_dir),
+    ):
+        build_log_path = log_dir / f"build-{build_key}.log"
+        build_status = build_benchmark_package(
+            build_cwd, env, args.cpu, build_log_path
+        )
+        if build_status != 0:
+            print(
+                f"benchmark build failed for {build_key}; see {build_log_path}",
+                file=sys.stderr,
+            )
+            return build_status
+
     manifest_path = output / "manifest.csv"
     with manifest_path.open("w", newline="", encoding="utf-8") as manifest:
         writer = csv.DictWriter(manifest, fieldnames=(
@@ -211,7 +298,6 @@ def main() -> int:
             "report_path", "rss_path", "log_path",
         ))
         writer.writeheader()
-        built_packages = {"yjson": False, "cjfast_json": False}
         for round_id in range(1, args.runs + 1):
             for workload_position, workload in enumerate(
                 balanced_workloads(workloads, round_id), start=1
@@ -228,21 +314,14 @@ def main() -> int:
                         log_dir /
                         f"run-{round_id:02d}-workload-{workload_position:02d}-{library}.log"
                     )
-                    if library in {"yjson", "stdx_json"}:
-                        cwd = YJSON_BENCH_DIR
-                        filter_name = f"ComprehensiveJsonCompareBenchmarks.{source_case}*"
-                        build_key = "yjson"
-                    else:
-                        cwd = cjfast_work_dir
-                        filter_name = f"CjFastJsonComprehensiveBenchmarks.{source_case}*"
-                        build_key = "cjfast_json"
-                    command = ["taskset", "-c", str(args.cpu), "cjpm", "bench"]
-                    if built_packages[build_key]:
-                        command.append("--skip-build")
-                    command.extend([
-                        "--no-color", "--filter", filter_name, "--report-path", str(report_path),
-                        "--report-format", "csv-raw", "--random-seed", str(round_id),
-                    ])
+                    cwd = build_cwd_for(library, cjfast_work_dir)
+                    command = cangjie_command(
+                        args.cpu,
+                        suite_for(library),
+                        source_case,
+                        report_path,
+                        round_id,
+                    )
                     load_before = os.getloadavg()[0]
                     started = time.monotonic()
                     completed = subprocess.run(
@@ -270,7 +349,7 @@ def main() -> int:
                             file=sys.stderr,
                         )
                         return 2
-                    built_packages[build_key] = True
+
                     if not list(report_path.rglob("bench-*.csv")):
                         print(
                             f"benchmark produced no raw CSV: round={round_id} "
