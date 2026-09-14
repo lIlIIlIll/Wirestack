@@ -293,6 +293,11 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     validate_http_files_manifest(http_files_manifest, payload)
     if provider_manifest.get("externalOpenSslDependency") is not False:
         raise ReleaseError("provider manifest does not set externalOpenSslDependency=false")
+    if (
+        provider_manifest.get("test_only_key_log", False) is not False
+        or "key-log" in provider_manifest.get("capabilities", [])
+    ):
+        raise ReleaseError("test-only TLS key logging cannot enter a release artifact")
 
     entries = [
         {

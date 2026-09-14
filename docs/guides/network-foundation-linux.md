@@ -4,7 +4,9 @@
 capability 和结构化错误。Linux backend 使用公开 `std.net` API，不暴露 SDK socket 或
 native handle。M8-002 提供 `TcpListener`、`TcpStream` 和 `UdpSocket` 的 Internet
 原生证据；M8-003 增加受 SDK 能力限制的 `UnixListener`、`UnixStream` 和
-`UnixDatagramSocket`。M8-004 增加经过 Linux 验收的 DNS wire client 与 resolver policy；后续协议集成属于 M8-005 及后续任务。
+`UnixDatagramSocket`。M8-004 增加经过 Linux 验收的 DNS wire client 与 resolver policy。
+M8-005 已完成 HTTP parity。M8-006 的 TLS context 和 external hook 子集已有 Linux
+证据；完整任务仍在补齐 native provider 边界和最终封存。
 
 ## 连接已解析的 TCP endpoint
 
@@ -243,6 +245,89 @@ client 仍归调用者所有，避免同一次 DNS 操作使用两个不同的�
 [runner](../../tools/m8_004_native_dns.py) 和
 [M8-004 记录](../evidence/M8-004/README.md)。这些证据不代表 DNSSEC 或加密 DNS 支持。
 
+## 替换 TLS context
+
+用 `TlsClientContextStore` 和 `TlsServerContextStore` 在进程运行期间替换 TLS 配置。每次
+`build()` 都生成一个非零、进程内唯一的 `contextVersion`。该值只在当前进程中标识
+session 分区，不是可保存或跨进程比较的版本号。
+
+`replace(context)` 原子替换 store 当前值并返回新 context 的 `contextVersion`。每次握手
+只读取一个不可变 snapshot。已经开始的握手和已经建立的 connection 继续使用旧配置；
+只有之后开始的握手使用新配置。新 context 的第一次连接执行完整握手，第二次及后续连接
+只能恢复该 `contextVersion` 分区中的 session。TLS 1.2 session 和 TLS 1.3 ticket 都遵守
+该规则。
+
+server 端把 `TlsServerContextStore` 传给 `TlsListener`。`TlsListener` 独占传入的
+`TransportListener`，在 accept 完成后、TLS 握手开始前读取 store。一个
+`OperationContext` 同时约束 accept 和握手。握手会接管 accepted transport；失败、
+取消或 Deadline 到期会 abort 该 transport。关闭 listener 不会关闭已经返回的
+`TlsConnection`。
+
+context builder 保留不可变的 certificate chain，在 `build()` 时复制 PKCS#8 和 external
+key 的公钥元数据。external signer service 保留为调用方拥有的线程安全引用。构建成功后可以关闭
+原始 `PrivateKeyRef`。关闭操作会清零原始对象的可导出内容，context 则继续使用自己的
+私有 snapshot。公共 API 不返回 provider 或 native handle。
+
+完整样例位于
+[`examples/linux/m8_006/native_tls.cj`](../../examples/linux/m8_006/native_tls.cj)。
+这是 M8-006 installed consumer 使用的完整源码，不是从 API 名称拼出的片段。
+`runVersionReplacement` 在 external signer 回调暂停时替换两端 store，验证已经开始的
+握手仍使用旧 snapshot。它随后再次替换 context，验证旧连接继续可用、新连接先完整握手
+再恢复同版本 session，并验证关闭 listener 不关闭已返回连接。同一文件还覆盖外部密钥失败和 test-only key logging。
+runner 会把 release archive 解压到 checkout 之外，再编译这份源码：
+
+```text
+python3 tools/m8_006_native_tls.py --profile release --report docs/evidence/M8-006/native-release.json
+python3 tools/m8_006_native_tls.py --profile keylog --report docs/evidence/M8-006/native-keylog.json
+```
+
+## 实现外部私钥回调
+
+`ExternalSigner.sign`、`ExternalDecryptor.decrypt` 和 `KeyLogSink.emit` 收到握手入口使用的
+同一个 `OperationContext`。Deadline、cancellation token 和 trace 不会替换。Wirestack
+先在锁内取得有界请求，再释放 engine 锁调用用户代码，最后重新取得锁提交结果。因此，
+回调可以调用外部服务而不占用 engine 锁。Wirestack 不承诺抢占正在阻塞的同步回调；
+实现应检查 context，并在 cancellation 或 Deadline 到期时返回。
+
+`ExternalDecryptor` 只允许配置到 server context。server identity 必须是 compatible RSA
+certificate 加 external signer 或 system signer，RSA modulus 对应的 raw block 必须为
+1 至 1,024 字节。PKCS#8 identity、非 RSA certificate、client context 和缺失
+`TlsCapability.ExternalDecryptor` 都在握手前拒绝。不要据此宣称任何硬件密钥设备已经
+通过验证，当前 M8-006 证据只覆盖 Linux 上的 external service。
+
+decrypt request 的算法只能是 `"RSA_RAW"`。ciphertext 必须是 modulus 的完整 raw block，
+长度为 1 至 1,024 字节；回调必须返回完全相同的长度。Wirestack 拥有成功返回的数组，
+并在 native completion 的所有路径清零它。回调不能保留、复用或之后修改该数组。
+provider 负责 PKCS#1 validation 和 padding removal，应用回调只执行 raw RSA private
+operation。
+
+build admission 使用 `TlsContextException` 和稳定的 `TlsContextErrorCode`。role、identity
+或 hook 不匹配时使用 `InvalidHook`；provider 不支持时使用 `UnsupportedCapability`，
+并设置对应的 `TlsCapability`。握手期 signer 或 decryptor 失败使用
+`TlsEngineException`。取消和 Deadline 分别保留 `HandshakeCancelled` 与
+`HandshakeTimeout`；外部私钥错误使用 `PrivateKeyFailure`。调用方应匹配 typed code，
+不要匹配 message。
+
+## 只在测试构建中记录 TLS secrets
+
+`KeyLogSink` 接收包含 traffic secret 的 NSS key-log record。这些值可以解密捕获的 TLS
+流量，不能进入普通日志或 release artifact。`TlsKeyLogLine` 的 label 只能由 1 至 128 个
+大写 ASCII 字母、数字或下划线组成。client random 恰好 32 字节，secret 是 1 至 64 字节。
+构造器和 getter 都复制数据；sink 必须清零自己取得的 secret copy。
+
+production provider 不编译 key-log callback，也不报告 `TlsCapability.KeyLog` 能力。
+`withKeyLogSink` 因此在 context build 时失败。测试构建必须显式传入
+`--enable-test-keylog`，还必须指定不同于默认 release output 的 `--out-dir`。M8-006
+runner 在独立的 native output directory 生成 test provider，只覆盖解压后的测试
+install。release collector 会拒绝 `test_only_key_log: true` 或包含 `key-log` capability
+的 provider。
+
+[keylog 报告](../evidence/M8-006/native-keylog.json) 包含 5 个场景，覆盖 TLS 1.2、
+TLS 1.3、sink exception、cancellation 和 Deadline。独立的 native `provider_boundary`
+已验证 pending SNI selection 时启用 capture、派生密钥前队列为空、TLS 1.3 NSS 记录有界，
+以及握手完成后不能再次启用。报告保留 typed raw stdout/stderr digest。这是 native
+边界验证，不是 Cangjie selector-policy 或 production key logging 的资格声明。
+
 ## Capability 与验证边界
 
 `SocketCapabilities` 是 advisory 值，调用结果仍是权威。当前 Linux Internet/Unix
@@ -258,5 +343,7 @@ Unix [consumer](../../examples/linux/m8_003/main.cj) 和
 [runner](../../tools/m8_003_native_sockets.py) 使用独立 Python peer，验证字节、来源、
 原生等待、背压超时、地址替换防护和活动进程中的 descriptor 清理。
 当前公开契约见 [API 参考](../api/README.md) 与
-[`wirestack-linux-pre1-m8-004.json`](../api/baselines/wirestack-linux-pre1-m8-004.json)。
-M8-004 的十二条 Linux 验收命令均已通过。M8-005 至 M8-007 仍待执行；局部资格确认不等于最终 release 验证。
+[`wirestack-linux-pre1-m8-006.json`](../api/baselines/wirestack-linux-pre1-m8-006.json)。
+M8-001 至 M8-006 已完成各自的 Linux 验收。M8-006 的十四条命令包含 75 个聚焦 TLS
+测试、13 个 release 场景、5 个 keylog 场景、native provider 边界、完整仓库及严格 HTML
+文档检查。提交绑定见任务证据清单；M8-007 仍须在最终候选上执行新的 86,400 秒 soak。

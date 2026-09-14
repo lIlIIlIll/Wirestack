@@ -1,0 +1,41 @@
+首页
+包 wirestack
+ExternalDecryptor
+wirestack.ExternalDecryptor
+
+interfacepublicsemantic: partial src/tls_contract.cj:209:1
+
+签名
+public interface ExternalDecryptor
+⧉
+概览
+
+Caller-owned, thread-safe service for an external RSA private operation.
+
+The TLS engine passes the exact handshake OperationContext. A successful callback transfers ownership of its returned array to Wirestack: it must contain exactly request.ciphertextBytes().size raw-RSA block bytes and the callback must not retain, reuse, or mutate it. Wirestack zeroes that array after native completion on every path.
+
+函数
+wirestack.ExternalDecryptor.decrypt
+
+functionpublicsemantic: partial Owner: wirestack.ExternalDecryptor · src/tls_contract.cj:215:5
+
+签名
+func decrypt(request: ExternalDecryptionRequest, context: OperationContext): Array<Byte>
+⧉
+概览
+
+Performs one bounded raw RSA private operation.
+
+参数
+request
+:ExternalDecryptionRequest
+
+Validated `RSA_RAW` ciphertext.
+
+context
+:OperationContext
+
+The caller's exact handshake operation context.
+
+返回值
+Array < Byte >

@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "kind": "tls-api-compatibility-classification",
+  "source_task": "M8-006",
+  "status": "PASS",
+  "status_meaning": "Classification completed and expected source-break reproductions observed; PASS is not a backward-compatibility guarantee.",
+  "basis": [
+    "M8-005 versus M8-006 frozen public-declaration inventories",
+    "Two minimal exhaustive-match clients compiled and ran with baseline variant sets, then failed compilation with candidate variant sets",
+    "Cangjie API declaration compatibility specification section 5.1.3.4.3.11",
+    "Native public-header diff inspection"
+  ],
+  "classifier_limit": "compat-agent is unavailable on PATH; no compat-test corpus verdict is claimed.",
+  "source_compatibility": {
+    "verdict": "BREAKING",
+    "affected": [
+      "wirestack.TlsCapability: ExternalDecryptor and KeyLog",
+      "wirestack.TlsContextErrorCode: InvalidHook"
+    ],
+    "migration": "Update exhaustive matches for the new cases and rebuild consumers. No pre-existing declaration or member was removed."
+  },
+  "binary_compatibility": {
+    "verdict": "NOT_QUALIFIED",
+    "reason": "The public Cangjie enums and context object layouts changed. No old compiled consumer/new library matrix was executed; rebuild consumers."
+  },
+  "native_c_abi": {
+    "version": 1,
+    "inspection": "Eight entrypoints and new enum/capability values were appended; existing header signatures and numeric values were preserved.",
+    "mixed_binary_verification": "NOT_EXECUTED"
+  },
+  "semantic_compatibility": {
+    "changes": [
+      "Fresh context versions intentionally prevent resumption across context versions.",
+      "Closing the original PrivateKeyRef does not revoke already-built context snapshots.",
+      "Store replacement changes future handshakes, not handshakes already in progress or returned connections."
+    ],
+    "runtime_evidence": [
+      "docs/evidence/M8-006/native-release.json",
+      "docs/evidence/M8-006/native-keylog.json"
+    ]
+  },
+  "inventory": {
+    "previous_declarations": 314,
+    "current_declarations": 324,
+    "previous_aliases": 110,
+    "current_aliases": 114,
+    "changes": [
+      {
+        "declaration": "wirestack.ExternalDecryptionRequest",
+        "kind": "struct",
+        "added_declaration": "public struct ExternalDecryptionRequest"
+      },
+      {
+        "declaration": "wirestack.ExternalDecryptor",
+        "kind": "interface",
+        "added_declaration": "public interface ExternalDecryptor"
+      },
+      {
+        "declaration": "wirestack.KeyLogSink",
+        "kind": "interface",
+        "added_declaration": "public interface KeyLogSink"
+      },
+      {
+        "declaration": "wirestack.TlsCapability",
+        "kind": "enum",
+        "added_members": [
+          "| ExternalDecryptor",
+          "| KeyLog"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.TlsContextErrorCode",
+        "kind": "enum",
+        "added_members": [
+          "| InvalidHook"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.TlsKeyLogLine",
+        "kind": "struct",
+        "added_declaration": "public struct TlsKeyLogLine"
+      },
+      {
+        "declaration": "wirestack.tls.ExternalDecryptionRequest",
+        "kind": "type",
+        "added_declaration": "public type ExternalDecryptionRequest = wirestack.ExternalDecryptionRequest"
+      },
+      {
+        "declaration": "wirestack.tls.ExternalDecryptor",
+        "kind": "type",
+        "added_declaration": "public type ExternalDecryptor = wirestack.ExternalDecryptor"
+      },
+      {
+        "declaration": "wirestack.tls.KeyLogSink",
+        "kind": "type",
+        "added_declaration": "public type KeyLogSink = wirestack.KeyLogSink"
+      },
+      {
+        "declaration": "wirestack.tls.TlsClientContext",
+        "kind": "class",
+        "added_members": [
+          "public let contextVersion: UInt64",
+          "public let externalDecryptor: ?ExternalDecryptor",
+          "public let keyLogSink: ?KeyLogSink"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.tls.TlsClientContextBuilder",
+        "kind": "class",
+        "added_members": [
+          "public func withExternalDecryptor( decryptor: ExternalDecryptor ): TlsClientContextBuilder",
+          "public func withKeyLogSink(sink: KeyLogSink): TlsClientContextBuilder"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.tls.TlsClientContextStore",
+        "kind": "class",
+        "added_declaration": "public class TlsClientContextStore"
+      },
+      {
+        "declaration": "wirestack.tls.TlsKeyLogLine",
+        "kind": "type",
+        "added_declaration": "public type TlsKeyLogLine = wirestack.TlsKeyLogLine"
+      },
+      {
+        "declaration": "wirestack.tls.TlsListener",
+        "kind": "class",
+        "added_members": [
+          "public init(listener: TransportListener, contextStore: TlsServerContextStore)"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.tls.TlsServerContext",
+        "kind": "class",
+        "added_members": [
+          "public let contextVersion: UInt64",
+          "public let externalDecryptor: ?ExternalDecryptor",
+          "public let keyLogSink: ?KeyLogSink"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.tls.TlsServerContextBuilder",
+        "kind": "class",
+        "added_members": [
+          "public func withExternalDecryptor( decryptor: ExternalDecryptor ): TlsServerContextBuilder",
+          "public func withKeyLogSink(sink: KeyLogSink): TlsServerContextBuilder"
+        ],
+        "removed_members": []
+      },
+      {
+        "declaration": "wirestack.tls.TlsServerContextStore",
+        "kind": "class",
+        "added_declaration": "public class TlsServerContextStore"
+      }
+    ]
+  },
+  "forward_compatibility": {
+    "verdict": "NOT_GUARANTEED",
+    "reason": "Future enum additions can require source changes. The current inventory is not an open-ended API or binary guarantee."
+  },
+  "reproduction_limits": [
+    "Fixtures preserve public variant sets and the same exhaustive client, not repository declaration ordering or binary layout.",
+    "Reproduction uses one SDK, not an old/new SDK matrix."
+  ],
+  "inputs": [
+    {
+      "path": "docs/api/baselines/wirestack-linux-pre1-m8-005.json",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "13828fa32952e3b8758507fe2bf7c7251f10f29650057c2a43b28cfe51857fec"
+      }
+    },
+    {
+      "path": "docs/api/baselines/wirestack-linux-pre1-m8-006.json",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ee5c125864a0cad0f5a9658472025451dd90976dde009a3faa813e4cbcbf718b"
+      }
+    }
+  ],
+  "reproductions": [
+    {
+      "id": "TlsCapability-baseline",
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/sts1.1.3",
+        "--root-level",
+        "--",
+        "cjc",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsCapability-baseline.cj",
+        "-o",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsCapability-baseline"
+      ],
+      "exit_code": 0,
+      "source": {
+        "path": "docs/evidence/M8-006/compatibility/TlsCapability-baseline.cj.txt",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "332ea978da86524a765390f2858f014275210220e686c92091786c529c09b22a"
+        }
+      },
+      "stdout": {
+        "path": "docs/evidence/M8-006/compatibility/TlsCapability-baseline.stdout.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/compatibility/TlsCapability-baseline.stderr.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "execution": {
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "<home>/cangjie_sdk/sts1.1.3",
+          "--root-level",
+          "--",
+          "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsCapability-baseline"
+        ],
+        "exit_code": 0,
+        "stdout": {
+          "path": "docs/evidence/M8-006/compatibility/TlsCapability-baseline.run.stdout.log",
+          "digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M8-006/compatibility/TlsCapability-baseline.run.stderr.log",
+          "digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "id": "TlsCapability-candidate",
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/sts1.1.3",
+        "--root-level",
+        "--",
+        "cjc",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsCapability-candidate.cj",
+        "-o",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsCapability-candidate"
+      ],
+      "exit_code": 1,
+      "source": {
+        "path": "docs/evidence/M8-006/compatibility/TlsCapability-candidate.cj.txt",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "dd622a9cdd199282ce9e9375f04edae4d631290804c8f8d7a58688531feb08f6"
+        }
+      },
+      "stdout": {
+        "path": "docs/evidence/M8-006/compatibility/TlsCapability-candidate.stdout.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/compatibility/TlsCapability-candidate.stderr.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "4b4fc1f1fa82aa7c58b47e3c625b4da6080074c641e432fd398c49248561cdd5"
+        }
+      }
+    },
+    {
+      "id": "TlsContextErrorCode-baseline",
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/sts1.1.3",
+        "--root-level",
+        "--",
+        "cjc",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsContextErrorCode-baseline.cj",
+        "-o",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsContextErrorCode-baseline"
+      ],
+      "exit_code": 0,
+      "source": {
+        "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-baseline.cj.txt",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "991d1c0576e345ddc6e7ff77abe6d93abdbeb55299f076919f7ad07b816689cf"
+        }
+      },
+      "stdout": {
+        "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-baseline.stdout.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-baseline.stderr.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "execution": {
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "<home>/cangjie_sdk/sts1.1.3",
+          "--root-level",
+          "--",
+          "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsContextErrorCode-baseline"
+        ],
+        "exit_code": 0,
+        "stdout": {
+          "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-baseline.run.stdout.log",
+          "digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-baseline.run.stderr.log",
+          "digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "id": "TlsContextErrorCode-candidate",
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/sts1.1.3",
+        "--root-level",
+        "--",
+        "cjc",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsContextErrorCode-candidate.cj",
+        "-o",
+        "/tmp/wirestack-m8-006-compat-ynhh2we9/TlsContextErrorCode-candidate"
+      ],
+      "exit_code": 1,
+      "source": {
+        "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-candidate.cj.txt",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "31a825e916ccf70f56d2931cd1baee4a01d7c7a48a506a175acf297344eed6de"
+        }
+      },
+      "stdout": {
+        "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-candidate.stdout.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/compatibility/TlsContextErrorCode-candidate.stderr.log",
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "ff8d5b690ff1196995879ee8df5878ef07c527fa78e6d94a53fb3d360459f925"
+        }
+      }
+    }
+  ]
+}

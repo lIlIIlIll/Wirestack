@@ -34,9 +34,11 @@ REQUIRED_CAPABILITIES = (
     "tls13",
     "http2",
     "externalSigner",
+    "external-decryptor",
     "sessionResumption",
     "secureRandom",
 )
+TEST_KEY_LOG_CAPABILITY = "key-log"
 
 
 class BuildError(RuntimeError):
@@ -248,6 +250,7 @@ def build_input_fingerprint(
     abi_contract: Path,
     tools: Mapping[str, str],
     target: Mapping[str, str],
+    enable_test_keylog: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     value = {
         "builder_sha256": evidence_digest.text_evidence_sha256(Path(__file__).resolve()),
@@ -259,6 +262,7 @@ def build_input_fingerprint(
         "abi_contract_sha256": evidence_digest.text_evidence_sha256(abi_contract),
         "tools": dict(tools),
         "target": dict(target),
+        "test_only_key_log": enable_test_keylog,
     }
     return evidence_digest.text_evidence_bytes_sha256(canonical_json(value)), value
 
@@ -281,7 +285,11 @@ def activate_build(output_root: Path, final_dir: Path) -> None:
     os.replace(temporary, current)
 
 
-def validate_cached_build(final_dir: Path, fingerprint: str) -> dict[str, Any] | None:
+def validate_cached_build(
+    final_dir: Path,
+    fingerprint: str,
+    test_only_key_log: bool | None = None,
+) -> dict[str, Any] | None:
     archive = final_dir / "lib" / "libwirestack_tls_provider.a"
     manifest_path = final_dir / "provider-manifest.json"
     if not archive.is_file() or not manifest_path.is_file():
@@ -299,6 +307,9 @@ def validate_cached_build(final_dir: Path, fingerprint: str) -> dict[str, Any] |
         return None
     if build_manifest.get("externalOpenSslDependency") is not False:
         return None
+    if (test_only_key_log is not None and
+            build_manifest.get("test_only_key_log") is not test_only_key_log):
+        return None
     return build_manifest
 
 
@@ -311,15 +322,22 @@ def build_provider(
     output_root: Path,
     tools: Mapping[str, str],
     target: Mapping[str, str],
+    enable_test_keylog: bool = False,
 ) -> tuple[Path, dict[str, Any]]:
     shim_dir = repo / "native" / "tls" / "aws_lc"
     shim_source = shim_dir / "wirestack_tls_provider.c"
     shim_header = shim_dir / "wirestack_tls_provider.h"
     fingerprint, build_inputs = build_input_fingerprint(
-        manifest, shim_source, shim_header, abi_contract, tools, target
+        manifest,
+        shim_source,
+        shim_header,
+        abi_contract,
+        tools,
+        target,
+        enable_test_keylog,
     )
     final_dir = output_root / "cache" / fingerprint
-    cached = validate_cached_build(final_dir, fingerprint)
+    cached = validate_cached_build(final_dir, fingerprint, enable_test_keylog)
     if cached is not None:
         activate_build(output_root, final_dir)
         return final_dir, cached
@@ -352,6 +370,10 @@ def build_provider(
         ssl_archive = find_archive(prefix, "libssl.a")
         crypto_archive = find_archive(prefix, "libcrypto.a")
         shim_object = staging / "wirestack_tls_provider.o"
+        shim_defines = (
+            ["-DWIRESTACK_TLS_ENABLE_TEST_KEYLOG=1"]
+            if enable_test_keylog else []
+        )
         run(
             [
                 tools["cc"],
@@ -364,6 +386,7 @@ def build_provider(
                 f"-I{prefix / 'include'}",
                 f"-I{shim_dir}",
                 f'-DWIRESTACK_TLS_BUILD_FINGERPRINT="{fingerprint}"',
+                *shim_defines,
                 "-c",
                 str(shim_source),
                 "-o",
@@ -399,11 +422,18 @@ def build_provider(
 int main(void) {
   uint64_t handle = 0; unsigned char data[32] = {0};
   uint64_t engine = 0, invalid_engine = 0, pending = 0, drained = 0;
+  uint64_t capabilities = 0;
   int32_t step = -1;
   if (wirestack_tls_provider_abi_version() != 1) return 13;
   if (wirestack_tls_provider_create(&handle) != 0) return 1;
   if (wirestack_tls_provider_random(handle, data, sizeof(data)) != 0) return 2;
-  if (wirestack_tls_provider_capabilities(handle) == 0) return 3;
+  capabilities = wirestack_tls_provider_capabilities(handle);
+  if ((capabilities & WIRESTACK_TLS_CAP_EXTERNAL_DECRYPTOR) == 0) return 3;
+#if defined(WIRESTACK_TLS_ENABLE_TEST_KEYLOG)
+  if ((capabilities & WIRESTACK_TLS_CAP_KEY_LOG) == 0) return 14;
+#else
+  if ((capabilities & WIRESTACK_TLS_CAP_KEY_LOG) != 0) return 14;
+#endif
   if (wirestack_tls_provider_target_triple(handle) == 0) return 10;
   if (wirestack_tls_provider_external_openssl_dependency(handle) != 0) return 11;
   if (wirestack_tls_provider_build_fingerprint(handle) == 0) return 12;
@@ -430,6 +460,7 @@ int main(void) {
                 "-Wextra",
                 "-Werror",
                 f"-I{include_dir}",
+                *shim_defines,
                 "-c",
                 str(smoke_source),
                 "-o",
@@ -469,10 +500,14 @@ int main(void) {
             "backend": manifest["abi"]["backend"],
             "abiVersion": manifest["abi"]["version"],
             "patchLevel": "abi-1;patches=none",
-            "capabilities": manifest["capabilities"],
+            "capabilities": [
+                *manifest["capabilities"],
+                *([TEST_KEY_LOG_CAPABILITY] if enable_test_keylog else []),
+            ],
             "source": dict(source_identity),
             "target": dict(target),
             "build_fingerprint": fingerprint,
+            "test_only_key_log": enable_test_keylog,
             "build_inputs": build_inputs,
             "archive": {
                 "name": combined.name,
@@ -485,7 +520,11 @@ int main(void) {
         (artifact_dir / "provider-manifest.json").write_bytes(canonical_json(build_manifest))
         final_dir.parent.mkdir(parents=True, exist_ok=True)
         if final_dir.exists():
-            cached = validate_cached_build(final_dir, fingerprint)
+            cached = validate_cached_build(
+                final_dir,
+                fingerprint,
+                enable_test_keylog,
+            )
             if cached is None:
                 raise BuildError(f"invalid provider cache already exists: {final_dir}")
             build_manifest = cached
@@ -504,6 +543,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out-dir", type=Path)
     parser.add_argument("--cache-dir", type=Path)
     parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--enable-test-keylog", action="store_true")
     parser.add_argument("--abi-contract", type=Path)
     parser.add_argument("--print-manifest", action="store_true")
     parser.add_argument("--cc")
@@ -522,7 +562,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     abi_contract = (
         args.abi_contract or repo / "tools" / "tls_provider" / "abi-v1.json"
     ).resolve()
-    output_root = (args.out_dir or repo / "target" / "native").resolve()
+    default_output_root = (repo / "target" / "native").resolve()
+    output_root = (args.out_dir or default_output_root).resolve()
+    if args.enable_test_keylog and (
+        args.out_dir is None or output_root == default_output_root
+    ):
+        raise BuildError(
+            "--enable-test-keylog requires an explicit non-default --out-dir"
+        )
     cache_root = (args.cache_dir or repo / ".local" / "tls-provider").resolve()
     source_override = args.source_dir
     if source_override is None:
@@ -548,9 +595,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         abi_contract,
         tools_with_versions,
         target,
+        args.enable_test_keylog,
     )
     cached_dir = output_root / "cache" / fingerprint
-    cached_manifest = validate_cached_build(cached_dir, fingerprint)
+    cached_manifest = validate_cached_build(
+        cached_dir,
+        fingerprint,
+        args.enable_test_keylog,
+    )
     if cached_manifest is not None:
         activate_build(output_root, cached_dir)
         if args.print_manifest:
@@ -570,6 +622,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         output_root,
         tools_with_versions,
         target,
+        args.enable_test_keylog,
     )
     if args.print_manifest:
         print(json.dumps(build_manifest, indent=2, sort_keys=True))

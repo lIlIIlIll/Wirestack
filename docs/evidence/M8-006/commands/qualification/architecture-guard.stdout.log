@@ -1,0 +1,9 @@
+{
+  "kind": "architecture-guard",
+  "ok": true,
+  "root": "<repo-root>-pr-worktrees/M8-006-tls",
+  "schema_version": 1,
+  "status": "PASS",
+  "violation_count": 0,
+  "violations": []
+}

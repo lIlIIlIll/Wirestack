@@ -1,0 +1,38 @@
+首页
+包 wirestack
+KeyLogSink
+wirestack.KeyLogSink
+
+interfacepublicsemantic: partial src/tls_contract.cj:268:1
+
+签名
+public interface KeyLogSink
+⧉
+概览
+
+Caller-owned, thread-safe sink available only in explicit test-keylog builds.
+
+Wirestack passes the exact handshake OperationContext. The sink must copy data it retains and must not log outside the explicitly enabled context.
+
+函数
+wirestack.KeyLogSink.emit
+
+functionpublicsemantic: partial Owner: wirestack.KeyLogSink · src/tls_contract.cj:274:5
+
+签名
+func emit(line: TlsKeyLogLine, context: OperationContext): Unit
+⧉
+概览
+
+Receives one validated key-log record.
+
+参数
+line
+:TlsKeyLogLine
+
+Bounded, owned key-log data.
+
+context
+:OperationContext
+
+The caller's exact handshake operation context.

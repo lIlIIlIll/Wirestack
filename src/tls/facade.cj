@@ -1,5 +1,7 @@
 package wirestack.tls
 
+import std.sync.AtomicReference
+
 import wirestack.internal.tls_engine as engine
 
 /** Read-only provider and build identity retained by a completed handshake. */
@@ -104,11 +106,20 @@ public class TlsClientContext {
  * Wirestack 公开 API：capabilities。
  */
     public let capabilities: TlsCapabilities
+    /** Checked process-unique epoch used to partition all resumable state. */
+    public let contextVersion: UInt64
+    /** Immutable reference to the configured external decryptor, when present. */
+    public let externalDecryptor: ?ExternalDecryptor
+    /** Immutable reference to the explicitly enabled test-build key-log sink. */
+    public let keyLogSink: ?KeyLogSink
 
     internal init(provider: engine.TlsProvider, value: engine.TlsClientContext) {
         this.provider = provider
         this.value = value
         capabilities = TlsCapabilities(value.capabilities)
+        contextVersion = value.contextVersion
+        externalDecryptor = value.externalDecryptor
+        keyLogSink = value.keyLogSink
     }
 
 /**
@@ -181,6 +192,70 @@ public class TlsClientContext {
     }
 }
 
+/**
+ * Atomically replaceable client context source.
+ *
+ * Each handshake loads exactly one immutable snapshot. Replacement affects
+ * only handshakes that load afterward; existing handshakes and connections
+ * retain their original context and session partition.
+ */
+public class TlsClientContextStore {
+    private let current: AtomicReference<TlsClientContext>
+
+    /** @param initial Context used until the first replacement. */
+    public init(initial: TlsClientContext) {
+        current = AtomicReference<TlsClientContext>(initial)
+    }
+
+    /** Returns the immutable context a handshake would currently use. */
+    public func snapshot(): TlsClientContext { current.load() }
+
+    /**
+     * Atomically selects a context for future handshakes.
+     * @param value Built immutable context selected by this replacement.
+     * @return The selected context's checked process-unique version.
+     */
+    public func replace(value: TlsClientContext): UInt64 {
+        let _ = current.swap(value)
+        value.contextVersion
+    }
+
+    /**
+     * Handshakes with one atomic context snapshot and a DNS reference identity.
+     * @param transport Connected transport consumed even when the handshake fails.
+     * @param serverName Canonical DNS name used for SNI and certificate verification.
+     * @param context Shared handshake cancellation, absolute deadline and trace.
+     */
+    public func handshake(
+        transport: DuplexTransport,
+        serverName: HostName,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection {
+        snapshot().handshake(transport, serverName, context: context)
+    }
+
+    /**
+     * Handshakes with one atomic snapshot and an explicit reference identity.
+     * @param transport Connected transport consumed even when the handshake fails.
+     * @param referenceIdentity Expected certificate identity, independent of SNI.
+     * @param serverName Optional canonical DNS name sent as SNI.
+     * @param context Shared handshake cancellation, absolute deadline and trace.
+     */
+    public func handshake(
+        transport: DuplexTransport,
+        referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName = None<HostName>,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection {
+        snapshot().handshake(
+            transport,
+            referenceIdentity,
+            serverName: serverName,
+            context: context
+        )
+    }
+}
+
 /** Mutable builder state never enters a built client context. */
 public class TlsClientContextBuilder {
     private let provider: engine.TlsProvider
@@ -238,6 +313,26 @@ public class TlsClientContextBuilder {
         this
     }
 
+    /**
+     * Configures an external decryptor. Client contexts reject this at build.
+     * @param decryptor Caller-owned thread-safe decryptor service.
+     */
+    public func withExternalDecryptor(
+        decryptor: ExternalDecryptor
+    ): TlsClientContextBuilder {
+        let _ = value.withExternalDecryptor(decryptor)
+        this
+    }
+
+    /**
+     * Configures explicit test-build key logging.
+     * @param sink Caller-owned thread-safe key-log sink.
+     */
+    public func withKeyLogSink(sink: KeyLogSink): TlsClientContextBuilder {
+        let _ = value.withKeyLogSink(sink)
+        this
+    }
+
 /**
  * Wirestack 公开 API：alpn。
  * @param protocols 参数 protocols。
@@ -261,11 +356,20 @@ public class TlsServerContext {
  * Wirestack 公开 API：capabilities。
  */
     public let capabilities: TlsCapabilities
+    /** Checked process-unique epoch used to partition all resumable state. */
+    public let contextVersion: UInt64
+    /** Immutable reference to the configured external decryptor, when present. */
+    public let externalDecryptor: ?ExternalDecryptor
+    /** Immutable reference to the explicitly enabled test-build key-log sink. */
+    public let keyLogSink: ?KeyLogSink
 
     internal init(provider: engine.TlsProvider, value: engine.TlsServerContext) {
         this.provider = provider
         this.value = value
         capabilities = TlsCapabilities(value.capabilities)
+        contextVersion = value.contextVersion
+        externalDecryptor = value.externalDecryptor
+        keyLogSink = value.keyLogSink
     }
 
 /**
@@ -318,6 +422,45 @@ public class TlsServerContext {
     }
 }
 
+/**
+ * Atomically replaceable server context source.
+ *
+ * Accepted connections snapshot it only when their TLS handshake begins.
+ */
+public class TlsServerContextStore {
+    private let current: AtomicReference<TlsServerContext>
+
+    /** @param initial Context used until the first replacement. */
+    public init(initial: TlsServerContext) {
+        current = AtomicReference<TlsServerContext>(initial)
+    }
+
+    /** Returns the immutable context a handshake would currently use. */
+    public func snapshot(): TlsServerContext { current.load() }
+
+    /**
+     * Atomically selects a context for future handshakes.
+     * @param value Built immutable context selected by this replacement.
+     * @return The selected context's checked process-unique version.
+     */
+    public func replace(value: TlsServerContext): UInt64 {
+        let _ = current.swap(value)
+        value.contextVersion
+    }
+
+    /**
+     * Handshakes using one atomic context snapshot.
+     * @param transport Connected transport transferred to the TLS connection.
+     * @param context Shared handshake cancellation, absolute deadline and trace.
+     */
+    public func handshake(
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection {
+        snapshot().handshake(transport, context: context)
+    }
+}
+
 /** Mutable builder state never enters a built server context. */
 public class TlsServerContextBuilder {
     private let provider: engine.TlsProvider
@@ -363,6 +506,26 @@ public class TlsServerContextBuilder {
  */
     public func identity(identity: LocalIdentity): TlsServerContextBuilder {
         let _ = value.identity(identity.value)
+        this
+    }
+
+    /**
+     * Configures external raw-RSA private-key decryption.
+     * @param decryptor Caller-owned thread-safe decryptor service.
+     */
+    public func withExternalDecryptor(
+        decryptor: ExternalDecryptor
+    ): TlsServerContextBuilder {
+        let _ = value.withExternalDecryptor(decryptor)
+        this
+    }
+
+    /**
+     * Configures explicit test-build key logging.
+     * @param sink Caller-owned thread-safe key-log sink.
+     */
+    public func withKeyLogSink(sink: KeyLogSink): TlsServerContextBuilder {
+        let _ = value.withKeyLogSink(sink)
         this
     }
 
@@ -472,38 +635,48 @@ public class TlsConnection <: DuplexTransport {
     public func isClosed(): Bool { value.isClosed() }
 }
 
-/** TLS acceptor over a caller-owned provider-neutral transport listener. */
+/**
+ * TLS acceptor over a caller-owned provider-neutral listener.
+ *
+ * Fixed-context construction remains available. Store-backed construction
+ * atomically snapshots the current context after transport acceptance and
+ * immediately before each TLS handshake.
+ */
 public class TlsListener <: Resource {
     private let listener: TransportListener
-    private let context: TlsServerContext
+    private let contextStore: TlsServerContextStore
 
-/**
- * Wirestack 公开 API：构造并校验该公开值。
- * @param context 控制本次操作的截止时间、取消和追踪范围。
- * @param listener 调用方提供的输入值。
- */
+    /**
+     * @param listener Exclusively owned transport listener.
+     * @param context Immutable context used for every accepted connection.
+     */
     public init(listener: TransportListener, context: TlsServerContext) {
         this.listener = listener
-        this.context = context
+        contextStore = TlsServerContextStore(context)
     }
 
-/**
- * Wirestack 公开 API：接受一个待处理连接。
- * @param context 控制本次操作的截止时间、取消和追踪范围。
- */
+    /**
+     * @param listener Exclusively owned transport listener.
+     * @param contextStore Atomically replaceable source for future handshakes.
+     */
+    public init(listener: TransportListener, contextStore: TlsServerContextStore) {
+        this.listener = listener
+        this.contextStore = contextStore
+    }
+
+    /**
+     * Accepts a transport and handshakes with one immutable context snapshot.
+     * @param context Shared cancellation, absolute deadline and trace for accept and handshake.
+     */
     public func accept(
         context!: OperationContext = OperationContext.background()
     ): TlsConnection {
         let accepted = listener.accept(context)
-        this.context.handshake(accepted, context: context)
+        contextStore.handshake(accepted, context: context)
     }
 
-/**
- * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
- */
+    /** Closes the owned listener without closing previously returned connections. */
     public func close(): Unit { listener.close() }
-/**
- * Wirestack 公开 API：报告资源是否已经关闭。
- */
+    /** Reports whether the owned transport listener is closed. */
     public func isClosed(): Bool { listener.isClosed() }
 }
