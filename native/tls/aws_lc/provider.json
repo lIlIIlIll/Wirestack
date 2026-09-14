@@ -34,6 +34,7 @@
     "tls13",
     "http2",
     "externalSigner",
+    "external-decryptor",
     "sessionResumption",
     "secureRandom"
   ]
