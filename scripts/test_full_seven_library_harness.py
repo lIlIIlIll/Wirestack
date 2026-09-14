@@ -53,20 +53,19 @@ def write_cangjie_csv(
 
 
 class RunnerSelectionTest(unittest.TestCase):
-    def test_cangjie_command_uses_exact_case_filter(self) -> None:
+    def test_cangjie_command_uses_exact_case_filter_on_binary(self) -> None:
         command = RUNNER.cangjie_command(
             7,
-            "ComprehensiveJsonCompareBenchmarks",
+            pathlib.Path("/tmp/yjson_benchmarks"),
             "yjsonStringDecodePerson",
             pathlib.Path("/tmp/report"),
             3,
         )
-        selected = command[command.index("--filter") + 1]
-        self.assertEqual(
-            selected,
-            "ComprehensiveJsonCompareBenchmarks.yjsonStringDecodePerson",
-        )
-        self.assertNotIn("*", selected)
+        selected = next(arg for arg in command if arg.startswith("--filter="))
+        self.assertEqual(selected, "--filter=*.yjsonStringDecodePerson")
+        self.assertIn("--bench", command)
+        self.assertNotIn("cjpm", command)
+        self.assertNotIn("--skip-build", command)
 
     def test_java_command_anchors_and_escapes_exact_case(self) -> None:
         command = RUNNER.java_command(
@@ -144,22 +143,19 @@ class CjfastSummaryRssTest(unittest.TestCase):
                 CJFAST_SUMMARY.load_report(root, "exactCase")
 
 
-class CjfastRunnerPolicyTest(unittest.TestCase):
-    def test_timed_command_uses_exact_case_and_skip_build(self) -> None:
+    def test_timed_command_uses_exact_case_on_binary(self) -> None:
         command = CJFAST_RUNNER.cangjie_command(
             3,
-            "ComprehensiveJsonCompareBenchmarks",
+            pathlib.Path("/tmp/fastjson.bench"),
             "yjsonStringDecodePrettyPerson",
             pathlib.Path("/tmp/report"),
             1,
         )
-        selected = command[command.index("--filter") + 1]
-        self.assertEqual(
-            selected,
-            "ComprehensiveJsonCompareBenchmarks.yjsonStringDecodePrettyPerson",
-        )
-        self.assertIn("--skip-build", command)
-        self.assertNotIn("*", selected)
+        selected = next(arg for arg in command if arg.startswith("--filter="))
+        self.assertEqual(selected, "--filter=*.yjsonStringDecodePrettyPerson")
+        self.assertIn("--bench", command)
+        self.assertNotIn("cjpm", command)
+        self.assertNotIn("--skip-build", command)
 
     def test_build_command_is_unmeasured_and_does_not_select_a_case(self) -> None:
         command = CJFAST_RUNNER.build_command(3)
@@ -182,6 +178,11 @@ class FixturePreflightContractTest(unittest.TestCase):
         for relative in required_dirs:
             (root / relative).mkdir(parents=True, exist_ok=True)
         (root / "cpu-selection.json").write_text("{}\n", encoding="utf-8")
+        for relative in set(RUNNER.CANGJIE_BINARIES.values()):
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            path.chmod(0o755)
         for relative in RUNNER.PREFLIGHT_FIXTURES:
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -203,6 +204,13 @@ class FixturePreflightContractTest(unittest.TestCase):
             missing = workspace / RUNNER.PREFLIGHT_FIXTURES[2]
             missing.write_text("no assertions\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "omit the canonical encode/decode"):
+                RUNNER.require_workspace_layout(workspace)
+
+    def test_missing_benchmark_binary_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = self.fixture_workspace(pathlib.Path(directory))
+            (workspace / RUNNER.CANGJIE_BINARIES["yjson"]).unlink()
+            with self.assertRaisesRegex(ValueError, "built Cangjie benchmark executables"):
                 RUNNER.require_workspace_layout(workspace)
 
     def test_fixture_overlay_applies_and_freezes_java_wire_shape(self) -> None:

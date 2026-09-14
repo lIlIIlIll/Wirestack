@@ -111,6 +111,13 @@ CANGJIE = {
         "cjfastString",
     ),
 }
+CANGJIE_BINARIES = {
+    "yjson": "repo/packages/benchmarks/target/release/unittest_bin/yjson_benchmarks",
+    "stdx_json": "repo/packages/benchmarks/target/release/unittest_bin/yjson_benchmarks",
+    "cangjieJSON": "harness/cjjson/target/release/unittest_bin/bench_cjjson",
+    "json4cj": "harness/json4cj/target/release/unittest_bin/bench_json4cj",
+    "cjfast_json": "cjfast-json/target/release/unittest_bin/fastjson.bench",
+}
 
 JAVA = {"jackson": "jackson", "fastjson2": "fastjson2"}
 PREFLIGHT_MARKER = "YJSON_SEVEN_LIBRARY_PREFLIGHT_V1"
@@ -196,31 +203,62 @@ def order(items: tuple, round_id: int) -> list:
     return rotated if round_id % 2 else list(reversed(rotated))
 
 
+def cangjie_binary(workspace: Path, library: str) -> Path:
+    try:
+        return workspace / CANGJIE_BINARIES[library]
+    except KeyError as error:
+        raise ValueError(f"no Cangjie binary configured for {library}") from error
+
+
+def cangjie_runtime_environment(
+    env: dict[str, str], stdx_sdk_root: Path
+) -> dict[str, str]:
+    command_env = env.copy()
+    dynamic_stdx = (
+        stdx_sdk_root
+        if stdx_sdk_root.name == "stdx"
+        else stdx_sdk_root / "linux_x86_64_cjnative/dynamic/stdx"
+    )
+    current = command_env.get("LD_LIBRARY_PATH", "")
+    command_env["LD_LIBRARY_PATH"] = (
+        f"{dynamic_stdx}:{current}" if current else str(dynamic_stdx)
+    )
+    return command_env
+
+
 def cangjie_command(
     cpu: int,
-    suite: str,
+    binary: Path,
     source_case: str,
     report_dir: Path,
     round_id: int,
 ) -> list[str]:
-    """Build a command selecting exactly one Cangjie benchmark case."""
+    """Build a timed command for one prebuilt Cangjie benchmark case."""
     return [
         "taskset",
         "-c",
         str(cpu),
-        "cjpm",
-        "bench",
-        "--skip-build",
+        str(binary),
+        "--bench",
         "--no-color",
-        "--filter",
-        f"{suite}.{source_case}",
-        "--report-path",
-        str(report_dir),
-        "--report-format",
-        "csv-raw",
-        "--random-seed",
-        str(round_id),
+        "--no-progress",
+        f"--filter=*.{source_case}",
+        f"--report-path={report_dir}",
+        "--report-format=csv-raw",
+        f"--random-seed={round_id}",
     ]
+
+
+def cangjie_binary_metadata(workspace: Path) -> dict[str, dict[str, str]]:
+    return {
+        library: {
+            "path": cangjie_binary(workspace, library).relative_to(workspace).as_posix(),
+            "sha256": file_digest(cangjie_binary(workspace, library)),
+        }
+        for library in CANGJIE
+    }
+
+
 
 
 def java_command(cpu: int, source_case: str, report_file: Path) -> list[str]:
@@ -275,6 +313,17 @@ def require_workspace_layout(workspace: Path) -> None:
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise ValueError("workspace omits required benchmark inputs: " + ", ".join(missing))
+    missing_binaries = []
+    for library in CANGJIE:
+        path = cangjie_binary(workspace, library)
+        if not path.is_file() or not os.access(path, os.X_OK):
+            missing_binaries.append(f"{library}: {path}")
+    if missing_binaries:
+        raise ValueError(
+            "workspace omits built Cangjie benchmark executables: "
+            + ", ".join(missing_binaries)
+        )
+
     missing_preflight = []
     for relative in PREFLIGHT_FIXTURES:
         path = workspace / relative
@@ -307,21 +356,24 @@ def run_correctness_preflight(
     for library in LIBRARIES:
         source_case: str
         if library in CANGJIE:
-            relative_cwd, suite, prefix = CANGJIE[library]
+            relative_cwd, _, prefix = CANGJIE[library]
             cwd = workspace / relative_cwd
+            binary = cangjie_binary(workspace, library)
             source_case = prefix + "EncodeAddress"
             report = preflight / library / "report"
             report.mkdir(parents=True)
-            command = cangjie_command(cpu, suite, source_case, report, 1)
+            command = cangjie_command(cpu, binary, source_case, report, 1)
         else:
             cwd = workspace / "harness/java"
             source_case = JAVA[library] + "EncodeAddress"
             report = preflight / library / "report"
             report.mkdir(parents=True)
             command = java_command(cpu, source_case, report / "jmh.json")
-        command_env = env.copy()
-        if library == "cangjieJSON":
-            command_env["CANGJIE_STDX_PATH"] = str(stdx_sdk_root)
+        command_env = (
+            cangjie_runtime_environment(env, stdx_sdk_root)
+            if library in CANGJIE
+            else env.copy()
+        )
         result = subprocess.run(
             command,
             cwd=cwd,
@@ -366,7 +418,12 @@ def metadata(
             "workload and seven-library order rotate; even rounds reverse workload order"
         ),
         "jmh": "1 fork per outer round, 3x500ms warmup, 1x1s measurement, avgt ns/op",
-        "cangjie_bench": "200ms warmup, >=1s duration, >=12 batches, csv-raw",
+        "cangjie_bench": "prebuilt executable direct; 200ms warmup, >=1s duration, >=12 batches, csv-raw",
+        "timing_build_policy": (
+            "all Cangjie benchmark packages are built before this runner; GNU time wraps "
+            "only the prebuilt benchmark executables"
+        ),
+        "cangjie_binaries": cangjie_binary_metadata(workspace),
         "case_selection": "exact fully-qualified benchmark method; report Case validated before manifest commit",
         "correctness_preflight": (
             "all seven fixtures execute and validate one exact case before formal timing; "
@@ -541,11 +598,12 @@ def main(argv: list[str] | None = None) -> int:
                     rss_path = report_dir / "time-rss.txt"
                     log_path = logs / f"run-{round_id:02d}-{workload_id}-{library}.log"
                     if library in CANGJIE:
-                        relative_cwd, suite, prefix = CANGJIE[library]
+                        relative_cwd, _, prefix = CANGJIE[library]
                         cwd = workspace / relative_cwd
+                        binary = cangjie_binary(workspace, library)
                         source_case = prefix + suffix
                         command = cangjie_command(
-                            args.cpu, suite, source_case, report_dir, round_id
+                            args.cpu, binary, source_case, report_dir, round_id
                         )
                     else:
                         cwd = workspace / "harness/java"
@@ -556,9 +614,11 @@ def main(argv: list[str] | None = None) -> int:
 
                     before = os.getloadavg()[0]
                     started = time.monotonic()
-                    command_env = env.copy()
-                    if library == "cangjieJSON":
-                        command_env["CANGJIE_STDX_PATH"] = str(stdx_sdk_root)
+                    command_env = (
+                        cangjie_runtime_environment(env, stdx_sdk_root)
+                        if library in CANGJIE
+                        else env.copy()
+                    )
                     result = subprocess.run(
                         [time_binary, "-v", "-o", str(rss_path), *command],
                         cwd=cwd,
