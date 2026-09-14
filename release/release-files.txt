@@ -190,6 +190,7 @@ benchmarks/results/full-seven-library/2026-09-09-main-987bc8a/README.md
 benchmarks/results/full-seven-library/2026-09-09-main-bddbe6e/README.md
 benchmarks/results/full-seven-library/2026-09-10-main-008e50b/README.md
 benchmarks/results/full-seven-library/2026-09-13-release-4766daa/README.md
+benchmarks/results/full-seven-library/2026-09-14-release-7436598/README.md
 docs/performance/results/2026-09-13-release-seven-library.md
 docs/performance/results/2026-09-13-linux-release-pure.md
 docs/performance/results/2026-09-13-release-three-library.md
