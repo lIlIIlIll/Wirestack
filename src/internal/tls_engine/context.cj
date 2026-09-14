@@ -1,5 +1,7 @@
 package wirestack.internal.tls_engine
 
+import std.sync.AtomicUInt64
+
 import wirestack.internal.trust.*
 import wirestack as api
 
@@ -14,6 +16,8 @@ private let PLATFORM_TLS12: UInt64 = 1u64 << 5
 private let PLATFORM_TLS13: UInt64 = 1u64 << 6
 private let PLATFORM_HTTP2: UInt64 = 1u64 << 7
 private let PLATFORM_NETWORK_BINDING: UInt64 = 1u64 << 8
+private let PLATFORM_EXTERNAL_DECRYPTOR: UInt64 = 1u64 << 9
+private let PLATFORM_KEY_LOG: UInt64 = 1u64 << 10
 
 private func platformCapabilityMask(capability: TlsCapability): UInt64 {
     match (capability) {
@@ -26,6 +30,8 @@ private func platformCapabilityMask(capability: TlsCapability): UInt64 {
         case TlsCapability.Tls13 => PLATFORM_TLS13
         case TlsCapability.Http2 => PLATFORM_HTTP2
         case TlsCapability.NetworkBinding => PLATFORM_NETWORK_BINDING
+        case TlsCapability.ExternalDecryptor => PLATFORM_EXTERNAL_DECRYPTOR
+        case TlsCapability.KeyLog => PLATFORM_KEY_LOG
     }
 }
 
@@ -62,6 +68,12 @@ public struct TlsCapabilities {
         }
         if (manifest.supports(TlsProviderCapability.Http2)) {
             value |= PLATFORM_HTTP2
+        }
+        if (manifest.supports(TlsProviderCapability.ExternalDecryptor)) {
+            value |= PLATFORM_EXTERNAL_DECRYPTOR
+        }
+        if (manifest.supports(TlsProviderCapability.KeyLog)) {
+            value |= PLATFORM_KEY_LOG
         }
         TlsCapabilities(value)
     }
@@ -110,6 +122,24 @@ public struct TlsSecurityPolicy {
 public type ClientAuthentication = api.ClientAuthentication
 public type TlsContextErrorCode = api.TlsContextErrorCode
 public type TlsContextException = api.TlsContextException
+public type ExternalDecryptor = api.ExternalDecryptor
+public type KeyLogSink = api.KeyLogSink
+
+private let NEXT_TLS_CONTEXT_VERSION = AtomicUInt64(1u64)
+
+private func allocateTlsContextVersion(): UInt64 {
+    var current = NEXT_TLS_CONTEXT_VERSION.load()
+    while (true) {
+        if (current == 0u64 || current == UInt64.Max) {
+            throw IllegalStateException("TLS context version space is exhausted")
+        }
+        if (NEXT_TLS_CONTEXT_VERSION.compareAndSwap(current, current + 1u64)) {
+            return current
+        }
+        current = NEXT_TLS_CONTEXT_VERSION.load()
+    }
+    throw IllegalStateException("unreachable TLS context version state")
+}
 
 /** Immutable, concurrently shareable client configuration. */
 public class TlsClientContext {
@@ -118,6 +148,9 @@ public class TlsClientContext {
     public let security: TlsSecurityPolicy
     public let trust: TrustPolicy
     public let identity: ?LocalIdentity
+    public let contextVersion: UInt64
+    public let externalDecryptor: ?ExternalDecryptor
+    public let keyLogSink: ?KeyLogSink
     private let protocolNames: Array<String>
 
     private init(
@@ -126,7 +159,10 @@ public class TlsClientContext {
         security: TlsSecurityPolicy,
         trust: TrustPolicy,
         identity: ?LocalIdentity,
-        protocolNames: Array<String>
+        protocolNames: Array<String>,
+        contextVersion: UInt64,
+        externalDecryptor: ?ExternalDecryptor,
+        keyLogSink: ?KeyLogSink
     ) {
         this.providerManifest = providerManifest
         this.capabilities = capabilities
@@ -134,6 +170,9 @@ public class TlsClientContext {
         this.trust = trust
         this.identity = identity
         this.protocolNames = copyStrings(protocolNames)
+        this.contextVersion = contextVersion
+        this.externalDecryptor = externalDecryptor
+        this.keyLogSink = keyLogSink
     }
 
     public static func builder(
@@ -151,7 +190,10 @@ public class TlsClientContext {
         security: TlsSecurityPolicy,
         trust: TrustPolicy,
         identity: ?LocalIdentity,
-        protocolNames: Array<String>
+        protocolNames: Array<String>,
+        contextVersion: UInt64,
+        externalDecryptor: ?ExternalDecryptor,
+        keyLogSink: ?KeyLogSink
     ): TlsClientContext {
         TlsClientContext(
             providerManifest,
@@ -159,7 +201,10 @@ public class TlsClientContext {
             security,
             trust,
             identity,
-            protocolNames
+            protocolNames,
+            contextVersion,
+            externalDecryptor,
+            keyLogSink
         )
     }
 }
@@ -172,6 +217,9 @@ public class TlsServerContext {
     public let identity: LocalIdentity
     public let clientAuthentication: ClientAuthentication
     public let clientTrust: ?TrustPolicy
+    public let contextVersion: UInt64
+    public let externalDecryptor: ?ExternalDecryptor
+    public let keyLogSink: ?KeyLogSink
     private let protocolNames: Array<String>
 
     private init(
@@ -181,7 +229,10 @@ public class TlsServerContext {
         identity: LocalIdentity,
         clientAuthentication: ClientAuthentication,
         clientTrust: ?TrustPolicy,
-        protocolNames: Array<String>
+        protocolNames: Array<String>,
+        contextVersion: UInt64,
+        externalDecryptor: ?ExternalDecryptor,
+        keyLogSink: ?KeyLogSink
     ) {
         this.providerManifest = providerManifest
         this.capabilities = capabilities
@@ -190,6 +241,9 @@ public class TlsServerContext {
         this.clientAuthentication = clientAuthentication
         this.clientTrust = clientTrust
         this.protocolNames = copyStrings(protocolNames)
+        this.contextVersion = contextVersion
+        this.externalDecryptor = externalDecryptor
+        this.keyLogSink = keyLogSink
     }
 
     public static func builder(
@@ -208,7 +262,10 @@ public class TlsServerContext {
         identity: LocalIdentity,
         clientAuthentication: ClientAuthentication,
         clientTrust: ?TrustPolicy,
-        protocolNames: Array<String>
+        protocolNames: Array<String>,
+        contextVersion: UInt64,
+        externalDecryptor: ?ExternalDecryptor,
+        keyLogSink: ?KeyLogSink
     ): TlsServerContext {
         TlsServerContext(
             providerManifest,
@@ -217,7 +274,10 @@ public class TlsServerContext {
             identity,
             clientAuthentication,
             clientTrust,
-            protocolNames
+            protocolNames,
+            contextVersion,
+            externalDecryptor,
+            keyLogSink
         )
     }
 }
@@ -230,6 +290,8 @@ public class TlsClientContextBuilder {
     private var maximum = TlsVersion.Tls13
     private var trustRequirement: ?TrustPolicy = Some(TrustPolicy.system())
     private var identityRequirement: ?LocalIdentity = None<LocalIdentity>
+    private var decryptor: ?ExternalDecryptor = None<ExternalDecryptor>
+    private var keyLogger: ?KeyLogSink = None<KeyLogSink>
     private var protocols = Array<String>()
 
     internal init(providerManifest: TlsProviderManifest, capabilities: TlsCapabilities) {
@@ -266,6 +328,16 @@ public class TlsClientContextBuilder {
         this
     }
 
+    public func withExternalDecryptor(value: ExternalDecryptor): TlsClientContextBuilder {
+        decryptor = Some(value)
+        this
+    }
+
+    public func withKeyLogSink(value: KeyLogSink): TlsClientContextBuilder {
+        keyLogger = Some(value)
+        this
+    }
+
     public func alpn(values: Array<String>): TlsClientContextBuilder {
         protocols = copyStrings(values)
         this
@@ -286,13 +358,30 @@ public class TlsClientContextBuilder {
             case Some(value) => validateIdentity(value, true, capabilities)
             case None => ()
         }
+        if (decryptor.isSome()) {
+            throw TlsContextException(
+                TlsContextErrorCode.InvalidHook,
+                "external decryption is valid only for TLS server contexts",
+                capability: Some(TlsCapability.ExternalDecryptor)
+            )
+        }
+        if (keyLogger.isSome()) {
+            requireCapability(capabilities, TlsCapability.KeyLog, "test-build TLS key logging")
+        }
+        let ownedIdentity = match (identityRequirement) {
+            case Some(value) => Some(value.snapshotForContext())
+            case None => None<LocalIdentity>
+        }
         TlsClientContext.create(
             providerManifest,
             capabilities,
             TlsSecurityPolicy(profile, minimum, maximum),
             resolvedTrust,
-            identityRequirement,
-            protocols
+            ownedIdentity,
+            protocols,
+            allocateTlsContextVersion(),
+            decryptor,
+            keyLogger
         )
     }
 }
@@ -306,6 +395,8 @@ public class TlsServerContextBuilder {
     private var identityRequirement: ?LocalIdentity = None<LocalIdentity>
     private var authentication = ClientAuthentication.None
     private var trustRequirement: ?TrustPolicy = None<TrustPolicy>
+    private var decryptor: ?ExternalDecryptor = None<ExternalDecryptor>
+    private var keyLogger: ?KeyLogSink = None<KeyLogSink>
     private var protocols = Array<String>()
 
     internal init(providerManifest: TlsProviderManifest, capabilities: TlsCapabilities) {
@@ -347,6 +438,16 @@ public class TlsServerContextBuilder {
         this
     }
 
+    public func withExternalDecryptor(value: ExternalDecryptor): TlsServerContextBuilder {
+        decryptor = Some(value)
+        this
+    }
+
+    public func withKeyLogSink(value: KeyLogSink): TlsServerContextBuilder {
+        keyLogger = Some(value)
+        this
+    }
+
     public func alpn(values: Array<String>): TlsServerContextBuilder {
         protocols = copyStrings(values)
         this
@@ -381,14 +482,35 @@ public class TlsServerContextBuilder {
                     "TLS client certificate authentication"
                 )
         }
+        if (decryptor.isSome()) {
+            requireCapability(
+                capabilities,
+                TlsCapability.ExternalDecryptor,
+                "external RSA private-key decryption"
+            )
+            if (!resolvedIdentity.supportsExternalDecryption()) {
+                throw TlsContextException(
+                    TlsContextErrorCode.InvalidHook,
+                    "external decryption requires an RSA external/system signer identity",
+                    capability: Some(TlsCapability.ExternalDecryptor)
+                )
+            }
+        }
+        if (keyLogger.isSome()) {
+            requireCapability(capabilities, TlsCapability.KeyLog, "test-build TLS key logging")
+        }
+        let ownedIdentity = resolvedIdentity.snapshotForContext()
         TlsServerContext.create(
             providerManifest,
             capabilities,
             TlsSecurityPolicy(profile, minimum, maximum),
-            resolvedIdentity,
+            ownedIdentity,
             authentication,
             trustRequirement,
-            protocols
+            protocols,
+            allocateTlsContextVersion(),
+            decryptor,
+            keyLogger
         )
     }
 }

@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "profile": "release",
+  "scenarios": 13,
+  "report": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-tls/docs/evidence/M8-006/native-release.json"
+}

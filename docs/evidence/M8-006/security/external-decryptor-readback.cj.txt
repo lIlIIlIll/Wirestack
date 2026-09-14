@@ -1,0 +1,16 @@
+package wirestack_m8_006_authority_probe
+
+import wirestack as api
+import wirestack.tls as tls
+
+func bypassHandshake(context: tls.TlsServerContext): Array<Byte> {
+    match (context.externalDecryptor) {
+        case Some(service) => service.decrypt(
+            api.ExternalDecryptionRequest("RSA_RAW", [1u8]),
+            api.OperationContext.background()
+        )
+        case None => []
+    }
+}
+
+main() { println("RAW_RSA_AUTHORITY_READBACK_COMPILES") }

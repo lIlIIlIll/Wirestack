@@ -501,8 +501,13 @@ all twelve acceptance commands, including 103 network tests and twelve native
 DNS scenarios. M8-005 passes all fourteen acceptance commands, including the offline
 PSL check, five installed HTTP consumer modes and 765 passing Cangjie cases
 and 23 skips. It qualifies bounded cookie, multipart/file, Upgrade, WebSocket,
-HTTP/2 push and hook behavior. M8-006 is READY. M8-007 remains pending and must
-not inherit socket, DNS or HTTP qualification as final release evidence.
+HTTP/2 push and hook behavior. M8-006 passes all fourteen acceptance commands:
+75 focused TLS tests, 13 installed release scenarios, 5 isolated test-keylog
+scenarios and a native SNI/keylog boundary. The full check passes 773 cases with
+23 skips; 254 tooling tests pass. Its API baseline has 324 declarations and 114
+aliases; strict documentation covers all symbols and parameters. The installed
+consumer rejects direct raw-RSA service readback through a public context. M8-007
+must rebuild the final artifact and run its own final 86,400-second candidate soak.
 
 | ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD/ADR 追踪 | 合并/验收条件 |
 |---|---|---|---:|---|---|---|

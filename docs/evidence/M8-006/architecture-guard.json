@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-006",
+  "status": "PASS",
+  "command": {
+    "id": "architecture-guard",
+    "argv": [
+      "python3",
+      "tools/architecture_guard.py",
+      "--format",
+      "json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-14T01:14:43.906882Z",
+    "finished_at_utc": "2026-09-14T01:14:48.927992Z",
+    "duration_ms": 5021.115,
+    "stdout_path": "docs/evidence/M8-006/commands/qualification/architecture-guard.stdout.log",
+    "stderr_path": "docs/evidence/M8-006/commands/qualification/architecture-guard.stderr.log",
+    "stdout_excerpt": "{\n  \"kind\": \"architecture-guard\",\n  \"ok\": true,\n  \"root\": \"/home/elliot/playground/Wirestack-pr-worktrees/M8-006-tls\",\n  \"schema_version\": 1,\n  \"status\": \"PASS\",\n  \"violation_count\": 0,\n  \"violations\": []\n}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3611a2cd26f4d41852dace0d688b3c16771db151f4499dcc060eb7f89758bda4"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

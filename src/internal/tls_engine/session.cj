@@ -20,6 +20,7 @@ public struct TlsSessionKey {
     public let clientIdentity: String
     public let providerIdentity: String
     public let securityContext: String
+    public let contextVersion: UInt64
 
     internal init(
         serverIdentity: String,
@@ -27,7 +28,8 @@ public struct TlsSessionKey {
         trustContextIdentity: String,
         clientIdentity: String,
         providerIdentity: String,
-        securityContext: String
+        securityContext: String,
+        contextVersion!: UInt64 = 0u64
     ) {
         this.serverIdentity = serverIdentity
         this.alpnContext = alpnContext
@@ -35,6 +37,7 @@ public struct TlsSessionKey {
         this.clientIdentity = clientIdentity
         this.providerIdentity = providerIdentity
         this.securityContext = securityContext
+        this.contextVersion = contextVersion
     }
 
     internal func sameAs(other: TlsSessionKey): Bool {
@@ -43,7 +46,8 @@ public struct TlsSessionKey {
             trustContextIdentity == other.trustContextIdentity &&
             clientIdentity == other.clientIdentity &&
             providerIdentity == other.providerIdentity &&
-            securityContext == other.securityContext
+            securityContext == other.securityContext &&
+            contextVersion == other.contextVersion
     }
 }
 
@@ -230,7 +234,8 @@ internal func clientSessionKey(
             case None => "none"
         },
         providerContextKey(context.providerManifest),
-        securityContextKey(context.security)
+        securityContextKey(context.security),
+        contextVersion: context.contextVersion
     )
 }
 
@@ -244,6 +249,7 @@ internal func serverSessionIdContext(
     }
     let material = "provider=${providerContextKey(context.providerManifest)};" +
         "security=${securityContextKey(context.security)};" +
+        "contextVersion=${context.contextVersion};" +
         "identity=${context.identity.contextIdentity};" +
         "alpn=${alpnContextKey(context.alpnProtocols())};" +
         "clientAuth=${clientAuthenticationKey(context.clientAuthentication)};" +

@@ -1,0 +1,266 @@
+cj
+cjdoc
+API 文档
+搜索 API
+Ctrl K
+按类别筛选
+全部类别
+class
+constructor
+enum
+enumCase
+function
+interface
+property
+struct
+typeAlias
+variable
+按包筛选
+全部包
+wirestack
+wirestack.http
+wirestack.net
+wirestack.tls
+v0.7.2
+GitHub
+主题
+跟随系统
+浅色
+深色
+纸张
+深海
+松林
+终端
+紫墨
+
+文档
+
+总览
+API 参考
+
+包参考
+
+wirestack
+4
+wirestack
+662
+wirestack.http
+402
+wirestack.net
+241
+wirestack.tls
+176
+
+生成自
+cjdoc.doc-ir/8
+
+首页
+包 wirestack.tls
+TlsClientContext
+wirestack.tls.TlsClientContext
+
+classpublicsemantic: partial src/tls/facade.cj:102:1
+
+签名
+public class TlsClientContext
+⧉
+概览
+
+Immutable, concurrently shareable Linux TLS client context.
+
+属性
+wirestack.tls.TlsClientContext.maximumVersion
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:135:5
+
+签名
+public prop maximumVersion: TlsVersion
+⧉
+概览
+
+Wirestack 公开 API：maximumVersion。
+
+返回值
+TlsVersion
+wirestack.tls.TlsClientContext.minimumVersion
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:131:5
+
+签名
+public prop minimumVersion: TlsVersion
+⧉
+概览
+
+Wirestack 公开 API：minimumVersion。
+
+返回值
+TlsVersion
+wirestack.tls.TlsClientContext.securityProfile
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:127:5
+
+签名
+public prop securityProfile: TlsSecurityProfile
+⧉
+概览
+
+Wirestack 公开 API：securityProfile。
+
+返回值
+TlsSecurityProfile
+wirestack.tls.TlsClientContext.trust
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:139:5
+
+签名
+public prop trust: TrustPolicy
+⧉
+概览
+
+Wirestack 公开 API：trust。
+
+返回值
+TrustPolicy
+变量
+wirestack.tls.TlsClientContext.capabilities
+
+variablepublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:108:5
+
+签名
+public let capabilities: TlsCapabilities
+⧉
+概览
+
+Wirestack 公开 API：capabilities。
+
+返回值
+TlsCapabilities
+wirestack.tls.TlsClientContext.contextVersion
+
+variablepublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:110:5
+
+签名
+public let contextVersion: UInt64
+⧉
+概览
+
+Checked process-unique epoch used to partition all resumable state.
+
+返回值
+UInt64
+函数
+wirestack.tls.TlsClientContext.alpnProtocols
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:143:5
+
+签名
+public func alpnProtocols(): Array<String>
+⧉
+概览
+
+Wirestack 公开 API：alpnProtocols。
+
+返回值
+Array < String >
+wirestack.tls.TlsClientContext.builder
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:122:5
+
+签名
+public static func builder(): TlsClientContextBuilder
+⧉
+概览
+
+Wirestack 公开 API：builder。
+
+返回值
+TlsClientContextBuilder
+wirestack.tls.TlsClientContext.handshake
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:151:5
+
+签名
+public func handshake(
+        transport: DuplexTransport,
+        serverName: HostName,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection
+⧉
+概览
+
+Uses one canonical DNS name for both SNI and reference-identity verification.
+
+参数
+transport
+:DuplexTransport
+
+参数 transport。
+
+serverName
+:HostName
+
+参数 serverName。
+
+context
+:OperationContext
+
+参数 context。
+
+返回值
+TlsConnection
+wirestack.tls.TlsClientContext.handshake
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContext · src/tls/facade.cj:172:5
+
+签名
+public func handshake(
+        transport: DuplexTransport,
+        referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName = None<HostName>,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection
+⧉
+概览
+
+Consumes transport and keeps SNI separate from the verified reference identity. Engine creation failures and handshake failures abort it.
+
+参数
+transport
+:DuplexTransport
+
+调用方提供的输入值。
+
+referenceIdentity
+:ReferenceIdentity
+
+连接所期望的身份。
+
+serverName
+:?HostName
+
+调用方提供的输入值。
+
+context
+:OperationContext
+
+控制本次操作的截止时间、取消和追踪范围。
+
+返回值
+TlsConnection
+
+本页目录
+
+▾
+class TlsClientContext
+prop maximumVersion: TlsVersion
+prop minimumVersion: TlsVersion
+prop securityProfile: TlsSecurityProfile
+prop trust: TrustPolicy
+let capabilities: TlsCapabilities
+let contextVersion: UInt64
+func alpnProtocols(): Array<String>
+static func builder(): TlsClientContextBuilder
+func handshake( transport: DuplexTransport, serverName: HostName, context!: OperationContext = OperationContext.background() ): TlsConnection
+func handshake( transport: DuplexTransport, referenceIdentity: ReferenceIdentity, serverName!: ?HostName = None<HostName>, context!: OperationContext = OperationContext.background() ): TlsConnection
+cjdoc · 由 Doc IR 生成
+0.7.2 · cjdoc.doc-ir/8

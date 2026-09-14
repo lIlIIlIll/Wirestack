@@ -172,6 +172,7 @@ private func m3028ClassifyServerInput(input: Array<Byte>): String {
             case TlsEngineStep.WantWrite => "want-write"
             case TlsEngineStep.NeedSignature => "need-signature"
             case TlsEngineStep.NeedServerSelection => "need-server-selection"
+            case TlsEngineStep.NeedDecryption => "need-decryption"
         }
     } catch (_: TlsEngineException) {
         "typed-tls-error"
