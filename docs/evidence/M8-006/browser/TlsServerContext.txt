@@ -1,0 +1,234 @@
+cj
+cjdoc
+API 文档
+搜索 API
+Ctrl K
+按类别筛选
+全部类别
+class
+constructor
+enum
+enumCase
+function
+interface
+property
+struct
+typeAlias
+variable
+按包筛选
+全部包
+wirestack
+wirestack.http
+wirestack.net
+wirestack.tls
+v0.7.2
+GitHub
+主题
+跟随系统
+浅色
+深色
+纸张
+深海
+松林
+终端
+紫墨
+
+文档
+
+总览
+API 参考
+
+包参考
+
+wirestack
+4
+wirestack
+662
+wirestack.http
+402
+wirestack.net
+241
+wirestack.tls
+176
+
+生成自
+cjdoc.doc-ir/8
+
+首页
+包 wirestack.tls
+TlsServerContext
+wirestack.tls.TlsServerContext
+
+classpublicsemantic: partial src/tls/facade.cj:346:1
+
+签名
+public class TlsServerContext
+⧉
+概览
+
+Immutable, concurrently shareable Linux TLS server context.
+
+属性
+wirestack.tls.TlsServerContext.clientAuthentication
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:383:5
+
+签名
+public prop clientAuthentication: ClientAuthentication
+⧉
+概览
+
+Wirestack 公开 API：clientAuthentication。
+
+返回值
+ClientAuthentication
+wirestack.tls.TlsServerContext.clientTrust
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:387:5
+
+签名
+public prop clientTrust: ?TrustPolicy
+⧉
+概览
+
+Wirestack 公开 API：clientTrust。
+
+返回值
+?TrustPolicy
+wirestack.tls.TlsServerContext.maximumVersion
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:379:5
+
+签名
+public prop maximumVersion: TlsVersion
+⧉
+概览
+
+Wirestack 公开 API：maximumVersion。
+
+返回值
+TlsVersion
+wirestack.tls.TlsServerContext.minimumVersion
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:375:5
+
+签名
+public prop minimumVersion: TlsVersion
+⧉
+概览
+
+Wirestack 公开 API：minimumVersion。
+
+返回值
+TlsVersion
+wirestack.tls.TlsServerContext.securityProfile
+
+propertypublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:371:5
+
+签名
+public prop securityProfile: TlsSecurityProfile
+⧉
+概览
+
+Wirestack 公开 API：securityProfile。
+
+返回值
+TlsSecurityProfile
+变量
+wirestack.tls.TlsServerContext.capabilities
+
+variablepublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:352:5
+
+签名
+public let capabilities: TlsCapabilities
+⧉
+概览
+
+Wirestack 公开 API：capabilities。
+
+返回值
+TlsCapabilities
+wirestack.tls.TlsServerContext.contextVersion
+
+variablepublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:354:5
+
+签名
+public let contextVersion: UInt64
+⧉
+概览
+
+Checked process-unique epoch used to partition all resumable state.
+
+返回值
+UInt64
+函数
+wirestack.tls.TlsServerContext.alpnProtocols
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:391:5
+
+签名
+public func alpnProtocols(): Array<String>
+⧉
+概览
+
+Wirestack 公开 API：alpnProtocols。
+
+返回值
+Array < String >
+wirestack.tls.TlsServerContext.builder
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:366:5
+
+签名
+public static func builder(): TlsServerContextBuilder
+⧉
+概览
+
+Wirestack 公开 API：builder。
+
+返回值
+TlsServerContextBuilder
+wirestack.tls.TlsServerContext.handshake
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsServerContext · src/tls/facade.cj:398:5
+
+签名
+public func handshake(
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection
+⧉
+概览
+
+Consumes one accepted transport and returns its exclusively owned TLS connection.
+
+参数
+transport
+:DuplexTransport
+
+参数 transport。
+
+context
+:OperationContext
+
+参数 context。
+
+返回值
+TlsConnection
+
+本页目录
+
+▾
+class TlsServerContext
+prop clientAuthentication: ClientAuthentication
+prop clientTrust: ?TrustPolicy
+prop maximumVersion: TlsVersion
+prop minimumVersion: TlsVersion
+prop securityProfile: TlsSecurityProfile
+let capabilities: TlsCapabilities
+let contextVersion: UInt64
+func alpnProtocols(): Array<String>
+static func builder(): TlsServerContextBuilder
+func handshake( transport: DuplexTransport, context!: OperationContext = OperationContext.background() ): TlsConnection
+cjdoc · 由 Doc IR 生成
+0.7.2 · cjdoc.doc-ir/8

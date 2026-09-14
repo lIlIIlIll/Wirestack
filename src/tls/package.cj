@@ -226,6 +226,22 @@ public type ExternalSignatureRequest = api.ExternalSignatureRequest
  * Wirestack 公开 API：ExternalSigner。
  */
 public type ExternalSigner = api.ExternalSigner
+/**
+ * Bounded `RSA_RAW` request passed to an external private-key decryptor.
+ */
+public type ExternalDecryptionRequest = api.ExternalDecryptionRequest
+/**
+ * Caller-owned external RSA private-operation service.
+ */
+public type ExternalDecryptor = api.ExternalDecryptor
+/**
+ * Owned, bounded NSS key-log record available to explicit test builds.
+ */
+public type TlsKeyLogLine = api.TlsKeyLogLine
+/**
+ * Caller-owned key-log sink available only when the provider advertises it.
+ */
+public type KeyLogSink = api.KeyLogSink
 
 /** Runtime/build identity for the active Linux TLS implementation. */
 public class TlsRuntimeInfo {

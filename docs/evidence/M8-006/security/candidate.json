@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "stage": "candidate",
+  "observed_exit_code": 1,
+  "expected_exit_code": 1,
+  "meaning": "Baseline permits a caller to recover the raw RSA service; candidate must reject that public member access.",
+  "installation": "Fresh archive extracted outside checkout; consumer depends only on extracted package.",
+  "fixture": {
+    "path": "docs/evidence/M8-006/security/external-decryptor-readback.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e4717db566754adb9345796a9ec5bc91872d09a3060d5b5110780b4a84d0eb96"
+    }
+  },
+  "facade": {
+    "path": "src/tls/facade.cj",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+    }
+  },
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "9a347a8e6ff4076b5b42ebf16ccad356622097f0bcfaf2231f8297c38ac84833"
+  },
+  "stdout": {
+    "path": "docs/evidence/M8-006/security/candidate.stdout.log",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "stderr": {
+    "path": "docs/evidence/M8-006/security/candidate.stderr.log",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7f3ca347e55e48289211131beaf4c7e4ce4919fb23949a0d93cfe272867466de"
+    }
+  }
+}

@@ -2,7 +2,12 @@ package wirestack.tls
 
 import wirestack.internal.tls_engine as engine
 
-/** Public owner of a provider-neutral private-key reference. */
+/**
+ * Public owner of a provider-neutral private-key reference.
+ *
+ * Closing this object zeroes its exportable material and never invalidates a
+ * context already built from it; the context owns an inaccessible snapshot.
+ */
 public class PrivateKeyRef <: Resource {
     internal let value: engine.PrivateKeyRef
 
@@ -91,7 +96,13 @@ public class PrivateKeyRef <: Resource {
     public func isClosed(): Bool { value.isClosed() }
 }
 
-/** Public certificate-chain/private-key association. */
+/**
+ * Public certificate-chain/private-key association.
+ *
+ * Builders validate this caller-owned value and then snapshot its immutable
+ * certificate and key material. External signer service objects are retained
+ * as caller-owned thread-safe references rather than copied or exported.
+ */
 public class LocalIdentity {
     internal let value: engine.LocalIdentity
 /**

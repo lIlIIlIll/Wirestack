@@ -1,0 +1,90 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 25690226441 ns, RESULT:
+    TCS: TlsConnectionTest, time elapsed: 15607694 ns, RESULT:
+    [ PASSED ] CASE: handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine (1050319 ns)
+    [ PASSED ] CASE: oneReadAndOneWriteMayOverlapButSecondReadFailsImmediately (983328 ns)
+    [ PASSED ] CASE: handshakeFailureAbortsTransportAndReleasesEngineExactlyOnce (81327 ns)
+    [ PASSED ] CASE: expiredHandshakeDeadlineStillConsumesAndAbortsBothInputs (73387 ns)
+    [ PASSED ] CASE: ioFailureAbortsAndRepeatedTerminalCallsDoNotReleaseTwice (779086 ns)
+    [ PASSED ] CASE: unsupportedHalfCloseDoesNotMutateAnOpenConnection (120640 ns)
+    [ PASSED ] CASE: concurrentCloseAndAbortReleaseUnderlyingResourcesOnce (9037806 ns)
+    [ PASSED ] CASE: gracefulCloseSendsAndProcessesCloseNotifyBeforeReleasingResources (122526 ns)
+    [ PASSED ] CASE: tcpEofDuringGracefulCloseRetainsTruncationAndStillReleasesEverything (132422 ns)
+    [ PASSED ] CASE: expiredCloseBudgetStillClosesTransportAndReleasesEngine (120949 ns)
+    [ PASSED ] CASE: abortNeverAttemptsTlsShutdownAndRetainsLocalAbortEvidence (64200 ns)
+    [ PASSED ] CASE: tcpEofDuringApplicationReadRetainsTruncationBeforeAbort (690845 ns)
+    [ PASSED ] CASE: peerCloseNotifyProducesEofEvidenceAndRejectsNewApplicationWrites (489136 ns)
+    TCS: Net06TlsTransportCleanupGateTest, time elapsed: 2431077 ns, RESULT:
+    [ PASSED ] CASE: failedHandshakesDisposeEngineAndTransportExactlyOnce (2098705 ns)
+    TCS: TlsContextTest, time elapsed: 4732568 ns, RESULT:
+    [ PASSED ] CASE: linuxCapabilitiesAreExplicitAndNeverInferredFromProviderNames (33380 ns)
+    [ PASSED ] CASE: defaultSystemTrustFailsAtBuildUntilLinuxAdapterIsAvailable (155282 ns)
+    [ PASSED ] CASE: modernClientContextIsImmutableAndConcurrentShareable (618675 ns)
+    [ PASSED ] CASE: strictTls13RejectsAnyTls12Override (153706 ns)
+    [ PASSED ] CASE: missingTls13AndHttp2CapabilitiesFailBeforeHandshake (171369 ns)
+    [ PASSED ] CASE: alpnRejectsEmptyAndDuplicateProtocolNames (427978 ns)
+    [ PASSED ] CASE: serverRequiresServerIdentityAndMtlSTrustAtBuildTime (1024594 ns)
+    [ PASSED ] CASE: clientIdentityCapabilityIsValidatedAtBuildTime (894898 ns)
+    TCS: TlsEnginePumpTest, time elapsed: 319716271 ns, RESULT:
+    [ PASSED ] CASE: awsLcClientEngineProducesAClientHelloWithoutSocketIo (35352222 ns)
+    [ PASSED ] CASE: strictTls13PolicyIsAcceptedByTheNativeEngine (171527 ns)
+    [ PASSED ] CASE: LinuxSystemTrustLoadsExplicitlyAndSniStaysSeparateFromReferenceIdentity (16710012 ns)
+    [ PASSED ] CASE: customRootChainIsLoadedIntoARealAwsLcClientEngine (692974 ns)
+    [ PASSED ] CASE: spkiPinPolicyConfiguresTheNativeVerificationPathBeforeHandshake (283336 ns)
+    [ PASSED ] CASE: matchingSpkiPinCompletesARealClientServerHandshake (13983842 ns)
+    [ PASSED ] CASE: matchingSpkiPinDoesNotBypassReferenceIdentityVerification (14166542 ns)
+    [ PASSED ] CASE: realAwsLcEnginesExchangeCloseNotifyInBothDirections (12653400 ns)
+    [ PASSED ] CASE: handshakeInfoReportsNegotiatedAlpnPeerChainAndVerificationEvidence (13610717 ns)
+    [ PASSED ] CASE: tls13TicketResumesAcrossFreshEnginesWithoutEarlyData (13059645 ns)
+    [ PASSED ] CASE: tls12TicketResumesAcrossFreshEngines (16768529 ns)
+    [ PASSED ] CASE: sniSelectsTheCompleteImmutableContextAndItsCertificate (17909412 ns)
+    [ PASSED ] CASE: sniSelectorRejectsMissingAndUnknownNamesWithStableEvidence (20691191 ns)
+    [ PASSED ] CASE: noSharedAlpnFailsTheHandshakeInsteadOfSilentlySelectingNothing (10960716 ns)
+    [ PASSED ] CASE: requiredMutualTlsUsesClientIdentityAndReturnsServerVerificationEvidence (14356787 ns)
+    [ PASSED ] CASE: requiredMutualTlsRejectsMissingClientIdentityButOptionalAllowsIt (13904216 ns)
+    [ PASSED ] CASE: mismatchedSpkiPinFailsARealClientServerHandshake (13038477 ns)
+    [ PASSED ] CASE: externalSignerCompletesARealHandshakeOutsideTheNativeCallback (23048401 ns)
+    [ PASSED ] CASE: externalSignerExceptionFailsClosedWithoutCrossingTheCAbi (8777115 ns)
+    [ PASSED ] CASE: cancellationBeforeSignerInvocationFailsThePendingNativeOperation (9153286 ns)
+    [ PASSED ] CASE: tls12ContextVersionsPartitionRealClientAndServerSessions (20447918 ns)
+    [ PASSED ] CASE: tls13ContextVersionsPartitionRealClientAndServerTickets (24699074 ns)
+    [ PASSED ] CASE: pumpHandlesWantReadWriteAndPartialIoWithBoundedBuffers (69095 ns)
+    [ PASSED ] CASE: wantWriteWithoutCiphertextFailsInsteadOfSpinning (73217 ns)
+    [ PASSED ] CASE: eofDuringWantReadRetainsTlsHandshakeEvidence (63956 ns)
+    [ PASSED ] CASE: preCancellationStopsBeforeCallingProviderOrTransport (88850 ns)
+    [ PASSED ] CASE: expiredDeadlineStopsBeforeCallingProviderOrTransport (63308 ns)
+    TCS: LocalIdentityTest, time elapsed: 4483811 ns, RESULT:
+    [ PASSED ] CASE: pkcs8InputIsExactBoundedAndZeroizable (514334 ns)
+    [ PASSED ] CASE: pkcs8FileAdapterReadsOneBoundedRegularFile (476140 ns)
+    [ PASSED ] CASE: localIdentityValidatesLeafKeyMatchAndHasStablePublicIdentity (1414713 ns)
+    [ PASSED ] CASE: mismatchedCertificateAndPrivateKeyFailAtIdentityBuild (812838 ns)
+    [ PASSED ] CASE: externalSignerAndSystemHandleShareOneOpaqueKeyContract (387763 ns)
+    [ PASSED ] CASE: duplicateSignerAlgorithmsAndMismatchedSpkiFailAtBuild (302695 ns)
+    TCS: M3028TlsFuzzTest, time elapsed: 25340063926 ns, RESULT:
+    [ PASSED ] CASE: recordMutationsHaveDeterministicTypedTerminals (10062384235 ns)
+    [ PASSED ] CASE: handshakeMutationsHaveDeterministicTypedTerminals (10050670795 ns)
+    [ PASSED ] CASE: certificateAdapterMutationsHaveDeterministicTypedTerminals (5226359864 ns)
+    TCS: TlsM8006ContextTest, time elapsed: 1373342 ns, RESULT:
+    [ PASSED ] CASE: sessionPartitionsRetainOnlyTheMatchingContextVersion (32164 ns)
+    [ PASSED ] CASE: decryptorRequiresProviderCapabilityAndRsaExternalIdentity (966954 ns)
+    [ PASSED ] CASE: keyLogSinkRequiresExplicitProviderCapability (49930 ns)
+    TCS: TlsProviderSubstitutionTest, time elapsed: 875673 ns, RESULT:
+    [ PASSED ] CASE: testProviderUsesTheProductionFactoryContract (218623 ns)
+    [ PASSED ] CASE: objectsFromDifferentProviderInstancesCannotMix (333818 ns)
+    [ PASSED ] CASE: activeEngineRetainsProviderUntilItCloses (15893 ns)
+    TCS: TlsSessionStoreTest, time elapsed: 299474 ns, RESULT:
+    [ PASSED ] CASE: boundedLruExpiryAndSingleUseAreDeterministic (24760 ns)
+    [ PASSED ] CASE: everySecurityPartitionDimensionPreventsReuse (37898 ns)
+Summary: TOTAL: 66
+    PASSED: 66, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 25697999054 ns, RESULT:
+TP: wirestack.*, time elapsed: 25697891081 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.tls_engine, time elapsed: 25690226441 ns
+Summary: TOTAL: 66
+    PASSED: 66, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
