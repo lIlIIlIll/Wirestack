@@ -191,16 +191,7 @@ benchmarks/results/full-seven-library/2026-09-09-main-bddbe6e/README.md
 benchmarks/results/full-seven-library/2026-09-10-main-008e50b/README.md
 benchmarks/results/full-seven-library/2026-09-13-release-4766daa/README.md
 benchmarks/results/full-seven-library/2026-09-14-release-7436598/README.md
-benchmarks/results/full-seven-library/2026-09-14-release-4c2432c/README.md
 benchmarks/results/full-seven-library/2026-09-15-release-af8693f/README.md
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/canonical-build-logs.tar.gz
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/checksums.txt
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/fixture-preflight-overlay.patch
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/formal-release-11-1.tar.gz
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/formal-release-11-2.tar.gz
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/harness-source.tar.gz
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/json4cj-source.tar.gz
-benchmarks/results/full-seven-library/2026-09-15-release-af8693f/source-identity.json
 docs/performance/results/2026-09-13-release-seven-library.md
 docs/performance/results/2026-09-13-linux-release-pure.md
 docs/performance/results/2026-09-13-release-three-library.md
