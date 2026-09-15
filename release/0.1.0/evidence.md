@@ -37,35 +37,38 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | --- | --- | --- |
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
-| Local Linux fresh candidate | PASS (current staging) | clean clone at candidate `29e222785a68bacf2b1eab2f62a1600a151c3b94` passed the default strict evidence check；`release_temp_tree.py --enforce-clean` copied `304` files；hosted registry rehearsal also passed |
-| Hosted PR CI | **PASS (current)** | run [`34880579436`](https://github.com/lIlIIlIll/yjson/actions/runs/34880579436) at `29e22278` completed all 28 jobs successfully，包括 API Documentation、Core Coverage、registry rehearsal 和 CI Required |
-| Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是当前候选的合并后 run |
-| Coverage | PASS (current hosted) | current run [`34880579436`](https://github.com/lIlIIlIll/yjson/actions/runs/34880579436) 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
-| Source-only staging | PASS (current hosted) | current run [`34880579436`](https://github.com/lIlIIlIll/yjson/actions/runs/34880579436) 的 `registry-rehearsal` 在 enforced source-only candidate 上通过 |
-| Package rehearsal | PASS (current hosted) | current run [`34880579436`](https://github.com/lIlIIlIll/yjson/actions/runs/34880579436) 的 `registry-rehearsal` job 通过 |
+| Local Linux release candidate | PASS (tagged source) | clean clone at tag `0.1.0` / commit `4c96a43686d72fe1a935176bae10c15af6844532` passed `release_temp_tree.py --enforce-clean` with `304` files；tagged registry artifact build and byte-determinism check passed |
+| Hosted PR CI | **PASS** | run [`34918398114`](https://github.com/lIlIIlIll/yjson/actions/runs/34918398114) at `a20284a3` completed all 28 jobs successfully |
+| Hosted main CI / Pages | **PASS** | post-merge run [`34918928732`](https://github.com/lIlIIlIll/yjson/actions/runs/34918928732) at merge commit `4c96a436` completed all 28 jobs；Pages deployed at <https://liliilill.github.io/yjson/> |
+| Coverage | **PASS** | `Core Coverage` passed in post-merge run [`34918928732`](https://github.com/lIlIIlIll/yjson/actions/runs/34918928732) |
+| Source-only staging | **PASS** | post-merge `registry-rehearsal` passed on the enforced source-only candidate |
+| Package rehearsal | **PASS (hosted)** | post-merge `registry-rehearsal` job [`104222519996`](https://github.com/lIlIIlIll/yjson/actions/runs/34918928732/job/104222519996) passed；nine package modules were validated |
 | Seven-library matrix | **PASS (RSS-complete)** | 当前候选两批 STS `1.1.3` 归档各含 770/770 单元；CPU 3/sibling 51 idle sample、checksum、identity、summary 和 770 个 RSS sidecar 均通过，见 `benchmarks/results/full-seven-library/2026-09-14-release-4c2432c/`；第一批 1/10 stable、第二批 2/10 stable |
 | Three-library release performance | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；7/36 stable、29/36 noisy，构建与 timed sample 分离，完整 raw archive 与每个进程 peak RSS 均保留；archive SHA-256 为 `66aa76fd5fa99058307c3e4d34f031cde1e96045ea58b2ff70c2c626e610482b` |
 | Pure baseline/candidate qualification | **PASS (RSS-complete)** | 当前候选 STS `1.1.3` 下 24 case、11 轮，`all_ratios_at_most_1_05=true`、`passed=true`；每个进程 peak RSS 均保留，归档包含 `checksums.txt` inventory；archive SHA-256 为 `4cccd194b00d8810f263f466f2ca9e56d5daccd67732b40627ef064c7e466e5f` |
 | Native acceleration | NON-BLOCKING (claim not qualified) | 当前三库结果为 `7/36` stable、`29/36` noisy；该结果不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
-| Release policy | **BLOCKING** | 当前三类性能证据和 hosted PR CI 已完成；仍要求 PR 合并到 `main`、合并后 required workflows/Pages 通过；当前没有创建 tag 或 Release |
-| Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
-| Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
+| Release policy | **PASS / PUBLISHED** | PR #27 merged to `main`；all required post-merge workflows and Pages deployment passed；tag and release assets are published |
+| Annotated tag / GitHub Release | **PASS** | annotated tag `0.1.0` (tag object `485c1e158fc851475cb9262b92c098ccad0e831b`)；[GitHub Release](https://github.com/lIlIIlIll/yjson/releases/tag/0.1.0) contains 12 uploaded assets |
+| Registry package assets | **PASS** | nine `0.1.0` `.cjp` bundles plus `checksums.txt`, `manifest.json` and `environment.json` are attached to the GitHub Release |
+| Central package registry publication | **NOT RUN** | the requested registry asset bundle is complete and published as Release assets；no separate central-registry endpoint was invoked |
 
 
-### 候选资产摘要（未上传）
+### 候选资产摘要（已上传）
 
-当前候选的性能复核资料已分别保存在：
+当前候选的性能复核资料仍保存在仓库中：
 
 - `benchmarks/results/full-seven-library/2026-09-14-release-4c2432c/`：两批 RSS-complete 七库 raw archive、sidecar、脚本闭包、身份和 checksum；
 - `benchmarks/results/release-performance/2026-09-14-7436598/yjson-pure-release-7436598-r1.tar.gz`：Pure 24-case RSS-complete raw archive，含 `checksums.txt` inventory，SHA-256 为 `4cccd194b00d8810f263f466f2ca9e56d5daccd67732b40627ef064c7e466e5f`；
 - `benchmarks/results/release-performance/2026-09-14-4c2432c/yjson-three-library-release-4c2432c-r1.tar.gz`：direct executable timing、exact-case filter、build-only RSS 后的三库 36-workload RSS-complete raw archive，SHA-256 为 `66aa76fd5fa99058307c3e4d34f031cde1e96045ea58b2ff70c2c626e610482b`；
 
-这些是仓库中的可审计证据，不是 GitHub Release 上传资产。七库证据目录另以
-`checksums.txt` 绑定 formal archive、harness source、json4cj source、overlay 记录和
-`source-identity.json`。包仓库 rehearsal 已在
-`/tmp/yjson-registry-rehearsal-c88d4e/artifacts/` 生成九个 `.cjp`，但该目录是临时
-rehearsal 输出，不是最终上传 bundle；当前候选的 `manifest.json`、`environment.json`
-和最终 `checksums.txt` 仍未生成，也没有上传 Release assets。
+这些性能资料是仓库中的可审计证据。九个 registry `.cjp`、`checksums.txt`、
+`manifest.json` 和 `environment.json` 已上传到
+[GitHub Release 0.1.0](https://github.com/lIlIIlIll/yjson/releases/tag/0.1.0)；
+`checksums.txt` SHA-256 为 `40762606e736d6615ba562ab510e26d4c7f153321fe8a7c61a38043218e27a28`，
+`manifest.json` SHA-256 为 `6887e30d24e209a509ba5c87ce536dc841a3255d6d73fe07fb08b0bd92cc53c1`，
+`environment.json` SHA-256 为 `15b48d7800652f4c355dadaf0f6757b5c2ea58a5ca0e232acae9a336e9eca170`。
+manifest 和 checksum inventory 均绑定 tag `0.1.0` 的源码提交
+`4c96a43686d72fe1a935176bae10c15af6844532`。
 
 历史 bundle 只绑定旧 commit `fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，
 保留作历史 rehearsal，不能用于当前候选的 GitHub Release。其 `checksums.txt`
@@ -215,25 +218,29 @@ Native 运行源码闭包 SHA-256 为
 ```text
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
-Local fresh-source simulation: PASS (clean clone 29e22278; strict evidence check and 304-file release staging passed)
-Hosted PR execution: PASS (run 34880579436 at 29e22278; all 28 jobs passed)
+Local fresh-source simulation: PASS (tagged commit 4c96a436; strict source-only staging and tagged artifact determinism passed)
+Hosted PR execution: PASS (run 34918398114 at a20284a3; all 28 jobs passed)
 Seven-library evidence freshness: PASS (two 770/770 RSS-complete archives; current marker schema v2; batch stability 1/10 and 2/10)
 Three-library performance qualification: PASS (36/36 workloads; 11 rounds; 7 stable / 29 noisy; direct executable timing; exact-case and RSS-complete archive)
 Pure baseline/candidate qualification: PASS (24 cases; 11 rounds; release ratio gate and RSS-complete archive)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current three-library batch has 7 stable and 29 noisy workloads; no precise acceleration claim)
-Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
-Coverage: PASS (current hosted Core Coverage passed in run 34880579436; previous historical job also passed)
-Release decision: BLOCKED; PR remains open with merge state clean; merge to main, post-merge workflows/Pages, and final release assets are still pending
+Hosted main execution and Pages: PASS (run 34918928732 at merge commit 4c96a436; 28 jobs and Pages deployment passed)
+Coverage: PASS (Core Coverage passed in run 34918928732)
+Release decision: PUBLISHED (annotated tag 0.1.0, GitHub Release and nine registry package assets published)
 ```
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。当前候选的七库、三库和
 Pure 证据已在合格 `Server` 上使用 GNU `/usr/bin/time -v` 完成 peak RSS 采集，并在
-归档、sidecar、summary 和 checksum 中闭合。clean clone 的 strict evidence check 和
-`release_temp_tree.py --enforce-clean`（304 files）通过；hosted run [`34880579436`](https://github.com/lIlIIlIll/yjson/actions/runs/34880579436) 的 28 个 PR jobs 也全部通过。
-rehearsal 已生成九个临时 `.cjp`，但最终 `manifest.json`、`environment.json`、
-`checksums.txt` 尚未生成或上传。
-发布策略仍要求先合并到 `main`，再等待合并提交的 required workflows 和 Pages 通过；
-因此当前不能创建 tag、GitHub Release 或执行中心包仓库发布。
+归档、sidecar、summary 和 checksum 中闭合。合并提交为
+`4c96a43686d72fe1a935176bae10c15af6844532`；post-merge run
+[`34918928732`](https://github.com/lIlIIlIll/yjson/actions/runs/34918928732) 的 28 个 jobs
+和 Pages 部署均通过。
+已创建附注标签 `0.1.0`（tag object
+`485c1e158fc851475cb9262b92c098ccad0e831b`）及
+[GitHub Release 0.1.0](https://github.com/lIlIIlIll/yjson/releases/tag/0.1.0)。
+Release 附件包含九个 `.cjp`、`manifest.json`、`environment.json` 和
+`checksums.txt`；三份元数据及九个包的校验值绑定同一 tag 提交。
 Native noisy 结果不阻断普通 Release，但不能用于精确 acceleration claim；5% target
-improvement 只属于明确声明的 optimization mode。
+improvement 只属于明确声明的 optimization mode。中心包仓库未执行独立 publish，
+本次已完成并上传可供 registry 使用的资产 bundle。
 
