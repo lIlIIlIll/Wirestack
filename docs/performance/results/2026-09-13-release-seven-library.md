@@ -75,5 +75,5 @@ Encode 从已经构造好的 typed value 生成紧凑 JSON 字符串。Decode �
 
 第一批所有 timed process 的最大 RSS 为 `226408 kbytes`；第二批为 `226396 kbytes`。归档 SHA-256：第一批 `6674e9ea391f2bb829616d4126aa992754e6e393e53e50e8d6ff2e2d30dc3dd1`，第二批 `60aee5c466081ff3557f8a35c5f859406551b9e46991fea9f07d057335182202`。两批共 1540 个 workload-library-round 单元，全部保留 raw report、日志、manifest、metadata 和 RSS sidecar。稳定行仅用于复核；noisy 行不支持稳定精确跨库排名。
 
-复核时在归档解压目录执行 `sha256sum -c checksums.txt`，再用仓库中的 `benchmarks/full-seven-library/summarize_full.py` 重新生成 summary；exact case filter 和 direct executable 命令记录在归档 `metadata.json` 与 `run_full.py` 中。
+复核时在包含这些文件的证据目录执行 `sha256sum -c checksums.txt`；该清单校验两份 formal archive 及同目录的 source/harness 文件，不在归档解压目录内。分别解压每份归档后，在包含 `manifest.csv` 的解压目录执行 `python3 benchmarks/full-seven-library/summarize_full.py <解压目录> --min-runs 11`，重新读取 raw report 和 RSS sidecar 并生成 summary；exact case filter 和 direct executable 命令记录在归档 `metadata.json` 与 `run_full.py` 中。
 
