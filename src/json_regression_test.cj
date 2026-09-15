@@ -143,6 +143,20 @@ public class AliasRecord {
     }
 }
 
+@JsonCodec
+class CompactDepthLeaf {
+    public var value: Int64 = 1
+
+    public init() {}
+}
+
+@JsonCodec
+class CompactDepthParent {
+    public var child: CompactDepthLeaf = CompactDepthLeaf()
+
+    public init() {}
+}
+
 @Test
 class YJsonRegressionTest {
     @TestCase
@@ -559,6 +573,20 @@ class YJsonRegressionTest {
         let profileOptionCodec = JsonCodecs.option(ProfileRecordJson)
         @Expect(YJson.toJson(Some(profile), codec: profileOptionCodec), expected)
         @Expect(YJson.toJson(None<ProfileRecord>, codec: profileOptionCodec), "null")
+    }
+
+    @TestCase
+    func generatedCompactConcreteChildPreservesWriteDepthPath(): Unit {
+        let value = CompactDepthParent()
+        let depthError = @AssertThrows[JsonException](
+            YJson.toJson(value, codec: CompactDepthParentJson,
+                options: JsonWriteOptions(maxDepth: 1)))
+        @Expect(depthError.code, "max_depth")
+        @Expect(depthError.path, "/child")
+        @Expect(
+            YJson.toJson(value, codec: CompactDepthParentJson,
+                options: JsonWriteOptions(maxDepth: 2)),
+            "{\"child\":{\"value\":1}}")
     }
 
     @TestCase
