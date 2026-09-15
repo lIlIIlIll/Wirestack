@@ -13,22 +13,14 @@
     "exit_code": 0,
     "timed_out": false,
     "error_code": null,
-    "started_at_utc": "2026-09-14T14:48:56.858942Z",
-    "finished_at_utc": "2026-09-14T14:48:57.072774Z",
-    "duration_ms": 213.837,
-    "stdout_path": "docs/evidence/M8-007/commands/20260914T144856/parser-fuzz-verification.stdout.log",
-    "stderr_path": "docs/evidence/M8-007/commands/20260914T144856/parser-fuzz-verification.stderr.log",
-    "stdout_excerpt": "{\"decision\": \"PASS\", \"evidence\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"b7a5fdb68740aa71a364d2d095917654710962a1c4391c738fccca35f050acd9\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/fuzz-report.json\"}, \"source_task\": \"M8-007\", \"targets\": 10}\n",
+    "started_at_utc": "2026-09-15T02:33:24.126047Z",
+    "finished_at_utc": "2026-09-15T02:33:24.339987Z",
+    "duration_ms": 213.946,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/parser-fuzz-verification.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/parser-fuzz-verification.stderr.log",
+    "stdout_excerpt": "{\"decision\": \"PASS\", \"evidence\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"4de53b9115a7e79c0622bbc1ee740b82d373d4dffd25915090f250ecdf1a6a6b\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/fuzz-report.json\"}, \"source_task\": \"M8-007\", \"targets\": 10}\n",
     "stderr_excerpt": "",
     "stdout_truncated": false,
-    "stderr_truncated": false,
-    "stdout_digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "caa920a969dc06273ab93d679b86ca3143bd47fb66d8dfb24ecd14e101b0820c"
-    },
-    "stderr_digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    }
+    "stderr_truncated": false
   }
 }

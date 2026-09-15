@@ -189,7 +189,32 @@ public class TlsConnection <: DuplexTransport {
             } finally {
                 pump.requestTerminal()
                 try {
-                    transport.close(context)
+                    // Terminal cleanup keeps the caller's own budget: handing a
+                    // context-free close to a peer-waiting transport could hang
+                    // past the caller's deadline. Once this budget has stopped
+                    // graceful cleanup, only an immediate abort claims the
+                    // transport without waiting for a peer again.
+                    if (context.isCancellationRequested()) {
+                        transport.abort(reason: Some(AbortReason.Cancelled))
+                    } else if (context.isDeadlineExceeded()) {
+                        transport.abort(reason: Some(AbortReason.DeadlineExceeded))
+                    } else {
+                        transport.close(context)
+                    }
+                } catch (error: NetworkException) {
+                    // The transport stopped graceful cleanup with this same
+                    // budget or failed before claiming disposal; abort claims
+                    // terminal cleanup so no active owner stays blocked.
+                    if (context.isCancellationRequested()) {
+                        transport.abort(reason: Some(AbortReason.Cancelled))
+                        throw TlsEngineException(TlsEngineErrorCode.HandshakeCancelled, "TLS close was cancelled")
+                    }
+                    if (context.isDeadlineExceeded()) {
+                        transport.abort(reason: Some(AbortReason.DeadlineExceeded))
+                        throw TlsEngineException(TlsEngineErrorCode.HandshakeTimeout, "TLS close deadline exceeded")
+                    }
+                    transport.abort(reason: abortReason(error))
+                    throw error
                 } finally {
                     synchronized(lifecycleMutex) {
                         closeActive = false

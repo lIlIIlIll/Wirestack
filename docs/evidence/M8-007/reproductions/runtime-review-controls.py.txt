@@ -24,6 +24,7 @@ TESTS = (
     'src/internal/http1/tls_client_pipeline_test.cj',
     'src/internal/http1/http2_connection_pool_test.cj',
     'src/internal/tls_engine/connection_test.cj',
+    'src/net/m8_007_tls_cleanup_test.cj',
 )
 EXPECTED = {
     'http1': {
@@ -35,9 +36,15 @@ EXPECTED = {
         'closeDeadlineExpiresWhileAnExistingBackgroundReadOwnsPumpAdmission',
         'closeCancellationInterruptsAnExistingBackgroundReadWithinTheBound',
         'closeCancellationDoesNotWaitBehindAnExistingCiphertextWrite',
+        'expiredCloseBudgetStillClosesTransportAndReleasesEngine',
+        'cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows',
+        'peerWaitingGracefulCloseStaysBoundedByTheCallerBudget',
     },
+    'native': {'closeDeadlineReleasesAnExistingNativeTcpReadWithoutPeerAssistance'},
 }
 EVIDENCE = ROOT / 'docs/evidence/M8-007'
+NATIVE_BASELINE = 'c0f13f575eae4ebce07a5ff17add0758f8fca561'
+NATIVE_SOURCE = 'src/internal/tls_engine/connection.cj'
 CASE = re.compile(r'^\s*\[\s*(\w+)\s*\]\s+CASE:\s+(\w+)', re.MULTILINE)
 
 
@@ -46,10 +53,10 @@ def record(path):
 
 
 def run_suite(name, phase, directory):
-    package = 'http1' if name == 'http1' else 'tls_engine'
+    package = {'http1': 'src/internal/http1', 'tls': 'src/internal/tls_engine', 'native': 'src/net'}[name]
     command = {
         'id': f'{phase}-{name}',
-        'argv': ['cjpm', 'test', f'src/internal/{package}', '--exclude-tags=Performance',
+        'argv': ['cjpm', 'test', package, '--exclude-tags=Performance',
                  '--parallel', '1', '--no-progress', '--no-color'],
         'timeout_seconds': 600, 'long_running': False, 'gate': 'task',
     }
@@ -88,7 +95,18 @@ def main():
         for path, content in original.items():
             (ROOT / path).write_bytes(content)
         baseline_source = release.source_tree_sha256(ROOT)
-        before = {name: run_suite(name, 'before', directory) for name in EXPECTED}
+        before = {name: run_suite(name, 'before', directory) for name in ('http1', 'tls')}
+    finally:
+        for path, content in fixed.items():
+            (ROOT / path).write_bytes(content)
+    native_baseline = subprocess.check_output(
+        ['git', 'cat-file', 'blob', f'{NATIVE_BASELINE}:{NATIVE_SOURCE}'], cwd=ROOT
+    )
+    native_snapshot = directory / 'native-baseline-connection.cj.txt'
+    native_snapshot.write_bytes(native_baseline)
+    try:
+        (ROOT / NATIVE_SOURCE).write_bytes(native_baseline)
+        before['native'] = run_suite('native', 'before', directory)
     finally:
         for path, content in fixed.items():
             (ROOT / path).write_bytes(content)
@@ -116,6 +134,8 @@ def main():
         'status': 'PASS' if all(checks.values()) else 'FAIL',
         'baseline_commit': baseline, 'baseline_source_sha256': baseline_source,
         'fixed_source_sha256': source_before_controls, 'source_inputs': sources,
+        'native_baseline_commit': NATIVE_BASELINE,
+        'native_baseline_source': record(native_snapshot),
         'driver': record(Path(__file__).resolve()),
         'expected_failures': {name: sorted(values) for name, values in EXPECTED.items()},
         'before': before, 'after': after, 'checks': checks,

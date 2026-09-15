@@ -40,7 +40,7 @@ Review pool partitioning and ownership across origins, TLS contexts, proxy confi
 
 ## Review regression evidence
 
-`runtime-review-controls.json` binds the complete HTTP/1 and TLS test suites to their source files and captured output. The baseline reproduces the oversized fixed-length request, nonreusable TLS response completion, unpublished HTTP/2 admission, and three TLS pump deadline/cancellation cases. The corrected suites must pass, including concurrent close/abort disposal.
+`runtime-review-controls.json` binds the complete HTTP/1, TLS, and net test suites to their source files and captured output. The original baseline reproduces the oversized fixed-length request, nonreusable TLS response completion, unpublished HTTP/2 admission, three TLS pump deadline/cancellation cases, expired close admission, cancelled registration cleanup, and the peer-waiting terminal-cleanup budget loss. The native TCP case separately binds the exact `c0f13f575eae4ebce07a5ff17add0758f8fca561` connection source. It requires a timed-out close to terminate an existing TCP read and release the engine without peer assistance. Its controlled TLS engine isolates scheduling and ownership; it is not a cryptographic TLS-handshake test. Terminal cleanup keeps the caller's own context while it is live and, once that budget stops graceful cleanup, claims the transport by immediate abort with the matching reason instead of handing a peer-waiting transport a reset deadline.
 
 The intermediate TLS correction also admitted close before registering cancellation outside its cleanup block. `reproductions/tls-close-registration-before.json` and the adjacent source snapshot retain the failure when an already-cancelled token invokes a throwing transport abort. The current runtime verifier requires that exact negative case and its successful execution in the corrected TLS suite.
 
@@ -62,7 +62,7 @@ Cancellation and transport observation tables each permit at most 1,024 referenc
 
 `reproductions/owner-registry-before.json` and `owner-registry-after.json` bind the baseline and corrected source, shared fixture, derived consumer, artifact, SDK invocation, and raw commands. The consumer adds a read-only synchronized slot observer. It exercises 4,096 claims without sampling and full tables with 1,024 strongly retained cancellation sentinels or closed transports. `blackBox` keeps those intended roots observable through the checks. Earlier single-GC and weak-observer attempts remain diagnostic records, not claims of an SDK defect or sufficient proof of table occupancy.
 
-The bounded-owner preflight completed 600 seconds with a 60-second application sampling interval, 5,909 cycles, maximum cancellation latency 6.133638 milliseconds, and zero terminal owners. It passed the existing latency and resource thresholds on `1.3.0-alpha.20260911010036`, selected through `$HOME/cangjie_sdk/daily`. It supplies no formal duration credit.
+The bounded-owner preflight completed 600 seconds with a 60-second application sampling interval, 5,846 cycles, maximum cancellation latency 18.493331 milliseconds, and zero terminal owners. It ran on the corrected `5896572753484b3f64903b2b4ccc4f0f471ddab33ef034f5c3b1bb1c3d509669` artifact under `1.3.0-alpha.20260911010036`, selected through `$HOME/cangjie_sdk/daily`. It supplies no formal duration credit.
 
 ## Signing authority
 

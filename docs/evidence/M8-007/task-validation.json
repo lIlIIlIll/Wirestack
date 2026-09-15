@@ -16,22 +16,14 @@
     "exit_code": 0,
     "timed_out": false,
     "error_code": null,
-    "started_at_utc": "2026-09-14T14:51:00.378347Z",
-    "finished_at_utc": "2026-09-14T14:51:00.842668Z",
-    "duration_ms": 464.319,
-    "stdout_path": "docs/evidence/M8-007/commands/20260914T144856/task-contract-validation.stdout.log",
-    "stderr_path": "docs/evidence/M8-007/commands/20260914T144856/task-contract-validation.stderr.log",
+    "started_at_utc": "2026-09-15T02:43:44.785198Z",
+    "finished_at_utc": "2026-09-15T02:43:45.349570Z",
+    "duration_ms": 564.376,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/task-contract-validation.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/task-contract-validation.stderr.log",
     "stdout_excerpt": "{\"issues\": [], \"kind\": \"task-contract-validation\", \"schema_version\": 1, \"status\": \"PASS\", \"task_ids\": [\"M0-014\", \"M2-004\", \"M2-006\", \"M3-029\", \"M3-030\", \"M3-031\", \"M6-026\", \"M7-022\", \"M7-027\", \"M7-028\", \"M7-029\", \"M7-030\", \"M7-031\", \"M7-032\", \"M7-033\", \"M8-001\", \"M8-002\", \"M8-003\", \"M8-004\", \"M8-005\", \"M8-006\", \"M8-007\", \"P1-012\", \"P1-013\", \"P1-014\"]}\n",
     "stderr_excerpt": "",
     "stdout_truncated": false,
-    "stderr_truncated": false,
-    "stdout_digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "6cbc5d215cb163cc1c1203768577da9316a4b28bd965cbadb6e2b806c944d38d"
-    },
-    "stderr_digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    }
+    "stderr_truncated": false
   }
 }

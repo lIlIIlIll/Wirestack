@@ -13,22 +13,14 @@
     "exit_code": 0,
     "timed_out": false,
     "error_code": null,
-    "started_at_utc": "2026-09-14T14:31:34.522881Z",
-    "finished_at_utc": "2026-09-14T14:31:40.861895Z",
-    "duration_ms": 6339.021,
-    "stdout_path": "docs/evidence/M8-007/commands/20260914T142422/release-core-verification.stdout.log",
-    "stderr_path": "docs/evidence/M8-007/commands/20260914T142422/release-core-verification.stderr.log",
-    "stdout_excerpt": "{\"artifact\": {\"bytes\": 2804949, \"digest\": {\"domain\": \"artifact-bytes-v1\", \"sha256\": \"c7aab6a634f6aa2fbe8b13d072ffd41b8570db883204d782766dd94d07de58fc\"}, \"name\": \"wirestack-0.1.0-linux-x86_64-glibc.tar.gz\"}, \"decision\": \"PASS\", \"evidence\": [{\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"15011e70612c6061e6c672278e91d3c4b8f23dd1e2225fcf6bdd7f51e5e2feab\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/qualification.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"3e90b268388d06029f21f9213f7da493d2a9bcd5c07a4c1c8aff456bfc90e8b8\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/native-rebuild.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"9cb572d0b4d37948003bb8836fa583219ec78c1e2f2633e40375258e1669c964\"}, \"path\": \"docs/api/baselines/wirestack-linux-pre1-m8-007.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"919b5f10508c9674c7dc2c5c5a258f5bc6e86a5a6800924c54ecfbec06502280\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/api-inventory.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"4f084bc796121a126227b649507fbbb25b07d2a3eac9abf1a479dee8509cb7c0\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/licenses.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"fd2e5968363f26e0da81e7fced3f718dc28fe9580792ff411c2e00876660d779\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/supply-chain/bundle.json\"}], \"non_claims\": [\"The 86400-second soak, independent security review, and production signatures are separate required gates.\"], \"payload_files\": 159, \"release_schema_version\": 2, \"schema_version\": 1, \"scope\": [\"fresh-native-artifact\", \"clean-installed-consumer\", \"public-api-inventory\", \"sbom\", \"license-deliverables\"], \"source_task\": \"M8-007\", \"status\": \"PASS\"}\n",
+    "started_at_utc": "2026-09-15T02:26:41.883331Z",
+    "finished_at_utc": "2026-09-15T02:26:44.148580Z",
+    "duration_ms": 2265.252,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/release-core-verification.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/release-core-verification.stderr.log",
+    "stdout_excerpt": "{\"artifact\": {\"bytes\": 2805049, \"digest\": {\"domain\": \"artifact-bytes-v1\", \"sha256\": \"eb99baa35dab1f2450afe40a2e676bb5216b2574c86766b4d0e2a27213935c2c\"}, \"name\": \"wirestack-0.1.0-linux-x86_64-glibc.tar.gz\"}, \"decision\": \"PASS\", \"evidence\": [{\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"98176749091a9ac24a60aa5f790001d044a9377ba0d0037c7c321b3659a6248b\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/qualification.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"3e90b268388d06029f21f9213f7da493d2a9bcd5c07a4c1c8aff456bfc90e8b8\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/native-rebuild.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"9cb572d0b4d37948003bb8836fa583219ec78c1e2f2633e40375258e1669c964\"}, \"path\": \"docs/api/baselines/wirestack-linux-pre1-m8-007.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"919b5f10508c9674c7dc2c5c5a258f5bc6e86a5a6800924c54ecfbec06502280\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/api-inventory.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"7fa664e92c76c4753a78ea61797636d21ee964b76df9b4f0dc69240474e462d4\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/licenses.json\"}, {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"0ab8b6e0ea4d655be55dc0b61a032960a14b1a5818fd7effb027c0c2cddc5dc7\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/supply-chain/bundle.json\"}], \"non_claims\": [\"The 86400-second soak, independent security review, and production signatures are separate required gates.\"], \"payload_files\": 159, \"release_schema_version\": 2, \"schema_version\": 1, \"scope\": [\"fresh-native-artifact\", \"clean-installed-consumer\", \"public-api-inventory\", \"sbom\", \"license-deliverables\"], \"source_task\": \"M8-007\", \"status\": \"PASS\"}\n",
     "stderr_excerpt": "",
     "stdout_truncated": false,
-    "stderr_truncated": false,
-    "stdout_digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "d8ddb06c435dc41245c7cfc1d8ac5440ee56d54a12110d909a7e1377887073a5"
-    },
-    "stderr_digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    }
+    "stderr_truncated": false
   }
 }

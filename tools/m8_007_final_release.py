@@ -576,6 +576,7 @@ def verify_runtime_controls() -> dict:
         "src/internal/http1/http2_connection_pool.cj", "src/internal/http1/http2_connection_pool_test.cj",
         "src/internal/tls_engine/connection.cj", "src/internal/tls_engine/connection_test.cj",
         "src/internal/tls_engine/engine.cj",
+        "src/net/m8_007_tls_cleanup_test.cj",
     }
     require(set(report["source_inputs"]) == expected_sources, "runtime control source inventory changed")
     for relative, expected in report["source_inputs"].items():
@@ -590,15 +591,30 @@ def verify_runtime_controls() -> dict:
             "closeDeadlineExpiresWhileAnExistingBackgroundReadOwnsPumpAdmission",
             "closeCancellationInterruptsAnExistingBackgroundReadWithinTheBound",
             "closeCancellationDoesNotWaitBehindAnExistingCiphertextWrite",
+            "expiredCloseBudgetStillClosesTransportAndReleasesEngine",
+            "cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows",
+            "peerWaitingGracefulCloseStaysBoundedByTheCallerBudget",
         },
+        "native": {"closeDeadlineReleasesAnExistingNativeTcpReadWithoutPeerAssistance"},
     }
     files = [record(RUNTIME_CONTROLS), record(ROOT / RUNTIME_CONTROL_DRIVER)]
+    native_baseline = "c0f13f575eae4ebce07a5ff17add0758f8fca561"
+    require(report.get("native_baseline_commit") == native_baseline, "native cleanup baseline changed")
+    native_source = subprocess.check_output(
+        ["git", "cat-file", "blob", f"{native_baseline}:src/internal/tls_engine/connection.cj"],
+        cwd=ROOT, timeout=10,
+    )
+    native_snapshot = (ROOT / report["native_baseline_source"]["path"]).resolve()
+    require(native_snapshot.is_relative_to((EVIDENCE.parent / "commands/runtime-review-controls").resolve())
+            and report["native_baseline_source"] == record(native_snapshot)
+            and native_snapshot.read_bytes() == native_source, "native cleanup baseline source changed")
+    files.append(record(native_snapshot))
     for phase in ("before", "after"):
         require(set(report[phase]) == set(expected_failures), f"runtime {phase} suite inventory changed")
         for name, expected in expected_failures.items():
             command = report[phase][name]
-            package = "http1" if name == "http1" else "tls_engine"
-            argv = ["cjpm", "test", f"src/internal/{package}", "--exclude-tags=Performance",
+            package = {"http1": "src/internal/http1", "tls": "src/internal/tls_engine", "native": "src/net"}[name]
+            argv = ["cjpm", "test", package, "--exclude-tags=Performance",
                     "--parallel", "1", "--no-progress", "--no-color"]
             require(command["argv"] == argv and not command["timed_out"], f"runtime {phase} command changed: {name}")
             require(command["exit_code"] == (1 if phase == "before" else 0), f"runtime {phase} command failed: {name}")

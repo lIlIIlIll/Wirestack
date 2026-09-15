@@ -1,8 +1,8 @@
 {
-  "url": "http://127.0.0.1:18707/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a636c6173733a546c73436f6e6e656374696f6e2367302829.html#symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a546c73436f6e6e656374696f6e3a3a66756e6374696f6e3a636c6f7365236730284f7065726174696f6e436f6e7465787429",
+  "url": "http://127.0.0.1:8891/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a636c6173733a546c73436f6e6e656374696f6e2367302829.html#symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a546c73436f6e6e656374696f6e3a3a66756e6374696f6e3a636c6f7365236730284f7065726174696f6e436f6e7465787429",
   "title": "wirestack.tls.TlsConnection",
   "search": "TlsConnection.close",
-  "target": "wirestack.tls.TlsConnection.close\n\nfunctionpublicsemantic: partial Owner: wirestack.tls.TlsConnection \u00b7 src/tls/facade.cj:610:5\n\n\u7b7e\u540d\npublic func close(context: OperationContext): Unit\n\u29c9\n\u6982\u89c8\n\nWirestack \u516c\u5f00 API\uff1a\u5173\u95ed\u8d44\u6e90\u5e76\u5524\u9192\u6b63\u5728\u7b49\u5f85\u7684\u64cd\u4f5c\u3002\n\n\u53c2\u6570\ncontext\n:OperationContext\n\n\u63a7\u5236\u672c\u6b21\u64cd\u4f5c\u7684\u622a\u6b62\u65f6\u95f4\u3001\u53d6\u6d88\u548c\u8ffd\u8e2a\u8303\u56f4\u3002",
+  "target": "wirestack.tls.TlsConnection.close\n\nfunctionpublicsemantic: partial Owner: wirestack.tls.TlsConnection · src/tls/facade.cj:610:5\n\n签名\npublic func close(context: OperationContext): Unit\n⧉\n概览\n\nWirestack 公开 API：关闭资源并唤醒正在等待的操作。\n\n参数\ncontext\n:OperationContext\n\n控制本次操作的截止时间、取消和追踪范围。",
   "source_task": "M8-007",
   "status": "PASS",
   "checks": {
@@ -15,18 +15,18 @@
     "path": "docs/evidence/M8-007/docs-report.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "fb67782d019a2775e30e1bff8bfed007e978669fc01a8c2dd6e7d2095ef73452"
+      "sha256": "8abb4655729c9232feb33fa385343bb371e8e196a6973c262689aafce7206f1c"
     }
   },
   "screenshot": {
     "path": "docs/evidence/M8-007/docs-close.webp.hex",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0082204c0833b714bee9eb3658b760014ee8a16e6275e9963fe3fa6ae96d2067"
+      "sha256": "4450c7a07f669fda4875639a5e8f0fbdbc616d030776b7c5d5c1464d3fda682a"
     }
   },
   "decoded_image_digest": {
     "domain": "artifact-bytes-v1",
-    "sha256": "1c507423b3e7cc67fef709c97a702c48b98e4c1f2cc6ba1c3c63172c74bca466"
+    "sha256": "079cdaec693b76b0077a5a72c54631f879c2d5f97a88e8d9a74ffa45ec91005d"
   }
 }

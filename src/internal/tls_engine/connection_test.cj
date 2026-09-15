@@ -236,7 +236,8 @@ class TlsConnectionTest {
 
         @Expect(timedOut)
         @Expect(engine.shutdownCalls.load(), 0)
-        @Expect(transport.closeCalls.load(), 1)
+        @Expect(transport.abortCalls.load(), 1)
+        @Expect(transport.terminalDisposals.load(), 1)
         @Expect(engine.closeCalls.load(), 1)
         @Expect(connection.isClosed())
     }
@@ -508,7 +509,62 @@ class TlsConnectionTest {
         @Expect(engine.closeCalls.load(), 1)
     }
 
+    @TestCase
+    func peerWaitingGracefulCloseStaysBoundedByTheCallerBudget(): Unit {
+        let transport = PeerWaitingTransport()
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let connection = TlsConnection.handshake(engine, transport)
+        let closing: Future<Bool> = spawn {
+            try {
+                connection.close(
+                    OperationContext(deadline: Some(Deadline.after(50 * Duration.millisecond)))
+                )
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.TimedOut => true
+                    case _ => false
+                }
+            }
+        }
+        transport.closeEntered.waitUntilZero()
 
+        var bounded = false
+        try {
+            bounded = closing.get(Duration.second)
+        } catch (_: TimeoutException) {
+            // Pre-fix guard: the reset budget made terminal cleanup wait forever.
+            transport.abort(reason: None<AbortReason>)
+            let _ = closing.get(Duration.second)
+        }
+
+        @Expect(bounded)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(transport.abortCalls.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        @Expect(connection.isClosed())
+    }
+
+    @TestCase
+    func peerWaitingGracefulCloseCompletesWithinItsBudget(): Unit {
+        let transport = PeerWaitingTransport()
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let connection = TlsConnection.handshake(engine, transport)
+        let closing: Future<Unit> = spawn {
+            connection.close(
+                OperationContext(deadline: Some(Deadline.after(Duration.second)))
+            )
+        }
+        transport.closeEntered.waitUntilZero()
+        transport.releaseGracefulClose()
+        closing.get(Duration.second)
+
+        @Expect(transport.closeCalls.load(), 1)
+        @Expect(transport.abortCalls.load(), 0)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        @Expect(connection.isClosed())
+    }
 }
 
 private func net06TlsCleanupIterations(): Int64 {
@@ -820,7 +876,15 @@ private class LifecycleTransport <: DuplexTransport {
     }
 
     public func shutdown(_: ShutdownDirection): Unit {}
-    public func close(_: OperationContext): Unit {
+    public func close(context: OperationContext): Unit {
+        if (!disposed.load()) {
+            if (context.isCancellationRequested()) {
+                throw TlsEngineException(TlsEngineErrorCode.HandshakeCancelled, "transport close cancelled")
+            }
+            if (context.isDeadlineExceeded()) {
+                throw TlsEngineException(TlsEngineErrorCode.HandshakeTimeout, "transport close deadline exceeded")
+            }
+        }
         closeCalls.fetchAdd(1)
         if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
         wakeBlockedOperations()
@@ -852,5 +916,95 @@ private class LifecycleTransport <: DuplexTransport {
     private func wakeBlockedOperations(): Unit {
         synchronized(readMutex) { readChanged.notifyAll() }
         synchronized(writeMutex) { writeChanged.notifyAll() }
+    }
+}
+
+/**
+ * Wraps the lifecycle transport with a graceful close that models the
+ * documented close(context) contract: it waits for the peer acknowledgement
+ * only while the received context still has budget, and the wait is stopped
+ * by terminal disposal. This exposes any cleanup path that resets the
+ * caller's deadline or cancellation before delegating transport close.
+ */
+private class PeerWaitingTransport <: DuplexTransport {
+    private let delegate = LifecycleTransport(respondToTlsClose: true)
+    private let closeMutex = Mutex()
+    private let closeChanged = synchronized(closeMutex) { closeMutex.condition() }
+    private var gracefulReleased = false
+    let closeEntered = SyncCounter(1)
+    let closeCalls = AtomicInt64(0)
+    let abortCalls = AtomicInt64(0)
+    let terminalDisposals = AtomicInt64(0)
+    private let disposed = AtomicBool(false)
+
+    public prop info: TransportInfo {
+        get() { delegate.info }
+    }
+
+    public func readSome(
+        destination: MutableByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): ReadResult {
+        delegate.readSome(destination, context: context)
+    }
+
+    public func writeSome(
+        source: ByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): Int64 {
+        delegate.writeSome(source, context: context)
+    }
+
+    public func shutdown(direction: ShutdownDirection): Unit {
+        delegate.shutdown(direction)
+    }
+
+    public func close(context: OperationContext): Unit {
+        closeCalls.fetchAdd(1)
+        if (disposed.load()) { return }
+        closeEntered.dec()
+        synchronized(closeMutex) {
+            while (!gracefulReleased && !disposed.load()) {
+                match (context.deadline) {
+                    case Some(deadline) =>
+                        let waitFor = deadline.remaining()
+                        if (waitFor <= Duration.Zero) {
+                            throw TlsEngineException(
+                                TlsEngineErrorCode.HandshakeTimeout,
+                                "peer-waiting test transport close deadline exceeded"
+                            )
+                        }
+                        closeChanged.wait(timeout: waitFor)
+                    case None => closeChanged.wait()
+                }
+            }
+        }
+        if (disposed.load()) {
+            throw NetworkException(
+                NetworkErrorCategory.Closed,
+                NetworkPhase.TransportClose,
+                NetworkErrorCode.Closed,
+                "peer-waiting test transport close was terminated",
+                retryability: Retryability.Never
+            )
+        }
+        if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
+        delegate.close(OperationContext.background())
+    }
+    public func close(): Unit { close(OperationContext.background()) }
+    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
+        let _ = reason
+        abortCalls.fetchAdd(1)
+        delegate.abort(reason: reason)
+        if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
+        synchronized(closeMutex) { closeChanged.notifyAll() }
+    }
+    public func isClosed(): Bool { closeCalls.load() > 0 || abortCalls.load() > 0 }
+
+    func releaseGracefulClose(): Unit {
+        synchronized(closeMutex) {
+            gracefulReleased = true
+            closeChanged.notifyAll()
+        }
     }
 }

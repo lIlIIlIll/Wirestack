@@ -1,0 +1,12 @@
+test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte) ... ok
+test_archive_rejects_aggregate_payload_over_limit (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_aggregate_payload_over_limit) ... ok
+test_archive_budget_includes_serialized_headers_and_padding (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_budget_includes_serialized_headers_and_padding) ... ok
+test_archive_rejects_oversized_pax_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_oversized_pax_metadata) ... ok
+test_archive_rejects_excessive_member_headers (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_excessive_member_headers) ... ok
+test_archive_bounds_cumulative_global_pax_fields (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_bounds_cumulative_global_pax_fields) ... ok
+test_archive_rejects_sparse_encodings_before_map_expansion (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_sparse_encodings_before_map_expansion) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.759s
+
+OK
