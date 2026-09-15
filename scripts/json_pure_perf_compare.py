@@ -18,7 +18,7 @@ import time
 
 STANDALONE_MACRO_GIT = (
     'git = "https://github.com/lIlIIlIll/yjson_macros.git", '
-    'commitId = "1803e9f68be1438a8f29157c9b9f54821870368a"'
+    'commitId = "fec0adce41f73d037d876cbac7a28aee8108bb5c"'
 )
 LEGACY_STANDALONE_MACRO_GIT = (
     'git = "https://github.com/lIlIIlIll/yjson_macros.git", '
