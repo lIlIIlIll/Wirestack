@@ -414,8 +414,7 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     public func writeObjectEntryNameInt64NoEscapeFast(first: Bool, name: String, value: Int64): Bool {
         if (!first) { writeRawByteNoEnsure(b',') }
         writeRawByteNoEnsure(b'"')
-        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
-        used += name.size
+        copyTextNoEnsureFast(name)
         writeRawByteNoEnsure(b'"')
         writeRawByteNoEnsure(b':')
         writeInt64NoEnsure(value)
@@ -462,13 +461,14 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     ): Bool {
         if (!first) { writeRawByteNoEnsure(b',') }
         writeRawByteNoEnsure(b'"')
-        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
-        used += name.size
+        copyTextNoEnsureFast(name)
         writeRawByteNoEnsure(b'"')
         writeRawByteNoEnsure(b':')
         writeRawByteNoEnsure(b'"')
-        unsafe { value.rawData().copyTo(buffer, 0, used, value.size) }
-        used += value.size
+        if (!value.isEmpty()) {
+            unsafe { value.rawData().copyTo(buffer, 0, used, value.size) }
+            used += value.size
+        }
         writeRawByteNoEnsure(b'"')
         false
     }
@@ -609,8 +609,7 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     ): Bool {
         if (!first) { writeRawByteNoEnsure(b',') }
         writeRawByteNoEnsure(b'"')
-        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
-        used += name.size
+        copyTextNoEnsureFast(name)
         writeRawByteNoEnsure(b'"')
         writeRawByteNoEnsure(b':')
         if (value) {
@@ -661,8 +660,7 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     ): Bool {
         if (!first) { writeRawByteNoEnsure(b',') }
         writeRawByteNoEnsure(b'"')
-        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
-        used += name.size
+        copyTextNoEnsureFast(name)
         writeRawByteNoEnsure(b'"')
         writeRawByteNoEnsure(b':')
         writeUInt64DigitsNoEnsure(value)
@@ -713,8 +711,7 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         ensureFiniteJsonFloat(value)
         if (!first) { writeRawByteNoEnsure(b',') }
         writeRawByteNoEnsure(b'"')
-        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
-        used += name.size
+        copyTextNoEnsureFast(name)
         writeRawByteNoEnsure(b'"')
         writeRawByteNoEnsure(b':')
         if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
@@ -1117,6 +1114,35 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
             value.rawData().copyTo(buffer, 0, used, value.size)
         }
         used += value.size
+    }
+    
+    // Generated scalar fields use short, compile-time ASCII names. Avoid
+    // dispatching tiny copies through the generic raw-data copy routine while
+    // retaining the fallback for arbitrary longer names.
+    private func copyTextNoEnsureFast(value: String): Unit {
+        let size = value.size
+        if (size == 0) { return }
+        unsafe {
+            let bytes = value.rawData()
+            if (size == 1) {
+                buffer[used] = bytes[0]
+            } else if (size == 2) {
+                buffer[used] = bytes[0]
+                buffer[used + 1] = bytes[1]
+            } else if (size == 3) {
+                buffer[used] = bytes[0]
+                buffer[used + 1] = bytes[1]
+                buffer[used + 2] = bytes[2]
+            } else if (size == 4) {
+                buffer[used] = bytes[0]
+                buffer[used + 1] = bytes[1]
+                buffer[used + 2] = bytes[2]
+                buffer[used + 3] = bytes[3]
+            } else {
+                bytes.copyTo(buffer, 0, used, size)
+            }
+        }
+        used += size
     }
 
     private func copyTextRangeNoEnsure(value: String, start: Int64, end: Int64): Unit {
@@ -3000,6 +3026,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     }
 
     private func firstRawStringEscapeIndex(value: String): Int64 {
+        if (value.size == 0) { return -1 }
         if (value.size < 256) { return firstStringEscapeIndex(value) }
         if (let Some(previous) <- lastRawString) {
             if (previous == value) { return lastRawStringEscapeIndex }
