@@ -70,6 +70,19 @@ class ExternalFastReadEnvelope {
 }
 
 @JsonCodec
+class ExternalScalarRecord {
+    public var i1: Int64 = 0
+    public var label: String = ""
+    public var ratio: Float64 = 0.0
+    public var enabled: Bool = false
+    public var i2: Int64 = 0
+    public var tail: String = ""
+    public var ratio2: Float64 = 0.0
+    public var enabled2: Bool = false
+    public init() {}
+}
+
+@JsonCodec
 class ExternalNonCompactInner {
     @JsonUsing[JsonCodecs.array(JsonCodecs.int64)]
     public let numbers: Array<Int64>
@@ -183,6 +196,43 @@ private func externalFastReadError(text: String): JsonException {
 
 @Test
 class GeneratedCollectionConsumerTest {
+    @TestCase
+    func generatedScalarRecordRoundTripsThroughCompactCodec(): Unit {
+        let value = ExternalScalarRecord()
+        value.i1 = 1
+        value.label = "scalar"
+        value.ratio = 1.5
+        value.enabled = true
+        value.i2 = -2
+        value.tail = "tail"
+        value.ratio2 = -2.25
+        value.enabled2 = false
+
+        let expected = "{\"i1\":1,\"label\":\"scalar\",\"ratio\":1.500000," +
+            "\"enabled\":true,\"i2\":-2,\"tail\":\"tail\"," +
+            "\"ratio2\":-2.250000,\"enabled2\":false}"
+        let text = YJson.toJson(value)
+        @Assert(text, expected)
+
+        let decoded = YJson.fromJson<ExternalScalarRecord>(text)
+        @Expect(decoded.i1, 1)
+        @Expect(decoded.label, "scalar")
+        @Expect(decoded.ratio, 1.5)
+        @Expect(decoded.enabled, true)
+        @Expect(decoded.i2, -2)
+        @Expect(decoded.tail, "tail")
+        @Expect(decoded.ratio2, -2.25)
+        @Expect(decoded.enabled2, false)
+
+        let reordered = "{\"enabled\":true,\"i1\":1,\"label\":\"scalar\"," +
+            "\"ratio\":1.500000,\"i2\":-2,\"tail\":\"tail\"," +
+            "\"ratio2\":-2.250000,\"enabled2\":false,\"unknown\":true}"
+        let reorderedDecoded = YJson.fromJson<ExternalScalarRecord>(reordered)
+        @Expect(reorderedDecoded.i1, 1)
+        @Expect(reorderedDecoded.enabled2, false)
+        @Expect(reorderedDecoded.tail, "tail")
+    }
+
     @TestCase
     func nonEmptyHashMapOfArraysUsesTypedTopLevelCodec(): Unit {
         let value = HashMap<String, Array<Int64>>()
