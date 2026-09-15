@@ -1842,10 +1842,12 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         }
     }
 
-    /// Finish a generated compact string whose codec has emitted the balanced
-    /// raw root itself.  The generated entry point already guarantees the
-    /// state shape, so avoid re-walking the optional semantic/context stacks
-    /// before materializing the buffer.
+    /**
+     * Finish a generated compact string whose codec has emitted the balanced
+     * raw root itself.  The generated entry point already guarantees the
+     * state shape, so avoid re-walking the optional semantic/context stacks
+     * before materializing the buffer.
+     */
     public func finishGeneratedCompactString(): String {
         target.finish()
         enforceOutputLimit()
@@ -2128,9 +2130,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         bufferTarget.writeObjectEntryNameInt64MapNoEscape(first, name, values)
     }
 
-    /// Compact generated path for maps whose keys are known ASCII-safe by the
-    /// generated benchmark shape. The generic entry point remains available
-    /// for arbitrary user data and still performs JSON escape checks.
+    /**
+     * Compact generated path for maps whose keys are known ASCII-safe by the
+     * generated benchmark shape. The generic entry point remains available
+     * for arbitrary user data and still performs JSON escape checks.
+     */
     public func writeRawObjectEntryKnownNameInt64MapKnownAsciiBuffer(
         first: Bool, name: String, values: HashMap<String, Int64>
     ): Bool {
@@ -2179,7 +2183,9 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         bufferTarget.writeObjectEntryNameInt64ArrayMapNoEscape(first, name, values)
     }
 
-    /// Compact generated path for nested maps with known ASCII-safe keys.
+    /**
+     * Compact generated path for nested maps with known ASCII-safe keys.
+     */
     public func writeRawObjectEntryKnownNameInt64ArrayMapKnownAsciiBuffer(
         first: Bool, name: String, values: HashMap<String, Array<Int64>>
     ): Bool {

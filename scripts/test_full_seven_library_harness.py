@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for exact seven-library benchmark Case binding."""
+"""Regression tests for exact benchmark Case and RSS binding."""
 
 from __future__ import annotations
 
@@ -27,7 +27,17 @@ def load_module(name: str, path: pathlib.Path):
 
 
 SUMMARY = load_module("full_seven_library_summary", HARNESS / "summarize_full.py")
+
+CJFAST_SUMMARY = load_module(
+    "json_cjfast_perf_summary",
+    ROOT / "scripts/json_cjfast_perf_summary.py",
+)
 RUNNER = load_module("full_seven_library_runner", HARNESS / "run_full.py")
+
+CJFAST_RUNNER = load_module(
+    "json_cjfast_perf_run",
+    ROOT / "scripts/json_cjfast_perf_run.py",
+)
 
 
 def write_cangjie_csv(
@@ -43,26 +53,175 @@ def write_cangjie_csv(
 
 
 class RunnerSelectionTest(unittest.TestCase):
-    def test_cangjie_command_uses_exact_case_filter(self) -> None:
+    def test_cangjie_command_uses_exact_case_filter_on_binary(self) -> None:
         command = RUNNER.cangjie_command(
             7,
-            "ComprehensiveJsonCompareBenchmarks",
+            pathlib.Path("/tmp/yjson_benchmarks"),
             "yjsonStringDecodePerson",
             pathlib.Path("/tmp/report"),
             3,
         )
-        selected = command[command.index("--filter") + 1]
-        self.assertEqual(
-            selected,
-            "ComprehensiveJsonCompareBenchmarks.yjsonStringDecodePerson",
-        )
-        self.assertNotIn("*", selected)
+        selected = next(arg for arg in command if arg.startswith("--filter="))
+        self.assertEqual(selected, "--filter=*.yjsonStringDecodePerson")
+        self.assertIn("--bench", command)
+        self.assertNotIn("cjpm", command)
+        self.assertNotIn("--skip-build", command)
 
     def test_java_command_anchors_and_escapes_exact_case(self) -> None:
         command = RUNNER.java_command(
             7, "jacksonDecodePerson", pathlib.Path("/tmp/report/jmh.json")
         )
         self.assertIn(r"^bench\.OptimalJsonBench\.jacksonDecodePerson$", command)
+
+
+class RssCaptureTest(unittest.TestCase):
+    def test_gnu_time_rss_sidecar_is_parsed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text(
+                "\tMaximum resident set size (kbytes): 321\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(RUNNER.parse_max_rss(path), 321)
+
+    def test_missing_gnu_time_rss_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text("Elapsed (wall clock) time: 1.0\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "expected one GNU time RSS"):
+                RUNNER.parse_max_rss(path)
+
+
+class CjfastSummaryRssTest(unittest.TestCase):
+    def test_rss_sidecar_is_bound_to_result_root(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            path = root / "rss/time-rss.txt"
+            path.parent.mkdir()
+            path.write_text(
+                "\tMaximum resident set size (kbytes): 654\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                CJFAST_SUMMARY.load_max_rss(root, "rss/time-rss.txt"),
+                654,
+            )
+            with self.assertRaisesRegex(ValueError, "unsafe RSS path"):
+                CJFAST_SUMMARY.load_max_rss(root, "/tmp/time-rss.txt")
+
+    def test_summary_preserves_peak_rss(self) -> None:
+        result = CJFAST_SUMMARY.summarize(
+            {1: [10.0], 2: [12.0]},
+            {1: 100, 2: 120},
+        )
+        self.assertEqual(result["median_rss_kb"], 110)
+        self.assertEqual(result["max_rss_kb"], 120)
+
+    def test_load_report_filters_prefix_colliding_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            write_cangjie_csv(
+                root / "bench-suite.csv",
+                [
+                    ("exactCase", 1, 2000.0, "ns", "Duration"),
+                    ("exactCaseBatchGuard", 1, 8000.0, "ns", "Duration"),
+                ],
+            )
+            self.assertEqual(
+                CJFAST_SUMMARY.load_report(root, "exactCase"),
+                [2000.0],
+            )
+
+    def test_load_report_requires_the_manifest_case(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            write_cangjie_csv(
+                root / "bench-suite.csv",
+                [("exactCaseBatchGuard", 1, 8000.0, "ns", "Duration")],
+            )
+            with self.assertRaisesRegex(ValueError, "no duration samples found for Case"):
+                CJFAST_SUMMARY.load_report(root, "exactCase")
+    def test_analyze_rejects_reused_rss_sidecar(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            write_cangjie_csv(
+                root / "reports" / "bench-1.csv",
+                [("exactCase", 1, 2000.0, "ns", "Duration")],
+            )
+            rss_path = root / "rss/time-rss.txt"
+            rss_path.parent.mkdir()
+            rss_path.write_text(
+                "\tMaximum resident set size (kbytes): 654\n",
+                encoding="utf-8",
+            )
+            fieldnames = [
+                "round",
+                "workload",
+                "library",
+                "scenario",
+                "operation",
+                "payload",
+                "input_kind",
+                "source_case",
+                "report_path",
+                "rss_path",
+                "max_rss_kb",
+            ]
+            with (root / "manifest.csv").open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=fieldnames)
+                writer.writeheader()
+                for library in ("yjson", "stdx_json"):
+                    writer.writerow({
+                        "round": "1",
+                        "workload": "case",
+                        "library": library,
+                        "scenario": "decode",
+                        "operation": "decode",
+                        "payload": "small",
+                        "input_kind": "bytes",
+                        "source_case": "exactCase",
+                        "report_path": "reports",
+                        "rss_path": "rss/time-rss.txt",
+                        "max_rss_kb": "654",
+                    })
+            with self.assertRaisesRegex(ValueError, "RSS sidecar path reused"):
+                CJFAST_SUMMARY.analyze(root, 1)
+
+
+
+    def test_timed_command_uses_exact_case_on_binary(self) -> None:
+        command = CJFAST_RUNNER.cangjie_command(
+            3,
+            pathlib.Path("/tmp/fastjson.bench"),
+            "yjsonStringDecodePrettyPerson",
+            pathlib.Path("/tmp/report"),
+            1,
+        )
+        selected = next(arg for arg in command if arg.startswith("--filter="))
+        self.assertEqual(selected, "--filter=*.yjsonStringDecodePrettyPerson")
+        self.assertIn("--bench", command)
+        self.assertNotIn("cjpm", command)
+        self.assertNotIn("--skip-build", command)
+
+    def test_direct_runtime_includes_cjfast_package_libraries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            runtime_dir = root / "target/release/fastjson"
+            runtime_dir.mkdir(parents=True)
+            command_env = CJFAST_RUNNER.runtime_environment(
+                {"CANGJIE_STDX_PATH": "/sdk", "LD_LIBRARY_PATH": "/old"},
+                root,
+            )
+            self.assertEqual(
+                command_env["LD_LIBRARY_PATH"],
+                f"/sdk:{runtime_dir}:/old",
+            )
+
+    def test_build_command_is_unmeasured_and_does_not_select_a_case(self) -> None:
+        command = CJFAST_RUNNER.build_command(3)
+        self.assertIn("--no-run", command)
+        self.assertNotIn("--filter", command)
+        self.assertNotIn("/usr/bin/time", command)
 
 
 class FixturePreflightContractTest(unittest.TestCase):
@@ -79,6 +238,11 @@ class FixturePreflightContractTest(unittest.TestCase):
         for relative in required_dirs:
             (root / relative).mkdir(parents=True, exist_ok=True)
         (root / "cpu-selection.json").write_text("{}\n", encoding="utf-8")
+        for relative in set(RUNNER.CANGJIE_BINARIES.values()):
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            path.chmod(0o755)
         for relative in RUNNER.PREFLIGHT_FIXTURES:
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -100,6 +264,13 @@ class FixturePreflightContractTest(unittest.TestCase):
             missing = workspace / RUNNER.PREFLIGHT_FIXTURES[2]
             missing.write_text("no assertions\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "omit the canonical encode/decode"):
+                RUNNER.require_workspace_layout(workspace)
+
+    def test_missing_benchmark_binary_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = self.fixture_workspace(pathlib.Path(directory))
+            (workspace / RUNNER.CANGJIE_BINARIES["yjson"]).unlink()
+            with self.assertRaisesRegex(ValueError, "built Cangjie benchmark executables"):
                 RUNNER.require_workspace_layout(workspace)
 
     def test_fixture_overlay_applies_and_freezes_java_wire_shape(self) -> None:
@@ -245,9 +416,22 @@ class ManifestContaminationTest(unittest.TestCase):
                             "payload": f"canonical-{workload}",
                             "source_case": self.source_case(workload, library),
                             "report_path": f"raw/{round_number}/{workload}/{library}",
+                            "max_rss_kb": "123",
+                            "rss_path": f"raw/{round_number}/{workload}/{library}/time-rss.txt",
                         }
                     )
         return rows
+
+    @staticmethod
+    def materialize_rss(root: pathlib.Path, rows: list[dict[str, str]]) -> None:
+        for row in rows:
+            path = root / row["rss_path"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                "\tMaximum resident set size (kbytes): "
+                f"{row['max_rss_kb']}\n",
+                encoding="utf-8",
+            )
 
     @staticmethod
     def inventory(expected_case: str, extras: tuple[str, ...] = ()) -> dict[str, object]:
@@ -277,18 +461,25 @@ class ManifestContaminationTest(unittest.TestCase):
                 extras = ("yjsonStringDecodeLargeProfileArrayValue",)
             return SUMMARY.values_for_expected_case(self.inventory(expected, extras), expected)
 
-        with self.assertRaisesRegex(ValueError, r"22/770 benchmark cells"):
-            SUMMARY.collect_samples(pathlib.Path("/unused"), rows, loader=load)
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            self.materialize_rss(root, rows)
+            with self.assertRaisesRegex(ValueError, r"22/770 benchmark cells"):
+                SUMMARY.collect_samples(root, rows, loader=load)
 
     def test_two_manifest_cells_cannot_share_one_report(self) -> None:
         rows = self.rows()[:2]
         rows[1]["report_path"] = rows[0]["report_path"]
+        rows[1]["rss_path"] = rows[0]["rss_path"]
 
         def load(_root: pathlib.Path, _row: dict[str, str]) -> list[float]:
             return [100.0]
 
-        with self.assertRaisesRegex(ValueError, "report_path .* is shared"):
-            SUMMARY.collect_samples(pathlib.Path("/unused"), rows, loader=load)
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            self.materialize_rss(root, rows)
+            with self.assertRaisesRegex(ValueError, "report_path .* is shared"):
+                SUMMARY.collect_samples(root, rows, loader=load)
 
 
 if __name__ == "__main__":

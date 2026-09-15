@@ -152,7 +152,9 @@ private class CustomNativeAccelerationProviderV1 <: JsonNativePrimitivesProvider
     }
 }
 
-/// Versioned closed SPI consumed by yjson_native_accel during startup.
+/**
+ * Versioned closed SPI consumed by yjson_native_accel during startup.
+ */
 public func initializeYJsonNativePrimitivesV1(): Unit {
     initializeYJsonAccelerationV1(CustomNativeAccelerationProviderV1())
 }

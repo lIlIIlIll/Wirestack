@@ -23,6 +23,7 @@ docs/codec-generation.md
 docs/configuration-and-errors.md
 docs/custom-codecs.md
 docs/library-comparison.md
+docs/maintainers/api-documentation.md
 docs/maintainers/native-internals.md
 docs/maintainers/repository-layout.md
 docs/maintainers/releasing.md
@@ -151,6 +152,8 @@ scripts/test_check_cjdoc_qualification.py
 scripts/prepare_cjdoc.py
 scripts/generate_api_docs.py
 scripts/test_generate_api_docs.py
+scripts/check_api_documentation.py
+scripts/test_check_api_documentation.py
 scripts/release_graph.py
 scripts/test_release_graph.py
 scripts/test_release_temp_tree.py
@@ -170,6 +173,7 @@ scripts/release_registry_rehearsal.py
 scripts/validate_cangjie_sts.py
 scripts/test_validate_cangjie_sts.py
 scripts/test_ci_candidate_wiring.py
+scripts/test_json_pure_perf_compare.py
 scripts/coverage.sh
 scripts/cjcov_to_lcov.py
 scripts/test_cjcov_to_lcov.py
@@ -185,6 +189,12 @@ benchmarks/results/full-seven-library/2026-09-07-main-3df2801/README.md
 benchmarks/results/full-seven-library/2026-09-09-main-987bc8a/README.md
 benchmarks/results/full-seven-library/2026-09-09-main-bddbe6e/README.md
 benchmarks/results/full-seven-library/2026-09-10-main-008e50b/README.md
+benchmarks/results/full-seven-library/2026-09-13-release-4766daa/README.md
+benchmarks/results/full-seven-library/2026-09-14-release-7436598/README.md
+benchmarks/results/full-seven-library/2026-09-14-release-4c2432c/README.md
+docs/performance/results/2026-09-13-release-seven-library.md
+docs/performance/results/2026-09-13-linux-release-pure.md
+docs/performance/results/2026-09-13-release-three-library.md
 release/0.1.0/evidence.md
 benchmarks/cjfast_json/cjfast_comprehensive_bench.cj
 packages/native_accel_benchmarks/build.cj
@@ -214,6 +224,7 @@ release/package-manifests/yjson_schema_formats.toml
 release/package-manifests/yjson_yyjson.toml
 release/cjdoc-tool.toml
 release/cjdoc-policy.toml
+release/api-documentation-required.json
 release/release-graph.toml
 release/public-api-inventory.toml
 release/public-api-snapshot.txt
@@ -287,6 +298,7 @@ packages/examples/README.md
 packages/examples/src/main.cj
 packages/codec_integration/cjpm.toml
 packages/codec_integration/cjpm.lock
+packages/codec_integration/src/api_documentation_contract_test.cj
 packages/codec_integration/src/generated_collections_test.cj
 packages/codec_integration/src/main.cj
 packages/codec_integration/src/json_literal_test.cj

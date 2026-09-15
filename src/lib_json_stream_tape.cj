@@ -30,8 +30,10 @@ private class JsonStreamTapeWriteContext {
     }
 }
 
-/// Matching-version Native bridge writer. Application codecs should depend on
-/// `JsonWriter`, not on this concrete tape representation.
+/**
+ * Matching-version Native bridge writer. Application codecs should depend on
+ * `JsonWriter`, not on this concrete tape representation.
+ */
 public class BackendTapeWriterV1 <: JsonWriter & GeneratedBulkWriterV1 & GeneratedWriteStateV1Owner {
     private let bytes = ArrayList<Byte>()
     private let contexts = ArrayList<JsonStreamTapeWriteContext>()
@@ -311,7 +313,9 @@ private class JsonStreamTapeReadContext {
     }
 }
 
-/// Matching-version Native bridge reader for the compact preorder tape.
+/**
+ * Matching-version Native bridge reader for the compact preorder tape.
+ */
 public class BackendTapeReaderV1 <: JsonReader & GeneratedReadStateV1Owner {
     private let bytes: Array<Byte>
     private let config: JsonReadOptions
@@ -561,7 +565,9 @@ public class BackendTapeReaderV1 <: JsonReader & GeneratedReadStateV1Owner {
         }
     }
 
-    /// Materializes one value while enforcing a maximum JSON-node budget.
+    /**
+     * Materializes one value while enforcing a maximum JSON-node budget.
+     */
     public func readNode(maxNodes: Int64): JsonNode {
         if (maxNodes <= 0) {
             throw IllegalArgumentException("maxNodes must be positive")

@@ -3,7 +3,9 @@ package yjson
 import std.collection.*
 import std.io.*
 
-/// In-memory output stream used by the public streaming codec API and examples.
+/**
+ * In-memory output stream used by the public streaming codec API and examples.
+ */
 public class YJsonMemoryOutputStream <: OutputStream {
     private let buffer = ArrayList<Byte>()
     public func write(bytes: Array<Byte>): Unit { buffer.add(all: bytes) }
@@ -12,7 +14,9 @@ public class YJsonMemoryOutputStream <: OutputStream {
     public func toUtf8String(): String { String.fromUtf8(toByteArray()) }
 }
 
-/// In-memory input stream with a bulk unread-byte operation for YJson.
+/**
+ * In-memory input stream with a bulk unread-byte operation for YJson.
+ */
 public class YJsonByteArrayInputStream <: InputStream {
     private let bytes: Array<Byte>
     private var start: Int64 = 0

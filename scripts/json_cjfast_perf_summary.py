@@ -7,12 +7,50 @@ import argparse
 import csv
 import json
 import math
+import re
 import statistics
 from collections import defaultdict
 from pathlib import Path
 
 
 UNIT_TO_NS = {"ns": 1.0, "us": 1_000.0, "ms": 1_000_000.0, "s": 1_000_000_000.0}
+
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
+
+
+def resolve_rss_path(root: Path, raw_path: str) -> Path:
+    relative = Path(raw_path)
+    if (
+        relative.is_absolute()
+        or not relative.parts
+        or any(part in ("", ".", "..") for part in relative.parts)
+    ):
+        raise ValueError(f"unsafe RSS path: {raw_path!r}")
+    path = (root / relative).resolve()
+    try:
+        path.relative_to(root.resolve())
+    except ValueError as error:
+        raise ValueError(f"RSS path escapes result root: {raw_path!r}") from error
+    return path
+
+
+def _read_max_rss(path: Path) -> int:
+    matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    if len(matches) != 1:
+        raise ValueError(f"expected one GNU time RSS value in {path}, found {len(matches)}")
+    value = int(matches[0])
+    if value <= 0:
+        raise ValueError(f"GNU time RSS value must be positive in {path}")
+    return value
+
+
+def load_max_rss(root: Path, raw_path: str) -> int:
+    return _read_max_rss(resolve_rss_path(root, raw_path))
+
+
 LIBRARIES = ("yjson", "stdx_json", "cjfast_json")
 PEERS = ("stdx_json", "cjfast_json")
 
@@ -28,11 +66,13 @@ def percentile(values: list[float], fraction: float) -> float:
     return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
-def load_report(path: Path) -> list[float]:
+def load_report(path: Path, source_case: str) -> list[float]:
     values: list[float] = []
     for report in sorted(path.rglob("bench-*.csv")):
         with report.open(newline="", encoding="utf-8") as stream:
             for row in csv.DictReader(stream):
+                if row.get("Case") != source_case:
+                    continue
                 batch_size = int(row["BatchSize"])
                 if batch_size <= 0 or row.get("Measurement") != "Duration":
                     continue
@@ -41,13 +81,19 @@ def load_report(path: Path) -> list[float]:
                     raise ValueError(f"unsupported duration unit {row['Unit']!r} in {report}")
                 values.append(float(row["Duration"]) * scale / batch_size)
     if not values:
-        raise ValueError(f"no duration samples found below {path}")
+        raise ValueError(f"no duration samples found for Case {source_case!r} below {path}")
     return values
 
 
-def summarize(run_samples: dict[int, list[float]]) -> dict[str, object]:
+def summarize(
+    run_samples: dict[int, list[float]],
+    rss_samples: dict[int, int],
+) -> dict[str, object]:
+    if set(run_samples) != set(rss_samples):
+        raise ValueError("timing and RSS round inventories differ")
     run_medians = [statistics.median(run_samples[key]) for key in sorted(run_samples)]
     raw_samples = [value for key in sorted(run_samples) for value in run_samples[key]]
+    rss_values = [rss_samples[key] for key in sorted(run_samples)]
     median = statistics.median(run_medians)
     mean = statistics.fmean(run_medians)
     mad = statistics.median(abs(value - median) for value in run_medians)
@@ -61,6 +107,9 @@ def summarize(run_samples: dict[int, list[float]]) -> dict[str, object]:
         "run_mad_percent": 0.0 if median == 0.0 else mad / median * 100.0,
         "raw_p95_ns": percentile(raw_samples, 0.95),
         "run_medians_ns": run_medians,
+        "rss_kb": rss_values,
+        "median_rss_kb": statistics.median(rss_values),
+        "max_rss_kb": max(rss_values),
     }
 
 
@@ -92,13 +141,41 @@ def compare(
 
 def analyze(root: Path, min_runs: int) -> list[dict[str, object]]:
     samples: dict[tuple[str, str], dict[int, list[float]]] = defaultdict(dict)
+    rss_samples: dict[tuple[str, str], dict[int, int]] = defaultdict(dict)
     metadata: dict[str, dict[str, str]] = {}
+    seen_rss_paths: dict[Path, tuple[str, str, int]] = {}
     with (root / "manifest.csv").open(newline="", encoding="utf-8") as stream:
-        for row in csv.DictReader(stream):
+        reader = csv.DictReader(stream)
+        required = {"round", "workload", "library", "report_path", "rss_path", "max_rss_kb"}
+        if reader.fieldnames is None or not required.issubset(reader.fieldnames):
+            missing = sorted(required - set(reader.fieldnames or ()))
+            raise ValueError(f"manifest columns are incomplete; missing {missing}")
+        for row in reader:
             workload = row["workload"]
             library = row["library"]
             round_id = int(row["round"])
-            samples[(workload, library)][round_id] = load_report(root / row["report_path"])
+            rss_path = resolve_rss_path(root, row["rss_path"])
+            previous = seen_rss_paths.get(rss_path)
+            if previous is not None:
+                previous_workload, previous_library, previous_round = previous
+                raise ValueError(
+                    f"RSS sidecar path reused for {workload}/{library}/round {round_id}; "
+                    f"already used by {previous_workload}/{previous_library}/round "
+                    f"{previous_round}: {row['rss_path']}"
+                )
+            seen_rss_paths[rss_path] = (workload, library, round_id)
+            recorded_rss = int(row["max_rss_kb"])
+            if recorded_rss <= 0:
+                raise ValueError(f"RSS must be positive: {workload}/{library}/round {round_id}")
+            measured_rss = _read_max_rss(rss_path)
+            if recorded_rss != measured_rss:
+                raise ValueError(
+                    f"manifest RSS differs from sidecar: {workload}/{library}/round {round_id}"
+                )
+            samples[(workload, library)][round_id] = load_report(
+                root / row["report_path"], row["source_case"]
+            )
+            rss_samples[(workload, library)][round_id] = measured_rss
             metadata[workload] = {
                 "scenario": row["scenario"],
                 "operation": row["operation"],
@@ -113,19 +190,29 @@ def analyze(root: Path, min_runs: int) -> list[dict[str, object]]:
             library: samples.get((workload, library), {})
             for library in LIBRARIES
         }
-        common_rounds = sorted(
-            set.intersection(*(set(library_runs[library]) for library in LIBRARIES))
-        )
+        library_rss = {
+            library: rss_samples.get((workload, library), {})
+            for library in LIBRARIES
+        }
+        round_sets = [set(library_runs[library]) for library in LIBRARIES]
+        round_sets.extend(set(library_rss[library]) for library in LIBRARIES)
+        common_rounds = sorted(set.intersection(*round_sets))
         if len(common_rounds) < min_runs:
             raise ValueError(
                 f"{workload} has {len(common_rounds)} complete three-library rounds, "
                 f"fewer than {min_runs}"
             )
         summaries = {
-            library: summarize({
-                round_id: library_runs[library][round_id]
-                for round_id in common_rounds
-            })
+            library: summarize(
+                {
+                    round_id: library_runs[library][round_id]
+                    for round_id in common_rounds
+                },
+                {
+                    round_id: library_rss[library][round_id]
+                    for round_id in common_rounds
+                },
+            )
             for library in LIBRARIES
         }
         row: dict[str, object] = {
@@ -162,8 +249,9 @@ def render_markdown(rows: list[dict[str, object]], cv_limit: float) -> str:
         f"- Noisy workloads retained: {len(rows) - len(stable_rows)}",
         "",
         "| Scenario | Operation | Payload | Input | Runs | yjson median | stdx median | "
-        "cjfast median | Y/S | Y/C | CV Y/S/C | yjson faster pairs S/C | Status |",
-        "|:--|:--|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|",
+        "cjfast median | RSS max KB Y/S/C | Y/S | Y/C | CV Y/S/C | "
+        "yjson faster pairs S/C | Status |",
+        "|:--|:--|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|",
     ]
     for row in rows:
         yjson = row["yjson"]
@@ -180,6 +268,9 @@ def render_markdown(rows: list[dict[str, object]], cv_limit: float) -> str:
             f"{float(yjson['median_ns']):.3f} ns | "
             f"{float(stdx['median_ns']):.3f} ns | "
             f"{float(cjfast['median_ns']):.3f} ns | "
+            f"{float(yjson['max_rss_kb']):.0f} / "
+            f"{float(stdx['max_rss_kb']):.0f} / "
+            f"{float(cjfast['max_rss_kb']):.0f} | "
             f"{float(stdx_comparison['yjson_over_peer_ratio_median']):.3f}x | "
             f"{float(cjfast_comparison['yjson_over_peer_ratio_median']):.3f}x | "
             f"{float(yjson['run_cv_percent']):.2f}% / "
@@ -208,6 +299,7 @@ def write_csv(rows: list[dict[str, object]], path: Path, cv_limit: float) -> Non
         writer.writerow([
             "scenario", "operation", "payload", "input_kind", "rounds",
             "yjson_median_ns", "stdx_json_median_ns", "cjfast_json_median_ns",
+            "yjson_max_rss_kb", "stdx_json_max_rss_kb", "cjfast_json_max_rss_kb",
             "yjson_over_stdx_ratio", "yjson_over_cjfast_ratio",
             "yjson_faster_pairs_vs_stdx", "yjson_faster_pairs_vs_cjfast",
             "yjson_cv_percent", "stdx_json_cv_percent", "cjfast_json_cv_percent",
@@ -228,6 +320,9 @@ def write_csv(rows: list[dict[str, object]], path: Path, cv_limit: float) -> Non
                 f"{float(yjson['median_ns']):.3f}",
                 f"{float(stdx['median_ns']):.3f}",
                 f"{float(cjfast['median_ns']):.3f}",
+                yjson["max_rss_kb"],
+                stdx["max_rss_kb"],
+                cjfast["max_rss_kb"],
                 f"{float(stdx_comparison['yjson_over_peer_ratio_median']):.6f}",
                 f"{float(cjfast_comparison['yjson_over_peer_ratio_median']):.6f}",
                 stdx_comparison["yjson_faster_pairs"],

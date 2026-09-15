@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       cangjie_version:
-        description: Pinned Cangjie STS version for release qualification (currently 1.1.0)
+        description: Pinned Cangjie STS version for release qualification (currently 1.1.3)
         required: false
         type: string
 
@@ -31,10 +31,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang
-      - name: Test failure propagation and candidate wiring
+      - name: Test CI and performance policy wiring
         env:
           YJSON_REQUIRE_UBSAN_PROBE: '1'
-        run: python3 scripts/test_ci_candidate_wiring.py
+        run: |
+          python3 scripts/test_ci_candidate_wiring.py
+          python3 scripts/test_json_pure_perf_compare.py
 
   generated-change-risk:
     name: Generated code change risk
@@ -110,7 +112,7 @@ jobs:
               --validate-version "$REQUESTED_VERSION")
             resolution=workflow-dispatch-exact
           else
-            value=1.1.0
+            value=1.1.3
             python3 scripts/validate_cangjie_sts.py \
               --validate-version "$value" >/dev/null
             resolution=pinned-sts
@@ -280,9 +282,18 @@ jobs:
         run: |
           ulimit -s 131072
           scripts/ci_job.sh api-docs
+      - name: Upload downloadable API documentation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: yjson-api-docs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: target/api-docs
+          if-no-files-found: error
+          retention-days: 30
       - name: Configure GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
       - name: Upload API documentation
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
           path: target/api-docs

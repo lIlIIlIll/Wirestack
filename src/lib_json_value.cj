@@ -10,15 +10,33 @@ public enum JsonKind {
     Null | Boolean | Number | String | Array | Object
 }
 
-/// A UTF-8 source position attached to a JSON failure.
-///
-/// `byteOffset` is zero-based. `line` and `column` are one-based Unicode
-/// scalar positions. A CRLF sequence counts as one newline.
+/**
+ * Source position attached to a JSON failure.
+ *
+ * byteOffset is zero-based and measured in UTF-8 bytes. line and column are one-based. Use the reported error position rather than reconstructing it from a string index.
+ */
 public struct JsonLocation {
+    /**
+     * Zero-based UTF-8 byte offset of the reported position.
+     */
     public let byteOffset: Int64
+    /**
+     * One-based source line of the reported position.
+     */
     public let line: Int64
+    /**
+     * One-based source column of the reported position.
+     */
     public let column: Int64
 
+    /**
+     * Creates JsonLocation with the supplied values.
+     *
+     * @param byteOffset Zero-based UTF-8 byte offset; must not be negative.
+     * @param line One-based source line; must be positive.
+     * @param column One-based source column; must be positive.
+     * @throws IllegalArgumentException The byte offset is negative, or line or column is nonpositive.
+     */
     public init(byteOffset: Int64, line: Int64, column: Int64) {
         if (byteOffset < 0) { throw IllegalArgumentException("byteOffset must not be negative") }
         if (line <= 0) { throw IllegalArgumentException("line must be positive") }
@@ -29,16 +47,34 @@ public struct JsonLocation {
     }
 }
 
-/// The single public exception type used for JSON data failures.
-///
-/// `code` and `path` are stable machine-readable fields. `path` is an RFC 6901
-/// JSON Pointer; the empty string identifies the root value. Message text is
-/// descriptive and is not a compatibility contract.
+/**
+ * Exception carrying a JSON failure code, path, and optional source position.
+ *
+ * Use code for programmatic error handling. path is an RFC 6901 JSON Pointer; the empty string denotes the root. Message text is descriptive, not a compatibility contract. I/O failures and custom-codec exceptions are not necessarily wrapped in this type.
+ */
 public open class JsonException <: Exception {
+    /**
+     * Machine-readable category for programmatic error handling.
+     */
     public let code: String
+    /**
+     * JSON Pointer for the failing value; the empty string denotes the root.
+     */
     public let path: String
+    /**
+     * Source position when known; None when no position is available.
+     */
     public let location: Option<JsonLocation>
 
+    /**
+     * Creates JsonException with the supplied values.
+     *
+     * @param message Human-readable diagnostic message; do not parse it for error handling.
+     * @param code Machine-readable error code; defaults to json_error.
+     * @param path JSON Pointer identifying the failing value; the empty string denotes the root.
+     * @param location Source position when available; None when no position is known.
+     * @throws IllegalArgumentException A nonempty path does not begin with a slash.
+     */
     public init(
         message: String,
         code!: String = "json_error",
@@ -52,6 +88,16 @@ public open class JsonException <: Exception {
         this.location = location
     }
 
+    /**
+     * Creates JsonException with the supplied values.
+     *
+     * @param message Human-readable diagnostic message; do not parse it for error handling.
+     * @param causedBy Original exception to retain as the cause.
+     * @param code Machine-readable error code; defaults to json_error.
+     * @param path JSON Pointer identifying the failing value; the empty string denotes the root.
+     * @param location Source position when available; None when no position is known.
+     * @throws IllegalArgumentException A nonempty path does not begin with a slash.
+     */
     public init(
         message: String,
         causedBy: Exception,
@@ -77,24 +123,67 @@ private func validateJsonExceptionPath(path: String): Unit {
     }
 }
 
+/**
+ * Policy for object fields not recognized by a typed codec.
+ *
+ * Ignore is the default; Reject requests an unknown-field error.
+ */
 public enum JsonUnknownFieldPolicy {
     Ignore | Reject
 }
 
+/**
+ * Policy for duplicate member names within a JSON object.
+ *
+ * Reject is the default. LastWins explicitly selects the last occurrence.
+ */
 public enum JsonDuplicateKeyPolicy {
     LastWins | Reject
 }
 
-/// Immutable options for parsing and decoding JSON.
+/**
+ * Immutable parsing and typed-decoding policies with bounded resource use.
+ *
+ * Defaults ignore unknown typed fields, reject duplicate object keys, and allow 64 MiB input, 16 MiB strings, 8 MiB captured-value buffers, and 256 nesting levels. All read budgets must be positive; zero does not mean unlimited.
+ */
 public class JsonReadOptions {
+    /**
+     * Policy for unknown object fields encountered during typed decoding.
+     */
     public let unknownFieldPolicy: JsonUnknownFieldPolicy
+    /**
+     * Policy for repeated member names in a JSON object.
+     */
     public let duplicateKeyPolicy: JsonDuplicateKeyPolicy
+    /**
+     * Maximum input size in bytes; must be positive.
+     */
     public let maxInputBytes: Int64
+    /**
+     * Maximum JSON string size in bytes; must be positive.
+     */
     public let maxStringBytes: Int64
+    /**
+     * Maximum captured-value buffer size in bytes; must be positive.
+     */
     public let maxBufferedValueBytes: Int64
+    /**
+     * Maximum permitted nesting depth; must be positive.
+     */
     public let maxDepth: Int64
     let defaultFastPath: Bool
 
+    /**
+     * Creates JsonReadOptions with the supplied values.
+     *
+     * @param unknownFieldPolicy Whether typed decoding ignores or rejects unknown object fields.
+     * @param duplicateKeyPolicy Whether duplicate object keys are rejected or the last value wins.
+     * @param maxInputBytes Positive input byte limit; defaults to 64 MiB.
+     * @param maxStringBytes Positive string byte limit; defaults to 16 MiB.
+     * @param maxBufferedValueBytes Positive captured-value buffer limit; defaults to 8 MiB.
+     * @param maxDepth Positive nesting-depth limit; defaults to 256.
+     * @throws IllegalArgumentException A read budget is zero or negative.
+     */
     public init(
         unknownFieldPolicy!: JsonUnknownFieldPolicy = JsonUnknownFieldPolicy.Ignore,
         duplicateKeyPolicy!: JsonDuplicateKeyPolicy = JsonDuplicateKeyPolicy.Reject,
@@ -126,8 +215,16 @@ public class JsonReadOptions {
             maxBufferedValueBytes == 8 * 1024 * 1024
     }
 
+    /**
+     * Shared immutable default configuration.
+     */
     public static let defaults: JsonReadOptions = JsonReadOptions()
 
+    /**
+     * Reports whether unknown typed fields are rejected.
+     *
+     * @return True when the corresponding policy is Reject.
+     */
     public func rejectsUnknownFields(): Bool {
         match (unknownFieldPolicy) {
             case Reject => true
@@ -135,6 +232,11 @@ public class JsonReadOptions {
         }
     }
 
+    /**
+     * Reports whether duplicate keys are rejected.
+     *
+     * @return True when the corresponding policy is Reject.
+     */
     public func rejectsDuplicateKeys(): Bool {
         match (duplicateKeyPolicy) {
             case Reject => true
@@ -223,10 +325,11 @@ func jsonStreamColumnAt(newlineOffsets: ArrayList<Int64>, offset: Int64): Int64 
     offset + 1
 }
 
-/// Immutable read contract shared by mutable DOM nodes and managed documents.
-///
-/// Implementations may use different storage layouts. A view keeps its owner
-/// alive and never exposes mutable backing storage.
+/**
+ * Read-only access to a JSON value, independent of its storage representation.
+ *
+ * Read-only access does not make a mutable JsonNode immutable or thread-safe. Managed document views retain their storage; resource-backed views remain subject to their owning backend document's lifetime. Use materialize for a detached mutable copy.
+ */
 public interface JsonValueView {
     func kind(): JsonKind
     func size(): Int64
@@ -244,6 +347,11 @@ public interface JsonValueView {
     func materialize(maxNodes: Int64): JsonNode
 }
 
+/**
+ * Base type for GC-managed JSON tree nodes.
+ *
+ * Arrays and objects can be modified. Parsing and writing honor their read and write options. deepCopy and materialize create detached trees rather than sharing mutable children. A JsonValueView of a mutable node does not provide a frozen snapshot.
+ */
 public abstract class JsonNode <: ToString & JsonValueView {
     public static prop nullValue: JsonNode {
         get() {
@@ -261,22 +369,47 @@ public abstract class JsonNode <: ToString & JsonValueView {
     public static func array(items: Array<JsonNode>): JsonArray { JsonArray(items) }
     public static func object(): JsonObject { JsonObject() }
 
+    /**
+     * Parses exactly one JSON document into a mutable tree.
+     *
+     * @param text One complete JSON document as a string.
+     * @param config Parsing policies and positive resource limits for this document.
+     * @return Parsed JSON node.
+     */
     public static func parse(text: String, config!: JsonReadOptions = JsonReadOptions.defaults): JsonNode {
         JsonParser(text, config: config).parse()
     }
 
-    /// Parses raw UTF-8 JSON without first materializing the complete input as
-    /// a String. String values and object keys are still materialized because
-    /// they are part of the public JsonNode representation.
+    /**
+     * Parses exactly one JSON document into a mutable tree.
+     *
+     * @param bytes One complete JSON document encoded as UTF-8 bytes.
+     * @param config Parsing policies and positive resource limits for this document.
+     * @return Parsed JSON node.
+     */
     public static func parse(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults): JsonNode {
         parseJsonValueFromBytes(bytes, config: config)
     }
 
+    /**
+     * Serializes this node as JSON text.
+     *
+     * @param options Read or write policies and resource limits for this call.
+     * @return JSON text.
+     */
     public func toJson(options!: JsonWriteOptions = JsonWriteOptions.defaults): String {
         freezeYJsonRuntime()
         writeJsonValueToString(this, options)
     }
 
+    /**
+     * Serializes this node to a caller-owned output stream.
+     *
+     * The stream is not closed. A failure may leave an already-written prefix.
+     *
+     * @param output Caller-owned output stream. This operation does not close it.
+     * @param options Read or write policies and resource limits for this call.
+     */
     public func writeJson(output: OutputStream,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit {
         freezeYJsonRuntime()
@@ -286,21 +419,46 @@ public abstract class JsonNode <: ToString & JsonValueView {
     public func kind(): JsonKind
     public func size(): Int64
 
-    /// Returns a detached JSON tree. Shared children are copied per occurrence.
-    /// Manual trees are limited to 256 levels and 100,000 visited nodes.
+    /**
+     * Creates a detached mutable copy of this tree.
+     *
+     * The operation is bounded to 256 levels and, unless maxNodes is supplied, 100,000 visited nodes.
+     *
+     * @return Detached tree.
+     */
     public func deepCopy(): JsonNode {
         deepCopyJsonNode(this)
     }
 
+    /**
+     * Creates a detached mutable copy of this tree.
+     *
+     * The operation is bounded to 256 levels and, unless maxNodes is supplied, 100,000 visited nodes.
+     *
+     * @return Detached tree.
+     */
     public func materialize(): JsonNode { deepCopyJsonNode(this) }
 
+    /**
+     * Creates a detached mutable copy of this tree.
+     *
+     * The operation is bounded to 256 levels and, unless maxNodes is supplied, 100,000 visited nodes.
+     *
+     * @param maxNodes Positive maximum number of nodes to copy.
+     * @return Detached tree.
+     */
     public func materialize(maxNodes: Int64): JsonNode {
         deepCopyJsonNode(this, maxNodes)
     }
 
-    /// JSON data-model equality. Numerically equal JSON numbers compare equal
-    /// even when their lexical representations differ. Manual trees use the
-    /// same 256-level and 100,000-node operation budget as deepCopy().
+    /**
+     * Compares JSON data-model equality, including numeric equality across different number spellings.
+     *
+     * The operation is bounded to 256 levels and, unless maxNodes is supplied, 100,000 visited nodes.
+     *
+     * @param other Tree to compare using JSON data-model equality.
+     * @return Whether the two trees are equivalent.
+     */
     public func equivalentTo(other: JsonNode): Bool {
         jsonNodesEquivalent(this, other)
     }

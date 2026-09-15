@@ -8,9 +8,11 @@ import yjson_algorithms.*
 @FastNative
 foreign func YJ_Schema_IdnaValidate(input: CPointer<UInt8>, length: Int64, asciiOnly: Int32): Int32
 
-/// Installs the internationalized hostname, email, URI, IRI, and URI Template formats.
-/// The hostname validators use the system libidn2 implementation of IDNA2008,
-/// including Punycode round-trip, Bidi, and ContextJ checks.
+/**
+ * Installs the internationalized hostname, email, URI, IRI, and URI Template formats.
+ * The hostname validators use the system libidn2 implementation of IDNA2008,
+ * including Punycode round-trip, Bidi, and ContextJ checks.
+ */
 public class StandardInternationalFormats <: JsonSchemaFormatProvider {
     public func installInto(registry: JsonSchemaFormatRegistry): Unit {
         registry.register("hostname", InternationalSchemaFormat("hostname"))

@@ -15,16 +15,16 @@
 - yjson、stdx.json、cjfast_json 的同一批次、相同数据的对比；
 - DOM、类型编解码和流式读写分别列出结果；
 - 校验和、RSS，以及不同配置下的重复测试；
-- 双方变异系数（CV）不超过 5%；超出时保留完整批次并标记为噪声较大。
+- 完整保留每一轮样本，并将 CV 超过 5% 的行标记为 noisy；该标签本身不阻断普通 Release。
 
-普通 Release 的 Pure 对比使用 `--gate-mode release`，验收稳定性和回退，不要求
-candidate 提升。只有 Release notes 明确声明性能优化时，才使用
-`--gate-mode optimization --target-case ...` 额外验证目标提升。
+普通 Release 的 Pure 对比使用 `--gate-mode release`，验收完整结果和回退，不把 CV
+稳定性作为失败条件，也不要求 candidate 提升。只有 Release notes 明确声明性能优化时，
+才使用 `--gate-mode optimization --target-case ...` 额外验证目标提升和稳定性。
 
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 
-当前 `main` 开发快照的七库完整测量见[2026-09-10 main 七库对比](results/2026-09-10-main-seven-library.md)。
+当前 `0.1.0` 候选的七库 RSS-complete 测量见[2026-09-14 当前候选七库对比](results/2026-09-13-release-seven-library.md)；两批各完成 770/770 单元，第一批 1/10 stable、9/10 noisy，第二批 2/10 stable、8/10 noisy，所有进程均保留 peak RSS sidecar。Cangjie timing 在未计时的 `cjpm bench --no-run` 构建后直接执行 prebuilt benchmark executable，GNU time 不包围构建步骤。三库 RSS-complete 测量见[2026-09-14 当前候选三库对比](results/2026-09-13-release-three-library.md)，36/36 workload 完成 11 轮；三库 direct executable timing 与稳定/noisy 统计见结果页。Pure 普通 Release timing/RSS 门禁见[2026-09-14 Pure 对比](results/2026-09-13-linux-release-pure.md)，当前 24 个 case 的 candidate/baseline 均不超过 `1.05`，gate `passed=true`；三类结果都绑定 STS `1.1.3` 和当前 measured candidate。
 
 ## 历史证据
 

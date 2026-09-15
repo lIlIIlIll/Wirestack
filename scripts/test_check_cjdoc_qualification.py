@@ -17,7 +17,7 @@ from check_cjdoc_qualification import CjdocQualificationError, validate_qualific
 
 class CjdocQualificationTest(unittest.TestCase):
     CJC_VERSION = (
-        "Cangjie Compiler: 1.1.0 (cjnative)\n"
+        "Cangjie Compiler: 1.1.3 (cjnative)\n"
         "Target: x86_64-unknown-linux-gnu"
     )
     CJPM_VERSION = "Cangjie Project Manager: 1.1.3"
@@ -52,7 +52,7 @@ class CjdocQualificationTest(unittest.TestCase):
             build_command = ["cjpm", "build"]
 
             cjc_channel = "sts"
-            cjc_version = "1.1.0"
+            cjc_version = "1.1.3"
 
             license_spdx = "MIT"
             license_url = "https://example.invalid/cjdoc/blob/{revision}/LICENSE"
@@ -140,7 +140,7 @@ class CjdocQualificationTest(unittest.TestCase):
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
     def test_rejects_non_sts_compiler(self, run: mock.Mock) -> None:
-        self.CJC_VERSION = "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)"
+        self.CJC_VERSION = "Cangjie Compiler: 1.1.3-alpha.20260829040003 (cjnative)"
         run.side_effect = self.qualified_commands
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)

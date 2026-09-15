@@ -11,10 +11,14 @@
 `release/public-cangjie-delta-bfd29.toml` 必须逐项覆盖快照的全部删除和新增声明。
 每条记录只能属于一个说明了理由的评审组；存在重复、漏项、`unclassified` 或尚未完成评审的组时，不得把发布图改为 `release-ready`。
 
-托管 CI 固定使用 Cangjie STS `1.1.0`。一个候选的所有托管 CI 任务必须使用同一
+托管 CI 固定使用 Cangjie STS `1.1.3`。一个候选的所有托管 CI 任务必须使用同一
 精确 SDK 版本，并在证据中记录解析出的版本和归档校验和。手工验证可以显式指定
 一个 STS SDK。API 参考文档按 `release/cjdoc-tool.toml` 使用 `cjdoc 0.7.2`，
 提交为 `fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0`。
+
+本次基线迁移只改变发布资格和托管 CI 使用的 SDK，不自动提高各包 manifest 的
+`cjc-version` 兼容性声明；包 manifest 的兼容性下限若要提高，必须单独完成公开
+兼容性评审。
 
 归档、二进制文件和 Action 版本必须通过仓库中的校验和/SHA 配置验证。
 
@@ -37,15 +41,19 @@
 13. cjdoc 源码验证、九包生成、已知限制清单、链接或可复现性检查失败。
 
 Pure 的普通 Release 验收使用 `json_pure_perf_compare.py --gate-mode release`：
-它要求结果稳定且没有超过政策阈值的回退，不要求 candidate 相对 baseline 提升。
+正式 `--enforce` 运行要求完整的 11 轮配对结果，且所有用例的 `candidate/baseline <= 1.05`；
+CV 只用于 stable/noisy 标签和性能声明精度，不作为普通 Release 的失败条件。
 只有 Release notes 明确宣称某项性能优化时，才额外使用
-`--gate-mode optimization --target-case ...` 验证该优化目标；优化目标未达标不应
-被误写成所有 Release 的通用性能失败。
+`--gate-mode optimization --target-case ...` 验证该优化目标；优化模式除 Release
+回退条件外还要求双方 CV 不超过 5%，目标用例达到指定提升并在 11 轮中至少赢 5 轮。
+优化目标未达标不应被误写成所有 Release 的通用性能失败。
 
-即使 CV 过高，也要保留并报告结果。Native 加速的正式检查使用 11 轮、固定 CPU、交替进程顺序；
-对外宣称加速的读写负载要求 `Native/Pure <= 0.95` 且至少赢 6/11，普通负载不得回退
-超过 5%，双方 CV 均不超过 5%。不稳定批次整体作废并完整重跑一次；第二批仍不稳定即不具备
-发布资格。
+即使 CV 过高，也要保留并报告结果；noisy 只表示不能发布精确性能比例。
+Native 加速的正式检查使用 11 轮、固定 CPU、交替进程顺序；对外宣称加速的读写负载
+要求 `Native/Pure <= 0.95` 且至少赢 6/11，普通负载不得回退超过 5%，双方 CV 均不超过
+5%。这些条件只决定 Native acceleration 性能声明是否成立；不稳定批次整体作废并完整重跑一次，
+第二批仍不稳定时不得发布该声明，但 noisy 本身不阻断普通 Release。只有 Release notes
+明确包含该加速声明时，才把这项 qualification 纳入该次发布的额外阻塞条件。
 
 ## 3. 记录各项检查结果
 

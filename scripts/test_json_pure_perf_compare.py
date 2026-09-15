@@ -3,8 +3,10 @@
 import importlib.util
 import pathlib
 import subprocess
+import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 SCRIPT = pathlib.Path(__file__).with_name("json_pure_perf_compare.py")
@@ -12,6 +14,37 @@ SPEC = importlib.util.spec_from_file_location("json_pure_perf_compare", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
+
+
+class RssCaptureTest(unittest.TestCase):
+    def test_gnu_time_rss_sidecar_is_parsed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text(
+                "\tMaximum resident set size (kbytes): 456\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(MODULE.parse_max_rss(path), 456)
+
+    def test_duplicate_gnu_time_rss_values_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "time-rss.txt"
+            path.write_text(
+                "Maximum resident set size (kbytes): 456\n"
+                "Maximum resident set size (kbytes): 457\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "expected one GNU time RSS"):
+                MODULE.parse_max_rss(path)
+
+    def test_summary_preserves_rss_inventory_and_peak(self) -> None:
+        result = MODULE.summarize(
+            {"case": [10.0, 12.0, 11.0]},
+            {"case": [100, 140, 120]},
+        )
+        self.assertEqual(result["case"]["rss_kb"], [100, 140, 120])
+        self.assertEqual(result["case"]["median_rss_kb"], 120)
+        self.assertEqual(result["case"]["max_rss_kb"], 140)
 
 
 class PurePerfProvenanceTest(unittest.TestCase):
@@ -174,6 +207,43 @@ class PurePerfGatePolicyTest(unittest.TestCase):
         self.assertIsNone(gates["targets_meet_improvement_and_5_of_11_wins"])
         self.assertTrue(gates["passed"])
 
+    def test_release_mode_does_not_require_stability(self) -> None:
+        self.baseline["target"]["cv_percent"] = 20.0
+        self.candidate["ordinary"]["cv_percent"] = 30.0
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "release",
+            (),
+            None,
+        )
+        self.assertFalse(gates["stability_gate_required"])
+        self.assertFalse(gates["both_cv_at_most_5_percent"])
+        self.assertTrue(gates["passed"])
+
+    def test_optimization_mode_still_requires_stability(self) -> None:
+        self.comparisons["target"].update({
+            "improvement_percent": 5.0,
+            "candidate_wins": 5,
+        })
+        self.baseline["target"]["cv_percent"] = 6.0
+        self.candidate["target"]["cv_percent"] = 6.0
+        gates = MODULE.evaluate_gates(
+            self.cases,
+            self.comparisons,
+            self.baseline,
+            self.candidate,
+            "optimization",
+            ("target",),
+            5.0,
+        )
+        self.assertTrue(gates["stability_gate_required"])
+        self.assertFalse(gates["both_cv_at_most_5_percent"])
+        self.assertFalse(gates["passed"])
+
+
     def test_optimization_mode_requires_target_improvement(self) -> None:
         gates = MODULE.evaluate_gates(
             self.cases,
@@ -210,6 +280,21 @@ class PurePerfGatePolicyTest(unittest.TestCase):
             SystemExit, "optimization requires at least one --target-case"
         ):
             MODULE.resolve_target_improvement_percent("optimization", (), None)
+
+    def test_rebuild_option_is_parsed(self) -> None:
+        argv = [
+            "json_pure_perf_compare.py",
+            "--baseline", "/tmp/baseline",
+            "--candidate", "/tmp/candidate",
+            "--corpus", "/tmp/corpus",
+            "--output", "/tmp/output",
+            "--rebuild",
+            "--cpu", "2",
+        ]
+        with mock.patch.object(sys, "argv", argv):
+            args = MODULE.parse_args()
+        self.assertTrue(args.rebuild)
+        self.assertEqual(args.cpu, 2)
 
 
 if __name__ == "__main__":
