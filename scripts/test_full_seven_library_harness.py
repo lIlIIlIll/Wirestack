@@ -141,6 +141,52 @@ class CjfastSummaryRssTest(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "no duration samples found for Case"):
                 CJFAST_SUMMARY.load_report(root, "exactCase")
+    def test_analyze_rejects_reused_rss_sidecar(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            write_cangjie_csv(
+                root / "reports" / "bench-1.csv",
+                [("exactCase", 1, 2000.0, "ns", "Duration")],
+            )
+            rss_path = root / "rss/time-rss.txt"
+            rss_path.parent.mkdir()
+            rss_path.write_text(
+                "\tMaximum resident set size (kbytes): 654\n",
+                encoding="utf-8",
+            )
+            fieldnames = [
+                "round",
+                "workload",
+                "library",
+                "scenario",
+                "operation",
+                "payload",
+                "input_kind",
+                "source_case",
+                "report_path",
+                "rss_path",
+                "max_rss_kb",
+            ]
+            with (root / "manifest.csv").open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=fieldnames)
+                writer.writeheader()
+                for library in ("yjson", "stdx_json"):
+                    writer.writerow({
+                        "round": "1",
+                        "workload": "case",
+                        "library": library,
+                        "scenario": "decode",
+                        "operation": "decode",
+                        "payload": "small",
+                        "input_kind": "bytes",
+                        "source_case": "exactCase",
+                        "report_path": "reports",
+                        "rss_path": "rss/time-rss.txt",
+                        "max_rss_kb": "654",
+                    })
+            with self.assertRaisesRegex(ValueError, "RSS sidecar path reused"):
+                CJFAST_SUMMARY.analyze(root, 1)
+
 
 
     def test_timed_command_uses_exact_case_on_binary(self) -> None:

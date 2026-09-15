@@ -21,7 +21,7 @@ RSS_RE = re.compile(
 )
 
 
-def load_max_rss(root: Path, raw_path: str) -> int:
+def resolve_rss_path(root: Path, raw_path: str) -> Path:
     relative = Path(raw_path)
     if (
         relative.is_absolute()
@@ -34,6 +34,10 @@ def load_max_rss(root: Path, raw_path: str) -> int:
         path.relative_to(root.resolve())
     except ValueError as error:
         raise ValueError(f"RSS path escapes result root: {raw_path!r}") from error
+    return path
+
+
+def _read_max_rss(path: Path) -> int:
     matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
     if len(matches) != 1:
         raise ValueError(f"expected one GNU time RSS value in {path}, found {len(matches)}")
@@ -41,6 +45,11 @@ def load_max_rss(root: Path, raw_path: str) -> int:
     if value <= 0:
         raise ValueError(f"GNU time RSS value must be positive in {path}")
     return value
+
+
+def load_max_rss(root: Path, raw_path: str) -> int:
+    return _read_max_rss(resolve_rss_path(root, raw_path))
+
 
 LIBRARIES = ("yjson", "stdx_json", "cjfast_json")
 PEERS = ("stdx_json", "cjfast_json")
@@ -134,6 +143,7 @@ def analyze(root: Path, min_runs: int) -> list[dict[str, object]]:
     samples: dict[tuple[str, str], dict[int, list[float]]] = defaultdict(dict)
     rss_samples: dict[tuple[str, str], dict[int, int]] = defaultdict(dict)
     metadata: dict[str, dict[str, str]] = {}
+    seen_rss_paths: dict[Path, tuple[str, str, int]] = {}
     with (root / "manifest.csv").open(newline="", encoding="utf-8") as stream:
         reader = csv.DictReader(stream)
         required = {"round", "workload", "library", "report_path", "rss_path", "max_rss_kb"}
@@ -144,10 +154,20 @@ def analyze(root: Path, min_runs: int) -> list[dict[str, object]]:
             workload = row["workload"]
             library = row["library"]
             round_id = int(row["round"])
+            rss_path = resolve_rss_path(root, row["rss_path"])
+            previous = seen_rss_paths.get(rss_path)
+            if previous is not None:
+                previous_workload, previous_library, previous_round = previous
+                raise ValueError(
+                    f"RSS sidecar path reused for {workload}/{library}/round {round_id}; "
+                    f"already used by {previous_workload}/{previous_library}/round "
+                    f"{previous_round}: {row['rss_path']}"
+                )
+            seen_rss_paths[rss_path] = (workload, library, round_id)
             recorded_rss = int(row["max_rss_kb"])
             if recorded_rss <= 0:
                 raise ValueError(f"RSS must be positive: {workload}/{library}/round {round_id}")
-            measured_rss = load_max_rss(root, row["rss_path"])
+            measured_rss = _read_max_rss(rss_path)
             if recorded_rss != measured_rss:
                 raise ValueError(
                     f"manifest RSS differs from sidecar: {workload}/{library}/round {round_id}"
