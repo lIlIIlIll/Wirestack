@@ -1,0 +1,157 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 1959804878 ns, RESULT:
+    TCS: HttpAutomaticHttpsClientTest, time elapsed: 7666656 ns, RESULT:
+    [ PASSED ] CASE: h2NegotiationMultiplexesTenRequestsOnOneTlsConnection (3824670 ns)
+    [ PASSED ] CASE: http11NegotiationFallsBackAndReusesTheAdoptedConnection (2675907 ns)
+    TCS: Http1ChunkedCodecTest, time elapsed: 1610716 ns, RESULT:
+    [ PASSED ] CASE: decoderStreamsDataExtensionsTrailersAndRemainder (120416 ns)
+    [ PASSED ] CASE: decoderHandlesEveryBoundaryOneByteAtATime (58546 ns)
+    [ PASSED ] CASE: encoderProducesCanonicalChunksAndBoundedTrailers (61324 ns)
+    [ PASSED ] CASE: rejectsInvalidSizeExtensionAndTerminators (56001 ns)
+    [ PASSED ] CASE: enforcesBodyChunkLineAndTrailerBounds (51919 ns)
+    [ PASSED ] CASE: streamingResponseKeepsEachChunkBoundedWithoutALifetimeCeiling (134084 ns)
+    [ PASSED ] CASE: rejectsForbiddenOrFoldedTrailers (61095 ns)
+    [ PASSED ] CASE: eofAndPostCompletionUseFailClosedStates (49784 ns)
+    [ PASSED ] CASE: decodeBatchesOwnDataAndRemainingBytes (33849 ns)
+    TCS: Http1ClientConnectionTest, time elapsed: 25626619 ns, RESULT:
+    [ PASSED ] CASE: expectContinueWaitsForApprovalBeforeOpeningBody (828544 ns)
+    [ PASSED ] CASE: finalRejectionBeforeContinueNeverOpensRequestBody (551199 ns)
+    [ PASSED ] CASE: continueWaitTimeoutSendsBodyUnderTheOriginalBudget (19210004 ns)
+    [ PASSED ] CASE: serializesRequestsUntilBodyEofThenReusesConnection (1317717 ns)
+    [ PASSED ] CASE: earlyBodyCloseClosesInsteadOfReturningConnectionForReuse (904403 ns)
+    [ PASSED ] CASE: connectionCloseResponseIsNeverReusableAfterEof (1091404 ns)
+    TCS: Http1CleartextClientTest, time elapsed: 2794897 ns, RESULT:
+    [ PASSED ] CASE: resolvesConnectsAndReusesOnlyAfterBodyCompletion (2204166 ns)
+    [ PASSED ] CASE: rejectsHttpsBeforeDnsOrPoolMutation (128058 ns)
+    TCS: Http1ConnectionPoolTest, time elapsed: 4105445 ns, RESULT:
+    [ PASSED ] CASE: emitsSecretFreeAcquireAndReleaseLifecycle (425732 ns)
+    [ PASSED ] CASE: reusesOnlyTheSameCompleteKey (395894 ns)
+    [ PASSED ] CASE: enforcesTotalPerKeyIdleAndWaiterBounds (748649 ns)
+    [ PASSED ] CASE: activeWaitHonorsCancellationAndReleasesWaiterSlot (515127 ns)
+    [ PASSED ] CASE: evictsExpiredAndClosedConnectionsInsteadOfReusingThem (475415 ns)
+    [ PASSED ] CASE: failedCreationRollsBackItsCapacityReservation (514424 ns)
+    TCS: Http1HeadParserTest, time elapsed: 1934581 ns, RESULT:
+    [ PASSED ] CASE: requestParsesIncrementallyAndReturnsBodyRemainder (155619 ns)
+    [ PASSED ] CASE: oneFeedRetainsBytesAfterTheHead (67039 ns)
+    [ PASSED ] CASE: responseParsesStatusReasonHeadersAndFraming (96308 ns)
+    [ PASSED ] CASE: acceptsOriginAbsoluteAuthorityAndAsteriskFormsOnlyWhereValid (225487 ns)
+    [ PASSED ] CASE: rejectsBareLfObsFoldAndInvalidHeaderSyntax (107189 ns)
+    [ PASSED ] CASE: requiresOneValidHostAndMatchingAbsoluteAuthority (218761 ns)
+    [ PASSED ] CASE: rejectsInvalidTargetVersionAndBoundViolations (110211 ns)
+    [ PASSED ] CASE: completedParserCannotBeReused (74743 ns)
+    TCS: Http2Streams1BenchmarkTest, time elapsed: 15790900 ns, RESULT:
+    [ PASSED ] CASE: benchmarkOneConcurrentStream (15552850 ns)
+    TCS: Http2Streams10BenchmarkTest, time elapsed: 121359850 ns, RESULT:
+    [ PASSED ] CASE: benchmarkTenConcurrentStreams (121069098 ns)
+    TCS: Http2Streams100BenchmarkTest, time elapsed: 1422839612 ns, RESULT:
+    [ PASSED ] CASE: benchmarkHundredConcurrentStreams (1422502952 ns)
+    TCS: Http1HundredConnectionBaselineTest, time elapsed: 43474268 ns, RESULT:
+    [ PASSED ] CASE: benchmarkHundredConcurrentConnections (43163720 ns)
+    TCS: Http2ConnectionPoolTest, time elapsed: 3405505 ns, RESULT:
+    [ PASSED ] CASE: alpnPrefersH2AndFallsBackOnlyToHttp11 (50082 ns)
+    [ PASSED ] CASE: oneConnectionIsSharedUntilPeerStreamCapacityIsFull (395877 ns)
+    [ PASSED ] CASE: concurrentFirstUseDoesNotCreateAConnectionStampede (657123 ns)
+    [ PASSED ] CASE: newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted (82143 ns)
+    [ PASSED ] CASE: closeRacingUnpublishedAdmissionReleasesConnectionOwners (485293 ns)
+    [ PASSED ] CASE: completeSecurityKeyPreventsCrossContextReuse (88568 ns)
+    [ PASSED ] CASE: drainingConnectionRetainsExistingStreamButReceivesNoNewLease (117567 ns)
+    [ PASSED ] CASE: drainingConnectionWaitsForNonLocalOwnersBeforeDiscard (84149 ns)
+    [ PASSED ] CASE: fullBoundedPoolHonorsOneCallerDeadline (59747 ns)
+    [ PASSED ] CASE: poolCloseAbortsEverySharedConnectionExactlyOnce (60513 ns)
+    TCS: Http1FramingTest, time elapsed: 1727065 ns, RESULT:
+    [ PASSED ] CASE: requestUsesOneSharedEmptyLengthOrChunkedDecision (70690 ns)
+    [ PASSED ] CASE: identicalContentLengthsAreAcceptedAcrossFieldsAndLists (34262 ns)
+    [ PASSED ] CASE: conflictingOrInvalidContentLengthsAreRejected (111872 ns)
+    [ PASSED ] CASE: contentLengthAndTransferEncodingNeverCoexist (81987 ns)
+    [ PASSED ] CASE: ambiguousTransferEncodingIsRejected (246224 ns)
+    [ PASSED ] CASE: responseHandlesHeadStatusesConnectAndCloseDelimiting (169695 ns)
+    [ PASSED ] CASE: bodylessAndSuccessfulConnectResponsesRejectFramingFields (146613 ns)
+    TCS: HttpConnectionPoolKeyTest, time elapsed: 672177 ns, RESULT:
+    [ PASSED ] CASE: canonicalOriginProducesStableEqualityAndHash (33162 ns)
+    [ PASSED ] CASE: everySecurityAndRouteDimensionPartitionsReuse (50268 ns)
+    [ PASSED ] CASE: refusesIncompletePartitionIdentities (28574 ns)
+    TCS: Http1ProxyClientPipelineTest, time elapsed: 5962206 ns, RESULT:
+    [ PASSED ] CASE: dynamicConnectCredentialsNeverReuseAnAuthenticatedTunnel (3283000 ns)
+    [ PASSED ] CASE: rejectedConnectDrainsClosesAndReturnsStructuredNonRetryableFailure (2179067 ns)
+    TCS: Http1RequestWriterTest, time elapsed: 5192102 ns, RESULT:
+    [ PASSED ] CASE: twoStageWriterDoesNotOpenBodyBeforeExplicitCommit (1620097 ns)
+    [ PASSED ] CASE: writesFixedBodyThroughPartialTransportOperations (496191 ns)
+    [ PASSED ] CASE: streamsUnknownLengthBodyAsCanonicalChunks (487917 ns)
+    [ PASSED ] CASE: rejectsDeclaredMismatchBeforeWritingAnything (288368 ns)
+    [ PASSED ] CASE: prematureBodyEofRetainsPartialCommitEvidence (525181 ns)
+    [ PASSED ] CASE: emptyFramingProbesSourceInsteadOfDroppingUnexpectedBytes (98438 ns)
+    TCS: Http1ResponseReaderTest, time elapsed: 6279339 ns, RESULT:
+    [ PASSED ] CASE: explicitUpgradeTransfersOnlyAMatching101Protocol (507318 ns)
+    [ PASSED ] CASE: mismatchedUpgradeResponseFailsClosed (464573 ns)
+    [ PASSED ] CASE: explicitConnectTransfersBufferedTunnelBytesAndTransportOwnership (565247 ns)
+    [ PASSED ] CASE: failedConnectRemainsAnHttpResponseAndClosesAfterBody (439666 ns)
+    [ PASSED ] CASE: readsInterimAndFixedResponseWithoutBufferingTheBody (380697 ns)
+    [ PASSED ] CASE: received4xxAnd5xxRemainHttpResponses (642956 ns)
+    [ PASSED ] CASE: decodesChunkedResponseAndPublishesTrailerAtEof (398487 ns)
+    [ PASSED ] CASE: closeDelimitedBodyCompletesOnlyAtTransportEof (293545 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (364377 ns)
+    [ PASSED ] CASE: prematureFixedBodyEofAbandonsResponseExactlyOnce (348536 ns)
+    [ PASSED ] CASE: rejectsImplicitUpgradeAndConnectTransportTransfer (615971 ns)
+    TCS: Http1SerializerTest, time elapsed: 1632829 ns, RESULT:
+    [ PASSED ] CASE: clientRequestAddsHostAndUsesOriginForm (84709 ns)
+    [ PASSED ] CASE: forwardProxyRequestUsesAbsoluteFormAndOriginHost (81657 ns)
+    [ PASSED ] CASE: requestPreservesOrderedMultipleFieldsAndLengthFraming (71593 ns)
+    [ PASSED ] CASE: requestRejectsMissingDuplicateOrMismatchedHost (66797 ns)
+    [ PASSED ] CASE: responseSerializesStatusAndUsesSharedFraming (54955 ns)
+    [ PASSED ] CASE: responseRejectsInjectionAndForbiddenBodyFraming (75764 ns)
+    [ PASSED ] CASE: writerHandlesPartialTransportWritesUnderOneContext (174001 ns)
+    [ PASSED ] CASE: serializedBytesAreDefensiveCopies (86720 ns)
+    TCS: Http1ServerConnectionTest, time elapsed: 5993728 ns, RESULT:
+    [ PASSED ] CASE: serializesTwoKeepAliveExchanges (2159808 ns)
+    [ PASSED ] CASE: unreadRequestBodyForcesConnectionCloseAfterResponse (538498 ns)
+    [ PASSED ] CASE: handlerFailureProducesBounded500AndCloses (633952 ns)
+    [ PASSED ] CASE: rejectedHandoffReleasesSessionOwnershipExactlyOnce (1205663 ns)
+    [ PASSED ] CASE: selectedUpgradeOfferTransfersBufferedSessionBytes (629242 ns)
+    TCS: Http1ServerRequestReaderTest, time elapsed: 17804016 ns, RESULT:
+    [ PASSED ] CASE: streamsFixedRequestBodyWithoutReadingPastItsLength (634355 ns)
+    [ PASSED ] CASE: rejectsOversizedFixedRequestBeforeReadingItsBody (468898 ns)
+    [ PASSED ] CASE: decodesChunkedRequestAndPublishesTrailer (1138036 ns)
+    [ PASSED ] CASE: sendsContinueOnlyWhenHandlerStartsReadingTheBody (12986417 ns)
+    [ PASSED ] CASE: rejectingWithoutReadingNeverSendsContinue (1133963 ns)
+    TCS: Http1ServerTest, time elapsed: 27710507 ns, RESULT:
+    [ PASSED ] CASE: shutdownAbortsConnectionBlockedInsideTlsHandshake (7192922 ns)
+    [ PASSED ] CASE: acceptSideTlsHookOwnsConnectionAndClosesAfterShutdown (639419 ns)
+    [ PASSED ] CASE: gracefulShutdownStopsAcceptAfterCompletedConnection (473955 ns)
+    [ PASSED ] CASE: expiredShutdownAbortsBlockedConnectionAndReturnsBoundedly (8441541 ns)
+    [ PASSED ] CASE: connectionLimitPreventsSecondAcceptUntilCapacityReturns (9876946 ns)
+    TCS: Http1ServerResponseWriterTest, time elapsed: 2603835 ns, RESULT:
+    [ PASSED ] CASE: writesFixedResponseThroughPartialTransportOperations (332272 ns)
+    [ PASSED ] CASE: streamsChunkedResponseAndTrailer (411962 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (379155 ns)
+    [ PASSED ] CASE: headResponseNeverTransfersRepresentationBytes (106024 ns)
+    [ PASSED ] CASE: closeDelimitedResponseRequiresConnectionClose (526502 ns)
+    [ PASSED ] CASE: rejectsKnownLengthMismatchBeforeCommittingHead (107612 ns)
+    TCS: Http1SmugglingCorpusTest, time elapsed: 81809464 ns, RESULT:
+    [ PASSED ] CASE: clientAndServerFramingRejectTheSameAmbiguousHeaderCorpus (1840954 ns)
+    [ PASSED ] CASE: identicalLengthsAndOneFinalChunkedCodingRemainUnambiguous (540044 ns)
+    [ PASSED ] CASE: rejectsWhitespaceTargetAndProxyDifferentialCorpus (514725 ns)
+    [ PASSED ] CASE: rejectsMalformedChunkAndTrailerCorpusAtInputOrEof (142045 ns)
+    [ PASSED ] CASE: everyAcceptedSingleByteMutationHasACanonicalReparse (70795938 ns)
+    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (2562895 ns)
+    [ PASSED ] CASE: validHeadParsesAtEveryTransportSplitBoundary (4104487 ns)
+    TCS: Http1HttpsClientTest, time elapsed: 2344532 ns, RESULT:
+    [ PASSED ] CASE: partitionsHandshakesAndReusesHttpsAfterBodyCompletion (1559608 ns)
+    [ PASSED ] CASE: zeroLengthConnectionCloseDoesNotWaitForTlsPeerShutdown (538060 ns)
+    TCS: Http1TlsServerTest, time elapsed: 146560707 ns, RESULT:
+    [ PASSED ] CASE: alpnServerRejectsAClientWithNoSharedHttpProtocol (55666303 ns)
+    [ PASSED ] CASE: automaticClientOffersH2FirstAndFallsBackToServerHttp11 (36927979 ns)
+    [ PASSED ] CASE: requiredMutualTlsCarriesAuthenticatedHttp1Exchange (29239068 ns)
+    [ PASSED ] CASE: realAwsLcHandshakeCarriesOneHttp1Exchange (23552131 ns)
+Summary: TOTAL: 121
+    PASSED: 118, SKIPPED: 3, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 1963261150 ns, RESULT:
+TP: wirestack.*, time elapsed: 1963195303 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http1, time elapsed: 1959804878 ns
+Summary: TOTAL: 121
+    PASSED: 118, SKIPPED: 3, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

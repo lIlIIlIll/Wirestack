@@ -1,0 +1,82 @@
+{
+  "kind": "architecture-guard",
+  "ok": false,
+  "root": "<repo-root>",
+  "schema_version": 1,
+  "status": "FAIL",
+  "violation_count": 9,
+  "violations": [
+    {
+      "column": 17,
+      "excerpt": "copied_artifact[\"digest\"][\"sha256\"] != artifact_digest",
+      "line": 852,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m7_022_linux_release_soak.py",
+      "rule": "untyped-evidence-digest-comparison"
+    },
+    {
+      "column": 20,
+      "excerpt": "or identities[\"artifact\"][\"digest\"][\"sha256\"] != artifact_digest",
+      "line": 853,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m7_022_linux_release_soak.py",
+      "rule": "untyped-evidence-digest-comparison"
+    },
+    {
+      "column": 19,
+      "excerpt": "\"sha256\": evidence_digest.artifact_bytes_sha256(provider_archive_raw),",
+      "line": 147,
+      "message": "Text evidence must not enter the artifact byte-digest domain.",
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "rule": "text-evidence-byte-digest"
+    },
+    {
+      "column": 19,
+      "excerpt": "\"sha256\": evidence_digest.artifact_bytes_sha256(resolver_archive_raw),",
+      "line": 163,
+      "message": "Text evidence must not enter the artifact byte-digest domain.",
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "rule": "text-evidence-byte-digest"
+    },
+    {
+      "column": 13,
+      "excerpt": "require(digest.artifact_byte_sha256(ARTIFACT) == qualification[\"artifact\"][\"sha256\"], \"qualified artifact changed\")",
+      "line": 185,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m8_007_final_release.py",
+      "rule": "untyped-evidence-digest-comparison"
+    },
+    {
+      "column": 17,
+      "excerpt": "digest.artifact_byte_sha256(ARTIFACT) == expected[\"sha256\"],",
+      "line": 208,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m8_007_final_release.py",
+      "rule": "untyped-evidence-digest-comparison"
+    },
+    {
+      "column": 17,
+      "excerpt": "digest.artifact_byte_sha256(downloaded) == expected[\"sha256\"],",
+      "line": 222,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m8_007_final_release.py",
+      "rule": "untyped-evidence-digest-comparison"
+    },
+    {
+      "column": 13,
+      "excerpt": "result[\"manifest_sha256\"] == digest.text_evidence_sha256(ROOT / result[\"manifest\"]), \"fuzz manifest changed\")",
+      "line": 266,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m8_007_final_release.py",
+      "rule": "untyped-evidence-digest-comparison"
+    },
+    {
+      "column": 13,
+      "excerpt": "require(result[\"source_sha256\"] == fuzz.source_fingerprint(ROOT), \"fuzz parser sources changed\")",
+      "line": 267,
+      "message": "Repository evidence digests must be parsed into a typed domain before comparison.",
+      "path": "tools/m8_007_final_release.py",
+      "rule": "untyped-evidence-digest-comparison"
+    }
+  ]
+}

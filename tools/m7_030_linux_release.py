@@ -130,6 +130,11 @@ def _strict_digest(value: Any, field: str) -> str:
 def build_release_manifest(
     artifact: Path = ARTIFACT,
     supply_chain: Path = SUPPLY_CHAIN,
+    *,
+    task_id: str = TASK_ID,
+    workflow: str = WORKFLOW,
+    qualified_inputs: Sequence[Path] = (),
+    root: Path = ROOT,
 ) -> dict[str, Any]:
     provider = load_json(supply_chain / "provider-manifest.json")
     fingerprint = load_json(supply_chain / "build-fingerprint.json")
@@ -155,7 +160,7 @@ def build_release_manifest(
             "SUPPLY_CHAIN_INVALID", "provider identity")
     manifest = {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": task_id,
         "release": {
             "name": package["name"],
             "version": package["version"],
@@ -196,19 +201,46 @@ def build_release_manifest(
             "offline": "openssh-ed25519-detached",
             "namespace": NAMESPACE,
             "repository": REPOSITORY,
-            "workflow": WORKFLOW,
+            "workflow": workflow,
             "requiredSubjects": ["artifact", "sbom", "release-manifest"],
             "runtimeFallback": False,
         },
     }
-    validate_release_manifest(manifest)
+    if qualified_inputs:
+        entries = {}
+        for path in qualified_inputs:
+            try:
+                relative = path.resolve().relative_to(root.resolve()).as_posix()
+            except ValueError as error:
+                raise ReleaseError("PATH_UNSAFE", str(path)) from error
+            require(relative not in entries, "MANIFEST_SOURCE", f"duplicate input: {relative}")
+            entries[relative] = evidence_digest.text_evidence_digest(path).to_json()
+        manifest["schemaVersion"] = 2
+        manifest["qualifiedInputs"] = entries
+    validate_release_manifest(manifest, task_id=task_id, workflow=workflow)
     return manifest
 
 
-def validate_release_manifest(manifest: Mapping[str, Any]) -> None:
-    _strict_keys(manifest, MANIFEST_KEYS, "MANIFEST_SCHEMA")
-    require(manifest["schemaVersion"] == SCHEMA_VERSION, "MANIFEST_SCHEMA", "version")
-    require(manifest["taskId"] == TASK_ID, "MANIFEST_TASK", str(manifest["taskId"]))
+def validate_release_manifest(
+    manifest: Mapping[str, Any], *, task_id: str = TASK_ID, workflow: str = WORKFLOW
+) -> None:
+    version = manifest.get("schemaVersion")
+    require(type(version) is int and version in {1, 2}, "MANIFEST_SCHEMA", "version")
+    _strict_keys(manifest, MANIFEST_KEYS | ({"qualifiedInputs"} if version == 2 else set()), "MANIFEST_SCHEMA")
+    if version == 2:
+        inputs = manifest["qualifiedInputs"]
+        require(isinstance(inputs, dict) and bool(inputs), "MANIFEST_SOURCE", "qualified inputs")
+        for relative, value in inputs.items():
+            require(isinstance(relative, str), "PATH_UNSAFE", "qualified input")
+            path = PurePosixPath(relative)
+            require(not path.is_absolute() and ".." not in path.parts and
+                    path.as_posix() == relative and "\\" not in relative and relative != ".",
+                    "PATH_UNSAFE", relative)
+            require(isinstance(value, dict), "MANIFEST_SOURCE", relative)
+            _strict_keys(value, {"domain", "sha256"}, "MANIFEST_SOURCE")
+            require(value["domain"] == "text-utf8-lf-v1", "MANIFEST_SOURCE", relative)
+            _strict_digest(value["sha256"], relative)
+    require(manifest["taskId"] == task_id, "MANIFEST_TASK", str(manifest["taskId"]))
     release = manifest["release"]
     target = manifest["target"]
     provider = manifest["provider"]
@@ -255,7 +287,7 @@ def validate_release_manifest(manifest: Mapping[str, Any]) -> None:
                         subject["sha256"], subject["signedPayloadSha256"]),
                     "MANIFEST_SUBJECT", "artifact digest domains must agree")
     require(names == {"artifact", "sbom"}, "MANIFEST_SUBJECTS", "incomplete")
-    require(policy.get("repository") == REPOSITORY and policy.get("workflow") == WORKFLOW,
+    require(policy.get("repository") == REPOSITORY and policy.get("workflow") == workflow,
             "MANIFEST_POLICY", "signer identity")
     require(policy.get("requiredSubjects") == ["artifact", "sbom", "release-manifest"],
             "MANIFEST_POLICY", "required subjects")

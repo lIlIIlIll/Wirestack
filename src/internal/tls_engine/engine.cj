@@ -2010,8 +2010,11 @@ public class TlsEnginePump {
     private let ciphertextChunkSize: Int64
     private var readScratch = None<TlsPumpScratch>
     private var writeScratch = None<TlsPumpScratch>
-    private let transportReadMutex = Mutex()
-    private let transportWriteMutex = Mutex()
+    private let readScratchMutex = Mutex()
+    private let writeScratchMutex = Mutex()
+    private let readAdmission = TlsPumpAdmission()
+    private let writeAdmission = TlsPumpAdmission()
+    private let terminal = AtomicBool(false)
 
     public init(ciphertextChunkSize!: Int64 = 16 * 1024) {
         if (ciphertextChunkSize <= 0 || ciphertextChunkSize > 64 * 1024) {
@@ -2022,12 +2025,23 @@ public class TlsEnginePump {
 
     /** Drops data-plane scratch storage while the connection is idle. */
     internal func releaseIdleBuffers(): Unit {
-        synchronized(transportReadMutex) { readScratch = None<TlsPumpScratch> }
-        synchronized(transportWriteMutex) { writeScratch = None<TlsPumpScratch> }
+        synchronized(readScratchMutex) { readScratch = None<TlsPumpScratch> }
+        synchronized(writeScratchMutex) { writeScratch = None<TlsPumpScratch> }
+    }
+
+    /**
+     * Stops new transport admission and wakes callers waiting behind active I/O.
+     * The connection closes or aborts the transport separately to interrupt the
+     * operation that already owns an admission.
+     */
+    internal func requestTerminal(): Unit {
+        terminal.store(true)
+        readAdmission.terminate()
+        writeAdmission.terminate()
     }
 
     private func takeReadScratch(): TlsPumpScratch {
-        synchronized(transportReadMutex) {
+        synchronized(readScratchMutex) {
             match (readScratch) {
                 case Some(value) => readScratch = None<TlsPumpScratch>; value
                 case None => TlsPumpScratch(ciphertextChunkSize)
@@ -2036,13 +2050,14 @@ public class TlsEnginePump {
     }
 
     private func returnReadScratch(value: TlsPumpScratch): Unit {
-        synchronized(transportReadMutex) {
-            if (readScratch.isNone()) { readScratch = Some(value) }
+        if (terminal.load()) { return }
+        synchronized(readScratchMutex) {
+            if (!terminal.load() && readScratch.isNone()) { readScratch = Some(value) }
         }
     }
 
     private func takeWriteScratch(): TlsPumpScratch {
-        synchronized(transportWriteMutex) {
+        synchronized(writeScratchMutex) {
             match (writeScratch) {
                 case Some(value) => writeScratch = None<TlsPumpScratch>; value
                 case None => TlsPumpScratch(ciphertextChunkSize)
@@ -2051,8 +2066,9 @@ public class TlsEnginePump {
     }
 
     private func returnWriteScratch(value: TlsPumpScratch): Unit {
-        synchronized(transportWriteMutex) {
-            if (writeScratch.isNone()) { writeScratch = Some(value) }
+        if (terminal.load()) { return }
+        synchronized(writeScratchMutex) {
+            if (!terminal.load() && writeScratch.isNone()) { writeScratch = Some(value) }
         }
     }
 
@@ -2068,7 +2084,7 @@ public class TlsEnginePump {
         let input = Array<Byte>(handshakeChunkSize, repeat: 0)
         let output = Array<Byte>(handshakeChunkSize, repeat: 0)
         while (true) {
-            checkTlsOperationContext(context)
+            checkTlsPumpContext(context, terminal)
             let step = engine.handshakeStep()
             match (engine) {
                 case logging: HandshakeKeyLoggingTlsEngine =>
@@ -2083,7 +2099,7 @@ public class TlsEnginePump {
                             logging.finishHandshakeKeyLogging()
                         case _ => ()
                     }
-                    checkTlsOperationContext(context)
+                    checkTlsPumpContext(context, terminal)
                     return
                 case TlsEngineStep.WantWrite =>
                     if (flushed == 0) {
@@ -2137,7 +2153,7 @@ public class TlsEnginePump {
         let scratch = takeReadScratch()
         try {
             while (true) {
-                checkTlsOperationContext(context)
+                checkTlsPumpContext(context, terminal)
                 let result = engine.readPlaintext(destination)
                 let flushed = flushCiphertext(engine, transport, scratch.output, context)
                 match (result) {
@@ -2173,7 +2189,7 @@ public class TlsEnginePump {
         let scratch = takeWriteScratch()
         try {
             while (true) {
-                checkTlsOperationContext(context)
+                checkTlsPumpContext(context, terminal)
                 let result = engine.writePlaintext(source)
                 let flushed = flushCiphertext(engine, transport, scratch.output, context)
                 match (result) {
@@ -2211,7 +2227,7 @@ public class TlsEnginePump {
         let input = Array<Byte>(shutdownChunkSize, repeat: 0)
         let output = Array<Byte>(shutdownChunkSize, repeat: 0)
         while (true) {
-            checkTlsOperationContext(context)
+            checkTlsPumpContext(context, terminal)
             let result = engine.shutdownStep()
             let flushed = flushCiphertext(engine, transport, output, context)
             match (result) {
@@ -2237,10 +2253,11 @@ public class TlsEnginePump {
         buffer: Array<Byte>,
         context: OperationContext
     ): Int64 {
-        synchronized(transportWriteMutex) {
+        writeAdmission.acquire(context)
+        try {
             var total: Int64 = 0
             while (engine.pendingCiphertext() > 0) {
-                checkTlsOperationContext(context)
+                checkTlsPumpContext(context, terminal)
                 let requested = min(engine.pendingCiphertext(), buffer.size)
                 let drained = engine.drainCiphertext(MutableByteSpan(buffer, length: requested))
                 if (drained <= 0 || drained > requested) {
@@ -2248,8 +2265,9 @@ public class TlsEnginePump {
                 }
                 var remaining = ByteSpan(buffer, length: drained)
                 while (!remaining.isEmpty()) {
-                    checkTlsOperationContext(context)
+                    checkTlsPumpContext(context, terminal)
                     let written = transport.writeSome(remaining, context: context)
+                    checkTlsPumpContext(context, terminal)
                     if (written <= 0 || written > remaining.length) {
                         throw noProgress("transport failed to write TLS ciphertext")
                     }
@@ -2258,6 +2276,8 @@ public class TlsEnginePump {
                 total += drained
             }
             total
+        } finally {
+            writeAdmission.release()
         }
     }
 
@@ -2267,20 +2287,25 @@ public class TlsEnginePump {
         buffer: Array<Byte>,
         context: OperationContext
     ): Unit {
-        synchronized(transportReadMutex) {
-            checkTlsOperationContext(context)
+        readAdmission.acquire(context)
+        try {
+            checkTlsPumpContext(context, terminal)
             match (transport.readSome(MutableByteSpan(buffer), context: context)) {
                 case ReadResult.EndOfStream =>
+                    checkTlsPumpContext(context, terminal)
                     throw TlsEngineException(
                         TlsEngineErrorCode.PeerClosedWithoutCloseNotify,
                         "transport reached EOF while TLS expected a record"
                     )
                 case ReadResult.Data(count) =>
+                    checkTlsPumpContext(context, terminal)
                     if (count <= 0 || count > buffer.size) {
                         throw noProgress("transport returned no TLS record progress")
                     }
                     feedAll(engine, ByteSpan(buffer, length: count))
             }
+        } finally {
+            readAdmission.release()
         }
     }
 
@@ -2300,6 +2325,74 @@ public class TlsEnginePump {
 
     private func noProgress(message: String): TlsEngineException {
         TlsEngineException(TlsEngineErrorCode.NoProgress, message)
+    }
+}
+
+private class TlsPumpAdmission {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var active = false
+    private var terminal = false
+
+    func acquire(context: OperationContext): Unit {
+        checkTlsOperationContext(context)
+        let registration = context.cancellation.register { => wake() }
+        try {
+            synchronized(mutex) {
+                while (active && !terminal) {
+                    checkTlsOperationContext(context)
+                    waitForAdmission(changed, context)
+                }
+                checkTlsOperationContext(context)
+                if (terminal) {
+                    throw TlsEngineException(
+                        TlsEngineErrorCode.Closed,
+                        "TLS transport pump is terminal"
+                    )
+                }
+                active = true
+            }
+        } finally {
+            registration.unregister()
+        }
+    }
+
+    func release(): Unit {
+        synchronized(mutex) {
+            active = false
+            changed.notifyAll()
+        }
+    }
+
+    func terminate(): Unit {
+        synchronized(mutex) {
+            terminal = true
+            changed.notifyAll()
+        }
+    }
+
+    private func wake(): Unit {
+        synchronized(mutex) { changed.notifyAll() }
+    }
+}
+
+private func waitForAdmission(condition: Condition, context: OperationContext): Unit {
+    match (context.deadline) {
+        case Some(deadline) =>
+            let remaining = deadline.remaining()
+            if (remaining <= Duration.Zero) { checkTlsOperationContext(context) }
+            condition.wait(timeout: remaining)
+        case None => condition.wait()
+    }
+}
+
+private func checkTlsPumpContext(context: OperationContext, terminal: AtomicBool): Unit {
+    checkTlsOperationContext(context)
+    if (terminal.load()) {
+        throw TlsEngineException(
+            TlsEngineErrorCode.Closed,
+            "TLS transport pump is terminal"
+        )
     }
 }
 

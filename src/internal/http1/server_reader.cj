@@ -75,6 +75,12 @@ public func readHttp1ServerRequest(
             if (mayHandoff) { upgradeRemainder = completed.remaining }
             RequestBody.empty().open()
         case Http1BodyFraming.ContentLength(length) =>
+            if (length > limits.maxBodyBytes) {
+                throw Http1ParseException(
+                    Http1ParseErrorCode.InvalidHeader,
+                    "HTTP/1 request Content-Length exceeds configured body limit"
+                )
+            }
             if (completed.remaining.size > length && !(mayHandoff && length == 0)) {
                 throw Http1ParseException(
                     Http1ParseErrorCode.InvalidHeader,

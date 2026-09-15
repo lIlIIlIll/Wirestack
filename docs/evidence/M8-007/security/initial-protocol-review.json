@@ -1,0 +1,115 @@
+{
+  "coverage_summary": "Completed source-only protocol review in the M8-007 release worktree. One actionable medium finding survives: HTTP/1 Content-Length requests bypass maxBodyBytes. Covered requiredScope labels http1-smuggling, http2-hpack, dns-proxy-routing and parser resource-bounds. Examined Http1RequestHeadParser.feed, Http1ResponseHeadParser.feed, Http1HeadAccumulator.feed, parseHeaders, validateHostHeader, resolveRequestFraming, resolveResponseFraming, Content-Length/Transfer-Encoding parsing, Http1ChunkedDecoder, readHttp1ServerRequest, serveHttp1Connection and Http1FixedBodyStream.read. Observed strict CRLF, obs-fold rejection, conflicting length and CL/TE rejection, trailer bounds and pipelining controls. Examined Http2FrameParser.feed, Http2FrameHeader, Http2HeaderBlockAssembler.accept, HpackDecoder.decode/decodeLiteral, integer/string/Huffman decoding, dynamic-table eviction and decodeHttp2ServerRequestHead. Observed envelope-before-payload checks, same-stream continuation ownership, compressed/decompressed/header-count/table bounds, pseudo-header ordering and duplicate controls. Examined DnsMessageParser.parse, parseDnsHeader/Record, compressed and uncompressed name expansion, DnsClient.queryWire/queryUdp/queryTcp/identityMatches/addressAnswer/sourceMatches/dnsTransactionId, and Resolver.resolveName. Observed selected-server endpoint and question/transaction/type/class checks, TCP fallback validation, answer-owner selection, alias-loop/hop limits, bounded search candidates and shared deadlines. Examined HttpClient.executeOnce/withProxyAuthorization, proxy connection factories, NoProxyRule.matches/parseNoProxyRule and redirect selection for origin/proxy separation. Sampled CookieJar admission, MultipartDecoder header/payload/fill limits and WebSocket readWireFrame/readWebSocketLength/message progression. Inspected campaign configuration and actual HTTP1, HTTP2 and URL/proxy mutation target definitions. No builds, tests, payload execution, network calls or file edits. Findings and coverage were sent to M8ReleaseReview. This process-isolated agent shares the assistant/provider ecosystem and is not an independent external human reviewer.",
+  "findings": [
+    {
+      "rule_id": "M8-PROTOCOL-001",
+      "title": "HTTP/1 fixed-length requests bypass the configured body-size ceiling",
+      "summary": "A remote HTTP/1 client can declare Content-Length greater than HttpLimits.maxBodyBytes and deliver that body to the server handler. The fixed-length branch checks only excess buffered bytes and constructs Http1FixedBodyStream without the configured limit. That stream permits reads until the attacker-declared length. Chunked requests and HTTP/2 requests enforce maxBodyBytes, so choosing Content-Length bypasses the server's body-size policy.",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "resource-bounds",
+      "locations": [
+        {
+          "path": "src/internal/http1/server_reader.cj",
+          "start_line": 77,
+          "end_line": 88,
+          "role": "Missing body-size admission check"
+        },
+        {
+          "path": "src/internal/http1/response_reader.cj",
+          "start_line": 618,
+          "end_line": 642,
+          "role": "Fixed-length consumption"
+        },
+        {
+          "path": "src/internal/http1/server_connection.cj",
+          "start_line": 68,
+          "end_line": 74,
+          "role": "Handler dispatch"
+        }
+      ],
+      "cwe": [
+        "CWE-770"
+      ],
+      "evidence": [
+        {
+          "label": "Unchecked remote length",
+          "explanation": "The request reader directly constructs the fixed stream without comparing length against maxBodyBytes.",
+          "excerpt": "Http1FixedBodyStream(transport, length, completed.remaining, context)"
+        },
+        {
+          "label": "Consumption follows declared length",
+          "explanation": "The stream has no HttpLimits argument and reads until the declared length.",
+          "excerpt": "let wanted = min(destination.size, length - consumed)"
+        },
+        {
+          "label": "Equivalent paths enforce the policy",
+          "explanation": "chunked.cj:171-175 enforces individual and cumulative request bounds; server_mapping.cj:1051-1053 rejects oversized HTTP/2 Content-Length. Public facade server.cj:541-558 wraps cancellation but adds no body-size policy before invoking the application."
+        }
+      ],
+      "optionalProperties": {
+        "requiredScope": [
+          "resource-bounds"
+        ],
+        "preconditions": "Remote HTTP/1 request uses Content-Length above configured maxBodyBytes; handler consumes body while relying on library policy.",
+        "impact": "Body-size policy bypass and handler-dependent disk, CPU or downstream resource exhaustion. Parser streams rather than allocating Content-Length bytes.",
+        "verification": "Source trace only. No payload or tests executed.",
+        "recommendation": "Reject oversized fixed-length request framing before handler dispatch; preserve intentionally unlimited streaming response behavior."
+      }
+    }
+  ],
+  "reviewed_paths": [
+    "docs/evidence/M8-007/security-scope.md",
+    "docs/evidence/M8-007/linux_x86_64/review-request.json",
+    "docs/evidence/M8-007/linux_x86_64/fuzz-report.json",
+    "tools/gates/campaigns/m7-023-linux-fuzz.json",
+    "src/http_model.cj",
+    "src/internal/http1/head_parser.cj",
+    "src/internal/http1/package.cj",
+    "src/internal/http1/chunked.cj",
+    "src/internal/http1/server_reader.cj",
+    "src/internal/http1/server_connection.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/smuggling_corpus_test.cj",
+    "src/internal/http2/frame_codec.cj",
+    "src/internal/http2/frame_model.cj",
+    "src/internal/http2/header_block.cj",
+    "src/internal/http2/hpack_core.cj",
+    "src/internal/http2/hpack_block.cj",
+    "src/internal/http2/hpack_dynamic_table.cj",
+    "src/internal/http2/hpack_huffman.cj",
+    "src/internal/http2/server_mapping.cj",
+    "src/internal/http2/deterministic_fuzz_test.cj",
+    "src/http/client.cj",
+    "src/http/server.cj",
+    "src/http/proxy.cj",
+    "src/http/redirect.cj",
+    "src/http/cookie.cj",
+    "src/http/multipart.cj",
+    "src/http/websocket.cj",
+    "src/http/deterministic_fuzz_test.cj",
+    "src/net/dns_wire.cj",
+    "src/net/dns_client.cj",
+    "src/net/dns_resolver.cj",
+    "src/internal/transport_stdnet/package.cj",
+    "src/internal/resolver/system_resolver.cj"
+  ],
+  "deferred": [
+    {
+      "reason": "Main reported release-tooling corrections and regeneration of qualification/fuzz/security inputs while runtime source remains unchanged. This source result must be integrated against the refreshed candidate and packet by M8ReleaseReview; it does not qualify the superseded packet."
+    },
+    {
+      "reason": "Finite source review, not exhaustive protocol verification. Native resolver ABI, underlying libc resolver behavior, TLS internals, full stream lifecycle/pool races and complete extension behavior belong to other slices or remain outside this slice. Selected functions and ranges were examined, not every line in listed files."
+    },
+    {
+      "reason": "The single-line current fuzz report was partly truncated by the read tool. Observed its recorded build command and successful build exit, but did not independently verify complete run metadata or digests. Campaign and actual target definitions were inspected: DNS, cookies, multipart and WebSocket are not among the ten campaign targets; per-input HPACK decoder mutation does not establish multi-block/multi-stream compression-state correctness.",
+      "paths": [
+        "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"
+      ]
+    },
+    {
+      "reason": "Formal 86400-second soak and hosted signatures have not run and remain separate gates. This review makes no execution or release-admission claim."
+    }
+  ]
+}

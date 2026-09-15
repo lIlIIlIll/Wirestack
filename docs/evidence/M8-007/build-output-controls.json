@@ -1,0 +1,101 @@
+{
+  "source_task": "M8-007",
+  "status": "PASS",
+  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "baseline_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "36b2145a41c11484b9b06861ddd18d29d4a843b35635241c3e6119fc602b9a88"
+  },
+  "driver": {
+    "path": "docs/evidence/M8-007/reproductions/build-output-controls.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "beeb00c620adea0b488ef0353c52eaab00e68a6a800cb7402f7b53b2611d4647"
+    }
+  },
+  "cases": [
+    "test_successful_build_bounds_report_and_preserves_raw_diagnostics",
+    "test_failed_build_bounds_error_and_preserves_raw_diagnostics",
+    "test_build_excerpt_byte_bound_survives_invalid_utf8"
+  ],
+  "source_inputs": {
+    "tools/m7_022_linux_release_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "67369f2a06b7eb27893920781318e656ce86706ac522dd4a624722f5392a9afc"
+    },
+    "tools/tests/test_m7_022_linux_release_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8482d9d03c1e5498271f15d0175ac6a888894d668421719cbaf17e3dcceba411"
+    }
+  },
+  "before": {
+    "id": "before",
+    "argv": [
+      "python3",
+      "docs/evidence/M8-007/reproductions/build-output-controls.py.txt",
+      "--baseline",
+      "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+      "--phase",
+      "before"
+    ],
+    "status": "FAIL",
+    "exit_code": 1,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T04:37:47.774551Z",
+    "finished_at_utc": "2026-09-15T04:37:48.440642Z",
+    "duration_ms": 666.096,
+    "stdout_path": "docs/evidence/M8-007/commands/build-output-controls/1789447067774228829/before.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/build-output-controls/1789447067774228829/before.stderr.log",
+    "stdout_excerpt": "{\"tests_run\": 3, \"failures\": 3, \"errors\": 0, \"baseline_source_digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"36b2145a41c11484b9b06861ddd18d29d4a843b35635241c3e6119fc602b9a88\"}}\n",
+    "stderr_excerpt": "test_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics) ... FAIL\ntest_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics) ... FAIL\ntest_build_excerpt_byte_bound_survives_invalid_utf8 (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8) ... FAIL\n\n======================================================================\nFAIL: test_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"<repo-root>/tools/tests/test_m7_022_linux_release_soak.py\", line 427, in test_successful_build_bounds_report_and_preserves_raw_diagnostics\n    self.assertLessEqual(len(output.encode(\"utf-8\")), gate.MAX_CAPTURE_BYTES)\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 2097185 not less than or equal to 16384\n\n======================================================================\nFAIL: test_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"<repo-root>/tools/tests/test_m7_022_linux_release_soak.py\", line 448, in test_failed_build_bounds_error_and_preserves_raw_diagnostics\n    self.assertLessEqual(\n    ~~~~~~~~~~~~~~~~~~~~^\n        len(caught.exception.detail.encode(\"utf-8\")), gate.MAX_CAPTURE_BYTES\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: 2097167 not less than or equal to 16384\n\n======================================================================\nFAIL: test_build_excerpt_byte_bound_survives_invalid_utf8 (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"<repo-root>/tools/tests/test_m7_022_linux_release_soak.py\", line 464, in test_build_excerpt_byte_bound_survives_invalid_utf8\n    self.assertLessEqual(len(output.encode(\"utf-8\")), gate.MAX_CAPTURE_BYTES)\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 49169 not less than or equal to 16384\n\n----------------------------------------------------------------------\nRan 3 tests in 0.217s\n\nFAILED (failures=3)\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a58fc6c31a4547f0ae7702ac54fe9a60251333fb38a3f1e991dd5ad926b57359"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c71a508648bec3a671af2776533f2674dc305a2b304d00508df5aee724507b82"
+    }
+  },
+  "after": {
+    "id": "after",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "-v",
+      "tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics",
+      "tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics",
+      "tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T04:37:48.441215Z",
+    "finished_at_utc": "2026-09-15T04:37:48.810614Z",
+    "duration_ms": 369.425,
+    "stdout_path": "docs/evidence/M8-007/commands/build-output-controls/1789447067774228829/after.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/build-output-controls/1789447067774228829/after.stderr.log",
+    "stdout_excerpt": "",
+    "stderr_excerpt": "test_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics) ... ok\ntest_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics) ... ok\ntest_build_excerpt_byte_bound_survives_invalid_utf8 (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.091s\n\nOK\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "786750c75405c6fba4df7e50f7069135d9f42141caac28a7e6475c6cc5b2ac34"
+    }
+  },
+  "checks": {
+    "baseline_cases_fail": true,
+    "corrected_cases_pass": true,
+    "commands_complete": true
+  }
+}

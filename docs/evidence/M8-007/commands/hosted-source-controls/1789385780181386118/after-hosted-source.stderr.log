@@ -1,0 +1,11 @@
+test_verify_all_rejects_hosted_revision_not_independently_approved (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_hosted_revision_not_independently_approved) ... ok
+test_verify_all_rejects_unarchived_signing_inputs (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_unarchived_signing_inputs) ... ok
+test_verify_all_rejects_unarchived_formal_inputs (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_unarchived_formal_inputs) ... ok
+test_verify_all_rejects_weakened_approved_task (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_weakened_approved_task) ... ok
+test_verify_all_rejects_removed_approved_source_input (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_removed_approved_source_input) ... ok
+test_frozen_command_rejects_weakened_release_contract (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_frozen_command_rejects_weakened_release_contract) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.006s
+
+OK

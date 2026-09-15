@@ -1,0 +1,155 @@
+{
+  "source_task": "M8-007",
+  "phase": "after",
+  "status": "FAIL",
+  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "artifact_sha256": "4441dbe6670e64804b44b941d2894c4945cb3b8e886d9f9fb9a11854c280adc0",
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
+  },
+  "driver": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77c76f79e71d4b93d3c73de4cbc47ef6857d627e6852c5417dc0acc9bc1d05ac"
+    }
+  },
+  "probe": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "959cd6a70ecd4f436eaf69224f357321591b76a0a5061d0f4df94958d479e683"
+    }
+  },
+  "derived_source": {
+    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/consumer.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a29238155356694b5966c390e7c3148469ad60c484ad6ad4c96f7c75928dda13"
+    }
+  },
+  "commands": {
+    "build": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "duration_ms": 10350.102911994327,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5da677c259bb20f78d2497b31ed34760e49d4476dd2688a472ab660aea301d8c"
+        }
+      }
+    },
+    "stale": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-clyixqw9/consumer/target/release/bin/main",
+        "stale"
+      ],
+      "exit_code": 1,
+      "duration_ms": 2115.710212965496,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/stale.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a26b584b94c1d6f5303ed9834e0751dac0ec2fd03c03b232e31b578817b5fa07"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/stale.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "eab8637c398368ffb24e160304b2ebf170eddeb4a0f3449308d0c8aa3edafd9b"
+        }
+      }
+    },
+    "live": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-clyixqw9/consumer/target/release/bin/main",
+        "live"
+      ],
+      "exit_code": 0,
+      "duration_ms": 2065.597087959759,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/live.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1d870f8b698efb87c219b4c42f283792c63c934906d2977fb55701916cc09854"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/live.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "transports": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-clyixqw9/consumer/target/release/bin/main",
+        "transports"
+      ],
+      "exit_code": 1,
+      "duration_ms": 163.93726598471403,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/transports.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8d1b4420a1fefeccb38b1b4f957bedc5542e4e1720ecaa87fdc3324f34355b3d"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390775630046669/transports.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f6359360953f8af4126238f81ed89b0c4b492285f44f0da9016d1743eb530654"
+        }
+      }
+    }
+  },
+  "observations": {
+    "stale": {
+      "mode": "stale",
+      "claims": "4096",
+      "retainedHandles": "1050",
+      "limit": "1024"
+    },
+    "live": {
+      "mode": "live",
+      "sentinels": "1024",
+      "retained": "1024",
+      "rejected": "true"
+    },
+    "transports": {
+      "mode": "transports",
+      "held": "1024",
+      "retained": "1024",
+      "rejected": "false"
+    }
+  },
+  "observed_bounds": false
+}

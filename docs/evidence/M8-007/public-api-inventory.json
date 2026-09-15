@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "command": {
+    "id": "public-api-inventory",
+    "argv": [
+      "python3",
+      "tools/m8_007_final_release.py",
+      "verify-api"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T02:26:39.817603Z",
+    "finished_at_utc": "2026-09-15T02:26:41.883019Z",
+    "duration_ms": 2065.419,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/public-api-inventory.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/public-api-inventory.stderr.log",
+    "stdout_excerpt": "{\"baselineSha256\": \"9cb572d0b4d37948003bb8836fa583219ec78c1e2f2633e40375258e1669c964\", \"cancellationHandles\": [\"HttpConnectionCancellationHandle\", \"HttpRequestCancellationHandle\", \"HttpStreamCancellationHandle\"], \"compatibilityEvidence\": {\"abiBinary\": \"BASELINE_ONLY_NO_PREVIOUS_RELEASE\", \"forward\": \"BASELINE_ONLY_NO_FUTURE_RELEASE\", \"packageAndMajor\": \"PASS_DEDICATED_MANIFEST_GATE\", \"semanticRuntime\": \"OUTSIDE_STATIC_GATE_USE_PROJECT_TESTS\", \"sourceAndInventory\": \"PASS_EXACT_BASELINE_MATCH\"}, \"decision\": \"PASS\", \"declarationCount\": 324, \"forbiddenPublicRules\": [\"global-tls-kit\", \"legacy-tls-socket\", \"low-level-socket\", \"openssl-string\", \"streaming-socket\", \"trust-all\"], \"generatorSha256\": \"e8ac807861efc8dd31184ec2983350b4deff8a9b71316a2407b8d260827606a4\", \"inventorySha256\": \"7feacdc10f5c1ca96ec314afe6f57318f84d7cafdc23aa05f502408ab46ea973\", \"nonClaims\": [\"The first API freeze does not prove compatibility with a previous binary release.\", \"Static declaration comparison does not prove runtime semantic compatibility.\", \"Forward compatibility requires a future library and consumer matrix.\", \"runtime and std source changes are not Wirestack dependencies.\"], \"package\": {\"major\": 0, \"name\": \"wirestack\", \"version\": \"0.1.0\"}, \"profile\": \"linux-x86_64-glibc\", \"publicPackages\": [\"wirestack\", \"wirestack.http\", \"wirestack.net\", \"wirestack.tls\"], \"resolvedAliasCount\": 114, \"schemaVersion\": 1, \"taskId\": \"M8-007\"}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  }
+}

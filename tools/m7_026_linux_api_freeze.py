@@ -501,7 +501,7 @@ def _validate_cancellation_handles(declarations: Sequence[Mapping[str, Any]]) ->
         _require(not missing, f"cancellation handle {name} is incomplete: {missing}")
 
 
-def build_inventory(root: Path = ROOT) -> dict[str, Any]:
+def build_inventory(root: Path = ROOT, *, task_id: str = TASK_ID) -> dict[str, Any]:
     root = root.resolve()
     metadata = package_metadata(root)
     _require(metadata["name"] == EXPECTED_PACKAGE_NAME, "Wirestack package name changed")
@@ -538,7 +538,7 @@ def build_inventory(root: Path = ROOT) -> dict[str, Any]:
     _validate_cancellation_handles(public_declarations)
     core = {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": task_id,
         "profile": PROFILE,
         "package": metadata,
         "publicPackages": list(PUBLIC_PACKAGES),
@@ -595,7 +595,7 @@ def build_report(
     declarations = inventory["declarations"]
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": inventory["taskId"],
         "profile": PROFILE,
         "decision": "PASS",
         "package": inventory["package"],
@@ -630,8 +630,9 @@ def validate(
     *,
     validate_report: bool = True,
     generator_path: Path = Path(__file__),
+    task_id: str = TASK_ID,
 ) -> dict[str, Any]:
-    current = build_inventory(root)
+    current = build_inventory(root, task_id=task_id)
     baseline = load_json(baseline_path)
     report = build_report(baseline_path, current, generator_path)
     if validate_report:

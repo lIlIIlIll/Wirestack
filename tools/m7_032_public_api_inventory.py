@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-import m7_026_linux_api_freeze as api_scan
+from tools import m7_026_linux_api_freeze as api_scan
 
 
 ROOT = Path(__file__).resolve().parents[1]

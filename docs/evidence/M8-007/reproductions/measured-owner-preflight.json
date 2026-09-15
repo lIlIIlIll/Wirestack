@@ -1,0 +1,1205 @@
+{
+  "acceptance_status": "INCOMPLETE",
+  "artifact": {
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f5fea51108e3d7059e0477e4577a5f41ba926294b7075e1e89f0fa0e7e77e894"
+    },
+    "installed_as_only_wirestack_dependency": true,
+    "path": "dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "payload_sha256": "c4bef1b33faa461aa9c72d57e15d1ea826551b864aa9e12699ea23d6c1942bb1",
+    "qualification_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "906314041c64dfbd1db4d167a9f5f3c94c346c9f4a6ce0cba285208aebb2bccf"
+    },
+    "qualification_sha256": "906314041c64dfbd1db4d167a9f5f3c94c346c9f4a6ce0cba285208aebb2bccf",
+    "sha256": "f5fea51108e3d7059e0477e4577a5f41ba926294b7075e1e89f0fa0e7e77e894"
+  },
+  "decision": "INCOMPLETE",
+  "formal_parameters_met": false,
+  "generated_at_utc": "2026-09-14T06:06:12.361158+00:00",
+  "input_identities": {
+    "artifact": {
+      "bytes": 2804923,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f5fea51108e3d7059e0477e4577a5f41ba926294b7075e1e89f0fa0e7e77e894"
+      },
+      "path": "dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+    },
+    "driver": {
+      "bytes": 50589,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "299b38693d6c29754fffeafe0005e8c38899d9faa1d8f1fccfa7954be8ee6947"
+      },
+      "path": "tools/m7_022_linux_release_soak.py"
+    },
+    "fixture": {
+      "bytes": 4025,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+      },
+      "path": "examples/linux/m7_027/fixtures.cj"
+    },
+    "qualification": {
+      "bytes": 15985,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "906314041c64dfbd1db4d167a9f5f3c94c346c9f4a6ce0cba285208aebb2bccf"
+      },
+      "path": "docs/evidence/M8-007/linux_x86_64/qualification.json"
+    },
+    "source": {
+      "bytes": 31337,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7f15fa14289264733838e2f80bdcdaf4500c2165d2a75027a728a7a76a12df0d"
+      },
+      "path": "tools/release_soak/main.cj"
+    }
+  },
+  "non_claims": [
+    "This result applies only to native Linux x86_64 glibc.",
+    "A short preflight is not 24-hour acceptance evidence.",
+    "This task does not sign the artifact or close the independent security review."
+  ],
+  "parameters": {
+    "application_sample_seconds": 2.0,
+    "duration_seconds": 60,
+    "idle_milliseconds": 10,
+    "minimum_formal_seconds": 86400,
+    "resource_sample_seconds": 2.0,
+    "teardown_seconds": 300
+  },
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "preflight_status": "FAIL",
+  "private_candidate_copies": {
+    "artifact": {
+      "bytes": 2804923,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f5fea51108e3d7059e0477e4577a5f41ba926294b7075e1e89f0fa0e7e77e894"
+      }
+    },
+    "qualification": {
+      "bytes": 15985,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "906314041c64dfbd1db4d167a9f5f3c94c346c9f4a6ce0cba285208aebb2bccf"
+      }
+    }
+  },
+  "process": {
+    "binary": {
+      "bytes": 17629264,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "fe30053730c1658e849d38f49af3f9269dca26c45179f6a90353df24e9a89169"
+      },
+      "path": "/tmp/wirestack-m8-007-e4lim6a7/consumer/target/release/bin/main"
+    },
+    "build_command": [
+      "<home>/cangjie_sdk/sts1.1.3/tools/bin/cjpm",
+      "build"
+    ],
+    "build_output": "\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m8-007-e4lim6a7/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:612:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m612\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m613\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m622\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m8-007-e4lim6a7/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:910:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m910\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m911\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m919\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m8-007-e4lim6a7/install/wirestack-0.1.0/src/internal/http2/server_connection.cj:411:28:\n    \u001b[36m| \u001b[0m\n\u001b[36m411\u001b[0m \u001b[36m| \u001b[0m            if (slotOwned) { releasePushSlot() }\u001b[0m\n    \u001b[36m| \u001b[0m                           \u001b[33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m8-007-e4lim6a7/install/wirestack-0.1.0/src/internal/http1/server_connection.cj:116:23:\n    \u001b[36m| \u001b[0m\n\u001b[36m116\u001b[0m \u001b[36m| \u001b[0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }\u001b[0m\n    \u001b[36m| \u001b[0m                      \u001b[33m^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m8-007-e4lim6a7/install/wirestack-0.1.0/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\ncjpm build success\n",
+    "build_output_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f6bacbb124c56716b098d21ede7d824d59b09d10e4ea5dc5ed67ac57d44d693d"
+    },
+    "clean_consumer_build": "PASS",
+    "command": [
+      "/tmp/wirestack-m8-007-e4lim6a7/consumer/target/release/bin/main",
+      "60",
+      "2000",
+      "10"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_elapsed_ms": 60179
+  },
+  "raw_log": {
+    "bytes": 8917,
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "35aedc7b16f7f84e02fa3e237999a82d22b38bec44ba1c4c58f1cb83cdfabbcf"
+    },
+    "path": "docs/evidence/M8-007/reproductions/measured-owner-preflight.log",
+    "sha256": "35aedc7b16f7f84e02fa3e237999a82d22b38bec44ba1c4c58f1cb83cdfabbcf",
+    "tail": "SOAK_READY cycles=1 elapsedMs=117\nM7022_SAMPLE index=0 elapsedMs=2043 usedHeapBytes=4272128 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=20 h1Requests=25 h2Requests=64 sseEvents=160\nM7022_SAMPLE index=1 elapsedMs=4005 usedHeapBytes=3993600 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=39 h1Requests=49 h2Requests=123 sseEvents=312\nM7022_SAMPLE index=2 elapsedMs=6058 usedHeapBytes=6307840 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=59 h1Requests=74 h2Requests=186 sseEvents=472\nM7022_SAMPLE index=3 elapsedMs=8079 usedHeapBytes=4960256 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=79 h1Requests=99 h2Requests=248 sseEvents=632\nM7022_SAMPLE index=4 elapsedMs=10091 usedHeapBytes=6119424 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=99 h1Requests=124 h2Requests=311 sseEvents=792\nM7022_SAMPLE index=5 elapsedMs=12005 usedHeapBytes=5017600 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=118 h1Requests=148 h2Requests=370 sseEvents=944\nM7022_SAMPLE index=6 elapsedMs=14073 usedHeapBytes=5406720 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=4 serverServeTasks=2 cycles=138 h1Requests=173 h2Requests=433 sseEvents=1104\nM7022_SAMPLE index=7 elapsedMs=16009 usedHeapBytes=5120000 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=157 h1Requests=197 h2Requests=492 sseEvents=1256\nM7022_SAMPLE index=8 elapsedMs=18096 usedHeapBytes=4927488 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=4 retainedCancellations=5 serverServeTasks=2 cycles=177 h1Requests=222 h2Requests=555 sseEvents=1416\nM7022_SAMPLE index=9 elapsedMs=20091 usedHeapBytes=5300224 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=2 serverServeTasks=2 cycles=197 h1Requests=247 h2Requests=617 sseEvents=1576\nM7022_SAMPLE index=10 elapsedMs=22009 usedHeapBytes=4595712 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=216 h1Requests=270 h2Requests=676 sseEvents=1728\nM7022_SAMPLE index=11 elapsedMs=24039 usedHeapBytes=6176768 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=236 h1Requests=295 h2Requests=739 sseEvents=1888\nM7022_SAMPLE index=12 elapsedMs=26037 usedHeapBytes=4476928 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=256 h1Requests=320 h2Requests=801 sseEvents=2048\nM7022_SAMPLE index=13 elapsedMs=28022 usedHeapBytes=4923392 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=276 h1Requests=345 h2Requests=864 sseEvents=2208\nM7022_SAMPLE index=14 elapsedMs=30107 usedHeapBytes=5595136 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=4 retainedCancellations=6 serverServeTasks=2 cycles=297 h1Requests=372 h2Requests=930 sseEvents=2376\nM7022_SAMPLE index=15 elapsedMs=32005 usedHeapBytes=6406144 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=316 h1Requests=395 h2Requests=989 sseEvents=2528\nM7022_SAMPLE index=16 elapsedMs=34041 usedHeapBytes=4472832 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=4 serverServeTasks=2 cycles=336 h1Requests=420 h2Requests=1051 sseEvents=2688\nM7022_SAMPLE index=17 elapsedMs=36011 usedHeapBytes=6070272 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=355 h1Requests=444 h2Requests=1111 sseEvents=2840\nM7022_SAMPLE index=18 elapsedMs=38009 usedHeapBytes=5275648 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=375 h1Requests=469 h2Requests=1173 sseEvents=3000\nM7022_SAMPLE index=19 elapsedMs=40079 usedHeapBytes=5836800 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=396 h1Requests=495 h2Requests=1239 sseEvents=3168\nM7022_SAMPLE index=20 elapsedMs=42073 usedHeapBytes=4456448 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=416 h1Requests=520 h2Requests=1301 sseEvents=3328\nM7022_SAMPLE index=21 elapsedMs=44023 usedHeapBytes=6389760 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=435 h1Requests=544 h2Requests=1361 sseEvents=3480\nM7022_SAMPLE index=22 elapsedMs=46000 usedHeapBytes=4853760 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=455 h1Requests=569 h2Requests=1423 sseEvents=3640\nM7022_SAMPLE index=23 elapsedMs=48060 usedHeapBytes=5767168 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=475 h1Requests=594 h2Requests=1486 sseEvents=3800\nM7022_SAMPLE index=24 elapsedMs=50013 usedHeapBytes=4841472 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=4 retainedCancellations=6 serverServeTasks=2 cycles=494 h1Requests=618 h2Requests=1545 sseEvents=3952\nM7022_SAMPLE index=25 elapsedMs=52053 usedHeapBytes=6279168 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=514 h1Requests=643 h2Requests=1608 sseEvents=4112\nM7022_SAMPLE index=26 elapsedMs=54056 usedHeapBytes=4780032 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=534 h1Requests=668 h2Requests=1670 sseEvents=4272\nM7022_SAMPLE index=27 elapsedMs=56022 usedHeapBytes=4259840 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=1 serverServeTasks=2 cycles=553 h1Requests=692 h2Requests=1730 sseEvents=4424\nM7022_SAMPLE index=28 elapsedMs=58010 usedHeapBytes=5046272 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=2 serverServeTasks=2 cycles=573 h1Requests=717 h2Requests=1792 sseEvents=4584\nM7022_SAMPLE index=29 elapsedMs=60046 usedHeapBytes=4501504 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=3 serverServeTasks=2 cycles=593 h1Requests=742 h2Requests=1855 sseEvents=4744\nM7022_SAMPLE index=30 elapsedMs=60047 usedHeapBytes=4501504 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=3 serverServeTasks=2 cycles=593 h1Requests=742 h2Requests=1855 sseEvents=4744\nM7022_RESULT durationSeconds=60 elapsedMs=60060 cycles=593 activePhases=593 idlePhases=593 connects=226 h1Requests=742 h2Requests=1855 h2MultiplexBatches=593 sseH1Events=2372 sseH2Events=2372 requestCancels=593 streamResets=593 connectionCancels=75 reconnects=75 spawnedTasks=1186 joinedTasks=1186 sequenceErrors=0 maxCancelLatencyNs=1432060 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=0 retainedTransports=0 retainedCancellations=0 serverServeTasks=0 serverConnections=0 clientsClosed=2 serversClosed=2 tlsConfigsClosed=2 poolAcquires=1335 poolReleases=1335 poolSequenceErrors=0\n"
+  },
+  "readiness": {
+    "cycles": 1,
+    "elapsedMs": 117,
+    "marker": "SOAK_READY",
+    "observed_by_parent": true
+  },
+  "resources": {
+    "application": {
+      "samples": [
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 20,
+          "elapsedMs": 2043,
+          "h1Requests": 25,
+          "h2Requests": 64,
+          "index": 0,
+          "retainedCancellations": 2,
+          "retainedTransports": 1,
+          "serverServeTasks": 2,
+          "sseEvents": 160,
+          "usedHeapBytes": 4272128
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 39,
+          "elapsedMs": 4005,
+          "h1Requests": 49,
+          "h2Requests": 123,
+          "index": 1,
+          "retainedCancellations": 2,
+          "retainedTransports": 1,
+          "serverServeTasks": 2,
+          "sseEvents": 312,
+          "usedHeapBytes": 3993600
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 59,
+          "elapsedMs": 6058,
+          "h1Requests": 74,
+          "h2Requests": 186,
+          "index": 2,
+          "retainedCancellations": 5,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 472,
+          "usedHeapBytes": 6307840
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 79,
+          "elapsedMs": 8079,
+          "h1Requests": 99,
+          "h2Requests": 248,
+          "index": 3,
+          "retainedCancellations": 2,
+          "retainedTransports": 1,
+          "serverServeTasks": 2,
+          "sseEvents": 632,
+          "usedHeapBytes": 4960256
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 99,
+          "elapsedMs": 10091,
+          "h1Requests": 124,
+          "h2Requests": 311,
+          "index": 4,
+          "retainedCancellations": 5,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 792,
+          "usedHeapBytes": 6119424
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 118,
+          "elapsedMs": 12005,
+          "h1Requests": 148,
+          "h2Requests": 370,
+          "index": 5,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 944,
+          "usedHeapBytes": 5017600
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 138,
+          "elapsedMs": 14073,
+          "h1Requests": 173,
+          "h2Requests": 433,
+          "index": 6,
+          "retainedCancellations": 4,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 1104,
+          "usedHeapBytes": 5406720
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 157,
+          "elapsedMs": 16009,
+          "h1Requests": 197,
+          "h2Requests": 492,
+          "index": 7,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 1256,
+          "usedHeapBytes": 5120000
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 177,
+          "elapsedMs": 18096,
+          "h1Requests": 222,
+          "h2Requests": 555,
+          "index": 8,
+          "retainedCancellations": 5,
+          "retainedTransports": 4,
+          "serverServeTasks": 2,
+          "sseEvents": 1416,
+          "usedHeapBytes": 4927488
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 197,
+          "elapsedMs": 20091,
+          "h1Requests": 247,
+          "h2Requests": 617,
+          "index": 9,
+          "retainedCancellations": 2,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 1576,
+          "usedHeapBytes": 5300224
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 216,
+          "elapsedMs": 22009,
+          "h1Requests": 270,
+          "h2Requests": 676,
+          "index": 10,
+          "retainedCancellations": 5,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 1728,
+          "usedHeapBytes": 4595712
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 236,
+          "elapsedMs": 24039,
+          "h1Requests": 295,
+          "h2Requests": 739,
+          "index": 11,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 1888,
+          "usedHeapBytes": 6176768
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 256,
+          "elapsedMs": 26037,
+          "h1Requests": 320,
+          "h2Requests": 801,
+          "index": 12,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 2048,
+          "usedHeapBytes": 4476928
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 276,
+          "elapsedMs": 28022,
+          "h1Requests": 345,
+          "h2Requests": 864,
+          "index": 13,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 2208,
+          "usedHeapBytes": 4923392
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 297,
+          "elapsedMs": 30107,
+          "h1Requests": 372,
+          "h2Requests": 930,
+          "index": 14,
+          "retainedCancellations": 6,
+          "retainedTransports": 4,
+          "serverServeTasks": 2,
+          "sseEvents": 2376,
+          "usedHeapBytes": 5595136
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 316,
+          "elapsedMs": 32005,
+          "h1Requests": 395,
+          "h2Requests": 989,
+          "index": 15,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 2528,
+          "usedHeapBytes": 6406144
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 336,
+          "elapsedMs": 34041,
+          "h1Requests": 420,
+          "h2Requests": 1051,
+          "index": 16,
+          "retainedCancellations": 4,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 2688,
+          "usedHeapBytes": 4472832
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 355,
+          "elapsedMs": 36011,
+          "h1Requests": 444,
+          "h2Requests": 1111,
+          "index": 17,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 2840,
+          "usedHeapBytes": 6070272
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 375,
+          "elapsedMs": 38009,
+          "h1Requests": 469,
+          "h2Requests": 1173,
+          "index": 18,
+          "retainedCancellations": 2,
+          "retainedTransports": 1,
+          "serverServeTasks": 2,
+          "sseEvents": 3000,
+          "usedHeapBytes": 5275648
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 396,
+          "elapsedMs": 40079,
+          "h1Requests": 495,
+          "h2Requests": 1239,
+          "index": 19,
+          "retainedCancellations": 5,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 3168,
+          "usedHeapBytes": 5836800
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 416,
+          "elapsedMs": 42073,
+          "h1Requests": 520,
+          "h2Requests": 1301,
+          "index": 20,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 3328,
+          "usedHeapBytes": 4456448
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 435,
+          "elapsedMs": 44023,
+          "h1Requests": 544,
+          "h2Requests": 1361,
+          "index": 21,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 3480,
+          "usedHeapBytes": 6389760
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 455,
+          "elapsedMs": 46000,
+          "h1Requests": 569,
+          "h2Requests": 1423,
+          "index": 22,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 3640,
+          "usedHeapBytes": 4853760
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 475,
+          "elapsedMs": 48060,
+          "h1Requests": 594,
+          "h2Requests": 1486,
+          "index": 23,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 3800,
+          "usedHeapBytes": 5767168
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 494,
+          "elapsedMs": 50013,
+          "h1Requests": 618,
+          "h2Requests": 1545,
+          "index": 24,
+          "retainedCancellations": 6,
+          "retainedTransports": 4,
+          "serverServeTasks": 2,
+          "sseEvents": 3952,
+          "usedHeapBytes": 4841472
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 514,
+          "elapsedMs": 52053,
+          "h1Requests": 643,
+          "h2Requests": 1608,
+          "index": 25,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 4112,
+          "usedHeapBytes": 6279168
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 534,
+          "elapsedMs": 54056,
+          "h1Requests": 668,
+          "h2Requests": 1670,
+          "index": 26,
+          "retainedCancellations": 2,
+          "retainedTransports": 1,
+          "serverServeTasks": 2,
+          "sseEvents": 4272,
+          "usedHeapBytes": 4780032
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 553,
+          "elapsedMs": 56022,
+          "h1Requests": 692,
+          "h2Requests": 1730,
+          "index": 27,
+          "retainedCancellations": 1,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 4424,
+          "usedHeapBytes": 4259840
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 573,
+          "elapsedMs": 58010,
+          "h1Requests": 717,
+          "h2Requests": 1792,
+          "index": 28,
+          "retainedCancellations": 2,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 4584,
+          "usedHeapBytes": 5046272
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 593,
+          "elapsedMs": 60046,
+          "h1Requests": 742,
+          "h2Requests": 1855,
+          "index": 29,
+          "retainedCancellations": 3,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 4744,
+          "usedHeapBytes": 4501504
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 593,
+          "elapsedMs": 60047,
+          "h1Requests": 742,
+          "h2Requests": 1855,
+          "index": 30,
+          "retainedCancellations": 3,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 4744,
+          "usedHeapBytes": 4501504
+        }
+      ],
+      "trend": {
+        "bounded_application_owners": false,
+        "decision": "FAIL",
+        "heavy_gc_heap": {
+          "decision": "PASS",
+          "first_median": 5120000,
+          "growth": -618496,
+          "growth_limit": 33554432,
+          "last_median": 4501504,
+          "monotonic_growth": false,
+          "positive_steps": 11
+        },
+        "in_flight_transport_io": {
+          "decision": "PASS",
+          "first_median": 1,
+          "growth": 0,
+          "growth_limit": 2,
+          "last_median": 1,
+          "monotonic_growth": false,
+          "positive_steps": 0
+        },
+        "minimum_samples": 5,
+        "retained_transport_owners": {
+          "decision": "PASS",
+          "first_median": 3,
+          "growth": -1,
+          "growth_limit": 2,
+          "last_median": 2,
+          "monotonic_growth": false,
+          "positive_steps": 8
+        },
+        "sample_count": 31,
+        "transport_owners_observed": false,
+        "workload_progress": true
+      }
+    },
+    "coverage": {
+      "buffer": "runtime-wide heavy-GC heap trend; no per-buffer public inventory exists",
+      "callback": "weak cancellation sentinels rooted by retained typed handles",
+      "fd": "process-tree file descriptors",
+      "gc_root": "heavy-GC used heap and weak-reference owner observations",
+      "rss": "process-tree VmRSS",
+      "socket": "process-tree socket descriptors plus weak transport reachability",
+      "task": "workload and serve Future state with terminal joins",
+      "thread": "process-tree thread trend, reported only as runtime-wide evidence",
+      "timer": "process-tree timerfd descriptors",
+      "waiter": "application Future, pool-lease, and in-flight transport I/O observations; no runtime-wide waiter inventory is claimed"
+    },
+    "ownership_scopes": {
+      "application_owned": {
+        "cancellation_links": "typed cancellation handles retained while weak event-sink sentinels prove response-owned callback graphs were released",
+        "controlled_responses": "HttpResponse.isClosed observed through weak response references",
+        "pool_leases": "actual HttpConnectionPoolHook acquire/release callbacks",
+        "servers": "HttpServer shutdown activeAtReturn, isClosed, and serve Future joins",
+        "tasks": "actual Future.tryGet samples and terminal Future.get joins"
+      },
+      "runtime_wide": {
+        "process_tree": "RSS, descriptors, timerfds, processes, and threads are complementary runtime-wide trends, not substitutes for in-process owner cleanup",
+        "protocol_workers": "custom-connector transport in-flight I/O and post-close weak reachability while the child remains alive"
+      }
+    },
+    "process_tree": {
+      "samples": [
+        {
+          "elapsed_ms": 0,
+          "fd_count": 5,
+          "process_count": 1,
+          "rss_kib": 22832,
+          "socket_count": 1,
+          "thread_count": 5,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 2031,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 33892,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 4062,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 29848,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 6101,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 32764,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 8130,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 29648,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 10168,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 30052,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 12197,
+          "fd_count": 9,
+          "process_count": 1,
+          "rss_kib": 31500,
+          "socket_count": 5,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 14231,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 33468,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 16263,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 31028,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 18295,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 32976,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 20344,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 30396,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 22384,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 32648,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 24412,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 32000,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 26441,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 31836,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 28482,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 31656,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 30512,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 31560,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 32545,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 31236,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 34572,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 32996,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 36611,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 31132,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 38644,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 31940,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 40670,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 31288,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 42699,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 31484,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 44743,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 34076,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 46774,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 31680,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 48807,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 34132,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 50839,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 31616,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 52876,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 32956,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 54908,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 33216,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 56934,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 31656,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 58969,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 33048,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        }
+      ],
+      "trend": {
+        "decision": "PASS",
+        "metrics": {
+          "fd_count": {
+            "decision": "PASS",
+            "first_median": 9.5,
+            "growth": -0.5,
+            "growth_limit": 2,
+            "last_median": 9.0,
+            "monotonic_growth": false,
+            "positive_steps": 5
+          },
+          "process_count": {
+            "decision": "PASS",
+            "first_median": 1.0,
+            "growth": 0.0,
+            "growth_limit": 0,
+            "last_median": 1.0,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          },
+          "rss_kib": {
+            "decision": "PASS",
+            "first_median": 32238.0,
+            "growth": 764.0,
+            "growth_limit": 65536,
+            "last_median": 33002.0,
+            "monotonic_growth": false,
+            "positive_steps": 11
+          },
+          "socket_count": {
+            "decision": "PASS",
+            "first_median": 5.5,
+            "growth": -0.5,
+            "growth_limit": 2,
+            "last_median": 5.0,
+            "monotonic_growth": false,
+            "positive_steps": 5
+          },
+          "thread_count": {
+            "decision": "PASS",
+            "first_median": 10.0,
+            "growth": 1.0,
+            "growth_limit": 2,
+            "last_median": 11.0,
+            "monotonic_growth": false,
+            "positive_steps": 1
+          },
+          "timerfd_count": {
+            "decision": "PASS",
+            "first_median": 0.0,
+            "growth": 0.0,
+            "growth_limit": 2,
+            "last_median": 0.0,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          }
+        },
+        "minimum_samples": 5,
+        "sample_count": 30
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "consumer": "tools/release_soak/main.cj",
+    "consumer_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7f15fa14289264733838e2f80bdcdaf4500c2165d2a75027a728a7a76a12df0d"
+    },
+    "consumer_sha256": "7f15fa14289264733838e2f80bdcdaf4500c2165d2a75027a728a7a76a12df0d",
+    "driver": "tools/m7_022_linux_release_soak.py",
+    "driver_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "299b38693d6c29754fffeafe0005e8c38899d9faa1d8f1fccfa7954be8ee6947"
+    },
+    "executed": {
+      "consumer": {
+        "bytes": 31337,
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7f15fa14289264733838e2f80bdcdaf4500c2165d2a75027a728a7a76a12df0d"
+        }
+      },
+      "fixture": {
+        "bytes": 4021,
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "59d05655f956c3226693cd048cce2653580935ed2aec7d02be3af08f4b810512"
+        }
+      },
+      "manifest": {
+        "bytes": 450,
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8de5ad2c57f3b7c3803a3f0abd3c90bd93bbb3f130cba7d7161057d130688dde"
+        }
+      }
+    },
+    "fixture": "examples/linux/m7_027/fixtures.cj",
+    "fixture_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+    },
+    "fixture_sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+  },
+  "source_task": "M8-007",
+  "status": "INCOMPLETE",
+  "toolchain": {
+    "at_build_boundary": {
+      "cjc": {
+        "bytes": 277701984,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+        },
+        "executable": "<home>/cangjie_sdk/sts1.1.3/bin/cjc",
+        "path": "<home>/cangjie_sdk/sts1.1.3/bin/cjc",
+        "version": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu"
+      },
+      "cjpm": {
+        "bytes": 15031040,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "32ab13ead318414ab1b9ef9bf6dee06f210f9d12c1cd31bdd5ce15b42c929cba"
+        },
+        "executable": "<home>/cangjie_sdk/sts1.1.3/tools/bin/cjpm",
+        "path": "<home>/cangjie_sdk/sts1.1.3/tools/bin/cjpm",
+        "version": "Cangjie Project Manager: 1.1.3"
+      },
+      "environment": {
+        "cangjie_home": "<home>/cangjie_sdk/sts1.1.3",
+        "cangjie_sdk_root": null,
+        "cj_sdk_libpath": null,
+        "ld_library_path": "<home>/cangjie_sdk/sts1.1.3/runtime/lib/linux_x86_64_cjnative:<home>/cangjie_sdk/sts1.1.3/tools/lib:"
+      }
+    },
+    "at_run_boundary": {
+      "cjc": {
+        "bytes": 277701984,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+        },
+        "executable": "<home>/cangjie_sdk/sts1.1.3/bin/cjc",
+        "path": "<home>/cangjie_sdk/sts1.1.3/bin/cjc",
+        "version": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu"
+      },
+      "cjpm": {
+        "bytes": 15031040,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "32ab13ead318414ab1b9ef9bf6dee06f210f9d12c1cd31bdd5ce15b42c929cba"
+        },
+        "executable": "<home>/cangjie_sdk/sts1.1.3/tools/bin/cjpm",
+        "path": "<home>/cangjie_sdk/sts1.1.3/tools/bin/cjpm",
+        "version": "Cangjie Project Manager: 1.1.3"
+      },
+      "environment": {
+        "cangjie_home": "<home>/cangjie_sdk/sts1.1.3",
+        "cangjie_sdk_root": null,
+        "cj_sdk_libpath": null,
+        "ld_library_path": "<home>/cangjie_sdk/sts1.1.3/runtime/lib/linux_x86_64_cjnative:<home>/cangjie_sdk/sts1.1.3/tools/lib:"
+      }
+    },
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  },
+  "workload": {
+    "checks": {
+      "active_idle_mix": true,
+      "cancellation_latency": true,
+      "child_duration": true,
+      "connection_recovery": true,
+      "connections": true,
+      "cycles": true,
+      "h1_pool": true,
+      "h2_multiplex": true,
+      "parent_duration": true,
+      "pool_owner_balance": true,
+      "request_cancellation": true,
+      "requested_duration": true,
+      "sequence_integrity": true,
+      "sse": true,
+      "stream_reset": true,
+      "task_join": true,
+      "terminal_application_owners": true,
+      "terminal_resources_closed": true,
+      "terminal_transport_owners": true
+    },
+    "decision": "PASS",
+    "result": {
+      "activeApplicationTasks": 0,
+      "activePhases": 593,
+      "activePoolLeases": 0,
+      "activeResponseOwners": 0,
+      "activeTransportIo": 0,
+      "clientsClosed": 2,
+      "connectionCancels": 75,
+      "connects": 226,
+      "cycles": 593,
+      "durationSeconds": 60,
+      "elapsedMs": 60060,
+      "h1Requests": 742,
+      "h2MultiplexBatches": 593,
+      "h2Requests": 1855,
+      "idlePhases": 593,
+      "joinedTasks": 1186,
+      "maxCancelLatencyNs": 1432060,
+      "poolAcquires": 1335,
+      "poolReleases": 1335,
+      "poolSequenceErrors": 0,
+      "reconnects": 75,
+      "requestCancels": 593,
+      "retainedCancellations": 0,
+      "retainedTransports": 0,
+      "sequenceErrors": 0,
+      "serverConnections": 0,
+      "serverServeTasks": 0,
+      "serversClosed": 2,
+      "spawnedTasks": 1186,
+      "sseH1Events": 2372,
+      "sseH2Events": 2372,
+      "streamResets": 593,
+      "tlsConfigsClosed": 2
+    }
+  }
+}

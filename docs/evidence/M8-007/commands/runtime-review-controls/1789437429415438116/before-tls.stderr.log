@@ -1,0 +1,284 @@
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                      if(e is AssertException) {[0m
+   [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+   [36m| [0m[34m|[0m                         throw e[0m
+   [36m| [0m[34m|[0m                     }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m [36m| [0m[33m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m79[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+   [36m| [0m
+   [36m| [0m                    None < TlsProviderException >[0m
+   [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                      if(e is AssertIntermediateException) {[0m
+   [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+   [36m| [0m[34m|[0m                         throw e[0m
+   [36m| [0m[34m|[0m                     }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m [36m| [0m[33m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m79[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                      if(e is AssertException) {[0m
+   [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+   [36m| [0m[34m|[0m                         throw e[0m
+   [36m| [0m[34m|[0m                     }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+   [36m| [0m[34m|[0m                         throw e[0m
+   [36m| [0m[34m|[0m                     }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m [36m| [0m[33m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m79[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                      if(e is AssertIntermediateException) {[0m
+   [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+   [36m| [0m[34m|[0m                         throw e[0m
+   [36m| [0m[34m|[0m                     }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m [36m| [0m[33m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m79[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+   [36m| [0m[34m|[0m                         throw e[0m
+   [36m| [0m[34m|[0m                     }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+  [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m [36m| [0m[33m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m79[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < TlsProviderException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: unused variable:'serverName'
+   [36m==>[0m <repo-root>/src/internal/tls_engine/provider_test.cj:141:9:
+    [36m| [0m
+[36m141[0m [36m| [0m        serverName!: ?HostName[0m
+    [36m| [0m        [33m^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo-root>/src/internal/tls_engine/m8_006_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class TlsM8006ContextTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m104[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+15 warnings generated, 15 warnings printed.
+Error: cjpm test failed

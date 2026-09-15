@@ -1,0 +1,12 @@
+{
+  "acceptance_status": "FAIL",
+  "decision": "FAIL",
+  "error": {
+    "code": "QUALIFICATION_INVALID",
+    "detail": "qualification input fingerprint is stale"
+  },
+  "generated_at_utc": "2026-09-14T03:29:52.258597+00:00",
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "FAIL"
+}

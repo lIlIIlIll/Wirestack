@@ -114,10 +114,16 @@ def text_evidence_sha256(path: Path) -> str:
         raise ReviewPackageError(error.code, str(path)) from error
 
 
-def build_index(root: Path = ROOT) -> dict[str, Any]:
+def build_index(
+    root: Path = ROOT,
+    *,
+    task_id: str = TASK_ID,
+    document_inputs: Sequence[tuple[str, str]] = DOCUMENTS,
+    evidence_inputs: Sequence[tuple[str, str, str, str, bool]] = EVIDENCE,
+) -> dict[str, Any]:
     documents = [
         {"topic": topic, "path": path, "sha256": text_evidence_sha256(safe_path(root, path))}
-        for topic, path in DOCUMENTS
+        for topic, path in document_inputs
     ]
     evidence = [
         {
@@ -128,11 +134,11 @@ def build_index(root: Path = ROOT) -> dict[str, Any]:
             "state": state,
             "gating": gating,
         }
-        for topic, task, path, state, gating in EVIDENCE
+        for topic, task, path, state, gating in evidence_inputs
     ]
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": task_id,
         "platform": PROFILE,
         "compatibilityPolicy": COMPATIBILITY_POLICY,
         "documents": documents,
@@ -153,10 +159,12 @@ def evidence_passes(path: Path) -> bool:
     return any(payload.get(key) == "PASS" for key in ("status", "decision", "acceptance_status"))
 
 
-def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
+def validate_index(
+    root: Path, index: Mapping[str, Any], *, task_id: str = TASK_ID
+) -> dict[str, Any]:
     exact_keys(index, {"schemaVersion", "taskId", "platform", "compatibilityPolicy", "documents", "evidence"}, "index")
     require(index["schemaVersion"] == SCHEMA_VERSION, "SCHEMA_VERSION", str(index["schemaVersion"]))
-    require(index["taskId"] == TASK_ID, "TASK_ID", str(index["taskId"]))
+    require(index["taskId"] == task_id, "TASK_ID", str(index["taskId"]))
     require(index["platform"] == PROFILE, "PLATFORM", str(index["platform"]))
     require(index["compatibilityPolicy"] == COMPATIBILITY_POLICY, "COMPATIBILITY_GATE", str(index["compatibilityPolicy"]))
     require(isinstance(index["documents"], list), "SCHEMA", "documents must be a list")
@@ -240,11 +248,13 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def build_report(index_path: Path, summary: Mapping[str, Any]) -> dict[str, Any]:
+def build_report(
+    index_path: Path, summary: Mapping[str, Any], *, task_id: str = TASK_ID
+) -> dict[str, Any]:
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
-        "source_task": TASK_ID,
+        "taskId": task_id,
+        "source_task": task_id,
         "platform": PROFILE,
         "status": "PASS",
         "decision": "PASS",
@@ -282,11 +292,17 @@ def validate(
     root: Path = ROOT,
     index_path: Path = DEFAULT_INDEX,
     report_path: Path | None = None,
+    *,
+    task_id: str = TASK_ID,
+    document_inputs: Sequence[tuple[str, str]] = DOCUMENTS,
+    evidence_inputs: Sequence[tuple[str, str, str, str, bool]] = EVIDENCE,
 ) -> dict[str, Any]:
     index = load_json(index_path)
-    summary = validate_index(root, index)
-    require(index == build_index(root), "INDEX_STALE", str(index_path))
-    report = build_report(index_path, summary)
+    summary = validate_index(root, index, task_id=task_id)
+    require(index == build_index(
+        root, task_id=task_id, document_inputs=document_inputs, evidence_inputs=evidence_inputs
+    ), "INDEX_STALE", str(index_path))
+    report = build_report(index_path, summary, task_id=task_id)
     if report_path is not None:
         require(load_json(report_path) == report, "REPORT_STALE", str(report_path))
     return report

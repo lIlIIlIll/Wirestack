@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from tools import evidence_digest
 
+from contextlib import redirect_stderr
 import json
 import subprocess
 import sys
@@ -19,9 +20,13 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             "index": index,
             "elapsedMs": elapsed,
             "usedHeapBytes": 1000,
-            "activeWaiters": 0,
-            "activeBuffers": 0,
-            "backgroundTasks": 2,
+            "activePoolLeases": 0,
+            "activeResponseOwners": 0,
+            "activeApplicationTasks": 0,
+            "activeTransportIo": 1,
+            "retainedTransports": 2,
+            "retainedCancellations": 0,
+            "serverServeTasks": 2,
             "cycles": cycles,
             "h1Requests": cycles,
             "h2Requests": cycles * 5,
@@ -50,10 +55,20 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             "joinedTasks": 32,
             "sequenceErrors": 0,
             "maxCancelLatencyNs": 1_000_000,
-            "activeWaiters": 0,
-            "activeBuffers": 0,
-            "backgroundTasks": 0,
-            "serverTasks": 0,
+            "activePoolLeases": 0,
+            "activeResponseOwners": 0,
+            "activeApplicationTasks": 0,
+            "activeTransportIo": 0,
+            "retainedTransports": 0,
+            "retainedCancellations": 0,
+            "serverServeTasks": 0,
+            "serverConnections": 0,
+            "clientsClosed": 2,
+            "serversClosed": 2,
+            "tlsConfigsClosed": 2,
+            "poolAcquires": 80,
+            "poolReleases": 80,
+            "poolSequenceErrors": 0,
         }
         return gate.RESULT_PREFIX + " ".join(f"{key}={value}" for key, value in values.items())
 
@@ -67,6 +82,22 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         samples, result = gate.parse_output(text)
         self.assertEqual(3, len(samples))
         self.assertEqual(8, result["cycles"])
+
+    def test_readiness_requires_one_marker_after_a_complete_cycle(self) -> None:
+        marker = "SOAK_READY cycles=1 elapsedMs=25"
+        self.assertEqual(
+            {"cycles": 1, "elapsedMs": 25},
+            gate.readiness_from_output(f"startup\n{marker}\n"),
+        )
+        for output, code in (
+            ("startup only\n", "SOAK_READY_COUNT"),
+            (marker + "\n" + marker + "\n", "SOAK_READY_COUNT"),
+            ("SOAK_READY cycles=0 elapsedMs=25\n", "SOAK_READY_INVALID"),
+        ):
+            with self.subTest(code=code):
+                with self.assertRaises(gate.SoakError) as caught:
+                    gate.readiness_from_output(output)
+                self.assertEqual(code, caught.exception.code)
 
     def test_marker_parser_rejects_missing_duplicate_reordered_unknown_and_skipped(self) -> None:
         valid = "\n".join([self.sample(0, 1000, 1), self.result()])
@@ -91,6 +122,21 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             with self.subTest(value=value[-80:]):
                 with self.assertRaises(gate.SoakError):
                     gate.parse_output(value)
+
+
+    def test_old_literal_owner_evidence_schema_is_rejected(self) -> None:
+        old_sample = self.sample(0, 1000, 1).replace(
+            "activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 "
+            "activeTransportIo=1 retainedTransports=2 retainedCancellations=0 "
+            "serverServeTasks=2",
+            "activeWaiters=0 activeBuffers=0 backgroundTasks=2",
+        )
+        old_result = self.result().split(" activePoolLeases=", 1)[0] + (
+            " activeWaiters=0 activeBuffers=0 backgroundTasks=0 serverTasks=0"
+        )
+        with self.assertRaises(gate.SoakError) as caught:
+            gate.parse_output(old_sample + "\n" + old_result)
+        self.assertEqual("MARKER_FIELDS", caught.exception.code)
 
     def test_metric_trend_accepts_limit_and_rejects_growth_or_monotonic_count(self) -> None:
         equality = gate.metric_trend([0, 0, 0, 0, 0, 2, 2, 2, 2, 2], 2, count_metric=False)
@@ -123,15 +169,39 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         self.assertEqual("PASS", gate.resource_trend(samples, minimum_samples=5)["decision"])
         application = [{
             "usedHeapBytes": 1000,
-            "activeWaiters": 0,
-            "activeBuffers": 0,
-            "backgroundTasks": 2,
+            "activePoolLeases": 0,
+            "activeResponseOwners": 0,
+            "activeApplicationTasks": 0,
+            "activeTransportIo": 1,
+            "retainedTransports": 2,
+            "retainedCancellations": 0,
+            "serverServeTasks": 2,
             "cycles": index,
         } for index in range(10)]
         self.assertEqual(
             "PASS", gate.application_trend(application, minimum_samples=5)["decision"]
         )
-        application[-1]["activeBuffers"] = 1
+        application[-1]["activeResponseOwners"] = 1
+        self.assertEqual(
+            "FAIL", gate.application_trend(application, minimum_samples=5)["decision"]
+        )
+        application[-1]["activeResponseOwners"] = 0
+        for sample, transports, cancellations in zip(
+            application, [1, 3, 2, 4, 2, 3, 1, 2, 3, 1], [2, 4, 3, 5, 1, 3, 2, 4, 1, 2]
+        ):
+            sample["retainedTransports"] = transports
+            sample["retainedCancellations"] = cancellations
+        self.assertEqual(
+            "PASS", gate.application_trend(application, minimum_samples=5)["decision"]
+        )
+        for index, sample in enumerate(application):
+            sample["retainedTransports"] = index + 2
+        self.assertEqual(
+            "FAIL", gate.application_trend(application, minimum_samples=5)["decision"]
+        )
+        for index, sample in enumerate(application):
+            sample["retainedTransports"] = 2
+            sample["retainedCancellations"] = index
         self.assertEqual(
             "FAIL", gate.application_trend(application, minimum_samples=5)["decision"]
         )
@@ -141,8 +211,20 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         checks = gate.validate_workload(result, 10, 10_000)
         self.assertTrue(all(checks.values()))
         self.assertFalse(gate.validate_workload(result, gate.FORMAL_SECONDS, 10_000)["requested_duration"])
-        result["backgroundTasks"] = 1
-        self.assertFalse(gate.validate_workload(result, 10, 10_000)["terminal_owners"])
+        result["retainedTransports"] = 1
+        self.assertFalse(
+            gate.validate_workload(result, 10, 10_000)["terminal_transport_owners"]
+        )
+        result["retainedTransports"] = 0
+        result["retainedCancellations"] = 1
+        self.assertFalse(
+            gate.validate_workload(result, 10, 10_000)["terminal_transport_owners"]
+        )
+        result["retainedCancellations"] = 0
+        result["poolReleases"] -= 1
+        self.assertFalse(
+            gate.validate_workload(result, 10, 10_000)["pool_owner_balance"]
+        )
 
     def test_platform_rejects_other_os_cpu_and_musl(self) -> None:
         for values, code in (
@@ -180,6 +262,55 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             with mock.patch.object(gate.release, "validate_report"):
                 _, actual = gate.load_qualified_artifact(root, qualification, artifact)
             self.assertEqual(digest, actual)
+
+    def test_private_candidate_copy_is_pinned_and_original_drift_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact = root / "candidate.tar.gz"
+            artifact.write_bytes(b"candidate-v1")
+            captured = gate.capture_input_identity(artifact, artifact=True)
+            private = root / "private" / "candidate.tar.gz"
+            copied = gate.copy_verified_input(
+                artifact,
+                private,
+                captured,
+                artifact=True,
+                drift_code="ARTIFACT_DRIFT",
+            )
+            self.assertEqual("artifact-bytes-v1", copied["digest"]["domain"])
+            artifact.write_bytes(b"candidate-v2")
+            gate.require_input_identity(
+                private,
+                copied,
+                artifact=True,
+                drift_code="PRIVATE_ARTIFACT_DRIFT",
+            )
+            with self.assertRaises(gate.SoakError) as caught:
+                gate.require_input_identity(
+                    artifact,
+                    captured,
+                    artifact=True,
+                    drift_code="ARTIFACT_DRIFT",
+                )
+            self.assertEqual("ARTIFACT_DRIFT", caught.exception.code)
+
+    def test_text_input_drift_is_rejected_in_the_text_evidence_domain(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            qualification = Path(directory) / "qualification.json"
+            qualification.write_text('{"decision":"PASS"}\n', encoding="utf-8")
+            captured = gate.capture_input_identity(
+                qualification, artifact=False
+            )
+            self.assertEqual("text-utf8-lf-v1", captured["digest"]["domain"])
+            qualification.write_text('{"decision":"FAIL"}\n', encoding="utf-8")
+            with self.assertRaises(gate.SoakError) as caught:
+                gate.require_input_identity(
+                    qualification,
+                    captured,
+                    artifact=False,
+                    drift_code="QUALIFICATION_DRIFT",
+                )
+            self.assertEqual("QUALIFICATION_DRIFT", caught.exception.code)
 
     def test_internal_import_and_package_drift_fail_closed(self) -> None:
         source = "package wirestack_m7_022_soak\nimport wirestack.http.*\n"
@@ -280,6 +411,59 @@ except gate.SoakError as error:
             path = Path(directory) / "output.log"
             path.write_text("a" * 100 + "tail")
             self.assertEqual("aaaaaatail", gate.bounded_tail(path, 10))
+
+    def test_successful_build_bounds_report_and_preserves_raw_diagnostics(self) -> None:
+        command = [
+            sys.executable, "-c",
+            "import os; os.write(2, b'first diagnostic\\n'); "
+            "[os.write(2, b'x' * 8192) for _ in range(256)]; "
+            "os.write(2, b'last diagnostic\\n')",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "diagnostics.log"
+            with log.open("w", encoding="utf-8") as stream, redirect_stderr(stream):
+                output = gate.run_build(command, root)
+            self.assertLessEqual(len(output.encode("utf-8")), gate.MAX_CAPTURE_BYTES)
+            self.assertTrue(output.endswith("last diagnostic\n"))
+            self.assertEqual(2_097_185, log.stat().st_size)
+            with log.open("r", encoding="utf-8") as stream:
+                self.assertEqual("first diagnostic\n", stream.readline())
+            self.assertTrue(gate.bounded_tail(log).endswith("last diagnostic\n"))
+
+    def test_failed_build_bounds_error_and_preserves_raw_diagnostics(self) -> None:
+        command = [
+            sys.executable, "-c",
+            "import os, sys; "
+            "[os.write(2, b'x' * 8192) for _ in range(256)]; "
+            "os.write(2, b'build rejected\\n'); sys.exit(7)",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "diagnostics.log"
+            with log.open("w", encoding="utf-8") as stream, redirect_stderr(stream):
+                with self.assertRaises(gate.SoakError) as caught:
+                    gate.run_build(command, root)
+            self.assertEqual("BUILD_FAILED", caught.exception.code)
+            self.assertLessEqual(
+                len(caught.exception.detail.encode("utf-8")), gate.MAX_CAPTURE_BYTES
+            )
+            self.assertTrue(caught.exception.detail.endswith("build rejected\n"))
+            self.assertEqual(2_097_167, log.stat().st_size)
+
+    def test_build_excerpt_byte_bound_survives_invalid_utf8(self) -> None:
+        command = [
+            sys.executable, "-c",
+            "import os; os.write(2, b'\\xff' * 16384 + b'final diagnostic\\n')",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "diagnostics.log"
+            with log.open("w", encoding="utf-8") as stream, redirect_stderr(stream):
+                output = gate.run_build(command, root)
+            self.assertLessEqual(len(output.encode("utf-8")), gate.MAX_CAPTURE_BYTES)
+            self.assertTrue(output.endswith("final diagnostic\n"))
+            self.assertEqual(16_384, log.read_text().count("\ufffd"))
 
     def test_terminate_process_group_stops_running_child(self) -> None:
         process = subprocess.Popen(

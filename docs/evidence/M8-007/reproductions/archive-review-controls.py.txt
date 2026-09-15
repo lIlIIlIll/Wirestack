@@ -1,0 +1,93 @@
+import argparse
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools import evidence_digest as digest
+from tools import m7_021_linux_release as release
+from tools.repository import repository_tooling as repository
+
+EVIDENCE = ROOT / 'docs/evidence/M8-007'
+PRODUCTION = 'tools/m7_021_linux_release.py'
+TESTS = 'tools/tests/test_m7_021_linux_release.py'
+EXPECTED = (
+    'test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte',
+    'test_archive_rejects_aggregate_payload_over_limit',
+    'test_archive_budget_includes_serialized_headers_and_padding',
+    'test_archive_rejects_oversized_pax_metadata',
+    'test_archive_rejects_excessive_member_headers',
+    'test_archive_bounds_cumulative_global_pax_fields',
+    'test_archive_rejects_sparse_encodings_before_map_expansion',
+)
+CASE = re.compile(r'^(test_\w+) \([^\n]+\) \.\.\. (ok|FAIL|ERROR)$', re.MULTILINE)
+
+
+def record(path):
+    return {'path': path.relative_to(ROOT).as_posix(), 'digest': digest.text_evidence_digest(path).to_json()}
+
+
+def run_suite(phase, directory):
+    command = {
+        'id': f'{phase}-archive',
+        'argv': ['python3', '-m', 'unittest', '-v'] + [
+            f'tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.{name}' for name in EXPECTED
+        ],
+        'timeout_seconds': 120, 'long_running': False, 'gate': 'task',
+    }
+    result = repository.run_command(ROOT, command, directory)
+    for stream in ('stdout', 'stderr'):
+        result[f'{stream}_digest'] = record(ROOT / result[f'{stream}_path'])['digest']
+    output = (ROOT / result['stdout_path']).read_text() + (ROOT / result['stderr_path']).read_text()
+    result['observed_cases'] = dict(CASE.findall(output))
+    print(json.dumps({'phase': phase, 'exit_code': result['exit_code'],
+                      'observed_cases': result['observed_cases']}), flush=True)
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', required=True)
+    args = parser.parse_args()
+    if (EVIDENCE / 'linux_x86_64/frozen-candidate.json').exists():
+        raise SystemExit('Refusing source mutation after formal candidate freeze')
+    baseline = subprocess.check_output(
+        ['git', 'rev-parse', '--verify', f'{args.baseline}^{{commit}}'], cwd=ROOT, text=True
+    ).strip()
+    original = subprocess.check_output(['git', 'cat-file', 'blob', f'{baseline}:{PRODUCTION}'], cwd=ROOT)
+    production = ROOT / PRODUCTION
+    fixed = production.read_bytes()
+    sources = {path: record(ROOT / path) for path in (PRODUCTION, TESTS)}
+    directory = EVIDENCE / 'commands/archive-review-controls' / str(time.time_ns())
+    directory.mkdir(parents=True, exist_ok=False)
+    try:
+        production.write_bytes(original)
+        baseline_source = record(production)
+        before = run_suite('before', directory)
+    finally:
+        production.write_bytes(fixed)
+    after = run_suite('after', directory)
+    passed = (
+        before['exit_code'] == 1 and not before['timed_out']
+        and before['observed_cases'] == {name: 'FAIL' for name in EXPECTED}
+        and after['exit_code'] == 0 and not after['timed_out']
+        and after['observed_cases'] == {name: 'ok' for name in EXPECTED}
+        and sources == {path: record(ROOT / path) for path in (PRODUCTION, TESTS)}
+    )
+    report = {
+        'schema_version': 1, 'source_task': 'M8-007', 'status': 'PASS' if passed else 'FAIL',
+        'driver': record(Path(__file__).resolve()), 'baseline_revision': baseline,
+        'baseline_source': baseline_source, 'source_records': sources,
+        'expected_cases': list(EXPECTED), 'before': before, 'after': after,
+    }
+    (EVIDENCE / 'archive-review-controls.json').write_bytes(release.canonical_json(report))
+    print(json.dumps({'status': report['status'], 'baseline_revision': baseline}), flush=True)
+    return 0 if passed else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

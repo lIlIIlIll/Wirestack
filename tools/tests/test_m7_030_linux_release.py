@@ -68,6 +68,44 @@ class M7030LinuxReleaseTest(unittest.TestCase):
         with self.assertRaisesRegex(release.ReleaseError, "MANIFEST_SUBJECT"):
             release.validate_release_manifest(duplicate)
 
+    def test_qualification_mutation_invalidates_signed_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            qualification = root / "qualification.json"
+            qualification.write_text('{"decision":"PASS"}\n', encoding="utf-8")
+            workflow = ".github/workflows/m8-007-linux-release-attestation.yml"
+            def manifest() -> dict:
+                return release.build_release_manifest(
+                    task_id="M8-007", workflow=workflow,
+                    qualified_inputs=[qualification], root=root,
+                )
+            first = manifest()
+            private = self.key(root)
+            public = release.public_key(private)
+            signature = root / "manifest.sig"
+            release.sign_bytes(private, release.canonical_json(first), signature)
+            release.verify_bytes(public, release.canonical_json(first), signature, "release-manifest")
+            qualification.write_text('{"decision":"FAIL"}\n', encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError, "SIGNATURE_INVALID"):
+                release.verify_bytes(public, release.canonical_json(manifest()), signature, "release-manifest")
+            with self.assertRaisesRegex(release.ReleaseError, "MANIFEST_POLICY"):
+                release.validate_release_manifest(first, task_id="M8-007")
+            first["qualifiedInputs"]["qualification.json"]["domain"] = "artifact-bytes-v1"
+            with self.assertRaisesRegex(release.ReleaseError, "MANIFEST_SOURCE"):
+                release.validate_release_manifest(first, task_id="M8-007", workflow=workflow)
+
+    def test_qualified_manifest_input_cannot_escape_source_root(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            child = root / "checkout"
+            child.mkdir()
+            outside = root / "qualification.json"
+            outside.write_text("{}\n", encoding="utf-8")
+            link = child / "qualification.json"
+            link.symlink_to(outside)
+            with self.assertRaisesRegex(release.ReleaseError, "PATH_UNSAFE"):
+                release.build_release_manifest(qualified_inputs=[link], root=child)
+
     def test_key_type_identity_and_location_fail_closed_without_secret_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
