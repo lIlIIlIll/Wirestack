@@ -1,0 +1,109 @@
+{
+  "source_task": "M8-007",
+  "phase": "after",
+  "status": "FAIL",
+  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "artifact_sha256": "4441dbe6670e64804b44b941d2894c4945cb3b8e886d9f9fb9a11854c280adc0",
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "4e57abfa4ffa50264a45d2fa1c756c503ebd197da7f823475c9e6d7d16f2d375"
+  },
+  "driver": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c80824f7fb9ff44f38a65dd6cebe6022cbe8cd193f96ff706162d0363be64e7f"
+    }
+  },
+  "probe": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f6fa78ddb5d648467a790f805b076b5c4c027283372a2af30045ddff06bf7f07"
+    }
+  },
+  "derived_source": {
+    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/consumer.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "873112e7b5000343894a9bfd4f0c627a4bb667a1bda62a3b1dd91660629c93a4"
+    }
+  },
+  "commands": {
+    "build": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "duration_ms": 10247.457914985716,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "17dbe947b44c1370f65ac34a27874b1d9615164833ff4cc0110768e15b2460ea"
+        }
+      }
+    },
+    "stale": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-5x1cx0dj/consumer/target/release/bin/main",
+        "stale"
+      ],
+      "exit_code": 1,
+      "duration_ms": 113.81469102343544,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/stale.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "951d0ecd388c413c65591a090c2c1e1aeb8a3d1a64096bf42ac2996b0f7f040a"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/stale.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "eab8637c398368ffb24e160304b2ebf170eddeb4a0f3449308d0c8aa3edafd9b"
+        }
+      }
+    },
+    "live": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-5x1cx0dj/consumer/target/release/bin/main",
+        "live"
+      ],
+      "exit_code": 1,
+      "duration_ms": 63.68061603279784,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/live.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "84fd7c5b497f3a4a90c32008e6f7dd23859fe2c968db6e2e5874363bbca6bce3"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789390086403575768/live.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "130e633fba8c19c3af8e0d34ea5a3fa66cd02eeba4a5be7a8fb92c133cd91861"
+        }
+      }
+    }
+  }
+}

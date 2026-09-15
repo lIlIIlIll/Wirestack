@@ -1,0 +1,105 @@
+private const OWNER_PROBE_LIMIT: Int64 = 1024
+
+private func claimReleasedProbe(owner: SoakControlledResponseOwner): Unit {
+    let handle = HttpRequestCancellationHandle()
+    let sentinel = SoakCancellationSentinel()
+    let response = HttpResponse(200, "OK", ResponseBody.empty())
+    try {
+        owner.claim(response, { => handle.isCancellationRequested }, sentinel)
+    } finally { response.close() }
+}
+
+private func staleOwnerProbe(): Unit {
+    let owner = SoakControlledResponseOwner()
+    var peak: Int64 = 0
+    for (_ in 0..(OWNER_PROBE_LIMIT * 4)) {
+        claimReleasedProbe(owner)
+        peak = max(peak, owner.observedProbeSlots())
+    }
+    println("OWNER_PROBE mode=stale claims=${OWNER_PROBE_LIMIT * 4} peakSlots=${peak} limit=${OWNER_PROBE_LIMIT}")
+    requireSoak(peak <= OWNER_PROBE_LIMIT, "cancellation registry stays bounded without samples")
+    requireSoak(owner.activeCount == 0, "all probe responses closed")
+}
+
+private func liveOwnerProbe(): Unit {
+    let owner = SoakControlledResponseOwner()
+    let sentinels = ArrayList<SoakCancellationSentinel>()
+    for (_ in 0..OWNER_PROBE_LIMIT) {
+        let handle = HttpRequestCancellationHandle()
+        let sentinel = SoakCancellationSentinel()
+        sentinels.add(sentinel)
+        let response = HttpResponse(200, "OK", ResponseBody.empty())
+        try {
+            owner.claim(response, { => handle.isCancellationRequested }, sentinel)
+        } finally { response.close() }
+    }
+    let extraHandle = HttpRequestCancellationHandle()
+    let extraSentinel = SoakCancellationSentinel()
+    let extraResponse = HttpResponse(200, "OK", ResponseBody.empty())
+    var rejected = false
+    try {
+        try {
+            owner.claim(extraResponse, { => extraHandle.isCancellationRequested }, extraSentinel)
+        } catch (_: IllegalStateException) { rejected = true }
+    } finally { extraResponse.close() }
+    let retained = owner.retainedCancellationCount()
+    let _ = blackBox(sentinels)
+    var liveSentinels: Int64 = 0
+    for (sentinel in sentinels) {
+        if (WeakRef<SoakCancellationSentinel>(sentinel, CleanupPolicy.EAGER).value.isSome()) {
+            liveSentinels += 1
+        }
+    }
+    requireSoak(liveSentinels == OWNER_PROBE_LIMIT, "live probe referents remain strongly held")
+    println("OWNER_PROBE mode=live sentinels=${sentinels.size} retained=${retained} rejected=${rejected}")
+    requireSoak(rejected, "live cancellation probe overflow fails closed")
+    requireSoak(retained == OWNER_PROBE_LIMIT, "live cancellation probes were not evicted")
+    requireSoak(owner.activeCount == 0, "overflow response closed")
+}
+
+private func liveTransportProbe(): Unit {
+    let owner = SoakTransportOwners()
+    let held = ArrayList<api.DuplexTransport>()
+    let server = HttpServer.builder()
+        .listen(loopback(0)).handler(SoakHandler()).connectionLimit(64).build()
+    let serving: Future<Unit> = spawn { server.serve() }
+    try {
+        for (_ in 0..OWNER_PROBE_LIMIT) {
+            let context = OperationContext(deadline: Some(Deadline.after(5 * Duration.second)))
+            let transport = owner.connect(server.localEndpoint, context)
+            transport.close()
+            held.add(transport)
+        }
+        var rejected = false
+        try {
+            let context = OperationContext(deadline: Some(Deadline.after(5 * Duration.second)))
+            let extra = owner.connect(server.localEndpoint, context)
+            extra.close()
+        } catch (_: IllegalStateException) { rejected = true }
+        let retained = owner.retainedTransportCount()
+        let _ = blackBox(held)
+        for (transport in held) { requireSoak(transport.isClosed(), "held transport is closed") }
+        println("OWNER_PROBE mode=transports held=${held.size} retained=${retained} rejected=${rejected}")
+        requireSoak(rejected, "live transport observation overflow fails closed")
+        requireSoak(retained == OWNER_PROBE_LIMIT, "retained transport observations were not evicted")
+    } finally {
+        let context = OperationContext(deadline: Some(Deadline.after(10 * Duration.second)))
+        let shutdown = server.shutdown(context: context)
+        serving.get(10 * Duration.second)
+        requireSoak(shutdown.activeAtReturn == 0, "native probe server joined")
+    }
+}
+
+main(args: Array<String>): Int64 {
+    try {
+        requireSoak(args.size == 1, "one owner probe mode")
+        if (args[0] == "stale") { staleOwnerProbe() }
+        else if (args[0] == "live") { liveOwnerProbe() }
+        else if (args[0] == "transports") { liveTransportProbe() }
+        else { throw IllegalStateException("unknown owner probe mode") }
+        0
+    } catch (error: Exception) {
+        eprintln("OWNER_PROBE_FAILED ${error}")
+        1
+    }
+}

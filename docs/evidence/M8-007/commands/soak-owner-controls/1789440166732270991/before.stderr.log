@@ -1,0 +1,16 @@
+git: /home/elliot/cangjie_sdk/daily/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected) ... FAIL
+
+======================================================================
+FAIL: test_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_022_linux_release_soak.py", line 137, in test_old_literal_owner_evidence_schema_is_rejected
+    with self.assertRaises(gate.SoakError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: SoakError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

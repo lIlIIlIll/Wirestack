@@ -1,0 +1,29 @@
+[31merror[0m: ambiguous use of 'ReadResult'
+  [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/src/net/m8_007_tls_cleanup_test.cj:71:8:
+   [36m| [0m
+[36m71[0m [36m| [0m    ): ReadResult {[0m
+   [36m| [0m       [31m^^^^^^^^^^ [0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: found candidate from implicit imported pacakge 'wirestack.net'
+[34mnote[0m: found imported candidate
+ [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/src/net/m8_007_tls_cleanup_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.transport.*[0m
+  [36m| [0m[34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+  [36m| [0m
+
+[31merror[0m: class 'NativeDeadlineTransport' missing abstract modifier, otherwise abstract function or property should be implemented
+  [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/src/net/m8_007_tls_cleanup_test.cj:60:1:
+   [36m| [0m
+[36m60[0m [36m| [0m  private class NativeDeadlineTransport <: DuplexTransport {[0m
+   [36m| [0m [31m_[0m[31m^[0m
+[36m61[0m [36m| [0m[31m|[0m     private let delegate: TcpStream[0m
+   [36m| [0m[31m|[0m ...[0m
+[36m84[0m [36m| [0m[31m|[0m }[0m
+   [36m| [0m[31m|[0m[31m_[0m[31m^[0m
+   [36m| [0m
+[34mnote[0m: unimplemented interface function 'readSome'
+   [36m==>[0m (package wirestack)transport.cj:118:5:
+
+2 errors generated, 2 errors printed.
+Error: cjpm test failed

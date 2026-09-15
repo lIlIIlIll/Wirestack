@@ -1,0 +1,138 @@
+name: M8-007 Linux Release Attestation
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'm8-007-signing-*'
+
+permissions: {}
+
+concurrency:
+  group: m8-007-release-attestation-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FROZEN_ARTIFACT_TAG: m8-007-frozen-artifact-58965727
+  FROZEN_ARTIFACT_SHA256: 5896572753484b3f64903b2b4ccc4f0f471ddab33ef034f5c3b1bb1c3d509669
+
+jobs:
+  stage-frozen-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.repository == 'lIlIIlIll/Wirestack' && github.ref_protected && github.ref_type == 'tag' && startsWith(github.ref_name, 'm8-007-signing-')
+    environment: m8-007-release
+    permissions:
+      contents: read
+    steps:
+      - name: Require the independently approved signing source
+        env:
+          APPROVED_SIGNING_SHA: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
+        run: |
+          if [ -z "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_SHA" != "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_REF" != "refs/tags/m8-007-signing-$APPROVED_SIGNING_SHA" ]; then
+            echo "ref and source must exactly match the independent signing approval" >&2
+            exit 1
+          fi
+      - name: Download and verify the frozen draft release asset
+        run: |
+          mkdir -p dist/m8-007
+          gh release download "$FROZEN_ARTIFACT_TAG" \
+            --repo lIlIIlIll/Wirestack \
+            --pattern wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            --dir dist/m8-007
+          # wirestack-digest-domain: artifact-bytes-v1
+          printf '%s  %s\n' "$FROZEN_ARTIFACT_SHA256" \
+            dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            | sha256sum --check --strict
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Transfer the verified artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: wirestack-m8-007-frozen-artifact
+          if-no-files-found: error
+          retention-days: 1
+          path: dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+
+  attest-linux-release:
+    needs: stage-frozen-artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.repository == 'lIlIIlIll/Wirestack' && github.ref_protected && github.ref_type == 'tag' && startsWith(github.ref_name, 'm8-007-signing-')
+    environment: m8-007-release
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Require the independently approved signing source
+        env:
+          APPROVED_SIGNING_SHA: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
+        run: |
+          if [ -z "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_SHA" != "$APPROVED_SIGNING_SHA" ] \
+            || [ "$GITHUB_REF" != "refs/tags/m8-007-signing-$APPROVED_SIGNING_SHA" ]; then
+            echo "ref and source must exactly match the independent signing approval" >&2
+            exit 1
+          fi
+      - name: Check out the independently approved source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Receive the frozen artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: wirestack-m8-007-frozen-artifact
+          path: dist/m8-007
+      - name: Reverify the transferred artifact
+        run: |
+          # wirestack-digest-domain: artifact-bytes-v1
+          printf '%s  %s\n' "$FROZEN_ARTIFACT_SHA256" \
+            dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            | sha256sum --check --strict
+      - name: Validate release evidence and generate the manifest subject
+        run: python3 tools/m8_007_final_release.py signing-manifest
+      - name: Attest the artifact with its SBOM
+        id: artifact
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+          sbom-path: docs/evidence/M8-007/linux_x86_64/supply-chain/sbom.spdx.json
+      - name: Attest the SBOM subject
+        id: sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: docs/evidence/M8-007/linux_x86_64/supply-chain/sbom.spdx.json
+      - name: Attest the qualified release manifest
+        id: manifest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: build/m8-007/signatures/release-manifest.json
+      - name: Preserve bundles and verify exact-source signatures
+        run: |
+          cp "$ARTIFACT_BUNDLE" build/m8-007/signatures/artifact.sigstore.json
+          cp "$SBOM_BUNDLE" build/m8-007/signatures/sbom.sigstore.json
+          cp "$MANIFEST_BUNDLE" build/m8-007/signatures/release-manifest.sigstore.json
+          python3 tools/m8_007_final_release.py verify-signatures \
+            --commit "$APPROVED_SIGNING_SHA" --directory build/m8-007/signatures
+        env:
+          APPROVED_SIGNING_SHA: ${{ vars.M8_007_APPROVED_SIGNING_SHA }}
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_BUNDLE: ${{ steps.artifact.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+          MANIFEST_BUNDLE: ${{ steps.manifest.outputs.bundle-path }}
+      - name: Upload subjects, bundles, and complete verification results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: wirestack-m8-007-attestation-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+            docs/evidence/M8-007/linux_x86_64/supply-chain/sbom.spdx.json
+            build/m8-007/signatures/

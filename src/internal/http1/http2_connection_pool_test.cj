@@ -88,6 +88,35 @@ class Http2ConnectionPoolTest {
     }
 
     @TestCase
+    func closeRacingUnpublishedAdmissionReleasesConnectionOwners(): Unit {
+        let pool = Http2ConnectionPool()
+        let gate = PoolAdmissionGate()
+        let factory = PoolGatedFactory(gate)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let pending = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory) }
+
+        gate.waitUntilEntered()
+        @Expect(factory.activeStreamCount, 1)
+        @Expect(factory.ownedStreamCount, 1)
+        try { pool.close() } finally { gate.release() }
+
+        var rejectedAsClosed = false
+        try {
+            let _ = pending.get(Duration.second)
+        } catch (error: NetworkException) {
+            rejectedAsClosed = isPoolClosed(error.category)
+        }
+
+        @Expect(rejectedAsClosed)
+        @Expect(factory.activeStreamCount, 0)
+        @Expect(factory.ownedStreamCount, 0)
+        @Expect(factory.connectionClosed)
+        let terminal = pool.snapshot()
+        @Expect(terminal.connections, 0)
+        @Expect(terminal.reservations, 0)
+    }
+
+    @TestCase
     func completeSecurityKeyPreventsCrossContextReuse(): Unit {
         let pool = Http2ConnectionPool()
         let factory = PoolFakeFactory(100u32)
@@ -272,6 +301,9 @@ private class PoolGatedFactory <: Http2MultiplexedConnectionFactory {
     }
 
     func finish(lease: Http2PoolLease): Unit { connection.finish(lease.admission.stream.id) }
+    prop activeStreamCount: Int64 { get() { connection.activeStreamCount } }
+    prop ownedStreamCount: Int64 { get() { connection.ownedStreamCount } }
+    prop connectionClosed: Bool { get() { connection.isClosed() } }
 }
 
 private class PoolGatedConnection <: Http2MultiplexedConnection {
@@ -290,8 +322,9 @@ private class PoolGatedConnection <: Http2MultiplexedConnection {
         listener: Http2GoAwayListener,
         endStream: Bool
     ): Http2PoolStreamClaim {
+        let admitted = delegate.openStream(listener, endStream)
         if (firstAdmission.compareAndSwap(true, false)) { gate.enter() }
-        delegate.openStream(listener, endStream)
+        admitted
     }
 
     public func close(): Unit { delegate.close() }
@@ -349,7 +382,14 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
         let claimed = synchronized(mutex) {
             if (closed) { false } else { closed = true; true }
         }
-        if (claimed) { let _ = abortCalls.fetchAdd(1) }
+        if (claimed) {
+            let _ = machine.finish(
+                code: Http2ErrorCode.InternalError, reason: "fake HTTP/2 connection aborted"
+            )
+            let _ = registry.closeConnection(machine.completion.getOrThrow())
+            flow.close()
+            let _ = abortCalls.fetchAdd(1)
+        }
     }
 
     func beginDrain(): Unit { let _ = machine.beginDrain() }
@@ -399,4 +439,7 @@ private func isNegotiatedHttp11(value: HttpNegotiatedProtocol): Bool {
 }
 private func isPoolDeadline(value: NetworkErrorCategory): Bool {
     match (value) { case NetworkErrorCategory.DeadlineExceeded => true; case _ => false }
+}
+private func isPoolClosed(value: NetworkErrorCategory): Bool {
+    match (value) { case NetworkErrorCategory.Closed => true; case _ => false }
 }

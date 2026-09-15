@@ -1,0 +1,195 @@
+{
+  "api_version": "2022-11-28",
+  "authority": {
+    "id": 180488944,
+    "login": "lIlIIlIll",
+    "repository_admin": true
+  },
+  "captured_at": "2026-09-14T09:19:20.739037Z",
+  "configured": {
+    "approved_sha_variable": {
+      "state": "ABSENT"
+    },
+    "deployment_branch_policies": [
+      {
+        "id": 59930076,
+        "name": "m8-007-signing-*",
+        "type": "tag"
+      }
+    ],
+    "environment": {
+      "can_admins_bypass": false,
+      "deployment_branch_policy": {
+        "custom_branch_policies": true,
+        "protected_branches": false
+      },
+      "id": 21876552654,
+      "name": "m8-007-release",
+      "protection_rules": [
+        {
+          "id": 65516996,
+          "prevent_self_review": false,
+          "reviewers": [
+            {
+              "id": 180488944,
+              "login": "lIlIIlIll",
+              "type": "User"
+            }
+          ],
+          "type": "required_reviewers"
+        },
+        {
+          "id": 65516997,
+          "type": "branch_policy"
+        }
+      ],
+      "state": "PRESENT"
+    },
+    "signing_rulesets": [
+      {
+        "bypass_actors": [
+          {
+            "actor_id": 5,
+            "actor_type": "RepositoryRole",
+            "bypass_mode": "always"
+          }
+        ],
+        "conditions": {
+          "ref_name": {
+            "exclude": [],
+            "include": [
+              "refs/tags/m8-007-signing-*"
+            ]
+          }
+        },
+        "enforcement": "active",
+        "id": 23276775,
+        "name": "M8-007 signing tags administrators only",
+        "rules": [
+          {
+            "type": "creation"
+          }
+        ],
+        "target": "tag"
+      },
+      {
+        "bypass_actors": [],
+        "conditions": {
+          "ref_name": {
+            "exclude": [],
+            "include": [
+              "refs/tags/m8-007-signing-*"
+            ]
+          }
+        },
+        "enforcement": "active",
+        "id": 23276779,
+        "name": "M8-007 signing tags immutable",
+        "rules": [
+          {
+            "type": "deletion"
+          },
+          {
+            "type": "update"
+          }
+        ],
+        "target": "tag"
+      }
+    ]
+  },
+  "files": [
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9f7f0f2b93e1985acd9bc4dc1c14aa72eda6b14fe5634bf808225418f133a414"
+      },
+      "path": ".github/workflows/m8-007-linux-release-attestation.yml"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "84d9fac9fa7b8db5aaf1fbcafff9ea27bf6663dfeed55ac802abae20bc0896b7"
+      },
+      "path": "tools/m8_007_signing_authorization.py"
+    }
+  ],
+  "initial": {
+    "approved_sha_variable": {
+      "state": "ABSENT"
+    },
+    "deployment_branch_policies": [
+      {
+        "id": 59930076,
+        "name": "m8-007-signing-*",
+        "type": "tag"
+      }
+    ],
+    "environment": {
+      "can_admins_bypass": false,
+      "deployment_branch_policy": {
+        "custom_branch_policies": true,
+        "protected_branches": false
+      },
+      "id": 21876552654,
+      "name": "m8-007-release",
+      "protection_rules": [
+        {
+          "id": 65516996,
+          "prevent_self_review": false,
+          "reviewers": [
+            {
+              "id": 180488944,
+              "login": "lIlIIlIll",
+              "type": "User"
+            }
+          ],
+          "type": "required_reviewers"
+        },
+        {
+          "id": 65516997,
+          "type": "branch_policy"
+        }
+      ],
+      "state": "PRESENT"
+    },
+    "repository_rulesets": [
+      {
+        "enforcement": "active",
+        "id": 23276775,
+        "name": "M8-007 signing tags administrators only",
+        "target": "tag"
+      },
+      {
+        "enforcement": "active",
+        "id": 23276779,
+        "name": "M8-007 signing tags immutable",
+        "target": "tag"
+      },
+      {
+        "enforcement": "active",
+        "id": 21787899,
+        "name": "Wirestack main clean Cangjie gate",
+        "target": "branch"
+      },
+      {
+        "enforcement": "active",
+        "id": 22713825,
+        "name": "main",
+        "target": "branch"
+      }
+    ]
+  },
+  "non_admin_probe": {
+    "claim": "No non-admin enforcement probe was performed",
+    "reason": "non-admin credential unavailable",
+    "status": "NOT_RUN"
+  },
+  "repository": {
+    "full_name": "lIlIIlIll/Wirestack",
+    "id": 1342891507,
+    "private": false
+  },
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS"
+}

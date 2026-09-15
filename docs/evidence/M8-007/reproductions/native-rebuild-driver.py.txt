@@ -1,0 +1,66 @@
+import datetime
+import json
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+root = Path.cwd().resolve()
+sys.path.insert(0, str(root))
+from tools import evidence_digest as digest
+from tools import m7_021_linux_release as release
+
+output = root / 'docs/evidence/M8-007/linux_x86_64'
+output.mkdir(parents=True, exist_ok=True)
+log_path = output / 'native-rebuild.log'
+report_path = output / 'native-rebuild.json'
+inputs = {path: digest.text_evidence_digest(root / path).to_json() for path in release.QUALIFICATION_INPUTS}
+backup_parent = root / 'build/m8-007'
+backup_parent.mkdir(parents=True, exist_ok=True)
+backup = Path(tempfile.mkdtemp(prefix='native-cache-before-rebuild-', dir=backup_parent))
+native = root / 'target/native'
+if native.exists():
+    native.rename(backup / 'native')
+command = [sys.executable, 'tools/build_native_dependencies.py', '--root', str(root)]
+started = time.monotonic()
+with log_path.open('w', encoding='utf-8') as stream:
+    result = subprocess.run(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT)
+report = {
+    'schema_version': 1,
+    'source_task': 'M8-007',
+    'status': 'FAIL',
+    'generated_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    'command': command,
+    'exit_code': result.returncode,
+    'elapsed_seconds': time.monotonic() - started,
+    'previous_cache_backup': backup.relative_to(root).as_posix(),
+    'source_inputs': inputs,
+    'driver': {'path': Path(__file__).resolve().relative_to(root).as_posix(), 'digest': digest.text_evidence_digest(Path(__file__)).to_json()},
+    'raw_log': {'path': log_path.relative_to(root).as_posix(), 'digest': digest.text_evidence_digest(log_path).to_json()},
+}
+try:
+    if result.returncode:
+        raise RuntimeError('native dependency build failed')
+    current = {path: digest.text_evidence_digest(root / path).to_json() for path in release.QUALIFICATION_INPUTS}
+    if inputs != current:
+        raise RuntimeError('native build source inputs changed during execution')
+    payload, _ = release.collect_payload(root)
+    members = (
+        'target/native/current/lib/libwirestack_tls_provider.a',
+        'target/native/current/provider-manifest.json',
+        'target/native/resolver/current/lib/libwirestack_resolver.a',
+        'target/native/resolver/current/resolver-manifest.json',
+        'target/native/http_files/current/lib/libwirestack_http_files.a',
+        'target/native/http_files/current/http-files-manifest.json',
+    )
+    report['artifact_members'] = {
+        member: {'bytes': len(payload[member]), 'digest': digest.artifact_byte_digest_bytes(payload[member]).to_json()}
+        for member in members
+    }
+    report['status'] = 'PASS'
+except Exception as error:
+    report['error'] = str(error)
+report_path.write_bytes(release.canonical_json(report))
+print(json.dumps({'status': report['status'], 'report': str(report_path), 'elapsed_seconds': report['elapsed_seconds']}))
+raise SystemExit(0 if report['status'] == 'PASS' else 1)

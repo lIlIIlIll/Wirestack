@@ -114,6 +114,11 @@ Thumbs.db
 !docs/evidence/M8-006/**/*.patch
 !docs/evidence/M8-006/**/*.hex
 !docs/evidence/M8-006/**/*.txt
+!docs/evidence/M8-007/**/*.json
+!docs/evidence/M8-007/**/*.log
+!docs/evidence/M8-007/**/*.patch
+!docs/evidence/M8-007/**/*.hex
+!docs/evidence/M8-007/**/*.txt
 *.tmp
 *.prof
 *.trace

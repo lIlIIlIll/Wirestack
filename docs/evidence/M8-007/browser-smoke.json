@@ -1,0 +1,32 @@
+{
+  "url": "http://127.0.0.1:8891/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a636c6173733a546c73436f6e6e656374696f6e2367302829.html#symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e746c733a3a546c73436f6e6e656374696f6e3a3a66756e6374696f6e3a636c6f7365236730284f7065726174696f6e436f6e7465787429",
+  "title": "wirestack.tls.TlsConnection",
+  "search": "TlsConnection.close",
+  "target": "wirestack.tls.TlsConnection.close\n\nfunctionpublicsemantic: partial Owner: wirestack.tls.TlsConnection · src/tls/facade.cj:610:5\n\n签名\npublic func close(context: OperationContext): Unit\n⧉\n概览\n\nWirestack 公开 API：关闭资源并唤醒正在等待的操作。\n\n参数\ncontext\n:OperationContext\n\n控制本次操作的截止时间、取消和追踪范围。",
+  "source_task": "M8-007",
+  "status": "PASS",
+  "checks": {
+    "generated_html": true,
+    "search_results": true,
+    "context_close_navigation": true,
+    "visual_confirmation": true
+  },
+  "documentation": {
+    "path": "docs/evidence/M8-007/docs-report.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8abb4655729c9232feb33fa385343bb371e8e196a6973c262689aafce7206f1c"
+    }
+  },
+  "screenshot": {
+    "path": "docs/evidence/M8-007/docs-close.webp.hex",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4450c7a07f669fda4875639a5e8f0fbdbc616d030776b7c5d5c1464d3fda682a"
+    }
+  },
+  "decoded_image_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "079cdaec693b76b0077a5a72c54631f879c2d5f97a88e8d9a74ffa45ec91005d"
+  }
+}

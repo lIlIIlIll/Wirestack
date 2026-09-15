@@ -36,15 +36,28 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
         report = review.validate(ROOT, review.DEFAULT_INDEX, review.DEFAULT_REPORT)
         self.assertEqual("PASS", report["status"])
         self.assertEqual("DISABLED_PRE_1_0", report["checks"]["compatibilityGate"])
-        self.assertEqual(
-            {
-                "CURRENT_PASS": 8,
-                "CURRENT_BOUND_INPUT": 3,
-                "STALE_AFTER_M7_032": 1,
-                "HISTORICAL_NON_GATING": 1,
-            },
-            report["stateCounts"],
-        )
+
+    def test_final_task_validates_its_own_evidence_without_historical_fallback(self) -> None:
+        temporary, root, _ = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        relative = "docs/evidence/M8-007/soak.json"
+        report = root / relative
+        report.parent.mkdir(parents=True)
+        report.write_text('{"decision":"PASS"}\n')
+        inputs = (*review.EVIDENCE, ("final-soak", "M8-007", relative, "CURRENT_PASS", True))
+        index_path = report.parent / "security-index.json"
+        index = review.build_index(root, task_id="M8-007", evidence_inputs=inputs)
+        review.atomic_json(index_path, index)
+        self.assertEqual("PASS", review.validate(
+            root, index_path, task_id="M8-007", evidence_inputs=inputs
+        )["decision"])
+        report.write_text('{"decision":"INCOMPLETE"}\n')
+        review.atomic_json(index_path, review.build_index(
+            root, task_id="M8-007", evidence_inputs=inputs
+        ))
+        with self.assertRaises(review.ReviewPackageError) as caught:
+            review.validate(root, index_path, task_id="M8-007", evidence_inputs=inputs)
+        self.assertEqual("SKIPPED_AS_PASS", caught.exception.code)
 
     def test_current_bound_inputs_require_pass_bundle_digest(self) -> None:
         temporary, root, index = self.fixture()

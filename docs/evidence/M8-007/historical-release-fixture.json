@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "kind": "historical-release-regression-fixture",
+  "source_archive": "/home/elliot/playground/Wirestack-pr-worktrees/M8-006-publication/dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+  "installed_fixture": "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+  "source_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+  },
+  "destination_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+  },
+  "scope": "Historical M7 tooling regression fixture only; not an M8 release artifact."
+}

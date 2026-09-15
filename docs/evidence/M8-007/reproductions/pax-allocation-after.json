@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "source_task": "M8-007",
+  "observations": [
+    {
+      "blocks": 20,
+      "decoded_bytes": 103424,
+      "peak_traced_bytes": 462205,
+      "rejection": "release archive exceeds the cumulative PAX field limit"
+    },
+    {
+      "blocks": 40,
+      "decoded_bytes": 205824,
+      "peak_traced_bytes": 478073,
+      "rejection": "release archive exceeds the cumulative PAX field limit"
+    },
+    {
+      "blocks": 80,
+      "decoded_bytes": 410624,
+      "peak_traced_bytes": 515767,
+      "rejection": "release archive exceeds the cumulative PAX field limit"
+    }
+  ]
+}

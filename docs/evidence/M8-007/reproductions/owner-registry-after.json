@@ -1,0 +1,156 @@
+{
+  "source_task": "M8-007",
+  "phase": "after",
+  "status": "PASS",
+  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "artifact_sha256": "5896572753484b3f64903b2b4ccc4f0f471ddab33ef034f5c3b1bb1c3d509669",
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
+  },
+  "driver": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "54c271aa7d642b998660373e4e0130639e59b5f150c19c8f7d25f045b3b707fa"
+    }
+  },
+  "probe": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8466260e30622877c353fe65aeff09c909870943d18b22cec7555c67a8530a8b"
+    }
+  },
+  "derived_source": {
+    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/consumer.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "669408df856080d342df911d62c0dff15da01c3956c1b2b31fa6159d13b22eaf"
+    }
+  },
+  "instrumentation": "Read-only synchronized registry occupancy counter in the throwaway derived consumer only.",
+  "commands": {
+    "build": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "duration_ms": 15717.262057005428,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "580556ed5022cbf4769ac43ef9ee0d8c0211070212ba6a265cb29a0511f7fefe"
+        }
+      }
+    },
+    "stale": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-6i875i76/consumer/target/release/bin/main",
+        "stale"
+      ],
+      "exit_code": 0,
+      "duration_ms": 113.84174099657685,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/stale.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cd351b0298deed7768c04a33198db5c6ad7753185aabf684558be62a1f9ada3c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/stale.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "live": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-6i875i76/consumer/target/release/bin/main",
+        "live"
+      ],
+      "exit_code": 0,
+      "duration_ms": 2068.5261380276643,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/live.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1d870f8b698efb87c219b4c42f283792c63c934906d2977fb55701916cc09854"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/live.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "transports": {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "/home/elliot/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-6i875i76/consumer/target/release/bin/main",
+        "transports"
+      ],
+      "exit_code": 0,
+      "duration_ms": 264.09980101743713,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/transports.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f6a8e09fa642394cb00258e407a6d99df7e8762520067763c3e987a87508e627"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447103650401142/transports.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  },
+  "observations": {
+    "stale": {
+      "mode": "stale",
+      "claims": "4096",
+      "peakSlots": "1024",
+      "limit": "1024"
+    },
+    "live": {
+      "mode": "live",
+      "sentinels": "1024",
+      "retained": "1024",
+      "rejected": "true"
+    },
+    "transports": {
+      "mode": "transports",
+      "held": "1024",
+      "retained": "1024",
+      "rejected": "true"
+    }
+  },
+  "observed_bounds": true
+}

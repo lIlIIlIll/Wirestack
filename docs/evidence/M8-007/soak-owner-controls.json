@@ -1,0 +1,114 @@
+{
+  "source_task": "M8-007",
+  "status": "PASS",
+  "baseline_revision": "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+  "baseline_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "66ec47609e0cd3d4608868997202de45fc9c9cc8f3575c2c6e880cdc2fab5c19"
+  },
+  "driver": {
+    "path": "docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "769648ba324215c41a6d8cad1b8496d6f183475336be200c79d98d77e96bd6e5"
+    }
+  },
+  "historical_log": {
+    "path": "docs/evidence/M8-007/reproductions/soak-preflight.log",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d5e340fd521c8a0ddf9d3877779ad303f1db3c1cdc59bb2d0ebcaee309e602e0"
+    }
+  },
+  "runtime_preflight": {
+    "path": "docs/evidence/M8-007/reproductions/bounded-owner-preflight-600s.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2b7cbb4b270e5d66d12785364423a492fc54268544648f1b670e01a81b722fb"
+    }
+  },
+  "source_inputs": {
+    "tools/m7_022_linux_release_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "67369f2a06b7eb27893920781318e656ce86706ac522dd4a624722f5392a9afc"
+    },
+    "tools/tests/test_m7_022_linux_release_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8482d9d03c1e5498271f15d0175ac6a888894d668421719cbaf17e3dcceba411"
+    },
+    "tools/release_soak/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
+    }
+  },
+  "before": {
+    "id": "before",
+    "argv": [
+      "python3",
+      "docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt",
+      "--baseline",
+      "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+      "--phase",
+      "before"
+    ],
+    "status": "FAIL",
+    "exit_code": 1,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T04:37:49.053584Z",
+    "finished_at_utc": "2026-09-15T04:37:49.368370Z",
+    "duration_ms": 314.792,
+    "stdout_path": "docs/evidence/M8-007/commands/soak-owner-controls/1789447069053420127/before.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/soak-owner-controls/1789447069053420127/before.stderr.log",
+    "stdout_excerpt": "{\"old_literal_log_accepted\": true, \"tests_run\": 1, \"failures\": 1, \"errors\": 0, \"baseline_source_digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"66ec47609e0cd3d4608868997202de45fc9c9cc8f3575c2c6e880cdc2fab5c19\"}}\n",
+    "stderr_excerpt": "test_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected) ... FAIL\n\n======================================================================\nFAIL: test_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/elliot/playground/Wirestack-pr-worktrees/M8-007-release/tools/tests/test_m7_022_linux_release_soak.py\", line 137, in test_old_literal_owner_evidence_schema_is_rejected\n    with self.assertRaises(gate.SoakError) as caught:\n         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\nAssertionError: SoakError not raised\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cc87a4a670ba5371879b3366b58edb58ad8ddb8a9e1a5e3acc7b7b03a6c02987"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "80e1c0344fac82f4f7991792cd7022144c784ee46ca2aedc0cc5c4d93f9165e1"
+    }
+  },
+  "after": {
+    "id": "after",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "-v",
+      "tools.tests.test_m7_022_linux_release_soak"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T04:37:49.368741Z",
+    "finished_at_utc": "2026-09-15T04:37:49.935647Z",
+    "duration_ms": 566.912,
+    "stdout_path": "docs/evidence/M8-007/commands/soak-owner-controls/1789447069053420127/after.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/soak-owner-controls/1789447069053420127/after.stderr.log",
+    "stdout_excerpt": "M7-022 Linux release soak: FAIL: SOAK_ALREADY_RUNNING: another invocation is active\n",
+    "stderr_excerpt": "test_artifact_missing_and_digest_drift_fail_before_execution (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_artifact_missing_and_digest_drift_fail_before_execution) ... ok\ntest_atomic_report_replaces_and_preserves_old_target_on_failure (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_atomic_report_replaces_and_preserves_old_target_on_failure) ... ok\ntest_bounded_tail_keeps_only_the_configured_suffix (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_bounded_tail_keeps_only_the_configured_suffix) ... ok\ntest_build_excerpt_byte_bound_survives_invalid_utf8 (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_build_excerpt_byte_bound_survives_invalid_utf8) ... ok\ntest_exact_artifact_digest_is_accepted (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_exact_artifact_digest_is_accepted) ... ok\ntest_exclusive_task_run_rejects_a_second_invocation (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_exclusive_task_run_rejects_a_second_invocation) ... ok\ntest_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics) ... ok\ntest_internal_import_and_package_drift_fail_closed (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_internal_import_and_package_drift_fail_closed) ... ok\ntest_isolated_raw_log_promotes_atomically_and_preserves_old_on_failure (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_isolated_raw_log_promotes_atomically_and_preserves_old_on_failure) ... ok\ntest_lock_failure_does_not_replace_active_run_report (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_lock_failure_does_not_replace_active_run_report) ... ok\ntest_marker_parser_accepts_exact_ordered_samples_and_one_result (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_marker_parser_accepts_exact_ordered_samples_and_one_result) ... ok\ntest_marker_parser_rejects_missing_duplicate_reordered_unknown_and_skipped (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_marker_parser_rejects_missing_duplicate_reordered_unknown_and_skipped) ... ok\ntest_metric_trend_accepts_limit_and_rejects_growth_or_monotonic_count (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_metric_trend_accepts_limit_and_rejects_growth_or_monotonic_count) ... ok\ntest_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected) ... ok\ntest_platform_rejects_other_os_cpu_and_musl (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_platform_rejects_other_os_cpu_and_musl) ... ok\ntest_private_candidate_copy_is_pinned_and_original_drift_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_private_candidate_copy_is_pinned_and_original_drift_is_rejected) ... ok\ntest_readiness_requires_one_marker_after_a_complete_cycle (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_readiness_requires_one_marker_after_a_complete_cycle) ... ok\ntest_resource_and_application_trends_fail_closed (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_resource_and_application_trends_fail_closed) ... ok\ntest_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics) ... ok\ntest_terminate_process_group_stops_running_child (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_terminate_process_group_stops_running_child) ... ok\ntest_text_input_drift_is_rejected_in_the_text_evidence_domain (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_text_input_drift_is_rejected_in_the_text_evidence_domain) ... ok\ntest_workload_requires_duration_mix_cancellation_reset_and_terminal_cleanup (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_workload_requires_duration_mix_cancellation_reset_and_terminal_cleanup) ... ok\n\n----------------------------------------------------------------------\nRan 22 tests in 0.271s\n\nOK\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1ea5f82dbffb713c8f9690c0047c61bea4387eacd0e558fbea9c86f17e0d8f2c"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c95dfe2f0b4b742e689c471f5d4ec32310f92c89fad44c10006de24dadb26a9c"
+    }
+  },
+  "checks": {
+    "baseline_accepts_literal_owners": true,
+    "baseline_regression_fails": true,
+    "corrected_owner_suite_passes": true,
+    "commands_complete": true,
+    "measured_owner_preflight_passes": true
+  }
+}
