@@ -634,6 +634,8 @@
     "docs/evidence/M8-007/commands/20260914T144856/parser-fuzz-verification.stdout.log",
     "docs/evidence/M8-007/commands/20260914T144856/task-contract-validation.stderr.log",
     "docs/evidence/M8-007/commands/20260914T144856/task-contract-validation.stdout.log",
+    "docs/evidence/M8-007/commands/20260915-auth-restored/independent-review-verification.stderr.log",
+    "docs/evidence/M8-007/commands/20260915-auth-restored/independent-review-verification.stdout.log",
     "docs/evidence/M8-007/commands/archive-review-controls/1789373500825725906/after-archive.stderr.log",
     "docs/evidence/M8-007/commands/archive-review-controls/1789373500825725906/after-archive.stdout.log",
     "docs/evidence/M8-007/commands/archive-review-controls/1789373500825725906/before-archive.stderr.log",
