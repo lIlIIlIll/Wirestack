@@ -13,4 +13,4 @@ package-configuration = {}
 
 [dependencies]
   yjson = { path = "../..", output-type = "static" }
-  yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "f784f302756d6e80570478466cacc6fb7172bb74", output-type = "static" }
+  yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "1803e9f68be1438a8f29157c9b9f54821870368", output-type = "static" }

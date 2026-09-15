@@ -13,4 +13,4 @@
 
 [test-dependencies]
   yjson = { path = "../.." }
-  yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "f784f302756d6e80570478466cacc6fb7172bb74" }
+  yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "1803e9f68be143a8f29157c9b9f54821870368" }
