@@ -14,7 +14,7 @@ package-configuration = {}
 [dependencies]
 
 [test-dependencies]
-yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "1803e9f68be1438a8f29157c9b9f54821870368" }
+yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "1803e9f68be1438a8f29157c9b9f54821870368a" }
 
 [profile.bench]
 no-color = true
