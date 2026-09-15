@@ -17,7 +17,9 @@ private func jsonPathError(message: String, expression: String,
 
 public class JsonPathMatch {
     public let value: JsonValueView
-    /// RFC 9535 normalized path, rooted at `$`.
+    /**
+     * RFC 9535 normalized path, rooted at `$`.
+     */
     public let normalizedPath: String
 
     public init(value: JsonValueView, normalizedPath: String) {
@@ -39,16 +41,20 @@ public class JsonPath {
         parse(expression, limits: JsonPathLimits.defaults)
     }
 
-    /// Parses with compile-time filter budgets from `limits`: expression
-    /// bytes, logical operator count, and logical nesting depth. Filters
-    /// exceeding a budget throw `JsonException(code: "invalid_json_path")`
-    /// instead of being accepted for evaluation.
+    /**
+     * Parses with compile-time filter budgets from `limits`: expression
+     * bytes, logical operator count, and logical nesting depth. Filters
+     * exceeding a budget throw `JsonException(code: "invalid_json_path")`
+     * instead of being accepted for evaluation.
+     */
     public static func parse(expression: String, limits!: JsonPathLimits): JsonPath {
         JsonPathParser(expression, JsonPathFilterBudget(limits)).parse()
     }
 
-    /// Creates a single-threaded lazy cursor. No candidate is visited until
-    /// `next()` is called.
+    /**
+     * Creates a single-threaded lazy cursor. No candidate is visited until
+     * `next()` is called.
+     */
     public func matches(root: JsonValueView,
         limits!: JsonPathLimits = JsonPathLimits.defaults): JsonPathCursor {
         cursorWithWork(root, JsonPathWork(limits))
@@ -162,7 +168,9 @@ class JsonPathWork {
     }
 }
 
-/// Single-threaded lazy JSONPath result cursor.
+/**
+ * Single-threaded lazy JSONPath result cursor.
+ */
 public class JsonPathCursor <: Iterator<JsonPathMatch> {
     private let root: JsonValueView
     private let segments: Array<JsonPathSegment>
@@ -440,10 +448,12 @@ class JsonPathSegment {
     }
 }
 
-/// Compile-time budget shared by every filter expression validated while
-/// parsing one JSONPath (including nested queries inside function
-/// arguments). Counts are per whole expression, matching the semantics of
-/// JsonPathLimits.maxFilter* fields.
+/**
+ * Compile-time budget shared by every filter expression validated while
+ * parsing one JSONPath (including nested queries inside function
+ * arguments). Counts are per whole expression, matching the semantics of
+ * JsonPathLimits.maxFilter* fields.
+ */
 private class JsonPathFilterBudget {
     let maxBytes: Int64
     let maxOperators: Int64

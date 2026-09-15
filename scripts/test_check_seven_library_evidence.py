@@ -187,6 +187,8 @@ yjson = "0.1.0"
             "schedule": "rotating and reversed",
             "jmh": "fixture",
             "cangjie_bench": "fixture",
+            "time_binary": "/usr/bin/time",
+            "rss_unit": "kbytes",
             "api_policy": "fastest semantically equivalent public typed API",
             "canonical_decode_payload_bytes": {"Address": 47},
             "versions": {
@@ -218,8 +220,13 @@ yjson = "0.1.0"
             result.append({"workload_id": workload, "libraries": libraries})
         return result
 
-    def summary_rows(self, batch: int, include_max_cv: bool) -> list[str]:
+    def summary_rows(
+        self, batch: int, include_max_cv: bool, stable_only: bool = False
+    ) -> list[str]:
         rows: list[str] = []
+        max_cv = len(checker.LIBRARIES) + batch / 10.0
+        if stable_only and max_cv > 5.0:
+            return rows
         for workload_index, workload in enumerate(checker.WORKLOADS):
             medians = [
                 f"{batch * 100 + workload_index * 10 + library_index + 1:.3f}"
@@ -227,12 +234,18 @@ yjson = "0.1.0"
             ]
             cells = [checker.WORKLOAD_LABELS[workload], *medians]
             if include_max_cv:
-                cells.append(f"{len(checker.LIBRARIES) + batch / 10.0:.2f}%")
+                cells.append(f"{max_cv:.2f}%")
             rows.append("| " + " | ".join(cells) + " |")
         return rows
 
     def _write_formal_archive(
-        self, archive: dict[str, str], batch: int, **metadata_overrides: object
+        self,
+        archive: dict[str, str],
+        batch: int,
+        *,
+        recorded_rss: int = 123,
+        sidecar_rss: int = 123,
+        **metadata_overrides: object,
     ) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = pathlib.Path(temporary) / archive["root"]
@@ -244,11 +257,20 @@ yjson = "0.1.0"
             )
             with (root / "manifest.csv").open("w", newline="", encoding="utf-8") as stream:
                 writer = csv.writer(stream)
-                writer.writerow(("round", "workload_id", "library"))
+                writer.writerow(
+                    ("round", "workload_id", "library", "max_rss_kb", "rss_path")
+                )
                 for round_number in range(1, 12):
                     for workload in checker.WORKLOADS:
                         for library in checker.LIBRARIES:
-                            writer.writerow((round_number, workload, library))
+                            rss_path = (
+                                f"rss/{round_number}/{workload}/{library}/time-rss.txt"
+                            )
+                            writer.writerow((round_number, workload, library, recorded_rss, rss_path))
+                            write(
+                                root / rss_path,
+                                f"Maximum resident set size (kbytes): {sidecar_rss}\n",
+                            )
             write(root / "summary.json", json.dumps(self.summary(batch), indent=2) + "\n")
             write(root / "summary.csv", "fixture\n")
             write(root / "summary.md", "fixture\n")
@@ -297,10 +319,22 @@ yjson = "0.1.0"
         lines = [f"{checker.sha256(self.evidence / name)}  {name}" for name in names]
         write(self.evidence / "checksums.txt", "\n".join(lines) + "\n")
 
-    def write_evidence(self, second_metadata: dict[str, object] | None = None) -> None:
+    def write_evidence(
+        self,
+        second_metadata: dict[str, object] | None = None,
+        *,
+        second_recorded_rss: int = 123,
+        second_sidecar_rss: int = 123,
+    ) -> None:
         self.evidence.mkdir(parents=True, exist_ok=True)
         self._write_formal_archive(self.formal[0], 1)
-        self._write_formal_archive(self.formal[1], 2, **(second_metadata or {}))
+        self._write_formal_archive(
+            self.formal[1],
+            2,
+            recorded_rss=second_recorded_rss,
+            sidecar_rss=second_sidecar_rss,
+            **(second_metadata or {}),
+        )
         self._write_harness_archive()
         evidence_to_result = pathlib.PurePosixPath(
             os.path.relpath(self.result, self.evidence)
@@ -320,7 +354,7 @@ yjson = "0.1.0"
             f"## 第一批\n\n{first_rows}\n\n"
             f"## 第二批\n\n{second_rows}\n",
         )
-        readme_rows = "\n".join(self.summary_rows(2, include_max_cv=False))
+        readme_rows = "\n".join(self.summary_rows(2, include_max_cv=False, stable_only=True))
         write(
             self.root / "README.md",
             f"[Current]({self.result_relative})\n\n## 性能\n\n{readme_rows}\n",
@@ -498,6 +532,11 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
         with self.assertRaisesRegex(checker.EvidenceError, "identity mismatch: api_policy"):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
 
+    def test_manifest_rss_must_match_sidecar(self) -> None:
+        self.fixture.write_evidence(second_recorded_rss=124)
+        with self.assertRaisesRegex(checker.EvidenceError, "manifest RSS differs from sidecar"):
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
+
     def test_two_batches_allow_lscpu_scaling_drift(self) -> None:
         self.fixture.write_evidence(
             second_metadata={"lscpu": "fixture CPU\nCPU(s) scaling MHz: 129%"}
@@ -543,11 +582,26 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
         write(self.root / "README.md", "stale link\n")
         with self.assertRaisesRegex(checker.EvidenceError, "does not link"):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
+    def test_readme_table_can_be_omitted_for_unstable_measurements(self) -> None:
+        write(
+            self.root / "README.md",
+            f"[Current]({self.fixture.result_relative})\n\n## 性能\n\n",
+        )
+        self.assertEqual(
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True),
+            2,
+        )
+
 
     def test_readme_number_drift_fails_closed(self) -> None:
         path = self.root / "README.md"
-        text = path.read_text(encoding="utf-8")
-        write(path, text.replace("| Address encode | 201.000", "| Address encode | 999.000", 1))
+        write(
+            path,
+            f"[Current]({self.fixture.result_relative})\n\n"
+            "## 性能\n\n"
+            "| Address encode | 201.000 | 202.000 | 203.000 | "
+            "204.000 | 205.000 | 206.000 | 207.000 |\n",
+        )
         with self.assertRaisesRegex(checker.EvidenceError, "README current performance table"):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
 

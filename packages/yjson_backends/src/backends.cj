@@ -7,7 +7,9 @@ public enum JsonStreamBufferingMode {
     | WholeDocument
 }
 
-/// Immutable facts about the engine that actually owns a backend document.
+/**
+ * Immutable facts about the engine that actually owns a backend document.
+ */
 public class JsonBackendMetadata {
     public let name: String
     public let version: String

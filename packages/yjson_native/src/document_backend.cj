@@ -12,7 +12,9 @@ private let CUSTOM_NATIVE_METADATA = JsonBackendMetadata(
     JsonStreamBufferingMode.WholeDocument
 )
 
-/// Closed, immutable facade for the qualified Custom Native backend.
+/**
+ * Closed, immutable facade for the qualified Custom Native backend.
+ */
 public class NativeBackendFacade {
     init() {}
 
@@ -118,8 +120,10 @@ public class NativeBackendFacade {
     }
 }
 
-/// Qualified first-party backend handles. Callers cannot construct or inject
-/// additional backend implementations.
+/**
+ * Qualified first-party backend handles. Callers cannot construct or inject
+ * additional backend implementations.
+ */
 public class NativeBackends {
     private static let qualified = NativeBackendFacade()
 

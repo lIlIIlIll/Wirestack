@@ -109,17 +109,17 @@ export LC_ALL=C
 (
     cd "$source_stage/packages/benchmarks"
     taskset -c "$cpu" cjpm bench --no-color \
-        --filter 'ComprehensiveJsonCompareBenchmarks.yjsonStringDecodePrettyPerson*'
+        --filter 'ComprehensiveJsonCompareBenchmarks.yjsonStringDecodePrettyPerson'
 ) > "$preflight/yjson.log" 2>&1 < /dev/null
 (
     cd "$source_stage/packages/benchmarks"
     taskset -c "$cpu" cjpm bench --skip-build --no-color \
-        --filter 'ComprehensiveJsonCompareBenchmarks.stdxStringDecodePrettyPerson*'
+        --filter 'ComprehensiveJsonCompareBenchmarks.stdxStringDecodePrettyPerson'
 ) > "$preflight/stdx-json.log" 2>&1 < /dev/null
 (
     cd "$cjfast_work"
     taskset -c "$cpu" cjpm bench --no-color \
-        --filter 'CjFastJsonComprehensiveBenchmarks.cjfastStringDecodePrettyPerson*'
+        --filter 'CjFastJsonComprehensiveBenchmarks.cjfastStringDecodePrettyPerson'
 ) > "$preflight/cjfast-json.log" 2>&1 < /dev/null
 
 if [[ "${YJSON_PERF_PREFLIGHT_ONLY:-0}" == "1" ]]; then

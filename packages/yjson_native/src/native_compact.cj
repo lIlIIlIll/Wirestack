@@ -164,8 +164,10 @@ func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteOptions): Array<
     }
 }
 
-/// Native-owned memory counters. `persistentCommitted` includes C-owned input,
-/// POD store capacities, and arena blocks; it is not Cangjie heap usage or RSS.
+/**
+ * Native-owned memory counters. `persistentCommitted` includes C-owned input,
+ * POD store capacities, and arena blocks; it is not Cangjie heap usage or RSS.
+ */
 struct NativeCompactStorageStats {
     public let sourceBytes: UInt64
     public let persistentUsed: UInt64
@@ -232,7 +234,9 @@ struct NativeCompactDuplicateStats {
     }
 }
 
-/// One object entry returned as a document-bound value view.
+/**
+ * One object entry returned as a document-bound value view.
+ */
 struct NativeCompactObjectEntry {
     public let key: String
     public let value: NativeCompactJsonValue
@@ -243,11 +247,13 @@ struct NativeCompactObjectEntry {
     }
 }
 
-/// Supported opt-in immutable Compact DOM backed entirely by C-owned memory.
-///
-/// Parsing is one coarse FFI call. Concurrent reads are supported. Explicit
-/// close is idempotent and waits for active reads; each racing read either
-/// completes or fails with resource_closed, without accessing released memory.
+/**
+ * Supported opt-in immutable Compact DOM backed entirely by C-owned memory.
+ *
+ * Parsing is one coarse FFI call. Concurrent reads are supported. Explicit
+ * close is idempotent and waits for active reads; each racing read either
+ * completes or fails with resource_closed, without accessing released memory.
+ */
 class NativeCompactJsonDocument <: Resource {
     private var handle: UInt64
     private let rootNode: UInt32
@@ -385,7 +391,9 @@ class NativeCompactJsonDocument <: Resource {
         materializeBulk(maxNodes: maxNodes)
     }
 
-    /// One native export plus one Cangjie bulk construction. No per-node FFI.
+    /**
+     * One native export plus one Cangjie bulk construction. No per-node FFI.
+     */
     func materializeBulk(maxNodes!: Int64 = 100000): JsonNode {
         let reader = BackendTapeReaderV1(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_ExportTapeAlloc(handle, buffer, size) }
@@ -409,7 +417,9 @@ class NativeCompactJsonDocument <: Resource {
         Some(exportStreamTape())
     }
 
-    /// Control path for the bulk materialization experiment.
+    /**
+     * Control path for the bulk materialization experiment.
+     */
     func materializeViaSerialization(): JsonNode {
         JsonNode.parse(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_SerializeAlloc(handle, buffer, size) }
@@ -698,9 +708,11 @@ class NativeCompactJsonDocument <: Resource {
     }
 }
 
-/// A value-like, document-bound native view. It does not allocate a Cangjie
-/// class per JSON node. Container payloads are native node indexes; object
-/// scalar values remain inline in the native object-entry stores.
+/**
+ * A value-like, document-bound native view. It does not allocate a Cangjie
+ * class per JSON node. Container payloads are native node indexes; object
+ * scalar values remain inline in the native object-entry stores.
+ */
 struct NativeCompactJsonValue <: JsonValueView {
     private let document: NativeCompactJsonDocument
     private let node: UInt32

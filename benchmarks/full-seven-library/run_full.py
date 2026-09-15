@@ -15,6 +15,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -110,6 +111,13 @@ CANGJIE = {
         "cjfastString",
     ),
 }
+CANGJIE_BINARIES = {
+    "yjson": "repo/packages/benchmarks/target/release/unittest_bin/yjson_benchmarks",
+    "stdx_json": "repo/packages/benchmarks/target/release/unittest_bin/yjson_benchmarks",
+    "cangjieJSON": "harness/cjjson/target/release/unittest_bin/bench_cjjson",
+    "json4cj": "harness/json4cj/target/release/unittest_bin/bench_json4cj",
+    "cjfast_json": "cjfast-json/target/release/unittest_bin/fastjson.bench",
+}
 
 JAVA = {"jackson": "jackson", "fastjson2": "fastjson2"}
 PREFLIGHT_MARKER = "YJSON_SEVEN_LIBRARY_PREFLIGHT_V1"
@@ -120,6 +128,32 @@ PREFLIGHT_FIXTURES = (
     "cjfast-json/src/bench/cjfast_comprehensive_bench.cj",
     "harness/java/src/main/java/bench/OptimalJsonBench.java",
 )
+
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
+
+
+def find_time_binary() -> str:
+    path = shutil.which("time", path="/usr/bin:/bin")
+    if path:
+        return path
+    raise SystemExit(
+        "GNU time (/usr/bin/time) is required for RSS capture; install the 'time' package"
+    )
+
+
+def parse_max_rss(path: Path) -> int:
+    matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    if len(matches) != 1:
+        raise ValueError(
+            f"expected one GNU time RSS value in {path}, found {len(matches)}"
+        )
+    value = int(matches[0])
+    if value <= 0:
+        raise ValueError(f"GNU time RSS value must be positive in {path}")
+    return value
 
 
 def source_digest(root: Path) -> str:
@@ -169,31 +203,69 @@ def order(items: tuple, round_id: int) -> list:
     return rotated if round_id % 2 else list(reversed(rotated))
 
 
+def cangjie_binary(workspace: Path, library: str) -> Path:
+    try:
+        return workspace / CANGJIE_BINARIES[library]
+    except KeyError as error:
+        raise ValueError(f"no Cangjie binary configured for {library}") from error
+
+
+def cangjie_runtime_environment(
+    env: dict[str, str], stdx_sdk_root: Path, cwd: Path
+) -> dict[str, str]:
+    command_env = env.copy()
+    dynamic_stdx = (
+        stdx_sdk_root
+        if stdx_sdk_root.name == "stdx"
+        else stdx_sdk_root / "linux_x86_64_cjnative/dynamic/stdx"
+    )
+    library_paths = [str(dynamic_stdx)]
+    for runtime_dir in (
+        cwd / "target/release/cjjson",
+        cwd / "target/release/fastjson",
+    ):
+        if runtime_dir.is_dir():
+            library_paths.append(str(runtime_dir))
+    current = command_env.get("LD_LIBRARY_PATH", "")
+    if current:
+        library_paths.append(current)
+    command_env["LD_LIBRARY_PATH"] = ":".join(library_paths)
+    return command_env
+
+
 def cangjie_command(
     cpu: int,
-    suite: str,
+    binary: Path,
     source_case: str,
     report_dir: Path,
     round_id: int,
 ) -> list[str]:
-    """Build a command selecting exactly one Cangjie benchmark case."""
+    """Build a timed command for one prebuilt Cangjie benchmark case."""
     return [
         "taskset",
         "-c",
         str(cpu),
-        "cjpm",
-        "bench",
-        "--skip-build",
+        str(binary),
+        "--bench",
         "--no-color",
-        "--filter",
-        f"{suite}.{source_case}",
-        "--report-path",
-        str(report_dir),
-        "--report-format",
-        "csv-raw",
-        "--random-seed",
-        str(round_id),
+        "--no-progress",
+        f"--filter=*.{source_case}",
+        f"--report-path={report_dir}",
+        "--report-format=csv-raw",
+        f"--random-seed={round_id}",
     ]
+
+
+def cangjie_binary_metadata(workspace: Path) -> dict[str, dict[str, str]]:
+    return {
+        library: {
+            "path": cangjie_binary(workspace, library).relative_to(workspace).as_posix(),
+            "sha256": file_digest(cangjie_binary(workspace, library)),
+        }
+        for library in CANGJIE
+    }
+
+
 
 
 def java_command(cpu: int, source_case: str, report_file: Path) -> list[str]:
@@ -248,6 +320,17 @@ def require_workspace_layout(workspace: Path) -> None:
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise ValueError("workspace omits required benchmark inputs: " + ", ".join(missing))
+    missing_binaries = []
+    for library in CANGJIE:
+        path = cangjie_binary(workspace, library)
+        if not path.is_file() or not os.access(path, os.X_OK):
+            missing_binaries.append(f"{library}: {path}")
+    if missing_binaries:
+        raise ValueError(
+            "workspace omits built Cangjie benchmark executables: "
+            + ", ".join(missing_binaries)
+        )
+
     missing_preflight = []
     for relative in PREFLIGHT_FIXTURES:
         path = workspace / relative
@@ -280,21 +363,24 @@ def run_correctness_preflight(
     for library in LIBRARIES:
         source_case: str
         if library in CANGJIE:
-            relative_cwd, suite, prefix = CANGJIE[library]
+            relative_cwd, _, prefix = CANGJIE[library]
             cwd = workspace / relative_cwd
+            binary = cangjie_binary(workspace, library)
             source_case = prefix + "EncodeAddress"
             report = preflight / library / "report"
             report.mkdir(parents=True)
-            command = cangjie_command(cpu, suite, source_case, report, 1)
+            command = cangjie_command(cpu, binary, source_case, report, 1)
         else:
             cwd = workspace / "harness/java"
             source_case = JAVA[library] + "EncodeAddress"
             report = preflight / library / "report"
             report.mkdir(parents=True)
             command = java_command(cpu, source_case, report / "jmh.json")
-        command_env = env.copy()
-        if library == "cangjieJSON":
-            command_env["CANGJIE_STDX_PATH"] = str(stdx_sdk_root)
+        command_env = (
+            cangjie_runtime_environment(env, stdx_sdk_root, cwd)
+            if library in CANGJIE
+            else env.copy()
+        )
         result = subprocess.run(
             command,
             cwd=cwd,
@@ -323,9 +409,26 @@ def metadata(
     env: dict[str, str],
     runs: int,
     cpu: int,
+    time_binary: str,
 ) -> dict[str, object]:
     stdx_static = stdx_sdk_root / "linux_x86_64_cjnative/static/stdx"
+    yjson_commit = env.get("YJSON_RELEASE_COMMIT") or capture(
+        ["git", "rev-parse", "HEAD"], workspace / "repo", env
+    )
+    provenance_env = {
+        "product_source_sha256": "YJSON_PRODUCT_SOURCE_SHA256",
+        "effective_harness_sha256": "YJSON_EFFECTIVE_HARNESS_SHA256",
+        "measured_overlay_sha256": "YJSON_MEASURED_OVERLAY_SHA256",
+    }
+    provenance = {
+        key: env[environment_key]
+        for key, environment_key in provenance_env.items()
+        if env.get(environment_key)
+    }
     return {
+        **provenance,
+        "time_binary": time_binary,
+        "rss_unit": "kbytes",
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
         "host": platform.node(),
         "platform": platform.platform(),
@@ -336,7 +439,12 @@ def metadata(
             "workload and seven-library order rotate; even rounds reverse workload order"
         ),
         "jmh": "1 fork per outer round, 3x500ms warmup, 1x1s measurement, avgt ns/op",
-        "cangjie_bench": "200ms warmup, >=1s duration, >=12 batches, csv-raw",
+        "cangjie_bench": "prebuilt executable direct; 200ms warmup, >=1s duration, >=12 batches, csv-raw",
+        "timing_build_policy": (
+            "all Cangjie benchmark packages are built before this runner; GNU time wraps "
+            "only the prebuilt benchmark executables"
+        ),
+        "cangjie_binaries": cangjie_binary_metadata(workspace),
         "case_selection": "exact fully-qualified benchmark method; report Case validated before manifest commit",
         "correctness_preflight": (
             "all seven fixtures execute and validate one exact case before formal timing; "
@@ -354,9 +462,7 @@ def metadata(
             "ArrayList<HashMap<String, ArrayList<ProfileRecord>>>": 1929,
         },
         "versions": {
-            "yjson_commit": capture(
-                ["git", "rev-parse", "HEAD"], workspace / "repo", env
-            ),
+            "yjson_commit": yjson_commit,
             "cangjieJSON_branch_commit": "910fd9c61858f33b242a0076c22b2e06c8073511",
             "cjfast_json_commit": capture(
                 ["git", "rev-parse", "HEAD"], workspace / "cjfast-json", env
@@ -449,6 +555,7 @@ def main(argv: list[str] | None = None) -> int:
     env = os.environ.copy()
     env["cjHeapSize"] = "128MB"
     env["LC_ALL"] = "C"
+    time_binary = find_time_binary()
     try:
         cpu_selection = json.loads(
             (workspace / "cpu-selection.json").read_text(encoding="utf-8")
@@ -470,7 +577,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         run_metadata = metadata(
-            workspace, stdx_sdk_root, cpu_selection, env, args.runs, args.cpu
+            workspace, stdx_sdk_root, cpu_selection, env, args.runs, args.cpu, time_binary
         )
     except (OSError, subprocess.CalledProcessError) as error:
         parser.error(f"cannot capture benchmark provenance: {error}")
@@ -489,9 +596,11 @@ def main(argv: list[str] | None = None) -> int:
         "payload",
         "source_case",
         "elapsed_seconds",
+        "max_rss_kb",
         "load1_before",
         "load1_after",
         "report_path",
+        "rss_path",
         "log_path",
     ]
     with (output / "manifest.csv").open("w", newline="", encoding="utf-8") as stream:
@@ -505,13 +614,15 @@ def main(argv: list[str] | None = None) -> int:
                 for library_position, library in enumerate(order(LIBRARIES, round_id), 1):
                     report_dir = raw / f"run-{round_id:02d}" / workload_id / library
                     report_dir.mkdir(parents=True)
+                    rss_path = report_dir / "time-rss.txt"
                     log_path = logs / f"run-{round_id:02d}-{workload_id}-{library}.log"
                     if library in CANGJIE:
-                        relative_cwd, suite, prefix = CANGJIE[library]
+                        relative_cwd, _, prefix = CANGJIE[library]
                         cwd = workspace / relative_cwd
+                        binary = cangjie_binary(workspace, library)
                         source_case = prefix + suffix
                         command = cangjie_command(
-                            args.cpu, suite, source_case, report_dir, round_id
+                            args.cpu, binary, source_case, report_dir, round_id
                         )
                     else:
                         cwd = workspace / "harness/java"
@@ -522,11 +633,13 @@ def main(argv: list[str] | None = None) -> int:
 
                     before = os.getloadavg()[0]
                     started = time.monotonic()
-                    command_env = env.copy()
-                    if library == "cangjieJSON":
-                        command_env["CANGJIE_STDX_PATH"] = str(stdx_sdk_root)
+                    command_env = (
+                        cangjie_runtime_environment(env, stdx_sdk_root, cwd)
+                        if library in CANGJIE
+                        else env.copy()
+                    )
                     result = subprocess.run(
-                        command,
+                        [time_binary, "-v", "-o", str(rss_path), *command],
                         cwd=cwd,
                         env=command_env,
                         text=True,
@@ -544,6 +657,16 @@ def main(argv: list[str] | None = None) -> int:
                             flush=True,
                         )
                         return result.returncode
+                    try:
+                        max_rss_kb = parse_max_rss(rss_path)
+                    except (OSError, UnicodeError, ValueError) as error:
+                        print(
+                            f"FAILED RSS capture round={round_id} workload={workload_id} "
+                            f"library={library}: {error}",
+                            file=sys.stderr,
+                            flush=True,
+                        )
+                        return 2
                     try:
                         validate_report(library, report_dir, source_case)
                     except (OSError, UnicodeError, ValueError) as error:
@@ -569,9 +692,11 @@ def main(argv: list[str] | None = None) -> int:
                             "payload": payload,
                             "source_case": source_case,
                             "elapsed_seconds": f"{elapsed:.6f}",
+                            "max_rss_kb": max_rss_kb,
                             "load1_before": f"{before:.3f}",
                             "load1_after": f"{after:.3f}",
                             "report_path": report_dir.relative_to(output),
+                            "rss_path": rss_path.relative_to(output),
                             "log_path": log_path.relative_to(output),
                         }
                     )

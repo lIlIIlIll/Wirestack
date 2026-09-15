@@ -54,6 +54,10 @@ ARCHIVE_KEYS = {"file", "root"}
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}\Z")
 PACKAGE_VERSION_RE = re.compile(r"0\.[1-9][0-9]*\.[0-9]+\Z")
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
 MARKDOWN_LINK_RE = re.compile(r"\]\(([^\s)]+)(?:\s+[^)]*)?\)")
 HTML_HREF_RE = re.compile(r"\bhref=[\"']([^\"']+)[\"']")
 LIBRARIES = (
@@ -112,6 +116,8 @@ STABLE_METADATA_KEYS = (
     "product_source_sha256",
     "effective_harness_sha256",
     "measured_overlay_sha256",
+    "time_binary",
+    "rss_unit",
 )
 
 
@@ -200,6 +206,21 @@ def repo_path(
     except ValueError as error:
         raise EvidenceError(f"{label} escapes the repository: {value!r}") from error
     return candidate
+
+
+def parse_max_rss(path: pathlib.Path) -> int:
+    try:
+        matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, UnicodeError) as error:
+        raise EvidenceError(f"cannot read RSS sidecar {path}: {error}") from error
+    if len(matches) != 1:
+        raise EvidenceError(
+            f"expected one GNU time RSS value in {path}, found {len(matches)}"
+        )
+    value = int(matches[0])
+    if value <= 0:
+        raise EvidenceError(f"GNU time RSS value must be positive in {path}")
+    return value
 
 
 def basename(value: object, label: str, suffix: str | None = None) -> str:
@@ -586,7 +607,7 @@ def read_metadata_and_validate(
             rows = list(csv.DictReader(stream))
     except (OSError, UnicodeError, csv.Error) as error:
         raise EvidenceError(f"cannot read manifest for {root.name}: {error}") from error
-    required_columns = {"round", "workload_id", "library"}
+    required_columns = {"round", "workload_id", "library", "max_rss_kb", "rss_path"}
     if not rows or not required_columns.issubset(rows[0]):
         raise EvidenceError(f"manifest columns are incomplete in {root.name}")
     cells = {(row["round"], row["workload_id"], row["library"]) for row in rows}
@@ -597,6 +618,29 @@ def read_metadata_and_validate(
             f"expected exact 770-cell matrix in {root.name}; "
             f"rows={len(rows)}, unique={len(cells)}, missing={missing}, unexpected={unexpected}"
         )
+    seen_rss: dict[pathlib.Path, tuple[str, str, str]] = {}
+    for row in rows:
+        cell = (row["round"], row["workload_id"], row["library"])
+        rss_path = repo_path(root, row["rss_path"], f"manifest rss_path in {root.name}")
+        previous = seen_rss.get(rss_path)
+        if previous is not None:
+            raise EvidenceError(
+                f"manifest rss_path is shared by {previous} and {cell} in {root.name}"
+            )
+        seen_rss[rss_path] = cell
+        try:
+            recorded_rss = int(row["max_rss_kb"])
+        except (TypeError, ValueError) as error:
+            raise EvidenceError(
+                f"invalid manifest max_rss_kb in {root.name}: {row['max_rss_kb']!r}"
+            ) from error
+        if recorded_rss <= 0:
+            raise EvidenceError(f"manifest max_rss_kb must be positive in {root.name}")
+        measured_rss = parse_max_rss(rss_path)
+        if recorded_rss != measured_rss:
+            raise EvidenceError(
+                f"manifest RSS differs from sidecar in {root.name}: {cell}"
+            )
     return metadata
 
 
@@ -669,7 +713,9 @@ def finite_number(value: object, label: str) -> float:
     return result
 
 
-def canonical_summary_rows(formal_root: pathlib.Path, include_max_cv: bool) -> list[str]:
+def canonical_summary_rows(
+    formal_root: pathlib.Path, include_max_cv: bool, stable_only: bool = False
+) -> list[str]:
     try:
         summary = json.loads((formal_root / "summary.json").read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
@@ -714,9 +760,12 @@ def canonical_summary_rows(formal_root: pathlib.Path, include_max_cv: bool) -> l
             )
             medians.append(f"{median_ns / 1000.0:.3f}")
             cvs.append(cv_percent)
+        max_cv = max(cvs)
+        if stable_only and max_cv > 5.0:
+            continue
         cells = [WORKLOAD_LABELS[workload], *medians]
         if include_max_cv:
-            cells.append(f"{max(cvs):.2f}%")
+            cells.append(f"{max_cv:.2f}%")
         rows.append("| " + " | ".join(cells) + " |")
     return rows
 
@@ -736,7 +785,7 @@ def verify_report_rows(
     root_readme: pathlib.Path,
     result_doc: pathlib.Path,
     result_batch_rows: list[list[str]],
-    readme_batch_rows: list[str] | None,
+    readme_stable_rows: list[str] | None,
 ) -> None:
     result_text = result_doc.read_text(encoding="utf-8")
     label_set = set(WORKLOAD_LABELS.values())
@@ -753,11 +802,13 @@ def verify_report_rows(
                 rows.append(stripped)
         return rows
 
-    if readme_batch_rows is not None:
+    if readme_stable_rows is not None:
         readme_text = root_readme.read_text(encoding="utf-8")
         readme_rows = actual_rows(readme_text, "性能", root_readme)
-        if readme_rows != readme_batch_rows:
-            raise EvidenceError("README current performance table differs from formal batch 2")
+        if readme_rows != readme_stable_rows:
+            raise EvidenceError(
+                "README current performance table differs from stable formal rows"
+            )
     for heading, expected in (
         ("第一批", result_batch_rows[0]),
         ("第二批", result_batch_rows[1]),
@@ -1055,7 +1106,7 @@ def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> in
             raise EvidenceError("harness archive omits summarize_full.py")
         identities: list[dict[str, Any]] = []
         result_batch_rows: list[list[str]] = []
-        readme_batch_rows: list[str] | None = None
+        readme_stable_rows: list[str] | None = None
         for index, archive_info in enumerate(marker["formal_archives"]):
             formal_root = safe_extract(
                 evidence / archive_info["file"],
@@ -1068,20 +1119,20 @@ def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> in
                 canonical_summary_rows(formal_root, include_max_cv=True)
             )
             if index == 1:
-                readme_batch_rows = canonical_summary_rows(
-                    formal_root, include_max_cv=False
+                readme_stable_rows = canonical_summary_rows(
+                    formal_root, include_max_cv=False, stable_only=True
                 )
 
         for key in STABLE_METADATA_KEYS:
             if stable_identity(identities[0], key) != stable_identity(identities[1], key):
                 raise EvidenceError(f"formal archive identity mismatch: {key}")
-        if readme_batch_rows is None:
+        if readme_stable_rows is None:
             raise EvidenceError("formal batch 2 is missing")
         verify_report_rows(
             root / "README.md",
             result_doc,
             result_batch_rows,
-            readme_batch_rows if current_schema else None,
+            readme_stable_rows if current_schema else None,
         )
 
     if not integrity_only:

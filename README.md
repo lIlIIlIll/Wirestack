@@ -175,25 +175,17 @@ let name = document.root().member("name").getOrThrow().asString()
 
 ## 性能
 
-下面是 2026-09-10 七库对比第二批的 11 轮中位数，单位为 µs/op，越小越好。
-测量使用提交 `2758853efe1117c7d2b272abd36cf90de46526f5`。
-**两批结果的每一行都至少有一个库的变异系数（CV）超过 5%，因此这些数字仅供查看，不能作为稳定的性能排名。**
-
-完整样本、波动情况和环境见[2026-09-10 main 七库对比](docs/performance/results/2026-09-10-main-seven-library.md)。
-测试方法见[性能文档](docs/performance/README.md)。结果只适用于记录中的源码、SDK、CPU 和测试数据。
+下面是 2026-09-14 当前 `0.1.0` 候选七库对比第二批的 11 轮中位数，单位为 µs/op，越小越好。
+测量使用提交 `4c2432c80688581dd28afa8bc4a7ec0bdf4858cf`；每个进程同时记录了 peak RSS。
+**只有第二批 Max CV 不超过 5% 的行列为 stable；其余行完整保留，但不能作为稳定的性能排名。**
 
 | Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Address encode | 0.297 | 0.724 | 0.770 | 0.777 | 0.649 | 0.119 | 0.051 |
-| Address decode | 0.158 | 1.243 | 0.413 | 1.439 | 0.541 | 0.203 | 0.044 |
-| Person encode | 0.767 | 2.870 | 4.557 | 1.813 | 2.626 | 0.362 | 0.151 |
-| Person decode | 1.081 | 5.258 | 3.464 | 5.995 | 3.508 | 0.721 | 0.254 |
-| Large Array encode | 11.987 | 24.691 | 65.484 | 29.276 | 21.757 | 5.063 | 2.794 |
-| Large Array decode | 23.765 | 46.327 | 30.231 | 69.087 | 31.836 | 10.077 | 3.420 |
-| Large Map encode | 2.350 | 17.590 | 36.412 | 21.804 | 19.560 | 1.650 | 1.176 |
-| Large Map decode | 7.355 | 39.397 | 40.563 | 44.449 | 37.728 | 3.350 | 2.660 |
-| Deep Nested encode | 13.125 | 19.467 | 41.231 | 22.654 | 17.022 | 2.809 | 1.575 |
-| Deep Nested decode | 33.975 | 34.780 | 25.950 | 44.101 | 24.069 | 6.121 | 2.081 |
+| Large Map decode | 26.768 | 243.456 | 352.000 | 223.573 | 230.724 | 5.327 | 4.000 |
+| Deep Nested encode | 43.421 | 74.496 | 172.000 | 85.248 | 73.728 | 4.437 | 2.484 |
+
+完整样本、波动、RSS 和环境见[2026-09-14 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-14 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
+测试方法见[性能文档](docs/performance/README.md)。结果只适用于记录中的源码、SDK、CPU 和测试数据。
 
 ## 文档
 

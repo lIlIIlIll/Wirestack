@@ -14,6 +14,7 @@ import csv
 import json
 import math
 import pathlib
+import re
 import statistics
 from collections import defaultdict
 from typing import Callable
@@ -29,6 +30,11 @@ LIBRARIES = (
     "fastjson2",
 )
 JAVA_LIBRARIES = {"jackson", "fastjson2"}
+
+RSS_RE = re.compile(
+    r"^[ \t]*Maximum resident set size \(kbytes\):[ \t]*(\d+)[ \t]*$",
+    re.MULTILINE,
+)
 UNITS = {"ns": 1.0, "us": 1_000.0, "ms": 1_000_000.0, "s": 1_000_000_000.0}
 MANIFEST_COLUMNS = {
     "round",
@@ -39,6 +45,8 @@ MANIFEST_COLUMNS = {
     "payload",
     "source_case",
     "report_path",
+    "max_rss_kb",
+    "rss_path",
 }
 
 
@@ -77,6 +85,35 @@ def _relative_report(root: pathlib.Path, raw: str) -> pathlib.Path:
     if not resolved.is_dir():
         raise ValueError(f"manifest report_path is not a directory: {raw!r}")
     return resolved
+
+
+def _relative_rss(root: pathlib.Path, raw: str) -> pathlib.Path:
+    relative = pathlib.PurePosixPath(raw)
+    if relative.is_absolute() or not relative.parts or any(
+        part in ("", ".", "..") for part in relative.parts
+    ):
+        raise ValueError(f"unsafe manifest rss_path: {raw!r}")
+    candidate = root.joinpath(*relative.parts)
+    resolved_root = root.resolve()
+    resolved = candidate.resolve()
+    try:
+        resolved.relative_to(resolved_root)
+    except ValueError as error:
+        raise ValueError(f"manifest rss_path escapes result root: {raw!r}") from error
+    if not resolved.is_file():
+        raise ValueError(f"manifest rss_path is not a file: {raw!r}")
+    return resolved
+
+
+def load_max_rss(root: pathlib.Path, raw: str) -> int:
+    path = _relative_rss(root, raw)
+    matches = RSS_RE.findall(path.read_text(encoding="utf-8", errors="replace"))
+    if len(matches) != 1:
+        raise ValueError(f"expected one GNU time RSS value in {path}, found {len(matches)}")
+    value = int(matches[0])
+    if value <= 0:
+        raise ValueError(f"GNU time RSS value must be positive in {path}")
+    return value
 
 
 def inspect_cangjie_report(path: pathlib.Path) -> dict[str, object]:
@@ -192,12 +229,18 @@ def collect_samples(
     root: pathlib.Path,
     rows: list[dict[str, str]],
     loader: CaseLoader | None = None,
-) -> tuple[dict[tuple[str, str], dict[int, list[float]]], dict[str, dict[str, str]]]:
+) -> tuple[
+    dict[tuple[str, str], dict[int, list[float]]],
+    dict[str, dict[str, str]],
+    dict[tuple[str, str], dict[int, int]],
+]:
     load = loader or _default_case_loader
     samples: dict[tuple[str, str], dict[int, list[float]]] = defaultdict(dict)
+    rss_samples: dict[tuple[str, str], dict[int, int]] = defaultdict(dict)
     metadata: dict[str, dict[str, str]] = {}
     seen_cells: set[tuple[int, str, str]] = set()
     seen_reports: dict[str, tuple[int, str, str]] = {}
+    seen_rss: dict[str, tuple[int, str, str]] = {}
     errors: list[str] = []
 
     if not rows:
@@ -236,7 +279,23 @@ def collect_samples(
             )
             continue
         seen_reports[report_path] = cell
+        rss_path = row["rss_path"]
+        previous_rss_cell = seen_rss.get(rss_path)
+        if previous_rss_cell is not None:
+            errors.append(
+                f"manifest rss_path {rss_path!r} is shared by {previous_rss_cell} and {cell}"
+            )
+            continue
+        seen_rss[rss_path] = cell
         try:
+            recorded_rss = int(row["max_rss_kb"])
+            if recorded_rss <= 0:
+                raise ValueError("RSS must be positive")
+            measured_rss = load_max_rss(root, rss_path)
+            if recorded_rss != measured_rss:
+                raise ValueError(
+                    f"manifest RSS {recorded_rss} differs from sidecar {measured_rss}"
+                )
             values = load(root, row)
         except (OSError, UnicodeError, ValueError) as error:
             errors.append(
@@ -248,6 +307,7 @@ def collect_samples(
             errors.append(f"manifest row {row_number} produced no samples")
             continue
         samples[(row["workload_id"], row["library"])][round_number] = values
+        rss_samples[(row["workload_id"], row["library"])][round_number] = measured_rss
         shape = {key: row[key] for key in ("scenario", "operation", "payload")}
         previous = metadata.get(row["workload_id"])
         if previous is not None and previous != shape:
@@ -262,11 +322,17 @@ def collect_samples(
         raise ValueError(
             f"{len(errors)}/{len(rows)} benchmark cells violate manifest/source-case binding: {preview}"
         )
-    return samples, metadata
+    return samples, metadata, rss_samples
 
 
-def summarize(round_values: dict[int, list[float]]) -> dict[str, object]:
+def summarize(
+    round_values: dict[int, list[float]],
+    rss_values: dict[int, int],
+) -> dict[str, object]:
+    if set(round_values) != set(rss_values):
+        raise ValueError("timing and RSS round inventories differ")
     medians = [statistics.median(round_values[round_number]) for round_number in sorted(round_values)]
+    rss = [rss_values[round_number] for round_number in sorted(round_values)]
     median = statistics.median(medians)
     mean = statistics.fmean(medians)
     return {
@@ -278,6 +344,9 @@ def summarize(round_values: dict[int, list[float]]) -> dict[str, object]:
         if median
         else 0.0,
         "run_medians_ns": medians,
+        "rss_kb": rss,
+        "median_rss_kb": statistics.median(rss),
+        "max_rss_kb": max(rss),
     }
 
 
@@ -308,19 +377,23 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with (root / "manifest.csv").open(newline="", encoding="utf-8") as stream:
             rows = list(csv.DictReader(stream))
-        samples, metadata = collect_samples(root, rows)
+        samples, metadata, rss_samples = collect_samples(root, rows)
     except (OSError, UnicodeError, csv.Error, ValueError) as error:
         parser.error(str(error))
 
     result_rows: list[dict[str, object]] = []
     for workload_id, shape in metadata.items():
         library_runs = {library: samples[(workload_id, library)] for library in LIBRARIES}
-        common = sorted(set.intersection(*(set(value) for value in library_runs.values())))
+        library_rss = {library: rss_samples[(workload_id, library)] for library in LIBRARIES}
+        round_sets = [set(value) for value in library_runs.values()]
+        round_sets.extend(set(value) for value in library_rss.values())
+        common = sorted(set.intersection(*round_sets))
         if len(common) < args.min_runs:
             parser.error(f"{workload_id}: only {len(common)} complete rounds")
         libraries = {
             library: summarize(
-                {round_number: library_runs[library][round_number] for round_number in common}
+                {round_number: library_runs[library][round_number] for round_number in common},
+                {round_number: library_rss[library][round_number] for round_number in common},
             )
             for library in LIBRARIES
         }
@@ -348,7 +421,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     headers = ["workload_id", "scenario", "operation", "payload", "rounds"]
     for library in LIBRARIES:
-        headers += [f"{library}_median_ns", f"{library}_cv_percent"]
+        headers += [
+            f"{library}_median_ns",
+            f"{library}_cv_percent",
+            f"{library}_max_rss_kb",
+        ]
     for library in LIBRARIES:
         if library != "yjson":
             headers += [f"paired_yjson_over_{library}", f"yjson_faster_rounds_vs_{library}"]
@@ -367,6 +444,7 @@ def main(argv: list[str] | None = None) -> int:
             for library in LIBRARIES:
                 output[f"{library}_median_ns"] = f"{libraries[library]['median_ns']:.3f}"
                 output[f"{library}_cv_percent"] = f"{libraries[library]['cv_percent']:.3f}"
+                output[f"{library}_max_rss_kb"] = libraries[library]["max_rss_kb"]
             for library, comparison in comparisons.items():
                 output[f"paired_yjson_over_{library}"] = (
                     f"{comparison['median_yjson_over_peer']:.6f}"
@@ -381,19 +459,23 @@ def main(argv: list[str] | None = None) -> int:
         "",
         f"Times are median ns/op across {completed_rounds} independent process rounds. Lower is better.",
         "",
-        "| Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 | Max CV |",
-        "|:--|--:|--:|--:|--:|--:|--:|--:|--:|",
+        "| Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 | "
+        "RSS max KB yjson/stdx/cjjson/json4cj/cjfast/Jackson/fastjson2 | Max CV |",
+        "|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|",
     ]
     for row in result_rows:
         libraries = row["libraries"]
         assert isinstance(libraries, dict)
         values = [libraries[library]["median_ns"] for library in LIBRARIES]
+        rss = [libraries[library]["max_rss_kb"] for library in LIBRARIES]
         cvs = [libraries[library]["cv_percent"] for library in LIBRARIES]
         lines.append(
             "| "
             + str(row["workload_id"])
             + " | "
             + " | ".join(f"{value / 1000.0:.3f} us" for value in values)
+            + " | "
+            + " / ".join(f"{value:.0f}" for value in rss)
             + f" | {max(cvs):.2f}% |"
         )
     (root / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -20,7 +20,9 @@ private let YYJSON_FALLBACK_METADATA = JsonBackendMetadata(
     JsonStreamBufferingMode.WholeDocument
 )
 
-/// Closed, immutable facade for the qualified yyjson backend.
+/**
+ * Closed, immutable facade for the qualified yyjson backend.
+ */
 public class YyjsonBackendFacade {
     init() {}
 
@@ -126,8 +128,10 @@ public class YyjsonBackendFacade {
     }
 }
 
-/// Qualified first-party backend handles. Callers cannot construct or inject
-/// additional backend implementations.
+/**
+ * Qualified first-party backend handles. Callers cannot construct or inject
+ * additional backend implementations.
+ */
 public class YyjsonBackends {
     private static let qualified = YyjsonBackendFacade()
 
