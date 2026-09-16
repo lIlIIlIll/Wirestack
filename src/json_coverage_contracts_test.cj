@@ -557,6 +557,71 @@ class JsonCoverageContractsTest {
     }
 
     @TestCase
+    func fastReaderCompactNameMatcherCoversEveryWidthAndMismatch(): Unit {
+        @Expect(!JsonFastReader(coverageBytes(""))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("a")))
+        @Expect(JsonFastReader(coverageBytes("\"a\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("a")))
+        @Expect(JsonFastReader(coverageBytes("\"ab\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("ab")))
+        @Expect(JsonFastReader(coverageBytes("\"abc\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abc")))
+        @Expect(JsonFastReader(coverageBytes("\"abcd\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcd")))
+        @Expect(JsonFastReader(coverageBytes("\"abcde\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcde")))
+
+        @Expect(!JsonFastReader(coverageBytes("\"b\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("a")))
+        @Expect(!JsonFastReader(coverageBytes("\"xb\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("ab")))
+        @Expect(!JsonFastReader(coverageBytes("\"ax\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("ab")))
+        @Expect(!JsonFastReader(coverageBytes("\"xbc\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abc")))
+        @Expect(!JsonFastReader(coverageBytes("\"axc\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abc")))
+        @Expect(!JsonFastReader(coverageBytes("\"abx\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abc")))
+        @Expect(!JsonFastReader(coverageBytes("\"xbcd\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcd")))
+        @Expect(!JsonFastReader(coverageBytes("\"axcd\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcd")))
+        @Expect(!JsonFastReader(coverageBytes("\"abxd\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcd")))
+        @Expect(!JsonFastReader(coverageBytes("\"abcx\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcd")))
+        @Expect(!JsonFastReader(coverageBytes("\"xbcde\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcde")))
+        @Expect(!JsonFastReader(coverageBytes("\"abxde\":"))
+            .tryReadRawCompactNameTokenBytes(true, coverageBytes("abcde")))
+    }
+
+    @TestCase
+    func directBufferFastEntriesCoverNameWidthsAndEmptyValues(): Unit {
+        let target = DirectBufferWriterTarget()
+        var first = true
+        first = target.writeObjectEntryNameStringNoEscapeFast(first, "", "")
+        first = target.writeObjectEntryNameInt64NoEscapeFast(first, "a", -7)
+        first = target.writeObjectEntryNameBoolNoEscapeFast(first, "bb", true)
+        first = target.writeObjectEntryNameUInt64NoEscapeFast(first, "ccc", 7u64)
+        first = target.writeObjectEntryNameFloat64NoEscapeFast(first, "dddd", 1.5)
+        first = target.writeObjectEntryNameStringNoEscapeFast(first, "eeeee", "value")
+        @Expect(first, false)
+        let result = JsonNode.parse("{" + target.buildString() + "}").asObject()
+        @Expect(result[""].asString(), "")
+        @Expect(result["a"].asInt64(), -7)
+        @Expect(result["bb"].asBool(), true)
+        @Expect(result["ccc"].asUInt64(), 7u64)
+        @Expect(result["dddd"].asFloat64(), 1.5)
+        @Expect(result["eeeee"].asString(), "value")
+
+        let raw = JsonDirectWriter()
+        raw.writeRawString("")
+        @Expect(raw.finishString(), "\"\"")
+    }
+
+    @TestCase
     func fastReaderTokensAndSkipCoverFallbackAndMalformedBoundaries(): Unit {
         for (text in ["", " ", "1"]) {
             @Expect(!JsonFastReader(coverageBytes(text)).tryReadRawAsciiStringToken())
