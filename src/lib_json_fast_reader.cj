@@ -191,10 +191,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         first: Bool,
         expectedNameBytes: Array<Byte>
     ): Bool {
-        tryReadRawAsciiNameTokenBytes(expectedNameBytes, first)
-    }
-
-    func tryReadRawAsciiNameTokenBytes(nameBytes: Array<Byte>, first: Bool): Bool {
         var currentIndex = index
         if (!first) {
             if (currentIndex >= size || data[currentIndex] != b',') {
@@ -202,21 +198,51 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
             }
             currentIndex++
         }
-        if (currentIndex + nameBytes.size + 3 > size || data[currentIndex] != b'"') {
+        let nameSize = expectedNameBytes.size
+        if (currentIndex + nameSize + 3 > size ||
+            data[currentIndex] != b'"') {
             return false
         }
         currentIndex++
-        for (offset in 0..nameBytes.size) {
-            if (data[currentIndex + offset] != nameBytes[offset]) {
-                return false
-            }
+        match (nameSize) {
+            case 1 =>
+                if (data[currentIndex] != expectedNameBytes[0]) { return false }
+            case 2 =>
+                if (data[currentIndex] != expectedNameBytes[0] ||
+                    data[currentIndex + 1] != expectedNameBytes[1]) {
+                    return false
+                }
+            case 3 =>
+                if (data[currentIndex] != expectedNameBytes[0] ||
+                    data[currentIndex + 1] != expectedNameBytes[1] ||
+                    data[currentIndex + 2] != expectedNameBytes[2]) {
+                    return false
+                }
+            case 4 =>
+                if (data[currentIndex] != expectedNameBytes[0] ||
+                    data[currentIndex + 1] != expectedNameBytes[1] ||
+                    data[currentIndex + 2] != expectedNameBytes[2] ||
+                    data[currentIndex + 3] != expectedNameBytes[3]) {
+                    return false
+                }
+            case _ =>
+                for (offset in 0..nameSize) {
+                    if (data[currentIndex + offset] != expectedNameBytes[offset]) {
+                        return false
+                    }
+                }
         }
-        currentIndex += nameBytes.size
+        currentIndex += nameSize
         if (data[currentIndex] != b'"' || data[currentIndex + 1] != b':') {
             return false
         }
         index = currentIndex + 2
         true
+    }
+    // Retained for package-level coverage probes; generated codecs use the
+    // inlined public bridge above so the compatibility helper is off hot paths.
+    func tryReadRawAsciiNameTokenBytes(nameBytes: Array<Byte>, first: Bool): Bool {
+        tryReadRawCompactNameTokenBytes(first, nameBytes)
     }
 
     public func startRawObject(): Unit {

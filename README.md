@@ -175,16 +175,16 @@ let name = document.root().member("name").getOrThrow().asString()
 
 ## 性能
 
-下面是 2026-09-14 当前 `0.1.0` 候选七库对比第二批的 11 轮中位数，单位为 µs/op，越小越好。
-测量使用提交 `4c2432c80688581dd28afa8bc4a7ec0bdf4858cf`；每个进程同时记录了 peak RSS。
+下面是 2026-09-15 当前 `0.1.0` 候选七库对比第二批的 11 轮中位数，单位为 µs/op，越小越好。
+测量使用提交 `af8693fe435f438bb67daf466d453e4dd079b3ca`；每个进程同时记录了 peak RSS。
 **只有第二批 Max CV 不超过 5% 的行列为 stable；其余行完整保留，但不能作为稳定的性能排名。**
 
 | Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Large Map decode | 26.768 | 243.456 | 352.000 | 223.573 | 230.724 | 5.327 | 4.000 |
-| Deep Nested encode | 43.421 | 74.496 | 172.000 | 85.248 | 73.728 | 4.437 | 2.484 |
+| Large Array encode | 26.098 | 85.248 | 250.240 | 91.582 | 75.648 | 9.162 | 4.147 |
+| Deep Nested encode | 43.966 | 75.200 | 172.297 | 84.576 | 73.884 | 4.503 | 2.494 |
 
-完整样本、波动、RSS 和环境见[2026-09-14 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-14 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
+完整样本、波动、RSS 和环境见[2026-09-15 当前候选七库对比](docs/performance/results/2026-09-13-release-seven-library.md)；三库完整测量见[2026-09-14 当前候选三库对比](docs/performance/results/2026-09-13-release-three-library.md)。
 测试方法见[性能文档](docs/performance/README.md)。结果只适用于记录中的源码、SDK、CPU 和测试数据。
 
 ## 文档
