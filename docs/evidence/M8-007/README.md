@@ -41,7 +41,7 @@ The first formal run was stopped after the archive review. Its [interrupted capt
 
 The [signing policy](linux_x86_64/signing-authorization.json) records administrator-only signing-tag creation, blocked tag updates and deletion, and the sole release-owner reviewer for `m8-007-release`. Administrator bypass is disabled. The pre-soak capture contains no approved SHA.
 
-The later `linux_x86_64/signing-approval.json` records the owner's independently selected full source SHA. `verify-all` rejects a different hosted source, missing archival inputs, removed source inputs, and changes to the approved task contract. The [publication controls](hosted-source-controls.json) reproduce six failures on `14a9925` and pass with the corrected verifier. Cryptographic verification is stubbed successful in the source-selection and archival controls; actual signatures remain a separate gate.
+The later `linux_x86_64/signing-approval.json` records the owner's independently selected full source SHA. `verify-all` rejects a different hosted source, missing archival inputs, removed source inputs, and changes to the approved task contract. The [publication controls](hosted-source-controls.json) reproduce six failures on `14a9925` and pass with the corrected verifier. The production [GitHub attestation](linux_x86_64/signatures/github-attestation.json) and four archived Sigstore bundles are the hosted signature evidence; [production-signature-verification.json](production-signature-verification.json) records the local exact-source verification.
 
 ## Local commands
 
@@ -65,3 +65,10 @@ The formal soak uses the installed archive as its only Wirestack dependency. Its
 5. Finish acceptance and closure documentation, commit source plus complete reports as T, then create the evidence-only seal E. Preserve the exact candidate refs and verify a fresh full clone with tags.
 
 The F-to-S and S-to-T task contracts permit additional source paths only. Existing inputs cannot be removed, and commands, required reports, dependencies, and timeouts cannot change. Frozen qualification inputs remain byte-bound throughout. Final planning status is sealed at T rather than falsely marked complete before signing.
+## Final acceptance
+
+- The frozen candidate [e94a1ffb](linux_x86_64/frozen-candidate.json) passed the exact 86,400-second gate. The raw command result is [soak-command.json](linux_x86_64/soak-command.json), the decision is [soak.json](linux_x86_64/soak.json), and the retained process output is [soak.log](linux_x86_64/soak.log).
+- The independently approved signing source is [ffd6551656ef990591dbd3bb9c67e6720588dd15](linux_x86_64/signing-approval.json). The protected tag is `m8-007-signing-ffd6551656ef990591dbd3bb9c67e6720588dd15`.
+- GitHub Actions run [35464592922](https://github.com/lIlIIlIll/Wirestack/actions/runs/35464592922) passed both the frozen-artifact staging and Linux attestation jobs. Its archived [GitHub attestation](linux_x86_64/signatures/github-attestation.json) binds the hosted result to the approved source.
+- The archived production bundles are [artifact.sigstore.json](linux_x86_64/signatures/artifact.sigstore.json), [sbom.sigstore.json](linux_x86_64/signatures/sbom.sigstore.json), and [release-manifest.sigstore.json](linux_x86_64/signatures/release-manifest.sigstore.json), alongside the signed [release-manifest.json](linux_x86_64/signatures/release-manifest.json).
+- [task-check.json](task-check.json) records a PASS for all ten non-long task-gate commands; [production-signature-verification.json](production-signature-verification.json), [formal-soak-verification.json](formal-soak-verification.json), `verify-all`, and `verify-soak` all pass against the retained evidence.
