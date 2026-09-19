@@ -26,6 +26,33 @@ class HttpRedirectPolicyTest {
         @Expect(!next.headers.contains("content-type"))
         @Expect(!next.headers.contains("content-length"))
     }
+    @TestCase
+    func noFollowPreservesRedirectResponse(): Unit {
+        let response = HttpResponse(
+            302,
+            "Found",
+            ResponseBody(RequestBody.string("redirect-body").open()),
+            headers: HttpHeaders.builder().add("Location", "/next").build()
+        )
+        try {
+            let next = HttpRedirectPolicy(followRedirects: false).nextRequest(
+                HttpRequest.get("https://example.com/start"), response
+            )
+            var followed = false
+            match (next) {
+                case Some(_) => followed = true
+                case None => ()
+            }
+            @Expect(!followed)
+            @Expect(response.status, 302)
+            @Expect(response.headers.getFirst("location"), Some("/next"))
+            let bytes = Array<Byte>(13, repeat: 0u8)
+            @Expect(response.body.read(bytes), 13)
+            @Expect(String.fromUtf8(bytes), "redirect-body")
+        } finally {
+            response.close()
+        }
+    }
 
     @TestCase
     func stripsSensitiveHeadersOnlyAcrossOrigins(): Unit {

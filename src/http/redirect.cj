@@ -60,6 +60,10 @@ public class HttpRedirectPolicy {
 /**
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
+    public let followRedirects: Bool
+/**
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ */
     public let maximumRedirects: Int64
 /**
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
@@ -73,14 +77,17 @@ public class HttpRedirectPolicy {
 /**
  * Wirestack 公开 API：构造并校验该公开值。
  * @param allowHttpsDowngrade 调用方提供的输入值。
+ * @param followRedirects 是否自动跟随带 Location 的重定向响应。
  * @param maximumDrainBytes 调用方提供的输入值。
  * @param maximumRedirects 调用方提供的输入值。
  */
-    public init(maximumRedirects!: Int64 = 10, allowHttpsDowngrade!: Bool = false,
+    public init(followRedirects!: Bool = true, maximumRedirects!: Int64 = 10,
+        allowHttpsDowngrade!: Bool = false,
         maximumDrainBytes!: Int64 = 64 * 1024) {
         if (maximumRedirects < 0 || maximumRedirects > 100 || maximumDrainBytes < 0) {
             throw IllegalArgumentException("HTTP redirect limits are invalid")
         }
+        this.followRedirects = followRedirects
         this.maximumRedirects = maximumRedirects
         this.allowHttpsDowngrade = allowHttpsDowngrade
         this.maximumDrainBytes = maximumDrainBytes
@@ -96,6 +103,7 @@ public class HttpRedirectPolicy {
     public func nextRequest(request: HttpRequest, response: HttpResponse,
         redirectsFollowed!: Int64 = 0, limits!: HttpLimits = HttpLimits()): ?HttpRequest {
         if (!isRedirectStatus(response.status)) { return None<HttpRequest> }
+        if (!followRedirects) { return None<HttpRequest> }
         let location = match (response.headers.getFirst("location")) {
             case Some(value) => value
             case None => return None<HttpRequest>
