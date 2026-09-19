@@ -1,0 +1,2 @@
+SOAK_READY task=M8-007 cycles=1 elapsedMs=135
+M8-007 Linux release soak: PASS preflight=PASS output=/work/docs/evidence/M8-007/linux_x86_64/soak.json

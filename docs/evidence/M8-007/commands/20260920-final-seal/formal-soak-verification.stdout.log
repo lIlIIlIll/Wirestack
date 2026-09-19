@@ -1,0 +1,1 @@
+{"decision": "PASS", "evidence": {"digest": {"domain": "text-utf8-lf-v1", "sha256": "e8b88107ff49851fcf98d85a0cc1e4cfe31ab13c48d56b0939233c901d91db4f"}, "path": "docs/evidence/M8-007/linux_x86_64/soak.json"}, "source_task": "M8-007"}
