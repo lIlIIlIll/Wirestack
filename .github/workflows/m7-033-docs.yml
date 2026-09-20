@@ -49,7 +49,7 @@ jobs:
         env:
           CJDOC_VERSION: 0.7.2
           CJDOC_REPOSITORY: lIlIIlIll/cjdoc
-          CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21
+          CJDOC_SOURCE_SHA: 582a95278c95024dc2cf3dfe9f011259c1002fc2
         shell: bash
         run: |
           set -euo pipefail
@@ -76,9 +76,82 @@ jobs:
           lines[index] = lines[index].replace('compile-option = ""', 'compile-option = "-O0"', 1)
           config.write_text("".join(lines), encoding="utf-8")
           PY
+          python3 - "$source_dir/cjpm.toml" "$source_dir/vendor/yjson_algorithms/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          for raw_path in sys.argv[1:]:
+              config = Path(raw_path)
+              text = config.read_text(encoding="utf-8")
+              lines = text.splitlines(keepends=True)
+              matches = [index for index, line in enumerate(lines) if line.strip().startswith('"yjson" = { git =') or line.strip().startswith('yjson = { git =')]
+              if len(matches) != 1 or 'commitId = ' not in lines[matches[0]]:
+                  raise SystemExit(f"unexpected yjson dependency schema: {config}")
+              index = matches[0]
+              lines[index] = re.sub(r'commitId = "[^"]+"', 'tag = "0.1.0"', lines[index], count=1)
+              config.write_text("".join(lines), encoding="utf-8")
+          PY
+          yjson_source_sha="54b4965dee0f0b96710cbc678ec5ec9a126b055c"
+          yjson_archive="$RUNNER_TEMP/yjson-release-0.1.0.tar.gz"
+          yjson_dir="$RUNNER_TEMP/yjson-release-0.1.0"
+          curl --fail --silent --show-error --location --max-time 180 \
+            "https://codeload.github.com/lIlIIlIll/yjson/tar.gz/$yjson_source_sha" \
+            --output "$yjson_archive"
+          mkdir -p "$yjson_dir"
+          tar --extract --gzip --file "$yjson_archive" --directory "$yjson_dir" --strip-components=1
+          for file in lib_json_patch.cj lib_json_path.cj lib_json_pointer.cj lib_json_schema.cj linear_regex.cj work_limits.cj; do
+            test -f "$yjson_dir/packages/yjson_algorithms/src/$file"
+            cp "$yjson_dir/packages/yjson_algorithms/src/$file" "$source_dir/vendor/yjson_algorithms/src/$file"
+          done
+          python3 - "$source_dir/src/output_manifest.cj" "$source_dir/src/schema_data/schema_v8.cj" "$source_dir/src/render/json_decode_primitives.cj" <<'PY'
+          from pathlib import Path
+          import sys
+
+          output_manifest, schema_v8, decoder = map(Path, sys.argv[1:])
+          text = output_manifest.read_text(encoding="utf-8")
+          anchor = "import yjson.*\n\n"
+          helper = """private func jsonArrayValues(value: JsonArray): Array<JsonNode> {
+              let result = ArrayList<JsonNode>()
+              for (index in 0..value.size()) {
+                  result.add(value.get(index).getOrThrow())
+              }
+              result.toArray()
+          }
+
+          """
+          if text.count(anchor) != 1 or "private func jsonArrayValues" in text:
+              raise SystemExit("unexpected output manifest schema")
+          output_manifest.write_text(text.replace(anchor, anchor + helper, 1), encoding="utf-8")
+
+          lines = schema_v8.read_text(encoding="utf-8").splitlines(keepends=True)
+          starts = [index for index, line in enumerate(lines)
+                    if ".replace(" in line and "portablePath" in line
+                    and index + 1 < len(lines) and "^(?!/)" in lines[index + 1]]
+          if len(starts) != 1:
+              raise SystemExit(f"unexpected schema v8 portable path patch count: {starts}")
+          index = starts[0]
+          if index + 4 >= len(lines) or "^(?![A-Za-z]:)" not in lines[index + 3] or "(?!.*/" not in lines[index + 4]:
+              raise SystemExit("unexpected schema v8 portable path pattern")
+          replacement = '            "\\"pattern\\": \\"^[^/]+(?:/[^/]+)*$\\"}")\n'
+          lines[index + 3:index + 5] = [replacement]
+          schema_v8.write_text("".join(lines), encoding="utf-8")
+
+          lines = decoder.read_text(encoding="utf-8").splitlines(keepends=True)
+          matches = [index for index, line in enumerate(lines)
+                     if "maxRefResolutions: DOC_IR_SCHEMA_MAX_WORK," in line]
+          if len(matches) != 1 or "maxRegexSteps" in lines[matches[0]]:
+              raise SystemExit("unexpected decoder schema budget")
+          index = matches[0]
+          lines[index] = lines[index].replace(
+              "maxRefResolutions: DOC_IR_SCHEMA_MAX_WORK,",
+              "maxRefResolutions: DOC_IR_SCHEMA_MAX_WORK, maxRegexSteps: DOC_IR_SCHEMA_MAX_WORK,",
+              1)
+          decoder.write_text("".join(lines), encoding="utf-8")
+          PY
           (cd "$source_dir" && cjpm update --skip-script)
           python3 - "$HOME/.cjpm/git/markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml" \
-            "$HOME/.cjpm/git/yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml" <<'PY'
+            "$HOME/.cjpm/git/yjson/c91859feb77aeba392a1fad0f99d731df66be831/cjpm.toml" <<'PY'
           from pathlib import Path
           import sys
 
@@ -87,6 +160,8 @@ jobs:
               if not path.is_file():
                   raise SystemExit(f"missing pinned dependency manifest: {path}")
               text = path.read_text(encoding="utf-8")
+              if path.parts[-2] == "c91859feb77aeba392a1fad0f99d731df66be831" and 'version = "0.1.0"' not in text:
+                  raise SystemExit(f"resolved yjson dependency is not release 0.1.0: {path}")
               count = text.count('compile-option = "-O2"')
               if count == 0:
                   raise SystemExit(f"pinned dependency has no expected optimizer keys: {path}")

@@ -47,8 +47,10 @@ failed before compilation because nightly `1.1.0-alpha.20260414010024` was no
 longer available. The earlier deployment did not qualify the repaired toolchain.
 
 Both workflows now select STS `1.1.3` and SDK manager `v0.2.21`. The cjdoc
-source remains pinned to `e966097a3591538fba8990772e2e6c543de86c21`. Building and
-running cjdoc with the same SDK removes the separate compatibility runtime.
+source is pinned to `582a95278c95024dc2cf3dfe9f011259c1002fc2`. The yjson
+dependency uses release tag `0.1.0` (resolved as `c91859feb77aeba392a1fad0f99d731df66be831`),
+while vendored yjson algorithm sources are fetched from immutable commit
+`54b4965dee0f0b96710cbc678ec5ec9a126b055c`.
 Exact versions and archive digests are recorded in
 [`m7-033-ci-toolchain.json`](../../references/m7-033-ci-toolchain.json).
 
