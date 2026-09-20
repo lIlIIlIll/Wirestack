@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_task": "M8-007",
   "status": "FAIL",
-  "baseline_commit": "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+  "baseline_commit": "019feabb45fbaea4fd8e17c528e917016aec27bb",
   "baseline_source_sha256": "40fa830bcff55aee60756aec3fb8c1b82829517eca92724eb1256fda9028ca06",
   "fixed_source_sha256": "4e431655a44cc3dd95c134697c353629d41535f98a6f89b164ec8be99bd5f3ff",
   "source_inputs": {
@@ -20,7 +20,7 @@
     },
     "src/internal/tls_engine/connection.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a065d48f66f551f8a2cdcb64d997f33eb0395046c74f3a769f8599fb7d16e1a9"
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
     },
     "src/internal/tls_engine/engine.cj": {
       "domain": "text-utf8-lf-v1",
@@ -40,14 +40,14 @@
     },
     "src/internal/tls_engine/connection_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "ad91a98dd4610beded7a4ee5367a075ee9f5768def7b6d187b92c8289f1567ca"
+      "sha256": "0b8a97c0f9cc125e732daa963c4032683b4eb59f7c7a03d91269f0f5c32ae647"
     }
   },
   "driver": {
     "path": "docs/evidence/M8-007/reproductions/runtime-review-controls.py.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "7d07bc6cf010430f880936bb3bc1723917a98a2a2fb7564697cda2110fb4726a"
+      "sha256": "5d5453b6c053192b1f06f83a47136420268d98330a4a5ca79cd11eec1bccb873"
     }
   },
   "expected_failures": {
@@ -90,11 +90,11 @@
       "stderr_truncated": false,
       "stdout_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "c238ed3fb0ffbdacb9c837e15b8fe40b1249bceffc1553e26dc52cdd3a22319e"
+        "sha256": "a37dab3e394d7abe46b18d67ab2d4890ecb961944a9dd82790312e5faf893f23"
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "519ede641e72944f6d37db19555019a9f0667979caa9e800a72ed1dd84798f50"
+        "sha256": "000ddf444e6fb8e5cb004c31407c623418aa8e547a52525a03df0d4e26db3627"
       },
       "observed_cases": {
         "h2NegotiationMultiplexesTenRequestsOnOneTlsConnection": "PASSED",
@@ -252,7 +252,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "dae9817b767423a254e9d0571cf515abd742007192ce6a90df3361233787480e"
+        "sha256": "2ab918947d5a42e929cfdd5ba659922f1d5c59e1e6797a985d0376fab344c22d"
       },
       "observed_cases": {
         "handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine": "PASSED",
@@ -364,7 +364,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "93918153d03e59fb0865b3ce1b0cef8640bd685d42a12cfdad7d5c91671d41b1"
+        "sha256": "09725424b83b829507e6fd1ca158c48c59c8dfea865ab3fc2c459113389ca400"
       },
       "observed_cases": {
         "h2NegotiationMultiplexesTenRequestsOnOneTlsConnection": "PASSED",
@@ -514,11 +514,11 @@
       "stderr_truncated": true,
       "stdout_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "1fc228ebfb8195f1befa4152da36aac1c5fc17b284579718ddb54ab8da579fe9"
+        "sha256": "e18d3aa3bb0d03b595a0245e5a9a25011263efc49896ae98d0bc1434e7fc8ee1"
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "dae9817b767423a254e9d0571cf515abd742007192ce6a90df3361233787480e"
+        "sha256": "2ab918947d5a42e929cfdd5ba659922f1d5c59e1e6797a985d0376fab344c22d"
       },
       "observed_cases": {
         "handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine": "PASSED",

@@ -31,7 +31,7 @@
       "bytes": 50979,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "36b2145a41c11484b9b06861ddd18d29d4a843b35635241c3e6119fc602b9a88"
+        "sha256": "67369f2a06b7eb27893920781318e656ce86706ac522dd4a624722f5392a9afc"
       },
       "path": "tools/m7_022_linux_release_soak.py"
     },
@@ -47,7 +47,7 @@
       "bytes": 16154,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d3d1c5c0746d3e371b0f889c02d73432722d66a7319734bd20aadc6adff320b0"
+        "sha256": "1ecd1195a1bf08c032e0b6378bbdf181e04460198ec504788b0232c0334d9747"
       },
       "path": "docs/evidence/M8-007/linux_x86_64/qualification.json"
     },
@@ -55,7 +55,7 @@
       "bytes": 31337,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7f15fa14289264733838e2f80bdcdaf4500c2165d2a75027a728a7a76a12df0d"
+        "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
       },
       "path": "tools/release_soak/main.cj"
     }

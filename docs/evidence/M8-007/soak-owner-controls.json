@@ -1,7 +1,7 @@
 {
   "source_task": "M8-007",
   "status": "PASS",
-  "baseline_revision": "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+  "baseline_revision": "019feabb45fbaea4fd8e17c528e917016aec27bb",
   "baseline_source_digest": {
     "domain": "text-utf8-lf-v1",
     "sha256": "66ec47609e0cd3d4608868997202de45fc9c9cc8f3575c2c6e880cdc2fab5c19"
@@ -24,7 +24,7 @@
     "path": "docs/evidence/M8-007/reproductions/bounded-owner-preflight-600s.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d2b7cbb4b270e5d66d12785364423a492fc54268544648f1b670e01a81b722fb"
+      "sha256": "64b933a5acecbc991e03dfeafff4908d1cded609132d92e90d65278b1fe494e4"
     }
   },
   "source_inputs": {
@@ -47,7 +47,7 @@
       "python3",
       "docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt",
       "--baseline",
-      "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+      "019feabb45fbaea4fd8e17c528e917016aec27bb",
       "--phase",
       "before"
     ],
@@ -70,7 +70,7 @@
     },
     "stderr_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "80e1c0344fac82f4f7991792cd7022144c784ee46ca2aedc0cc5c4d93f9165e1"
+      "sha256": "dac80e4c3562b64d32e37c1a9ce86e77f17ae86f053ac5fd3182d6940618f168"
     }
   },
   "after": {

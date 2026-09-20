@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_task": "M8-007",
   "status": "PASS",
-  "baseline_commit": "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+  "baseline_commit": "019feabb45fbaea4fd8e17c528e917016aec27bb",
   "baseline_source_sha256": "40fa830bcff55aee60756aec3fb8c1b82829517eca92724eb1256fda9028ca06",
   "fixed_source_sha256": "defebdceb1be82ad88fc01227c2ea87326b921cab6c6718f3c81a23c9a1bcaf7",
   "source_inputs": {
@@ -47,7 +47,7 @@
       "sha256": "b00c5383fe95630ad562589eaee4db988b21c9552cba99f973ddf79d56a43ade"
     }
   },
-  "native_baseline_commit": "c0f13f575eae4ebce07a5ff17add0758f8fca561",
+  "native_baseline_commit": "74e88f6ea5f347c178ef40e850ce3dc4675f5ad5",
   "native_baseline_source": {
     "path": "docs/evidence/M8-007/commands/runtime-review-controls/1789444913213866999/native-baseline-connection.cj.txt",
     "digest": {
@@ -59,7 +59,7 @@
     "path": "docs/evidence/M8-007/reproductions/runtime-review-controls.py.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "53e1168a095e41ee066fbf9eb6c3a2b19de8489c13af9a71ed6a4e2f118716fa"
+      "sha256": "5d5453b6c053192b1f06f83a47136420268d98330a4a5ca79cd11eec1bccb873"
     }
   },
   "expected_failures": {
@@ -108,11 +108,11 @@
       "stderr_truncated": false,
       "stdout_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "2a6ef5bedeb6f3e45c0f90e3ddb42fec4e3df114e47369dab40a08501d6c61a8"
+        "sha256": "0a0ab3d11a5d9562469aedd9420ba8c75567848374059c7ee530c5e549a68887"
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "519ede641e72944f6d37db19555019a9f0667979caa9e800a72ed1dd84798f50"
+        "sha256": "000ddf444e6fb8e5cb004c31407c623418aa8e547a52525a03df0d4e26db3627"
       },
       "observed_cases": {
         "h2NegotiationMultiplexesTenRequestsOnOneTlsConnection": "PASSED",
@@ -270,7 +270,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "91720dadb89c379d1ddc538a663b532aadab5951b9561a7fc9ebba210ae1da02"
+        "sha256": "8242b8412f2a5fc8ec4ee536259f7fb869402e4423e034f8cce8a65e1b6fab9a"
       },
       "observed_cases": {
         "handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine": "PASSED",
@@ -386,7 +386,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6003aa4de977883e31c463dda41e3ea9465f32ea4da5853ab93b1c507f3b140f"
+        "sha256": "8b16a65cc1c5ad745710824e89eda823d65c7be1540911b49480ba237c1e597e"
       },
       "observed_cases": {
         "publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry": "PASSED",
@@ -531,7 +531,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "93918153d03e59fb0865b3ce1b0cef8640bd685d42a12cfdad7d5c91671d41b1"
+        "sha256": "09725424b83b829507e6fd1ca158c48c59c8dfea865ab3fc2c459113389ca400"
       },
       "observed_cases": {
         "h2NegotiationMultiplexesTenRequestsOnOneTlsConnection": "PASSED",
@@ -685,7 +685,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "bfee98246532ed880f077b3d0740c50561840b7c04cd83bacb857d9718fa7c23"
+        "sha256": "2d3368d0d201a7948740911b8edc0167d6200c701835b7265e9f19502bdf463e"
       },
       "observed_cases": {
         "handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine": "PASSED",
@@ -794,7 +794,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "60ef214716c31f2d163dac4fb9abde54f97c87fe0fccf8e0fda64539f540968e"
+        "sha256": "7a14af465dc560ea9d3b901288f4454a4061bca75d6c69d573b44f1b93604887"
       },
       "observed_cases": {
         "publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry": "PASSED",

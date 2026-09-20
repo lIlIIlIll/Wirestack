@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_task": "M8-007",
   "status": "FAIL",
-  "baseline_commit": "50bc5cc1f7a8a67f2d9d4fe9f2916ba5a45ea590",
+  "baseline_commit": "019feabb45fbaea4fd8e17c528e917016aec27bb",
   "baseline_source_sha256": "40fa830bcff55aee60756aec3fb8c1b82829517eca92724eb1256fda9028ca06",
   "fixed_source_sha256": "0c57e521f789a18a88b0225259ef241cf9606fab4f7b712ada2feebfc5b6c1b7",
   "source_inputs": {
@@ -20,7 +20,7 @@
     },
     "src/internal/tls_engine/connection.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "e39ab71d714c092fe5de1f52e69485870f8efbe9eb5b7e8c0d68871de44c2344"
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
     },
     "src/internal/tls_engine/engine.cj": {
       "domain": "text-utf8-lf-v1",
@@ -40,14 +40,14 @@
     },
     "src/internal/tls_engine/connection_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "11cf3228934a04952945f9bfc928891577d8207324f023676dd158691d9a13cc"
+      "sha256": "0b8a97c0f9cc125e732daa963c4032683b4eb59f7c7a03d91269f0f5c32ae647"
     },
     "src/net/m8_007_tls_cleanup_test.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "b00c5383fe95630ad562589eaee4db988b21c9552cba99f973ddf79d56a43ade"
     }
   },
-  "native_baseline_commit": "c0f13f575eae4ebce07a5ff17add0758f8fca561",
+  "native_baseline_commit": "74e88f6ea5f347c178ef40e850ce3dc4675f5ad5",
   "native_baseline_source": {
     "path": "docs/evidence/M8-007/commands/runtime-review-controls/1789437429415438116/native-baseline-connection.cj.txt",
     "digest": {
@@ -59,7 +59,7 @@
     "path": "docs/evidence/M8-007/reproductions/runtime-review-controls.py.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "8b133bc2a03346caf1feee04af8661e7f84f5349bc81d351601a0ccd07b7c5d4"
+      "sha256": "5d5453b6c053192b1f06f83a47136420268d98330a4a5ca79cd11eec1bccb873"
     }
   },
   "expected_failures": {
@@ -106,11 +106,11 @@
       "stderr_truncated": false,
       "stdout_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "3146d38495e1a213c336dc1b6c741b96f7dbe6b353a1560e711d7a328b6793fa"
+        "sha256": "48cec400c2a2557cd736b7142f5451f576a5ecba46c078fd96bbcf016cb77f91"
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "519ede641e72944f6d37db19555019a9f0667979caa9e800a72ed1dd84798f50"
+        "sha256": "000ddf444e6fb8e5cb004c31407c623418aa8e547a52525a03df0d4e26db3627"
       },
       "observed_cases": {
         "h2NegotiationMultiplexesTenRequestsOnOneTlsConnection": "PASSED",
@@ -268,7 +268,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "91720dadb89c379d1ddc538a663b532aadab5951b9561a7fc9ebba210ae1da02"
+        "sha256": "8242b8412f2a5fc8ec4ee536259f7fb869402e4423e034f8cce8a65e1b6fab9a"
       },
       "observed_cases": {
         "handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine": "PASSED",
@@ -381,7 +381,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6003aa4de977883e31c463dda41e3ea9465f32ea4da5853ab93b1c507f3b140f"
+        "sha256": "8b16a65cc1c5ad745710824e89eda823d65c7be1540911b49480ba237c1e597e"
       },
       "observed_cases": {
         "publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry": "PASSED",
@@ -526,7 +526,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "93918153d03e59fb0865b3ce1b0cef8640bd685d42a12cfdad7d5c91671d41b1"
+        "sha256": "09725424b83b829507e6fd1ca158c48c59c8dfea865ab3fc2c459113389ca400"
       },
       "observed_cases": {
         "h2NegotiationMultiplexesTenRequestsOnOneTlsConnection": "PASSED",
@@ -680,7 +680,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "bfee98246532ed880f077b3d0740c50561840b7c04cd83bacb857d9718fa7c23"
+        "sha256": "2d3368d0d201a7948740911b8edc0167d6200c701835b7265e9f19502bdf463e"
       },
       "observed_cases": {
         "handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine": "PASSED",
@@ -787,7 +787,7 @@
       },
       "stderr_digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "60ef214716c31f2d163dac4fb9abde54f97c87fe0fccf8e0fda64539f540968e"
+        "sha256": "7a14af465dc560ea9d3b901288f4454a4061bca75d6c69d573b44f1b93604887"
       },
       "observed_cases": {
         "publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry": "PASSED",

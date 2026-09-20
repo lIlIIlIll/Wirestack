@@ -297,7 +297,7 @@
       "source_task": "M8-007"
     }
   ],
-  "revision": "2fcaac47f0ad75b87d73235810f6b096a1a2157e",
+  "revision": "c3b2062889e983e7b399d446495a9c8efd0616ca",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/m8-007-linux-release-attestation.yml": {

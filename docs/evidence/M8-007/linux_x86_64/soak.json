@@ -44,10 +44,10 @@
       "path": "examples/linux/m7_027/fixtures.cj"
     },
     "qualification": {
-      "bytes": 18091,
+      "bytes": 18067,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e178a2ec72024b3414a72870c958161c50b04aa7e50064f5baf601415fd1ae98"
+        "sha256": "1ecd1195a1bf08c032e0b6378bbdf181e04460198ec504788b0232c0334d9747"
       },
       "path": "docs/evidence/M8-007/linux_x86_64/qualification.json"
     },
@@ -89,10 +89,10 @@
       }
     },
     "qualification": {
-      "bytes": 18091,
+      "bytes": 18067,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e178a2ec72024b3414a72870c958161c50b04aa7e50064f5baf601415fd1ae98"
+        "sha256": "1ecd1195a1bf08c032e0b6378bbdf181e04460198ec504788b0232c0334d9747"
       }
     }
   },

@@ -33,7 +33,7 @@
     },
     "stderr_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f0d36a1154dc7615f6f4ce24873eac6cb91fb64c07a2cd99e74c5626d86c9978"
+      "sha256": "3f1286f80da7170780539fafc81e37275391ace3bb7fb77143a463a62bed7684"
     }
   },
   "production_snapshot_path": "docs/evidence/M8-007/reproductions/tls-close-registration-before.cj.txt",

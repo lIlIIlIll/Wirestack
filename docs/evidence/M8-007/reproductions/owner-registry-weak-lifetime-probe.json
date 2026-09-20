@@ -2,7 +2,7 @@
   "source_task": "M8-007",
   "phase": "after",
   "status": "FAIL",
-  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "baseline_revision": "8a79209e6471b343774fe54a99f251f5b273352e",
   "artifact_sha256": "4441dbe6670e64804b44b941d2894c4945cb3b8e886d9f9fb9a11854c280adc0",
   "source_digest": {
     "domain": "text-utf8-lf-v1",
@@ -12,14 +12,14 @@
     "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c80824f7fb9ff44f38a65dd6cebe6022cbe8cd193f96ff706162d0363be64e7f"
+      "sha256": "a67415ac07018f04c13ffea55fd34099d442bd499db4191e4d75cb3dbe3f4b71"
     }
   },
   "probe": {
     "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.cj.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f6fa78ddb5d648467a790f805b076b5c4c027283372a2af30045ddff06bf7f07"
+      "sha256": "8466260e30622877c353fe65aeff09c909870943d18b22cec7555c67a8530a8b"
     }
   },
   "derived_source": {

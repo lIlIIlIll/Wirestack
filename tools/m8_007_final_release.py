@@ -46,7 +46,7 @@ ARCHIVE_CONTROLS = EVIDENCE.parent / "archive-review-controls.json"
 ARCHIVE_CONTROL_DRIVER = "docs/evidence/M8-007/reproductions/archive-review-controls.py.txt"
 ARCHIVE_CONTROL_SOURCE = "tools/m7_021_linux_release.py"
 ARCHIVE_CONTROL_TESTS = "tools/tests/test_m7_021_linux_release.py"
-REVIEW_BASELINE_REVISION = "14a9925dd78ded4f5d99eb8aa70c34f676404f3c"
+REVIEW_BASELINE_REVISION = "95fd86079d263d7d730277540451f7c61955beb3"
 PYTHON_CONTROL_TIMEOUT_SECONDS = 120
 ARCHIVE_CASES = (
     "test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte",
@@ -68,7 +68,7 @@ HOSTED_SOURCE_CASES = (
     "test_verify_all_rejects_removed_approved_source_input",
     "test_frozen_command_rejects_weakened_release_contract",
 )
-INSTRUMENTATION_BASELINE = "8a6039051dd46e5c42c57f7debbe748ae52c266d"
+INSTRUMENTATION_BASELINE = "8a79209e6471b343774fe54a99f251f5b273352e"
 BUILD_OUTPUT_CONTROLS = EVIDENCE.parent / "build-output-controls.json"
 BUILD_OUTPUT_DRIVER = "docs/evidence/M8-007/reproductions/build-output-controls.py.txt"
 BUILD_OUTPUT_CASES = (
@@ -598,7 +598,7 @@ def verify_runtime_controls() -> dict:
         "native": {"closeDeadlineReleasesAnExistingNativeTcpReadWithoutPeerAssistance"},
     }
     files = [record(RUNTIME_CONTROLS), record(ROOT / RUNTIME_CONTROL_DRIVER)]
-    native_baseline = "c0f13f575eae4ebce07a5ff17add0758f8fca561"
+    native_baseline = "74e88f6ea5f347c178ef40e850ce3dc4675f5ad5"
     require(report.get("native_baseline_commit") == native_baseline, "native cleanup baseline changed")
     native_source = subprocess.check_output(
         ["git", "cat-file", "blob", f"{native_baseline}:src/internal/tls_engine/connection.cj"],

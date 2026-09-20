@@ -43,7 +43,7 @@ EXPECTED = {
     'native': {'closeDeadlineReleasesAnExistingNativeTcpReadWithoutPeerAssistance'},
 }
 EVIDENCE = ROOT / 'docs/evidence/M8-007'
-NATIVE_BASELINE = 'c0f13f575eae4ebce07a5ff17add0758f8fca561'
+NATIVE_BASELINE = '74e88f6ea5f347c178ef40e850ce3dc4675f5ad5'
 NATIVE_SOURCE = 'src/internal/tls_engine/connection.cj'
 CASE = re.compile(r'^\s*\[\s*(\w+)\s*\]\s+CASE:\s+(\w+)', re.MULTILINE)
 

@@ -31,7 +31,7 @@
       "bytes": 46689,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "66ec47609e0cd3d4608868997202de45fc9c9cc8f3575c2c6e880cdc2fab5c19"
+        "sha256": "67369f2a06b7eb27893920781318e656ce86706ac522dd4a624722f5392a9afc"
       },
       "path": "tools/m7_022_linux_release_soak.py"
     },
@@ -55,7 +55,7 @@
       "bytes": 17099,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "dc8170a37a153000f7c91d214ebb2bcc0256bc1bff5d33620d3b2dc01c5ccac0"
+        "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
       },
       "path": "tools/release_soak/main.cj"
     }

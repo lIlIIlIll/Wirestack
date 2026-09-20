@@ -3,7 +3,7 @@
   "source_task": "M8-007",
   "status": "INCOMPLETE",
   "requested_duration_seconds": 86400,
-  "frozen_revision": "14a9925dd78ded4f5d99eb8aa70c34f676404f3c",
+  "frozen_revision": "95fd86079d263d7d730277540451f7c61955beb3",
   "readiness_observed": true,
   "supervisor_exit_code": 143,
   "supervisor_uptime": "17m50s",
@@ -17,7 +17,7 @@
       "path": "docs/evidence/M8-007/reproductions/formal-soak-14a9925/frozen-candidate.json",
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "bf9b9433611609b6c00c26b605eb833965deb5b733559facdc1a1d1fe6dec993"
+        "sha256": "0a90c7ad24f792202ddb447e91d5045c3b6e774e4735269d5d2b854a314c5c74"
       }
     },
     {

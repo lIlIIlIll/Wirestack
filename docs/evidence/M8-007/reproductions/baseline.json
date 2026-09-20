@@ -4,7 +4,7 @@
   "status": "PASS",
   "kind": "baseline-gate-defect-reproduction",
   "status_meaning": "PASS reproduces defects, not release qualification.",
-  "base_revision": "1015979d85bf73b26b8132d0c418cbd017e252ff",
+  "base_revision": "aa59af7d509b22b60474633f7672d63f810ceed7",
   "artifact_digest": {
     "domain": "artifact-bytes-v1",
     "sha256": "9a347a8e6ff4076b5b42ebf16ccad356622097f0bcfaf2231f8297c38ac84833"

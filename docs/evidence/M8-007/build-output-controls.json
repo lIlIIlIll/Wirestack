@@ -1,7 +1,7 @@
 {
   "source_task": "M8-007",
   "status": "PASS",
-  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "baseline_revision": "8a79209e6471b343774fe54a99f251f5b273352e",
   "baseline_source_digest": {
     "domain": "text-utf8-lf-v1",
     "sha256": "36b2145a41c11484b9b06861ddd18d29d4a843b35635241c3e6119fc602b9a88"
@@ -34,7 +34,7 @@
       "python3",
       "docs/evidence/M8-007/reproductions/build-output-controls.py.txt",
       "--baseline",
-      "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+      "8a79209e6471b343774fe54a99f251f5b273352e",
       "--phase",
       "before"
     ],
@@ -57,7 +57,7 @@
     },
     "stderr_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c71a508648bec3a671af2776533f2674dc305a2b304d00508df5aee724507b82"
+      "sha256": "9582cfe6faac8989853702411a12308b06dff5f05fb00101aa3726df13af121c"
     }
   },
   "after": {

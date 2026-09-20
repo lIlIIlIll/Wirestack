@@ -101,7 +101,7 @@
     {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9f7f0f2b93e1985acd9bc4dc1c14aa72eda6b14fe5634bf808225418f133a414"
+        "sha256": "5890c55375df4639dd456cffbe911e2d9aa85439c21aacc453f940fbf21c3bf7"
       },
       "path": ".github/workflows/m8-007-linux-release-attestation.yml"
     },

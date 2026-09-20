@@ -2,7 +2,7 @@
   "source_task": "M8-007",
   "phase": "before",
   "status": "PASS",
-  "baseline_revision": "8a6039051dd46e5c42c57f7debbe748ae52c266d",
+  "baseline_revision": "8a79209e6471b343774fe54a99f251f5b273352e",
   "artifact_sha256": "5896572753484b3f64903b2b4ccc4f0f471ddab33ef034f5c3b1bb1c3d509669",
   "source_digest": {
     "domain": "text-utf8-lf-v1",
@@ -12,7 +12,7 @@
     "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "54c271aa7d642b998660373e4e0130639e59b5f150c19c8f7d25f045b3b707fa"
+      "sha256": "a67415ac07018f04c13ffea55fd34099d442bd499db4191e4d75cb3dbe3f4b71"
     }
   },
   "probe": {
