@@ -41662,7 +41662,7 @@
             "-o",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/lan/instrumentation/0B/heaptrack-data",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-            "<private-ip>",
+            "<local-ip>00",
             "19005",
             "0",
             "65536",
@@ -41944,7 +41944,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "0",
               "65536",
@@ -41997,7 +41997,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "0",
               "65536",
@@ -42049,7 +42049,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "0",
               "65536",
@@ -42101,7 +42101,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "0",
               "65536",
@@ -42153,7 +42153,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "0",
               "65536",
@@ -42207,7 +42207,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "0",
               "65536",
@@ -42327,7 +42327,7 @@
             "-o",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/lan/instrumentation/1KiB/heaptrack-data",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-            "<private-ip>",
+            "<local-ip>00",
             "19005",
             "1024",
             "65536",
@@ -42565,7 +42565,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1024",
               "65536",
@@ -42621,7 +42621,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1024",
               "65536",
@@ -42675,7 +42675,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1024",
               "65536",
@@ -42730,7 +42730,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1024",
               "65536",
@@ -42786,7 +42786,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1024",
               "65536",
@@ -42842,7 +42842,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1024",
               "65536",
@@ -42963,7 +42963,7 @@
             "-o",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/lan/instrumentation/16KiB/heaptrack-data",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-            "<private-ip>",
+            "<local-ip>00",
             "19005",
             "16384",
             "65536",
@@ -43129,7 +43129,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "16384",
               "65536",
@@ -43183,7 +43183,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "16384",
               "65536",
@@ -43232,7 +43232,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "16384",
               "65536",
@@ -43286,7 +43286,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "16384",
               "65536",
@@ -43340,7 +43340,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "16384",
               "65536",
@@ -43392,7 +43392,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "16384",
               "65536",
@@ -43515,7 +43515,7 @@
             "-o",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/lan/instrumentation/64KiB/heaptrack-data",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-            "<private-ip>",
+            "<local-ip>00",
             "19005",
             "65536",
             "65536",
@@ -43731,7 +43731,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "65536",
               "65536",
@@ -43784,7 +43784,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "65536",
               "65536",
@@ -43838,7 +43838,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "65536",
               "65536",
@@ -43889,7 +43889,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "65536",
               "65536",
@@ -43945,7 +43945,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "65536",
               "65536",
@@ -44001,7 +44001,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "65536",
               "65536",
@@ -44121,7 +44121,7 @@
             "-o",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/lan/instrumentation/1MiB/heaptrack-data",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-            "<private-ip>",
+            "<local-ip>00",
             "19005",
             "1048576",
             "65536",
@@ -44397,7 +44397,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1048576",
               "65536",
@@ -44491,7 +44491,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1048576",
               "65536",
@@ -44590,7 +44590,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1048576",
               "65536",
@@ -44682,7 +44682,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1048576",
               "65536",
@@ -44782,7 +44782,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1048576",
               "65536",
@@ -44885,7 +44885,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "1048576",
               "65536",
@@ -45054,7 +45054,7 @@
             "-o",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/lan/instrumentation/100MiB/heaptrack-data",
             "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-            "<private-ip>",
+            "<local-ip>00",
             "19005",
             "104857600",
             "65536",
@@ -49487,7 +49487,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "104857600",
               "65536",
@@ -53689,7 +53689,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "104857600",
               "65536",
@@ -57534,7 +57534,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "104857600",
               "65536",
@@ -61356,7 +61356,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "104857600",
               "65536",
@@ -64984,7 +64984,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "104857600",
               "65536",
@@ -68704,7 +68704,7 @@
           "process": {
             "command": [
               "<repo-root>/build/gates/m0-005-raw-tcp-baseline/probe/net05_receive",
-              "<private-ip>",
+              "<local-ip>00",
               "19005",
               "104857600",
               "65536",
@@ -72248,7 +72248,7 @@
     }
   ],
   "lan_peer": {
-    "host": "<private-ip>",
+    "host": "<local-ip>00",
     "hypervisor": "libvirt-kvm-virbr0",
     "image_id": "cirros-0.6.3-x86_64-disk.img",
     "image_sha256": "7d6355852aeb6dbcd191bcda7cd74f1536cfe5cbf8a10495a7283a8396e4b75b",
@@ -72261,7 +72261,7 @@
       "raw": "WIRESTACK_M0_005_PEER schema=1 sysname=Linux release=5.15.0-117-generic machine=x86_64 payload_count=6",
       "sysname": "Linux"
     },
-    "route": "<private-ip> dev virbr0 src <private-ip> uid 1000 \n    cache"
+    "route": "<local-ip>00 dev virbr0 src <local-ip> uid 1000 \n    cache"
   },
   "lan_status": "PASS",
   "linux_baseline_status": "PASS",

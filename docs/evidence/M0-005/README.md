@@ -60,7 +60,7 @@ the valid command; no source change was made for that invocation error.
 Formal loopback plus KVM LAN command, run from the M0-005 LAN working tree:
 
 ```text
-timeout 120s <home>/.codex/scripts/codex_cangjie_env --cwd <repo-root> bash scripts/gate-m0-005-raw-tcp-baseline --warmup 1 --repetitions 5 --repository-revision working-tree-m0-005-lan --output docs/evidence/M0-005/linux_x86_64/loopback-baseline.json --lan-peer-host <private-ip> --lan-peer-port 19005 --lan-peer-image-id cirros-0.6.3-x86_64-disk.img --lan-peer-image-sha256 7d6355852aeb6dbcd191bcda7cd74f1536cfe5cbf8a10495a7283a8396e4b75b --lan-peer-hypervisor libvirt-kvm-virbr0 --lan-peer-binary-sha256 1eedad6a7517041e76ffa25145b9a7e73308c9d1c91a3a8072cb85f6c6187b61
+timeout 120s <home>/.codex/scripts/codex_cangjie_env --cwd <repo-root> bash scripts/gate-m0-005-raw-tcp-baseline --warmup 1 --repetitions 5 --repository-revision working-tree-m0-005-lan --output docs/evidence/M0-005/linux_x86_64/loopback-baseline.json --lan-peer-host <local-ip>00 --lan-peer-port 19005 --lan-peer-image-id cirros-0.6.3-x86_64-disk.img --lan-peer-image-sha256 7d6355852aeb6dbcd191bcda7cd74f1536cfe5cbf8a10495a7283a8396e4b75b --lan-peer-hypervisor libvirt-kvm-virbr0 --lan-peer-binary-sha256 1eedad6a7517041e76ffa25145b9a7e73308c9d1c91a3a8072cb85f6c6187b61
 ```
 
 Result: exit 0 in 84.2 seconds including one tool yield. Every measured sample
@@ -83,7 +83,7 @@ passed exact-byte and payload-pattern validation. The report records
 | KVM LAN | 100 MiB | 16.612 | 1,620 | 409,206 | 104,857,600 |
 
 The LAN peer reported `Linux 5.15.0-117-generic x86_64`. The host route was
-`<private-ip> dev virbr0 src <private-ip>`. The peer used the checksum-pinned
+`<local-ip>00 dev virbr0 src <local-ip>`. The peer used the checksum-pinned
 CirrOS 0.6.3 x86_64 image and the statically linked peer built from
 [`m0_005_lan_peer.c`](../../../tools/gates/native/m0_005_lan_peer.c). The peer
 has a 180-second bounded accept, an eight-connection listen backlog, a fixed
