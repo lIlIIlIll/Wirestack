@@ -1,0 +1,3028 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-13T00:02:33.831560Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/plan-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b8de226899b0736201d4d2ae212883a980f0b17a3f29fb1f290925b79ebef16a"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/architecture-guard.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "89ff5685df0c29de99a19fa109afa68d9437db6f25f5937963d2060e0d345bc8"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/task-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e897c967143edeb8fd772c83526ad1712d4e5ac194c1391d6c312e606620d886"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/cangjie-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1c0eda7ac3fa75260878fc3096a73f8808551fb173e014a87155fdfc22de7eee"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/cangjie-build.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1be8aefc3e8a3dbcbd4ff69517ec307d9d2cbbf52998e66044aa586031346209"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/network-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f0fa39dfad76d059e9cbacadd6f2fbbf67ac8fcaa09ee987d5f449ed062be191"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/transport-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "71938b96f3c9dc08dc029773700e56d80bfe0462a44b787543ff7ea3edc31d4e"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/native-dns.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c5969cb00e5dafbf835f6b0291b6f63c29560ad978d274e795ed12285ac12108"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/public-api-inventory.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "3c70011b1ba890a7d91cd56809702ca712238c685637c6dd0ab9f3e9aee43f33"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/docs-report.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "dd2f99f31a52f2005eaa102ba346b76498b38a90562bcb0d6388c22eb652ea47"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/full-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0513e0a81df43b73df88ed93304356ff07d9173d895dbe8c937ec3dce3e2e90d"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/regression-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ffff81a3b325effee3c69db912ef79da5e4bfcdff4efdba7f7ecdbd1fcb7c351"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/task-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3c6d940dde4b21a7702d0e360b82a3784a5c44ea70f15bc3bc26fff7e050e4f"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/review-dispositions.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e7adee99c89adbb992ce3ef35040d8aef734e0343a399fef75c8f137bf2c3dcc"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/compatibility-inventory.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4380005ce9c88848e0e04f76e5b6062fd7e7101a5e0f99f019e2da00de1d9ef7"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/raw-log-closure.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5642ea7bd3c8e149e70009ee78020283e85b2bb25813e148fc982377205fcee1"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cfb5b6ff0df338cbe67358d5dc24f1f31aa5c6db8b2f0e633931944c98e0b788"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-second-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "80296ccf6a25153b59d63d8f3cb9dbbb635cddc2aff3a1d5c0542ae8dfcf9e8c"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-third-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f1be9a045c0d3d85457aa378968418daec4979bd178669842232e2c0e0a9c412"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-boundary-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "3de3ac82c3455cf476c6432f7e8b79a74a9e3f555a4a101f96d3e4c490ab764f"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-failover-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "08baedc27a7d2db2c9aeefceea8acd6649c96089f67f2d40cf9433849fcddde4"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-fallback-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "521698b852271e0214e9b55e27fe5c66cfd235aeda3f56c59ba4156401bfbf17"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-system-fallback-green-confirmed.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cc5208f77c337b7f515e18c74500ee2a1f1e194d92e844a10c295a0c283b7805"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-literal-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a1db2a4a64063842f21462096ca04f306595f8817f016b0f1eaeaa1bd79689ef"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-native-literal-green.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1f9394f6a9770cd75c6875a7798613e4a94469c8a80015f07d603e753a813048"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-response-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "57279931d177718b02ad11e5ebfea2f8cbcd1e77da5da9f21c725be5d33e6015"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-interpretation-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2c781c46acfccd8566e458236ab4d59318d07cd00e8589e4da9e64de92ae3e34"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-aggregation-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9a921b62e08abb2262818d156d0a4ae873a13f165b5ac756d1c3baf71add1939"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-nxdomain-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "60ddfb609b4c6b69ccb065408c5f8a05ca0122727ca2b04f3956a50c0e65701b"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-ownership-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "03253a6883a2097df56e871d8c2f56f587f347a91e4d270c15c5a83ac779b577"
+      },
+      "source_task": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-004/pr160-alias-fixture-review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5e6bfd6a8dfdd3fd8ef6e3faf377815c64dd890fe2fd838ac8970e3ecb3603e6"
+      },
+      "source_task": "M8-004"
+    }
+  ],
+  "revision": "f1f5933da51d19ad13889f0a03f50c97041e6fa1",
+  "schema_version": 2,
+  "source_sha256": {
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69e11ccd5155f2906754f80de02c21955fbc8ee414f3e50e61a1f7b0b9f2956f"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b46ef4240920117c2a6404c54ade17ac6672e79a60d84f2ca56b6dd83b693d3c"
+    },
+    "docs/api/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "591da15603b0f826368f82b108eaa42c84a2324852869e0bd4ff7b80c3e16534"
+    },
+    "docs/api/baselines/wirestack-linux-pre1-m8-004.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9a92ea4e5d4253aeef60cd7350cfa6cdc066bee7987bb8faab3644498db75012"
+    },
+    "docs/api/generated/api-surface.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cf2428b060842a375652ff316c063c38d47b58fb0ff9a82070b841afd3d373df"
+    },
+    "docs/api/generated/coverage.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "18db760cdcfddadefacbb77bb6a92ce5ac499667ca724b1559099c02edf8126b"
+    },
+    "docs/api/generated/docs.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fd54cd20cfa2b82d18e6ccc030de1c658dabc2b96d4a5c5f0555922cabb03452"
+    },
+    "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e6e6574.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "db6b5a5fdc4ab38494e736c4d05da7874621611ede7e8d3a202f50902895ec25"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a636c6173733a446e73436c69656e742367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "91c7d68127716345e5d6f7f8dffa8c3b0e0b6bbcd874a431c721f2aae72b4355"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a636c6173733a446e734d6573736167655061727365722367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "be24a1c6a062e06b7b474a50b9e33c84b64e88b8070c96dc2ca2c4a4f60ca9e7"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a636c6173733a5265736f6c7665722367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c12b7d695dbfde9316a2c1b8cff70d095d430cb15d484c511f3f127390db6fe5"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a656e756d3a446e735265636f7264547970652367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1f512915ca771017f84a9944d025462b58de83563f99e125d76b4ad59905cd15"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a7374727563743a44--1652784500-1249714487.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e5ccbfabe1bbaf586082e891c31d070e1675d0b25f6d09175a85c7050401a31d"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a7374727563743a44--22297501-353611172.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "836c75c7703844679dca9b604627fd3412d7058c89bdfaa6392f6ce1281020e9"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a7374727563743a446e735061727365724c696d6974732367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4ab58bf6ca88d1af57baa768c9a1bd7541a54e596f3a78d669944f36246ee5c4"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a7374727563743a446e735175657374696f6e2367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fe9ba5d2f7ab5c9a79a71178a8dae5c60595f5c71a6ef3cce50dea2d92f49854"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a7374727563743a446e735265636f72642367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0d9dfd0641ced81105a70959ee29cb8bd8aa416bbac57f76504118073f10ec9e"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a636c6173733a5265736f6c7665457863657074696f6e2367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d34e6e06a07cc8e8564f9a85545e1b2dbb56e3f6a25a587d598f22f90ef1c86"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a636c6173733a5374617469635265736f6c7665722367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "48f6c64ef121390a19ac1d56971f5cb3116b22547c161985d017195bb9dfe32d"
+    },
+    "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a696e746572666163653a5265736f6c7665722367302829.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3ba24180656741af8fc436573329ee1b34701d6361d7f4f048fb3c362486097e"
+    },
+    "docs/evidence/M8-004/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0d00f525bc3b8737bd26783443df38e95f22321714d134621350151c8a53e77c"
+    },
+    "docs/evidence/M8-004/api-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cf8634dab74f3b73415a76c8e9ec35f014c0b8fda41c7de942606877fc788ef4"
+    },
+    "docs/evidence/M8-004/architecture-guard.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "89ff5685df0c29de99a19fa109afa68d9437db6f25f5937963d2060e0d345bc8"
+    },
+    "docs/evidence/M8-004/cangjie-build.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1be8aefc3e8a3dbcbd4ff69517ec307d9d2cbbf52998e66044aa586031346209"
+    },
+    "docs/evidence/M8-004/cangjie-check.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1c0eda7ac3fa75260878fc3096a73f8808551fb173e014a87155fdfc22de7eee"
+    },
+    "docs/evidence/M8-004/commands/architecture-guard.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/architecture-guard.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b0cf3ec182a139a590b7c7f45adf8f34010ce66e847607297113d2a4689928e5"
+    },
+    "docs/evidence/M8-004/commands/cangjie-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/commands/cangjie-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/commands/cangjie-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/cangjie-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5abbfcc1ccab341c084bd90f5817673ac0ffb479e72f094c6f43d497a7c111ef"
+    },
+    "docs/evidence/M8-004/commands/native-dns-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/native-dns-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5ff8484fbf3488ae505d92240f72b0833bfc8ec6f97a471e2b022c1bc10e7cf0"
+    },
+    "docs/evidence/M8-004/commands/network-contract-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8b97752d38b45c6e01f31d5ff05bd46c79cd4b0330302c688cba2af8429e8db"
+    },
+    "docs/evidence/M8-004/commands/network-contract-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "79f50e5a87e8d9be425dff1001b48b713485bff3613f6a50b746e69819770dae"
+    },
+    "docs/evidence/M8-004/commands/plan-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/plan-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1317a5856964bd6697cd2a190bacc6291bf757e154f7035d968e780d56ac9c94"
+    },
+    "docs/evidence/M8-004/commands/public-api-documentation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/public-api-documentation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c49572165b5fc7c0a520f37b731ee481ceef9f867d116c785b8a62b375f978fa"
+    },
+    "docs/evidence/M8-004/commands/public-api-inventory.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/public-api-inventory.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3ac0d1a20efda081ae19d140cd38ba4231bd70d3710e69baa49c677a40f80027"
+    },
+    "docs/evidence/M8-004/commands/repository-full-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b9230cd9b2843ace620ee674934032cb52204d11fae7fedea2fbf4ab4323c364"
+    },
+    "docs/evidence/M8-004/commands/repository-full-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2e169366716cc0048707cd38936cf7287cf9bd0e78160e93296ad3e7d2b7ce35"
+    },
+    "docs/evidence/M8-004/commands/repository-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6157bb588a66e3c4d2b3026a5d4230d18b9d0cab737c4f59669c4ff673ae752a"
+    },
+    "docs/evidence/M8-004/commands/repository-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/task-contract-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/task-contract-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a6b6d8a9a6e35b473ba705429e692e7f84c01a88348f6ba9a1005bafcc1bb79d"
+    },
+    "docs/evidence/M8-004/commands/transport-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/commands/transport-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6049fc00d89611ed34d52b0aa053cb27e3d67f1330830b19bd1949dd4cba6dc4"
+    },
+    "docs/evidence/M8-004/compatibility-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4380005ce9c88848e0e04f76e5b6062fd7e7101a5e0f99f019e2da00de1d9ef7"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/architecture-guard.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/architecture-guard.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b0cf3ec182a139a590b7c7f45adf8f34010ce66e847607297113d2a4689928e5"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/cangjie-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/cangjie-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/cangjie-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/cangjie-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5abbfcc1ccab341c084bd90f5817673ac0ffb479e72f094c6f43d497a7c111ef"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/native-dns-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/native-dns-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "66b7259b504f6c5bda4dc78cc1df4bb1687f0d261859853ca73651cd0a8b1791"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/network-contract-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8b97752d38b45c6e01f31d5ff05bd46c79cd4b0330302c688cba2af8429e8db"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/network-contract-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "79f50e5a87e8d9be425dff1001b48b713485bff3613f6a50b746e69819770dae"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/plan-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/plan-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b58fb4a85a36028b8006fd51c1114c5093becb276c706515dca607945702c57a"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/public-api-documentation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/public-api-documentation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d5492b601c630dc592b78dff8db7fbfc7c84d228404d900d4ff75413233981e9"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/public-api-inventory.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/public-api-inventory.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3ac0d1a20efda081ae19d140cd38ba4231bd70d3710e69baa49c677a40f80027"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/repository-full-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "497dfe6e7f27b072855bf85df46630f57f7510961cbd0f055a274bc5dd4d7270"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/repository-full-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8d3eb916fa9a5b64aac6af9c9893d2e34e670e55f8c5d2c92c9c59dbae04a49"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/repository-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "46d5a7559df494cc403f9027ff8ed4aa164e9d69133b6b288ec2ad0d2aaada56"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/repository-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/task-contract-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/task-contract-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a6b6d8a9a6e35b473ba705429e692e7f84c01a88348f6ba9a1005bafcc1bb79d"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/transport-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/commands/transport-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6049fc00d89611ed34d52b0aa053cb27e3d67f1330830b19bd1949dd4cba6dc4"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/docs-report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "18383ee8d0eeb6edcceb113355a2030dcb96f83b82218126d9f76a7383f298c2"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "29b387e35dd6f61ee9f9e47c90af6b40662c4ad911635a2fea1fb32ae5fc4f5a"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/cache-capacity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/cache-capacity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/native-dns/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/development/acceptance-first/task-check.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2ba4b80339f172070c1cf335963bb504d8f099822f5cd1b61cd439f3cffce2d2"
+    },
+    "docs/evidence/M8-004/development/hosts-precedence-green.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a4cc1a88816a7be8aa41cbd2b88696610966bb094b4e9fec25725fac9de6fbe"
+    },
+    "docs/evidence/M8-004/development/hosts-precedence-red.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7e023d783dfad3e717fb0b4759ad954f751469753a505bfe7916fece64050e90"
+    },
+    "docs/evidence/M8-004/development/legacy-glue-green.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2f91818857d4912dc80c284cab44695375df7037c44bb9b0b9cc04096e630958"
+    },
+    "docs/evidence/M8-004/development/legacy-glue-red.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c71abaa3a46e7066c6daa86e8e51ee31aa946b5f175c566a066b93f19f22dfe5"
+    },
+    "docs/evidence/M8-004/development/network-80-green.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "969d1b93a925d3aea68bf404b801149d645dabb86778ebb685b5fd991a0046ba"
+    },
+    "docs/evidence/M8-004/development/network-82-green.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f075798ca75e74f498c5720dfcbbfb8f37a8617d1618e09aa556009006b3738c"
+    },
+    "docs/evidence/M8-004/development/policy-review-original.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b783e466e19fa7e20246c6c1fde07b854fadae23ef697fdf6bd73072a9c85f83"
+    },
+    "docs/evidence/M8-004/development/port-reservation-smoke.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "be372bbc459c2acea2239f76dfb56675d7106585eda3f35ac8d8b40200ed033c"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/architecture-guard.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/architecture-guard.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d3a2e10e5a459a2051f94374679aa3ee18194affb12ae7b20eafaff6d417df7e"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/cangjie-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/cangjie-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/cangjie-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/cangjie-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5abbfcc1ccab341c084bd90f5817673ac0ffb479e72f094c6f43d497a7c111ef"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/native-dns-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/native-dns-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4eefb6455cead31a419a7794a6fed1534729b2139a83a366a6c7ea6c2697a688"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/network-contract-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "04e9bde58c365ddfeada9453c77decd0fa7607e6757fa816523ccb32607cd38c"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/network-contract-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "eb6624b9a2df14ba6757efb7f0a9e839e678514f2d2e1547eb5d3d5061a371ed"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/plan-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/plan-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "43c0f128c80845745c415d56e9b3e94e7528caf07365f7d1c269156ab60c6002"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/public-api-documentation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/public-api-documentation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40b51bc90bf01b458b6d2e10f62185e012ed98f3b7986fbbbec745a93422372a"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/public-api-inventory.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/public-api-inventory.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3ac0d1a20efda081ae19d140cd38ba4231bd70d3710e69baa49c677a40f80027"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/repository-full-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8283802a102e5df14a9e95a6cc16462ff8dec8a89af09048b8db0f42a0d05a6f"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/repository-full-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b796d1e7ec4463e98de59372136639656fdf35200e081b9c2bf88754ec40799"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/repository-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "12f21513a34c3265260cec1e5086f8f4f6520b581f86396e0d9e18af3c0b031a"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/repository-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/task-contract-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/task-contract-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a6b6d8a9a6e35b473ba705429e692e7f84c01a88348f6ba9a1005bafcc1bb79d"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/transport-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-acceptance/transport-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "19b4755750455b60f04e7090774f7a835391444d24a3d9755846c3b4b83323c1"
+    },
+    "docs/evidence/M8-004/development/pr160-aggregation-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49975cc59e6e546a6cdf44c1517482e4cb9c6cf9d785d0359d3754f7ec2a8172"
+    },
+    "docs/evidence/M8-004/development/pr160-aggregation-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a8f079d1632ba4ec48130a61ad1b7769724d2b9a06462ab801d24a571409fb61"
+    },
+    "docs/evidence/M8-004/development/pr160-aggregation-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ed16369d7e3e66573aebb1d85149f9cf72e7ef2154be3a1a9ace9dd9ecd5bbf7"
+    },
+    "docs/evidence/M8-004/development/pr160-aggregation-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "84213f102cbb79ccf0b6aad2b283eadf4c5077b7ec4bf0d71c87fb6efc53bf74"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-fixture-error.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1186a6f768069292fc695c0f1b721317d66537a08745f211dd9eb5db66816f96"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-fixture-error.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5c0af3895fb04a77f44c4e0b4f9dad958ec81109728cdd00507de29b62a3b7bf"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "04e9bde58c365ddfeada9453c77decd0fa7607e6757fa816523ccb32607cd38c"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5f9a7bc6f4b0bc86c43f581751d52e5c19f8570c76f2879dcb49219f311eb273"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-negative-retention-regression.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "14df33b2afdfc2074bf2df9c13ce2dbba38409f53c7e3f7ba4cac6fc94a03b6d"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-negative-retention-regression.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "af3c424afadc3896f33835e37e28cf1962c8f75975a2c10b038cb8a408f7bb2b"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "830485f2def58814bd8b069734834ae334a405df4c8b3a9e5c5d684e5cc16de5"
+    },
+    "docs/evidence/M8-004/development/pr160-alias-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "23889e97560cbbe712d243aff58b3d14bfedce72db957cb2dc384b5253290045"
+    },
+    "docs/evidence/M8-004/development/pr160-boundary-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b6c875fe6c114a281a4be260718ed5143e338622668259a8ab0995e31b17ba89"
+    },
+    "docs/evidence/M8-004/development/pr160-boundary-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fce556841f7da5be0de5cd5ed93cd4dd79c4965f4534e448bbd67ebb6037de57"
+    },
+    "docs/evidence/M8-004/development/pr160-boundary-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3b574f27c77bf2613735a2dd3916a996a4e6bdaa04d1082ba264b092e8d42542"
+    },
+    "docs/evidence/M8-004/development/pr160-boundary-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8b2ad549d3e95461692ddf606fbb0be7727330e59a4489991493be7e6d0c0c41"
+    },
+    "docs/evidence/M8-004/development/pr160-failover-cancel-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "db01a9caeb4f167f38aeac4fe81c210d77a68377c8f98d115e8e68d61b963593"
+    },
+    "docs/evidence/M8-004/development/pr160-failover-cancel-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b61d6d1446575239a4a56a5834cf1086ddfc20ff3b240b4b16f02eba07a1372"
+    },
+    "docs/evidence/M8-004/development/pr160-failover-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "934b631ce7514f75d6e894b3db46445f4be557ef6ef484e31c89add4542696a4"
+    },
+    "docs/evidence/M8-004/development/pr160-failover-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "991893488904858ae6aca0ad79c7bfc533a4aeda05a8b0b9764a3a3ed8b72df3"
+    },
+    "docs/evidence/M8-004/development/pr160-failover-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e6c66e57d11dddb7dbc85e4f610687ac0865da41a2f520365daa51e5f1b4050a"
+    },
+    "docs/evidence/M8-004/development/pr160-failover-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90cb8ba44c132c50c8afe8e00eea2ceaf1c2138937cee0f72552caafcd0e785a"
+    },
+    "docs/evidence/M8-004/development/pr160-fallback-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e815a6cd5d9792d9d1a4b087cfa0c9c96b06e6c2cb9306ac2652429edbcf6fa"
+    },
+    "docs/evidence/M8-004/development/pr160-fallback-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a131fb1151eb9b5e588160d9da5f6fbce83357011b45411cb40124f4a569bfc"
+    },
+    "docs/evidence/M8-004/development/pr160-fallback-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "45e0146dd1fccda09207c644f1d6cc236919df4df3cf982704df4b5fa4cebc18"
+    },
+    "docs/evidence/M8-004/development/pr160-fallback-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2ad1c88d98f525fb1fd4f31a80d7a147054a5d8b76cc8cb79762c71fe9abc105"
+    },
+    "docs/evidence/M8-004/development/pr160-interpretation-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7436d252890c1713197a7ef53e69dd494889eff5fba104a285f2325c67d6a15d"
+    },
+    "docs/evidence/M8-004/development/pr160-interpretation-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2af3c228aad5dbc7d5a6367f80510605ea51b29f81585519037f8cd0e38ba4e6"
+    },
+    "docs/evidence/M8-004/development/pr160-interpretation-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b630cff9425a335b0c47ed100836fa37c88f228c65befb8025474e9243d0912b"
+    },
+    "docs/evidence/M8-004/development/pr160-interpretation-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "33fcb34bd08320da54920cc1921432dd5a64cb16b2274685023abfe33a122335"
+    },
+    "docs/evidence/M8-004/development/pr160-literal-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32949e4c95e714c63dad5a828decdbbf08fa0338f0c2c6181b2a9cbdeefc1c29"
+    },
+    "docs/evidence/M8-004/development/pr160-literal-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "67f518299e05c93cdef4a23685c3ff57c574ff02efb51d40465381c34324ae40"
+    },
+    "docs/evidence/M8-004/development/pr160-literal-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e22b6a8a8310236bfefaf13dca4c726062294fbdb6add36e8710995d7a6b0117"
+    },
+    "docs/evidence/M8-004/development/pr160-literal-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e51fad7a7842eda57cf3dd3ddd750eb12d1927929fcde11fea107895c7db7dea"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cache-capacity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cache-capacity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-namespace.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-namespace.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c5db96a249211018c9be7c77201d6635c9c9c695148f446e22d183a75bbdebcd"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-0.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-0.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-1.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-1.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-2.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-2.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-3.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-3.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-4.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-network-4.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-nsswitch.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-nsswitch.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-resolv.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback-resolv.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/system-fallback.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2f5cf36c43898886dd4a4915c42e5d525fdaefc6ad714fd8fdcafd30a8fb2d8"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-green/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cache-capacity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cache-capacity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-namespace.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-namespace.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9da016b044d1b75f2eb881ea1c30f33eceaeb23d423b67df2e90ade94b5dfda5"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-0.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-0.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-1.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-1.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-2.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-2.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-3.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-3.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-4.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-network-4.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-nsswitch.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-nsswitch.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-resolv.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback-resolv.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8561370dee7cac052f87ddf36d555d3e24ac85bc72f7ef90170b2da1d063a172"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/system-fallback.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-native-literal-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/development/pr160-network-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d037bae9211c8d565ff30a75b71e53beafa6b49001aff021d1fbdcdc966ac498"
+    },
+    "docs/evidence/M8-004/development/pr160-network-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5ba6fef7cb0a2cb30d764154114f95a52bb8e252958f39eb593ae6ec629b2e06"
+    },
+    "docs/evidence/M8-004/development/pr160-nxdomain-counter-compile.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "93c28b5ebe096999a24504f310d473d5d15c56ef40a686da269180e2986acf3e"
+    },
+    "docs/evidence/M8-004/development/pr160-nxdomain-counter-compile.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-nxdomain-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "39c98a4b327d5102f9d5174face3bf396d0ab48a99c037e79a4ba84b68941246"
+    },
+    "docs/evidence/M8-004/development/pr160-nxdomain-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "615bf4f03acac69df9677b46dd55266715c5d403b41e48a3e322e4e96538e96b"
+    },
+    "docs/evidence/M8-004/development/pr160-nxdomain-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8a517c46314a3870cba084c4023650508eef43b180d110290659dc63ef4b5a9f"
+    },
+    "docs/evidence/M8-004/development/pr160-nxdomain-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6bfa350ca5e5fcbf7779983285cebacd09e9231db940f6c17bb0323bc676c4f1"
+    },
+    "docs/evidence/M8-004/development/pr160-ownership-ci-failure.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5bddcae98c27719284e711a47b973d0364eda5b295542e11d9ba3824fa294227"
+    },
+    "docs/evidence/M8-004/development/pr160-ownership-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10ddb4bf3d394357f4d87a1f5f1f1298e171709e119b72f93151636ad9ba21d9"
+    },
+    "docs/evidence/M8-004/development/pr160-ownership-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a76562b9540f18e6a02abd69400c2415366131ed5ea125c9bfe71887df85f33f"
+    },
+    "docs/evidence/M8-004/development/pr160-ownership-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c2fde35b84e609d4cab6f80d06d7b4dadea40908052f11bb64c7780f19244eda"
+    },
+    "docs/evidence/M8-004/development/pr160-ownership-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "604d8d249abc4440e5d6c99b23a20950a0f0231da56014a5fc670006a6bf98f9"
+    },
+    "docs/evidence/M8-004/development/pr160-policy-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "17ccbf83a4232cb442d45b07de5b1786a6b0d1672cea7b30fb55137d84a57938"
+    },
+    "docs/evidence/M8-004/development/pr160-policy-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e2b8e10a887f16a2a1e32e058ee9ec9ea5c2469d1f496ed2a55fb60d85f653c0"
+    },
+    "docs/evidence/M8-004/development/pr160-response-assertion-compile.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "affd57f1cdca609301b5d570fd03f47f2d05f33139063c5f30e53edb31688ef3"
+    },
+    "docs/evidence/M8-004/development/pr160-response-assertion-compile.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-response-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2434c1b05e6ffa54eeefb14b88eb4a0a4cc51a32f6e0c351f750ffe261a4687d"
+    },
+    "docs/evidence/M8-004/development/pr160-response-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6b7f2ec4bb9a79bde5ebc3263da251bf9d72a7b9d7b12e2cdb1a0c7c8806053c"
+    },
+    "docs/evidence/M8-004/development/pr160-response-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2ef73ec507982443d6974f0311263d7cb2376fb6fda01df4cb6ae74051b8d028"
+    },
+    "docs/evidence/M8-004/development/pr160-response-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "01e01c180e565602544824bfb96e2ca679417342427276ca220703b903df4307"
+    },
+    "docs/evidence/M8-004/development/pr160-response-timeout-compile.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c4f8964a4834fe7bbcf75f031357b5314ffb74f5558ec74eb6fe06212be0a23f"
+    },
+    "docs/evidence/M8-004/development/pr160-response-timeout-compile.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-second-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "170ce026784d40ad4c3d204a2d7a8589960f9064ea5323b8c1743fce5e808476"
+    },
+    "docs/evidence/M8-004/development/pr160-second-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ff34b8f350874e595132f7b7ee75f58db8055ce3d73b4af297a3063fd23df9dc"
+    },
+    "docs/evidence/M8-004/development/pr160-second-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bb9f022ff4d735a00b003945f6404ce3f598cd5209a0d6c219896c18b7d161d2"
+    },
+    "docs/evidence/M8-004/development/pr160-second-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44efd571e1ea78e31afbb7b0a1c12b469bb402f55a89cd3b7a15048658dd12b2"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-namespace.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-namespace.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6061747a28a221ef7221ee0352edd7f4a4edc73ad57aae7041b85bccbccdc77f"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-0.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-0.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-1.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-1.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-2.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-2.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-3.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-3.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-4.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-network-4.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-nsswitch.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-nsswitch.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-resolv.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback-resolv.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green-confirmed/system-fallback.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2f5cf36c43898886dd4a4915c42e5d525fdaefc6ad714fd8fdcafd30a8fb2d8"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fc7080f9cf566029cd33b22d82b29c2fc90bef469cb8eede7656e5c318c43276"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-green/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-namespace.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-namespace.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c3f5257edf8807b77557352b38ac9711cf26ad3b3dde4a376202cb63a4aedaf6"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-0.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-0.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-1.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-1.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-2.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-2.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-3.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-3.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-4.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-network-4.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-nsswitch.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-nsswitch.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-resolv.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback-resolv.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2c2a47d47ced0d6da3f5cca0cdaad7c642450fe81be0666216f783cba5f4ca6"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red-confirmed/system-fallback.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cache-capacity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cache-capacity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/system-fallback-namespace.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1a54f26f4d29497c88f922a3f5b28b266f333a11c6fac85fc264063a7b914f4c"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/system-fallback-namespace.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/development/pr160-system-fallback-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/development/pr160-third-green.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c5143c146046e2dc8c4db3e529010cb40fbcecaa534fe5e7cfba59b3e2478f61"
+    },
+    "docs/evidence/M8-004/development/pr160-third-green.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d09d1b98bfc07989cdedb86a14915fcf7d29a9266bcc21ef3a841dbcf1ba6e7"
+    },
+    "docs/evidence/M8-004/development/pr160-third-red.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0b64c86fc88cfa0dd475c6b0d1a964b989ce1228eda211e8f9ff2b5b10c25d06"
+    },
+    "docs/evidence/M8-004/development/pr160-third-red.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "06f7ceaff253062205b0abc9cb4b98d4d3e3a094e02093dac5ef52b1f65f2c25"
+    },
+    "docs/evidence/M8-004/development/wire-review-original.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b71ed78787c980a2aeb2ccc4c07ef6217f7782e2bb7f9f56757f033dbc6a0205"
+    },
+    "docs/evidence/M8-004/docs-report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dd2f99f31a52f2005eaa102ba346b76498b38a90562bcb0d6388c22eb652ea47"
+    },
+    "docs/evidence/M8-004/full-check.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0513e0a81df43b73df88ed93304356ff07d9173d895dbe8c937ec3dce3e2e90d"
+    },
+    "docs/evidence/M8-004/native-cache-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c6f485cd91987330ab4eb7560588c2392bc3925ae4820f332619466e98ae573d"
+    },
+    "docs/evidence/M8-004/native-cache-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-cache-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-cache-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-cache-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-cache-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cache-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-cname-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6cbd6bcf799ae0e12e8ad7694f37280a011068c2f183eb0408aa05b8ab3b9060"
+    },
+    "docs/evidence/M8-004/native-cname-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-cname-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-cname-red/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0fee678ebc2bc1bacd01cdc622be8afeb81bb66d6faa293cd042a172789fc755"
+    },
+    "docs/evidence/M8-004/native-cname-red/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-cname-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-cname-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-cname-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-cname-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-dns.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c5969cb00e5dafbf835f6b0291b6f63c29560ad978d274e795ed12285ac12108"
+    },
+    "docs/evidence/M8-004/native-dns/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-dns/cache-capacity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/cache-capacity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+    },
+    "docs/evidence/M8-004/native-dns/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-dns/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/native-dns/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-dns/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/native-dns/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/native-dns/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d694085e3fe23c1fe7fb13b684537a1e2e567e31c07e0090d057417ac9837aa7"
+    },
+    "docs/evidence/M8-004/native-dns/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-dns/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-dns/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/native-dns/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/native-dns/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-namespace.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-namespace.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c0a3f093f657772dcc1c7159cc4a0e22788704bbfdb666b1a214e0d74aeb4aeb"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-0.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-0.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-1.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-1.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-2.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-2.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-3.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-3.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-4.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-network-4.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-nsswitch.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-nsswitch.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-resolv.conf.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback-resolv.conf.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/system-fallback.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2f5cf36c43898886dd4a4915c42e5d525fdaefc6ad714fd8fdcafd30a8fb2d8"
+    },
+    "docs/evidence/M8-004/native-dns/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-dns/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-glue-green.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cd5f837f7cf1243ee26e35ed30b515f709529c41d9b2fcb8d1e02718d456dd86"
+    },
+    "docs/evidence/M8-004/native-glue-green/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-glue-green/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-glue-green/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-glue-green/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/native-glue-green/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-glue-green/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-glue-green/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-glue-green/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/native-glue-green/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-glue-green/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-green.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b2bafe307ea36d2e71dceb261b006980be1a3c4d674f90a279dbd438426a4d74"
+    },
+    "docs/evidence/M8-004/native-green/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-green/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-green/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-green/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/native-green/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-green/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-green/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-green/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/native-green/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-green/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "66007b06d2b741905c20f6437a1616618e232dbbc47ae89d356c6ac38632ece7"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e65d4230602050ccc784bc643595055c80f958687a7078aa1051c2982e79f383"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-negative-cname-wire-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bde6127c3d29e14408b469120a05c446d679e44c7a8249d098891d5b4f4cf33c"
+    },
+    "docs/evidence/M8-004/native-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5b599cae66e0c5394b8a73a55a193c7036cafdbe91cebf4b4083ca9ea4605330"
+    },
+    "docs/evidence/M8-004/native-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-review-green.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9c22e1a2624453622208906c88c03953022675a949231a4ec407d266e3e1c517"
+    },
+    "docs/evidence/M8-004/native-review-green/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-review-green/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-review-green/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/native-review-green/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-review-green/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/native-review-green/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/native-review-green/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-review-green/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-review-green/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-review-green/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/native-review-green/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/native-review-green/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/native-review-green/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-green/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-review-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6f7634a94d684b8544aed766ef00e36ad3f66cc1a7a43a3ca51f4855c6c77f2f"
+    },
+    "docs/evidence/M8-004/native-review-red/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-review-red/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-review-red/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d6b8e6ea3420910df0be7b7366b6f1fb234241c3f69c137cb45c460cadc1fb57"
+    },
+    "docs/evidence/M8-004/native-review-red/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-review-red/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8dfd496d6e740d1d5dd05b35293d682fb41fdbc331f4804f032b3ff73331f5ef"
+    },
+    "docs/evidence/M8-004/native-review-red/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/native-review-red/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-review-red/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-review-red/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-review-red/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/native-review-red/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/native-review-red/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c41921135a2752d836fb26dc9e51fa9ff985fb22436511ba8685b1a85cb47424"
+    },
+    "docs/evidence/M8-004/native-review-red/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-review-red/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5f2e60a8ebf2436d8cbacbe2a12ed3f83b15d8bfc4bef1bbf61e3af363075f1b"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cache-capacity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cache-capacity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c25f36fc08243f8c64949e65535794ecde57606ec520e390db4563e7be1c5eea"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cache-policy.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cache-policy.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ea3e741a2e26a398d306048156230c16a23f3343d57fadd03e8ad525b0c4a9b7"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cname-bounds.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cname-bounds.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7aad441d60aa8298c2116f7904b1948167a9c59e0b1a342d3698bdd4d864c773"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cname-ttl.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/cname-ttl.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c413a0228a225fee23bfaa06e7129177014fe6c090567cd2e1b869a27fb40c1"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/combined-negative.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/combined-negative.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69a49c74c6436fc4a579efa0ea4f1e7dc18afabda746ead2bf383a4ac671ae27"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2a1bac0d3fb03977ce2079302fbfec37164085f44bda43d22c29b01edff5a13"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/fallback-identity.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/fallback-identity.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdb43f55ce754a30cccf11822551140110c40945c0d70831eb100e8ade85c489"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/lifecycle.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/lifecycle.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a2fead43d72bb8cf170bdd67365928904ad8c95324c41c41689ab1057aaba7ce"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/negative-scope.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/negative-scope.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90466b42fad269e56b70e14f49db5e4e0b362bf553210fb95ab918df97cc5be1"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/search-boundary.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/search-boundary.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8737ec7295e1c2ed20bb72d5ea59e4755ff4e20991547566d01119742601791"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-fixed/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/native-scenario-green.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "95a6578257f66f201615a427413f31be7696f3f2110560358d447574d4fbfe95"
+    },
+    "docs/evidence/M8-004/native-scenario-green/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a0dd159d3e0d47447c1cfb8d46dc36a097f35ea582d3358a9a70544bafec60f3"
+    },
+    "docs/evidence/M8-004/native-scenario-green/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-green/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-green/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-green/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-004/native-scenario-green/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-004/network-tests.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f0fa39dfad76d059e9cbacadd6f2fbbf67ac8fcaa09ee987d5f449ed062be191"
+    },
+    "docs/evidence/M8-004/plan-validation.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8de226899b0736201d4d2ae212883a980f0b17a3f29fb1f290925b79ebef16a"
+    },
+    "docs/evidence/M8-004/pr160-aggregation-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9a921b62e08abb2262818d156d0a4ae873a13f165b5ac756d1c3baf71add1939"
+    },
+    "docs/evidence/M8-004/pr160-alias-fixture-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5e6bfd6a8dfdd3fd8ef6e3faf377815c64dd890fe2fd838ac8970e3ecb3603e6"
+    },
+    "docs/evidence/M8-004/pr160-boundary-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3de3ac82c3455cf476c6432f7e8b79a74a9e3f555a4a101f96d3e4c490ab764f"
+    },
+    "docs/evidence/M8-004/pr160-failover-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08baedc27a7d2db2c9aeefceea8acd6649c96089f67f2d40cf9433849fcddde4"
+    },
+    "docs/evidence/M8-004/pr160-fallback-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "521698b852271e0214e9b55e27fe5c66cfd235aeda3f56c59ba4156401bfbf17"
+    },
+    "docs/evidence/M8-004/pr160-interpretation-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c781c46acfccd8566e458236ab4d59318d07cd00e8589e4da9e64de92ae3e34"
+    },
+    "docs/evidence/M8-004/pr160-literal-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a1db2a4a64063842f21462096ca04f306595f8817f016b0f1eaeaa1bd79689ef"
+    },
+    "docs/evidence/M8-004/pr160-native-literal-green.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1f9394f6a9770cd75c6875a7798613e4a94469c8a80015f07d603e753a813048"
+    },
+    "docs/evidence/M8-004/pr160-native-literal-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7e330cdd3176b97a0b9348dacd0a352675396ccb552383bea880855977913037"
+    },
+    "docs/evidence/M8-004/pr160-nxdomain-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "60ddfb609b4c6b69ccb065408c5f8a05ca0122727ca2b04f3956a50c0e65701b"
+    },
+    "docs/evidence/M8-004/pr160-ownership-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "03253a6883a2097df56e871d8c2f56f587f347a91e4d270c15c5a83ac779b577"
+    },
+    "docs/evidence/M8-004/pr160-response-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "57279931d177718b02ad11e5ebfea2f8cbcd1e77da5da9f21c725be5d33e6015"
+    },
+    "docs/evidence/M8-004/pr160-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cfb5b6ff0df338cbe67358d5dc24f1f31aa5c6db8b2f0e633931944c98e0b788"
+    },
+    "docs/evidence/M8-004/pr160-second-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "80296ccf6a25153b59d63d8f3cb9dbbb635cddc2aff3a1d5c0542ae8dfcf9e8c"
+    },
+    "docs/evidence/M8-004/pr160-system-fallback-green-confirmed.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cc5208f77c337b7f515e18c74500ee2a1f1e194d92e844a10c295a0c283b7805"
+    },
+    "docs/evidence/M8-004/pr160-system-fallback-green.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9b383102c29d88eea899584bd8b794a5d3e39714c0548ac9dcef87b92cdb14d8"
+    },
+    "docs/evidence/M8-004/pr160-system-fallback-red-confirmed.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "474e53f92cfd3b1ab92a09660eb088018e0a36a47d9001079a19c88a15832aa7"
+    },
+    "docs/evidence/M8-004/pr160-system-fallback-red.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5647e5216f00cffed3f053703cf12343602f39a5b9f7d22055c530d6ffac9b51"
+    },
+    "docs/evidence/M8-004/pr160-third-review.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f1be9a045c0d3d85457aa378968418daec4979bd178669842232e2c0e0a9c412"
+    },
+    "docs/evidence/M8-004/public-api-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3c70011b1ba890a7d91cd56809702ca712238c685637c6dd0ab9f3e9aee43f33"
+    },
+    "docs/evidence/M8-004/raw-log-closure.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5642ea7bd3c8e149e70009ee78020283e85b2bb25813e148fc982377205fcee1"
+    },
+    "docs/evidence/M8-004/regression-tests.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ffff81a3b325effee3c69db912ef79da5e4bfcdff4efdba7f7ecdbd1fcb7c351"
+    },
+    "docs/evidence/M8-004/review-dispositions.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7adee99c89adbb992ce3ef35040d8aef734e0343a399fef75c8f137bf2c3dcc"
+    },
+    "docs/evidence/M8-004/task-check.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3c6d940dde4b21a7702d0e360b82a3784a5c44ea70f15bc3bc26fff7e050e4f"
+    },
+    "docs/evidence/M8-004/task-validation.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e897c967143edeb8fd772c83526ad1712d4e5ac194c1391d6c312e606620d886"
+    },
+    "docs/evidence/M8-004/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "59678e3dc22573bc85db839b8da6a7f6dbeb7632424ba3fb5caf50b55760b378"
+    },
+    "docs/evidence/M8-004/transport-tests.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "71938b96f3c9dc08dc029773700e56d80bfe0462a44b787543ff7ea3edc31d4e"
+    },
+    "docs/guides/network-foundation-linux.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "011ee79bf6010e7fc4a148571b06a8a6ab1336784e7c40275d846a760f578b2a"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "71294c409bbb0c354b1aa35d381b6766ac43761a8f9747354c88f945d4c0fd05"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4f667f1502e5b2b27f18308e5cee11f2948aa59f167e942dcd7aebc5f20f4119"
+    },
+    "examples/linux/m8_004/native_dns.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ddb9c88e5db2be784ee9bccf70e2af53ceb4bee4dd1f9e49afcbe6a166ee86d6"
+    },
+    "native/resolver/linux/wirestack_resolver.c": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f8bdb11af530e4e84cbdbf374afe93e5493dc74886500c6b26acbc3adaf9abae"
+    },
+    "native/resolver/windows/wirestack_resolver.c": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cdf41a40bd57960dc5040289b3803b4af04e9e3203d1e8a7b654446c962bb6c4"
+    },
+    "scripts/check": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "99f3461d7b672ef2ffc4a72ad2a417f83a26c1270fa4fdeca74dec0c88204079"
+    },
+    "scripts/check-code": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6b1e73c263c844e08e4974100cbbe0ce30a7deef5a05319baeb9c8fbdef19b4f"
+    },
+    "scripts/check-docs": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10b4d9c6589d4593bcff1c1e672307312e3265a692d9e35a6b4e7445e108e797"
+    },
+    "src/byte_span.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+    },
+    "src/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d"
+    },
+    "src/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3"
+    },
+    "src/deadline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+    },
+    "src/internal/connector/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+    },
+    "src/internal/resolver/bounded_backend.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ad49a33fdce5823d5afbae43fc5b366d429d56f0ed207ec9145bbe9d0b5f2eab"
+    },
+    "src/internal/resolver/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+    },
+    "src/internal/resolver/system_resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cc35345eef32af804135ae5bfa7f99a09b90a30afdb336dfc1615e26937ba3f4"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    "src/internal/transport_stdnet/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2d055c6698f10b8b5383fafa103411b8a8486b255b3838112dee7c884036f597"
+    },
+    "src/internal/transport_stdnet/stdnet_transport_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "112f93054d8b56cf71729c789a49a82509a0141f55dc61628d9b66e06c583ecd"
+    },
+    "src/internal/transport_stdnet/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "322ec7f64149760896f3e2688c9898cfff8a6e656aa414a8f7dc66b0ec9d46f5"
+    },
+    "src/internal/transport_stdnet/unix_address.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    "src/internal/transport_stdnet/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    "src/net/datagram_socket_core.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2095e7d3a02c805c3018badf7045b0d76a42a56e101a2e08867f32b676c34ae6"
+    },
+    "src/net/dns_client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a63095f98489b93b83f76cebc878678391d338f9080e15cf2ea7277ff6562622"
+    },
+    "src/net/dns_client_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b845ce03fe4a21b214c07289b66aeb10d8d6230a787a4b446914e0a3a7996ee6"
+    },
+    "src/net/dns_resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65b410bda4ed26d315848f68bdd70b432101153b12e3c5d6dcccd8bea14ec183"
+    },
+    "src/net/dns_resolver_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7dc4ea59138a3f737c7ceb1a5314f1a5628b3315fef4550ece982b3685356477"
+    },
+    "src/net/dns_wire.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+    },
+    "src/net/dns_wire_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3341da7328f396631f0666f722f88e5d954724619acab7c005b2e82046a32f2c"
+    },
+    "src/net/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05ee39721856fab3dc82dc4a83baaa0adfd9bb8af4fb38e0af41d4f5cb4430cc"
+    },
+    "src/net/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a59cba97d797a3800338f6a8594bfcd0f93456fc926421b2f9bce81149c9546b"
+    },
+    "src/net/unix_datagram_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    "src/net/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    "src/net/unix_stream.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    "src/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+    },
+    "src/network_event.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084"
+    },
+    "src/operation_context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "523a1c1efaab2f3e6ba0755386460ea504a2caa8ef1453a18134f950c6e1234d"
+    },
+    "src/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+    },
+    "src/transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+    },
+    "tools/build_linux_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "22d176ad6c9de3d89e20c050b834585a56a42726a80474062a3328ded879dd95"
+    },
+    "tools/docs/m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c885f526536437d4a06ea3dd913269564d228109241b0763165dcf4fc02a7d45"
+    },
+    "tools/evidence_digest.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44f03ada4f369f4b1d74f48312c71b32696094f4d9e3f6adb1a9f879b8b1db84"
+    },
+    "tools/m8_004_native_dns.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a9e39da8ed7b54c11dbce7df2f562ca301056087d099ec90aa83df8ee2e5aa1"
+    },
+    "tools/repository/repository_tooling.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "857f88f2cb323b44389768a7adc8d700e15da96e5395059a2bdaf013e4dca73e"
+    },
+    "tools/tasks/M8-004.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9972d23907fd4bc0e423cfcc7ab34253f6cf694c5bc5fe9c6cb1205db54d01e0"
+    }
+  },
+  "source_task": "M8-004",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

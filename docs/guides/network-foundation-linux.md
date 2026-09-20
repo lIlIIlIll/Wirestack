@@ -1,0 +1,355 @@
+# 使用 Linux 网络契约
+
+`wirestack` 提供共享 Internet/Unix endpoint，`wirestack.net` 提供同步 socket 生命周期、
+capability 和结构化错误。Linux backend 使用公开 `std.net` API，不暴露 SDK socket 或
+native handle。M8-002 提供 `TcpListener`、`TcpStream` 和 `UdpSocket` 的 Internet
+原生证据；M8-003 增加受 SDK 能力限制的 `UnixListener`、`UnixStream` 和
+`UnixDatagramSocket`。M8-004 增加经过 Linux 验收的 DNS wire client 与 resolver policy。
+M8-005 已完成 HTTP parity。M8-006 覆盖 Linux TLS context、external hook、
+native provider 边界和安装后 consumer；证据见对应任务记录。
+
+## 连接已解析的 TCP endpoint
+
+先按[Linux 入门指南](getting-started-linux.md)配置仓颉 SDK 和 Wirestack 依赖，
+并在本机 `127.0.0.1:8080` 启动可接收字节的 TCP 服务。连接构造不做 DNS。
+
+```cj
+import wirestack.net.*
+import wirestack as api
+
+main(): Int64 {
+    let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])
+    let endpoint = api.SocketEndpoint(address, 8080u16)
+    let context = api.OperationContext(
+        deadline: Some(api.Deadline.after(5 * Duration.second)))
+    let stream = TcpStream.connect(endpoint, context: context)
+    try {
+        let payload = api.ByteSpan("hello".toArray())
+        stream.writeAll(payload, context: context)
+    } finally {
+        stream.close()
+    }
+    0
+}
+```
+
+成功时服务端收到 `hello`，客户端退出码为 0。连接拒绝时先检查服务是否监听上述
+地址。连接和写入共享同一个单调绝对 Deadline，不为每一步重新设置相对超时。
+
+`finally` 使用无参 `close()` 回收资源，不重复使用可能已经耗尽的读写预算。
+需要限制等待关闭的时间时，显式调用 `close(context:)` 并处理取消或超时。
+
+## 监听已解析的 TCP endpoint
+
+使用 `TcpListener.bind(endpoint, backlog:, context:)` 绑定已解析的 IPv4 或 IPv6
+`SocketEndpoint`。端口为 0 时，`localEndpoint` 返回内核实际分配的端口。
+`backlog` 默认为 128，只接受 1 至 65,535。无效范围、预取消或已过期 context 都在
+listener 创建前失败。
+
+同一 listener 同时只允许一个 `accept`。第二个重叠调用返回结构化
+`ConcurrentOperation`，不会进入等待队列。活动 `accept` 的取消或 Deadline 只结束
+该次接受操作，listener 保持 `Listening`，之后仍可再次接受连接。这是
+operation-local cancellation。`close` 和 `abort` 才会唤醒接受者并终止 listener，
+且第一个取得 native close 所有权的操作决定保留 `Closed`、`Aborted` 或 `Failed`
+终态。接受成功后返回 `TcpStream`，其 `localEndpoint` 和 `remoteEndpoint` 都是已解析
+endpoint。
+
+## 生命周期与能力边界
+
+流式 `read`/`write` 可以部分完成；需要完整缓冲区时使用 `readExact`/`writeAll`。
+`readExact` 在缓冲区填满前遇到 EOF 时抛出 `UnexpectedEof`，保留已捕获的本地和远端
+endpoint；已有错误中的 endpoint、分类、phase、重试性、native code 与 cause 不被覆盖。
+对端 FIN 不因此中止仍可写的 TCP 方向；`UnexpectedEof` 表示此次精确读取未完成，
+不是连接重置。所有 socket 操作统一报告底层异常，并保留可用的 endpoint 和原始 cause。
+未分类异常的错误码为 `SystemFailure`；连接使用 `TcpConnect`，读写分别使用
+`TcpRead` 和 `TcpWrite`，`shutdown`、`close`、`abort` 使用 `TransportClose`。
+底层关闭失败保留 `Failed`；中止已经占有底层关闭时，即使回收失败也保留 `Aborted`。
+`close` 与 `abort` 幂等，EOF、取消、Deadline 和本地关闭保持不同结果。
+成功的单方向 `shutdown` 分别显示 `ReadHalfClosed` 或 `WriteHalfClosed`；不支持的
+shutdown 不改变状态。正常关闭为 `Closed`，主动中止为 `Aborted`，终止性 I/O
+失败为 `Failed`。后续 `close`/`abort` 不覆盖已确定的终态。
+预取消且未触及 socket 的操作不改变生命周期。即使操作已获准进入读写路径，
+其预取消检查也不能把并发正常关闭的 `Closing` 或 `Closed` 改成 `Aborted`。
+只有真正拥有底层首次关闭的中止（包括取消）才保留 `Aborted`。其他操作随后观察到
+`Closed` 或调用者随后执行 `close`，都不把该中止改记为失败或正常关闭。
+半关闭后，对已关闭方向的新非空读写请求返回结构化 `Closed` 错误，但另一方向仍可用，
+socket 保留对应的半关闭状态，不因此转为 `Failed`。空 buffer 仍按无 I/O 操作完成。
+两个方向均关闭后，若底层资源也已关闭则为 `Closed`；否则保持 `Closing`，
+调用 `close` 释放资源。被唤醒的旧 I/O 不把正常关闭改记为 `Failed`。
+
+`close(context:)` 对 `Closed`、`Aborted`、`Failed` 直接返回，不访问调用者的取消标记或
+时钟。对仍需关闭的流，接管前检查取消和 Deadline；拒绝时不调用底层，也不改变状态。
+关闭已经开始后，上下文约束调用方的等待时间，而不放弃资源回收。等待被取消或超时时
+返回结构化错误，关闭仍会继续；实际完成后才记录 `Closed` 或 `Failed`。
+底层正常关闭已经占有资源时，后到的 `abort` 不升级或打断该关闭，也不把 `Closing` 或
+`Closed` 改成 `Aborted`。若中止先占有底层关闭，后到的正常关闭不覆盖 `Aborted`。
+
+## 收发 UDP 报文
+
+`UdpSocket.bind(endpoint, context:)` 实现 Internet datagram 的原生创建与绑定，
+不执行 DNS。端口为 0 时，`localEndpoint` 返回包含实际绑定地址的
+`NetworkEndpoint.Internet`；`remoteEndpoint` 在 `connect` 成功前为 `None`。
+`connect` 选择一个已解析的 Internet peer，并在 native socket 上安装接收来源过滤。
+之后 `send` 发送给该 peer，未连接时以 `NotConnected` 失败；`sendTo` 则不改变已选择
+的 peer。
+
+`send` 和 `sendTo` 把报文作为原子单元处理，成功时返回完整 payload 长度。当前
+Linux `std.net` backend 接受的非空 payload 上限是 65,507 字节。空 payload 在 native
+I/O 前以结构化 `Unsupported` 失败，`capabilities.zeroLengthDatagramSend` 为 false，
+socket 保持可用。这个限制只影响发送。接收空 UDP 报文是已实现的必需行为，
+`receive` 会返回空 payload 和 `truncated == false`，不能把它当作 EOF。
+
+`receive(capacity, context:)` 的 capacity 范围是 1 至 65,507。结果拥有自己的 payload，
+并保留已解析的 source endpoint。报文超过 capacity 时只保留前缀，丢弃该报文剩余字节，
+并设置 `truncated`；下一次 `receive` 从下一条报文开始。一次 send-like 操作可以与一次
+receive 重叠。同方向的第二个操作以及与活动 I/O 竞态的 `connect` 返回
+`ConcurrentOperation`，不会形成无界队列。
+
+```cj
+func forwardOneDatagram(
+    socket: UdpSocket,
+    target: api.NetworkEndpoint,
+    context: api.OperationContext
+): Int64 {
+    let received = socket.receive(65507, context: context)
+    if (received.truncated) {
+        throw IllegalStateException("refusing to forward a truncated datagram")
+    }
+    socket.sendTo(target, api.ByteSpan(received.payload), context: context)
+}
+```
+
+预取消或已经到期的 context 在 UDP I/O admission 前失败，不改变 socket 的 `Open`
+状态。Deadline 到期会终止该次等待，socket 仍可复用。取消已经活动的 UDP
+`connect`、`send`、`sendTo` 或 `receive` 不同：该操作通过 abortive close 唤醒
+`std.net`，因此关闭此 `UdpSocket` 并保留 `Aborted` 所有权。每个 socket 必须在
+`finally` 中调用 `close()`；不要把活动 UDP 取消当成 listener accept 那样的局部取消。
+
+## Unix-domain socket
+
+`UnixListener.bind(endpoint, backlog:, context:)` 绑定命名 Unix endpoint；
+`accept(context:)` 返回 `UnixStream`。也可以用 `UnixStream.connect(endpoint, context:)`
+主动连接。读写、exact/all helper、EOF 后继续写、单读单写并发和终态所有权沿用 TCP
+契约。一次活动 accept 的取消只终止该 waiter，listener 可继续接受连接；
+活动 stream I/O 的取消会关闭 stream。
+
+`UnixDatagramSocket.bind(endpoint, context:)` 提供显式 `sendTo` 和拥有独立 payload 的
+`receive`，可以作为 `DatagramSocket` 传入上面的转发函数。报文上限和截断语义与 UDP
+相同。`connect` 安装内核接收端 peer 过滤，但 **connected `send` 不可用**：
+SDK 自己的 `send` 也会重新解析 Unix 地址。pathname 被替换后，原本针对旧 peer 的
+报文可能误投新 socket。因此 `connectedDatagramSend` 为 false，`send` 显式返回
+`Unsupported`；显式 `sendTo` 仍按调用者提供的目的地址发送，不改变接收过滤。
+
+| 地址或操作 | 当前 Linux backend |
+|---|---|
+| Pathname bind/connect | 支持；close 不删除文件系统节点，调用方负责清理 |
+| Outgoing abstract name | 仅支持恰好 107 字节且为有效 UTF-8 的名称；允许内嵌 NUL |
+| 短或非 UTF-8 outgoing abstract name | `Unsupported`；不补零或改写名称 |
+| Stream 的未命名 peer | 保留 `UnixEndpoint.unnamed()` |
+| Datagram 的命名 sender | 保留实际来源字节，包括短名称和非 UTF-8 abstract bytes |
+| Datagram 的未绑定 sender | SDK 消费报文后无法转换来源地址，操作失败；不伪造来源或恢复报文 |
+| 空 datagram | 接收支持；发送为 `Unsupported`，socket 可继续使用 |
+
+`api.UnixEndpoint.pathname`、`abstractName` 和 `unnamed` 是不同的值。pathname
+拒绝 NUL 字节；abstract name 保留任意字节，包括 NUL。两类地址都由
+`api.NetworkEndpoint` 承载，`api.NetworkException.localEndpoint` 与
+`remoteEndpoint` 使用同一类型，不把 Unix 地址转换为有损字符串。
+地址值的表示范围大于当前 SDK 的 native 支持范围。AF_PACKET、AF_NETLINK、
+SOCK_SEQPACKET、ancillary data 和特权 raw I/O 不计为成功能力；
+`RawSocket.open` 当前没有 native adapter，所有 modeled domain 均返回 `Unsupported`。
+`RawSocket.open` 必须显式传入 `protocolValue`；IPv6 ICMP 使用
+`RawSocketProtocol.icmpv6()`，不继承 IPv4 的默认协议。
+
+捕获共享 `NetworkException` 后，可直接匹配 Unix peer，不需要解析错误字符串：
+
+```cj
+func unixPeer(error: api.NetworkException): ?api.UnixEndpoint {
+    match (error.remoteEndpoint) {
+        case Some(api.NetworkEndpoint.Unix(endpoint)) => Some(endpoint)
+        case _ => None<api.UnixEndpoint>
+    }
+}
+```
+
+## DNS 解析与连接
+
+`DnsClient` 使用 `DnsResolverConfig.nameservers` 中的已解析 endpoint 发送 UDP DNS 查询。
+响应必须匹配服务器、transaction ID、question、class 和 type；合法截断响应在同一个
+`OperationContext` 下改用 TCP。`query(name, recordType, context:)` 返回有界
+`DnsMessageSummary`；`lookup(host, options:, context:)` 返回请求 family 的地址。
+公开摘要构造器在复制数组前检查每个 section 的 16-bit 数量范围，并将 resource record
+总数限制为 65,535。无效数量抛出 `IllegalArgumentException`。
+没有配置 nameserver 时，地址查询使用已有的有界 system resolver；它不伪造 DNS TTL。
+该路径把已经选定的 DNS 名称作为绝对名称交给系统，不再应用系统 search 后缀。
+因此显式根点与手动展开的 search 候选在 system fallback 中仍保持原意。
+`Any` 查询中，某个地址族的 `TemporaryFailure` 或 `SystemFailure` 不会丢弃另一个
+地址族的可用地址。收集到 `maxResults` 个地址后停止查询其他地址族，不让无法返回的
+额外结果消耗预算。在达到容量前，取消、超时和跨地址族 canonical name 冲突仍会终止查询。
+关闭 `DnsClient` 导致排队或活跃请求终止时，错误为 `Cancelled`；关闭后发起的
+新请求返回 `SystemFailure`。
+DNS transport 错误保留已有的本地和远端 endpoint、native code 和 cause。
+底层 receive 错误没有远端 endpoint 时，顶层 `ResolveException` 使用本次选择的 nameserver。
+`SERVFAIL` 和 `REFUSED` 重试耗尽时，错误保留最后响应的 nameserver。
+匹配但格式损坏的 UDP 响应、重复 TC 的 TCP 响应等协议错误也保留所选 nameserver 和 cause。
+实时 NXDOMAIN（含 CNAME）和 NODATA 错误保留响应的 nameserver；地址族汇总不丢弃
+这些错误的 endpoint。真正的负缓存命中不声称发生了新的远端响应。
+未支持的 RCODE 和 CNAME 解释错误同样保留响应服务器；解释阶段统一应用已有的
+context 错误映射。NXDOMAIN 是 name-wide 结果，无论是否带有可缓存的 SOA，
+都会立即结束当前 DNS 名称的跨地址族查询，不采用其他地址族的结果。
+缺少 SOA 时不建立负缓存；之后独立发起的查询仍可访问服务器。
+跨地址族 canonical name 冲突也保留本次实时响应的服务器，即使另一个地址族来自缓存。
+若两族都来自缓存，则不附加声称有新响应的 endpoint。
+每次尝试按剩余总预算和尚未执行的服务器尝试次数分配子 Deadline，UDP 与对应的
+TCP fallback 共用该子 Deadline。静默服务器不会独占全部预算。子 Deadline 不会延长
+总 Deadline；活跃取消或总预算耗尽立即终止，不进入下一次尝试。
+
+`Resolver` 将标准点分十进制 IPv4 字面量直接作为 `ResolverSource.Static` 返回，不应用 hosts/search/DNS；
+仍检查取消和 Deadline。请求的 family 不匹配时返回 `NoData`，不会转为 DNS 查询。
+system fallback 支持 253 字节的规范 DNS 名称；native 输入上限为 254 字节，
+包含提交绝对名称时追加的根点。
+
+`Resolver(config:, dns:)` 在构造时读取 hosts 快照。精确 hosts 名称优先于 DNS；
+DNS 候选按 `searchDomains` 和 `ndots` 排序。需要保留末尾根点时使用
+`resolve(String, options:, context:)`，因为 `HostName` 已规范化并移除末尾点。
+`DnsResolverConfig.fromSystem(path:)` 支持 Linux resolv.conf 的 nameserver、
+search/domain 和 ndots；不实现完整 NSS 配置。配置路径必须是可信的本地普通文件。
+IPv6 nameserver 的 zone 只接受 `UInt32` 数字 scope ID。`fromSystem` 忽略接口名称
+和超出范围的 zone；直接构造 `DnsResolverConfig` 则抛出 `IllegalArgumentException`，
+不会进入无效 endpoint 的重试。没有可用 nameserver 时，地址查询仍可使用有界 system resolver。
+nameserver 的数字 zone 会去除前导零；scope ID 0 规范化为无 zone，
+与 native receive 返回的 endpoint 身份保持一致。
+系统配置在去重前规范化 scope，八个 nameserver 的容量只由不同的 endpoint 占用；
+等价的数字拼写不会挤掉后续的不同服务器。
+hosts 快照同样忽略接口名称和超出 `UInt32` 范围的 zone，保留数字 zone 和无 zone 地址。
+数字 scope 与 nameserver 一样规范化，等价拼写不会重复占用 `maxResults` 的地址名额。
+
+正缓存使用整个 CNAME 链最早的绝对过期时间。负缓存要求相关父域的 SOA，并受
+SOA TTL、MINIMUM、已经过的 CNAME 寿命和 `maximumCacheTtl` 限制。零 TTL、
+缺失或无关 SOA 不会成为可复用缓存。`cacheCapacity` 限制缓存条目数。
+每次有效 NXDOMAIN 都清理同名的旧地址族缓存，即使没有 SOA 或负缓存寿命已为零。
+只有尚未过期的可缓存负响应才会插入负缓存项。
+CNAME 链的 NXDOMAIN 还会清理已遍历目标、经过的别名以及以这些名称为最终 canonical host
+的旧正缓存。已有目标 NXDOMAIN 缓存仍按原来的绝对过期时间保留，不延长寿命。
+
+`Resolver.connect(host, port, options:, attemptDelay:, context:)` 复用 Happy Eyeballs，
+DNS 和所有 TCP attempt 消耗同一个绝对 Deadline。返回 transport 归调用者所有；
+关闭 resolver 不关闭已经返回的连接。resolver 拥有传入的可选 `DnsClient`，
+关闭时也会关闭它；不要将该 client 当作独立共享资源。
+采用现有 client 时可使用 `Resolver(config: client.config, dns: Some(client))`。
+配置必须按值一致；不一致时在读取 hosts 或接管 client 前抛出 `IllegalArgumentException`，
+client 仍归调用者所有，避免同一次 DNS 操作使用两个不同的超时和 nameserver 配置。
+`queryTimeout` 只限制 DNS 解析，不会额外缩短 TCP attempt 的调用者 Deadline。
+
+可复现的本地 UDP/TCP DNS peer、取消、缓存和服务字节交换见
+[原生 consumer](../../examples/linux/m8_004/native_dns.cj)、
+[runner](../../tools/m8_004_native_dns.py) 和
+[M8-004 记录](../evidence/M8-004/README.md)。这些证据不代表 DNSSEC 或加密 DNS 支持。
+
+## 替换 TLS context
+
+用 `TlsClientContextStore` 和 `TlsServerContextStore` 在进程运行期间替换 TLS 配置。每次
+`build()` 都生成一个非零、进程内唯一的 `contextVersion`。该值只在当前进程中标识
+session 分区，不是可保存或跨进程比较的版本号。
+
+`replace(context)` 原子替换 store 当前值并返回新 context 的 `contextVersion`。每次握手
+只读取一个不可变 snapshot。已经开始的握手和已经建立的 connection 继续使用旧配置；
+只有之后开始的握手使用新配置。新 context 的第一次连接执行完整握手，第二次及后续连接
+只能恢复该 `contextVersion` 分区中的 session。TLS 1.2 session 和 TLS 1.3 ticket 都遵守
+该规则。
+
+server 端把 `TlsServerContextStore` 传给 `TlsListener`。`TlsListener` 独占传入的
+`TransportListener`，在 accept 完成后、TLS 握手开始前读取 store。一个
+`OperationContext` 同时约束 accept 和握手。握手会接管 accepted transport；失败、
+取消或 Deadline 到期会 abort 该 transport。关闭 listener 不会关闭已经返回的
+`TlsConnection`。
+
+context builder 保留不可变的 certificate chain，在 `build()` 时复制 PKCS#8 和 external
+key 的公钥元数据。external signer service 保留为调用方拥有的线程安全引用。构建成功后可以关闭
+原始 `PrivateKeyRef`。关闭操作会清零原始对象的可导出内容，context 则继续使用自己的
+私有 snapshot。公共 API 不返回 provider 或 native handle。
+
+完整样例位于
+[`examples/linux/m8_006/native_tls.cj`](../../examples/linux/m8_006/native_tls.cj)。
+这是 M8-006 installed consumer 使用的完整源码，不是从 API 名称拼出的片段。
+`runVersionReplacement` 在 external signer 回调暂停时替换两端 store，验证已经开始的
+握手仍使用旧 snapshot。它随后再次替换 context，验证旧连接继续可用、新连接先完整握手
+再恢复同版本 session，并验证关闭 listener 不关闭已返回连接。同一文件还覆盖外部密钥失败和 test-only key logging。
+runner 会把 release archive 解压到 checkout 之外，再编译这份源码：
+
+```text
+python3 tools/m8_006_native_tls.py --profile release --report docs/evidence/M8-006/native-release.json
+python3 tools/m8_006_native_tls.py --profile keylog --report docs/evidence/M8-006/native-keylog.json
+```
+
+## 实现外部私钥回调
+
+`ExternalSigner.sign`、`ExternalDecryptor.decrypt` 和 `KeyLogSink.emit` 收到握手入口使用的
+同一个 `OperationContext`。Deadline、cancellation token 和 trace 不会替换。Wirestack
+先在锁内取得有界请求，再释放 engine 锁调用用户代码，最后重新取得锁提交结果。因此，
+回调可以调用外部服务而不占用 engine 锁。Wirestack 不承诺抢占正在阻塞的同步回调；
+实现应检查 context，并在 cancellation 或 Deadline 到期时返回。
+
+公开 context 不提供 `externalDecryptor` 或 `keyLogSink` 对象的读回接口。
+持有 context 只允许使用其 TLS 行为，不授予绕过握手状态机直接调用 raw RSA 服务的权限。
+配置 hook 的调用方仍拥有其原始服务对象，必须自行控制该对象的分发。
+
+`ExternalDecryptor` 只允许配置到 server context。server identity 必须是 compatible RSA
+certificate 加 external signer 或 system signer，RSA modulus 对应的 raw block 必须为
+1 至 1,024 字节。PKCS#8 identity、非 RSA certificate、client context 和缺失
+`TlsCapability.ExternalDecryptor` 都在握手前拒绝。不要据此宣称任何硬件密钥设备已经
+通过验证，当前 M8-006 证据只覆盖 Linux 上的 external service。
+
+decrypt request 的算法只能是 `"RSA_RAW"`。ciphertext 必须是 modulus 的完整 raw block，
+长度为 1 至 1,024 字节；回调必须返回完全相同的长度。Wirestack 拥有成功返回的数组，
+并在 native completion 的所有路径清零它。回调不能保留、复用或之后修改该数组。
+provider 负责 PKCS#1 validation 和 padding removal，应用回调只执行 raw RSA private
+operation。
+
+build admission 使用 `TlsContextException` 和稳定的 `TlsContextErrorCode`。role、identity
+或 hook 不匹配时使用 `InvalidHook`；provider 不支持时使用 `UnsupportedCapability`，
+并设置对应的 `TlsCapability`。握手期 signer 或 decryptor 失败使用
+`TlsEngineException`。取消和 Deadline 分别保留 `HandshakeCancelled` 与
+`HandshakeTimeout`；外部私钥错误使用 `PrivateKeyFailure`。调用方应匹配 typed code，
+不要匹配 message。
+
+## 只在测试构建中记录 TLS secrets
+
+`KeyLogSink` 接收包含 traffic secret 的 NSS key-log record。这些值可以解密捕获的 TLS
+流量，不能进入普通日志或 release artifact。`TlsKeyLogLine` 的 label 只能由 1 至 128 个
+大写 ASCII 字母、数字或下划线组成。client random 恰好 32 字节，secret 是 1 至 64 字节。
+构造器和 getter 都复制数据；sink 必须清零自己取得的 secret copy。
+
+production provider 不编译 key-log callback，也不报告 `TlsCapability.KeyLog` 能力。
+`withKeyLogSink` 因此在 context build 时失败。测试构建必须显式传入
+`--enable-test-keylog`，还必须指定不同于默认 release output 的 `--out-dir`。M8-006
+runner 在独立的 native output directory 生成 test provider，只覆盖解压后的测试
+install。release collector 会拒绝 `test_only_key_log: true` 或包含 `key-log` capability
+的 provider，还会校验实际打包静态库的名称、长度和 SHA-256。manifest 从已捕获的
+payload 解析，而不是重新读取可能已改变的文件；生产 manifest 不能掩盖静态库的部分覆盖。
+这些检查不等同于经过签名的构建证明。
+
+[keylog 报告](../evidence/M8-006/native-keylog.json) 包含 5 个场景，覆盖 TLS 1.2、
+TLS 1.3、sink exception、cancellation 和 Deadline。独立的 native `provider_boundary`
+已验证 pending SNI selection 时启用 capture、派生密钥前队列为空、TLS 1.3 NSS 记录有界，
+以及握手完成后不能再次启用。报告保留 typed raw stdout/stderr digest。这是 native
+边界验证，不是 Cangjie selector-policy 或 production key logging 的资格声明。
+
+## Capability 与验证边界
+
+`SocketCapabilities` 是 advisory 值，调用结果仍是权威。当前 Linux Internet/Unix
+listener、stream 和 datagram socket 报告 `nonBlocking` 与 `closeOnExec`。
+Internet UDP 还报告 `broadcast`、`multicast` 和 `connectedDatagramSend`；
+Unix datagram 的 connected send 为 false。当前 backend 的 `halfClose`、`raw`、
+`ancillaryData` 和 `zeroLengthDatagramSend` 均为 false。`SocketOption` 仍只是类型化值，
+公共 API 尚无 option application 操作。
+
+Internet 原生结果见 [M8-002 验收记录](../evidence/M8-002/README.md)，Unix 支持范围与
+SDK 限制见 [M8-003 验收记录](../evidence/M8-003/README.md)。
+Unix [consumer](../../examples/linux/m8_003/main.cj) 和
+[runner](../../tools/m8_003_native_sockets.py) 使用独立 Python peer，验证字节、来源、
+原生等待、背压超时、地址替换防护和活动进程中的 descriptor 清理。
+当前公开契约见 [API 参考](../api/README.md) 与
+[`wirestack-linux-pre1-m8-006.json`](../api/baselines/wirestack-linux-pre1-m8-006.json)。
+M8-001 至 M8-006 已完成各自的 Linux 验收。M8-006 的十四条命令包含 75 个聚焦 TLS
+测试、13 个 release 场景、5 个 keylog 场景、native provider 边界、完整仓库及严格 HTML
+文档检查。提交绑定见任务证据清单；M8-007 仍须在最终候选上执行新的 86,400 秒 soak。

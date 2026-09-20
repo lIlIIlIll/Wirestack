@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "cjpm",
+    "test",
+    "src/net",
+    "--no-progress",
+    "--no-color"
+  ],
+  "duration_ms": 14051.505,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-10T15:01:18.120332Z",
+  "id": "ninth-native-after",
+  "source_task": "M8-001",
+  "started_at_utc": "2026-09-10T15:01:04.068829Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-001/ninth-native-after.stderr.log",
+  "stderr_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr_truncated": false,
+  "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 21720339 ns, RESULT:\n    TCS: NinthNativeOwnershipProbe, time elapsed: 1493020 ns, RESULT:\n    [ PASSED ] CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns (530054 ns)\n    [ PASSED ] CASE: realTerminalCloseIgnoresStoppedContexts (219946 ns)\n    TCS: NetworkFoundationContractTest, time elapsed: 20077625 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (109925 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (44962 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (67381 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (37137 ns)\n    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (80795 ns)\n    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (26918 ns)\n    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (105583 ns)\n    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (89369 ns)\n    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (54525 ns)\n    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (91974 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (61014 ns)\n    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (85743 ns)\n    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (74418 ns)\n    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (23369 ns)\n    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (30944 ns)\n    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (19594 ns)\n    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (41218 ns)\n    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (95811 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (66663 ns)\n    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (67636 ns)\n    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (69058 ns)\n    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11292465 ns)\n    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (165751 ns)\n    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (170838 ns)\n    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (66235 ns)\n    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (28661 ns)\n    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (77913 ns)\n    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (119852 ns)\n    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (84337 ns)\n    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (130217 ns)\n    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (111703 ns)\n    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (60575 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (173001 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1909322 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (26573 ns)\nSummary: TOTAL: 37\n    PASSED: 37, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 30022328 ns, RESULT:\nTP: wirestack.*, time elapsed: 29930940 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 21720339 ns\nSummary: TOTAL: 37\n    PASSED: 37, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+  "stdout_path": "docs/evidence/M8-001/ninth-native-after.stdout.log",
+  "stdout_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "eb702d6b504315544744dcf45b47436e5177f5ce2892b11442abfb58948552e8"
+  },
+  "stdout_truncated": false,
+  "timed_out": false
+}

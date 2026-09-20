@@ -1,0 +1,15 @@
+test_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected) ... FAIL
+
+======================================================================
+FAIL: test_old_literal_owner_evidence_schema_is_rejected (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_old_literal_owner_evidence_schema_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_022_linux_release_soak.py", line 136, in test_old_literal_owner_evidence_schema_is_rejected
+    with self.assertRaises(gate.SoakError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: SoakError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

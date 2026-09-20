@@ -1,0 +1,6 @@
+test_verify_all_rejects_hosted_revision_not_independently_approved (tools.tests.test_m8_007_final_release.M8007FinalReleaseTest.test_verify_all_rejects_hosted_revision_not_independently_approved) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK

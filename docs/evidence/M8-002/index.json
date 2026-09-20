@@ -1,0 +1,31 @@
+{
+  "evidence": "docs/evidence/M8-002/evidence.json",
+  "evidence_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "03fdc6038ebb021b3df49775d3f5b9faa9922cbbdb1407ff9500257d9261703e"
+  },
+  "historical_review_candidate": "408a0c92e1111ad7b8b533e92ded1d624cda558b",
+  "native_close_experiment_limit": "Pinned SDK returns success after injected libc EIO; one native close before and after. No double-kernel-close or SDK-exception red/green claim.",
+  "native_close_review": "docs/evidence/M8-002/review-native-close.json",
+  "required_retention_ref": "refs/tags/evidence/M8-002/b58b519ae70892f1f535ab4ac9c1b27af6931ce5",
+  "schema_version": 1,
+  "source_candidate": "b58b519ae70892f1f535ab4ac9c1b27af6931ce5",
+  "source_task": "M8-002",
+  "status": "PASS",
+  "verification": {
+    "issues": [],
+    "kind": "evidence-freshness",
+    "schema_version": 1,
+    "status": "PASS",
+    "tasks": [
+      {
+        "issues": [],
+        "report_count": 21,
+        "source_count": 44,
+        "stale_paths": [],
+        "status": "PASS",
+        "task_id": "M8-002"
+      }
+    ]
+  }
+}

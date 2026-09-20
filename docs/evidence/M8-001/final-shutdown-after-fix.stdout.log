@@ -1,0 +1,35 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 11622774 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 11622774 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (495689 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (53221 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (49497 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (171485 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (99933 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (47654 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (129518 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (86271 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (112754 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (122149 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (34867 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (312988 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (60729 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (62246 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (60793 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (42823 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (277956 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (4886041 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (40124 ns)
+Summary: TOTAL: 19
+    PASSED: 19, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 19618410 ns, RESULT:
+TP: wirestack.*, time elapsed: 19573561 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 11622774 ns
+Summary: TOTAL: 19
+    PASSED: 19, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

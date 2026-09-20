@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "command": {
+    "id": "architecture-guard",
+    "argv": [
+      "python3",
+      "tools/architecture_guard.py",
+      "--format",
+      "json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T02:43:37.813853Z",
+    "finished_at_utc": "2026-09-15T02:43:44.784387Z",
+    "duration_ms": 6970.533,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/architecture-guard.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/architecture-guard.stderr.log",
+    "stdout_excerpt": "{\n  \"kind\": \"architecture-guard\",\n  \"ok\": true,\n  \"root\": \"<repo-root>\",\n  \"schema_version\": 1,\n  \"status\": \"PASS\",\n  \"violation_count\": 0,\n  \"violations\": []\n}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  }
+}

@@ -1,0 +1,7 @@
+test_successful_build_bounds_report_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_successful_build_bounds_report_and_preserves_raw_diagnostics) ... ok
+test_failed_build_bounds_error_and_preserves_raw_diagnostics (tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.test_failed_build_bounds_error_and_preserves_raw_diagnostics) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.036s
+
+OK

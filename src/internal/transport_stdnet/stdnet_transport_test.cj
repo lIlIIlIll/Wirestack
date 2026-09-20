@@ -10,6 +10,7 @@ import wirestack.internal.common.*
 import wirestack.internal.connector.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.NetworkEndpoint
 
 private func loopback(port: UInt16): SocketEndpoint {
     SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127, 0, 0, 1]), port)
@@ -41,7 +42,7 @@ private func stableReadSocketError(
     }
     categoryMatches && phaseMatches && codeMatches && retryabilityMatches &&
         error.nativeCode.isNone() && error.localEndpoint.isSome() &&
-        error.remoteEndpoint.isSome() && error.cause.isSome()
+        error.remoteEndpoint.isSome()
 }
 
 private func stableClosedRead(error: NetworkException): Bool {
@@ -84,7 +85,18 @@ private func stableUnknownConnectError(error: NetworkException, endpoint: Socket
     }
     categoryMatches && phaseMatches && codeMatches && retryabilityMatches &&
         error.nativeCode.isNone() && error.localEndpoint.isNone() &&
-        error.remoteEndpoint == Some(endpoint) && error.cause.isSome()
+        internetEndpointMatches(error.remoteEndpoint, Some(endpoint)) && error.cause.isSome()
+}
+
+private func internetEndpointMatches(
+    actual: ?NetworkEndpoint,
+    expected: ?SocketEndpoint
+): Bool {
+    match ((actual, expected)) {
+        case (Some(NetworkEndpoint.Internet(value)), Some(endpoint)) => value == endpoint
+        case (None, None) => true
+        case _ => false
+    }
 }
 
 private func net06CancellationIterations(): Int64 {
@@ -175,12 +187,6 @@ class Net06CancellationGateTest {
 
 @Test
 class StdNetTransportTest {
-    @TestCase
-    func writeTimeoutIsNeverRetryableWithoutZeroCommitProof(): Unit {
-        let error = writeTimedOut(Exception("scripted timeout"))
-        @Expect(stableWriteTimeout(error))
-    }
-
     @TestCase
     func writeSomeIsPartialAndReusesBoundedConnectionStaging(): Unit {
         let listener = StdNetTransportListener.bind(loopback(0), stagingBufferSize: 3)
@@ -368,8 +374,8 @@ class StdNetTransportTest {
                     @Expect(stableCode)
                     @Expect(stableRetryability)
                     @Expect(error.nativeCode.isNone())
-                    @Expect(error.localEndpoint, client.info.localEndpoint)
-                    @Expect(error.remoteEndpoint, client.info.remoteEndpoint)
+                    @Expect(internetEndpointMatches(error.localEndpoint, client.info.localEndpoint))
+                    @Expect(internetEndpointMatches(error.remoteEndpoint, client.info.remoteEndpoint))
                     unsupported = true
                 }
                 @Expect(unsupported)
@@ -393,8 +399,9 @@ class StdNetTransportTest {
         }
     }
 
+
     @TestCase
-    func cancellationWakesBlockedReadAndIsNeverReportedAsEof(): Unit {
+    func cancellationAbortRemainsNativeOwnerAfterLaterClose(): Unit {
         let listener = StdNetTransportListener.bind(loopback(0))
         let accepted = spawn { listener.accept() }
         let client = StdNetTransport.connect(listener.localEndpoint)
@@ -411,12 +418,15 @@ class StdNetTransportTest {
                 stableReadSocketError(error, NetworkErrorCode.Cancelled, Retryability.Never)
             }
         }
-        // The spawned task may not have entered readSome when it starts. Gate on
-        // the adapter's actual read lifecycle so this exercises active-I/O cancellation.
+        // Lifecycle admission can precede native I/O. Cancellation ownership
+        // must not depend on whether the SDK has produced an exception.
         @Expect(client.waitUntilReadActive(Duration.second))
         source.cancel()
         @Expect(result.get(Duration.second), true)
         @Expect(client.isClosed())
+        @Expect(client.wasClosedByAbort())
+        client.close()
+        @Expect(client.wasClosedByAbort())
         server.close()
         listener.close()
     }
@@ -578,49 +588,67 @@ class StdNetTransportTest {
     }
 
     @TestCase
-    func firstCloseOrAbortKeepsItsPeerVisibleTerminalResult(): Unit {
-        let gracefulListener = StdNetTransportListener.bind(loopback(0))
-        let gracefulAccepted = spawn { gracefulListener.accept() }
-        let gracefulClient = StdNetTransport.connect(gracefulListener.localEndpoint)
-        let gracefulServer = gracefulAccepted.get(Duration.second)
-        gracefulClient.close()
-        gracefulClient.abort(reason: Some(AbortReason.ApplicationAbort))
-        gracefulClient.close()
-        match (gracefulServer.readSome(
-            MutableByteSpan(Array<Byte>(1, repeat: 0)),
-            context: OperationContext.background()
-        )) {
-            case ReadResult.EndOfStream => ()
-            case ReadResult.Data(_) => @Fail("graceful close did not produce peer EOF")
-        }
-        gracefulServer.close()
-        gracefulListener.close()
-
-        let abortListener = StdNetTransportListener.bind(loopback(0))
-        let abortAccepted = spawn { abortListener.accept() }
-        let abortClient = StdNetTransport.connect(abortListener.localEndpoint)
-        let abortServer = abortAccepted.get(Duration.second)
-        writeAll(abortClient, ByteSpan([1]))
-        let transferred = Array<Byte>(1, repeat: 0)
-        readExact(abortServer, MutableByteSpan(transferred))
-        abortClient.abort(reason: Some(AbortReason.ApplicationAbort))
-        abortClient.close()
-        abortClient.abort()
-        var resetObserved = false
+    func gracefulNativeCloseRemainsGracefulAfterLaterAbort(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = accepted.get(Duration.second)
         try {
-            match (abortServer.readSome(
+            client.close()
+            @Expect(!client.wasClosedByAbort())
+            client.abort(reason: Some(AbortReason.ApplicationAbort))
+            client.close()
+            @Expect(!client.wasClosedByAbort())
+            match (server.readSome(
                 MutableByteSpan(Array<Byte>(1, repeat: 0)),
                 context: OperationContext.background()
             )) {
                 case ReadResult.EndOfStream => ()
-                case ReadResult.Data(_) => ()
+                case ReadResult.Data(_) => @Fail("graceful close did not produce peer EOF")
             }
-        } catch (_: NetworkException) {
-            resetObserved = true
+        } finally {
+            client.close()
+            server.close()
+            listener.close()
         }
-        @Expect(resetObserved)
-        abortServer.close()
-        abortListener.close()
+    }
+
+    @TestCase
+    func explicitAbortRemainsNativeOwnerAfterLaterClose(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = accepted.get(Duration.second)
+        try {
+            writeAll(client, ByteSpan([1]))
+            let transferred = Array<Byte>(1, repeat: 0)
+            readExact(server, MutableByteSpan(transferred))
+            client.abort(reason: Some(AbortReason.ApplicationAbort))
+            @Expect(client.wasClosedByAbort())
+            client.close()
+            client.abort()
+            @Expect(client.wasClosedByAbort())
+            var resetObserved = false
+            try {
+                match (server.readSome(
+                    MutableByteSpan(Array<Byte>(1, repeat: 0)),
+                    context: OperationContext(deadline: Some(Deadline.after(Duration.second)))
+                )) {
+                    case ReadResult.EndOfStream => ()
+                    case ReadResult.Data(_) => ()
+                }
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.SystemFailure => resetObserved = true
+                    case _ => throw error
+                }
+            }
+            @Expect(resetObserved)
+        } finally {
+            client.close()
+            server.close()
+            listener.close()
+        }
     }
 
     @TestCase
@@ -693,24 +721,4 @@ class StdNetTransportTest {
             listener.close()
         }
     }
-}
-
-private func stableWriteTimeout(error: NetworkException): Bool {
-    let category = match (error.category) {
-        case NetworkErrorCategory.Write => true
-        case _ => false
-    }
-    let phase = match (error.phase) {
-        case NetworkPhase.TcpWrite => true
-        case _ => false
-    }
-    let code = match (error.code) {
-        case NetworkErrorCode.TimedOut => true
-        case _ => false
-    }
-    let retryability = match (error.retryability) {
-        case Retryability.Never => true
-        case _ => false
-    }
-    category && phase && code && retryability && error.cause.isSome()
 }

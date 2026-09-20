@@ -6,6 +6,8 @@ import wirestack.internal.transport.*
 
 public enum Http2StreamState {
     | Idle
+    | ReservedLocal
+    | ReservedRemote
     | Open
     | HalfClosedLocal
     | HalfClosedRemote
@@ -67,6 +69,40 @@ public class Http2StreamStateMachine {
                 else { Http2StreamState.HalfClosedRemote }
         }
     }
+    /** Reserves an idle push stream without opening either direction. */
+    internal func reserve(): Unit {
+        synchronized(mutex) {
+            if (!isStreamIdle(current)) { invalidLocalStreamState("HTTP/2 stream was already reserved") }
+            current = if (isLocalInitiator(initiator)) {
+                Http2StreamState.ReservedLocal
+            } else {
+                Http2StreamState.ReservedRemote
+            }
+        }
+    }
+
+    /** Opens a reserved push stream when its response HEADERS is emitted or received. */
+    internal func openReserved(endStream: Bool): Bool {
+        synchronized(mutex) {
+            match (current) {
+                case Http2StreamState.ReservedLocal =>
+                    if (endStream) {
+                        completeLocked(Http2ErrorCode.NoError, "HTTP/2 pushed stream completed on headers")
+                    } else {
+                        current = Http2StreamState.HalfClosedRemote
+                        false
+                    }
+                case Http2StreamState.ReservedRemote =>
+                    if (endStream) {
+                        completeLocked(Http2ErrorCode.NoError, "HTTP/2 pushed stream completed on headers")
+                    } else {
+                        current = Http2StreamState.HalfClosedLocal
+                        false
+                    }
+                case _ => invalidLocalStreamState("HTTP/2 stream is not reserved")
+            }
+        }
+    }
 
     /** Applies a locally sent END_STREAM and returns whether this closed the stream. */
     internal func localEnd(): Bool {
@@ -77,6 +113,8 @@ public class Http2StreamStateMachine {
                     Http2ErrorCode.NoError, "HTTP/2 stream completed normally"
                 )
                 case Http2StreamState.Idle => invalidLocalStreamState("HTTP/2 idle stream cannot send END_STREAM")
+                case Http2StreamState.ReservedLocal | Http2StreamState.ReservedRemote =>
+                    invalidLocalStreamState("HTTP/2 reserved stream cannot send DATA END_STREAM")
                 case Http2StreamState.HalfClosedLocal =>
                     invalidLocalStreamState("HTTP/2 local stream side is already closed")
                 case Http2StreamState.Closed => invalidLocalStreamState("HTTP/2 stream is closed")
@@ -95,6 +133,10 @@ public class Http2StreamStateMachine {
                 case Http2StreamState.Idle => throw streamProtocolFailure(
                     id, Http2ErrorCode.ProtocolError, "HTTP/2 idle stream cannot receive END_STREAM"
                 )
+                case Http2StreamState.ReservedLocal | Http2StreamState.ReservedRemote =>
+                    throw streamProtocolFailure(
+                        id, Http2ErrorCode.ProtocolError, "HTTP/2 reserved stream cannot receive DATA END_STREAM"
+                    )
                 case Http2StreamState.HalfClosedRemote => throw streamProtocolFailure(
                     id, Http2ErrorCode.StreamClosed, "HTTP/2 remote stream side is already closed"
                 )
@@ -193,12 +235,22 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
             if (countInitiatorLocked(true) >= Int64(peerMaximum)) {
                 throw Http2StreamLimitException("HTTP/2 peer concurrent stream limit reached")
             }
-            if (localIdsExhausted) { throw Http2StreamLimitException("HTTP/2 local stream ids are exhausted") }
-            let id = nextLocalId
-            if (id > 2147483645u32) { localIdsExhausted = true } else { nextLocalId += 2u32 }
+            let id = claimNextLocalIdLocked()
             addStreamLocked(Http2StreamId(id), Http2StreamInitiator.Local, endStream)
         }
     }
+    /** Allocates the next local id in RFC reserved(local) state for server push. */
+    public func reserveLocal(): Http2StreamStateMachine {
+        synchronized(mutex) {
+            requireRegistryOpenLocked()
+            if (countInitiatorLocked(true) >= Int64(peerMaximum)) {
+                throw Http2StreamLimitException("HTTP/2 peer concurrent stream limit reached")
+            }
+            let id = claimNextLocalIdLocked()
+            addReservedStreamLocked(Http2StreamId(id), Http2StreamInitiator.Local)
+        }
+    }
+
 
     /** Admits a strictly increasing, role-correct peer stream under the local limit. */
     public func openPeer(streamId: Http2StreamId, endStream!: Bool = false): Http2StreamStateMachine {
@@ -220,6 +272,35 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
             addStreamLocked(streamId, Http2StreamInitiator.Peer, endStream)
         }
     }
+    /** Consumes and reserves a strictly increasing peer id for PUSH_PROMISE. */
+    public func reservePeer(streamId: Http2StreamId): Http2StreamStateMachine {
+        synchronized(mutex) {
+            requireRegistryOpenLocked()
+            requirePeerStreamIdLocked(streamId)
+            if (streamId.value <= greatestPeerId) {
+                throw streamConnectionFailure("HTTP/2 promised stream ids must increase monotonically")
+            }
+            greatestPeerId = streamId.value
+            if (countInitiatorLocked(false) >= Int64(localMaximum)) {
+                throw streamProtocolFailure(
+                    streamId, Http2ErrorCode.RefusedStream,
+                    "HTTP/2 local concurrent promised-stream limit reached"
+                )
+            }
+            addReservedStreamLocked(streamId, Http2StreamInitiator.Peer)
+        }
+    }
+
+    /** Transitions a locally promised stream when response HEADERS are emitted. */
+    public func openReservedLocal(streamId: Http2StreamId, endStream!: Bool = false): Unit {
+        openReservedStream(streamId, true, endStream)
+    }
+
+    /** Transitions a peer-promised stream when response HEADERS are received. */
+    public func openReservedPeer(streamId: Http2StreamId, endStream!: Bool = false): Unit {
+        openReservedStream(streamId, false, endStream)
+    }
+
 
     public func stream(streamId: Http2StreamId): ?Http2StreamStateMachine {
         synchronized(mutex) {
@@ -248,6 +329,16 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
         let won = managed.machine.reset(code, reason)
         cleanupClosed(streamId, managed.machine)
         won
+    }
+
+    /** Transitions a reserved stream without admitting a second owner. */
+    private func openReservedStream(streamId: Http2StreamId, local: Bool, endStream: Bool): Unit {
+        let managed = requireActiveStream(streamId, !local)
+        if (isLocalInitiator(managed.machine.initiator) != local) {
+            throw IllegalStateException("HTTP/2 reserved stream has the wrong initiator")
+        }
+        let _ = managed.machine.openReserved(endStream)
+        cleanupClosed(streamId, managed.machine)
     }
 
     /** Waits without polling until every active stream finishes or the caller budget ends. */
@@ -303,6 +394,25 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
         streams.add(Http2ManagedStream(machine))
         machine
     }
+    private func addReservedStreamLocked(
+        id: Http2StreamId,
+        initiator: Http2StreamInitiator
+    ): Http2StreamStateMachine {
+        let machine = Http2StreamStateMachine(id, initiator)
+        machine.reserve()
+        streams.add(Http2ManagedStream(machine))
+        machine
+    }
+
+    private func claimNextLocalIdLocked(): UInt32 {
+        if (localIdsExhausted) {
+            throw Http2StreamLimitException("HTTP/2 local stream ids are exhausted")
+        }
+        let id = nextLocalId
+        if (id > 2147483645u32) { localIdsExhausted = true } else { nextLocalId += 2u32 }
+        id
+    }
+
 
     private func requireActiveStream(streamId: Http2StreamId, peerOperation: Bool): Http2ManagedStream {
         synchronized(mutex) {

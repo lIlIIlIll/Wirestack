@@ -29,7 +29,8 @@ enum wirestack_tls_engine_step {
     WIRESTACK_TLS_ENGINE_WANT_READ = 1,
     WIRESTACK_TLS_ENGINE_WANT_WRITE = 2,
     WIRESTACK_TLS_ENGINE_NEED_SIGNATURE = 3,
-    WIRESTACK_TLS_ENGINE_NEED_SERVER_SELECTION = 4
+    WIRESTACK_TLS_ENGINE_NEED_SERVER_SELECTION = 4,
+    WIRESTACK_TLS_ENGINE_NEED_DECRYPTION = 5
 };
 
 enum wirestack_tls_engine_io_step {
@@ -68,7 +69,9 @@ enum wirestack_tls_provider_capability {
     WIRESTACK_TLS_CAP_HTTP2 = UINT64_C(1) << 5,
     WIRESTACK_TLS_CAP_EXTERNAL_SIGNER = UINT64_C(1) << 6,
     WIRESTACK_TLS_CAP_SESSION_RESUMPTION = UINT64_C(1) << 7,
-    WIRESTACK_TLS_CAP_SECURE_RANDOM = UINT64_C(1) << 8
+    WIRESTACK_TLS_CAP_SECURE_RANDOM = UINT64_C(1) << 8,
+    WIRESTACK_TLS_CAP_EXTERNAL_DECRYPTOR = UINT64_C(1) << 9,
+    WIRESTACK_TLS_CAP_KEY_LOG = UINT64_C(1) << 10
 };
 
 uint32_t wirestack_tls_provider_abi_version(void);
@@ -88,6 +91,25 @@ int32_t wirestack_tls_sha256(
     const uint8_t *input,
     uint64_t size,
     uint8_t out_digest[32]
+);
+/*
+ * Private WebSocket helpers. Base64 output capacities include one trailing
+ * NUL byte; out_size excludes that terminator.
+ */
+int32_t wirestack_tls_websocket_random(uint8_t *output, uint64_t size);
+int32_t wirestack_tls_websocket_base64(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_size
+);
+int32_t wirestack_tls_websocket_sha1_base64(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_size
 );
 int32_t wirestack_tls_certificate_validate_der(
     const uint8_t *input,
@@ -119,6 +141,10 @@ int32_t wirestack_tls_identity_validate_spki(
     uint64_t leaf_certificate_size,
     const uint8_t *subject_public_key_info,
     uint64_t subject_public_key_info_size
+);
+int32_t wirestack_tls_identity_validate_external_rsa(
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size
 );
 
 int32_t wirestack_tls_engine_create(
@@ -239,6 +265,27 @@ int32_t wirestack_tls_engine_complete_external_signature(
     uint64_t signature_size
 );
 int32_t wirestack_tls_engine_fail_external_signature(uint64_t engine_handle);
+int32_t wirestack_tls_engine_enable_external_decryptor(uint64_t engine_handle);
+int32_t wirestack_tls_engine_external_decryption_request(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size
+);
+int32_t wirestack_tls_engine_complete_external_decryption(
+    uint64_t engine_handle,
+    const uint8_t *input,
+    uint64_t size
+);
+int32_t wirestack_tls_engine_fail_external_decryption(uint64_t engine_handle);
+int32_t wirestack_tls_engine_enable_key_log(uint64_t engine_handle);
+int32_t wirestack_tls_engine_pending_key_log(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size
+);
+int32_t wirestack_tls_engine_disable_key_log(uint64_t engine_handle);
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step

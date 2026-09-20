@@ -7,21 +7,21 @@ import wirestack.internal.transport as transport
 /** The public cancellation scope owned by one typed HTTP handle. */
 public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
 /**
- * Wirestack 公开 API：Request。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Request
 /**
- * Wirestack 公开 API：Connection。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Connection
 /**
- * Wirestack 公开 API：Stream。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Stream
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: HttpCancellationScope): Bool {
         match ((this, other)) {
@@ -33,8 +33,8 @@ public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: HttpCancellationScope): Bool { !(this == other) }
 }
@@ -43,15 +43,15 @@ public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
 public class HttpRequestCancellationHandle {
     private let state = HttpHandleCancellationState()
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Request } }
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
 /**
- * Wirestack 公开 API：cancel。
+ * Wirestack 公开 API：请求取消当前操作。
  */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
@@ -61,15 +61,15 @@ public class HttpRequestCancellationHandle {
 public class HttpConnectionCancellationHandle {
     private let state = HttpHandleCancellationState()
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Connection } }
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
 /**
- * Wirestack 公开 API：cancel。
+ * Wirestack 公开 API：请求取消当前操作。
  */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
@@ -79,15 +79,15 @@ public class HttpConnectionCancellationHandle {
 public class HttpStreamCancellationHandle {
     private let state = HttpHandleCancellationState()
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Stream } }
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
 /**
- * Wirestack 公开 API：cancel。
+ * Wirestack 公开 API：请求取消当前操作。
  */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
@@ -96,23 +96,23 @@ public class HttpStreamCancellationHandle {
 /** Optional typed handles supplied to one controlled client request. */
 public class HttpCancellationHandles {
 /**
- * Wirestack 公开 API：request。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let request: ?HttpRequestCancellationHandle
 /**
- * Wirestack 公开 API：connection。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let connection: ?HttpConnectionCancellationHandle
 /**
- * Wirestack 公开 API：stream。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let stream: ?HttpStreamCancellationHandle
 
 /**
- * Wirestack 公开 API：init。
- * @param connection 参数 connection。
- * @param request 参数 request。
- * @param stream 参数 stream。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param connection 调用方提供的输入值。
+ * @param request 待处理的 HTTP 请求。
+ * @param stream 提供连续数据的输入流。
  */
     public init(
         request!: ?HttpRequestCancellationHandle = None<HttpRequestCancellationHandle>,
@@ -141,14 +141,16 @@ private class HttpHandleCancellationState {
 
 /**
  * Links caller context plus typed handles into one immutable request context.
- * Input registrations are removed on normal body completion, close, error, or
- * as soon as any linked source wins cancellation.
+ * Input registrations remain until the response and retained push workers finish,
+ * or are removed immediately when any linked source wins cancellation.
  */
 internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     private let source = transport.CancellationSource()
     private let mutex = Mutex()
     private var registrations = ArrayList<transport.CancellationRegistration>()
     private var released = false
+    private var responseReleased = false
+    private var retainedLifetimes: Int64 = 0
     internal let context: OperationContext
     internal let connectionCancellation: transport.CancellationToken
 
@@ -170,7 +172,19 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     }
 
     internal func wrap(response: HttpResponse): HttpResponse {
-        if (response.body.isFullyConsumed()) { release(); return response }
+        let pushes = match (response.pushes) {
+            case Some(value) =>
+                Some<HttpPushSource>(HttpCancellationPushSource(value, retainLifetime()))
+            case None => None<HttpPushSource>
+        }
+        if (response.body.isFullyConsumed()) {
+            release()
+            if (pushes.isNone()) { return response }
+            return HttpResponse(
+                response.status, response.reason, response.body,
+                version: response.version, headers: response.headers, pushes: pushes
+            )
+        }
         let delegate = response.body
         HttpResponse(
             response.status,
@@ -182,7 +196,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
                 completeAtDeclaredLength: delegate.completesAtDeclaredLength
             ),
             version: response.version,
-            headers: response.headers
+            headers: response.headers,
+            pushes: pushes
         )
     }
 
@@ -201,6 +216,30 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         }
         if (discard) { registration.unregister() }
     }
+
+    internal func retainLifetime(): Resource {
+        synchronized(mutex) {
+            if (released || responseReleased) {
+                if (context.isCancellationRequested()) {
+                    throw transport.NetworkException(
+                        transport.NetworkErrorCategory.Cancelled, transport.NetworkPhase.HttpBody,
+                        transport.NetworkErrorCode.Cancelled, "HTTP request cancelled before push admission",
+                        retryability: transport.Retryability.Never)
+                }
+                throw IllegalStateException("HTTP request cancellation lifetime has ended")
+            }
+            retainedLifetimes++
+        }
+        HttpRequestCancellationLifetime(this)
+    }
+
+    internal func releaseLifetime(): Unit {
+        let finished = synchronized(mutex) {
+            retainedLifetimes--
+            responseReleased && retainedLifetimes == 0
+        }
+        if (finished) { releaseRegistrations() }
+    }
 /**
  * Wirestack 公开 API：completed。
  */
@@ -217,22 +256,169 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
 
     private func cancelAndRelease(): Unit {
         source.cancel()
-        release()
+        releaseRegistrations()
     }
 
     private func release(): Unit {
+        let finished = synchronized(mutex) {
+            if (responseReleased) { return }
+            responseReleased = true
+            retainedLifetimes == 0
+        }
+        if (finished) { releaseRegistrations() }
+    }
+
+    private func releaseRegistrations(): Unit {
         let claimed = synchronized(mutex) {
-            if (released) {
-                ArrayList<transport.CancellationRegistration>()
-            } else {
-                released = true
-                let result = registrations
-                registrations = ArrayList<transport.CancellationRegistration>()
-                result
-            }
+            if (released) { return }
+            released = true
+            let result = registrations
+            registrations = ArrayList<transport.CancellationRegistration>()
+            result
         }
         for (registration in claimed) { registration.unregister() }
     }
+}
+
+private class HttpRequestCancellationLifetime <: Resource {
+    private let operation: HttpRequestCancellationOperation
+    private let mutex = Mutex()
+    private var closed = false
+    init(operation: HttpRequestCancellationOperation) { this.operation = operation }
+    /** Releases this worker's cancellation lifetime exactly once. */
+    public func close(): Unit {
+        synchronized(mutex) {
+            if (closed) { return }
+            closed = true
+        }
+        operation.releaseLifetime()
+    }
+    /** Reports whether this worker has released its retained lifetime. */
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
+}
+
+/**
+ * Retains request cancellation while a push source can still transfer ownership or
+ * any already-transferred pushed body remains live.
+ */
+private class HttpCancellationPushSource <: HttpPushSource {
+    private let delegate: HttpPushSource
+    private let lifetime: Resource
+    private let mutex = Mutex()
+    private var activeReceivers: Int64 = 0
+    private var activeBodies: Int64 = 0
+    private var sourceFinished = false
+    private var lifetimeReleased = false
+
+    init(delegate: HttpPushSource, lifetime: Resource) {
+        this.delegate = delegate
+        this.lifetime = lifetime
+        if (delegate.isClosed()) { finishSource() }
+    }
+
+    /**
+     * Receives one pushed response with its request cancellation lifetime.
+     * @param context Deadline and cancellation that bound offer delivery.
+     * @return The next owned push, or None after source completion.
+     */
+    public func receive(
+        context!: OperationContext = OperationContext.background()
+    ): ?HttpPushedResponse {
+        synchronized(mutex) { activeReceivers++ }
+        let received = try {
+            delegate.receive(context: context)
+        } catch (error: Exception) {
+            finishReceive(delegate.isClosed())
+            throw error
+        }
+        match (received) {
+            case Some(value) =>
+                let owner = claimTransferred(delegate.isClosed())
+                let response = value.response
+                let body = response.body
+                Some(HttpPushedResponse(
+                    value.request,
+                    HttpResponse(
+                        response.status,
+                        response.reason,
+                        ResponseBody(
+                            HttpCancellationBodyStream(body),
+                            observer: owner,
+                            trailerProvider: { => body.trailer },
+                            completeAtDeclaredLength: body.completesAtDeclaredLength
+                        ),
+                        version: response.version,
+                        headers: response.headers,
+                        pushes: response.pushes
+                    )
+                ))
+            case None =>
+                finishReceive(true)
+                None<HttpPushedResponse>
+        }
+    }
+
+    /** Closes unclaimed push ownership without closing transferred bodies. */
+    public func close(): Unit {
+        try { delegate.close() }
+        finally { finishSource() }
+    }
+
+    /** Reports whether the delegated push source is closed. */
+    public func isClosed(): Bool {
+        let closed = delegate.isClosed()
+        if (closed) { finishSource() }
+        closed
+    }
+
+    private func claimTransferred(sourceClosed: Bool): HttpCancellationPushBodyLifetime {
+        synchronized(mutex) {
+            activeReceivers--
+            activeBodies++
+            if (sourceClosed) { sourceFinished = true }
+        }
+        releaseIfFinished()
+        HttpCancellationPushBodyLifetime(this)
+    }
+
+    private func finishReceive(sourceClosed: Bool): Unit {
+        synchronized(mutex) {
+            activeReceivers--
+            if (sourceClosed) { sourceFinished = true }
+        }
+        releaseIfFinished()
+    }
+
+    private func finishSource(): Unit {
+        synchronized(mutex) { sourceFinished = true }
+        releaseIfFinished()
+    }
+
+    func releaseTransferred(): Unit {
+        synchronized(mutex) { activeBodies-- }
+        releaseIfFinished()
+    }
+
+    private func releaseIfFinished(): Unit {
+        let release = synchronized(mutex) {
+            if (lifetimeReleased || !sourceFinished || activeReceivers != 0 || activeBodies != 0) {
+                false
+            } else {
+                lifetimeReleased = true
+                true
+            }
+        }
+        if (release) { lifetime.close() }
+    }
+}
+
+private class HttpCancellationPushBodyLifetime <: ResponseBodyObserver {
+    private let source: HttpCancellationPushSource
+    init(source: HttpCancellationPushSource) { this.source = source }
+    /** Releases cancellation ownership after the transferred body completes. */
+    public func completed(): Unit { source.releaseTransferred() }
+    /** Releases cancellation ownership after the transferred body is abandoned. */
+    public func abandoned(): Unit { source.releaseTransferred() }
 }
 
 private class HttpCancellationBodyStream <: HttpBodyStream {
@@ -243,12 +429,12 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
         this.context = context
     }
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop contentLength: ?Int64 { get() { delegate.contentLength } }
 /**
- * Wirestack 公开 API：read。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：读取下一段数据并返回实际进度。
+ * @param destination 调用方提供的输入值。
  */
     public func read(destination: Array<Byte>): Int64 {
         if (!destination.isEmpty()) {
@@ -276,11 +462,11 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
         delegate.read(destination)
     }
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { delegate.close() }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { delegate.isClosed() }
 }

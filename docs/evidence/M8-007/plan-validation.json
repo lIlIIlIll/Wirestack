@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "command": {
+    "id": "plan-validation",
+    "argv": [
+      "python3",
+      "tools/repository/repository_tooling.py",
+      "--root",
+      ".",
+      "validate-plan",
+      "docs/evidence/M8-007/test-plan.md",
+      "--json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T02:43:37.698375Z",
+    "finished_at_utc": "2026-09-15T02:43:37.812522Z",
+    "duration_ms": 114.146,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/plan-validation.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/plan-validation.stderr.log",
+    "stdout_excerpt": "{\"counts\": {\"paths\": 23, \"scenarios\": 23, \"tests\": 23}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  }
+}

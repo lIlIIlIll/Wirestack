@@ -21,16 +21,28 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from pathlib import Path, PurePosixPath
+from typing import Any, BinaryIO, Iterable, Mapping, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "0.1.0"
 PACKAGE_ROOT = f"wirestack-{VERSION}"
 ARTIFACT_NAME = f"{PACKAGE_ROOT}-linux-x86_64-glibc.tar.gz"
+MAX_ARCHIVE_MEMBER_BYTES = 8 * 1024 * 1024
+MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
+MAX_ARCHIVE_MEMBERS = 4096
+MAX_ARCHIVE_METADATA_BYTES = 8192
+MAX_ARCHIVE_PAX_FIELDS = 128
+ARCHIVE_METADATA_TYPES = (
+    tarfile.XHDTYPE, tarfile.XGLTYPE, tarfile.SOLARIS_XHDTYPE,
+    tarfile.GNUTYPE_LONGNAME, tarfile.GNUTYPE_LONGLINK,
+)
 SMOKE_FIXTURE = ROOT / "tools/release_smoke/main.cj"
 FORBIDDEN_OPENSSL_NAMES = re.compile(r"^lib(?:ssl|crypto)(?:\.so(?:\..*)?)?$", re.IGNORECASE)
+HTTP_FILES_PAYLOAD_ROOT = "target/native/http_files/current"
+HTTP_FILES_MANIFEST_NAME = "http-files-manifest.json"
+HTTP_FILES_ARCHIVE = "lib/libwirestack_http_files.a"
 FORBIDDEN_LOADER_BYTES = (b"libssl.so", b"libcrypto.so")
 EXPECTED_SMOKE_LINES = {
     "HTTPS_CLIENT_SERVER=PASS",
@@ -42,11 +54,18 @@ EXPECTED_SMOKE_LINES = {
     "externalOpenSslDependency=false",
 }
 PROJECT_LICENSE_EXPRESSION = "Apache-2.0"
+PUBLIC_SUFFIX_FILES = (
+    "third_party/public_suffix/LICENSE.MPL-2.0",
+    "third_party/public_suffix/public_suffix_list.dat",
+    "third_party/public_suffix/source.json",
+    "third_party/public_suffix/generate.py",
+)
 RELEASE_METADATA_FILES = (
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
     "third_party/aws-lc/LICENSE",
     "third_party/aws-lc/NOTICE",
+    PUBLIC_SUFFIX_FILES[0],
 )
 QUALIFICATION_INPUTS = (
     "LICENSE",
@@ -54,12 +73,16 @@ QUALIFICATION_INPUTS = (
     "build.cj",
     "cjpm.lock",
     "cjpm.toml",
-    "docs/planning/implementation-backlog.md",
+    "README.md",
     "native/resolver/linux/wirestack_resolver.c",
+    "native/http_files/wirestack_http_files.c",
+    "native/http_files/wirestack_http_files.h",
     "native/resolver/linux/wirestack_resolver.h",
     "native/tls/aws_lc/provider.json",
     "native/tls/aws_lc/wirestack_tls_provider.c",
     "native/tls/aws_lc/wirestack_tls_provider.h",
+    "tools/build_linux_http_files.py",
+    "tools/build_native_dependencies.py",
     "tools/build_linux_resolver.py",
     "tools/build_linux_tls_provider.py",
     "tools/build_tls_provider.py",
@@ -70,7 +93,7 @@ QUALIFICATION_INPUTS = (
     "tools/release_smoke/main.cj",
     "third_party/aws-lc/LICENSE",
     "third_party/aws-lc/NOTICE",
-)
+) + PUBLIC_SUFFIX_FILES
 EXCLUDED_PLATFORM_PARTS = {
     ("src", "internal", "platform", "android"),
     ("src", "internal", "platform", "apple"),
@@ -166,6 +189,16 @@ def prepare_native_dependencies(root: Path, *, offline: bool) -> None:
         provider.append("--offline")
     run(provider, cwd=root)
     run([sys.executable, str(root / "tools/build_linux_resolver.py"), "--quiet"], cwd=root)
+    run(
+        [
+            sys.executable,
+            str(root / "tools/build_linux_http_files.py"),
+            "--root",
+            str(root),
+            "--quiet",
+        ],
+        cwd=root,
+    )
 
 
 def _native_payload(root: Path, relative_root: str, current: Path) -> dict[str, bytes]:
@@ -178,9 +211,89 @@ def _native_payload(root: Path, relative_root: str, current: Path) -> dict[str, 
     return payload
 
 
+def _payload_manifest(
+    payload: Mapping[str, bytes], path: str, label: str
+) -> dict[str, Any]:
+    try:
+        manifest = json.loads(payload[path])
+    except (KeyError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ReleaseError(f"{label} manifest is absent or invalid in the release payload") from error
+    if not isinstance(manifest, dict):
+        raise ReleaseError(f"{label} manifest must be a JSON object")
+    return manifest
+
+def validate_http_files_manifest(
+    manifest: Mapping[str, Any],
+    payload: Mapping[str, bytes],
+) -> None:
+    if (
+        manifest.get("schema_version") != 1
+        or manifest.get("component") != "wirestack-http-files"
+        or manifest.get("abi_version") != 1
+        or manifest.get("private_runtime_abi") is not False
+    ):
+        raise ReleaseError("HTTP files native manifest identity is invalid")
+    fingerprint = manifest.get("build_fingerprint")
+    inputs = manifest.get("inputs")
+    if (
+        not isinstance(fingerprint, str)
+        or re.fullmatch(r"[0-9a-f]{64}", fingerprint) is None
+        or not isinstance(inputs, dict)
+    ):
+        raise ReleaseError("HTTP files native build provenance is absent")
+    if not evidence_digest.schema_text_sha256_equal(
+        fingerprint,
+        evidence_digest.text_evidence_bytes_sha256(canonical_json(inputs)),
+    ):
+        raise ReleaseError("HTTP files native build fingerprint does not bind its inputs")
+    expected_sources = {
+        "native/http_files/wirestack_http_files.c",
+        "native/http_files/wirestack_http_files.h",
+    }
+    sources = inputs.get("sources")
+    tools = inputs.get("tools")
+    if (
+        not isinstance(sources, dict)
+        or set(sources) != expected_sources
+        or any(
+            not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
+            for value in sources.values()
+        )
+        or not isinstance(inputs.get("builder_sha256"), str)
+        or re.fullmatch(r"[0-9a-f]{64}", inputs["builder_sha256"]) is None
+        or not isinstance(tools, dict)
+        or set(tools) != {"ar", "cc", "ranlib"}
+        or any(
+            not isinstance(value, dict)
+            or not isinstance(value.get("path"), str)
+            or not value["path"]
+            or not isinstance(value.get("version"), str)
+            or not value["version"]
+            for value in tools.values()
+        )
+    ):
+        raise ReleaseError("HTTP files native source or tool provenance is incomplete")
+    archive = manifest.get("archive")
+    archive_payload_path = f"{HTTP_FILES_PAYLOAD_ROOT}/{HTTP_FILES_ARCHIVE}"
+    if (
+        not isinstance(archive, dict)
+        or archive.get("path") != HTTP_FILES_ARCHIVE
+        or archive_payload_path not in payload
+        or archive.get("bytes") != len(payload[archive_payload_path])
+        or not evidence_digest.schema_artifact_sha256_equal(
+            archive.get("sha256"),
+            artifact_payload_sha256(payload[archive_payload_path]),
+        )
+    ):
+        raise ReleaseError("HTTP files native archive provenance is invalid")
+
+
 def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     payload: dict[str, bytes] = {}
-    for relative in ("cjpm.toml", "cjpm.lock", "README.md", *RELEASE_METADATA_FILES):
+    for relative in (
+        "cjpm.toml", "cjpm.lock", "README.md",
+        *RELEASE_METADATA_FILES, *PUBLIC_SUFFIX_FILES[1:],
+    ):
         path = root / relative
         if not path.is_file():
             raise ReleaseError(f"release input is absent: {relative}")
@@ -190,13 +303,53 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
 
     provider_root = root / "target/native/current"
     resolver_root = root / "target/native/resolver/current"
+    http_files_root = root / HTTP_FILES_PAYLOAD_ROOT
     payload.update(_native_payload(root, "target/native/current", provider_root))
     payload.update(_native_payload(root, "target/native/resolver/current", resolver_root))
+    payload.update(_native_payload(root, HTTP_FILES_PAYLOAD_ROOT, http_files_root))
 
-    provider_manifest = load_json(provider_root / "provider-manifest.json")
-    resolver_manifest = load_json(resolver_root / "resolver-manifest.json")
+    provider_manifest = _payload_manifest(
+        payload, "target/native/current/provider-manifest.json", "TLS provider"
+    )
+    resolver_manifest = _payload_manifest(
+        payload, "target/native/resolver/current/resolver-manifest.json", "resolver"
+    )
+    http_files_manifest = _payload_manifest(
+        payload, f"{HTTP_FILES_PAYLOAD_ROOT}/{HTTP_FILES_MANIFEST_NAME}", "HTTP files"
+    )
+    validate_http_files_manifest(http_files_manifest, payload)
+    provider_archive = provider_manifest.get("archive")
+    provider_archive_bytes = payload.get("target/native/current/lib/libwirestack_tls_provider.a")
+    if (
+        not isinstance(provider_archive, dict)
+        or provider_archive.get("name") != "libwirestack_tls_provider.a"
+        or provider_archive_bytes is None
+        or provider_archive.get("bytes") != len(provider_archive_bytes)
+        or not evidence_digest.schema_artifact_sha256_equal(
+            provider_archive.get("sha256"),
+            artifact_payload_sha256(provider_archive_bytes),
+        )
+    ):
+        raise ReleaseError("TLS provider native archive provenance is invalid")
+    resolver_archive = resolver_manifest.get("archive")
+    resolver_archive_bytes = payload.get("target/native/resolver/current/lib/libwirestack_resolver.a")
+    if (
+        not isinstance(resolver_archive, dict)
+        or resolver_archive.get("path") != "lib/libwirestack_resolver.a"
+        or resolver_archive_bytes is None
+        or not evidence_digest.schema_artifact_sha256_equal(
+            resolver_archive.get("sha256"),
+            artifact_payload_sha256(resolver_archive_bytes),
+        )
+    ):
+        raise ReleaseError("resolver native archive provenance is invalid")
     if provider_manifest.get("externalOpenSslDependency") is not False:
         raise ReleaseError("provider manifest does not set externalOpenSslDependency=false")
+    if (
+        provider_manifest.get("test_only_key_log", False) is not False
+        or "key-log" in provider_manifest.get("capabilities", [])
+    ):
+        raise ReleaseError("test-only TLS key logging cannot enter a release artifact")
 
     entries = [
         {
@@ -208,7 +361,7 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     ]
     payload_digest = evidence_digest.text_evidence_bytes_sha256(canonical_json(entries))
     release_manifest: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "package": "wirestack",
         "version": VERSION,
         "target": platform_identity(),
@@ -248,6 +401,15 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
             "archive_sha256": resolver_manifest.get("archive", {}).get("sha256"),
             "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(
                 payload["target/native/resolver/current/resolver-manifest.json"]
+            ),
+        },
+        "httpFiles": {
+            "component": http_files_manifest.get("component"),
+            "abi_version": http_files_manifest.get("abi_version"),
+            "build_fingerprint": http_files_manifest.get("build_fingerprint"),
+            "archive_sha256": http_files_manifest.get("archive", {}).get("sha256"),
+            "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(
+                payload[f"{HTTP_FILES_PAYLOAD_ROOT}/{HTTP_FILES_MANIFEST_NAME}"]
             ),
         },
         "externalOpenSslDependency": False,
@@ -298,20 +460,161 @@ def write_reproducible_archive(path: Path, payload: Mapping[str, bytes]) -> None
                     archive.addfile(info, io.BytesIO(content))
 
 
+class _BoundedArchiveReader:
+    def __init__(self, stream: BinaryIO) -> None:
+        self._stream = stream
+        self._remaining = MAX_ARCHIVE_BYTES
+
+    def read(self, size: int = -1) -> bytes:
+        limit = self._remaining + 1
+        content = self._stream.read(limit if size < 0 else min(size, limit))
+        if len(content) > self._remaining:
+            raise ReleaseError("release archive exceeds the decompressed byte limit")
+        self._remaining -= len(content)
+        return content
+
+
+def read_verified_payload(path: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
+    """Bound archive decoding and verify the complete regular-file inventory."""
+    header_count = 0
+
+    class LimitedTarInfo(tarfile.TarInfo):
+        def _proc_member(self, archive: tarfile.TarFile) -> tarfile.TarInfo:
+            if self.type == tarfile.GNUTYPE_SPARSE:
+                raise ReleaseError("release archive does not support sparse files")
+            if len(archive.pax_headers) > MAX_ARCHIVE_PAX_FIELDS:
+                raise ReleaseError("release archive exceeds the cumulative PAX field limit")
+            # Check raw headers before tarfile expands PAX/GNU metadata.
+            nonlocal header_count
+            header_count += 1
+            if header_count > MAX_ARCHIVE_MEMBERS:
+                raise ReleaseError("release archive exceeds the member header limit")
+            limit = MAX_ARCHIVE_METADATA_BYTES if self.type in ARCHIVE_METADATA_TYPES else MAX_ARCHIVE_MEMBER_BYTES
+            if not 0 <= self.size <= limit:
+                raise ReleaseError(f"release archive member exceeds the {limit}-byte limit: {self.name}")
+            return super()._proc_member(archive)
+
+        def _apply_pax_info(self, pax_headers: dict, encoding: str, errors: str) -> None:
+            if len(pax_headers) > MAX_ARCHIVE_PAX_FIELDS:
+                raise ReleaseError("release archive exceeds the effective PAX field limit")
+            super()._apply_pax_info(pax_headers, encoding, errors)
+
+        def _proc_gnusparse_00(self, next: tarfile.TarInfo, raw_headers: list) -> None:
+            raise ReleaseError("release archive does not support sparse files")
+
+        def _proc_gnusparse_01(self, next: tarfile.TarInfo, pax_headers: dict) -> None:
+            raise ReleaseError("release archive does not support sparse files")
+
+        def _proc_gnusparse_10(self, next: tarfile.TarInfo, pax_headers: dict, archive: tarfile.TarFile) -> None:
+            raise ReleaseError("release archive does not support sparse files")
+
+    expanded_bytes = 0
+    payload: dict[str, bytes] = {}
+    names: set[str] = set()
+    try:
+        with (
+            gzip.open(path, "rb") as decoded,
+            tarfile.open(fileobj=_BoundedArchiveReader(decoded), mode="r|", tarinfo=LimitedTarInfo) as archive,
+        ):
+            for member in archive:
+                name = member.name
+                if member.isdir() and name.endswith("/"):
+                    name = name[:-1]
+                parsed = PurePosixPath(name)
+                if (
+                    not name
+                    or "\\" in name
+                    or "\0" in name
+                    or parsed.is_absolute()
+                    or parsed.as_posix() != name
+                    or not parsed.parts
+                    or ".." in parsed.parts
+                    or parsed.parts[0] != PACKAGE_ROOT
+                ):
+                    raise ReleaseError(f"unsafe release archive member: {member.name}")
+                if name in names:
+                    raise ReleaseError(f"duplicate release archive member: {name}")
+                names.add(name)
+                if not 0 <= member.size <= MAX_ARCHIVE_MEMBER_BYTES:
+                    raise ReleaseError(f"release archive member exceeds the byte limit: {name}")
+                if member.isdir():
+                    if member.size:
+                        raise ReleaseError(f"release archive directory contains payload bytes: {name}")
+                    continue
+                if not member.isfile() or len(parsed.parts) < 2:
+                    raise ReleaseError(f"release archive requires regular files: {name}")
+                expanded_bytes += member.size
+                if expanded_bytes > MAX_ARCHIVE_BYTES:
+                    raise ReleaseError("release archive exceeds the expanded payload byte limit")
+                stream = archive.extractfile(member)
+                if stream is None:
+                    raise ReleaseError(f"release archive member cannot be read: {name}")
+                with stream:
+                    content = stream.read(member.size + 1)
+                if len(content) != member.size:
+                    raise ReleaseError(f"release archive member length differs from its header: {name}")
+                payload[parsed.relative_to(PACKAGE_ROOT).as_posix()] = content
+    except (OSError, tarfile.TarError, RecursionError) as error:
+        raise ReleaseError(f"cannot read release archive: {error}") from error
+    file_names = {f"{PACKAGE_ROOT}/{relative}" for relative in payload}
+    for name in names:
+        if any(parent.as_posix() in file_names for parent in PurePosixPath(name).parents):
+            raise ReleaseError(f"release archive file overlaps a directory: {name}")
+    manifest = _payload_manifest(payload, "release-manifest.json", "release")
+    if (
+        type(manifest.get("schema_version")) is not int
+        or manifest["schema_version"] not in {1, 2}
+        or manifest.get("package") != "wirestack"
+        or manifest.get("version") != VERSION
+    ):
+        raise ReleaseError("release manifest identity is invalid")
+    entries = manifest.get("payload")
+    if not isinstance(entries, list):
+        raise ReleaseError("release payload inventory is absent")
+    declared: set[str] = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+            raise ReleaseError("release payload inventory entry is invalid")
+        relative = entry["path"]
+        if relative == "release-manifest.json" or relative in declared:
+            raise ReleaseError(f"duplicate or self-referential release payload entry: {relative}")
+        declared.add(relative)
+        content = payload.get(relative)
+        if (
+            content is None
+            or type(entry.get("bytes")) is not int
+            or entry["bytes"] != len(content)
+            or not evidence_digest.schema_artifact_sha256_equal(
+                entry.get("sha256"), artifact_payload_sha256(content)
+            )
+        ):
+            raise ReleaseError(f"release payload bytes differ from the inventory: {relative}")
+    if declared != set(payload) - {"release-manifest.json"}:
+        raise ReleaseError("release payload inventory has missing or extra files")
+    fingerprint = evidence_digest.text_evidence_bytes_sha256(canonical_json(entries))
+    if (
+        not evidence_digest.schema_text_sha256_equal(manifest.get("payload_sha256"), fingerprint)
+        or not evidence_digest.schema_text_sha256_equal(manifest.get("artifactBuildFingerprint"), fingerprint)
+    ):
+        raise ReleaseError("release payload fingerprint differs from the inventory")
+    return payload, manifest
+
+
 def extract_archive(path: Path, destination: Path) -> Path:
+    payload, _ = read_verified_payload(path)
     destination.mkdir(parents=True, exist_ok=True)
     root = destination.resolve()
-    with tarfile.open(path, mode="r:gz") as archive:
-        for member in archive.getmembers():
-            if member.issym() or member.islnk():
-                raise ReleaseError("release archive may not contain links")
-            target = (destination / member.name).resolve()
-            if target != root and root not in target.parents:
-                raise ReleaseError(f"unsafe release archive member: {member.name}")
-        archive.extractall(destination)
     installed = destination / PACKAGE_ROOT
-    if not (installed / "release-manifest.json").is_file():
-        raise ReleaseError("installed artifact has no release manifest")
+    try:
+        installed.mkdir()
+    except FileExistsError as error:
+        raise ReleaseError("release installation directory already exists") from error
+    for relative, content in payload.items():
+        target = installed / relative
+        if root not in target.resolve().parents:
+            raise ReleaseError(f"unsafe release installation path: {relative}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
     return installed
 
 
@@ -405,6 +708,13 @@ def scan_binary(binary: Path) -> dict[str, Any]:
         "resolved": resolved,
         "forbidden_dependencies": [],
         "runtime_loader_library_strings": [],
+        "raw_outputs": {
+            name: {
+                "text": output,
+                "digest": evidence_digest.text_evidence_digest_bytes(output.encode("utf-8")).to_json(),
+            }
+            for name, output in (("readelf", readelf_output), ("ldd", ldd_output))
+        },
     }
 
 
@@ -432,6 +742,9 @@ def validate_report(
         or reproducibility.get("digests") != [digest, digest]
     ):
         raise ReleaseError("artifact reproducibility evidence is invalid")
+    release_schema_version = artifact.get("release_schema_version")
+    if release_schema_version is not None and release_schema_version not in {1, 2}:
+        raise ReleaseError("qualification release manifest schema is unsupported")
     source_digest = report.get("source_tree_sha256")
     if not isinstance(source_digest, str) or re.fullmatch(r"[0-9a-f]{64}", source_digest) is None:
         raise ReleaseError("qualification source tree fingerprint is invalid")
@@ -523,7 +836,7 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
         installed_manifest = load_json(installed / "release-manifest.json")
         if installed_manifest != release_manifest:
             raise ReleaseError("installed release manifest differs from the packaged manifest")
-        binary, _build_output, smoke_output = build_and_run_consumer(installed, work)
+        binary, build_output, smoke_output = build_and_run_consumer(installed, work)
         dependency_scan = scan_binary(binary)
 
     cjc_version = run(["cjc", "-v"], cwd=root).strip().splitlines()
@@ -541,6 +854,7 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
             "name": artifact.name,
             "bytes": artifact.stat().st_size,
             "sha256": evidence_digest.artifact_byte_sha256(artifact),
+            "release_schema_version": release_manifest["schema_version"],
             "reproducibility": {
                 "builds": 2,
                 "digests": [first_digest, second_digest],
@@ -555,6 +869,10 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
             "https_client_server_smoke": "PASS",
             "runtime_info_smoke": "PASS",
             "smoke_output": smoke_output.splitlines(),
+            "build_output": {
+                "text": build_output,
+                "digest": evidence_digest.text_evidence_digest_bytes(build_output.encode("utf-8")).to_json(),
+            },
         },
         "dependency_scan": dependency_scan,
         "runtime": {
@@ -567,8 +885,7 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
         },
         "toolchain": {"cjc": cjc_version, "cjpm": cjpm_version},
         "non_claims": [
-            "The artifact is unsigned; M7-030 owns release signing.",
-            "The artifact has no SBOM; M7-025 owns the SBOM and provider manifest bundle.",
+            "This installation qualification does not assess artifact signatures or SBOM sidecars.",
             "This native result applies only to the Linux x86_64 glibc profile.",
         ],
     }

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "kind": "baseline-gate-defect-reproduction",
+  "status_meaning": "PASS reproduces defects, not release qualification.",
+  "base_revision": "aa59af7d509b22b60474633f7672d63f810ceed7",
+  "artifact_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "9a347a8e6ff4076b5b42ebf16ccad356622097f0bcfaf2231f8297c38ac84833"
+  },
+  "supply_chain": {
+    "generated_bundle_rejected": true,
+    "error": "SPDX package inventory is incomplete",
+    "public_suffix_package_present": true
+  },
+  "resolver_archive": {
+    "mutated_archive_accepted": true,
+    "production_manifest_unchanged": true,
+    "original_digest": "dcef4fbe2f69e05fc7a52a427aa0ae91e6ce2e8fba94fd68e1f642e3e81e8faa",
+    "actual_digest": "7f25d49648aeaf041e382e18febf6ceced34e7eb063880ab959e90013ac4d3a2"
+  },
+  "sources": [
+    {
+      "path": "docs/evidence/M8-007/reproductions/baseline-release-collector.py.txt",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2fcae2efdeb7039b1178a598a17de77596e6641ebdad14844d83c0de59409cff"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/reproductions/baseline-supply-chain.py.txt",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cd5c3ab032983c3b503b939c8edd54e8b22146b966374c57a814695d2b1c188b"
+      }
+    }
+  ]
+}

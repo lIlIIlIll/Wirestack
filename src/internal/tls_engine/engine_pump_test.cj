@@ -744,6 +744,16 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func tls12ContextVersionsPartitionRealClientAndServerSessions(): Unit {
+        proveVersionedNativeSessions(TlsVersion.Tls12)
+    }
+
+    @TestCase
+    func tls13ContextVersionsPartitionRealClientAndServerTickets(): Unit {
+        proveVersionedNativeSessions(TlsVersion.Tls13)
+    }
+
+    @TestCase
     func pumpHandlesWantReadWriteAndPartialIoWithBoundedBuffers(): Unit {
         let engine = ScriptedEngine()
         let transport = ScriptedTransport([7, 6, 5], readChunk: 2, writeChunk: 2)
@@ -939,6 +949,56 @@ private func proveRealSessionResumption(
     }
 }
 
+private func proveVersionedNativeSessions(version: TlsVersion): Unit {
+    let provider = NativeTlsProvider()
+    let identity = tlsTestLocalIdentity()
+    let capabilities = provider.capabilities()
+    let oldClient = TlsClientContext.builder(provider.manifest(), capabilities)
+        .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+        .versions(version, version).build()
+    let oldServer = TlsServerContext.builder(provider.manifest(), capabilities)
+        .identity(identity).versions(version, version).build()
+    let newClient = TlsClientContext.builder(provider.manifest(), capabilities)
+        .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+        .versions(version, version).build()
+    let newServer = TlsServerContext.builder(provider.manifest(), capabilities)
+        .identity(identity).versions(version, version).build()
+    // Closing caller-owned material must not alter any built context.
+    identity.privateKeyRef.close()
+    try {
+        for (round in 0..5) {
+            let clientContext = if (round < 3) { oldClient } else { newClient }
+            let serverContext = if (round < 2) { oldServer } else { newServer }
+            let client = provider.createClientEngineWithTrustLocation(
+                clientContext, ReferenceIdentity.Dns(HostName("example.com"))
+            )
+            let server = provider.createServerEngineWithTrustLocation(serverContext)
+            try {
+                drivePairedMemoryHandshake(client, server)
+                let expectedReuse = round == 1 || round == 4
+                @Expect(requireHandshakeInfo(client).resumed, expectedReuse)
+                @Expect(requireHandshakeInfo(server).resumed, expectedReuse)
+                let payload = [UInt8(round + 1)]
+                match (server.writePlaintext(ByteSpan(payload))) {
+                    case TlsEngineWriteResult.Consumed(count) => @Expect(count, 1)
+                    case _ => @Fail("versioned session did not accept application data")
+                }
+                let _ = transferCiphertext(server, client)
+                let received = Array<Byte>(1, repeat: 0)
+                match (client.readPlaintext(MutableByteSpan(received))) {
+                    case TlsEngineReadResult.Data(count) =>
+                        @Expect(count, 1)
+                        @Expect(received[0], payload[0])
+                    case _ => @Fail("versioned session did not deliver application data")
+                }
+            } finally {
+                client.close()
+                server.close()
+            }
+        }
+    } finally { provider.close() }
+}
+
 private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): Unit {
     for (_ in 0..128) {
         let clientStep = client.handshakeStep()
@@ -1003,6 +1063,14 @@ private func serviceEngineRequestIfNeeded(
             case _ => throw TlsEngineException(
                 TlsEngineErrorCode.PrivateKeyFailure,
                 "test engine cannot service external signature"
+            )
+        }
+        case TlsEngineStep.NeedDecryption => match (engine) {
+            case decrypting: ExternalDecryptingTlsEngine =>
+                decrypting.serviceExternalDecryption(OperationContext.background())
+            case _ => throw TlsEngineException(
+                TlsEngineErrorCode.PrivateKeyFailure,
+                "test engine cannot service external decryption"
             )
         }
         case TlsEngineStep.NeedServerSelection => match (engine) {

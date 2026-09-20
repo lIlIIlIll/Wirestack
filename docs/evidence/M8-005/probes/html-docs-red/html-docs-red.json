@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "FAIL",
+  "head_sha": "d43b55e59686d5896fd4d627bb8739a0f3f1ef22",
+  "run_id": 34770914302,
+  "job_id": 103760517867,
+  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/34770914302/job/103760517867",
+  "invocation": [
+    "scripts/check-docs",
+    "--html",
+    "--json"
+  ],
+  "failure": [
+    {
+      "code": "CJDOC_GENERATE",
+      "detail": "combined generation returned a non-zero status"
+    }
+  ],
+  "failed_commands": [
+    {
+      "kind": "generate",
+      "package": "combined",
+      "returncode": 1,
+      "status": "FAIL",
+      "stderr": "An exception has occurred:\n    Out of memory\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    }
+  ],
+  "raw_log": {
+    "path": "docs/evidence/M8-005/probes/html-docs-red/ci.log",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b605898ff021440a0f7f3908a9ceaac688716a5cfe4b6a0b025ecf96abf9ee3"
+    }
+  },
+  "largest_suffix_declaration_header_bytes": 206440
+}

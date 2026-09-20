@@ -1,0 +1,109 @@
+{
+  "source_task": "M8-007",
+  "phase": "after",
+  "status": "FAIL",
+  "baseline_revision": "8a79209e6471b343774fe54a99f251f5b273352e",
+  "artifact_sha256": "4441dbe6670e64804b44b941d2894c4945cb3b8e886d9f9fb9a11854c280adc0",
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "a45a8b79fb2364877c29c865f9e323af1eaa5eeaa578d6c85ed545101cc4fe14"
+  },
+  "driver": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a67415ac07018f04c13ffea55fd34099d442bd499db4191e4d75cb3dbe3f4b71"
+    }
+  },
+  "probe": {
+    "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8466260e30622877c353fe65aeff09c909870943d18b22cec7555c67a8530a8b"
+    }
+  },
+  "derived_source": {
+    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/consumer.cj.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4294f6de0144bb5df9227060b276b4c375596dc3142fc8cae93389ad232fe7bc"
+    }
+  },
+  "commands": {
+    "build": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "duration_ms": 15459.509489010088,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d47b5174e48ff56e0a3fce88084706f9e80e16eb3d0a9376829dc75c9c4bdac9"
+        }
+      }
+    },
+    "stale": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-9vv1ae7s/consumer/target/release/bin/main",
+        "stale"
+      ],
+      "exit_code": 1,
+      "duration_ms": 31.665380985941738,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/stale.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/stale.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b0f81896d95e0feea623243d18a83c2d3e1ed322c4f2873427539f92610f173d"
+        }
+      }
+    },
+    "live": {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<home>/cangjie_sdk/daily",
+        "/tmp/wirestack-owner-registry-9vv1ae7s/consumer/target/release/bin/main",
+        "live"
+      ],
+      "exit_code": 0,
+      "duration_ms": 31.600944988895208,
+      "stdout": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/live.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1d870f8b698efb87c219b4c42f283792c63c934906d2977fb55701916cc09854"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789389890422924017/live.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,161 @@
+cj
+cjdoc
+API 文档
+搜索 API
+Ctrl K
+按类别筛选
+全部类别
+class
+constructor
+enum
+enumCase
+function
+interface
+property
+struct
+typeAlias
+variable
+按包筛选
+全部包
+wirestack
+wirestack.http
+wirestack.net
+wirestack.tls
+v0.7.2
+GitHub
+主题
+跟随系统
+浅色
+深色
+纸张
+深海
+松林
+终端
+紫墨
+
+文档
+
+总览
+API 参考
+
+包参考
+
+wirestack
+4
+wirestack
+662
+wirestack.http
+402
+wirestack.net
+241
+wirestack.tls
+176
+
+生成自
+cjdoc.doc-ir/8
+
+首页
+包 wirestack.tls
+TlsServerContextStore
+wirestack.tls.TlsServerContextStore
+
+classpublicsemantic: partial src/tls/facade.cj:418:1
+
+签名
+public class TlsServerContextStore
+⧉
+概览
+
+Atomically replaceable server context source.
+
+Accepted connections snapshot it only when their TLS handshake begins.
+
+构造器
+wirestack.tls.TlsServerContextStore.init
+
+constructorpublicsemantic: partial Owner: wirestack.tls.TlsServerContextStore · src/tls/facade.cj:422:5
+
+签名
+public init(initial: TlsServerContext)
+⧉
+概览
+参数
+initial
+:TlsServerContext
+
+Context used until the first replacement.
+
+函数
+wirestack.tls.TlsServerContextStore.handshake
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsServerContextStore · src/tls/facade.cj:444:5
+
+签名
+public func handshake(
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection
+⧉
+概览
+
+Handshakes using one atomic context snapshot.
+
+参数
+transport
+:DuplexTransport
+
+Connected transport transferred to the TLS connection.
+
+context
+:OperationContext
+
+Shared handshake cancellation, absolute deadline and trace.
+
+返回值
+TlsConnection
+wirestack.tls.TlsServerContextStore.replace
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsServerContextStore · src/tls/facade.cj:434:5
+
+签名
+public func replace(value: TlsServerContext): UInt64
+⧉
+概览
+
+Atomically selects a context for future handshakes.
+
+参数
+value
+:TlsServerContext
+
+Built immutable context selected by this replacement.
+
+返回值
+UInt64
+
+The selected context's checked process-unique version.
+
+wirestack.tls.TlsServerContextStore.snapshot
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsServerContextStore · src/tls/facade.cj:427:5
+
+签名
+public func snapshot(): TlsServerContext
+⧉
+概览
+
+Returns the immutable context a handshake would currently use.
+
+返回值
+TlsServerContext
+
+本页目录
+
+▾
+class TlsServerContextStore
+init(initial: TlsServerContext)
+func handshake( transport: DuplexTransport, context!: OperationContext = OperationContext.background() ): TlsConnection
+func replace(value: TlsServerContext): UInt64
+func snapshot(): TlsServerContext
+cjdoc · 由 Doc IR 生成
+0.7.2 · cjdoc.doc-ir/8

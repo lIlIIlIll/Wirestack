@@ -1,0 +1,34 @@
+{
+  "argv": [
+    "python3",
+    "tools/m7_026_linux_api_freeze.py",
+    "--baseline",
+    "docs/api/baselines/wirestack-linux-pre1-m8-003.json",
+    "--report",
+    "docs/evidence/M8-003/api-inventory.json"
+  ],
+  "duration_ms": 814.504,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-11T04:18:57.642747Z",
+  "id": "public-api-inventory",
+  "schema_version": 1,
+  "source_task": "M8-003",
+  "started_at_utc": "2026-09-11T04:18:56.828248Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-003/public-api-inventory.stderr.log",
+  "stderr_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr_truncated": false,
+  "stdout_excerpt": "M7-026 Linux API compatibility: PASS\npackage=wirestack@0.1.0\ndeclarations=265\nresolved_aliases=103\ninventory_sha256=788f4c22f888cbeaa44a1abaa4631fd9ceb8afa7f470de1c0929ff0dca41f234\n",
+  "stdout_path": "docs/evidence/M8-003/public-api-inventory.stdout.log",
+  "stdout_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "20d5f6a4131bf39467904bb2c9784a1822c3d93a9431e51515bb05e45abb9dd6"
+  },
+  "stdout_truncated": false,
+  "timed_out": false
+}

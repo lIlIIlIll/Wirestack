@@ -27,6 +27,10 @@ foreign func wirestack_tls_identity_validate_spki(
     subjectPublicKeyInfo: CPointer<UInt8>,
     subjectPublicKeyInfoSize: UInt64
 ): Int32
+foreign func wirestack_tls_identity_validate_external_rsa(
+    leafCertificate: CPointer<UInt8>,
+    leafCertificateSize: UInt64
+): Int32
 foreign func wirestack_tls_sha256(
     input: CPointer<UInt8>,
     size: UInt64,
@@ -185,7 +189,7 @@ public class PrivateKeyRef <: Resource {
     }
 
     internal func withPkcs8(action: (Array<Byte>) -> Unit): Unit {
-        synchronized(mutex) {
+        let transient = synchronized(mutex) {
             if (closed) {
                 throw PrivateKeyException(
                     PrivateKeyErrorCode.Closed,
@@ -193,18 +197,17 @@ public class PrivateKeyRef <: Resource {
                 )
             }
             match (kind) {
-                case PrivateKeyKind.Pkcs8 =>
-                    let transient = pkcs8Bytes.clone()
-                    try {
-                        action(transient)
-                    } finally {
-                        zeroBytes(transient)
-                    }
+                case PrivateKeyKind.Pkcs8 => pkcs8Bytes.clone()
                 case _ => throw PrivateKeyException(
                     PrivateKeyErrorCode.UnsupportedKeyKind,
                     "private key kind is not available through the PKCS#8 adapter"
                 )
             }
+        }
+        try {
+            action(transient)
+        } finally {
+            zeroBytes(transient)
         }
     }
 
@@ -250,6 +253,52 @@ public class PrivateKeyRef <: Resource {
         }
     }
 
+    /**
+     * Produces a context-private key snapshot without invoking caller code.
+     *
+     * Exportable PKCS#8 and public-key metadata are copied. External/system
+     * signer service objects remain caller-owned thread-safe references.
+     */
+    internal func snapshotForContext(): PrivateKeyRef {
+        synchronized(mutex) {
+            if (closed) {
+                throw PrivateKeyException(
+                    PrivateKeyErrorCode.Closed,
+                    "private key reference is closed"
+                )
+            }
+            PrivateKeyRef(
+                kind,
+                referenceIdentity,
+                requiresHardwareKey,
+                pkcs8Bytes.clone(),
+                publicKeyBytes.clone(),
+                algorithms.clone(),
+                signer
+            )
+        }
+    }
+
+    internal func supportsExternalDecryption(): Bool {
+        synchronized(mutex) {
+            if (closed) {
+                throw PrivateKeyException(
+                    PrivateKeyErrorCode.Closed,
+                    "private key reference is closed"
+                )
+            }
+            match (kind) {
+                case PrivateKeyKind.Pkcs8 => false
+                case _ =>
+                    var supported = false
+                    for (algorithm in algorithms) {
+                        if (isRsaSignatureAlgorithm(algorithm)) { supported = true }
+                    }
+                    supported
+            }
+        }
+    }
+
     public func close(): Unit {
         synchronized(mutex) {
             if (!closed) {
@@ -284,6 +333,16 @@ public class LocalIdentity {
     public let certificateChain: CertificateChain
     public let privateKeyRef: PrivateKeyRef
     public let contextIdentity: String
+
+    private init(
+        certificateChain: CertificateChain,
+        privateKeyRef: PrivateKeyRef,
+        contextIdentity: String
+    ) {
+        this.certificateChain = certificateChain
+        this.privateKeyRef = privateKeyRef
+        this.contextIdentity = contextIdentity
+    }
 
     public init(certificateChain: CertificateChain, privateKeyRef: PrivateKeyRef) {
         let leaf = certificateChain.certificateAt(0).derBytes()
@@ -348,6 +407,23 @@ public class LocalIdentity {
             privateKeyRef.kind,
             privateKeyRef.referenceIdentity
         )
+    }
+
+    /** Creates the inaccessible identity/key snapshot owned by a built context. */
+    internal func snapshotForContext(): LocalIdentity {
+        LocalIdentity(certificateChain, privateKeyRef.snapshotForContext(), contextIdentity)
+    }
+
+    internal func supportsExternalDecryption(): Bool {
+        if (!privateKeyRef.supportsExternalDecryption()) { return false }
+        let leaf = certificateChain.certificateAt(0).derBytes()
+        let status = unsafe {
+            let input = acquireArrayRawData(leaf)
+            try {
+                wirestack_tls_identity_validate_external_rsa(input.pointer, UInt64(leaf.size))
+            } finally { releaseArrayRawData(input) }
+        }
+        status == IDENTITY_NATIVE_OK
     }
 }
 
@@ -456,6 +532,18 @@ internal func nativeSignatureAlgorithm(value: TlsSignatureAlgorithm): UInt16 {
         case TlsSignatureAlgorithm.EcdsaSecp384r1Sha384 => 0x0503
         case TlsSignatureAlgorithm.EcdsaSecp521r1Sha512 => 0x0603
         case TlsSignatureAlgorithm.Ed25519 => 0x0807
+    }
+}
+
+private func isRsaSignatureAlgorithm(value: TlsSignatureAlgorithm): Bool {
+    match (value) {
+        case TlsSignatureAlgorithm.RsaPssRsaeSha256 => true
+        case TlsSignatureAlgorithm.RsaPssRsaeSha384 => true
+        case TlsSignatureAlgorithm.RsaPssRsaeSha512 => true
+        case TlsSignatureAlgorithm.RsaPkcs1Sha256 => true
+        case TlsSignatureAlgorithm.RsaPkcs1Sha384 => true
+        case TlsSignatureAlgorithm.RsaPkcs1Sha512 => true
+        case _ => false
     }
 }
 

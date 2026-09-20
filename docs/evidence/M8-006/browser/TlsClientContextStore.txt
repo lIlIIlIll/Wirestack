@@ -1,0 +1,207 @@
+cj
+cjdoc
+API 文档
+搜索 API
+Ctrl K
+按类别筛选
+全部类别
+class
+constructor
+enum
+enumCase
+function
+interface
+property
+struct
+typeAlias
+variable
+按包筛选
+全部包
+wirestack
+wirestack.http
+wirestack.net
+wirestack.tls
+v0.7.2
+GitHub
+主题
+跟随系统
+浅色
+深色
+纸张
+深海
+松林
+终端
+紫墨
+
+文档
+
+总览
+API 参考
+
+包参考
+
+wirestack
+4
+wirestack
+662
+wirestack.http
+402
+wirestack.net
+241
+wirestack.tls
+176
+
+生成自
+cjdoc.doc-ir/8
+
+首页
+包 wirestack.tls
+TlsClientContextStore
+wirestack.tls.TlsClientContextStore
+
+classpublicsemantic: partial src/tls/facade.cj:196:1
+
+签名
+public class TlsClientContextStore
+⧉
+概览
+
+Atomically replaceable client context source.
+
+Each handshake loads exactly one immutable snapshot. Replacement affects only handshakes that load afterward; existing handshakes and connections retain their original context and session partition.
+
+构造器
+wirestack.tls.TlsClientContextStore.init
+
+constructorpublicsemantic: partial Owner: wirestack.tls.TlsClientContextStore · src/tls/facade.cj:200:5
+
+签名
+public init(initial: TlsClientContext)
+⧉
+概览
+参数
+initial
+:TlsClientContext
+
+Context used until the first replacement.
+
+函数
+wirestack.tls.TlsClientContextStore.handshake
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContextStore · src/tls/facade.cj:223:5
+
+签名
+public func handshake(
+        transport: DuplexTransport,
+        serverName: HostName,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection
+⧉
+概览
+
+Handshakes with one atomic context snapshot and a DNS reference identity.
+
+参数
+transport
+:DuplexTransport
+
+Connected transport consumed even when the handshake fails.
+
+serverName
+:HostName
+
+Canonical DNS name used for SNI and certificate verification.
+
+context
+:OperationContext
+
+Shared handshake cancellation, absolute deadline and trace.
+
+返回值
+TlsConnection
+wirestack.tls.TlsClientContextStore.handshake
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContextStore · src/tls/facade.cj:238:5
+
+签名
+public func handshake(
+        transport: DuplexTransport,
+        referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName = None<HostName>,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection
+⧉
+概览
+
+Handshakes with one atomic snapshot and an explicit reference identity.
+
+参数
+transport
+:DuplexTransport
+
+Connected transport consumed even when the handshake fails.
+
+referenceIdentity
+:ReferenceIdentity
+
+Expected certificate identity, independent of SNI.
+
+serverName
+:?HostName
+
+Optional canonical DNS name sent as SNI.
+
+context
+:OperationContext
+
+Shared handshake cancellation, absolute deadline and trace.
+
+返回值
+TlsConnection
+wirestack.tls.TlsClientContextStore.replace
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContextStore · src/tls/facade.cj:212:5
+
+签名
+public func replace(value: TlsClientContext): UInt64
+⧉
+概览
+
+Atomically selects a context for future handshakes.
+
+参数
+value
+:TlsClientContext
+
+Built immutable context selected by this replacement.
+
+返回值
+UInt64
+
+The selected context's checked process-unique version.
+
+wirestack.tls.TlsClientContextStore.snapshot
+
+functionpublicsemantic: partial Owner: wirestack.tls.TlsClientContextStore · src/tls/facade.cj:205:5
+
+签名
+public func snapshot(): TlsClientContext
+⧉
+概览
+
+Returns the immutable context a handshake would currently use.
+
+返回值
+TlsClientContext
+
+本页目录
+
+▾
+class TlsClientContextStore
+init(initial: TlsClientContext)
+func handshake( transport: DuplexTransport, serverName: HostName, context!: OperationContext = OperationContext.background() ): TlsConnection
+func handshake( transport: DuplexTransport, referenceIdentity: ReferenceIdentity, serverName!: ?HostName = None<HostName>, context!: OperationContext = OperationContext.background() ): TlsConnection
+func replace(value: TlsClientContext): UInt64
+func snapshot(): TlsClientContext
+cjdoc · 由 Doc IR 生成
+0.7.2 · cjdoc.doc-ir/8

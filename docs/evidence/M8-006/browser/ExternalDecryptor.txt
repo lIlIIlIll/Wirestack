@@ -1,0 +1,105 @@
+cj
+cjdoc
+API 文档
+搜索 API
+Ctrl K
+按类别筛选
+全部类别
+class
+constructor
+enum
+enumCase
+function
+interface
+property
+struct
+typeAlias
+variable
+按包筛选
+全部包
+wirestack
+wirestack.http
+wirestack.net
+wirestack.tls
+v0.7.2
+GitHub
+主题
+跟随系统
+浅色
+深色
+纸张
+深海
+松林
+终端
+紫墨
+
+文档
+
+总览
+API 参考
+
+包参考
+
+wirestack
+4
+wirestack
+662
+wirestack.http
+402
+wirestack.net
+241
+wirestack.tls
+176
+
+生成自
+cjdoc.doc-ir/8
+
+首页
+包 wirestack
+ExternalDecryptor
+wirestack.ExternalDecryptor
+
+interfacepublicsemantic: partial src/tls_contract.cj:209:1
+
+签名
+public interface ExternalDecryptor
+⧉
+概览
+
+Caller-owned, thread-safe service for an external RSA private operation.
+
+The TLS engine passes the exact handshake OperationContext. A successful callback transfers ownership of its returned array to Wirestack: it must contain exactly request.ciphertextBytes().size raw-RSA block bytes and the callback must not retain, reuse, or mutate it. Wirestack zeroes that array after native completion on every path.
+
+函数
+wirestack.ExternalDecryptor.decrypt
+
+functionpublicsemantic: partial Owner: wirestack.ExternalDecryptor · src/tls_contract.cj:215:5
+
+签名
+func decrypt(request: ExternalDecryptionRequest, context: OperationContext): Array<Byte>
+⧉
+概览
+
+Performs one bounded raw RSA private operation.
+
+参数
+request
+:ExternalDecryptionRequest
+
+Validated `RSA_RAW` ciphertext.
+
+context
+:OperationContext
+
+The caller's exact handshake operation context.
+
+返回值
+Array < Byte >
+
+本页目录
+
+▾
+interface ExternalDecryptor
+func decrypt(request: ExternalDecryptionRequest, context: OperationContext): Array<Byte>
+cjdoc · 由 Doc IR 生成
+0.7.2 · cjdoc.doc-ir/8

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<repo-root>/docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt", line 90, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo-root>/docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt", line 54, in main
+    return baseline_control(args.baseline)
+  File "<repo-root>/docs/evidence/M8-007/reproductions/soak-owner-controls.py.txt", line 37, in baseline_control
+    samples, terminal = baseline.parse_output(OLD_LOG.read_text())
+                        ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/m8-007-owner-baseline-u3k9r2gk/baseline.py", line 558, in parse_output
+  File "/tmp/m8-007-owner-baseline-u3k9r2gk/baseline.py", line 488, in parse_fields
+m8_owner_baseline.SoakError: sample missing=['activeApplicationTasks', 'activePoolLeases', 'activeResponseOwners', 'activeTransportIo', 'retainedCancellations', 'retainedTransports', 'serverServeTasks'] unknown=['activeBuffers', 'activeWaiters', 'backgroundTasks']

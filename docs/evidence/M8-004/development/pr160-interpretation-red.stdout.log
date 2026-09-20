@@ -1,0 +1,139 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 1529077263 ns, RESULT:
+    TCS: DnsClientWireTest, time elapsed: 917972389 ns, RESULT:
+    [ PASSED ] CASE: publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry (2393557 ns)
+    [ PASSED ] CASE: publicQueryEncodesEveryModeledRecordType (7732842 ns)
+    [ PASSED ] CASE: wrongSourceIdAndQuestionAreIgnoredBeforeValidUdpResponse (1026655 ns)
+    [ PASSED ] CASE: validatedTruncationFallsBackToExactTcpFrame (1173081 ns)
+    [ PASSED ] CASE: activeCancellationRetainsNameserverWithoutRetry (60487189 ns)
+    [ PASSED ] CASE: silentDnsAttemptsLeaveBudgetForServerAndPassFailover (504778773 ns)
+    [ PASSED ] CASE: exhaustedResponseCodesRetainTheLastRespondingNameserver (2925236 ns)
+    [ PASSED ] CASE: dnsTransportFailuresRetainSelectedNameserver (252295438 ns)
+    [ PASSED ] CASE: tcpResponseCannotRemainTruncated (1392263 ns)
+    [ PASSED ] CASE: malformedMatchingResponseAndUnrelatedSectionsCannotPoisonCache (2788209 ns)
+    [ PASSED ] CASE: fullResultCapacityDoesNotQueryAnotherFamily (60444909 ns)
+    [ PASSED ] CASE: rfc2308CacheRetainsNxdomainVersusNodataWithoutNewPackets (2879944 ns)
+    [ PASSED ] CASE: zeroTtlNeverCreatesAPositiveCacheEntry (1843128 ns)
+    [ PASSED ] CASE: callerCancellationAndClientCloseWakeActiveNativeReceive (2031768 ns)
+    [ PASSED ] CASE: anyFamilyRetainsAddressesWhenTheOtherFamilyFails (3549783 ns)
+    [ PASSED ] CASE: boundedAdmissionRejectsExcessAndCloseWakesQueuedCallers (1020045 ns)
+    [ FAILED ] CASE: unsupportedResponseCodeRetainsRespondingNameserver (1839145 ns)
+    Assert Failed: `(unsupported DNS response code lost its responding nameserver)`
+
+    [ FAILED ] CASE: cnameTraversalUsesAnswerOwnersAndRejectsConflictingTargets (1868662 ns)
+    Assert Failed: `(conflicting CNAME response lost its responding nameserver)`
+
+    [ FAILED ] CASE: nameWideNegativeOverridesEarlierFamilyFailure (1897712 ns)
+    Expect Failed: `(dnsClientTestCodeIs(error.resolveCode, api.ResolveErrorCode.NameNotFound) == true)`
+       left: false
+      right: true
+
+    TCS: DnsResolverPolicyTest, time elapsed: 285731072 ns, RESULT:
+    [ PASSED ] CASE: fromSystemParsesTabsCommentsLastSearchAndClampedNdots (306082 ns)
+    [ PASSED ] CASE: directConfigRejectsUnsupportedNameserverZonesBeforeQueries (30344 ns)
+    [ PASSED ] CASE: numericNameserverZonesUseCanonicalEndpointIdentity (35714 ns)
+    [ PASSED ] CASE: systemNameserversRetainOnlySupportedNumericZones (251891 ns)
+    [ PASSED ] CASE: configOwnsInputArraysAndReturnsDefensiveCopies (48179 ns)
+    [ PASSED ] CASE: systemFilesFailClosedWhenMissingOversizedOrNonregular (13029517 ns)
+    [ PASSED ] CASE: ipv4LiteralsBypassHostsSearchAndNameservers (60313696 ns)
+    [ PASSED ] CASE: hostsSnapshotRetainsOnlyUsableIpv6Zones (381512 ns)
+    [ PASSED ] CASE: hostsAliasesFilterFamiliesAndRemainSnapshotted (482953 ns)
+    [ PASSED ] CASE: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst (2993611 ns)
+    [ PASSED ] CASE: exactHostsEntryWinsBeforeSearchSuffixDns (203864912 ns)
+    [ PASSED ] CASE: cancelledExpiredAndClosedCallsRetainPublicResolveClassifications (464524 ns)
+    [ PASSED ] CASE: connectUsesHostsMappingForANativeListenerExchange (898739 ns)
+    [ PASSED ] CASE: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission (444704 ns)
+    TCS: DnsWireParserTest, time elapsed: 21952998 ns, RESULT:
+    [ PASSED ] CASE: decodesCompressedTargetsBinaryTxtSoaAndUnknownData (195793 ns)
+    [ PASSED ] CASE: recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit (67823 ns)
+    [ PASSED ] CASE: summariesAndRecordsOwnParserAndConstructorInputs (55473 ns)
+    [ PASSED ] CASE: publicSummaryRejectsCountsBeyondWireAndCombinedRecordBounds (15898493 ns)
+    [ PASSED ] CASE: parserPreservesQuestionIdentityAndRejectsIncompleteRecords (181501 ns)
+    [ PASSED ] CASE: asciiNameProfileRejectsAmbiguousLabels (215416 ns)
+    [ PASSED ] CASE: compressionLoopsForwardPointersAndOutOfRangePointersAreRejected (130231 ns)
+    [ PASSED ] CASE: expandedNameAndSectionCountsRespectConfiguredBounds (164166 ns)
+    [ PASSED ] CASE: completeParserRejectsTrailingAndTruncatedSectionBytes (109241 ns)
+    [ PASSED ] CASE: typedRdataLengthsAndTxtSegmentsAreExact (159581 ns)
+    [ PASSED ] CASE: compressedRdataNamesCannotConsumeNeighboringRecordBytes (538603 ns)
+    [ PASSED ] CASE: srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds (106562 ns)
+    [ PASSED ] CASE: summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries (49891 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceAuthorityNameserverTarget (158971 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceSecondLegacyMailboxName (196225 ns)
+    TCS: DnsWireFuzzTest, time elapsed: 173228374 ns, RESULT:
+    [ PASSED ] CASE: wireMutationsRejectMalformedMessagesOrRetainOwnedSections (172889727 ns)
+    TCS: M8002TcpListenerTest, time elapsed: 56900216 ns, RESULT:
+    [ PASSED ] CASE: bindRejectsInvalidBacklogAndStoppedContextsWithStructuredErrors (93256 ns)
+    [ PASSED ] CASE: bindFailureRetainsPublicCoordinatesAndCause (124856 ns)
+    [ PASSED ] CASE: cancelledAndExpiredAcceptsLeaveListenerReusable (24933737 ns)
+    [ PASSED ] CASE: acceptedStreamTransfersExactDataInBothDirections (208483 ns)
+    [ PASSED ] CASE: overlappingAcceptIsRejectedWithoutCreatingAPendingQueue (30049848 ns)
+    [ PASSED ] CASE: stoppedCloseAdmissionHasNoNativeEffectAndListenerRemainsUsable (270511 ns)
+    [ PASSED ] CASE: gracefulAndAbortTerminalOwnersAreStableAndWakeAccept (144931 ns)
+    TCS: M8002UdpSocketTest, time elapsed: 33312359 ns, RESULT:
+    [ PASSED ] CASE: datagramBoundariesAndOwnedPayloadSurviveScratchReuse (210900 ns)
+    [ PASSED ] CASE: exactCapacityAndTruncationDiscardOnlyTheCurrentDatagramTail (145428 ns)
+    [ PASSED ] CASE: connectedSocketSelectsNativePeerAndFiltersOtherSenders (236070 ns)
+    [ PASSED ] CASE: invalidAndUnsupportedInputsLeaveSocketReusable (1547818 ns)
+    [ PASSED ] CASE: cancellationDeadlineCloseAndAbortRetainDistinctState (30437001 ns)
+    TCS: NetworkFoundationContractTest, time elapsed: 39149998 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (16224 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (24404 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (43706 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (38165 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (77989 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (23936 ns)
+    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (84982 ns)
+    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (68941 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (51688 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (93572 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (58063 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (76743 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (79424 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (27341 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (51699 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (24211 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (57308 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (133087 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (83173 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (35593 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (70706 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (1212356 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (143239 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (82485 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (56546 ns)
+    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (26872 ns)
+    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (49894 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (70600 ns)
+    [ PASSED ] CASE: tcpStreamJoiningBackgroundCloseWaitsForCompletion (28721494 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (89260 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (84992 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (77081 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (47784 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (113831 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2800920 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (16687 ns)
+Summary: TOTAL: 97
+    PASSED: 94, SKIPPED: 0, ERROR: 0
+    FAILED: 3, listed below:
+            TCS: DnsClientWireTest, CASE: unsupportedResponseCodeRetainsRespondingNameserver
+            TCS: DnsClientWireTest, CASE: cnameTraversalUsesAnswerOwnersAndRejectsConflictingTargets
+            TCS: DnsClientWireTest, CASE: nameWideNegativeOverridesEarlierFamilyFailure
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 1537410276 ns, RESULT:
+TP: wirestack.*, time elapsed: 1537320468 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 1529077263 ns, RESULT:
+        TCS: DnsClientWireTest, time elapsed: 917972389 ns, RESULT:
+        [ FAILED ] CASE: unsupportedResponseCodeRetainsRespondingNameserver (1839145 ns)
+        [ FAILED ] CASE: cnameTraversalUsesAnswerOwnersAndRejectsConflictingTargets (1868662 ns)
+        [ FAILED ] CASE: nameWideNegativeOverridesEarlierFamilyFailure (1897712 ns)
+        TCS: DnsResolverPolicyTest, time elapsed: 285731072 ns, RESULT:
+        TCS: DnsWireParserTest, time elapsed: 21952998 ns, RESULT:
+        TCS: DnsWireFuzzTest, time elapsed: 173228374 ns, RESULT:
+        TCS: M8002TcpListenerTest, time elapsed: 56900216 ns, RESULT:
+        TCS: M8002UdpSocketTest, time elapsed: 33312359 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 39149998 ns, RESULT:
+Summary: TOTAL: 97
+    PASSED: 94, SKIPPED: 0, ERROR: 0
+    FAILED: 3
+--------------------------------------------------------------------------------------------------

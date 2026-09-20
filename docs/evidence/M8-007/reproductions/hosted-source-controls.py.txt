@@ -1,0 +1,98 @@
+import argparse
+import importlib
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+import types
+import unittest
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools import evidence_digest as digest
+from tools import m7_021_linux_release as release
+from tools.repository import repository_tooling as repository
+
+EVIDENCE = ROOT / 'docs/evidence/M8-007'
+PRODUCTION = 'tools/m8_007_final_release.py'
+TESTS = 'tools/tests/test_m8_007_final_release.py'
+CASE_NAMES = (
+    'test_verify_all_rejects_hosted_revision_not_independently_approved',
+    'test_verify_all_rejects_unarchived_signing_inputs',
+    'test_verify_all_rejects_unarchived_formal_inputs',
+    'test_verify_all_rejects_weakened_approved_task',
+    'test_verify_all_rejects_removed_approved_source_input',
+    'test_frozen_command_rejects_weakened_release_contract',
+)
+CASE = re.compile(r'^(test_\w+) \([^\n]+\) \.\.\. (ok|FAIL|ERROR)$', re.MULTILINE)
+
+
+def record(path):
+    return {'path': path.relative_to(ROOT).as_posix(), 'digest': digest.text_evidence_digest(path).to_json()}
+
+
+def run_case(phase, baseline):
+    tests = importlib.import_module('tools.tests.test_m8_007_final_release')
+    if phase == 'before':
+        source = subprocess.check_output(['git', 'cat-file', 'blob', f'{baseline}:{PRODUCTION}'], cwd=ROOT)
+        module = types.ModuleType('tools.m8_007_control_baseline')
+        module.__file__ = str(ROOT / PRODUCTION)
+        module.__package__ = 'tools'
+        sys.modules[module.__name__] = module
+        exec(compile(source, f'{baseline}:{PRODUCTION}', 'exec'), module.__dict__)
+        tests.final_release = module
+    suite = unittest.TestSuite([tests.M8007FinalReleaseTest(name) for name in CASE_NAMES])
+    return 0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', required=True)
+    parser.add_argument('--phase', choices=('before', 'after'))
+    args = parser.parse_args()
+    baseline = subprocess.check_output(
+        ['git', 'rev-parse', '--verify', f'{args.baseline}^{{commit}}'], cwd=ROOT, text=True
+    ).strip()
+    if args.phase:
+        return run_case(args.phase, baseline)
+    if (EVIDENCE / 'linux_x86_64/frozen-candidate.json').exists():
+        raise SystemExit('Refusing evidence replacement after formal candidate freeze')
+    driver = record(Path(__file__).resolve())
+    sources = {path: record(ROOT / path) for path in (PRODUCTION, TESTS)}
+    directory = EVIDENCE / 'commands/hosted-source-controls' / str(time.time_ns())
+    directory.mkdir(parents=True, exist_ok=False)
+    results = {}
+    for phase in ('before', 'after'):
+        command = {
+            'id': f'{phase}-hosted-source',
+            'argv': ['python3', driver['path'], '--baseline', baseline, '--phase', phase],
+            'timeout_seconds': 120, 'long_running': False, 'gate': 'task',
+        }
+        result = repository.run_command(ROOT, command, directory)
+        for stream in ('stdout', 'stderr'):
+            result[f'{stream}_digest'] = record(ROOT / result[f'{stream}_path'])['digest']
+        output = (ROOT / result['stdout_path']).read_text() + (ROOT / result['stderr_path']).read_text()
+        result['observed_cases'] = dict(CASE.findall(output))
+        results[phase] = result
+        print(json.dumps({'phase': phase, 'exit_code': result['exit_code'],
+                          'observed_cases': result['observed_cases']}), flush=True)
+    passed = all(
+        results[phase]['exit_code'] == exit_code and not results[phase]['timed_out']
+        and results[phase]['observed_cases'] == {name: status for name in CASE_NAMES}
+        for phase, exit_code, status in (('before', 1, 'FAIL'), ('after', 0, 'ok'))
+    ) and sources == {path: record(ROOT / path) for path in (PRODUCTION, TESTS)}
+    report = {
+        'schema_version': 1, 'source_task': 'M8-007', 'status': 'PASS' if passed else 'FAIL',
+        'driver': driver, 'baseline_revision': baseline,
+        'baseline_source': {'path': PRODUCTION, 'digest': repository._source_digest_at_commit(ROOT, baseline, PRODUCTION).to_json()},
+        'source_records': sources, 'expected_cases': list(CASE_NAMES), **results,
+    }
+    (EVIDENCE / 'hosted-source-controls.json').write_bytes(release.canonical_json(report))
+    print(json.dumps({'status': report['status'], 'baseline_revision': baseline}), flush=True)
+    return 0 if passed else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

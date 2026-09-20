@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M7-026"
 SCHEMA_VERSION = 1
 PROFILE = "linux-x86_64-glibc"
-PUBLIC_PACKAGES = ("wirestack", "wirestack.http", "wirestack.tls")
+PUBLIC_PACKAGES = ("wirestack", "wirestack.http", "wirestack.net", "wirestack.tls")
 EXPECTED_PACKAGE_NAME = "wirestack"
 EXPECTED_MAJOR = 0
 DEFAULT_BASELINE = ROOT / "docs/api/baselines/wirestack-linux-v0.json"
@@ -501,7 +501,7 @@ def _validate_cancellation_handles(declarations: Sequence[Mapping[str, Any]]) ->
         _require(not missing, f"cancellation handle {name} is incomplete: {missing}")
 
 
-def build_inventory(root: Path = ROOT) -> dict[str, Any]:
+def build_inventory(root: Path = ROOT, *, task_id: str = TASK_ID) -> dict[str, Any]:
     root = root.resolve()
     metadata = package_metadata(root)
     _require(metadata["name"] == EXPECTED_PACKAGE_NAME, "Wirestack package name changed")
@@ -538,7 +538,7 @@ def build_inventory(root: Path = ROOT) -> dict[str, Any]:
     _validate_cancellation_handles(public_declarations)
     core = {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": task_id,
         "profile": PROFILE,
         "package": metadata,
         "publicPackages": list(PUBLIC_PACKAGES),
@@ -595,7 +595,7 @@ def build_report(
     declarations = inventory["declarations"]
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "taskId": TASK_ID,
+        "taskId": inventory["taskId"],
         "profile": PROFILE,
         "decision": "PASS",
         "package": inventory["package"],
@@ -630,13 +630,14 @@ def validate(
     *,
     validate_report: bool = True,
     generator_path: Path = Path(__file__),
+    task_id: str = TASK_ID,
 ) -> dict[str, Any]:
-    current = build_inventory(root)
+    current = build_inventory(root, task_id=task_id)
     baseline = load_json(baseline_path)
-    compare_inventory(baseline, current)
     report = build_report(baseline_path, current, generator_path)
     if validate_report:
         _require(load_json(report_path) == report, "committed compatibility report is stale")
+    compare_inventory(baseline, current)
     return report
 
 

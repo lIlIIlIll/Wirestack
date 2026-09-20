@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "FAIL",
+  "command": {
+    "id": "client-hpack-red",
+    "argv": [
+      "cjpm",
+      "test",
+      "src/internal/http2",
+      "--skip-build",
+      "--filter=Http2ClientConnectionTest.encodedHeaderFailureClosesTheConnection",
+      "--exclude-tags=Performance",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "status": "FAIL",
+    "exit_code": 1,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T13:19:54.831480Z",
+    "finished_at_utc": "2026-09-13T13:19:57.747930Z",
+    "duration_ms": 2916.452,
+    "stdout_path": "docs/evidence/M8-005/probes/client-hpack-red/client-hpack-red.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/probes/client-hpack-red/client-hpack-red.stderr.log",
+    "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 2041539148 ns, RESULT:\n    TCS: Http2ClientConnectionTest, time elapsed: 2029168506 ns, RESULT:\n    [ ERROR  ] CASE: encodedHeaderFailureClosesTheConnection (2027323797 ns)\n    REASON: An exception has occurred:TimeoutException\n\tat wirestack.internal.http2/test.Http2ClientConnectionTest.encodedHeaderFailureClosesTheConnection()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:30)\n\tat wirestack.internal.http2/test.Http2ClientConnectionTest.asTestSuite.lambda.0.lambda.0()(<repo-root>-pr-worktrees/M8-005-publication/src/internal/http2/client_connection_test.cj:319)\nSummary: TOTAL: 175\n    PASSED: 0, SKIPPED: 174, ERROR: 1\n    FAILED: 0, listed below:\n            TCS: Http2ClientConnectionTest, CASE: encodedHeaderFailureClosesTheConnection\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 2049051442 ns, RESULT:\nTP: wirestack.*, time elapsed: 2048960873 ns, RESULT:\n    FAILED:\n    TP: wirestack.internal.http2, time elapsed: 2041539148 ns, RESULT:\n        TCS: Http2ClientConnectionTest, time elapsed: 2029168506 ns, RESULT:\n        [ ERROR  ] CASE: encodedHeaderFailureClosesTheConnection (2027323797 ns)\nSummary: TOTAL: 175\n    PASSED: 0, SKIPPED: 174, ERROR: 1\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+    "stderr_excerpt": "Error: cjpm test failed\n",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3be74871f77499133f0f57be7776a2365b8e41cdb8920b8c1c46d1f7adbaf87d"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+    }
+  }
+}
