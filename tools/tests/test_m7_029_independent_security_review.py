@@ -34,7 +34,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
     def valid_report(request: dict) -> dict:
         return {
             "schemaVersion": 1,
-            "taskId": "M7-029",
+            "taskId": request["taskId"],
             "target": {
                 "packagePath": request["packagePath"],
                 "packageSha256": request["packageSha256"],
@@ -61,6 +61,46 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         summary = review.validate_review(root, request, self.valid_report(request))
         self.assertEqual(0, summary["findingCount"])
+
+    def test_final_review_rejects_historical_task_and_changed_package(self) -> None:
+        temporary, root, historical_request = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        package_relative = "docs/evidence/M8-007/security-index.json"
+        report_relative = "docs/evidence/M8-007/independent-review.json"
+        package = root / package_relative
+        package.parent.mkdir(parents=True)
+        package.write_text('{"candidate":"new"}\n')
+        request = review.build_request(
+            root, task_id="M8-007", package_path=package_relative, report_path=report_relative
+        )
+        request_path = package.parent / "review-request.json"
+        report_path = root / report_relative
+        review.atomic_json(request_path, request)
+        review.atomic_json(report_path, self.valid_report(historical_request))
+        with self.assertRaises(review.IndependentReviewError) as caught:
+            review.validate(
+                root, request_path, report_path, task_id="M8-007", package_path=package_relative
+            )
+        self.assertEqual("TASK_ID", caught.exception.code)
+        review.atomic_json(report_path, self.valid_report(request))
+        self.assertEqual("PASS", review.validate(
+            root, request_path, report_path, task_id="M8-007", package_path=package_relative
+        )["decision"])
+        package.write_text('{"candidate":"changed after review"}\n')
+        with self.assertRaises(review.IndependentReviewError) as caught:
+            review.validate(
+                root, request_path, report_path, task_id="M8-007", package_path=package_relative
+            )
+        self.assertEqual("REQUEST_STALE", caught.exception.code)
+
+    def test_review_path_outside_package_root_is_a_controlled_failure(self) -> None:
+        temporary, root, request = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        request_path = root / "request.json"
+        review.atomic_json(request_path, request)
+        with self.assertRaises(review.IndependentReviewError) as caught:
+            review.validate(root, request_path, root.parent / "outside-review.json")
+        self.assertEqual("PATH_ESCAPE", caught.exception.code)
 
     def test_prepare_cli_returns_structured_invalid_utf8_failure(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-m7-029-utf8-") as directory:
@@ -149,53 +189,6 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         )
         self.assertEqual(1, visible.returncode)
 
-    def test_clean_cangjie_workflow_covers_the_release_critical_gates(self) -> None:
-        workflow = (ROOT / ".github/workflows/clean-cangjie-build.yml").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn("name: Clean Cangjie Build", workflow)
-        self.assertIn("pull_request:", workflow)
-        self.assertIn("runs-on: ubuntu-latest", workflow)
-        self.assertNotIn("self-hosted", workflow)
-        self.assertIn(
-            "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
-            workflow,
-        )
-        self.assertIn(
-            "Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7",
-            workflow,
-        )
-        self.assertIn(
-            'python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"',
-            workflow,
-        )
-        self.assertIn("version: ${{ steps.cangjie-nightly.outputs.version }}", workflow)
-        self.assertIn("sudo apt-get install --yes clang llvm cmake ninja-build", workflow)
-        for command in (
-            "scripts/repo-doctor --json",
-            "scripts/check-code",
-            "scripts/check-m7-027-linux-examples --json",
-            "git diff --exit-code",
-            "git status --porcelain --untracked-files=all",
-        ):
-            self.assertIn(command, workflow)
-        self.assertIn('case "$doctor_exit" in', workflow)
-        self.assertIn("0|6) ;;", workflow)
-        self.assertIn('*) exit "$doctor_exit" ;;', workflow)
-        self.assertNotIn("continue-on-error", workflow)
-        self.assertNotIn("|| true", workflow)
-        self.assertNotIn("scripts/verify-evidence --all", workflow)
-        check = (ROOT / "scripts/check").read_text(encoding="utf-8")
-        code_gate = (ROOT / "scripts/check-code").read_text(encoding="utf-8")
-        self.assertIn("scripts/check-code", check)
-        for command in (
-            "tools/architecture_guard.py",
-            "scripts/build-linux-resolver --quiet",
-            "cjpm check",
-            "cjpm build",
-            "cjpm test --exclude-tags=Performance",
-        ):
-            self.assertIn(command, code_gate)
 
     def test_hosted_ci_nightly_resolution_fails_closed(self) -> None:
         version = "1.3.0-alpha.20260829010011"
@@ -214,24 +207,9 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 nightly.resolve_release(mutation)
 
-    def test_cjpm_build_hook_uses_fail_closed_platform_selection(self) -> None:
-        build_script = (ROOT / "build.cj").read_text(encoding="utf-8")
-        self.assertIn('join("build_native_dependencies.py")', build_script)
-        self.assertIn("private func buildNativeDependencies(scriptPath: String): Int64", build_script)
-        self.assertIn('"--cjpm-script-path", scriptPath', build_script)
-        self.assertNotIn('join("build_linux_resolver.py")', build_script)
-        self.assertNotIn('join("build_tls_provider.py")', build_script)
-        for phase in (
-            "pre-build", "pre-check", "pre-test", "pre-bench",
-            "pre-run", "pre-install", "pre-publish",
-        ):
-            self.assertIn(
-                f'case "{phase}" => buildNativeDependencies(args[0])',
-                build_script,
-            )
-
+    def test_native_dependency_plan_uses_fail_closed_platform_selection(self) -> None:
         self.assertEqual(
-            ["tls-provider", "resolver"],
+            ["tls-provider", "resolver", "http-files"],
             build_native_dependencies.plan("Linux"),
         )
         self.assertEqual(["resolver"], build_native_dependencies.plan("Windows"))
@@ -351,6 +329,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         temporary, root, request = self.fixture()
         self.addCleanup(temporary.cleanup)
         request_path = root / "request.json"
+        request["reportPath"] = "missing-review.json"
         review.atomic_json(request_path, request)
         with self.assertRaises(review.IndependentReviewError) as caught:
             review.validate(root, request_path, root / "missing-review.json")

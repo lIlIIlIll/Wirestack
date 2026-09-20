@@ -1,0 +1,88 @@
+import argparse
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools import evidence_digest as digest
+from tools.repository import repository_tooling as repository
+
+EVIDENCE = ROOT / 'docs/evidence/M8-007'
+SOURCE = 'tools/m7_022_linux_release_soak.py'
+TEST = 'tools/tests/test_m7_022_linux_release_soak.py'
+CASES = (
+    'test_successful_build_bounds_report_and_preserves_raw_diagnostics',
+    'test_failed_build_bounds_error_and_preserves_raw_diagnostics',
+    'test_build_excerpt_byte_bound_survives_invalid_utf8',
+)
+
+
+def record(path):
+    return {'path': path.relative_to(ROOT).as_posix(), 'digest': digest.text_evidence_digest(path).to_json()}
+
+
+def baseline_control(revision):
+    from tools.tests import test_m7_022_linux_release_soak as tests
+    original = subprocess.check_output(['git', 'cat-file', 'blob', f'{revision}:{SOURCE}'], cwd=ROOT)
+    with tempfile.TemporaryDirectory(prefix='wirestack-build-output-baseline-') as temporary:
+        path = Path(temporary) / 'baseline.py'
+        path.write_bytes(original)
+        spec = importlib.util.spec_from_file_location('m8_build_output_baseline', path)
+        baseline = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = baseline
+        spec.loader.exec_module(baseline)
+        tests.gate = baseline
+        result = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(
+            [tests.M7022LinuxReleaseSoakTest(case) for case in CASES]
+        ))
+        print(json.dumps({'tests_run': result.testsRun, 'failures': len(result.failures),
+                          'errors': len(result.errors),
+                          'baseline_source_digest': digest.text_evidence_digest_bytes(original).to_json()}))
+        return 1 if result.testsRun == len(CASES) and len(result.failures) == len(CASES) and not result.errors else 2
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', required=True)
+    parser.add_argument('--phase', choices=['before'])
+    args = parser.parse_args()
+    if args.phase:
+        return baseline_control(args.baseline)
+    directory = EVIDENCE / 'commands/build-output-controls' / str(time.time_ns())
+    directory.mkdir(parents=True)
+    commands = {}
+    for phase, argv in (
+        ('before', ['python3', str(Path(__file__).relative_to(ROOT)), '--baseline', args.baseline, '--phase', 'before']),
+        ('after', ['python3', '-m', 'unittest', '-v', *[
+            'tools.tests.test_m7_022_linux_release_soak.M7022LinuxReleaseSoakTest.' + case for case in CASES
+        ]]),
+    ):
+        command = {'id': phase, 'argv': argv, 'timeout_seconds': 120, 'long_running': False, 'gate': 'task'}
+        commands[phase] = repository.run_command(ROOT, command, directory)
+        for stream in ('stdout', 'stderr'):
+            commands[phase][stream + '_digest'] = record(ROOT / commands[phase][stream + '_path'])['digest']
+    before = json.loads((ROOT / commands['before']['stdout_path']).read_text())
+    checks = {
+        'baseline_cases_fail': commands['before']['exit_code'] == 1 and before['tests_run'] == len(CASES)
+                              and before['failures'] == len(CASES) and before['errors'] == 0,
+        'corrected_cases_pass': commands['after']['exit_code'] == 0,
+        'commands_complete': all(not command['timed_out'] for command in commands.values()),
+    }
+    report = {'source_task': 'M8-007', 'status': 'PASS' if all(checks.values()) else 'FAIL',
+              'baseline_revision': args.baseline, 'baseline_source_digest': before['baseline_source_digest'],
+              'driver': record(Path(__file__)), 'cases': list(CASES),
+              'source_inputs': {path: digest.text_evidence_digest(ROOT / path).to_json() for path in (SOURCE, TEST)},
+              'before': commands['before'], 'after': commands['after'], 'checks': checks}
+    (EVIDENCE / 'build-output-controls.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({'status': report['status'], 'checks': checks}))
+    return 0 if report['status'] == 'PASS' else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

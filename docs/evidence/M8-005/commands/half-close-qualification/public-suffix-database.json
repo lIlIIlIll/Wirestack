@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "PASS",
+  "command": {
+    "id": "public-suffix-database",
+    "argv": [
+      "python3",
+      "third_party/public_suffix/generate.py",
+      "--check"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T19:54:20.642306Z",
+    "finished_at_utc": "2026-09-13T19:54:20.756139Z",
+    "duration_ms": 113.839,
+    "stdout_path": "docs/evidence/M8-005/commands/half-close-qualification/public-suffix-database.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/commands/half-close-qualification/public-suffix-database.stderr.log",
+    "stdout_excerpt": "",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

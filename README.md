@@ -2,7 +2,11 @@
 
 Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
 
-当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现和验收。AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
+当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现。M8-001 已冻结 Wirestack-owned `wirestack.net` 同步网络底座契约；M8-002 已完成基于 `std.net` 的公共 `TcpListener` 和 `UdpSocket`，并通过 Linux IPv4/IPv6 原生验收。M8-003 增加经过 Linux 原生验证的 `UnixListener`、`UnixStream` 和 capability-scoped `UnixDatagramSocket`；短或非 UTF-8 outgoing abstract 名称、Unix connected send 和 raw native I/O 不计为支持能力。当前 backend 不支持发送空 datagram，但必须接收空报文；新增 capability 字段属于需要 consumer 重编译的 pre-1.0 ABI 变更。M8-004 的 DNS parser、wire client 和 resolver policy 已通过十二条 Linux 验收命令，包括 103 项网络测试及 12 个原生场景。
+
+M8-005 增加有界 CookieJar、multipart、Linux FileHandler、显式 HTTP/1.1 Upgrade、无压缩的 HTTP/1.1 和 HTTP/2 WebSocket、有界 HTTP/2 push，以及 connector、pool 和 service hooks。M8-006 的十四条验收命令全部通过：75 个聚焦 TLS 测试、13 个 release 场景、5 个独立 keylog 场景和原生 SNI/keylog 边界均有证据；完整检查为 773 passed、23 skipped。context store 只影响之后开始的握手，每个 context 使用非零 `contextVersion` 隔离 session；外部密钥回调共享握手 `OperationContext`。新增 enum 分支要求旧穷尽匹配补充分支并重编译 consumer，见[兼容性记录](docs/evidence/M8-006/compatibility.json)。
+
+AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。`KeyLogSink` 只能在显式测试 provider 构建中启用，production provider 不编译该能力，release collector 也拒绝包含 key-log capability 的产物。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
 
 ## 目标
 
@@ -32,6 +36,7 @@ HTTP → TLS → Transport SPI ← StdNetTransport → std.net
 ```text
 wirestack.tls
 wirestack.http
+wirestack.net
 wirestack.internal.transport
 wirestack.internal.transport_stdnet
 wirestack.internal.resolver
@@ -44,14 +49,14 @@ wirestack.internal.http2
 wirestack.internal.platform.*
 ```
 
-Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Linux glibc 实现。全平台发布矩阵仍未完成。
+Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Linux glibc 实现。`wirestack.net` 提供 Internet TCP/UDP、受 SDK 能力限制的 Unix stream/datagram adapter，以及 DNS wire client 和 resolver policy。原生验收、API baseline 与任务证据见 [M8-002](docs/evidence/M8-002/README.md)、[M8-003](docs/evidence/M8-003/README.md)、[M8-004](docs/evidence/M8-004/README.md)、[M8-005](docs/evidence/M8-005/README.md) 和 [M8-006](docs/evidence/M8-006/README.md)。TLS context replacement、external-key hook 与测试 key-log 边界见 [Linux 网络底座指南](docs/guides/network-foundation-linux.md#替换-tls-context)。HTTP 扩展的用法和所有权规则见 [Linux HTTP 指南](docs/guides/http-parity-linux.md)。全平台发布矩阵仍未完成。
 
 ## 本地验证
 
-已验证工具链：
+当前 CI 和干净 consumer 已验证的工具链：
 
 ```text
-Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)
+Cangjie Compiler: 1.1.3 (cjnative)
 Cangjie Project Manager: 1.1.3
 ```
 
@@ -69,6 +74,7 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 ## 文档
 
 - [Linux 开发者入门](docs/guides/getting-started-linux.md)
+- [Linux 网络底座指南](docs/guides/network-foundation-linux.md)
 - [公开 API 参考（cjdoc 0.7.2）](docs/api/README.md)
 - [在线 API 文档（GitHub Pages）](https://lIlIIlIll.github.io/Wirestack/)
 - [产品 PRD](docs/product/prd.md)
@@ -80,11 +86,12 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 - [CJPM 包布局 ADR](docs/architecture/adr/0001-cjpm-package-layout.md)
 - [采纳与发布门禁](docs/gates/README.md)
 - [任务证据约定](docs/evidence/README.md)
-- [SDK 检查记录](docs/references/cangjie-sdk-1.1.0-alpha.20260817040003.md)
+- [当前 CI 工具链版本与归档摘要](docs/references/m7-033-ci-toolchain.json)
+- [历史 SDK 检查记录](docs/references/cangjie-sdk-1.1.0-alpha.20260817040003.md)
 - [Codex/Agent 仓库规则](AGENTS.md)
 
 ## 当前执行点
 
-Linux glibc 主体能力和发布门禁已经完成。M7-033 正在补齐开发者文档、公开 API 参考和 GitHub Pages 发布；本地 `cjdoc 0.7.2` 产物已通过，托管 Pages 部署与 smoke 仍以 CI 结果为准。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
+Linux glibc 主体能力和 M7 发布门禁已有独立证据。M8-001 至 M8-006 的能力边界与任务状态见[状态页](docs/planning/status.md)。M8-006 已保留原生 provider、完整仓库、严格文档及浏览器验证，源码与报告由任务证据清单绑定。最终发布要求重建 release artifact，并在冻结候选上完成新的 86,400 秒 soak；验收状态见 [M8-007 证据](docs/evidence/M8-007/README.md)，历史 M7 记录不能替代。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
 
 不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。

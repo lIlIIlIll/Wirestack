@@ -236,7 +236,8 @@ class TlsConnectionTest {
 
         @Expect(timedOut)
         @Expect(engine.shutdownCalls.load(), 0)
-        @Expect(transport.closeCalls.load(), 1)
+        @Expect(transport.abortCalls.load(), 1)
+        @Expect(transport.terminalDisposals.load(), 1)
         @Expect(engine.closeCalls.load(), 1)
         @Expect(connection.isClosed())
     }
@@ -257,6 +258,25 @@ class TlsConnectionTest {
             case Some(TlsClosureEvidence.LocalAbort) => @Expect(true)
             case _ => @Fail("abort must retain local termination evidence")
         }
+    }
+
+    @TestCase
+    func cancelledCloseReleasesEngineWhenImmediateAbortCallbackThrows(): Unit {
+        let engine = LifecycleEngine()
+        let transport = LifecycleTransport(failAbort: true)
+        let connection = TlsConnection.handshake(engine, transport)
+        let source = CancellationSource()
+        source.cancel()
+        var failed = false
+        try {
+            connection.close(OperationContext(cancellation: source.token))
+        } catch (_: Exception) {
+            failed = true
+        }
+        @Expect(failed)
+        @Expect(engine.closeCalls.load(), 1)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(connection.isClosed())
     }
 
     @TestCase
@@ -308,6 +328,242 @@ class TlsConnectionTest {
             case _ => @Fail("peer close_notify must be retained")
         }
         connection.close()
+    }
+
+    @TestCase
+    func closeDeadlineExpiresWhileAnExistingBackgroundReadOwnsPumpAdmission(): Unit {
+        let readEntered = SyncCounter(1)
+        let shutdownWaiting = SyncCounter(1)
+        let engine = LifecycleEngine(
+            readNeedsTransport: true,
+            shutdownNeedsPeer: true,
+            shutdownWaiting: Some(shutdownWaiting)
+        )
+        let transport = LifecycleTransport(
+            blockRead: true,
+            readEntered: Some(readEntered)
+        )
+        let connection = TlsConnection.handshake(engine, transport)
+        let reading: Future<Bool> = spawn {
+            try {
+                let _ = connection.readSome(
+                    MutableByteSpan(Array<Byte>(1, repeat: 0))
+                )
+                false
+            } catch (_: NetworkException) {
+                true
+            }
+        }
+        readEntered.waitUntilZero()
+        let closing: Future<Bool> = spawn {
+            try {
+                connection.close(
+                    OperationContext(
+                        deadline: Some(Deadline.after(20 * Duration.millisecond))
+                    )
+                )
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.TimedOut => true
+                    case _ => false
+                }
+            }
+        }
+        shutdownWaiting.waitUntilZero()
+
+        var bounded = false
+        try {
+            bounded = closing.get(50 * Duration.millisecond)
+        } catch (_: TimeoutException) {
+            // Pre-fix guard: release the first read so the failed test cannot
+            // strand its close task behind the old transport mutex.
+            transport.releaseBlockedRead()
+            let _ = closing.get(Duration.second)
+        } finally {
+            transport.releaseBlockedRead()
+        }
+        let readStopped = reading.get(Duration.second)
+
+        @Expect(bounded)
+        @Expect(readStopped)
+        @Expect(connection.isClosed())
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+    }
+
+    @TestCase
+    func closeCancellationInterruptsAnExistingBackgroundReadWithinTheBound(): Unit {
+        let readEntered = SyncCounter(1)
+        let shutdownWaiting = SyncCounter(1)
+        let engine = LifecycleEngine(
+            readNeedsTransport: true,
+            shutdownNeedsPeer: true,
+            shutdownWaiting: Some(shutdownWaiting)
+        )
+        let transport = LifecycleTransport(
+            blockRead: true,
+            readEntered: Some(readEntered)
+        )
+        let connection = TlsConnection.handshake(engine, transport)
+        let reading: Future<Bool> = spawn {
+            try {
+                let _ = connection.readSome(
+                    MutableByteSpan(Array<Byte>(1, repeat: 0))
+                )
+                false
+            } catch (_: NetworkException) {
+                true
+            }
+        }
+        readEntered.waitUntilZero()
+        let source = CancellationSource()
+        let closing: Future<Bool> = spawn {
+            try {
+                connection.close(OperationContext(cancellation: source.token))
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Cancelled => true
+                    case _ => false
+                }
+            }
+        }
+        shutdownWaiting.waitUntilZero()
+        source.cancel()
+
+        var bounded = false
+        try {
+            bounded = closing.get(50 * Duration.millisecond)
+        } catch (_: TimeoutException) {
+            // Pre-fix guard for baseline replay.
+            transport.releaseBlockedRead()
+            let _ = closing.get(Duration.second)
+        } finally {
+            transport.releaseBlockedRead()
+        }
+        let readStopped = reading.get(Duration.second)
+
+        @Expect(bounded)
+        @Expect(readStopped)
+        @Expect(connection.isClosed())
+        @Expect(transport.abortCalls.load() >= 1)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+    }
+
+    @TestCase
+    func closeCancellationDoesNotWaitBehindAnExistingCiphertextWrite(): Unit {
+        let writeEntered = SyncCounter(1)
+        let shutdownStarted = SyncCounter(1)
+        let engine = LifecycleEngine(
+            writeNeedsTransport: true,
+            shutdownNeedsPeer: true,
+            shutdownStarted: Some(shutdownStarted)
+        )
+        let transport = LifecycleTransport(
+            blockWrite: true,
+            writeEntered: Some(writeEntered)
+        )
+        let connection = TlsConnection.handshake(engine, transport)
+        let writing: Future<Bool> = spawn {
+            try {
+                let _ = connection.writeSome(ByteSpan([1]))
+                false
+            } catch (_: NetworkException) {
+                true
+            }
+        }
+        writeEntered.waitUntilZero()
+        let source = CancellationSource()
+        let closing: Future<Bool> = spawn {
+            try {
+                connection.close(OperationContext(cancellation: source.token))
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Cancelled => true
+                    case _ => false
+                }
+            }
+        }
+        shutdownStarted.waitUntilZero()
+        source.cancel()
+
+        var bounded = false
+        try {
+            bounded = closing.get(50 * Duration.millisecond)
+        } catch (_: TimeoutException) {
+            transport.releaseBlockedWrite()
+            let _ = closing.get(Duration.second)
+        } finally {
+            transport.releaseBlockedWrite()
+        }
+        let writeStopped = writing.get(Duration.second)
+
+        @Expect(bounded)
+        @Expect(writeStopped)
+        @Expect(connection.isClosed())
+        @Expect(transport.abortCalls.load() >= 1)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+    }
+
+    @TestCase
+    func peerWaitingGracefulCloseStaysBoundedByTheCallerBudget(): Unit {
+        let transport = PeerWaitingTransport()
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let connection = TlsConnection.handshake(engine, transport)
+        let closing: Future<Bool> = spawn {
+            try {
+                connection.close(
+                    OperationContext(deadline: Some(Deadline.after(50 * Duration.millisecond)))
+                )
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.TimedOut => true
+                    case _ => false
+                }
+            }
+        }
+        transport.closeEntered.waitUntilZero()
+
+        var bounded = false
+        try {
+            bounded = closing.get(Duration.second)
+        } catch (_: TimeoutException) {
+            // Pre-fix guard: the reset budget made terminal cleanup wait forever.
+            transport.abort(reason: None<AbortReason>)
+            let _ = closing.get(Duration.second)
+        }
+
+        @Expect(bounded)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(transport.abortCalls.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        @Expect(connection.isClosed())
+    }
+
+    @TestCase
+    func peerWaitingGracefulCloseCompletesWithinItsBudget(): Unit {
+        let transport = PeerWaitingTransport()
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let connection = TlsConnection.handshake(engine, transport)
+        let closing: Future<Unit> = spawn {
+            connection.close(
+                OperationContext(deadline: Some(Deadline.after(Duration.second)))
+            )
+        }
+        transport.closeEntered.waitUntilZero()
+        transport.releaseGracefulClose()
+        closing.get(Duration.second)
+
+        @Expect(transport.closeCalls.load(), 1)
+        @Expect(transport.abortCalls.load(), 0)
+        @Expect(transport.terminalDisposals.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        @Expect(connection.isClosed())
     }
 }
 
@@ -377,14 +633,21 @@ private class LifecycleEngine <: TlsEngine {
     private let failRead: Bool
     private let blockRead: Bool
     private let readNeedsTransport: Bool
+    private let writeNeedsTransport: Bool
     private let peerClosedRead: Bool
     private let shutdownNeedsPeer: Bool
+    private let shutdownStarted: ?SyncCounter
+    private let shutdownWaiting: ?SyncCounter
     private let entered: ?SyncCounter
     private let readMutex = Mutex()
     private let readChanged = synchronized(readMutex) { readMutex.condition() }
     private var readReleased = false
     private var closeNotifyPending = false
+    private var applicationWritePending = false
+    private var applicationWriteFlushed = false
     private var peerCloseReceived = false
+    private let shutdownStartSignalled = AtomicBool(false)
+    private let shutdownWaitSignalled = AtomicBool(false)
     let closeCalls = AtomicInt64(0)
     let writtenBytes = AtomicInt64(0)
     let shutdownCalls = AtomicInt64(0)
@@ -394,16 +657,22 @@ private class LifecycleEngine <: TlsEngine {
         failRead!: Bool = false,
         blockRead!: Bool = false,
         readNeedsTransport!: Bool = false,
+        writeNeedsTransport!: Bool = false,
         peerClosedRead!: Bool = false,
         shutdownNeedsPeer!: Bool = false,
+        shutdownStarted!: ?SyncCounter = None<SyncCounter>,
+        shutdownWaiting!: ?SyncCounter = None<SyncCounter>,
         entered!: ?SyncCounter = None<SyncCounter>
     ) {
         this.failHandshake = failHandshake
         this.failRead = failRead
         this.blockRead = blockRead
         this.readNeedsTransport = readNeedsTransport
+        this.writeNeedsTransport = writeNeedsTransport
         this.peerClosedRead = peerClosedRead
         this.shutdownNeedsPeer = shutdownNeedsPeer
+        this.shutdownStarted = shutdownStarted
+        this.shutdownWaiting = shutdownWaiting
         this.entered = entered
     }
 
@@ -416,10 +685,18 @@ private class LifecycleEngine <: TlsEngine {
         }
         TlsEngineStep.Complete
     }
-
-    public func pendingCiphertext(): Int64 { if (closeNotifyPending) { 1 } else { 0 } }
+    public func pendingCiphertext(): Int64 {
+        if (closeNotifyPending || applicationWritePending) { 1 } else { 0 }
+    }
     public func drainCiphertext(destination: MutableByteSpan): Int64 {
-        if (!closeNotifyPending || destination.isEmpty()) { return 0 }
+        if (destination.isEmpty()) { return 0 }
+        if (applicationWritePending) {
+            destination.bytes[destination.offset] = 23
+            applicationWritePending = false
+            applicationWriteFlushed = true
+            return 1
+        }
+        if (!closeNotifyPending) { return 0 }
         destination.bytes[destination.offset] = 21
         closeNotifyPending = false
         1
@@ -453,20 +730,34 @@ private class LifecycleEngine <: TlsEngine {
         destination.bytes[destination.offset] = 42
         TlsEngineReadResult.Data(1)
     }
-
     public func writePlaintext(source: ByteSpan): TlsEngineWriteResult {
+        if (writeNeedsTransport && !applicationWriteFlushed) {
+            applicationWritePending = true
+            return TlsEngineWriteResult.WantWrite
+        }
         writtenBytes.fetchAdd(source.length)
         TlsEngineWriteResult.Consumed(source.length)
     }
-
     public func shutdownStep(): TlsEngineShutdownResult {
         shutdownCalls.fetchAdd(1)
+        if (!shutdownStartSignalled.swap(true)) {
+            match (shutdownStarted) {
+                case Some(counter) => counter.dec()
+                case None => ()
+            }
+        }
         if (!shutdownNeedsPeer || peerCloseReceived) {
             return TlsEngineShutdownResult.Complete
         }
         if (shutdownCalls.load() == 1) {
             closeNotifyPending = true
             return TlsEngineShutdownResult.Sent
+        }
+        if (!shutdownWaitSignalled.swap(true)) {
+            match (shutdownWaiting) {
+                case Some(counter) => counter.dec()
+                case None => ()
+            }
         }
         TlsEngineShutdownResult.WantRead
     }
@@ -484,15 +775,37 @@ private class LifecycleEngine <: TlsEngine {
 
 private class LifecycleTransport <: DuplexTransport {
     private let respondToTlsClose: Bool
+    private let failAbort: Bool
+    private let blockRead: Bool
+    private let readEntered: ?SyncCounter
+    private let readMutex = Mutex()
+    private let readChanged = synchronized(readMutex) { readMutex.condition() }
+    private var readReleased = false
+    private let blockWrite: Bool
+    private let writeEntered: ?SyncCounter
+    private let writeMutex = Mutex()
+    private let writeChanged = synchronized(writeMutex) { writeMutex.condition() }
+    private var writeReleased = false
     let readCalls = AtomicInt64(0)
     let writeCalls = AtomicInt64(0)
     let closeCalls = AtomicInt64(0)
     let abortCalls = AtomicInt64(0)
     let terminalDisposals = AtomicInt64(0)
     private let disposed = AtomicBool(false)
-
-    init(respondToTlsClose!: Bool = false) {
+    init(
+        respondToTlsClose!: Bool = false,
+        failAbort!: Bool = false,
+        blockRead!: Bool = false,
+        readEntered!: ?SyncCounter = None<SyncCounter>,
+        blockWrite!: Bool = false,
+        writeEntered!: ?SyncCounter = None<SyncCounter>
+    ) {
         this.respondToTlsClose = respondToTlsClose
+        this.failAbort = failAbort
+        this.blockRead = blockRead
+        this.readEntered = readEntered
+        this.blockWrite = blockWrite
+        this.writeEntered = writeEntered
     }
 
     public prop info: TransportInfo {
@@ -505,6 +818,26 @@ private class LifecycleTransport <: DuplexTransport {
     ): ReadResult {
         let _ = context
         readCalls.fetchAdd(1)
+        if (blockRead) {
+            match (readEntered) {
+                case Some(counter) => counter.dec()
+                case None => ()
+            }
+            synchronized(readMutex) {
+                while (!readReleased && !disposed.load()) {
+                    readChanged.wait()
+                }
+            }
+            if (disposed.load()) {
+                throw NetworkException(
+                    NetworkErrorCategory.Closed,
+                    NetworkPhase.TcpRead,
+                    NetworkErrorCode.Closed,
+                    "lifecycle test transport closed an active read",
+                    retryability: Retryability.Never
+                )
+            }
+        }
         if (respondToTlsClose) {
             destination.bytes[destination.offset] = 21
             ReadResult.Data(1)
@@ -519,20 +852,159 @@ private class LifecycleTransport <: DuplexTransport {
     ): Int64 {
         let _ = context
         writeCalls.fetchAdd(1)
+        if (blockWrite) {
+            match (writeEntered) {
+                case Some(counter) => counter.dec()
+                case None => ()
+            }
+            synchronized(writeMutex) {
+                while (!writeReleased && !disposed.load()) {
+                    writeChanged.wait()
+                }
+            }
+            if (disposed.load()) {
+                throw NetworkException(
+                    NetworkErrorCategory.Closed,
+                    NetworkPhase.TcpWrite,
+                    NetworkErrorCode.Closed,
+                    "lifecycle test transport closed an active write",
+                    retryability: Retryability.Never
+                )
+            }
+        }
         source.length
     }
 
     public func shutdown(_: ShutdownDirection): Unit {}
-    public func close(_: OperationContext): Unit {
+    public func close(context: OperationContext): Unit {
+        if (!disposed.load()) {
+            if (context.isCancellationRequested()) {
+                throw TlsEngineException(TlsEngineErrorCode.HandshakeCancelled, "transport close cancelled")
+            }
+            if (context.isDeadlineExceeded()) {
+                throw TlsEngineException(TlsEngineErrorCode.HandshakeTimeout, "transport close deadline exceeded")
+            }
+        }
         closeCalls.fetchAdd(1)
         if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
+        wakeBlockedOperations()
     }
     public func close(): Unit { close(OperationContext.background()) }
     public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
         let _ = reason
         abortCalls.fetchAdd(1)
         if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
-        ()
+        wakeBlockedOperations()
+        if (failAbort) { throw IllegalStateException("controlled abort failure") }
     }
     public func isClosed(): Bool { closeCalls.load() > 0 || abortCalls.load() > 0 }
+
+    func releaseBlockedRead(): Unit {
+        synchronized(readMutex) {
+            readReleased = true
+            readChanged.notifyAll()
+        }
+    }
+
+    func releaseBlockedWrite(): Unit {
+        synchronized(writeMutex) {
+            writeReleased = true
+            writeChanged.notifyAll()
+        }
+    }
+
+    private func wakeBlockedOperations(): Unit {
+        synchronized(readMutex) { readChanged.notifyAll() }
+        synchronized(writeMutex) { writeChanged.notifyAll() }
+    }
+}
+
+/**
+ * Wraps the lifecycle transport with a graceful close that models the
+ * documented close(context) contract: it waits for the peer acknowledgement
+ * only while the received context still has budget, and the wait is stopped
+ * by terminal disposal. This exposes any cleanup path that resets the
+ * caller's deadline or cancellation before delegating transport close.
+ */
+private class PeerWaitingTransport <: DuplexTransport {
+    private let delegate = LifecycleTransport(respondToTlsClose: true)
+    private let closeMutex = Mutex()
+    private let closeChanged = synchronized(closeMutex) { closeMutex.condition() }
+    private var gracefulReleased = false
+    let closeEntered = SyncCounter(1)
+    let closeCalls = AtomicInt64(0)
+    let abortCalls = AtomicInt64(0)
+    let terminalDisposals = AtomicInt64(0)
+    private let disposed = AtomicBool(false)
+
+    public prop info: TransportInfo {
+        get() { delegate.info }
+    }
+
+    public func readSome(
+        destination: MutableByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): ReadResult {
+        delegate.readSome(destination, context: context)
+    }
+
+    public func writeSome(
+        source: ByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): Int64 {
+        delegate.writeSome(source, context: context)
+    }
+
+    public func shutdown(direction: ShutdownDirection): Unit {
+        delegate.shutdown(direction)
+    }
+
+    public func close(context: OperationContext): Unit {
+        closeCalls.fetchAdd(1)
+        if (disposed.load()) { return }
+        closeEntered.dec()
+        synchronized(closeMutex) {
+            while (!gracefulReleased && !disposed.load()) {
+                match (context.deadline) {
+                    case Some(deadline) =>
+                        let waitFor = deadline.remaining()
+                        if (waitFor <= Duration.Zero) {
+                            throw TlsEngineException(
+                                TlsEngineErrorCode.HandshakeTimeout,
+                                "peer-waiting test transport close deadline exceeded"
+                            )
+                        }
+                        closeChanged.wait(timeout: waitFor)
+                    case None => closeChanged.wait()
+                }
+            }
+        }
+        if (disposed.load()) {
+            throw NetworkException(
+                NetworkErrorCategory.Closed,
+                NetworkPhase.TransportClose,
+                NetworkErrorCode.Closed,
+                "peer-waiting test transport close was terminated",
+                retryability: Retryability.Never
+            )
+        }
+        if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
+        delegate.close(OperationContext.background())
+    }
+    public func close(): Unit { close(OperationContext.background()) }
+    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
+        let _ = reason
+        abortCalls.fetchAdd(1)
+        delegate.abort(reason: reason)
+        if (!disposed.swap(true)) { terminalDisposals.fetchAdd(1); () }
+        synchronized(closeMutex) { closeChanged.notifyAll() }
+    }
+    public func isClosed(): Bool { closeCalls.load() > 0 || abortCalls.load() > 0 }
+
+    func releaseGracefulClose(): Unit {
+        synchronized(closeMutex) {
+            gracefulReleased = true
+            closeChanged.notifyAll()
+        }
+    }
 }

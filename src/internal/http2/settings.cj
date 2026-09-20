@@ -10,6 +10,7 @@ public class Http2SettingsSnapshot {
     public let initialWindowSize: UInt32
     public let maxFrameSize: UInt32
     public let maxHeaderListSize: UInt32
+    public let enableConnectProtocol: Bool
 
     public init(
         headerTableSize: UInt32,
@@ -17,7 +18,8 @@ public class Http2SettingsSnapshot {
         maxConcurrentStreams: UInt32,
         initialWindowSize: UInt32,
         maxFrameSize: UInt32,
-        maxHeaderListSize: UInt32
+        maxHeaderListSize: UInt32,
+        enableConnectProtocol!: Bool = false
     ) {
         let _ = Http2Setting(Http2SettingId.InitialWindowSize, initialWindowSize)
         let _ = Http2Setting(Http2SettingId.MaxFrameSize, maxFrameSize)
@@ -27,6 +29,7 @@ public class Http2SettingsSnapshot {
         this.initialWindowSize = initialWindowSize
         this.maxFrameSize = maxFrameSize
         this.maxHeaderListSize = maxHeaderListSize
+        this.enableConnectProtocol = enableConnectProtocol
     }
 }
 
@@ -89,6 +92,7 @@ public class Http2SettingsState {
                 }
             }
         }
+        rejectConnectProtocolWithdrawal(advertisedLocalState, settings)
         let next = applyHttp2Settings(advertisedLocalState, settings, limits)
         let frame = encodeHttp2Settings(settings)
         advertisedLocalState = next
@@ -126,6 +130,7 @@ public class Http2SettingsState {
                 }
             }
         }
+        rejectConnectProtocolWithdrawal(peerState, decoded.settings)
         let next = applyHttp2Settings(peerState, decoded.settings, limits)
         let delta = Int64(next.initialWindowSize) - Int64(peerState.initialWindowSize)
         peerState = next
@@ -228,16 +233,25 @@ private func effectivePeerDefaults(limits: Http2Limits): Http2SettingsSnapshot {
 /** Every finite local receive limit that differs from an RFC default is advertised. */
 public func initialHttp2Settings(
     role: Http2ConnectionRole,
-    limits: Http2Limits
+    limits: Http2Limits,
+    enablePush!: Bool = false,
+    enableConnectProtocol!: Bool = true,
+    maximumConcurrentStreams!: UInt32 = limits.maxConcurrentStreams
 ): Array<Http2Setting> {
     let settings = ArrayList<Http2Setting>()
     if (limits.maxHeaderTableBytes != 4096u32) {
         settings.add(Http2Setting(Http2SettingId.HeaderTableSize, limits.maxHeaderTableBytes))
     }
     if (!isServerSettingsRole(role)) {
-        settings.add(Http2Setting(Http2SettingId.EnablePush, 0u32))
+        settings.add(Http2Setting(Http2SettingId.EnablePush, if (enablePush) { 1u32 } else { 0u32 }))
     }
-    settings.add(Http2Setting(Http2SettingId.MaxConcurrentStreams, limits.maxConcurrentStreams))
+    if (enableConnectProtocol) {
+        settings.add(Http2Setting(Http2SettingId.EnableConnectProtocol, 1u32))
+    }
+    settings.add(Http2Setting(
+        Http2SettingId.MaxConcurrentStreams,
+        min(maximumConcurrentStreams, limits.maxConcurrentStreams)
+    ))
     if (limits.initialWindowSize != 65535u32) {
         settings.add(Http2Setting(Http2SettingId.InitialWindowSize, limits.initialWindowSize))
     }
@@ -263,6 +277,7 @@ private func applyHttp2Settings(
     var initialWindowSize = current.initialWindowSize
     var maxFrameSize = current.maxFrameSize
     var maxHeaderListSize = current.maxHeaderListSize
+    var enableConnectProtocol = current.enableConnectProtocol
     for (setting in settings) {
         match (setting.identifier) {
             case Http2SettingId.HeaderTableSize =>
@@ -274,12 +289,35 @@ private func applyHttp2Settings(
             case Http2SettingId.MaxFrameSize => maxFrameSize = min(setting.value, limits.maxFrameSize)
             case Http2SettingId.MaxHeaderListSize =>
                 maxHeaderListSize = min(setting.value, limits.maxHeaderListBytes)
+            case Http2SettingId.EnableConnectProtocol =>
+                enableConnectProtocol = setting.value == 1u32
             case Http2SettingId.Unknown(_) => ()
         }
     }
     Http2SettingsSnapshot(
-        headerTableSize, enablePush, maxConcurrentStreams, initialWindowSize, maxFrameSize, maxHeaderListSize
+        headerTableSize, enablePush, maxConcurrentStreams, initialWindowSize, maxFrameSize,
+        maxHeaderListSize, enableConnectProtocol: enableConnectProtocol
     )
+}
+
+private func rejectConnectProtocolWithdrawal(
+    current: Http2SettingsSnapshot,
+    settings: Array<Http2Setting>
+): Unit {
+    if (!current.enableConnectProtocol) { return }
+    for (setting in settings) {
+        match (setting.identifier) {
+            case Http2SettingId.EnableConnectProtocol =>
+                if (setting.value == 0u32) {
+                    throw Http2ProtocolException(
+                        Http2ErrorCode.ProtocolError,
+                        Http2ErrorScope.Connection,
+                        "HTTP/2 ENABLE_CONNECT_PROTOCOL cannot transition from one to zero"
+                    )
+                }
+            case _ => ()
+        }
+    }
 }
 
 private func isSettingsFrame(frameType: Http2FrameType): Bool {

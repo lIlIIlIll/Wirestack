@@ -142,15 +142,29 @@ public func mapHttp2ClientRequest(
     request: HttpRequest,
     trailer!: HttpTrailer = HttpTrailer(),
     limits!: HttpLimits = HttpLimits(),
-    http2Limits!: Http2Limits = Http2Limits()
+    http2Limits!: Http2Limits = Http2Limits(),
+    protocol!: ?String = None<String>,
+    keepConnectOpen!: Bool = false
 ): Http2ClientRequestPlan {
     validateKnownBodyBound(request.body.contentLength, limits)
     let fields = ArrayList<HpackFieldEncoding>()
     fields.add(h2Encoding(":method", request.method.value))
     let connect = request.method == HttpMethod("CONNECT")
+    if (protocol.isSome() && !connect) {
+        localHeaderError("HTTP/2 :protocol requires CONNECT")
+    }
     let authority = requestAuthority(request)
     if (connect) {
-        fields.add(h2Encoding(":authority", authority))
+        if (let Some(value) <- protocol) {
+            let _ = try { HttpMethod(value) }
+            catch (_: IllegalArgumentException) { localHeaderError("HTTP/2 :protocol is not a valid token") }
+            fields.add(h2Encoding(":protocol", value))
+            fields.add(h2Encoding(":scheme", request.url.scheme))
+            fields.add(h2Encoding(":authority", authority))
+            fields.add(h2Encoding(":path", request.url.requestTarget))
+        } else {
+            fields.add(h2Encoding(":authority", authority))
+        }
     } else {
         fields.add(h2Encoding(":scheme", request.url.scheme))
         fields.add(h2Encoding(":authority", authority))
@@ -165,9 +179,77 @@ public func mapHttp2ClientRequest(
     }
     let initial = fields.toArray()
     validateH2FieldBounds(initial, http2Limits)
-    let endOnHeaders = request.body.contentLength == Some(0) && trailer.headers.size == 0
+    let endOnHeaders = request.body.contentLength == Some(0) && trailer.headers.size == 0 &&
+        !(connect && keepConnectOpen)
     Http2ClientRequestPlan(initial, request.body, trailer, limits, http2Limits, endOnHeaders)
 }
+/** Maps an ordinary or extended CONNECT whose DATA directions remain open after HEADERS. */
+public func mapHttp2ClientConnectRequest(
+    request: HttpRequest,
+    protocol!: ?String = None<String>,
+    limits!: HttpLimits = HttpLimits(),
+    http2Limits!: Http2Limits = Http2Limits()
+): Http2ClientRequestPlan {
+    if (request.method != HttpMethod("CONNECT")) {
+        throw IllegalArgumentException("HTTP/2 connect stream requires CONNECT")
+    }
+    if (request.body.contentLength != Some(0)) {
+        throw IllegalArgumentException("HTTP/2 connect stream initial request body must be empty")
+    }
+    mapHttp2ClientRequest(
+        request,
+        limits: limits,
+        http2Limits: http2Limits,
+        protocol: protocol,
+        keepConnectOpen: true
+    )
+}
+
+/**
+ * Decodes and validates a promised request before application policy is
+ * consulted. A permissive policy cannot weaken method, protocol, body, or
+ * same-origin requirements.
+ */
+public func decodeHttp2PushedRequest(
+    fields: Array<HpackHeaderField>,
+    streamId: Http2StreamId,
+    parent: HttpUrl,
+    limits!: HttpLimits = HttpLimits(),
+    http2Limits!: Http2Limits = Http2Limits()
+): HttpRequest {
+    let head = decodeHttp2ServerRequestHead(
+        fields, streamId, limits: limits, http2Limits: http2Limits
+    )
+    if (head.method != HttpMethod("GET")) {
+        pushedRequestError(streamId, "HTTP/2 promised request must use GET")
+    }
+    if (head.protocol.isSome()) {
+        pushedRequestError(streamId, "HTTP/2 promised request cannot use extended CONNECT")
+    }
+    if (let Some(length) <- head.expectedContentLength) {
+        if (length != 0) {
+            pushedRequestError(streamId, "HTTP/2 promised request cannot carry a body")
+        }
+    }
+    let scheme = match (head.scheme) {
+        case Some(value) => value
+        case None => pushedRequestError(streamId, "HTTP/2 promised request requires :scheme")
+    }
+    let promised = try {
+        HttpUrl.parse("${scheme}://${head.authority}${head.target}")
+    } catch (_: IllegalArgumentException) {
+        pushedRequestError(streamId, "HTTP/2 promised request URL is invalid")
+    }
+    if (promised.scheme != parent.scheme ||
+        promised.host.toAsciiLower() != parent.host.toAsciiLower() ||
+        promised.port != parent.port) {
+        pushedRequestError(streamId, "HTTP/2 promised request must be same-origin with its parent")
+    }
+    HttpRequest(
+        head.method, promised, headers: head.headers, body: RequestBody.empty()
+    )
+}
+
 
 public enum Http2ClientHeaderEventKind {
     | Informational
@@ -188,9 +270,14 @@ public class Http2ClientResponseHead {
         this.expectedContentLength = expectedContentLength
     }
 
-    /** Binds protocol-neutral body ownership after the stream integration creates it. */
-    public func toResponse(body: ResponseBody): HttpResponse {
-        HttpResponse(status, "", body, version: HttpVersion.Http2, headers: headers)
+    /** Binds protocol-neutral body and push ownership after stream integration creates them. */
+    public func toResponse(
+        body: ResponseBody,
+        pushes!: ?HttpPushSource = None<HttpPushSource>
+    ): HttpResponse {
+        HttpResponse(
+            status, "", body, version: HttpVersion.Http2, headers: headers, pushes: pushes
+        )
     }
 }
 
@@ -660,4 +747,10 @@ private func localContentLengthError(): Nothing {
 
 private func responseProtocolError(streamId: Http2StreamId, message: String): Nothing {
     throw Http2ProtocolException(Http2ErrorCode.ProtocolError, Http2ErrorScope.Stream(streamId), message)
+}
+
+private func pushedRequestError(streamId: Http2StreamId, message: String): Nothing {
+    throw Http2ProtocolException(
+        Http2ErrorCode.ProtocolError, Http2ErrorScope.Stream(streamId), message
+    )
 }

@@ -10,10 +10,13 @@ private const HTTP1_SERVER_READ_BUFFER_SIZE: Int64 = 16 * 1024
 public class Http1ServerRequest {
     public let head: Http1RequestHead
     public let body: ResponseBody
+    internal let upgradeRemainder: Array<Byte>
 
-    public init(head: Http1RequestHead, body: ResponseBody) {
+    public init(head: Http1RequestHead, body: ResponseBody,
+        upgradeRemainder!: Array<Byte> = Array<Byte>()) {
         this.head = head
         this.body = body
+        this.upgradeRemainder = upgradeRemainder
     }
 
     public func close(): Unit { body.close() }
@@ -58,23 +61,38 @@ public func readHttp1ServerRequest(
     }
     let completed = parsed.getOrThrow()
     let head = completed.head
+    let mayHandoff = head.method == HttpMethod("CONNECT") ||
+        headerContainsToken(head.headers, "connection", "upgrade")
+    var upgradeRemainder = Array<Byte>()
     let source = match (head.framing) {
         case Http1BodyFraming.Empty =>
-            if (!completed.remaining.isEmpty()) {
+            if (!completed.remaining.isEmpty() && !mayHandoff) {
                 throw Http1ParseException(
                     Http1ParseErrorCode.InvalidHeader,
                     "bodyless HTTP/1 request retained unexpected bytes; pipelining is disabled"
                 )
             }
+            if (mayHandoff) { upgradeRemainder = completed.remaining }
             RequestBody.empty().open()
         case Http1BodyFraming.ContentLength(length) =>
-            if (completed.remaining.size > length) {
+            if (length > limits.maxBodyBytes) {
+                throw Http1ParseException(
+                    Http1ParseErrorCode.InvalidHeader,
+                    "HTTP/1 request Content-Length exceeds configured body limit"
+                )
+            }
+            if (completed.remaining.size > length && !(mayHandoff && length == 0)) {
                 throw Http1ParseException(
                     Http1ParseErrorCode.InvalidHeader,
                     "HTTP/1 request contains bytes past Content-Length; pipelining is disabled"
                 )
             }
-            Http1FixedBodyStream(transport, length, completed.remaining, context)
+            if (mayHandoff && length == 0) {
+                upgradeRemainder = completed.remaining
+                RequestBody.empty().open()
+            } else {
+                Http1FixedBodyStream(transport, length, completed.remaining, context)
+            }
         case Http1BodyFraming.Chunked =>
             Http1ChunkedBodyStream(transport, completed.remaining, context, limits)
         case _ => throw Http1FramingException(
@@ -93,7 +111,7 @@ public func readHttp1ServerRequest(
             ResponseBody(gated, observer: observer, trailerProvider: { => chunked.trailer })
         case _ => ResponseBody(gated, observer: observer)
     }
-    Http1ServerRequest(head, body)
+    Http1ServerRequest(head, body, upgradeRemainder: upgradeRemainder)
 }
 
 private class Http1ContinueBodyStream <: HttpBodyStream {

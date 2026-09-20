@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "PASS",
+  "command": {
+    "id": "plan-validation",
+    "argv": [
+      "python3",
+      "tools/repository/repository_tooling.py",
+      "--root",
+      ".",
+      "validate-plan",
+      "docs/evidence/M8-005/test-plan.md",
+      "--json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T22:05:51.684377Z",
+    "finished_at_utc": "2026-09-13T22:05:51.798309Z",
+    "duration_ms": 113.931,
+    "stdout_path": "docs/evidence/M8-005/commands/html-stability-final-metadata/plan-validation.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/commands/html-stability-final-metadata/plan-validation.stderr.log",
+    "stdout_excerpt": "{\"counts\": {\"paths\": 13, \"scenarios\": 50, \"tests\": 36}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f38cd844efbc65efcded34b81dbd180e7b91c9fd9e528d2bddfb24d5ba70e417"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

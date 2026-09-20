@@ -57,6 +57,14 @@ public class Http1CleartextClient <: Resource {
         }
     }
 
+    public func upgrade(request: HttpRequest,
+        context!: OperationContext = OperationContext.background()): Http1UpgradeExchangeResult {
+        if (request.url.scheme != "http") {
+            throw IllegalArgumentException("cleartext HTTP/1 upgrade requires an http URL")
+        }
+        upgradeHttp1Lease(pool, factory, cleartextPoolKey(request.url), request, context)
+    }
+
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func close(): Unit { pool.close() }
     public func isClosed(): Bool { pool.isClosed() }
@@ -93,4 +101,23 @@ private func cleartextPoolKey(url: HttpUrl): HttpConnectionPoolKey {
         "none",
         "http/1.1"
     )
+}
+
+internal func upgradeHttp1Lease(
+    pool: Http1ConnectionPool,
+    factory: Http1ConnectionFactory,
+    key: HttpConnectionPoolKey,
+    request: HttpRequest,
+    context: OperationContext
+): Http1UpgradeExchangeResult {
+    let lease = pool.acquire(key, factory, context: context)
+    try {
+        lease.connection.upgradeTracked(request, context: context, onTerminated: { reusable =>
+            if (reusable) { pool.release(lease, context: context) }
+            else { pool.discard(lease, context: context) }
+        })
+    } catch (error: Exception) {
+        pool.discard(lease, context: context)
+        throw error
+    }
 }

@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 188182067 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 171243545 ns, RESULT:
+    [ PASSED ] CASE: encodedHeaderFailureClosesTheConnection (990734 ns)
+    [ PASSED ] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (2757020 ns)
+    [ PASSED ] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (3239476 ns)
+    [ PASSED ] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (2588468 ns)
+    [ PASSED ] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (659440 ns)
+    [ PASSED ] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (1004446 ns)
+    [ PASSED ] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (2611975 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (781713 ns)
+    [ PASSED ] CASE: connectedStreamOutlivesHandshakeCancellationAndUsesOperationContexts (1650873 ns)
+    [ PASSED ] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (4673799 ns)
+    [ PASSED ] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (9043575 ns)
+    [ PASSED ] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (10145701 ns)
+    [ PASSED ] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (109996042 ns)
+    [ PASSED ] CASE: queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (9776873 ns)
+    [ PASSED ] CASE: rejectedConnectReturnsFullResponseAndClosesRequestDirection (2566904 ns)
+    [ PASSED ] CASE: enabledPushAttachesBoundedCallerDrivenResponses (5117456 ns)
+Summary: TOTAL: 182
+    PASSED: 16, SKIPPED: 166, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 195717001 ns, RESULT:
+TP: wirestack.*, time elapsed: 195677074 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 188182067 ns
+Summary: TOTAL: 182
+    PASSED: 16, SKIPPED: 166, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

@@ -1,0 +1,6 @@
+cyclic dependency:
+wirestack.internal.tls_engine -> wirestack.net
+wirestack.net -> wirestack.internal.transport_stdnet
+wirestack.internal.transport_stdnet -> wirestack.internal.tls_engine
+
+Error: cjpm test failed

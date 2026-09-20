@@ -1,0 +1,85 @@
+test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte) ... FAIL
+test_archive_rejects_aggregate_payload_over_limit (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_aggregate_payload_over_limit) ... FAIL
+test_archive_budget_includes_serialized_headers_and_padding (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_budget_includes_serialized_headers_and_padding) ... FAIL
+test_archive_rejects_oversized_pax_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_oversized_pax_metadata) ... FAIL
+test_archive_rejects_excessive_member_headers (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_excessive_member_headers) ... FAIL
+test_archive_bounds_cumulative_global_pax_fields (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_bounds_cumulative_global_pax_fields) ... FAIL
+test_archive_rejects_sparse_encodings_before_map_expansion (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_sparse_encodings_before_map_expansion) ... FAIL
+
+======================================================================
+FAIL: test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 135, in test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_aggregate_payload_over_limit (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_aggregate_payload_over_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 146, in test_archive_rejects_aggregate_payload_over_limit
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_budget_includes_serialized_headers_and_padding (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_budget_includes_serialized_headers_and_padding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 155, in test_archive_budget_includes_serialized_headers_and_padding
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_oversized_pax_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_oversized_pax_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 167, in test_archive_rejects_oversized_pax_metadata
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_excessive_member_headers (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_excessive_member_headers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 229, in test_archive_rejects_excessive_member_headers
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_bounds_cumulative_global_pax_fields (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_bounds_cumulative_global_pax_fields)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 189, in test_archive_bounds_cumulative_global_pax_fields
+    with self.assertRaises(release.ReleaseError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ReleaseError not raised
+
+======================================================================
+FAIL: test_archive_rejects_sparse_encodings_before_map_expansion (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_sparse_encodings_before_map_expansion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_021_linux_release.py", line 222, in test_archive_rejects_sparse_encodings_before_map_expansion
+    self.assertEqual([], accepted)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != [{'GNU.sparse.major': '1', 'GNU.sparse.min[170 chars]None]
+
+Second list contains 4 additional elements.
+First extra element 0:
+{'GNU.sparse.major': '1', 'GNU.sparse.minor': '0', 'GNU.sparse.realsize': '0'}
+
+- []
++ [{'GNU.sparse.major': '1', 'GNU.sparse.minor': '0', 'GNU.sparse.realsize': '0'},
++  {'GNU.sparse.map': '0,0', 'GNU.sparse.size': '0'},
++  {'GNU.sparse.numbytes': '0', 'GNU.sparse.offset': '0', 'GNU.sparse.size': '0'},
++  None]
+
+----------------------------------------------------------------------
+Ran 7 tests in 1.606s
+
+FAILED (failures=7)

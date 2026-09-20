@@ -1,0 +1,17 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 86406477 ns, RESULT:
+    TCS: HttpFacadeTest, time elapsed: 79458750 ns, RESULT:
+    [ PASSED ] CASE: requestCancellationOutlivesCompletedParentWhileTransferredPushStalls (77944144 ns)
+Summary: TOTAL: 111
+    PASSED: 1, SKIPPED: 110, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 94212689 ns, RESULT:
+TP: wirestack.*, time elapsed: 94181969 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 86406477 ns
+Summary: TOTAL: 111
+    PASSED: 1, SKIPPED: 110, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

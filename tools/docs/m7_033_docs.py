@@ -33,6 +33,7 @@ from tools.evidence_digest import text_evidence_digest
 
 TASK_ID = "M7-033"
 EXPECTED_CJDOC_VERSION = "0.7.2"
+DOCUMENTATION_CFG = {"os": "Linux", "arch": "x86_64", "env": "gnu"}
 DOC_IR_SCHEMA = "cjdoc.doc-ir/8"
 API_SCHEMA = "cjdoc.api-surface/1"
 COVERAGE_SCHEMA = "cjdoc.documentation-coverage/1"
@@ -49,6 +50,7 @@ PUBLIC_ROOT_FILES = (
     "http_contract.cj",
     "http_message.cj",
     "http_model.cj",
+    "http_push.cj",
     "http_url.cj",
     "network_error.cj",
     "network_event.cj",
@@ -64,7 +66,12 @@ PUBLIC_PACKAGE_FILES = {
     "wirestack.http": (
         "cancellation.cj",
         "client.cj",
+        "cookie.cj",
+        "duplex.cj",
         "error.cj",
+        "file_handler.cj",
+        "hooks.cj",
+        "multipart.cj",
         "package.cj",
         "proxy.cj",
         "redirect.cj",
@@ -72,8 +79,16 @@ PUBLIC_PACKAGE_FILES = {
         "retry.cj",
         "server.cj",
         "tls.cj",
+        "upgrade.cj",
+        "websocket.cj",
+        "websocket_handshake.cj",
     ),
     "wirestack.tls": ("facade.cj", "identity.cj", "package.cj"),
+    "wirestack.net": (
+        "package.cj", "datagram_socket_core.cj", "tcp_listener.cj", "udp_socket.cj",
+        "unix_stream.cj", "unix_listener.cj", "unix_datagram_socket.cj",
+        "dns_wire.cj", "dns_client.cj", "dns_resolver.cj",
+    ),
 }
 
 
@@ -291,13 +306,12 @@ def _validate_layer(output: Path, package: str) -> dict[str, Any]:
             "markdownSha256": _text_digest(paths["markdown"])}
 
 
-def _generate(cjdoc: str, project: Path, output: Path, include_html: bool,
-              timeout: int) -> dict[str, Any]:
-    formats = ["json", "api-surface", "coverage", "markdown"]
-    if include_html:
-        formats.append("html")
+def _generate(cjdoc: str, project: Path, output: Path, timeout: int, *,
+              formats: Sequence[str] = ("json", "api-surface", "coverage", "markdown")) -> dict[str, Any]:
     argv = [cjdoc, "generate", "--project", str(project), "--audience", "external",
             "--lint-profile", "strict", "--jobs", "1", "--locale", "zh-CN"]
+    for name, value in DOCUMENTATION_CFG.items():
+        argv.extend(["--cfg", f"{name}={value}"])
     for fmt in formats:
         argv.extend(["--format", fmt])
     argv.extend(["--output", str(output)])
@@ -308,6 +322,8 @@ def _check(cjdoc: str, project: Path, timeout: int) -> dict[str, Any]:
     argv = [cjdoc, "check", "--project", str(project), "--deny-warnings",
             "--lint-profile", "strict", "--min-symbol-coverage", "100",
             "--min-parameter-coverage", "100"]
+    for name, value in DOCUMENTATION_CFG.items():
+        argv.extend(["--cfg", f"{name}={value}"])
     return _run(argv, project, timeout)
 
 
@@ -325,6 +341,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
         "platform": {"system": platform.system(), "machine": platform.machine(),
                       "libc": platform.libc_ver()[0] or "unknown"},
         "expectedCjdoc": EXPECTED_CJDOC_VERSION,
+        "targetCfg": DOCUMENTATION_CFG,
         "layers": [],
         "commands": [],
         "sourceSha256": {},
@@ -351,7 +368,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
                 report["commands"].append({"package": package, "kind": "check", **check_command})
                 if check_command["status"] != "PASS":
                     raise DocsError("CJDOC_CHECK", f"{package} strict check returned {check_command['returncode']}")
-                command = _generate(cjdoc, project, output, False, timeout)
+                command = _generate(cjdoc, project, output, timeout)
                 report["commands"].append({"package": package, "kind": "generate", **command})
                 if command["status"] != "PASS":
                     raise DocsError("CJDOC_GENERATE", f"{package} generation returned {command['returncode']}")
@@ -364,21 +381,27 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
             report["commands"].append({"package": "combined", "kind": "check", **check_command})
             if check_command["status"] != "PASS":
                 raise DocsError("CJDOC_CHECK", "combined strict check returned a non-zero status")
-            command = _generate(cjdoc, combined_project, combined_output, include_html, timeout)
+            command = _generate(cjdoc, combined_project, combined_output, timeout)
             report["commands"].append({"package": "combined", "kind": "generate", **command})
             if command["status"] != "PASS":
                 raise DocsError("CJDOC_GENERATE", "combined generation returned a non-zero status")
             combined = _validate_layer(combined_output, "combined")
             if include_html:
-                paths = _artifact_paths(combined_output)
+                # Keep HTML rendering out of the process retaining the other serialized formats.
+                html_output = staging / "combined" / "html-output"
+                command = _generate(cjdoc, combined_project, html_output, timeout, formats=("html",))
+                report["commands"].append({"package": "combined", "kind": "generate-html", **command})
+                if command["status"] != "PASS":
+                    raise DocsError("CJDOC_GENERATE", "combined HTML generation returned a non-zero status")
+                paths = _artifact_paths(html_output)
                 for key in ("html", "search"):
                     if not paths[key].is_file():
                         raise DocsError("HTML_MISSING", f"missing HTML artifact: {key}")
                 combined["htmlSha256"] = _text_digest(paths["html"])
                 combined["searchSha256"] = _text_digest(paths["search"])
                 combined["htmlPages"] = sorted(
-                    str(path.relative_to(combined_output / "html"))
-                    for path in (combined_output / "html").rglob("*.html")
+                    str(path.relative_to(html_output / "html"))
+                    for path in (html_output / "html").rglob("*.html")
                     if path.name != "index.html"
                 )
             report["combined"] = combined
@@ -398,7 +421,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
                 if html.exists():
                     shutil.rmtree(html)
                 html.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copytree(combined_output / "html", html)
+                shutil.copytree(html_output / "html", html)
                 report["artifacts"]["html"] = str(html.relative_to(root))
             report["artifacts"].update({
                 "docs": "docs/api/generated/docs.json",

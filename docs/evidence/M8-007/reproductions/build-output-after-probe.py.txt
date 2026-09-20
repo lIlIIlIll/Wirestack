@@ -1,0 +1,8 @@
+import json, sys, tempfile, tracemalloc
+from pathlib import Path
+from tools import m7_022_linux_release_soak as soak
+with tempfile.TemporaryDirectory(prefix='wirestack-build-bound-before-') as directory:
+    tracemalloc.start()
+    result = soak.run_build([sys.executable, '-c', "import os; [os.write(1, b'x' * 8192) for _ in range(256)]"], Path(directory))
+    _, peak = tracemalloc.get_traced_memory()
+    print(json.dumps({'baseline_commit': '8a79209e6471b343774fe54a99f251f5b273352e', 'source_state': 'corrected working tree', 'emitted_bytes': 2097152, 'report_excerpt_bytes': len(result.encode()), 'configured_tail_bytes': soak.MAX_CAPTURE_BYTES, 'peak_traced_bytes': peak, 'bounded_excerpt': len(result.encode()) <= soak.MAX_CAPTURE_BYTES}))

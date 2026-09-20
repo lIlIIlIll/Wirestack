@@ -5,27 +5,27 @@ import std.collection.ArrayList
 /** Canonical absolute HTTP(S) URL with a DNS-free authority representation. */
 public class HttpUrl <: ToString {
 /**
- * Wirestack 公开 API：scheme。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let scheme: String
 /**
- * Wirestack 公开 API：host。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let host: String
 /**
- * Wirestack 公开 API：port。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let port: UInt16
 /**
- * Wirestack 公开 API：explicitPort。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let explicitPort: Bool
 /**
- * Wirestack 公开 API：authority。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let authority: String
 /**
- * Wirestack 公开 API：requestTarget。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let requestTarget: String
     private let serialized: String
@@ -49,8 +49,8 @@ public class HttpUrl <: ToString {
     }
 
 /**
- * Wirestack 公开 API：parse。
- * @param value 参数 value。
+ * Wirestack 公开 API：解析外部输入并返回结构化结果。
+ * @param value 待写入或配置的值。
  */
     public static func parse(value: String): HttpUrl {
         let bytes = value.toArray()
@@ -94,7 +94,7 @@ public class HttpUrl <: ToString {
     }
 
 /**
- * Wirestack 公开 API：toString。
+ * Wirestack 公开 API：返回适合日志和诊断的文本表示。
  */
     public func toString(): String { serialized }
 }

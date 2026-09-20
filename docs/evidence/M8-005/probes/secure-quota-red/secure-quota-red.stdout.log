@@ -1,0 +1,64 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 229339829 ns, RESULT:
+    TCS: HttpCookieJarTest, time elapsed: 222876605 ns, RESULT:
+    [ PASSED ] CASE: cookieSerializesStandardMetadataWithoutInventingBrowserPolicy (297194 ns)
+    [ PASSED ] CASE: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries (379292 ns)
+    [ PASSED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (819853 ns)
+    [ PASSED ] CASE: defaultPathAndPathMatchUseDirectoryAndSlashBoundaries (170969 ns)
+    [ PASSED ] CASE: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity (216062 ns)
+    [ PASSED ] CASE: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection (77695 ns)
+    [ PASSED ] CASE: valuedSecureAttributeCannotLeakCookiesToCleartext (87634 ns)
+    [ PASSED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (450052 ns)
+    [ PASSED ] CASE: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage (115749 ns)
+    [ PASSED ] CASE: capacityHeaderBoundsAndReplacementRemainDeterministic (130071 ns)
+    [ PASSED ] CASE: removalClearAndSnapshotsExposeOnlyLiveImmutableCookies (99243 ns)
+    [ PASSED ] CASE: concurrentStoresAndReadsRemainRaceFreeAndBounded (1723546 ns)
+    [ PASSED ] CASE: boundedSetCookieMutationsPreserveScopeAndHeaderSafety (214796322 ns)
+    [ FAILED ] CASE: cleartextQuotaFloodCannotEvictSecureIdentityAndInstallReplacement (663139 ns)
+    Expect Failed: `(! jar.acceptSetCookie("session=attacker; Path=/", clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: jar.headerFor(secureOrigin) != "session=trusted; flood7=attacker"
+               jar.headerFor(secureOrigin): "flood7=attacker; session=attacker"
+        "session=trusted; flood7=attacker": "session=trusted; flood7=attacker"
+
+    Expect Failed: jar.headerFor(clearOrigin) != "flood7=attacker"
+        jar.headerFor(clearOrigin): "flood7=attacker; session=attacker"
+                 "flood7=attacker": "flood7=attacker··················"
+                                     ===============------------------
+
+    [ FAILED ] CASE: allSecureQuotaRejectsCleartextInsertionsFromBothStorageEntrypoints (143454 ns)
+    Expect Failed: `(! jar.acceptSetCookie("flood=parsed; Path=/", clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! jar.store(Cookie("flood", "direct", path: "/"), clearOrigin) == true)`
+       left: false
+      right: true
+
+    Expect Failed: jar.headerFor(secureOrigin) != "session=trusted"
+        jar.headerFor(secureOrigin): ""
+                  "session=trusted": "session=trusted"
+
+    Expect Failed: jar.headerFor(clearOrigin) != ""
+        jar.headerFor(clearOrigin): "flood=direct"
+                                "": ""
+
+Summary: TOTAL: 113
+    PASSED: 13, SKIPPED: 98, ERROR: 0
+    FAILED: 2, listed below:
+            TCS: HttpCookieJarTest, CASE: cleartextQuotaFloodCannotEvictSecureIdentityAndInstallReplacement
+            TCS: HttpCookieJarTest, CASE: allSecureQuotaRejectsCleartextInsertionsFromBothStorageEntrypoints
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 237018455 ns, RESULT:
+TP: wirestack.*, time elapsed: 236895005 ns, RESULT:
+    FAILED:
+    TP: wirestack.http, time elapsed: 229339829 ns, RESULT:
+        TCS: HttpCookieJarTest, time elapsed: 222876605 ns, RESULT:
+        [ FAILED ] CASE: cleartextQuotaFloodCannotEvictSecureIdentityAndInstallReplacement (663139 ns)
+        [ FAILED ] CASE: allSecureQuotaRejectsCleartextInsertionsFromBothStorageEntrypoints (143454 ns)
+Summary: TOTAL: 113
+    PASSED: 13, SKIPPED: 98, ERROR: 0
+    FAILED: 2
+--------------------------------------------------------------------------------------------------

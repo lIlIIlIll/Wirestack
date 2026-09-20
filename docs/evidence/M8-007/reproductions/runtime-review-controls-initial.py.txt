@@ -1,0 +1,128 @@
+import argparse
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools import evidence_digest as digest
+from tools import m7_021_linux_release as release
+from tools.repository import repository_tooling as repository
+
+PRODUCTION = (
+    'src/internal/http1/server_reader.cj',
+    'src/internal/http1/client_connection.cj',
+    'src/internal/http1/http2_connection_pool.cj',
+    'src/internal/tls_engine/connection.cj',
+    'src/internal/tls_engine/engine.cj',
+)
+TESTS = (
+    'src/internal/http1/server_reader_test.cj',
+    'src/internal/http1/tls_client_pipeline_test.cj',
+    'src/internal/http1/http2_connection_pool_test.cj',
+    'src/internal/tls_engine/connection_test.cj',
+)
+EXPECTED = {
+    'http1': {
+        'rejectsOversizedFixedRequestBeforeReadingItsBody',
+        'zeroLengthConnectionCloseDoesNotWaitForTlsPeerShutdown',
+        'closeRacingUnpublishedAdmissionReleasesConnectionOwners',
+    },
+    'tls': {
+        'closeDeadlineExpiresWhileAnExistingBackgroundReadOwnsPumpAdmission',
+        'closeCancellationInterruptsAnExistingBackgroundReadWithinTheBound',
+        'closeCancellationDoesNotWaitBehindAnExistingCiphertextWrite',
+    },
+}
+EVIDENCE = ROOT / 'docs/evidence/M8-007'
+CASE = re.compile(r'^\s*\[\s*(\w+)\s*\]\s+CASE:\s+(\w+)', re.MULTILINE)
+
+
+def record(path):
+    return {'path': path.relative_to(ROOT).as_posix(), 'digest': digest.text_evidence_digest(path).to_json()}
+
+
+def run_suite(name, phase, directory):
+    package = 'http1' if name == 'http1' else 'tls_engine'
+    command = {
+        'id': f'{phase}-{name}',
+        'argv': ['cjpm', 'test', f'src/internal/{package}', '--exclude-tags=Performance',
+                 '--parallel', '1', '--no-progress', '--no-color'],
+        'timeout_seconds': 600, 'long_running': False, 'gate': 'task',
+    }
+    result = repository.run_command(ROOT, command, directory)
+    for stream in ('stdout', 'stderr'):
+        result[f'{stream}_digest'] = record(ROOT / result[f'{stream}_path'])['digest']
+    output = (ROOT / result['stdout_path']).read_text() + (ROOT / result['stderr_path']).read_text()
+    cases = {case: status for status, case in CASE.findall(output)}
+    failures = sorted(case for case, status in cases.items() if status not in {'PASSED', 'SKIPPED'})
+    result['observed_cases'] = cases
+    result['failed_cases'] = failures
+    print(json.dumps({'phase': phase, 'suite': name, 'exit_code': result['exit_code'],
+                      'timed_out': result['timed_out'], 'failed_cases': failures}), flush=True)
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--baseline', required=True)
+    args = parser.parse_args()
+    if (EVIDENCE / 'linux_x86_64/frozen-candidate.json').exists():
+        raise SystemExit('Refusing source mutation after formal candidate freeze')
+    baseline = subprocess.check_output(
+        ['git', 'rev-parse', '--verify', f'{args.baseline}^{{commit}}'], cwd=ROOT, text=True
+    ).strip()
+    fixed = {path: (ROOT / path).read_bytes() for path in PRODUCTION}
+    original = {
+        path: subprocess.check_output(['git', 'cat-file', 'blob', f'{baseline}:{path}'], cwd=ROOT)
+        for path in PRODUCTION
+    }
+    source_before_controls = release.source_tree_sha256(ROOT)
+    sources = {path: digest.text_evidence_digest(ROOT / path).to_json() for path in PRODUCTION + TESTS}
+    directory = EVIDENCE / 'commands/runtime-review-controls'
+    directory.mkdir(parents=True, exist_ok=False)
+    try:
+        for path, content in original.items():
+            (ROOT / path).write_bytes(content)
+        baseline_source = release.source_tree_sha256(ROOT)
+        before = {name: run_suite(name, 'before', directory) for name in EXPECTED}
+    finally:
+        for path, content in fixed.items():
+            (ROOT / path).write_bytes(content)
+    if not digest.schema_text_sha256_equal(source_before_controls, release.source_tree_sha256(ROOT)):
+        raise SystemExit('Fixed production source was not restored exactly')
+    after = {name: run_suite(name, 'after', directory) for name in EXPECTED}
+    checks = {
+        'source_restored': all((ROOT / path).read_bytes() == content for path, content in fixed.items()),
+        'source_unchanged_during_controls': digest.schema_text_sha256_equal(
+            source_before_controls, release.source_tree_sha256(ROOT)),
+        'test_inputs_unchanged': all(record(ROOT / path)['digest'] == sources[path] for path in TESTS),
+    }
+    for name, expected in EXPECTED.items():
+        checks[f'{name}_baseline_reproduces'] = (
+            before[name]['exit_code'] == 1 and not before[name]['timed_out']
+            and set(before[name]['failed_cases']) == expected
+        )
+        checks[f'{name}_corrected_passes'] = (
+            after[name]['exit_code'] == 0 and not after[name]['timed_out']
+            and not after[name]['failed_cases']
+            and all(after[name]['observed_cases'].get(case) == 'PASSED' for case in expected)
+        )
+    report = {
+        'schema_version': 1, 'source_task': 'M8-007',
+        'status': 'PASS' if all(checks.values()) else 'FAIL',
+        'baseline_commit': baseline, 'baseline_source_sha256': baseline_source,
+        'fixed_source_sha256': source_before_controls, 'source_inputs': sources,
+        'driver': record(Path(__file__).resolve()),
+        'expected_failures': {name: sorted(values) for name, values in EXPECTED.items()},
+        'before': before, 'after': after, 'checks': checks,
+    }
+    (EVIDENCE / 'runtime-review-controls.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({'status': report['status'], 'checks': checks}), flush=True)
+    return 0 if report['status'] == 'PASS' else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

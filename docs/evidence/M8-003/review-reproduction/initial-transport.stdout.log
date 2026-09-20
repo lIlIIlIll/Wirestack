@@ -1,0 +1,63 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 189677642 ns, RESULT:
+    TCS: StdNetTransportListenerTest, time elapsed: 91347897 ns, RESULT:
+    [ PASSED ] CASE: listenerRejectsOutOfRangeBacklogBeforeBinding (272232 ns)
+    [ PASSED ] CASE: listenerPreCancelledAndExpiredAcceptsFailFast (170784 ns)
+    [ PASSED ] CASE: listenerDeadlineBoundsBlockedAcceptAndListenerRemainsUsable (38798723 ns)
+    [ PASSED ] CASE: listenerCancellationWakesActiveAcceptAndListenerRemainsUsable (40092537 ns)
+    [ PASSED ] CASE: listenerCloseWakesActiveAcceptWithStructuredErrorAndIsIdempotent (10839512 ns)
+    TCS: M123TransportDiagnosticsTest, time elapsed: 619702 ns, RESULT:
+    [ PASSED ] CASE: stdNetReportsRuntimeEndpointsAndCapabilitiesWithoutGuessingIoBackend (254877 ns)
+    [ PASSED ] CASE: deterministicTransportUsesTheSameProviderNeutralContract (46192 ns)
+    TCS: M127BackgroundFastPathTest, time elapsed: 24466050 ns, RESULT:
+    [ PASSED ] CASE: backgroundAndObservedPathsTransferEquivalentData (183330 ns)
+    [ PASSED ] CASE: backgroundPeerCloseRemainsEof (129065 ns)
+    [ PASSED ] CASE: backgroundLocalCloseRaceRemainsClosed (1387747 ns)
+    [ PASSED ] CASE: backgroundStillRejectsConcurrentReaders (1260349 ns)
+    [ PASSED ] CASE: cancellableAndDeadlineContextsRetainGenericChecks (169901 ns)
+    [ PASSED ] CASE: deadlineTimeoutIsClearedBeforeBackgroundRead (20396348 ns)
+    TCS: Net06CancellationGateTest, time elapsed: 6179979 ns, RESULT:
+    [ PASSED ] CASE: cancelledReadsReleaseSocketsWaitersAndTasks (5869479 ns)
+    TCS: StdNetTransportTest, time elapsed: 64237645 ns, RESULT:
+    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (432025 ns)
+    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (2617946 ns)
+    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (248915 ns)
+    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (207890 ns)
+    [ PASSED ] CASE: emptyOperationsAreImmediate (223247 ns)
+    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (250311 ns)
+    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1112500 ns)
+    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29230229 ns)
+    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (36521 ns)
+    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (140394 ns)
+    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (20346088 ns)
+    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (1320690 ns)
+    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (1313166 ns)
+    [ PASSED ] CASE: gracefulNativeCloseRemainsGracefulAfterLaterAbort (263358 ns)
+    [ PASSED ] CASE: explicitAbortRemainsNativeOwnerAfterLaterClose (270581 ns)
+    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (135122 ns)
+    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (1240478 ns)
+    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (330693 ns)
+    [ FAILED ] CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose (1201705 ns)
+    Expect Failed: `(result.get(Duration.second) == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 50
+    PASSED: 32, SKIPPED: 17, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: StdNetTransportTest, CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 197777669 ns, RESULT:
+TP: wirestack.*, time elapsed: 197740689 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 189677642 ns, RESULT:
+        TCS: StdNetTransportListenerTest, time elapsed: 91347897 ns, RESULT:
+        TCS: M123TransportDiagnosticsTest, time elapsed: 619702 ns, RESULT:
+        TCS: M127BackgroundFastPathTest, time elapsed: 24466050 ns, RESULT:
+        TCS: Net06CancellationGateTest, time elapsed: 6179979 ns, RESULT:
+        TCS: StdNetTransportTest, time elapsed: 64237645 ns, RESULT:
+        [ FAILED ] CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose (1201705 ns)
+Summary: TOTAL: 50
+    PASSED: 32, SKIPPED: 17, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

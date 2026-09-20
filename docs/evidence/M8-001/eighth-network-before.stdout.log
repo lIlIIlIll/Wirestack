@@ -1,0 +1,121 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 4163025142 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 4163025142 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (290517 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (46498 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (55776 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (118235 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (91119 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (35662 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (72186 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (66850 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (91611 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (55024 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (20859 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (33383 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (18311 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (55537 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (177800 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (271800 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (54337 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (106263 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11485106 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (175631 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (161892 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (60488 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (27900 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (84077 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (75269 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1544018 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (21317 ns)
+    [ FAILED ] CASE: tcpStreamStoppedCloseContextsFailBeforeLifecycleAdmission (73160 ns)
+    Expect Failed: `(closeFailsForContext(cancelledStream, api.OperationContext(cancellation: cancellation.token), false) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! cancelledStream.isClosed() == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(cancelledDelegate.closeCalls == 0)`
+       left: 1
+      right: 0
+
+    Expect Failed: `(closeFailsForContext(deadlineStream, api.OperationContext(deadline: Some(api.Deadline.after(Duration.Zero))), true) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! deadlineStream.isClosed() == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(deadlineDelegate.closeCalls == 0)`
+       left: 1
+      right: 0
+
+    [ FAILED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (21761 ns)
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! stream.isClosed() == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(delegate.closeCalls == 0)`
+       left: 1
+      right: 0
+
+    [ ERROR  ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (1024524822 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.net/test.NetworkFoundationContractTest.tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:818)
+	at wirestack.net/test.NetworkFoundationContractTest.asTestSuite.lambda.25.lambda.0()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:11)
+    [ ERROR  ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (1044467204 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.net/test.NetworkFoundationContractTest.tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:848)
+	at wirestack.net/test.NetworkFoundationContractTest.asTestSuite.lambda.26.lambda.0()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:11)
+    [ ERROR  ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (1041499227 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.net/test.NetworkFoundationContractTest.tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:882)
+	at wirestack.net/test.NetworkFoundationContractTest.asTestSuite.lambda.27.lambda.0()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:11)
+    [ ERROR  ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (1031983509 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.net/test.NetworkFoundationContractTest.tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:915)
+	at wirestack.net/test.NetworkFoundationContractTest.asTestSuite.lambda.28.lambda.0()(/tmp/wirestack-m8-001-eighth-baseline-77rxumq1/src/net/package_test.cj:11)
+Summary: TOTAL: 33
+    PASSED: 27, SKIPPED: 0, ERROR: 4
+    FAILED: 2, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamStoppedCloseContextsFailBeforeLifecycleAdmission
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 4171321825 ns, RESULT:
+TP: wirestack.*, time elapsed: 4171243135 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 4163025142 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 4163025142 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamStoppedCloseContextsFailBeforeLifecycleAdmission (73160 ns)
+        [ FAILED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (21761 ns)
+        [ ERROR  ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (1024524822 ns)
+        [ ERROR  ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (1044467204 ns)
+        [ ERROR  ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (1041499227 ns)
+        [ ERROR  ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (1031983509 ns)
+Summary: TOTAL: 33
+    PASSED: 27, SKIPPED: 0, ERROR: 4
+    FAILED: 2
+--------------------------------------------------------------------------------------------------

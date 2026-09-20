@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+    assert actual == ['xn--fa-hia.test']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

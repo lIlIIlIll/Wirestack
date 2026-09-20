@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "PASS",
+  "command": {
+    "id": "parser-fuzz-verification",
+    "argv": [
+      "python3",
+      "tools/m8_007_final_release.py",
+      "verify-fuzz"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-15T02:33:24.126047Z",
+    "finished_at_utc": "2026-09-15T02:33:24.339987Z",
+    "duration_ms": 213.946,
+    "stdout_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/parser-fuzz-verification.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260915-tls-cleanup-qualification/parser-fuzz-verification.stderr.log",
+    "stdout_excerpt": "{\"decision\": \"PASS\", \"evidence\": {\"digest\": {\"domain\": \"text-utf8-lf-v1\", \"sha256\": \"4de53b9115a7e79c0622bbc1ee740b82d373d4dffd25915090f250ecdf1a6a6b\"}, \"path\": \"docs/evidence/M8-007/linux_x86_64/fuzz-report.json\"}, \"source_task\": \"M8-007\", \"targets\": 10}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  }
+}

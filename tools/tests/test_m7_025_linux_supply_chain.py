@@ -14,6 +14,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
+from tools.m7_021_linux_release import PACKAGE_ROOT, artifact_payload_sha256
 from tools import m7_025_linux_supply_chain as supply
 
 
@@ -40,6 +41,8 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 ("nativeComponents", "tlsProvider", "sourceContentSha256"),
                 ("nativeComponents", "resolver", "archiveSha256"),
                 ("nativeComponents", "resolver", "buildFingerprint"),
+                ("nativeComponents", "httpFiles", "archiveSha256"),
+                ("nativeComponents", "httpFiles", "buildInputsSha256"),
             )
             for path in changes:
                 changed = copy.deepcopy(inputs)
@@ -76,7 +79,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 {name: supply.canonical_json(value) for name, value in second.items()},
             )
 
-    def test_project_and_resolver_sbom_packages_use_apache_2_0(self) -> None:
+    def test_sbom_distinguishes_project_and_public_suffix_licenses(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             artifact, qualification, provider_pin = self.fixture(Path(temporary))
             documents = supply.build_documents(
@@ -89,9 +92,83 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             for package_id in (
                 "SPDXRef-Package-Wirestack-Artifact",
                 "SPDXRef-Package-Wirestack-Resolver",
+                supply.HTTP_FILES_SPDX_ID,
             ):
                 self.assertEqual("Apache-2.0", packages[package_id]["licenseDeclared"])
                 self.assertEqual("Apache-2.0", packages[package_id]["licenseConcluded"])
+            suffix = packages[supply.PUBLIC_SUFFIX_SPDX_ID]
+            self.assertEqual("MPL-2.0", suffix["licenseDeclared"])
+            self.assertEqual("MPL-2.0", suffix["licenseConcluded"])
+            provider = packages[supply.provider_spdx_id(provider_pin["provider_id"])]
+            self.assertEqual(
+                [
+                    {
+                        "referenceCategory": "OTHER",
+                        "referenceType": "vcs",
+                        "referenceLocator": (
+                            "git+" + provider_pin["source"]["url"] + "@"
+                            + provider_pin["source"]["commit"]
+                        ),
+                    }
+                ],
+                provider["externalRefs"],
+            )
+
+    def test_schema_two_sidecars_self_validate_with_explicit_task_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact, qualification, provider_pin = self.fixture(root)
+            output = root / "evidence"
+            qualification_path = root / "qualification.json"
+            provider_pin_path = root / "provider.json"
+            task_id = "M8-007"
+            created_utc = "2026-09-14T12:34:56Z"
+            qualification_path.write_bytes(supply.canonical_json(qualification))
+            provider_pin_path.write_bytes(supply.canonical_json(provider_pin))
+            documents = supply.build_documents(
+                artifact,
+                qualification,
+                provider_pin,
+                generator_sha256=evidence_digest.text_evidence_sha256(
+                    Path(supply.__file__)
+                ),
+                task_id=task_id,
+                created_utc=created_utc,
+            )
+            supply.write_documents(documents, output)
+
+            bundle = supply.validate_documents(
+                output,
+                artifact_path=artifact,
+                qualification_path=qualification_path,
+                provider_pin_path=provider_pin_path,
+                task_id=task_id,
+                created_utc=created_utc,
+            )
+
+            self.assertEqual(task_id, bundle["taskId"])
+            suffix = next(
+                package
+                for package in documents["sbom.spdx.json"]["packages"]
+                if package["SPDXID"] == supply.PUBLIC_SUFFIX_SPDX_ID
+            )
+            self.assertEqual("SHA256", suffix["checksums"][0]["algorithm"])
+
+    def test_actual_native_archive_bytes_must_match_component_manifests(self) -> None:
+        cases = (
+            ("provider", "provider archive identity mismatch"),
+            ("resolver", "resolver archive identity mismatch"),
+        )
+        for component, message in cases:
+            with self.subTest(component=component), tempfile.TemporaryDirectory() as temporary:
+                artifact, qualification, provider_pin = self.fixture(
+                    Path(temporary), forged_native_archive=component
+                )
+                metadata = supply.artifact_metadata(artifact)
+                with self.assertRaisesRegex(supply.SupplyChainError, message):
+                    supply.validate_artifact_inputs(
+                        metadata, qualification, provider_pin
+                    )
 
     def test_wrong_project_license_expression_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -102,6 +179,41 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             with self.assertRaisesRegex(
                 supply.SupplyChainError, "release license expression is invalid"
             ):
+                supply.validate_artifact_inputs(metadata, qualification, provider_pin)
+
+    def test_schema_two_requires_http_files_payload_but_schema_one_remains_readable(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact, _qualification, _provider_pin = self.fixture(
+                root / "missing", include_http_payload=False
+            )
+            with self.assertRaisesRegex(
+                supply.SupplyChainError, "http-files-manifest.json"
+            ):
+                supply.artifact_metadata(artifact)
+
+            legacy, qualification, provider_pin = self.fixture(
+                root / "legacy", release_schema=1
+            )
+            metadata = supply.artifact_metadata(legacy)
+            self.assertIsNone(metadata["http_files"])
+            supply.validate_artifact_inputs(metadata, qualification, provider_pin)
+
+    def test_schema_two_rejects_missing_public_suffix_license(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            artifact, _, _ = self.fixture(
+                Path(temporary), include_public_suffix_license=False
+            )
+            with self.assertRaisesRegex(supply.SupplyChainError, "LICENSE.MPL-2.0"):
+                supply.artifact_metadata(artifact)
+
+    def test_schema_two_rejects_public_suffix_data_outside_its_source_pin(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            artifact, qualification, provider_pin = self.fixture(
+                Path(temporary), public_suffix_digest="0" * 64
+            )
+            metadata = supply.artifact_metadata(artifact)
+            with self.assertRaisesRegex(supply.SupplyChainError, "public suffix source digest mismatch"):
                 supply.validate_artifact_inputs(metadata, qualification, provider_pin)
 
     def test_main_translates_invalid_license_text_to_controlled_failure(self) -> None:
@@ -134,11 +246,23 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         *,
         license_expression: str = "Apache-2.0",
         license_bytes: bytes = b"project license\n",
+        release_schema: int = 2,
+        include_http_payload: bool = True,
+        include_public_suffix_license: bool = True,
+        public_suffix_digest: str | None = None,
+        forged_native_archive: str | None = None,
     ):
+        root.mkdir(parents=True, exist_ok=True)
         provider_pin = supply.load_json(supply.PROVIDER_PIN)
+        provider_archive = b"native TLS provider archive\n"
+        resolver_archive = b"native resolver archive\n"
         provider = {
             "abiVersion": 1,
-            "archive": {"bytes": 3, "name": "libprovider.a", "sha256": "1" * 64},
+            "archive": {
+                "bytes": len(provider_archive),
+                "name": "libwirestack_tls_provider.a",
+                "sha256": evidence_digest.artifact_bytes_sha256(provider_archive),
+            },
             "backend": "aws-lc-static",
             "build_fingerprint": "2" * 64,
             "build_inputs": {"provider": provider_pin},
@@ -151,22 +275,118 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "source": provider_pin["source"],
         }
         resolver = {
-            "archive": {"path": "libresolver.a", "sha256": "3" * 64},
+            "archive": {
+                "path": "lib/libwirestack_resolver.a",
+                "sha256": evidence_digest.artifact_bytes_sha256(resolver_archive),
+            },
             "build_fingerprint": "4" * 64,
             "private_runtime_abi": False,
             "worker_model": "fixed bounded worker pool",
         }
+        http_archive = b"native HTTP files archive\n"
+        http_files = {
+            "schema_version": 1,
+            "component": "wirestack-http-files",
+            "abi_version": 1,
+            "build_fingerprint": "6" * 64,
+            "inputs": {
+                "builder_sha256": "7" * 64,
+                "sources": {
+                    "native/http_files/wirestack_http_files.c": "8" * 64,
+                    "native/http_files/wirestack_http_files.h": "9" * 64,
+                },
+                "tools": {
+                    "ar": {"path": "/usr/bin/ar", "version": "GNU ar test"},
+                    "cc": {"path": "/usr/bin/cc", "version": "cc test"},
+                    "ranlib": {"path": "/usr/bin/ranlib", "version": "GNU ranlib test"},
+                },
+            },
+            "archive": {
+                "path": "lib/libwirestack_http_files.a",
+                "bytes": len(http_archive),
+                "sha256": evidence_digest.artifact_bytes_sha256(http_archive),
+            },
+            "private_runtime_abi": False,
+        }
+        http_files["build_fingerprint"] = evidence_digest.text_evidence_bytes_sha256(
+            supply.canonical_json(http_files["inputs"])
+        )
         provider_raw = supply.canonical_json(provider)
         resolver_raw = supply.canonical_json(resolver)
+        http_files_raw = supply.canonical_json(http_files)
+        suffix_data = b"com\nco.uk\n"
+        suffix_license = b"Mozilla Public License fixture\n"
+        suffix_source = {
+            "name": "publicsuffix/list",
+            "upstream_repository": "https://github.com/publicsuffix/list",
+            "upstream_revision": "a" * 40,
+            "sha256": public_suffix_digest
+            or evidence_digest.artifact_bytes_sha256(suffix_data),
+            "license_file": "LICENSE.MPL-2.0",
+            "license_sha256": evidence_digest.artifact_bytes_sha256(suffix_license),
+            "license": "MPL-2.0",
+        }
+        suffix_files = {
+            supply.PUBLIC_SUFFIX_FILES[0]: suffix_license,
+            supply.PUBLIC_SUFFIX_FILES[1]: suffix_data,
+            supply.PUBLIC_SUFFIX_FILES[2]: supply.canonical_json(suffix_source),
+            supply.PUBLIC_SUFFIX_FILES[3]: b"# offline generator fixture\n",
+        }
+        actual_provider_archive = (
+            b"forged TLS provider archive\n"
+            if forged_native_archive == "provider"
+            else provider_archive
+        )
+        actual_resolver_archive = (
+            b"forged resolver archive\n"
+            if forged_native_archive == "resolver"
+            else resolver_archive
+        )
+        members = {
+            "LICENSE": license_bytes,
+            "THIRD_PARTY_NOTICES.md": b"notices\n",
+            "third_party/aws-lc/LICENSE": b"aws license\n",
+            "third_party/aws-lc/NOTICE": b"aws notice\n",
+            "target/native/current/provider-manifest.json": provider_raw,
+            "target/native/current/lib/libwirestack_tls_provider.a": actual_provider_archive,
+            "target/native/resolver/current/resolver-manifest.json": resolver_raw,
+            "target/native/resolver/current/lib/libwirestack_resolver.a": actual_resolver_archive,
+        }
+        if release_schema == 2:
+            members.update(
+                {
+                    path: content
+                    for path, content in suffix_files.items()
+                    if include_public_suffix_license
+                    or path != supply.PUBLIC_SUFFIX_FILES[0]
+                }
+            )
+        if release_schema == 2 and include_http_payload:
+            members[supply.HTTP_FILES_MANIFEST] = http_files_raw
+            members[supply.HTTP_FILES_ARCHIVE] = http_archive
+
+        payload_entries = [
+            {
+                "path": path,
+                "bytes": len(content),
+                "sha256": artifact_payload_sha256(content),
+            }
+            for path, content in sorted(members.items())
+        ]
+        payload_sha256 = evidence_digest.text_evidence_bytes_sha256(
+            supply.canonical_json(payload_entries)
+        )
         try:
             license_sha256 = evidence_digest.text_evidence_bytes_sha256(license_bytes)
         except evidence_digest.DigestError:
             license_sha256 = "0" * 64
         release = {
-            "schema_version": 1,
+            "schema_version": release_schema,
             "package": "wirestack",
             "version": "0.1.0",
-            "payload_sha256": "5" * 64,
+            "payload": payload_entries,
+            "payload_sha256": payload_sha256,
+            "artifactBuildFingerprint": payload_sha256,
             "externalOpenSslDependency": False,
             "license": {
                 "expression": license_expression,
@@ -176,9 +396,18 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "thirdPartyNotices": {
                 "index": "THIRD_PARTY_NOTICES.md",
                 "files": [
-                    {"path": "THIRD_PARTY_NOTICES.md", "sha256": evidence_digest.text_evidence_bytes_sha256(b"notices\n")},
-                    {"path": "third_party/aws-lc/LICENSE", "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws license\n")},
-                    {"path": "third_party/aws-lc/NOTICE", "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws notice\n")},
+                    {
+                        "path": "THIRD_PARTY_NOTICES.md",
+                        "sha256": evidence_digest.text_evidence_bytes_sha256(b"notices\n"),
+                    },
+                    {
+                        "path": "third_party/aws-lc/LICENSE",
+                        "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws license\n"),
+                    },
+                    {
+                        "path": "third_party/aws-lc/NOTICE",
+                        "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws notice\n"),
+                    },
                 ],
             },
             "provider": {
@@ -196,20 +425,32 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 "libc_version": "2.44",
             },
         }
+        if release_schema == 2:
+            release["httpFiles"] = {
+                "component": http_files["component"],
+                "abi_version": http_files["abi_version"],
+                "build_fingerprint": http_files["build_fingerprint"],
+                "archive_sha256": http_files["archive"]["sha256"],
+                "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(http_files_raw),
+            }
+            release["thirdPartyNotices"]["files"].append(
+                {
+                    "path": supply.PUBLIC_SUFFIX_FILES[0],
+                    "sha256": evidence_digest.text_evidence_bytes_sha256(suffix_license),
+                }
+            )
+
         artifact = root / "wirestack.tar.gz"
-        members = {
-            "wirestack/release-manifest.json": supply.canonical_json(release),
-            "wirestack/LICENSE": license_bytes,
-            "wirestack/THIRD_PARTY_NOTICES.md": b"notices\n",
-            "wirestack/third_party/aws-lc/LICENSE": b"aws license\n",
-            "wirestack/third_party/aws-lc/NOTICE": b"aws notice\n",
-            "wirestack/target/native/current/provider-manifest.json": provider_raw,
-            "wirestack/target/native/resolver/current/resolver-manifest.json": resolver_raw,
+        archive_members = {
+            f"{PACKAGE_ROOT}/{path}": content for path, content in members.items()
         }
+        archive_members[f"{PACKAGE_ROOT}/release-manifest.json"] = supply.canonical_json(
+            release
+        )
         with artifact.open("wb") as raw:
             with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as compressed:
                 with tarfile.open(fileobj=compressed, mode="w") as archive:
-                    for name, value in sorted(members.items()):
+                    for name, value in sorted(archive_members.items()):
                         info = tarfile.TarInfo(name)
                         info.size = len(value)
                         info.mtime = 0
@@ -219,6 +460,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 "name": artifact.name,
                 "bytes": artifact.stat().st_size,
                 "sha256": evidence_digest.artifact_byte_sha256(artifact),
+                "release_schema_version": release_schema,
                 "payload_sha256": release["payload_sha256"],
             },
             "runtime": {"providerBuildFingerprint": provider["build_fingerprint"]},

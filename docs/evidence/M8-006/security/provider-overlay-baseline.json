@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-006",
+  "kind": "real-test-keylog-partial-overlay",
+  "status": "PASS",
+  "stage": "baseline",
+  "status_meaning": "Baseline PASS reproduces vulnerable acceptance; candidate PASS requires rejection.",
+  "accepted": true,
+  "error": null,
+  "production_manifest_unchanged": true,
+  "production_declared_archive_sha256": "4d00dfdca62e62ca37193144fcf6a74c20313b79a52e203e9abc915a9a7c27e8",
+  "actual_packaged_archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "b2b934be43605f6b731c1b53b5cc04a71b31407cd403a2c0e02c4a19b1a2baa1"
+  },
+  "foreign_test_only_key_log": true,
+  "foreign_capabilities": [
+    "customRoots",
+    "clientCert",
+    "server",
+    "tls12",
+    "tls13",
+    "http2",
+    "externalSigner",
+    "external-decryptor",
+    "sessionResumption",
+    "secureRandom",
+    "key-log"
+  ],
+  "collector": {
+    "path": "docs/evidence/M8-006/security/baseline-release-collector.py.txt",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8d99977ac24182ff94731839f5204efd59038bbac520c7279675615afbf7e89a"
+    }
+  },
+  "foreign_provider_manifest": {
+    "path": "docs/evidence/M8-006/security/overlay-keylog-provider.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77897d88fc6dbf70fbb182a532d3fda57c0cd84fd51c41f5d92495623271f9b4"
+    }
+  }
+}

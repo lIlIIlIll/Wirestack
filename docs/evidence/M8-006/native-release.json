@@ -1,0 +1,1303 @@
+{
+  "schema_version": 1,
+  "kind": "native-tls-context-hooks",
+  "source_task": "M8-006",
+  "status": "PASS",
+  "profile": "linux-x86_64-glibc-release",
+  "key_log_release_qualified": false,
+  "commands": [
+    {
+      "id": "toolchain",
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/toolchain.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/toolchain.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "release-provider-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_tls_provider.py",
+        "--offline"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 1800,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/release-provider-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "928e0fed4078c0d9ad07e79ea642bc044115a9b67a3922458ead48d75d040974"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/release-provider-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "resolver-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_linux_resolver.py",
+        "--quiet"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/resolver-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/resolver-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "http-files-build",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo-root>-pr-worktrees/M8-006-tls/tools/build_linux_http_files.py",
+        "--root",
+        "<repo-root>-pr-worktrees/M8-006-tls",
+        "--quiet"
+      ],
+      "cwd": "<repo-root>-pr-worktrees/M8-006-tls",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/http-files-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/http-files-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-build",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c499203b551c9ba446737af30158803f0bbdeaf2935f95f029b862ac849306b2"
+        }
+      }
+    },
+    {
+      "id": "fixture-certificate",
+      "argv": [
+        "/usr/bin/openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-keyout",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.pem",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-subj",
+        "/CN=example.com",
+        "-addext",
+        "subjectAltName=DNS:example.com",
+        "-days",
+        "2"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/fixture-certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/fixture-certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4336cdf59be497fa188054e029ee4c8e652cfc7ffb82a0e276a0d09ca03d3246"
+        }
+      }
+    },
+    {
+      "id": "fixture-certificate-der",
+      "argv": [
+        "/usr/bin/openssl",
+        "x509",
+        "-in",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/fixture-certificate-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/fixture-certificate-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "fixture-key-der",
+      "argv": [
+        "/usr/bin/openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/fixture-key-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/fixture-key-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "fixture-spki",
+      "argv": [
+        "/usr/bin/openssl",
+        "pkey",
+        "-in",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.pem",
+        "-pubout",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/fixture-spki.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/fixture-spki.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-versions12",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "versions12",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions12.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "26ec0ba5b5c433056d4e6f1beaa43c3a916b3a8530e361a3a85609e81bfdf241"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions12.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-versions13",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "versions13",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions13.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "26ec0ba5b5c433056d4e6f1beaa43c3a916b3a8530e361a3a85609e81bfdf241"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions13.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-release-keylog-rejected",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "release-keylog-rejected",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-release-keylog-rejected.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5421d182c744bc3c152356ad534c7add3ce80a7c01c505c06301d0e20acbf84a"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-release-keylog-rejected.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-sign-ok",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "sign-ok",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0c63b78175ebba17349bac42929e921c06f9f48013f2716b0239e2188cb1066c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-sign-throw",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "sign-throw",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-throw.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "de9501a9a1f6f0169ba3419b7505bfeb919cbb5baec2e16655a2655417a95a07"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-throw.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-sign-cancel",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "sign-cancel",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "276e22f21fb8d3cafc00f01254dfa8124ddc55b9390333fed91b74538fdcfca5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-sign-deadline",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "sign-deadline",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-deadline.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1b516db75ac65d40b257214d779b7a0423d0d30e6cf69d5176f56d28c31ea289"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-deadline.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-ok-peer",
+      "argv": [
+        "/usr/bin/openssl",
+        "s_client",
+        "-quiet",
+        "-tls1_2",
+        "-cipher",
+        "AES128-GCM-SHA256",
+        "-connect",
+        "127.0.0.1:40681",
+        "-servername",
+        "example.com",
+        "-CAfile",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-verify_return_error",
+        "-verify_hostname",
+        "example.com"
+      ],
+      "exit_code": 0,
+      "expected_success": true,
+      "timeout_seconds": 12,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-ok-peer.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-ok-peer.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "34c6a95043c9444c0edd91dc2e3e0141df441d7c62c261ee2de7ef7713fbb956"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-ok",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "decrypt-ok",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "31c338ad9bb9baca3d6459f6562b6dd0d850ec7e52a4aaf1bedf84decd49ec8f"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-throw-peer",
+      "argv": [
+        "/usr/bin/openssl",
+        "s_client",
+        "-quiet",
+        "-tls1_2",
+        "-cipher",
+        "AES128-GCM-SHA256",
+        "-connect",
+        "127.0.0.1:43041",
+        "-servername",
+        "example.com",
+        "-CAfile",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-verify_return_error",
+        "-verify_hostname",
+        "example.com"
+      ],
+      "exit_code": 1,
+      "expected_success": false,
+      "timeout_seconds": 12,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-throw-peer.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-throw-peer.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "09f2e222fec7b045fcb251faaac5d8732d140625dc5ba3daab153d3d8a80ac0d"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-throw",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "decrypt-throw",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-throw.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "44601079a8a6009a4f1ec443f728ba339a4343df9c0316a7a3b81316f79bdee5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-throw.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-cancel-peer",
+      "argv": [
+        "/usr/bin/openssl",
+        "s_client",
+        "-quiet",
+        "-tls1_2",
+        "-cipher",
+        "AES128-GCM-SHA256",
+        "-connect",
+        "127.0.0.1:38081",
+        "-servername",
+        "example.com",
+        "-CAfile",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-verify_return_error",
+        "-verify_hostname",
+        "example.com"
+      ],
+      "exit_code": 1,
+      "expected_success": false,
+      "timeout_seconds": 12,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-cancel-peer.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-cancel-peer.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c605ade5ea7b3cd394885a937498c4675f9eb7bc2e5278c18890a23b36ce07c2"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-cancel",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "decrypt-cancel",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c1e44e053b333657bba950b3d538817e098d3385a7b0f5c91f8f7461bd17e7a4"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-deadline-peer",
+      "argv": [
+        "/usr/bin/openssl",
+        "s_client",
+        "-quiet",
+        "-tls1_2",
+        "-cipher",
+        "AES128-GCM-SHA256",
+        "-connect",
+        "127.0.0.1:43165",
+        "-servername",
+        "example.com",
+        "-CAfile",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-verify_return_error",
+        "-verify_hostname",
+        "example.com"
+      ],
+      "exit_code": 1,
+      "expected_success": false,
+      "timeout_seconds": 12,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-deadline-peer.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-deadline-peer.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9150b087f0f20cd9fdffd843951102cac0abb2adaefd78a39d3ea64261b0e7bf"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-deadline",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "decrypt-deadline",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-deadline.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "00cfc634e64c633f85e4fd47f021ca4bdeb04f257bffdb140090e3be85f499f8"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-deadline.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-short-peer",
+      "argv": [
+        "/usr/bin/openssl",
+        "s_client",
+        "-quiet",
+        "-tls1_2",
+        "-cipher",
+        "AES128-GCM-SHA256",
+        "-connect",
+        "127.0.0.1:46679",
+        "-servername",
+        "example.com",
+        "-CAfile",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.pem",
+        "-verify_return_error",
+        "-verify_hostname",
+        "example.com"
+      ],
+      "exit_code": 1,
+      "expected_success": false,
+      "timeout_seconds": 12,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-short-peer.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-short-peer.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0919e6fc4e5be806a48904064cc2cd75a8f5a9f2796fa03ca9d488c9002a7316"
+        }
+      }
+    },
+    {
+      "id": "consumer-decrypt-short",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "decrypt-short",
+        "/tmp/wirestack-m8-006-release-u921okkx/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/spki.der"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-short.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0129397ce2f25cca0809af66e44270cc08759067bc5f7d1c087da822e10e87d8"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-short.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "ec-fixture-certificate",
+      "argv": [
+        "/usr/bin/openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "ec",
+        "-pkeyopt",
+        "ec_paramgen_curve:P-256",
+        "-nodes",
+        "-keyout",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/key.pem",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/certificate.pem",
+        "-subj",
+        "/CN=example.com",
+        "-addext",
+        "subjectAltName=DNS:example.com",
+        "-days",
+        "2"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c50a939cb5df0f354df7e34da4deaaa0031cb068f9d9090c306642cd10287cfa"
+        }
+      }
+    },
+    {
+      "id": "ec-fixture-certificate-der",
+      "argv": [
+        "/usr/bin/openssl",
+        "x509",
+        "-in",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/certificate.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/certificate.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-certificate-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-certificate-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "ec-fixture-key-der",
+      "argv": [
+        "/usr/bin/openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/key.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/key.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-key-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-key-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "ec-fixture-spki",
+      "argv": [
+        "/usr/bin/openssl",
+        "pkey",
+        "-in",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/key.pem",
+        "-pubout",
+        "-outform",
+        "DER",
+        "-out",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-spki.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/ec-fixture-spki.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-reject-non-rsa",
+      "argv": [
+        "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin/main",
+        "reject-non-rsa",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/certificate.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/key.der",
+        "/tmp/wirestack-m8-006-release-u921okkx/elliptic-identity/spki.der"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer/target/release/bin",
+      "exit_code": 0,
+      "timed_out": false,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-reject-non-rsa.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7dce85ff1da2ad9daa6cde17a3ae214692f5c0091a0f5f33f375ddeb347e7212"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-reject-non-rsa.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "reject-decryptor-readback",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "/tmp/wirestack-m8-006-release-u921okkx/consumer",
+      "exit_code": 1,
+      "timed_out": false,
+      "timeout_seconds": 600,
+      "expected_exit_code": 1,
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/reject-decryptor-readback.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/reject-decryptor-readback.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cbe02a3af63bd93a09f030948b31611ca2aa5ba72f6263e93d0b054b8d58ddf6"
+        }
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "mode": "versions12",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_VERSIONS=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions12.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "26ec0ba5b5c433056d4e6f1beaa43c3a916b3a8530e361a3a85609e81bfdf241"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions12.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "versions13",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_VERSIONS=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions13.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "26ec0ba5b5c433056d4e6f1beaa43c3a916b3a8530e361a3a85609e81bfdf241"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-versions13.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "release-keylog-rejected",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_RELEASE_KEYLOG_REJECTED=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-release-keylog-rejected.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5421d182c744bc3c152356ad534c7add3ce80a7c01c505c06301d0e20acbf84a"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-release-keylog-rejected.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "sign-ok",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_sign-ok=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0c63b78175ebba17349bac42929e921c06f9f48013f2716b0239e2188cb1066c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "sign-throw",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_sign-throw=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-throw.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "de9501a9a1f6f0169ba3419b7505bfeb919cbb5baec2e16655a2655417a95a07"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-throw.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "sign-cancel",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_sign-cancel=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "276e22f21fb8d3cafc00f01254dfa8124ddc55b9390333fed91b74538fdcfca5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "sign-deadline",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_sign-deadline=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-deadline.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1b516db75ac65d40b257214d779b7a0423d0d30e6cf69d5176f56d28c31ea289"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-sign-deadline.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "decrypt-ok",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_decrypt-ok=PASS",
+      "peer_policy": "external OpenSSL peer restricts existing TLS 1.2 static-RSA policy; Wirestack cipher policy unchanged",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-ok.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "31c338ad9bb9baca3d6459f6562b6dd0d850ec7e52a4aaf1bedf84decd49ec8f"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-ok.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "decrypt-throw",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_decrypt-throw=PASS",
+      "peer_policy": "external OpenSSL peer restricts existing TLS 1.2 static-RSA policy; Wirestack cipher policy unchanged",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-throw.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "44601079a8a6009a4f1ec443f728ba339a4343df9c0316a7a3b81316f79bdee5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-throw.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "decrypt-cancel",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_decrypt-cancel=PASS",
+      "peer_policy": "external OpenSSL peer restricts existing TLS 1.2 static-RSA policy; Wirestack cipher policy unchanged",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c1e44e053b333657bba950b3d538817e098d3385a7b0f5c91f8f7461bd17e7a4"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "decrypt-deadline",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_decrypt-deadline=PASS",
+      "peer_policy": "external OpenSSL peer restricts existing TLS 1.2 static-RSA policy; Wirestack cipher policy unchanged",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-deadline.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "00cfc634e64c633f85e4fd47f021ca4bdeb04f257bffdb140090e3be85f499f8"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-deadline.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "decrypt-short",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_decrypt-short=PASS",
+      "peer_policy": "external OpenSSL peer restricts existing TLS 1.2 static-RSA policy; Wirestack cipher policy unchanged",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-short.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0129397ce2f25cca0809af66e44270cc08759067bc5f7d1c087da822e10e87d8"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-decrypt-short.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "mode": "reject-non-rsa",
+      "status": "PASS",
+      "marker": "NATIVE_TLS_reject-non-rsa=PASS",
+      "stdout": {
+        "path": "docs/evidence/M8-006/native-release/consumer-reject-non-rsa.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7dce85ff1da2ad9daa6cde17a3ae214692f5c0091a0f5f33f375ddeb347e7212"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M8-006/native-release/consumer-reject-non-rsa.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "a7b45037ca5f3a22a8eb74538174f659110ca2c77e67cd36089c0f0b65ea6b99"
+  },
+  "generated_at_utc": "2026-09-14T01:40:07.574628+00:00",
+  "installation": {
+    "method": "fresh archive extracted outside source checkout",
+    "archive_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9a347a8e6ff4076b5b42ebf16ccad356622097f0bcfaf2231f8297c38ac84833"
+    },
+    "archive_retained": false,
+    "source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40fa830bcff55aee60756aec3fb8c1b82829517eca92724eb1256fda9028ca06"
+    },
+    "checkout_path_dependency": false,
+    "test_only_provider_overlay": false,
+    "consumer_manifest_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f18bd7f27bcb1174d0784fbb720a87a576afba8b26affde84888ac9b7b233590"
+    }
+  },
+  "consumer_binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "3755b1656bead2feea83f81acc72f4f1ff713561154a5ee3a04a99db924e0a8b"
+  },
+  "public_context_authority": {
+    "status": "PASS",
+    "contract": "An installed public context cannot yield the raw RSA decryptor service.",
+    "fixture": {
+      "path": "docs/evidence/M8-006/security/external-decryptor-readback.cj.txt",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e4717db566754adb9345796a9ec5bc91872d09a3060d5b5110780b4a84d0eb96"
+      }
+    },
+    "consumer_manifest_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d61287166514b399609f0743bc507c983cc48e212bd3b00e2e4413d2d01f83e0"
+    },
+    "stdout": {
+      "path": "docs/evidence/M8-006/native-release/reject-decryptor-readback.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "docs/evidence/M8-006/native-release/reject-decryptor-readback.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cbe02a3af63bd93a09f030948b31611ca2aa5ba72f6263e93d0b054b8d58ddf6"
+      }
+    }
+  }
+}

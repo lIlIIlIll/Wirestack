@@ -1,0 +1,2 @@
+{"case": "fictitious", "result": "REJECTED", "revision": "0000000000000000000000000000000000000000", "code": "REPORT_REVISION"}
+{"case": "unrelated", "result": "REJECTED", "revision": "f8e8dbca3006a45ab7859373436f82c35eda3eb9", "code": "SOURCE_REVISION_MISMATCH"}

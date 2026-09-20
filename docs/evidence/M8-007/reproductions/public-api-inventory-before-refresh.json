@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "status": "FAIL",
+  "command": {
+    "id": "public-api-inventory",
+    "argv": [
+      "scripts/check-m7-032-public-api",
+      "--json",
+      "--inventory",
+      "docs/api/baselines/wirestack-linux-pre1-m8-007.json"
+    ],
+    "status": "FAIL",
+    "exit_code": 1,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-14T07:03:21.565770Z",
+    "finished_at_utc": "2026-09-14T07:03:23.832081Z",
+    "duration_ms": 2266.31,
+    "stdout_path": "docs/evidence/M8-007/commands/20260914T065346/public-api-inventory.stdout.log",
+    "stderr_path": "docs/evidence/M8-007/commands/20260914T065346/public-api-inventory.stderr.log",
+    "stdout_excerpt": "{\"error\": \"committed public API inventory is stale\", \"status\": \"FAIL\", \"taskId\": \"M7-032\"}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4c010f6cf3aafa67bf3e213341e8530dd6f8d87084b0a1743d2e883535f49ea6"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

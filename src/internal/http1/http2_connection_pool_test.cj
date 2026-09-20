@@ -88,6 +88,35 @@ class Http2ConnectionPoolTest {
     }
 
     @TestCase
+    func closeRacingUnpublishedAdmissionReleasesConnectionOwners(): Unit {
+        let pool = Http2ConnectionPool()
+        let gate = PoolAdmissionGate()
+        let factory = PoolGatedFactory(gate)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let pending = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory) }
+
+        gate.waitUntilEntered()
+        @Expect(factory.activeStreamCount, 1)
+        @Expect(factory.ownedStreamCount, 1)
+        try { pool.close() } finally { gate.release() }
+
+        var rejectedAsClosed = false
+        try {
+            let _ = pending.get(Duration.second)
+        } catch (error: NetworkException) {
+            rejectedAsClosed = isPoolClosed(error.category)
+        }
+
+        @Expect(rejectedAsClosed)
+        @Expect(factory.activeStreamCount, 0)
+        @Expect(factory.ownedStreamCount, 0)
+        @Expect(factory.connectionClosed)
+        let terminal = pool.snapshot()
+        @Expect(terminal.connections, 0)
+        @Expect(terminal.reservations, 0)
+    }
+
+    @TestCase
     func completeSecurityKeyPreventsCrossContextReuse(): Unit {
         let pool = Http2ConnectionPool()
         let factory = PoolFakeFactory(100u32)
@@ -122,6 +151,31 @@ class Http2ConnectionPoolTest {
         factory.finish(existing)
         pool.release(existing)
         @Expect(firstConnection.closeCalls.load(), 1)
+        factory.finish(replacement)
+        pool.release(replacement)
+        pool.close()
+    }
+
+    @TestCase
+    func drainingConnectionWaitsForNonLocalOwnersBeforeDiscard(): Unit {
+        let pool = Http2ConnectionPool()
+        let factory = PoolFakeFactory(8u32)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        let draining = factory.connection(0)
+        draining.retainOwner()
+        draining.beginDrain()
+        factory.finish(lease)
+        pool.release(lease)
+
+        @Expect(draining.activeStreamCount, 0)
+        @Expect(draining.ownedStreamCount, 1)
+        @Expect(draining.closeCalls.load(), 0)
+        @Expect(pool.snapshot().ownedStreams, 1)
+
+        draining.releaseOwner()
+        let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        @Expect(draining.closeCalls.load(), 1)
         factory.finish(replacement)
         pool.release(replacement)
         pool.close()
@@ -247,6 +301,9 @@ private class PoolGatedFactory <: Http2MultiplexedConnectionFactory {
     }
 
     func finish(lease: Http2PoolLease): Unit { connection.finish(lease.admission.stream.id) }
+    prop activeStreamCount: Int64 { get() { connection.activeStreamCount } }
+    prop ownedStreamCount: Int64 { get() { connection.ownedStreamCount } }
+    prop connectionClosed: Bool { get() { connection.isClosed() } }
 }
 
 private class PoolGatedConnection <: Http2MultiplexedConnection {
@@ -257,6 +314,7 @@ private class PoolGatedConnection <: Http2MultiplexedConnection {
     init(gate: PoolAdmissionGate) { this.gate = gate }
 
     public prop activeStreamCount: Int64 { get() { delegate.activeStreamCount } }
+    public prop ownedStreamCount: Int64 { get() { delegate.ownedStreamCount } }
     public prop streamCapacity: UInt32 { get() { delegate.streamCapacity } }
     public prop acceptingNewStreams: Bool { get() { delegate.acceptingNewStreams } }
 
@@ -264,8 +322,9 @@ private class PoolGatedConnection <: Http2MultiplexedConnection {
         listener: Http2GoAwayListener,
         endStream: Bool
     ): Http2PoolStreamClaim {
+        let admitted = delegate.openStream(listener, endStream)
         if (firstAdmission.compareAndSwap(true, false)) { gate.enter() }
-        delegate.openStream(listener, endStream)
+        admitted
     }
 
     public func close(): Unit { delegate.close() }
@@ -282,6 +341,7 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
     private let goAway: Http2GoAwayManager
     private let mutex = Mutex()
     private var closed = false
+    private var retainedOwners: Int64 = 0
     let closeCalls = AtomicInt64(0)
     let abortCalls = AtomicInt64(0)
 
@@ -295,6 +355,9 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
     }
 
     public prop activeStreamCount: Int64 { get() { registry.activeLocalCount } }
+    public prop ownedStreamCount: Int64 {
+        get() { registry.activeCount + synchronized(mutex) { retainedOwners } }
+    }
     public prop streamCapacity: UInt32 { get() { registry.peerMaxConcurrentStreams } }
     public prop acceptingNewStreams: Bool {
         get() { synchronized(mutex) { !closed } && goAway.acceptingNewStreams }
@@ -319,10 +382,19 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
         let claimed = synchronized(mutex) {
             if (closed) { false } else { closed = true; true }
         }
-        if (claimed) { let _ = abortCalls.fetchAdd(1) }
+        if (claimed) {
+            let _ = machine.finish(
+                code: Http2ErrorCode.InternalError, reason: "fake HTTP/2 connection aborted"
+            )
+            let _ = registry.closeConnection(machine.completion.getOrThrow())
+            flow.close()
+            let _ = abortCalls.fetchAdd(1)
+        }
     }
 
     func beginDrain(): Unit { let _ = machine.beginDrain() }
+    func retainOwner(): Unit { synchronized(mutex) { retainedOwners++ } }
+    func releaseOwner(): Unit { synchronized(mutex) { retainedOwners-- } }
     func has(id: Http2StreamId): Bool { registry.stream(id).isSome() }
     func finish(id: Http2StreamId): Unit {
         registry.localEnd(id)
@@ -367,4 +439,7 @@ private func isNegotiatedHttp11(value: HttpNegotiatedProtocol): Bool {
 }
 private func isPoolDeadline(value: NetworkErrorCategory): Bool {
     match (value) { case NetworkErrorCategory.DeadlineExceeded => true; case _ => false }
+}
+private func isPoolClosed(value: NetworkErrorCategory): Bool {
+    match (value) { case NetworkErrorCategory.Closed => true; case _ => false }
 }

@@ -1,5 +1,7 @@
 package wirestack.tls
 
+import std.sync.AtomicReference
+
 import wirestack.internal.tls_engine as engine
 
 /** Read-only provider and build identity retained by a completed handshake. */
@@ -41,8 +43,8 @@ public class TlsCapabilities {
     internal init(value: engine.TlsCapabilities) { this.value = value }
 
 /**
- * Wirestack 公开 API：supports。
- * @param capability 参数 capability。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param capability 调用方提供的输入值。
  */
     public func supports(capability: TlsCapability): Bool {
         value.supports(capability)
@@ -52,35 +54,35 @@ public class TlsCapabilities {
 /** Immutable negotiated TLS facts retained before engine ownership transfers. */
 public class TlsHandshakeInfo {
 /**
- * Wirestack 公开 API：version。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let version: TlsVersion
 /**
- * Wirestack 公开 API：cipherSuite。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let cipherSuite: String
 /**
- * Wirestack 公开 API：negotiatedAlpn。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let negotiatedAlpn: ?String
 /**
- * Wirestack 公开 API：peerCertificateChain。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let peerCertificateChain: ?CertificateChain
 /**
- * Wirestack 公开 API：verificationEvidence。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let verificationEvidence: ?TrustVerificationEvidence
 /**
- * Wirestack 公开 API：resumed。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let resumed: Bool
 /**
- * Wirestack 公开 API：provider。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let provider: TlsProviderInfo
 /**
- * Wirestack 公开 API：requestedServerName。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let requestedServerName: ?String
 
@@ -104,11 +106,14 @@ public class TlsClientContext {
  * Wirestack 公开 API：capabilities。
  */
     public let capabilities: TlsCapabilities
+    /** Checked process-unique epoch used to partition all resumable state. */
+    public let contextVersion: UInt64
 
     internal init(provider: engine.TlsProvider, value: engine.TlsClientContext) {
         this.provider = provider
         this.value = value
         capabilities = TlsCapabilities(value.capabilities)
+        contextVersion = value.contextVersion
     }
 
 /**
@@ -159,10 +164,10 @@ public class TlsClientContext {
     /**
      * Consumes `transport` and keeps SNI separate from the verified reference
      * identity. Engine creation failures and handshake failures abort it.
- * @param context 参数 context。
- * @param referenceIdentity 参数 referenceIdentity。
- * @param serverName 参数 serverName。
- * @param transport 参数 transport。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param referenceIdentity 连接所期望的身份。
+ * @param serverName 调用方提供的输入值。
+ * @param transport 调用方提供的输入值。
      */
     public func handshake(
         transport: DuplexTransport,
@@ -178,6 +183,70 @@ public class TlsClientContext {
         }
         let secured = engine.TlsConnection.handshake(tlsEngine, transport, context: context)
         TlsConnection(secured, provider)
+    }
+}
+
+/**
+ * Atomically replaceable client context source.
+ *
+ * Each handshake loads exactly one immutable snapshot. Replacement affects
+ * only handshakes that load afterward; existing handshakes and connections
+ * retain their original context and session partition.
+ */
+public class TlsClientContextStore {
+    private let current: AtomicReference<TlsClientContext>
+
+    /** @param initial Context used until the first replacement. */
+    public init(initial: TlsClientContext) {
+        current = AtomicReference<TlsClientContext>(initial)
+    }
+
+    /** Returns the immutable context a handshake would currently use. */
+    public func snapshot(): TlsClientContext { current.load() }
+
+    /**
+     * Atomically selects a context for future handshakes.
+     * @param value Built immutable context selected by this replacement.
+     * @return The selected context's checked process-unique version.
+     */
+    public func replace(value: TlsClientContext): UInt64 {
+        let _ = current.swap(value)
+        value.contextVersion
+    }
+
+    /**
+     * Handshakes with one atomic context snapshot and a DNS reference identity.
+     * @param transport Connected transport consumed even when the handshake fails.
+     * @param serverName Canonical DNS name used for SNI and certificate verification.
+     * @param context Shared handshake cancellation, absolute deadline and trace.
+     */
+    public func handshake(
+        transport: DuplexTransport,
+        serverName: HostName,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection {
+        snapshot().handshake(transport, serverName, context: context)
+    }
+
+    /**
+     * Handshakes with one atomic snapshot and an explicit reference identity.
+     * @param transport Connected transport consumed even when the handshake fails.
+     * @param referenceIdentity Expected certificate identity, independent of SNI.
+     * @param serverName Optional canonical DNS name sent as SNI.
+     * @param context Shared handshake cancellation, absolute deadline and trace.
+     */
+    public func handshake(
+        transport: DuplexTransport,
+        referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName = None<HostName>,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection {
+        snapshot().handshake(
+            transport,
+            referenceIdentity,
+            serverName: serverName,
+            context: context
+        )
     }
 }
 
@@ -202,8 +271,8 @@ public class TlsClientContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：securityProfile。
- * @param profile 参数 profile。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param profile 调用方提供的输入值。
  */
     public func securityProfile(profile: TlsSecurityProfile): TlsClientContextBuilder {
         let _ = value.securityProfile(profile)
@@ -211,9 +280,9 @@ public class TlsClientContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：versions。
- * @param maximum 参数 maximum。
- * @param minimum 参数 minimum。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param maximum 调用方提供的输入值。
+ * @param minimum 调用方提供的输入值。
  */
     public func versions(minimum: TlsVersion, maximum: TlsVersion): TlsClientContextBuilder {
         let _ = value.versions(minimum, maximum)
@@ -221,8 +290,8 @@ public class TlsClientContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：trust。
- * @param policy 参数 policy。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param policy 调用方提供的输入值。
  */
     public func trust(policy: TrustPolicy): TlsClientContextBuilder {
         let _ = value.trust(policy)
@@ -238,6 +307,26 @@ public class TlsClientContextBuilder {
         this
     }
 
+    /**
+     * Configures an external decryptor. Client contexts reject this at build.
+     * @param decryptor Caller-owned thread-safe decryptor service.
+     */
+    public func withExternalDecryptor(
+        decryptor: ExternalDecryptor
+    ): TlsClientContextBuilder {
+        let _ = value.withExternalDecryptor(decryptor)
+        this
+    }
+
+    /**
+     * Configures explicit test-build key logging.
+     * @param sink Caller-owned thread-safe key-log sink.
+     */
+    public func withKeyLogSink(sink: KeyLogSink): TlsClientContextBuilder {
+        let _ = value.withKeyLogSink(sink)
+        this
+    }
+
 /**
  * Wirestack 公开 API：alpn。
  * @param protocols 参数 protocols。
@@ -248,7 +337,7 @@ public class TlsClientContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：build。
+ * Wirestack 公开 API：构造不可变结果并执行边界校验。
  */
     public func build(): TlsClientContext { TlsClientContext(provider, value.build()) }
 }
@@ -261,11 +350,14 @@ public class TlsServerContext {
  * Wirestack 公开 API：capabilities。
  */
     public let capabilities: TlsCapabilities
+    /** Checked process-unique epoch used to partition all resumable state. */
+    public let contextVersion: UInt64
 
     internal init(provider: engine.TlsProvider, value: engine.TlsServerContext) {
         this.provider = provider
         this.value = value
         capabilities = TlsCapabilities(value.capabilities)
+        contextVersion = value.contextVersion
     }
 
 /**
@@ -318,6 +410,45 @@ public class TlsServerContext {
     }
 }
 
+/**
+ * Atomically replaceable server context source.
+ *
+ * Accepted connections snapshot it only when their TLS handshake begins.
+ */
+public class TlsServerContextStore {
+    private let current: AtomicReference<TlsServerContext>
+
+    /** @param initial Context used until the first replacement. */
+    public init(initial: TlsServerContext) {
+        current = AtomicReference<TlsServerContext>(initial)
+    }
+
+    /** Returns the immutable context a handshake would currently use. */
+    public func snapshot(): TlsServerContext { current.load() }
+
+    /**
+     * Atomically selects a context for future handshakes.
+     * @param value Built immutable context selected by this replacement.
+     * @return The selected context's checked process-unique version.
+     */
+    public func replace(value: TlsServerContext): UInt64 {
+        let _ = current.swap(value)
+        value.contextVersion
+    }
+
+    /**
+     * Handshakes using one atomic context snapshot.
+     * @param transport Connected transport transferred to the TLS connection.
+     * @param context Shared handshake cancellation, absolute deadline and trace.
+     */
+    public func handshake(
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): TlsConnection {
+        snapshot().handshake(transport, context: context)
+    }
+}
+
 /** Mutable builder state never enters a built server context. */
 public class TlsServerContextBuilder {
     private let provider: engine.TlsProvider
@@ -339,8 +470,8 @@ public class TlsServerContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：securityProfile。
- * @param profile 参数 profile。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param profile 调用方提供的输入值。
  */
     public func securityProfile(profile: TlsSecurityProfile): TlsServerContextBuilder {
         let _ = value.securityProfile(profile)
@@ -348,9 +479,9 @@ public class TlsServerContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：versions。
- * @param maximum 参数 maximum。
- * @param minimum 参数 minimum。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param maximum 调用方提供的输入值。
+ * @param minimum 调用方提供的输入值。
  */
     public func versions(minimum: TlsVersion, maximum: TlsVersion): TlsServerContextBuilder {
         let _ = value.versions(minimum, maximum)
@@ -366,6 +497,26 @@ public class TlsServerContextBuilder {
         this
     }
 
+    /**
+     * Configures external raw-RSA private-key decryption.
+     * @param decryptor Caller-owned thread-safe decryptor service.
+     */
+    public func withExternalDecryptor(
+        decryptor: ExternalDecryptor
+    ): TlsServerContextBuilder {
+        let _ = value.withExternalDecryptor(decryptor)
+        this
+    }
+
+    /**
+     * Configures explicit test-build key logging.
+     * @param sink Caller-owned thread-safe key-log sink.
+     */
+    public func withKeyLogSink(sink: KeyLogSink): TlsServerContextBuilder {
+        let _ = value.withKeyLogSink(sink)
+        this
+    }
+
 /**
  * Wirestack 公开 API：clientAuthentication。
  * @param value 参数 value。
@@ -376,8 +527,8 @@ public class TlsServerContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：clientTrust。
- * @param policy 参数 policy。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param policy 调用方提供的输入值。
  */
     public func clientTrust(policy: TrustPolicy): TlsServerContextBuilder {
         let _ = value.clientTrust(policy)
@@ -385,8 +536,8 @@ public class TlsServerContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：alpn。
- * @param protocols 参数 protocols。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param protocols 调用方提供的输入值。
  */
     public func alpn(protocols: Array<String>): TlsServerContextBuilder {
         let _ = value.alpn(protocols)
@@ -394,7 +545,7 @@ public class TlsServerContextBuilder {
     }
 
 /**
- * Wirestack 公开 API：build。
+ * Wirestack 公开 API：构造不可变结果并执行边界校验。
  */
     public func build(): TlsServerContext { TlsServerContext(provider, value.build()) }
 }
@@ -404,7 +555,7 @@ public class TlsConnection <: DuplexTransport {
     private let value: engine.TlsConnection
     private let provider: engine.TlsProvider
 /**
- * Wirestack 公开 API：handshakeInfo。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let handshakeInfo: TlsHandshakeInfo
 
@@ -415,22 +566,22 @@ public class TlsConnection <: DuplexTransport {
     }
 
 /**
- * Wirestack 公开 API：info。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop info: TransportInfo { get() { value.info } }
 /**
- * Wirestack 公开 API：state。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop state: TlsConnectionState { get() { value.state } }
 /**
- * Wirestack 公开 API：closureEvidence。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop closureEvidence: ?TlsClosureEvidence { get() { value.closureEvidence } }
 
 /**
- * Wirestack 公开 API：readSome。
- * @param context 参数 context。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param destination 调用方提供的输入值。
  */
     public func readSome(
         destination: MutableByteSpan,
@@ -438,9 +589,9 @@ public class TlsConnection <: DuplexTransport {
     ): ReadResult { value.readSome(destination, context: context) }
 
 /**
- * Wirestack 公开 API：writeSome。
- * @param context 参数 context。
- * @param source 参数 source。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param source 调用方提供的输入值。
  */
     public func writeSome(
         source: ByteSpan,
@@ -448,62 +599,72 @@ public class TlsConnection <: DuplexTransport {
     ): Int64 { value.writeSome(source, context: context) }
 
 /**
- * Wirestack 公开 API：shutdown。
- * @param direction 参数 direction。
+ * Wirestack 公开 API：请求服务有序停止并返回停止状态。
+ * @param direction 调用方提供的输入值。
  */
     public func shutdown(direction: ShutdownDirection): Unit { value.shutdown(direction) }
 /**
- * Wirestack 公开 API：close。
- * @param context 参数 context。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
  */
     public func close(context: OperationContext): Unit { value.close(context) }
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { value.close() }
 /**
- * Wirestack 公开 API：abort。
- * @param reason 参数 reason。
+ * Wirestack 公开 API：立即中止资源并释放底层状态。
+ * @param reason 描述终止原因的稳定值。
  */
     public func abort(reason!: ?AbortReason = None<AbortReason>): Unit { value.abort(reason: reason) }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { value.isClosed() }
 }
 
-/** TLS acceptor over a caller-owned provider-neutral transport listener. */
+/**
+ * TLS acceptor over a caller-owned provider-neutral listener.
+ *
+ * Fixed-context construction remains available. Store-backed construction
+ * atomically snapshots the current context after transport acceptance and
+ * immediately before each TLS handshake.
+ */
 public class TlsListener <: Resource {
     private let listener: TransportListener
-    private let context: TlsServerContext
+    private let contextStore: TlsServerContextStore
 
-/**
- * Wirestack 公开 API：init。
- * @param context 参数 context。
- * @param listener 参数 listener。
- */
+    /**
+     * @param listener Exclusively owned transport listener.
+     * @param context Immutable context used for every accepted connection.
+     */
     public init(listener: TransportListener, context: TlsServerContext) {
         this.listener = listener
-        this.context = context
+        contextStore = TlsServerContextStore(context)
     }
 
-/**
- * Wirestack 公开 API：accept。
- * @param context 参数 context。
- */
+    /**
+     * @param listener Exclusively owned transport listener.
+     * @param contextStore Atomically replaceable source for future handshakes.
+     */
+    public init(listener: TransportListener, contextStore: TlsServerContextStore) {
+        this.listener = listener
+        this.contextStore = contextStore
+    }
+
+    /**
+     * Accepts a transport and handshakes with one immutable context snapshot.
+     * @param context Shared cancellation, absolute deadline and trace for accept and handshake.
+     */
     public func accept(
         context!: OperationContext = OperationContext.background()
     ): TlsConnection {
         let accepted = listener.accept(context)
-        this.context.handshake(accepted, context: context)
+        contextStore.handshake(accepted, context: context)
     }
 
-/**
- * Wirestack 公开 API：close。
- */
+    /** Closes the owned listener without closing previously returned connections. */
     public func close(): Unit { listener.close() }
-/**
- * Wirestack 公开 API：isClosed。
- */
+    /** Reports whether the owned transport listener is closed. */
     public func isClosed(): Bool { listener.isClosed() }
 }

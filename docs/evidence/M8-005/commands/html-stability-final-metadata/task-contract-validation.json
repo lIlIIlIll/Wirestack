@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-005",
+  "status": "PASS",
+  "command": {
+    "id": "task-contract-validation",
+    "argv": [
+      "python3",
+      "tools/repository/repository_tooling.py",
+      "--root",
+      ".",
+      "validate-tasks",
+      "--json"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-13T22:05:56.668268Z",
+    "finished_at_utc": "2026-09-13T22:05:57.032273Z",
+    "duration_ms": 364.008,
+    "stdout_path": "docs/evidence/M8-005/commands/html-stability-final-metadata/task-contract-validation.stdout.log",
+    "stderr_path": "docs/evidence/M8-005/commands/html-stability-final-metadata/task-contract-validation.stderr.log",
+    "stdout_excerpt": "{\"issues\": [], \"kind\": \"task-contract-validation\", \"schema_version\": 1, \"status\": \"PASS\", \"task_ids\": [\"M0-014\", \"M2-004\", \"M2-006\", \"M3-029\", \"M3-030\", \"M3-031\", \"M6-026\", \"M7-022\", \"M7-027\", \"M7-028\", \"M7-029\", \"M7-030\", \"M7-031\", \"M7-032\", \"M7-033\", \"M8-001\", \"M8-002\", \"M8-003\", \"M8-004\", \"M8-005\", \"P1-012\", \"P1-013\", \"P1-014\"]}\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false,
+    "stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c39d78f4bc42aa113a7b455d07590afa474297074fdb989158dc553c717bd6e"
+    },
+    "stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "26c43d3a8019fae54c24faff8b8bce6d00953140",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "exit_code": 1,
+      "total": 102,
+      "passed": 99,
+      "failed": 3,
+      "errors": 0
+    },
+    "green": {
+      "exit_code": 0,
+      "total": 102,
+      "passed": 102,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-ownership-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-ownership-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-ownership-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-ownership-green.stderr.log"
+      }
+    }
+  },
+  "findings": [
+    {
+      "comment": 3997896969,
+      "correction": "Reject adopted DNS clients whose immutable settings differ by value, before hosts input or ownership transfer. Equivalent separately constructed settings are accepted. Comparison uses owned arrays internally rather than allocating defensive copies.",
+      "proof": "A one-second client cannot be adopted under a thirty-second resolver budget. Rejection leaves the client open and caller-owned; a matching adoption succeeds and closing the resolver closes its owned client."
+    },
+    {
+      "comment": 3997896972,
+      "correction": "Hosts and nameservers share address-scope validation and canonicalization, removing leading zeros and zero scope IDs.",
+      "proof": "The hosts regression contains equivalent %1/%01 addresses and a zero-scoped loopback address. A two-result limit retains distinct addresses and canonical scope values rather than duplicate endpoints."
+    },
+    {
+      "comment": 3997896973,
+      "correction": "Name-wide cache invalidation no longer depends on inserting a retained negative entry. Valid NXDOMAIN without SOA or with zero/expired negative lifetime purges old family entries under the existing cache mutex.",
+      "proof": "The owned peer alternates cached positive A answers with NXDOMAIN without SOA and with zero-TTL SOA. Each subsequent Any/maxResults=1 lookup performs a fresh query and receives a changed address instead of serving the stale positive. No negative lifetime is invented."
+    }
+  ]
+}

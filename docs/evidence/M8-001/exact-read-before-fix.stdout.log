@@ -1,0 +1,50 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 6373535 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 6373535 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (258527 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (58895 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (41077 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (119699 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (54749 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (19600 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (81109 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (44997 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (91558 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (87937 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (33370 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (26081 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (88397 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (138007 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (84277 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (50335 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (47293 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (65839 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1528104 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (12887 ns)
+    [ FAILED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (69728 ns)
+    Expect Failed: `(matched == true)`
+       left: false
+      right: true
+
+    [ FAILED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (55213 ns)
+    Expect Failed: `(matched == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 22
+    PASSED: 20, SKIPPED: 0, ERROR: 0
+    FAILED: 2, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 14794698 ns, RESULT:
+TP: wirestack.*, time elapsed: 14751916 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 6373535 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 6373535 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (69728 ns)
+        [ FAILED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (55213 ns)
+Summary: TOTAL: 22
+    PASSED: 20, SKIPPED: 0, ERROR: 0
+    FAILED: 2
+--------------------------------------------------------------------------------------------------
