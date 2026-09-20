@@ -1,7 +1,7 @@
 name: Linux Release Attestation
 
-on:
-  workflow_dispatch:
+# Retained as historical M7 evidence only. M8-007 is the active signer.
+on: []
 
 permissions: {}
 

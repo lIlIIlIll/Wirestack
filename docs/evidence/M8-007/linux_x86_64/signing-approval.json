@@ -1,23 +1,23 @@
 {
-  "approved_at": "2026-09-19T19:28:53.703331Z",
+  "approved_at": "2026-09-20T06:40:46.720503Z",
   "approved_by": {
     "id": 180488944,
     "login": "lIlIIlIll"
   },
-  "approved_ref": "refs/tags/m8-007-signing-97b3ffcf35126ca358a0b946dfe12f0adfb499da",
-  "approved_source_commit": "97b3ffcf35126ca358a0b946dfe12f0adfb499da",
+  "approved_ref": "refs/tags/m8-007-signing-f67142f174cd7f7c710f36144b11e9cc21aa9470",
+  "approved_source_commit": "f67142f174cd7f7c710f36144b11e9cc21aa9470",
   "configured": {
     "approved_sha_variable": {
       "created_at": "2026-09-19T19:28:49Z",
       "name": "M8_007_APPROVED_SIGNING_SHA",
       "state": "PRESENT",
-      "updated_at": "2026-09-19T19:28:49Z",
-      "value": "97b3ffcf35126ca358a0b946dfe12f0adfb499da"
+      "updated_at": "2026-09-20T06:40:38Z",
+      "value": "f67142f174cd7f7c710f36144b11e9cc21aa9470"
     },
     "deployment_branch_policies": [
       {
-        "id": 59930076,
-        "name": "m8-007-signing-97b3ffcf35126ca358a0b946dfe12f0adfb499da",
+        "id": 60463311,
+        "name": "m8-007-signing-f67142f174cd7f7c710f36144b11e9cc21aa9470",
         "type": "tag"
       }
     ],
@@ -125,14 +125,14 @@
   "policy": {
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b140b22da2a1d12478ff88fff15608e941a00f92662a6ac056be6aef1634f9bf"
+      "sha256": "150f50cd56eebc7dca0f90b04cff10de2e5f1486548f5c0c62764342514f2100"
     },
     "path": "docs/evidence/M8-007/linux_x86_64/signing-authorization.json"
   },
   "remote_commit": {
-    "api_url": "https://api.github.com/repos/lIlIIlIll/Wirestack/git/commits/97b3ffcf35126ca358a0b946dfe12f0adfb499da",
+    "api_url": "https://api.github.com/repos/lIlIIlIll/Wirestack/git/commits/f67142f174cd7f7c710f36144b11e9cc21aa9470",
     "repository_id": 1342891507,
-    "sha": "97b3ffcf35126ca358a0b946dfe12f0adfb499da"
+    "sha": "f67142f174cd7f7c710f36144b11e9cc21aa9470"
   },
   "repository": {
     "full_name": "lIlIIlIll/Wirestack",
