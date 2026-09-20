@@ -167,7 +167,7 @@ def terminate(process: subprocess.Popen[str]) -> None:
 def run_case(package: str, filter_name: str, iterations: int, timeout: float,
              interval: float) -> tuple[dict[str, Any], list[dict[str, int]]]:
     base_command = [
-        "<home>/.codex/scripts/codex_cangjie_env", "--cwd", str(ROOT),
+        str(Path.home() / ".codex/scripts/codex_cangjie_env"), "--cwd", str(ROOT),
         "cjpm", "test", package, "-j", "1", "--parallel", "1",
         "--filter", filter_name, "--show-all-output", "--no-progress", "--no-color",
     ]

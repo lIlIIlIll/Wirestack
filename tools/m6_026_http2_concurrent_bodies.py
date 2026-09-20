@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M6-026"
 PROFILE = "linux-x86_64-glibc"
 REPORT = ROOT / "docs/evidence/M6-026/linux_x86_64/concurrent-bodies.json"
-ENV_WRAPPER = Path("<home>/.codex/scripts/codex_cangjie_env")
+ENV_WRAPPER = Path.home() / ".codex/scripts/codex_cangjie_env"
 PROFILE_CASE = "oneThousandOverlappingBatchesCompleteAndTerminate"
 RESULT = re.compile(
     r"^\s*M6_026_RESULT batches=(\d+) responses=(\d+) bytes=(\d+) "

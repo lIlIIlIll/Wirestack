@@ -188,7 +188,7 @@ def parse_cancellation(stdout: str, warmup: int, repetitions: int) -> dict[str, 
 
 def run_cancellation(warmup: int, repetitions: int, timeout: float) -> dict[str, Any]:
     command = [
-        "<home>/.codex/scripts/codex_cangjie_env",
+        str(Path.home() / ".codex/scripts/codex_cangjie_env"),
         "cjpm",
         "test",
         "src/internal/transport_stdnet",

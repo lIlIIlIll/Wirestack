@@ -27,7 +27,7 @@ from tools.tls_provider.selection import archive_symbols, expected_symbols, sele
 TASK_ID = "M3-030"
 PROFILE = "linux-x86_64-glibc"
 OUTPUT = ROOT / "docs/evidence/M3-030"
-ENV_WRAPPER = Path("<home>/.codex/scripts/codex_cangjie_env")
+ENV_WRAPPER = Path.home() / ".codex/scripts/codex_cangjie_env"
 
 
 class GateError(RuntimeError):

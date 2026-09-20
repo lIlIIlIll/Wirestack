@@ -452,7 +452,7 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--timeout-seconds", type=float, default=180.0)
     parser.add_argument("--build-timeout-seconds", type=float, default=600.0)
     parser.add_argument("--command-prefix", nargs="+",
-                        default=["<home>/.codex/scripts/codex_cangjie_env"])
+                        default=[str(Path.home() / ".codex/scripts/codex_cangjie_env")])
     return parser.parse_args(argv)
 
 

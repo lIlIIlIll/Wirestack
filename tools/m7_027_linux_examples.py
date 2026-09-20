@@ -21,7 +21,7 @@ PROFILE = "linux-x86_64-glibc"
 EXAMPLE_ROOT = ROOT / "examples/linux/m7_027"
 GUIDE = ROOT / "docs/guides/migrate-to-wirestack-linux.md"
 REPORT = ROOT / "docs/evidence/M7-027/linux_x86_64/examples.json"
-ENV_WRAPPER = Path("<home>/.codex/scripts/codex_cangjie_env")
+ENV_WRAPPER = Path.home() / ".codex/scripts/codex_cangjie_env"
 PACKAGE_DECLARATION = "package wirestack_m7_027_examples"
 SOURCE_NAMES = (
     "fixtures.cj",

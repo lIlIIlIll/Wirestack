@@ -285,7 +285,7 @@ def run_test(
     timeout: float, sample_resources: bool,
 ) -> tuple[dict[str, Any], list[dict[str, int]]]:
     command = [
-        "<home>/.codex/scripts/codex_cangjie_env", "--cwd", str(root),
+        str(Path.home() / ".codex/scripts/codex_cangjie_env"), "--cwd", str(root),
         "cjpm", "test", "src/internal/transport_stdnet", "-j", "1",
         "--parallel", "1", "--filter", "M2015NativeNetworkGateTest.*",
         "--show-all-output", "--no-progress", "--no-color",
@@ -413,7 +413,7 @@ def run_deadline_scenario(root: Path, scenario: str, count: int) -> dict[str, An
 
 def tool_version(root: Path, tool: str) -> str:
     result = subprocess.run(
-        ["<home>/.codex/scripts/codex_cangjie_env", "--cwd", str(root), tool, "--version"],
+        [str(Path.home() / ".codex/scripts/codex_cangjie_env"), "--cwd", str(root), tool, "--version"],
         stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         text=True, errors="replace", timeout=30, check=False,
     )

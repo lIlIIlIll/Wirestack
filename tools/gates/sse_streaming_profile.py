@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
-ENV_RUNNER = Path("<home>/.codex/scripts/codex_cangjie_env")
+ENV_RUNNER = Path.home() / ".codex/scripts/codex_cangjie_env"
 FORMAL_SECONDS = 3600
 FORMAL_EVENTS = 1_000_000
 MAX_CANCEL_NS = 50_000_000

@@ -379,7 +379,7 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--output", type=Path)
     parser.add_argument(
         "--command-prefix", nargs="+",
-        default=["<home>/.codex/scripts/codex_cangjie_env"],
+        default=[str(Path.home() / ".codex/scripts/codex_cangjie_env")],
     )
     return parser.parse_args(argv)
 

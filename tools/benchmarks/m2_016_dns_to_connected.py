@@ -83,7 +83,7 @@ def prepare_snapshot(root: Path, destination: Path, timeout: float) -> tuple[Pat
     (target / "native").symlink_to(native, target_is_directory=True)
     enable_o2_manifest(destination / "cjpm.toml")
     command = [
-        "<home>/.codex/scripts/codex_cangjie_env", "--cwd", str(destination),
+        str(Path.home() / ".codex/scripts/codex_cangjie_env"), "--cwd", str(destination),
         "cjpm", "test", "src/internal/transport_stdnet", "-j", "1", "--no-run",
     ]
     run_checked(command, timeout=timeout)
@@ -344,7 +344,7 @@ def execute(root: Path, rounds: int, samples_per_round: int,
 
 
 def tool_version(root: Path, tool: str) -> str:
-    command = ["<home>/.codex/scripts/codex_cangjie_env", "--cwd", str(root), tool, "--version"]
+    command = [str(Path.home() / ".codex/scripts/codex_cangjie_env"), "--cwd", str(root), tool, "--version"]
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             text=True, errors="replace", timeout=30, check=False)
     if result.returncode != 0 or not result.stdout.strip():

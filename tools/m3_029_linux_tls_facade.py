@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M3-029"
 PROFILE = "linux-x86_64-glibc"
 REPORT = ROOT / "docs/evidence/M3-029/linux_x86_64/public-tls-facade.json"
-ENV_WRAPPER = Path("<home>/.codex/scripts/codex_cangjie_env")
+ENV_WRAPPER = Path.home() / ".codex/scripts/codex_cangjie_env"
 EXPECTED_MARKERS = {"HTTPS_CLIENT_SERVER=PASS", "PUBLIC_TLS_FACADE=PASS"}
 
 
