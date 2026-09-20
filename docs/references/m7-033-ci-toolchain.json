@@ -9,10 +9,10 @@
   "cjdoc": {
     "repository": "https://github.com/lIlIIlIll/cjdoc",
     "version": "0.7.2",
-    "commit": "e966097a3591538fba8990772e2e6c543de86c21",
+    "commit": "582a95278c95024dc2cf3dfe9f011259c1002fc2",
     "dependency_commits": {
       "markdown": "db4f9527944b589db8436669f1d255192388cee2",
-      "yjson": "bf65cbecd99ac25e7485f8db60990e94a04e57bc"
+      "yjson": "c91859feb77aeba392a1fad0f99d731df66be831"
     }
   },
   "setup_cangjie": {
