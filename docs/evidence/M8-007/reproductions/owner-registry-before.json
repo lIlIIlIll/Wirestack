@@ -3,7 +3,7 @@
   "phase": "before",
   "status": "PASS",
   "baseline_revision": "8a79209e6471b343774fe54a99f251f5b273352e",
-  "artifact_sha256": "5896572753484b3f64903b2b4ccc4f0f471ddab33ef034f5c3b1bb1c3d509669",
+  "artifact_sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1",
   "source_digest": {
     "domain": "text-utf8-lf-v1",
     "sha256": "7f15fa14289264733838e2f80bdcdaf4500c2165d2a75027a728a7a76a12df0d"
@@ -12,7 +12,7 @@
     "path": "docs/evidence/M8-007/reproductions/owner-registry-probe.py.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a67415ac07018f04c13ffea55fd34099d442bd499db4191e4d75cb3dbe3f4b71"
+      "sha256": "5bf4c8b954474892d65c86e1344cc638ca0ad8de2d39dc40e22f9a5f1270a108"
     }
   },
   "probe": {
@@ -23,7 +23,7 @@
     }
   },
   "derived_source": {
-    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/consumer.cj.txt",
+    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/consumer.cj.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
       "sha256": "7b34536be76ff44800c986612576dc6d7e4579d674cdb5501a547a93b3577dc0"
@@ -33,48 +33,44 @@
   "commands": {
     "build": {
       "argv": [
-        "<home>/.codex/scripts/codex_cangjie_env",
-        "--sdk-root",
-        "<home>/cangjie_sdk/daily",
+        "<cangjie-env-wrapper>",
         "cjpm",
         "build"
       ],
       "exit_code": 0,
-      "duration_ms": 25020.328213984612,
+      "duration_ms": 12170.66307598725,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/build.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/build.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/build.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/build.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "c5f6b3ad563db66af876f0de6f3c51baabd746f3d6ca53f3a8ed2ea241685399"
+          "sha256": "7806da2492a445ab42286895ccb9e8aa646a200017e4904d19984040c09c3fed"
         }
       }
     },
     "stale": {
       "argv": [
-        "<home>/.codex/scripts/codex_cangjie_env",
-        "--sdk-root",
-        "<home>/cangjie_sdk/daily",
-        "/tmp/wirestack-owner-registry-mucy1ia5/consumer/target/release/bin/main",
+        "<cangjie-env-wrapper>",
+        "<workspace>/consumer/target/release/bin/main",
         "stale"
       ],
       "exit_code": 1,
-      "duration_ms": 63.67360398871824,
+      "duration_ms": 63.62622801680118,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/stale.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/stale.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "9c0435d6e3e1c89806a2e0cbfa2bf5358eddcaae3e5bab3b7765beecb8f34e97"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/stale.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/stale.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "2f4221ab581104863f0b6e7764e603dcd580cce67acf2fadb19c24536af51bf2"
@@ -83,23 +79,21 @@
     },
     "live": {
       "argv": [
-        "<home>/.codex/scripts/codex_cangjie_env",
-        "--sdk-root",
-        "<home>/cangjie_sdk/daily",
-        "/tmp/wirestack-owner-registry-mucy1ia5/consumer/target/release/bin/main",
+        "<cangjie-env-wrapper>",
+        "<workspace>/consumer/target/release/bin/main",
         "live"
       ],
       "exit_code": 1,
-      "duration_ms": 63.7625899980776,
+      "duration_ms": 31.4950339961797,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/live.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/live.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "309fed285bfe8f42a40f455a284342d2b0101bf4c0c06ee3dcfda026941db5b7"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/live.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/live.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "130e633fba8c19c3af8e0d34ea5a3fa66cd02eeba4a5be7a8fb92c133cd91861"
@@ -108,23 +102,21 @@
     },
     "transports": {
       "argv": [
-        "<home>/.codex/scripts/codex_cangjie_env",
-        "--sdk-root",
-        "<home>/cangjie_sdk/daily",
-        "/tmp/wirestack-owner-registry-mucy1ia5/consumer/target/release/bin/main",
+        "<cangjie-env-wrapper>",
+        "<workspace>/consumer/target/release/bin/main",
         "transports"
       ],
       "exit_code": 1,
-      "duration_ms": 214.65839602751657,
+      "duration_ms": 163.59845496481284,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/transports.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/transports.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "923dc751c3bbc05a20a0ed3e16d3b5907fa0dc491e7857567de8cf30add1a906"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1789447077729773024/transports.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013325098555037/transports.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "f6359360953f8af4126238f81ed89b0c4b492285f44f0da9016d1743eb530654"

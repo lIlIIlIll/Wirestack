@@ -1,0 +1,191 @@
+{
+  "binary": {
+    "bytes": 25034568,
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9019b51e78e0d906a7ddda6275e1edea82afdc92a5d8f54b996664996fc68d0c"
+    },
+    "name": "cjdoc",
+    "version": "0.7.2"
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "fetch",
+        "--depth=1",
+        "<cjdoc-repository>",
+        "582a95278c95024dc2cf3dfe9f011259c1002fc2"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cjpm",
+        "update",
+        "--skip-script"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<rebuilt-cjdoc>",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cjdoc 0.7.2\n"
+    }
+  ],
+  "dependencies": {
+    "markdown": "db4f9527944b589db8436669f1d255192388cee2",
+    "match_pin": true,
+    "yjson": "c91859feb77aeba392a1fad0f99d731df66be831"
+  },
+  "generated_at_utc": "2026-09-21T17:48:09.747346Z",
+  "kind": "cjdoc-rebuild-verification",
+  "notes": [
+    "The pinned base commit does not compile against the pinned dependency revisions without the listed compatibility patch set.",
+    "The report binds every patched tracked file and both pinned dependency commits; version-only acceptance was not used.",
+    "Executable byte identity is not claimed across build directories."
+  ],
+  "old_qualification_binary_reused": false,
+  "schema_version": 1,
+  "sdk": {
+    "archive_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a"
+    },
+    "pin": "docs/references/m7-033-ci-toolchain.json",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "1.1.3"
+  },
+  "source": {
+    "base_commit": "582a95278c95024dc2cf3dfe9f011259c1002fc2",
+    "base_commit_matches_pin": true,
+    "missing_files": [],
+    "patch_count": 10,
+    "patches": [
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a9a11a3e476816621caa43ff41d3b4b4111fd9fbebd463a6a1ff6375fc644ad7"
+        },
+        "path": "cjpm.lock",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6240e5237481fa77df4395b6e5b3bc54ffd6937410eeb09395749eb998a8c2e4"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ed757669568a2259178ccf39cf1bd55a1059cb0f28db6a072478e80d62b5e37e"
+        },
+        "path": "cjpm.toml",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1a6b6c6cd507d78886419ef10ce5914c87a33ecc5b4cfab11c44396ee220feae"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "737323bb2a0302bb5af0df66e5a9f3b2c9a42eb1d65cd20f468c47b876a6402e"
+        },
+        "path": "src/output_manifest.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f7cd9dca78376de4a054f0efb8d9a5d705cddac8185fdfb8918973a70f936bbc"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "191505f058d466b4a7536a8300f7231337c2cae1fb85b97281576a164300e37c"
+        },
+        "path": "src/render/json_decode_primitives.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "34852089ad39296bbed94b871105ab670bd2f35cd47ef8f92cd9c4b11851f238"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b9bbe30589c19531ba5a339ec18dda15d0dec361871e0d34215132a8e136e626"
+        },
+        "path": "src/schema_data/schema_v8.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "99c400cf5397cd8d7ed69596adc501f904c0c80ba586c78a1ab00ad77c9547d3"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "21919a70642bee3eeb982c831192b046c0b5a2016f5f54f42234702f412e4f36"
+        },
+        "path": "vendor/yjson_algorithms/cjpm.toml",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c575610563d7679af775fc236941a82596a42eae49f76a55e15345834f583d6e"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "32848edf1826af8b8b6816a7244ab6ffd370485f21e6ecbda0baa20fa4495492"
+        },
+        "path": "vendor/yjson_algorithms/src/lib_json_patch.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "82115f63f01807f3e7057518579cea4e058baf51c0e767e93e867a3a9c34a5de"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "972ce953184cb0e2b0c0d2b5da1589b376639f1d1d496331d435842c4d50d991"
+        },
+        "path": "vendor/yjson_algorithms/src/lib_json_pointer.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ac5ffe300745a4123fbf0f6ecfb73aa2fc3743c89945dda4bc56c11d1fadf012"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bc6e110bb7b78807b26eb7c23e091c5fef2c02997f616a792fc5b70f81184a01"
+        },
+        "path": "vendor/yjson_algorithms/src/lib_json_schema.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d2b301b266b3358e033347ea2da88c5f2431feffe5af5b64f2bcc3cc70c723a3"
+        }
+      },
+      {
+        "base": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "52aa1b8fbd41deaa72c80028f1500fe6ff9bafbcf9f5b11d2569bbc61baaeb6c"
+        },
+        "path": "vendor/yjson_algorithms/src/work_limits.cj",
+        "rebuilt_source": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6af3af0f970f47e87ab045ceaf9d9c4675ef7cdc23f27df2870a275b3f057e21"
+        }
+      }
+    ],
+    "repository": "https://github.com/lIlIIlIll/cjdoc",
+    "tracked_files": 353
+  },
+  "source_task": "M8-007",
+  "status": "PASS"
+}

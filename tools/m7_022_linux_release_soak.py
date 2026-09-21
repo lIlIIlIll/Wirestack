@@ -189,6 +189,17 @@ def report_path(path: Path) -> str:
         return str(resolved)
 
 
+def redact_local_paths(value: Any, replacements: Sequence[tuple[str, str]]) -> Any:
+    if isinstance(value, str):
+        for actual, placeholder in sorted(replacements, key=lambda item: len(item[0]), reverse=True):
+            value = value.replace(actual, placeholder)
+        return value
+    if isinstance(value, list):
+        return [redact_local_paths(item, replacements) for item in value]
+    if isinstance(value, dict):
+        return {key: redact_local_paths(item, replacements) for key, item in value.items()}
+    return value
+
 def capture_input_identity(
     path: Path,
     *,
@@ -1134,7 +1145,7 @@ def execute(
         or raw_log_identity["digest"] != running_log_identity["digest"]
     ):
         raise SoakError("SOAK_LOG_DRIFT", "published raw log identity drifted")
-    return {
+    report = {
         "schema_version": 1,
         "source_task": task_id,
         "status": decision,
@@ -1272,6 +1283,23 @@ def execute(
             "This task does not sign the artifact or close the independent security review.",
         ],
     }
+    sdk_root = os.path.commonpath(
+        [build_toolchain[name]["executable"] for name in ("cjc", "cjpm")]
+    )
+    replacements = [
+        (str(consumer.resolve()), "<consumer>"),
+        (str(work.resolve()), "<workspace>"),
+        (str(Path(sdk_root).resolve()), "<cangjie-sdk>"),
+        (str(ROOT.resolve()), "<repo>"),
+        (str(Path.home().resolve()), "$HOME"),
+    ]
+    report = redact_local_paths(report, replacements)
+    report["process"]["build_output_digest"] = (
+        evidence_digest.text_evidence_digest_bytes(
+            report["process"]["build_output"].encode("utf-8")
+        ).to_json()
+    )
+    return report
 
 
 def parser() -> argparse.ArgumentParser:

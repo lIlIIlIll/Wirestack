@@ -1,0 +1,438 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M8-007",
+  "sliceId": "requalification-tls-native",
+  "platform": "linux-x86_64-glibc",
+  "reviewMode": "ProcessIsolatedAgent",
+  "reviewerIdentity": {
+    "agentId": "M8NewTlsNativeReview",
+    "kind": "AIReviewAgent",
+    "model": "openai-codex/gpt-5.6-sol",
+    "humanReviewer": false,
+    "externalHumanApprovalClaimed": false,
+    "processIsolated": true
+  },
+  "startedAtUtc": "2026-09-21T18:54:59Z",
+  "completedAtUtc": "2026-09-21T19:12:22Z",
+  "source": {
+    "revision": "c54258a4cb4646a16e9bcaa42186d5ee2c605a0d",
+    "reviewedWorkingTree": true,
+    "implementationModifiedByReviewer": false,
+    "gitModifiedByReviewer": false
+  },
+  "requestBinding": {
+    "requestPath": "docs/evidence/M8-007/linux_x86_64/review-request.json",
+    "packagePath": "docs/evidence/M8-007/linux_x86_64/security-index.json",
+    "expectedPackageSha256": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478",
+    "actualPackageSha256": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478",
+    "matchedBeforeReview": true
+  },
+  "scopeSlice": [
+    "certificate-identity",
+    "private-keys",
+    "tls-protocol",
+    "native-c-abi",
+    "linux-platform",
+    "sensitive-data",
+    "supply-chain"
+  ],
+  "methods": [
+    "source-review",
+    "native-c-abi",
+    "evidence-audit",
+    "source-to-evidence-digest-verification",
+    "targeted-tool-regression-tests",
+    "credential-and-secret-pattern-scan",
+    "upstream-advisory-screening"
+  ],
+  "filesReviewed": [
+    {
+      "path": "docs/evidence/M8-007/security-scope.md",
+      "lines": "1-99",
+      "focus": "threat model, native boundary, trust, sensitive data, final-gate exclusions"
+    },
+    {
+      "path": "src/private_key_contract.cj",
+      "lines": "1-172",
+      "focus": "external signer request ownership, algorithm and input bounds"
+    },
+    {
+      "path": "src/tls_contract.cj",
+      "lines": "1-484",
+      "focus": "external decryptor, test keylog, typed errors, closure evidence"
+    },
+    {
+      "path": "src/trust.cj",
+      "lines": "1-611",
+      "focus": "certificate and chain ownership, trust policy, pins, identity inputs"
+    },
+    {
+      "path": "src/hostname_verifier.cj",
+      "lines": "1-362",
+      "focus": "SAN-only DNS and IP verification, wildcard and native-output bounds"
+    },
+    {
+      "path": "src/tls/facade.cj",
+      "lines": "90-670",
+      "focus": "public context encapsulation, snapshot replacement, provider ownership, handshake transfer"
+    },
+    {
+      "path": "src/tls/identity.cj",
+      "lines": "1-132",
+      "focus": "public private-key owner and inaccessible context snapshot"
+    },
+    {
+      "path": "src/internal/tls_engine/context.cj",
+      "lines": "1-633",
+      "focus": "immutable contexts, process-unique versions, capability and configuration validation"
+    },
+    {
+      "path": "src/internal/tls_engine/identity.cj",
+      "lines": "1-586",
+      "focus": "PKCS#8 and SPKI bounds, exact DER, key matching, cloning, zeroization"
+    },
+    {
+      "path": "src/internal/tls_engine/package.cj",
+      "lines": "180-589",
+      "focus": "provider synchronization, explicit Linux trust, engine creation, session-store ownership"
+    },
+    {
+      "path": "src/internal/tls_engine/engine.cj",
+      "lines": "1-2412",
+      "focus": "FFI lengths, reference identity, callbacks, secret cleanup, error conversion, pump bounds, native destruction"
+    },
+    {
+      "path": "src/internal/tls_engine/session.cj",
+      "lines": "1-336",
+      "focus": "bounded resumption store, security partition, context generation, expiration and zeroization"
+    },
+    {
+      "path": "src/internal/tls_engine/connection.cj",
+      "lines": "1-391",
+      "focus": "ownership transfer, cancellation registration, close/abort races, exactly-once release"
+    },
+    {
+      "path": "src/internal/platform/linux/package.cj",
+      "lines": "1-233",
+      "focus": "explicit CA sources, bounded trust material, no provider-default fallback"
+    },
+    {
+      "path": "native/tls/aws_lc/wirestack_tls_provider.h",
+      "lines": "1-358",
+      "focus": "ABI v1 signatures, capacities, ownership, stable status values"
+    },
+    {
+      "path": "native/tls/aws_lc/wirestack_tls_provider.c",
+      "lines": "1-2333",
+      "focus": "argument and output bounds, verification, callbacks, allocations, terminal cleanup, keylog gating, static AWS-LC"
+    },
+    {
+      "path": "native/resolver/linux/wirestack_resolver.h",
+      "lines": "1-92",
+      "focus": "resolver ABI and ownership contract"
+    },
+    {
+      "path": "native/resolver/linux/wirestack_resolver.c",
+      "lines": "1-592",
+      "focus": "bounded workers, jobs, names, output capacity, shutdown and late-result ownership"
+    },
+    {
+      "path": "src/internal/resolver/bounded_backend.cj",
+      "lines": "1-454",
+      "focus": "native resolver handle lifetime, polling, close and output validation"
+    },
+    {
+      "path": "native/http_files/wirestack_http_files.h",
+      "lines": "1-88",
+      "focus": "filesystem ABI and terminal operations"
+    },
+    {
+      "path": "native/http_files/wirestack_http_files.c",
+      "lines": "1-596",
+      "focus": "descriptor-relative traversal, no-follow policy, bounded upload/download, partial-failure cleanup"
+    },
+    {
+      "path": "src/internal/http_files/package.cj",
+      "lines": "90-525",
+      "focus": "FFI handle serialization, cancellation, close/abort and range validation"
+    },
+    {
+      "path": "native/tls/aws_lc/provider.json",
+      "lines": "all",
+      "focus": "immutable AWS-LC tag, commit, tree, content digest, static build options"
+    },
+    {
+      "path": "tools/tls_provider/selection.json",
+      "lines": "all",
+      "focus": "Linux production provider selection"
+    },
+    {
+      "path": "tools/tls_provider/abi-v1.json",
+      "lines": "all",
+      "focus": "required symbol and signature inventory"
+    },
+    {
+      "path": "tools/build_linux_tls_provider.py",
+      "lines": "24-639",
+      "focus": "pin enforcement, production versus test-keylog builds, archive and smoke checks"
+    },
+    {
+      "path": "tools/m7_021_linux_release.py",
+      "lines": "345-814",
+      "focus": "release rejection of keylog capability, forbidden dynamic dependencies and loader strings"
+    },
+    {
+      "path": "native/tls/aws_lc/tests/m8_006_keylog_boundary.c",
+      "lines": "1-543",
+      "focus": "test-only keylog handshake boundary and bounded record consumption"
+    }
+  ],
+  "commands": [
+    {
+      "command": "sha256sum docs/evidence/M8-007/linux_x86_64/security-index.json",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478; matched review request"
+    },
+    {
+      "command": "git rev-parse HEAD",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "c54258a4cb4646a16e9bcaa42186d5ee2c605a0d"
+    },
+    {
+      "command": "git diff --stat 019feabb45fbaea4fd8e17c528e917016aec27bb..HEAD -- <tls-native-scope> && git diff --name-only 019feabb45fbaea4fd8e17c528e917016aec27bb..HEAD -- <tls-native-scope>",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "three current TLS files differ from the prior review: src/internal/tls_engine/connection.cj, connection_test.cj and engine.cj; 691 insertions and 51 deletions; current versions were reviewed"
+    },
+    {
+      "command": "python3 -c '<verify native-rebuild source_inputs with tools.evidence_digest>'",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "29 source inputs checked; zero missing files or digest mismatches"
+    },
+    {
+      "command": "python3 -c '<verify runtime-review-controls source_inputs with tools.evidence_digest>'",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "10 source inputs checked; zero missing files or digest mismatches"
+    },
+    {
+      "command": "python3 -m unittest tools.tests.test_m3_030_tls_provider_architecture tools.tests.test_m7_021_linux_release",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "40 tests ran in 1.421 seconds; OK"
+    },
+    {
+      "command": "python3 -m unittest tools.tests.test_linux_tls_provider_build tools.tests.test_build_linux_http_files tools.tests.test_linux_resolver_build",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "13 tests ran in 0.306 seconds; OK"
+    },
+    {
+      "command": "pattern scan of docs/evidence/M8-007 for PEM private keys, NSS keylog records and credential headers",
+      "cwd": "<repo>",
+      "exitCode": 0,
+      "result": "no PEM private-key material or credential-header literals found; keylog-label hits were compiler excerpts of synthetic tests, not emitted random/secret bytes"
+    }
+  ],
+  "evidenceReviewed": [
+    {
+      "path": "docs/evidence/M8-007/linux_x86_64/qualification.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "sourceTreeSha256": "988f10f67b0f6ff545041b095d614f15359cfbcd351b353b7e8c3336aedf8ca7",
+        "artifactSha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1",
+        "byteIdenticalBuilds": 2,
+        "forbiddenDynamicDependencies": [],
+        "neededLibraries": [
+          "libboundscheck.so",
+          "libc.so.6",
+          "libcangjie-runtime.so",
+          "libm.so.6"
+        ]
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/linux_x86_64/native-rebuild.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "sourceInputsRecomputed": 29,
+        "sourceInputMismatches": 0,
+        "tlsArchiveSha256": "d395b1121d01ba09c857188b4278da3050535091c26e4c388b69aea958278ad3",
+        "resolverArchiveSha256": "dcef4fe3461a178085b640a61da58f2cecf79470762e7d6fb3ab2e428122ba58",
+        "httpFilesArchiveSha256": "8524cf82d682aa9d83329f0e190cbf3ef229839815a5091abb90fdab6c189f78"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/linux_x86_64/supply-chain/provider-manifest.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "provider": "AWS-LC 5.5.0",
+        "tag": "v5.5.0",
+        "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+        "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+        "contentSha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+        "externalOpenSslDependency": false,
+        "runtimeLoaderLibraryStrings": [],
+        "productionKeyLogCapabilityPresent": false
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/tls-lifecycle-tests.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "tests": 70,
+        "passed": 70,
+        "failed": 0,
+        "skipped": 0,
+        "coverage": "real AWS-LC TLS 1.2/1.3, trust, pins, hostname verification, mTLS, SNI, ALPN, resumption, external signer, lifecycle, fuzz mutations and corrected cleanup races"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/runtime-review-controls.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "sourceInputsRecomputed": 10,
+        "sourceInputMismatches": 0,
+        "negativeReproductionRetained": "docs/evidence/M8-007/reproductions/tls-close-registration-before.json",
+        "correctedTlsSourceCovered": true
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/evidence-identity-audit.json",
+      "reportedStatus": "BLOCKED",
+      "observedFacts": {
+        "candidateMatchCount": 1024,
+        "candidateMismatchCount": 133,
+        "mismatchesMatchingCurrentCandidateBytes": 111,
+        "historicalEvidenceRelabeled": false
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/dependency-evidence-audit.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "dependencyEvidenceAudited": true
+      }
+    },
+    {
+      "path": "docs/evidence/M8-007/linux_x86_64/fuzz-report.json",
+      "reportedStatus": "PASS",
+      "observedFacts": {
+        "finiteCampaignOnly": true,
+        "notExhaustiveNativeAbiProof": true
+      }
+    }
+  ],
+  "scopeConclusions": [
+    {
+      "scope": "certificate-identity",
+      "status": "PASS",
+      "conclusion": "The public client handshake installs explicit trust, keeps SNI separate from DNS/IP reference identity, rejects zoned IP references, enables peer verification and uses SAN-only matching without Common Name fallback. Pin verification still applies reference-identity verification. Native SAN output is two-pass and bounded."
+    },
+    {
+      "scope": "private-keys",
+      "status": "PASS",
+      "conclusion": "PKCS#8 and SPKI inputs are bounded, exact-DER validated and copied into inaccessible owners; certificate/key matching occurs before use. Explicit close and finalization zero exportable private-key and session material. External signer and raw-RSA decryptor callbacks are bounded, execute outside the native callback, receive the handshake OperationContext and fail closed; returned decrypt blocks are length-checked and zeroed. The public built contexts do not expose their adopted decryptor."
+    },
+    {
+      "scope": "tls-protocol",
+      "status": "PASS",
+      "conclusion": "Only TLS 1.2 and 1.3 are admitted. The public API exposes no cipher string, renegotiation, compression or 0-RTT enablement. Production uses the pinned AWS-LC defaults, disables early data for serialized sessions and partitions resumption by reference identity, ALPN, trust source, client identity, provider identity, security policy and checked context generation. Handshake, record, close-notify, truncation and no-progress terminals are typed and bounded."
+    },
+    {
+      "scope": "native-c-abi",
+      "status": "PASS",
+      "conclusion": "The TLS, resolver and HTTP-files ABIs use explicit capacities and out lengths, reject invalid domains before allocation, validate native-returned counts in Cangjie and release pinned array views in finally blocks. Native partial failures close or cleanse owned resources. Resolver workers/jobs are bounded and reference-counted across late native completion. HTTP file access is descriptor-relative, no-follow, bounded and terminally cleaned."
+    },
+    {
+      "scope": "linux-platform",
+      "status": "PASS",
+      "conclusion": "Linux system trust selects an explicit bounded CA bundle or hashed directory and does not call provider-default trust lookup. The qualified artifact is Linux x86_64 glibc only. Its dynamic dependency set contains no libssl or libcrypto, and production TLS is the pinned static AWS-LC archive."
+    },
+    {
+      "scope": "sensitive-data",
+      "status": "PASS",
+      "conclusion": "Production provider capabilities omit key logging; the release checks reject test-only keylog capability and system OpenSSL loader strings. Native pending keys, sessions, ticket keys, decrypt blocks and keylog buffers are cleansed on terminal paths. Evidence scanning found no PEM private keys or credential-header literals; keylog-label matches were synthetic source excerpts without emitted key bytes."
+    },
+    {
+      "scope": "supply-chain",
+      "status": "PASS_WITH_GATE_GAP",
+      "conclusion": "The native source pins, current source-input digests, rebuilt archive digests and installed artifact manifest agree for the reviewed qualification. A current upstream advisory screen found no listed AWS-LC advisory affecting upstream 5.5.0, but this is not an exhaustive third-party audit. The separate evidence-identity audit remains BLOCKED and prevents this slice from certifying the release packet as a whole."
+    }
+  ],
+  "findingSummary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "informational": 0
+  },
+  "findings": [],
+  "gaps": [
+    {
+      "id": "TLS-NATIVE-GAP-001",
+      "severity": "GATE",
+      "status": "OPEN",
+      "title": "Candidate evidence identity audit is blocked",
+      "reproduction": "Read docs/evidence/M8-007/evidence-identity-audit.json and inspect status, results.candidate_mismatch_count and disposition.completion_prerequisites.",
+      "evidence": "The current report says BLOCKED, records 133 candidate mismatches, and says 111 mismatches match current candidate bytes. This is an evidence-integrity gate, not a TLS source vulnerability.",
+      "requiredAction": "Resolve the authorized replacement-candidate evidence identity and rerun the candidate-bound acceptance set; do not relabel historical outputs."
+    },
+    {
+      "id": "TLS-NATIVE-GAP-002",
+      "severity": "GATE",
+      "status": "NOT_COMPLETED",
+      "title": "Formal soak and production signature remain outside this review",
+      "reproduction": "Compare this review scope with docs/evidence/M8-007/security-scope.md final-gate exclusions and the authorization state supplied for this review.",
+      "evidence": "The required 86,400-second soak and production signature have not completed. Older PASS-looking verification files are not accepted as current completion proof by this source review.",
+      "requiredAction": "Complete and independently verify those final gates against the selected replacement candidate under separate authorization."
+    },
+    {
+      "id": "TLS-NATIVE-GAP-003",
+      "severity": "INFORMATIONAL",
+      "status": "DOCUMENTED",
+      "title": "This process did not rerun a heavy native build, sanitizer campaign or exhaustive C ABI fuzz campaign",
+      "reproduction": "Review the command list in this sidecar.",
+      "evidence": "This process recomputed 29 native and 10 corrected-runtime source bindings, reviewed current code and existing raw execution evidence, and ran 53 targeted Python tests. The parser campaign is finite and does not claim exhaustive native ABI coverage.",
+      "requiredAction": "Treat native-rebuild, TLS lifecycle and fuzz reports as bounded evidence; use an isolated scratch build and sanitizer/C ABI campaign if stronger assurance is required."
+    },
+    {
+      "id": "TLS-NATIVE-GAP-004",
+      "severity": "INFORMATIONAL",
+      "status": "DOCUMENTED",
+      "title": "Internal native handles rely on trusted in-process callers",
+      "reproduction": "Inspect the native handle lookup functions in native/tls/aws_lc/wirestack_tls_provider.c and corresponding resolver/filesystem bridges.",
+      "evidence": "Handles are private pointer-valued ABI tokens guarded by magic values after dereference. Public Cangjie wrappers serialize ownership and zero handles before destroy; arbitrary forged or use-after-destroy calls by hostile in-process native code are outside the stated remote-peer threat model and were not certified.",
+      "requiredAction": "Do not expose the internal native ABI to untrusted extensions. Add generation-indexed handle indirection before broadening that trust boundary."
+    },
+    {
+      "id": "TLS-NATIVE-GAP-005",
+      "severity": "INFORMATIONAL",
+      "status": "DOCUMENTED",
+      "title": "System trust mutation is a trusted-local-input boundary",
+      "reproduction": "Inspect src/internal/platform/linux/package.cj and src/internal/tls_engine/package.cj trust discovery and engine configuration.",
+      "evidence": "The adapter hashes and then supplies explicit CA filesystem paths. Concurrent local mutation between discovery and provider load was not tested or certified; repository and system-trust administrators are trusted local actors in the declared threat model.",
+      "requiredAction": "Preserve that trust assumption or snapshot/open the selected trust source atomically before admitting hostile local mutation into scope."
+    }
+  ],
+  "independenceAndConflicts": {
+    "implementedByReviewer": false,
+    "priorReviewReusedAsApproval": false,
+    "priorReviewUsedForOrientationOnly": true,
+    "currentSourceAndEvidenceReadDirectly": true,
+    "sharedModelConflict": "Other process-isolated review slices may use the same model family or organizational toolchain; no model-diversity or external-human-independence claim is made.",
+    "sharedToolchainConflict": "The review used repository digest helpers and qualification artifacts produced by the same project toolchain, with independent source reading and digest recomputation but without a separately implemented build system.",
+    "humanApproval": "NONE"
+  },
+  "conclusion": {
+    "status": "PASS_WITH_GAPS",
+    "sourceReviewResult": "NO_ACTIONABLE_SECURITY_FINDINGS",
+    "releaseCertified": false,
+    "formalSoakCertified": false,
+    "productionSignatureCertified": false,
+    "summary": "Current TLS, certificate identity, private-key, native-boundary and Linux-provider source was independently reviewed. No actionable vulnerability was found in this slice, and targeted controls passed. The blocked evidence-identity audit plus incomplete final soak and production-signature gates prevent a release-readiness or production-approval claim."
+  }
+}

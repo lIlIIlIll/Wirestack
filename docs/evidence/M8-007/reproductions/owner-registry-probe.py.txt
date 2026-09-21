@@ -1,6 +1,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -17,7 +18,8 @@ from tools import m8_007_final_release as final
 EVIDENCE = ROOT / 'docs/evidence/M8-007'
 SOURCE = 'tools/release_soak/main.cj'
 PROBE = Path(__file__).with_name('owner-registry-probe.cj.txt')
-ENVIRONMENT = ['<home>/.codex/scripts/codex_cangjie_env', '--sdk-root', str(Path.home() / 'cangjie_sdk/daily')]
+ENVIRONMENT_WRAPPER = os.environ.get('CANGJIE_ENV_WRAPPER')
+ENVIRONMENT = [ENVIRONMENT_WRAPPER] if ENVIRONMENT_WRAPPER else []
 MODES = ('stale', 'live', 'transports')
 
 
@@ -31,7 +33,10 @@ def run(argv, cwd, directory, name):
     started = time.monotonic()
     with stdout.open('wb') as out, stderr.open('wb') as err:
         result = subprocess.run(argv, cwd=cwd, stdout=out, stderr=err, timeout=600, check=False)
-    return {'argv': argv, 'exit_code': result.returncode, 'duration_ms': (time.monotonic() - started) * 1000,
+    recorded = list(argv)
+    if ENVIRONMENT_WRAPPER and recorded and recorded[0] == ENVIRONMENT_WRAPPER:
+        recorded[0] = '<cangjie-env-wrapper>'
+    return {'argv': recorded, 'exit_code': result.returncode, 'duration_ms': (time.monotonic() - started) * 1000,
             'stdout': record(stdout), 'stderr': record(stderr)}
 
 
@@ -40,6 +45,8 @@ def main():
     parser.add_argument('--phase', choices=['before', 'after'], required=True)
     parser.add_argument('--baseline', required=True)
     args = parser.parse_args()
+    if not ENVIRONMENT_WRAPPER:
+        raise RuntimeError('CANGJIE_ENV_WRAPPER is required')
     original = (subprocess.check_output(['git', 'cat-file', 'blob', f'{args.baseline}:{SOURCE}'], cwd=ROOT)
                 if args.phase == 'before' else (ROOT / SOURCE).read_bytes())
     source = final.owner_registry_probe_source(original.decode('utf-8'))

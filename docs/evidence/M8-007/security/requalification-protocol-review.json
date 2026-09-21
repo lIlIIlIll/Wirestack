@@ -1,0 +1,457 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M8-007",
+  "platform": "linux-x86_64-glibc",
+  "reviewType": "source-security-requalification",
+  "reviewMode": "ProcessIsolatedAgent",
+  "reviewer": {
+    "identity": "M8NewProtocolReview",
+    "agentType": "AI worker agent",
+    "model": "openai-codex/gpt-5.6-sol",
+    "implementedReviewedWork": false,
+    "independentHumanApproval": false,
+    "processIsolation": "Separate review process with a read-only assignment and a dedicated report path.",
+    "sharedModelConflict": "Other implementation or review workers may use the same model family; process isolation is not independent human review.",
+    "sharedToolchainConflict": "The review consumed the same repository, evidence, SDK identity, and project tooling selected by the implementation. No separately controlled compiler or runtime toolchain was used in this source-review slice.",
+    "workspaceCondition": "The selected worktree contained the paused requalification changes: 0 staged paths, 48 unstaged paths, and 11 untracked paths at review start. The review assessed that live worktree and did not modify implementation, existing reports, or Git state."
+  },
+  "timing": {
+    "startedAtUtc": "2026-09-21T18:52:36Z",
+    "completedAtUtc": "2026-09-21T19:17:59Z"
+  },
+  "target": {
+    "reviewRequest": "docs/evidence/M8-007/linux_x86_64/review-request.json",
+    "packagePath": "docs/evidence/M8-007/linux_x86_64/security-index.json",
+    "expectedPackageSha256": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478",
+    "observedPackageSha256": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478",
+    "bindingStatus": "PASS",
+    "scopeDocument": "docs/evidence/M8-007/security-scope.md",
+    "scopeDocumentSha256": "a3d2cbf54009d716eff09d3f4dfff2d0aab361400499b92ebf98a7f1d31a6a8c",
+    "reviewedWorktreeHead": "c54258a4cb4646a16e9bcaa42186d5ee2c605a0d"
+  },
+  "conclusion": {
+    "status": "REQUIRES_REMEDIATION",
+    "releaseGateOpinion": "NOT_READY_FOR_FINAL_SECURITY_ACCEPTANCE",
+    "reason": "The bound evidence is current for its declared fingerprint and the reviewed parsers contain substantial fail-closed controls, but two remotely triggerable resource-consumption paths remain open: linear-table HPACK Huffman decoding at the maximum default compressed block size and eager WebSocket frame allocation before payload receipt. A separate low-severity HTTP/1 serializer-limit inconsistency is also open.",
+    "unresolvedCritical": 0,
+    "unresolvedHigh": 0,
+    "unresolvedMedium": 2,
+    "unresolvedLow": 1,
+    "blockingFindingIds": [
+      "M8-007-PROTOCOL-001",
+      "M8-007-PROTOCOL-002"
+    ]
+  },
+  "methods": [
+    {
+      "id": "source-review",
+      "description": "Manual control-flow and ownership review of current DNS, routing, HTTP/1, HTTP/2, cookie/PSL, multipart, WebSocket, and pool source plus focused negative-control tests."
+    },
+    {
+      "id": "evidence-audit",
+      "description": "Verified the review-request package binding, all 26 security-index document/evidence digests, fuzz-report source freshness, target outcomes, and campaign surface coverage."
+    },
+    {
+      "id": "adversarial-complexity-analysis",
+      "description": "Derived an exact source-level lower bound for HPACK Huffman table-entry checks using the checked-in code and length tables; did not substitute this static count for a wall-clock benchmark."
+    },
+    {
+      "id": "negative-control-review",
+      "description": "Inspected malformed framing, truncation, mutation, count/byte-limit, credential-stripping, retry, cancellation, pool-key, and generated-PSL drift controls."
+    }
+  ],
+  "sliceScopes": [
+    {
+      "scope": "dns-proxy-routing",
+      "status": "PASS_WITH_COVERAGE_GAPS",
+      "assessment": "DNS parsing is length/count bounded, rejects trailing/truncated input, restricts compression pointers to earlier validated labels, caps indirections, and carries one shortened deadline through retries and TCP fallback. DNS client matching checks response source and query identity. Proxy routing is explicit rather than environment-discovered; NO_PROXY rules are bounded and label-aware; caller Proxy-Authorization is removed and only the selected route provider may inject it. Cross-origin redirects strip Authorization, Proxy-Authorization, Cookie, and Cookie2, and HTTPS downgrade is denied by default.",
+      "limitations": [
+        "The fresh fuzz campaign has a proxy-parser target but no dns-wire target, and the fuzz source fingerprint omits src/net.",
+        "No single fresh adversarial campaign combines DNS late packets, NO_PROXY route switching, proxy authentication, redirects, and retry transitions."
+      ]
+    },
+    {
+      "scope": "http1-smuggling",
+      "status": "PASS_WITH_LOW_FINDING",
+      "assessment": "The shared HTTP/1 framing parser rejects conflicting or non-identical Content-Length values, Transfer-Encoding plus Content-Length, unsupported transfer codings, invalid line termination, bytes past fixed request bodies, pipelining, malformed chunks, and forbidden framing trailers. The previously reported oversized fixed-length server request gap is repaired before body construction and has a focused regression test.",
+      "findingIds": ["M8-007-PROTOCOL-003"]
+    },
+    {
+      "scope": "http2-hpack",
+      "status": "REMEDIATION_REQUIRED",
+      "assessment": "HTTP/2 frame, header-block, header-list, field-count, dynamic-table, continuation, integer, EOS, padding, and decoded-output bounds are present and protocol failures are connection-scoped where required. The HPACK Huffman decoder nevertheless performs repeated linear scans of all 257 code entries for each input bit and can consume excessive CPU within an otherwise valid default-size block.",
+      "findingIds": ["M8-007-PROTOCOL-001"]
+    },
+    {
+      "scope": "resource-bounds",
+      "status": "REMEDIATION_REQUIRED",
+      "assessment": "DNS jobs/queues/packets/hops, HTTP/1 heads/chunks/trailers, HTTP/2 frames/header blocks/tables/writes/streams, cookies, multipart bodies, WebSocket messages, and pool entries have explicit finite bounds. The WebSocket reader allocates the entire declared frame after reading only its length, allowing a stalled peer to convert a small header into immediate per-connection allocation up to the configured frame ceiling.",
+      "findingIds": [
+        "M8-007-PROTOCOL-001",
+        "M8-007-PROTOCOL-002",
+        "M8-007-PROTOCOL-003"
+      ]
+    },
+    {
+      "scope": "pool-isolation",
+      "status": "PASS_WITH_COVERAGE_GAPS",
+      "assessment": "The connection-pool key includes scheme, canonical origin, port, proxy route, network binding, TLS context, trust context, client identity, provider identity, and ALPN policy in both equality and hashing. HTTP/1 and HTTP/2 pools impose total/per-key/waiter bounds, reserve before factory publication, roll back failed reservations, remove cancelled waiters, and avoid publication after cancellation or GOAWAY.",
+      "limitations": [
+        "Structural key tests vary every partition, but no fresh installed/native matrix was observed that performs real handshakes for every TLS/trust/client/provider identity permutation and proves non-reuse at the socket level.",
+        "Pool limits are finite per pool; this slice did not find a current client-wide aggregate connection or managed-buffer ledger across all protocol/proxy pools."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "M8-007-PROTOCOL-001",
+      "title": "HPACK Huffman decoding performs high-cost linear table scans per input bit",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "confidence": "HIGH",
+      "category": "CWE-400 uncontrolled resource consumption",
+      "affectedScopes": ["http2-hpack", "resource-bounds"],
+      "description": "decodeHpackHuffman processes every input bit by calling huffmanExactSymbol, which linearly scans the 257-entry code table, and for unmatched prefixes calls huffmanPrefixExists, which performs another linear scan. The default compressed header-block limit is 65,536 bytes and a valid block may reach that bound through HEADERS plus CONTINUATION frames. Bounds prevent unlimited memory growth but do not prevent substantial connection-thread CPU amplification.",
+      "evidence": [
+        {
+          "path": "src/internal/http2/hpack_huffman.cj",
+          "lines": "84-126",
+          "observation": "Bit loop and the two linear table scans."
+        },
+        {
+          "path": "src/internal/http2/frame_model.cj",
+          "lines": "20-40",
+          "observation": "Default maxHeaderBlockBytes is 65,536."
+        },
+        {
+          "path": "src/internal/http2/header_block.cj",
+          "lines": "35-69,121-129",
+          "observation": "Continuation fragments are accumulated up to the configured compressed block bound."
+        },
+        {
+          "path": "src/internal/http2/hpack_block.cj",
+          "lines": "27-30,83-100,113-119",
+          "observation": "Compressed/list/count limits are enforced but Huffman decode is invoked at the compressed-block ceiling."
+        },
+        {
+          "path": "src/internal/http2/deterministic_fuzz_test.cj",
+          "lines": "45-78",
+          "observation": "Mutation seeds exercise fail-closed decoding but not maximum-size adversarial CPU behavior."
+        },
+        {
+          "path": "docs/evidence/M8-007/linux_x86_64/fuzz-report.json",
+          "lines": "target hpack-decoder",
+          "observation": "Fresh target passed 290 deterministic iterations; it is not a maximum-block performance or work-budget test."
+        }
+      ],
+      "reproduction": {
+        "type": "source-level operation-count probe",
+        "executed": true,
+        "result": "A valid repeated symbol 253 stream uses a 27-bit code. At a 65,536-byte compressed input ceiling, 19,418 complete symbols require a source-level lower bound of 154,120,666 HPACK table-entry checks before padding. The probe exited 0. No Cangjie wall-clock benchmark was run.",
+        "runtimeExploitPrerequisite": "A remote HTTP/2 peer can submit a valid Huffman literal inside a header block; no malformed-input bypass is required."
+      },
+      "impact": "A peer can consume disproportionate CPU and delay other work on the same connection while remaining inside declared byte bounds.",
+      "recommendation": "Replace the per-bit linear searches with a bounded decode trie/table or equivalent constant-step decoder, then add a maximum-size valid adversarial Huffman benchmark with a frozen work/time ceiling and sibling-stream responsiveness assertion."
+    },
+    {
+      "id": "M8-007-PROTOCOL-002",
+      "title": "WebSocket receiver eagerly allocates the complete declared frame before payload arrival",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "confidence": "HIGH",
+      "category": "CWE-789 uncontrolled memory allocation",
+      "affectedScopes": ["resource-bounds"],
+      "description": "After validating a frame length, the receiver allocates Array<Byte>(length) and only then reads the payload. The public limit accepts up to 1 GiB per frame and defaults to 1 MiB. A peer can send only a valid frame header declaring a limit-sized frame and stall, retaining the full allocation for each admitted connection until context termination or transport close.",
+      "evidence": [
+        {
+          "path": "src/http/websocket.cj",
+          "lines": "88-124",
+          "observation": "maximumFrameBytes defaults to 1 MiB and permits values through 1 GiB."
+        },
+        {
+          "path": "src/http/websocket.cj",
+          "lines": "555-589",
+          "observation": "Length is validated, then the entire payload array is allocated at line 586 before readWebSocketExact receives payload bytes."
+        },
+        {
+          "path": "src/http/websocket_test.cj",
+          "lines": "220-260,533-672",
+          "observation": "Deterministic framing mutations and oversized-length rejection exist, but no stalled-peer assertion covers allocation retention at an accepted large length."
+        }
+      ],
+      "reproduction": {
+        "type": "source-confirmed scenario",
+        "executed": false,
+        "steps": [
+          "Use the default 1 MiB frame limit or a larger accepted configured limit.",
+          "Open an admitted WebSocket connection and send a role-correct frame header whose declared length equals the configured maximum.",
+          "Send no payload bytes and leave the receive context without a near deadline.",
+          "The receiver reaches the full-size allocation before blocking for payload bytes; repeat across admitted connections for aggregate pressure."
+        ],
+        "notExecutedReason": "A deliberate high-memory/stalled-peer experiment was not appropriate in this read-only evidence review and no isolated resource container was assigned."
+      },
+      "impact": "Small peer input can reserve limit-sized memory per connection, creating remotely driven memory pressure or process termination under concurrency.",
+      "mitigationsObserved": [
+        "The default per-frame ceiling is 1 MiB rather than the allowed 1 GiB maximum.",
+        "Protocol role, canonical length, message-size, and close/error checks fail closed.",
+        "Server and pool connection counts are finite."
+      ],
+      "recommendation": "Read frame payload incrementally into bounded staging or a caller-owned stream, and charge retained payload against an aggregate budget before allocation. Add a controlled peer that advertises an accepted maximum frame, stalls, and proves bounded memory plus prompt cancellation cleanup."
+    },
+    {
+      "id": "M8-007-PROTOCOL-003",
+      "title": "HTTP/1 fixed-length request serialization does not enforce HttpLimits.maxBodyBytes",
+      "severity": "LOW",
+      "status": "OPEN",
+      "confidence": "HIGH",
+      "category": "local policy enforcement inconsistency",
+      "affectedScopes": ["http1-smuggling", "resource-bounds"],
+      "description": "HttpLimits is documented as shared parser and serializer bounds. HTTP/1 validates that a fixed body content length equals Content-Length, but it does not reject a known length greater than maxBodyBytes; the fixed writer streams the declared amount without consulting limits. HTTP/1 chunked serialization and HTTP/2 request mapping do enforce the same bound.",
+      "evidence": [
+        {
+          "path": "src/http_model.cj",
+          "lines": "73-137",
+          "observation": "HttpLimits is declared as shared parser and serializer bounds and contains maxBodyBytes."
+        },
+        {
+          "path": "src/internal/http1/request_writer.cj",
+          "lines": "48-85,131-191,194-214",
+          "observation": "Initialization validates fixed-length equality only; writeFixedBody lacks a maxBodyBytes comparison, while chunked writing enforces the bound."
+        },
+        {
+          "path": "src/internal/http1/request_writer_test.cj",
+          "lines": "34-108,207-211",
+          "observation": "Fixed-body success and length-mismatch tests exist; BodyTooLarge is only matched as an enum and no known fixed-length over-limit case was found."
+        },
+        {
+          "path": "src/internal/http2/client_mapping.cj",
+          "lines": "104-106,141-150,540-544",
+          "observation": "HTTP/2 rejects known and streamed request bodies beyond maxBodyBytes."
+        }
+      ],
+      "reproduction": {
+        "type": "source-confirmed scenario",
+        "executed": false,
+        "steps": [
+          "Construct an HTTP/1 request with a five-byte replayable body and Content-Length: 5.",
+          "Call the HTTP/1 writer with HttpLimits(maxBodyBytes: 4).",
+          "The fixed framing equality check succeeds and writeFixedBody sends five bytes; the corresponding HTTP/2 mapping rejects the request before transmission."
+        ],
+        "notExecutedReason": "The discrepancy is explicit in current control flow; no build was started in the shared target during concurrent requalification."
+      },
+      "impact": "A local caller can accidentally bypass its configured HTTP serializer egress bound on the HTTP/1 fixed-length path. This is not directly controlled by a remote peer.",
+      "recommendation": "Reject ContentLength(expected) when expected exceeds limits.maxBodyBytes before writing the request head, and add a regression asserting zero transport writes for exact-limit-plus-one."
+    }
+  ],
+  "resolvedObservations": [
+    {
+      "id": "M8-007-PROTOCOL-RESOLVED-001",
+      "status": "RESOLVED_IN_CURRENT_SOURCE",
+      "title": "Oversized fixed-length HTTP/1 server requests are rejected before body construction",
+      "evidence": [
+        {
+          "path": "src/internal/http1/server_reader.cj",
+          "lines": "77-95",
+          "observation": "Content-Length greater than limits.maxBodyBytes is rejected before Http1FixedBodyStream construction."
+        },
+        {
+          "path": "src/internal/http1/server_reader_test.cj",
+          "lines": "28-54",
+          "observation": "Focused regression covers an oversized fixed request before body reads."
+        }
+      ]
+    }
+  ],
+  "coverageGaps": [
+    {
+      "id": "M8-007-PROTOCOL-GAP-001",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "Fresh fuzz campaign omits four reviewed parser surfaces",
+      "detail": "The current M7-023 campaign contains tls-record, tls-handshake, hostname-verifier, certificate-adapter, http1-parser, chunked-decoder, http2-frame, hpack-decoder, url-authority, and proxy-parser. It has no dns-wire, cookie-psl, multipart, or websocket target. DNS, multipart, and WebSocket have deterministic mutation-style unit tests, but those executions are not represented by the fresh fuzz report; no equivalent cookie/PSL mutation campaign was found. The fuzz source fingerprint also omits src/net.",
+      "evidence": [
+        "tools/gates/campaigns/m7-023-linux-fuzz.json:1-120",
+        "tools/gates/m7_023_linux_fuzz.py:279-286",
+        "src/net/dns_wire_test.cj:311-382",
+        "src/http/multipart_test.cj:154-277",
+        "src/http/websocket_test.cj:220-260",
+        "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"
+      ],
+      "recommendation": "Add bound source-fresh targets for DNS wire parsing, cookie/PSL parsing, multipart framing, and WebSocket framing, retaining their split schedules, truncations, mutations, stable terminals, and resource ceilings."
+    },
+    {
+      "id": "M8-007-PROTOCOL-GAP-002",
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "Pool partitioning lacks a fresh real-connection identity matrix",
+      "detail": "Pool-key equality/hash tests vary all routing and security dimensions and pool tests cover bounds/races. This slice did not observe a fresh installed/native test that establishes distinct live connections for every TLS context, trust context, client identity, provider identity, proxy route, network binding, and ALPN permutation.",
+      "evidence": [
+        "src/internal/http1/pool_key.cj:4-76",
+        "src/internal/http1/pool_key_test.cj:8-70",
+        "src/internal/http1/connection_pool_test.cj",
+        "src/internal/http1/http2_connection_pool_test.cj"
+      ],
+      "recommendation": "Add a controlled peer/descriptor matrix that proves non-reuse and separate handshake identity for each security partition, not only key inequality."
+    },
+    {
+      "id": "M8-007-PROTOCOL-GAP-003",
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "PSL generation is pinned but runtime matching is not differentially checked against every vendored rule",
+      "detail": "The vendored PSL digest, license, revision, and generated Cangjie data are deterministic and current, and representative exact/wildcard/exception/private-domain tests exist. No exhaustive differential execution over every vendored exact, wildcard, and exception rule was observed.",
+      "evidence": [
+        "third_party/public_suffix/source.json:1-9",
+        "third_party/public_suffix/generate.py:27-61,90-160",
+        "src/internal/http_model/public_suffix.cj:3-75",
+        "src/http/cookie_test.cj"
+      ],
+      "recommendation": "Generate a deterministic table-driven differential corpus from the pinned PSL snapshot and assert public-suffix plus registrable-domain behavior for every rule class and adjacent-label boundary."
+    },
+    {
+      "id": "M8-007-PROTOCOL-GAP-004",
+      "severity": "RELEASE_GATE",
+      "status": "NOT_COMPLETED",
+      "title": "Final soak and production signature are outside this source-review result",
+      "detail": "The required 86,400-second soak and production signature have not completed. This report does not certify either gate and does not convert owner/signing control reports into final soak or signature evidence."
+    }
+  ],
+  "filesReviewed": [
+    {"path": "docs/evidence/M8-007/linux_x86_64/review-request.json", "lines": "1", "focus": "bound package, methods, and scope"},
+    {"path": "docs/evidence/M8-007/linux_x86_64/security-index.json", "lines": "1", "focus": "26 document/evidence bindings and states"},
+    {"path": "docs/evidence/M8-007/security-scope.md", "lines": "1-220", "focus": "threat model, parser/resource scope, limitations"},
+    {"path": "docs/evidence/M8-007/linux_x86_64/fuzz-report.json", "lines": "complete JSON object", "focus": "fresh target decisions, source identity, crashes"},
+    {"path": "tools/gates/campaigns/m7-023-linux-fuzz.json", "lines": "1-120", "focus": "target inventory, seeds, minimum iterations"},
+    {"path": "tools/gates/m7_023_linux_fuzz.py", "lines": "202-205,279-286,409-410", "focus": "build and source-fingerprint coverage"},
+    {"path": "src/net/dns_wire.cj", "lines": "195-258,338-350,478-505,593-620", "focus": "message/name/count/compression bounds"},
+    {"path": "src/net/dns_wire_test.cj", "lines": "91-382", "focus": "counts, truncation, pointers, RDATA, deterministic mutations"},
+    {"path": "src/net/dns_client.cj", "lines": "11-15,54-136,250-620", "focus": "admission, deadlines, retries, identity matching, TCP fallback"},
+    {"path": "src/net/dns_client_test.cj", "lines": "1-520", "focus": "controlled UDP/TCP peers, truncation, spoof/mismatch, cancellation"},
+    {"path": "src/net/dns_resolver.cj", "lines": "1-360", "focus": "nameserver/search/cache/file bounds"},
+    {"path": "src/internal/resolver/system_resolver.cj", "lines": "1-190", "focus": "bounded native delegation and exact resolution"},
+    {"path": "src/http/proxy.cj", "lines": "24-218", "focus": "explicit routing, NO_PROXY bounds, auth provider"},
+    {"path": "src/http/redirect.cj", "lines": "67-125,247-264", "focus": "redirect limits, downgrade, credential stripping"},
+    {"path": "src/http/retry.cj", "lines": "7-75", "focus": "attempt, replayability, idempotency, structured error rules"},
+    {"path": "src/http/client.cj", "lines": "405-527,647-659", "focus": "route selection and Proxy-Authorization ownership"},
+    {"path": "src/internal/http1/package.cj", "lines": "34-176", "focus": "Content-Length and Transfer-Encoding framing"},
+    {"path": "src/internal/http1/head_parser.cj", "lines": "99-310", "focus": "incremental CRLF/head/target/Host validation"},
+    {"path": "src/internal/http1/chunked.cj", "lines": "61-254", "focus": "chunk/trailer/cumulative body limits"},
+    {"path": "src/internal/http1/server_reader.cj", "lines": "25-114", "focus": "fixed/chunked request body admission"},
+    {"path": "src/internal/http1/server_reader_test.cj", "lines": "1-90", "focus": "fixed body and exact-limit-plus-one regression"},
+    {"path": "src/internal/http1/server_connection.cj", "lines": "46-121", "focus": "serial request ownership and unread-body close"},
+    {"path": "src/internal/http1/request_writer.cj", "lines": "48-214", "focus": "fixed and chunked serializer bounds"},
+    {"path": "src/internal/http1/request_writer_test.cj", "lines": "1-211", "focus": "fixed/chunked/mismatch tests"},
+    {"path": "src/internal/http1/smuggling_corpus_test.cj", "lines": "8-164", "focus": "ambiguous framing, mutations, split boundaries"},
+    {"path": "src/internal/http2/frame_model.cj", "lines": "4-61,280-305", "focus": "frame/header/write/stream bounds"},
+    {"path": "src/internal/http2/frame_codec.cj", "lines": "28-110", "focus": "envelope-before-payload validation"},
+    {"path": "src/internal/http2/header_block.cj", "lines": "35-140", "focus": "CONTINUATION sequencing and aggregate compressed bound"},
+    {"path": "src/internal/http2/hpack_core.cj", "lines": "67-143", "focus": "integer and encoded/decoded string bounds"},
+    {"path": "src/internal/http2/hpack_huffman.cj", "lines": "57-132", "focus": "EOS/padding/output limits and decoder complexity"},
+    {"path": "src/internal/http2/hpack_huffman_test.cj", "lines": "1-180", "focus": "vectors, octets, EOS, padding, output limit"},
+    {"path": "src/internal/http2/hpack_block.cj", "lines": "15-122,131-211", "focus": "block/list/count/table bounds and sensitive indexing"},
+    {"path": "src/internal/http2/hpack_dynamic_table.cj", "lines": "18-127", "focus": "capacity, eviction, ownership"},
+    {"path": "src/internal/http2/connection_state.cj", "lines": "140-175", "focus": "compression failure scope"},
+    {"path": "src/internal/http2/deterministic_fuzz_test.cj", "lines": "8-95", "focus": "frame/HPACK mutation corpus"},
+    {"path": "src/internal/http2/client_mapping.cj", "lines": "104-150,424-544", "focus": "request/response body bounds"},
+    {"path": "src/internal/http1/pool_key.cj", "lines": "4-76", "focus": "routing/security partition equality and hash"},
+    {"path": "src/internal/http1/pool_key_test.cj", "lines": "8-70", "focus": "all-key-dimension structural tests"},
+    {"path": "src/internal/http1/connection_pool.cj", "lines": "91-340", "focus": "HTTP/1 capacity, reservations, cancellation, publication"},
+    {"path": "src/internal/http1/http2_connection_pool.cj", "lines": "1-420", "focus": "HTTP/2 capacity, stream admission, GOAWAY, cancellation"},
+    {"path": "src/internal/http1/connection_pool_test.cj", "lines": "1-760", "focus": "bounds, rollback, cancellation, race controls"},
+    {"path": "src/internal/http1/http2_connection_pool_test.cj", "lines": "1-690", "focus": "key isolation, stream admission, GOAWAY races"},
+    {"path": "src/http/cookie.cj", "lines": "1-520", "focus": "name/value/domain/path/jar/header bounds and secure overlay"},
+    {"path": "src/http/cookie_test.cj", "lines": "1-650", "focus": "domain, Secure, public suffix, limits, ownership"},
+    {"path": "src/internal/http_model/public_suffix.cj", "lines": "3-75", "focus": "exact/wildcard/exception matching"},
+    {"path": "src/internal/http_model/public_suffix_data.cj", "lines": "1-40 and generated table declarations", "focus": "pinned revision/digest/rule counts"},
+    {"path": "third_party/public_suffix/source.json", "lines": "1-9", "focus": "upstream revision, digest, license"},
+    {"path": "third_party/public_suffix/generate.py", "lines": "27-61,90-160", "focus": "rule normalization and deterministic drift check"},
+    {"path": "src/http/multipart.cj", "lines": "81-125,176-245,420-850", "focus": "metadata/body/part limits, incremental delimiter handling, ownership"},
+    {"path": "src/http/multipart_test.cj", "lines": "154-277", "focus": "mutations, truncations, splits, exact limits"},
+    {"path": "src/http/websocket.cj", "lines": "88-124,390-640", "focus": "frame/message bounds, state progression, receive allocation"},
+    {"path": "src/http/websocket_test.cj", "lines": "60-120,220-260,533-672", "focus": "limits, deterministic mutations, malformed lengths"}
+  ],
+  "commands": [
+    {
+      "command": "sha256sum docs/evidence/M8-007/linux_x86_64/security-index.json",
+      "exitCode": 0,
+      "result": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478; matched review-request packageSha256. This was the first review check."
+    },
+    {
+      "command": "date -u +%Y-%m-%dT%H:%M:%SZ && git rev-parse HEAD && git status --short",
+      "exitCode": 0,
+      "result": "Started 2026-09-21T18:52:36Z at c54258a4cb4646a16e9bcaa42186d5ee2c605a0d; 0 staged, 48 unstaged, and 11 untracked paths. Path listing was intentionally omitted from this sanitized report."
+    },
+    {
+      "command": "sha256sum docs/evidence/M8-007/security-scope.md",
+      "exitCode": 0,
+      "result": "a3d2cbf54009d716eff09d3f4dfff2d0aab361400499b92ebf98a7f1d31a6a8c; matched all nine security-index document entries."
+    },
+    {
+      "command": "python3 -c '<load security-index; SHA-256 every documents[] and evidence[] path; print mismatch count>'",
+      "exitCode": 0,
+      "result": "entries=26 mismatches=0"
+    },
+    {
+      "command": "python3 -c '<import tools/gates/m7_023_linux_fuzz.py; recompute source_fingerprint; compare with fuzz-report.json>'",
+      "exitCode": 0,
+      "result": "current=71bf6b8efa4174194d1ca1ba29cf1333583d2b2f8203e52e4778f85d519a0be4 report=71bf6b8efa4174194d1ca1ba29cf1333583d2b2f8203e52e4778f85d519a0be4 match=True"
+    },
+    {
+      "command": "jq -r '.targets[] | [.target,.decision,.marker.iterations,.marker.seed,.process.exit_code,.process.timed_out] | @tsv' docs/evidence/M8-007/linux_x86_64/fuzz-report.json",
+      "exitCode": 0,
+      "result": "All 10 targets PASS, seed 7023, exit 0, timed_out=false, crash_artifacts=0. Protocol iterations: http1-parser=870, chunked-decoder=127, http2-frame=289, hpack-decoder=290, url-authority=825, proxy-parser=480."
+    },
+    {
+      "command": "python3 -c '<compare requested protocol surfaces with tools/gates/campaigns/m7-023-linux-fuzz.json target names>'",
+      "exitCode": 0,
+      "result": "targets=tls-record,tls-handshake,hostname-verifier,certificate-adapter,http1-parser,chunked-decoder,http2-frame,hpack-decoder,url-authority,proxy-parser; absent=dns-wire,cookie-psl,multipart,websocket"
+    },
+    {
+      "command": "python3 - <<'PY'\n<parse HPACK_HUFFMAN_CODES and HPACK_HUFFMAN_LENGTHS; exactly count source-level exact/prefix table checks for valid repeated symbols; select worst checks-per-bit symbol with code length at least 8; project to 65536 compressed bytes>\nPY",
+      "exitCode": 0,
+      "result": "symbol=253 code_bits=27 table_checks_per_symbol=7937 decoded_symbols=19418 lower_bound_table_checks=154120666 input_bytes=65536"
+    },
+    {
+      "command": "python3 third_party/public_suffix/generate.py --check",
+      "exitCode": 0,
+      "result": "No output; vendored PSL digest/license metadata and generated Cangjie table were current."
+    },
+    {
+      "command": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "exitCode": 0,
+      "result": "2026-09-21T19:17:59Z"
+    }
+  ],
+  "freshEvidenceAssessment": {
+    "securityIndexDigestEntries": 26,
+    "securityIndexDigestMismatches": 0,
+    "fuzzReportStatus": "PASS",
+    "fuzzReportSourceFresh": true,
+    "fuzzReportTargetCount": 10,
+    "fuzzReportCrashArtifacts": 0,
+    "fuzzReportStartedAtUtc": "2026-09-21T18:40:58.817942Z",
+    "fuzzReportFinishedAtUtc": "2026-09-21T18:43:11.443102Z",
+    "importantQualification": "A PASS fuzz report proves only its ten declared targets and mutations. It does not close the omitted parser surfaces or the HPACK maximum-size CPU and accepted-length WebSocket allocation findings."
+  },
+  "executionLimits": {
+    "sdkWrapper": "<qualified-sdk-wrapper>",
+    "sdkWrapperInvoked": false,
+    "tmpdir": "<isolated-tmpdir>",
+    "tmpdirUsed": false,
+    "buildsRun": false,
+    "testsRun": false,
+    "nativeReproductionsRun": false,
+    "reason": "This was a read-only source/evidence review. Concurrent heavy CJPM builds into the shared target were prohibited; the two resource findings were established from current control flow and a read-only source-operation probe."
+  },
+  "certificationBoundaries": {
+    "sourceReviewCompleted": true,
+    "evidenceBindingAudited": true,
+    "nativeCAbiReviewedByThisSlice": false,
+    "tlsReviewedByThisSlice": false,
+    "lifecycleReviewedByThisSlice": false,
+    "soak86400SecondsCompleted": false,
+    "productionSignatureCompleted": false,
+    "independentHumanApprovalProvided": false,
+    "finalReleaseCertified": false,
+    "statement": "This sidecar is one process-isolated AI source/security slice. It cannot be used as independent human approval, as certification of the 86,400-second soak, as production-signature evidence, or as final release authorization."
+  }
+}

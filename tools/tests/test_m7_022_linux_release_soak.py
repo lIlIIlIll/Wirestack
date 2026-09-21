@@ -15,6 +15,20 @@ from tools import m7_022_linux_release_soak as gate
 
 
 class M7022LinuxReleaseSoakTest(unittest.TestCase):
+    def test_report_path_redaction_is_recursive_and_longest_first(self) -> None:
+        report = {
+            "command": ["/var/tmp/soak/consumer/bin/main"],
+            "environment": {"sdk": "/var/tmp/sdk/cangjie"},
+        }
+        redacted = gate.redact_local_paths(
+            report,
+            [("/var/tmp/soak/consumer", "<consumer>"), ("/var/tmp/soak", "<workspace>"),
+             ("/var/tmp/sdk", "<cangjie-sdk>")],
+        )
+        self.assertEqual("<consumer>/bin/main", redacted["command"][0])
+        self.assertEqual("<cangjie-sdk>/cangjie", redacted["environment"]["sdk"])
+        self.assertEqual("/var/tmp/soak/consumer/bin/main", report["command"][0])
+
     def sample(self, index: int, elapsed: int, cycles: int) -> str:
         values = {
             "index": index,

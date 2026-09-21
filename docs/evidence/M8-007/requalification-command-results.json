@@ -1,0 +1,357 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M8-007/test-plan.md",
+        "--json"
+      ],
+      "exit_code": 0,
+      "id": "plan-validation",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fc582b4f311118c575b3673fb61a7f39223f3750a4b1a2fa8605f53ed1ae4941"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/plan-validation.json"
+      },
+      "observed_duration_ms": 100.636,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--format",
+        "json"
+      ],
+      "exit_code": 0,
+      "id": "architecture-guard",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "16c2c74c0eb589466c4403afda58a413af1d83feb4f1a3da912bde7512aff5bb"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/architecture-guard.json"
+      },
+      "observed_duration_ms": 4825.058,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-tasks",
+        "--json"
+      ],
+      "exit_code": 0,
+      "id": "task-contract-validation",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6cbc5d215cb163cc1c1203768577da9316a4b28bd965cbadb6e2b806c944d38d"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/task-validation.json"
+      },
+      "observed_duration_ms": 450.526,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-docs",
+        "--html",
+        "--json",
+        "--output",
+        "docs/evidence/M8-007/docs-report.json"
+      ],
+      "detail": "Fresh qualified cjdoc run already completed for this working source before the review slices.",
+      "exit_code": 0,
+      "id": "public-api-documentation",
+      "report": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d1729da59e05d31b53712d2e5195d6320d663349432dc5031efc0cf703896a4"
+        },
+        "path": "docs/evidence/M8-007/docs-report.json"
+      },
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check"
+      ],
+      "detail": {
+        "actual_text_sha256": "07db22cf3aadd49e63c40e88b553e410fb89adcdbf3c44aee871429a1349b404",
+        "base_file_has_same_actual_digest": true,
+        "base_revision": "1b11f3ec26c3c63d8e65705946f1adf7dd90af35",
+        "code": "M7_028_RETAINED_PACKAGE_DIGEST_MISMATCH",
+        "expected_text_sha256": "c6a463895c20960229242d6ea11419d45704de37209f361d1d7b60426c58a01c",
+        "path": "docs/evidence/M7-021/linux_x86_64/qualification.json",
+        "scope": "pre-existing retained M7-028 package/index inconsistency; not altered under M8-007",
+        "test": "test_checked_in_package_is_valid"
+      },
+      "exit_code": 1,
+      "id": "repository-full-check",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "796e01fd00f8fff00ffd5489a96965d1c10ccf7d032670e4688f72313e8669c4"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/full-check.log"
+      },
+      "observed_duration_ms": 8867.906,
+      "status": "FAIL",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.repository.tests.test_repository_tooling",
+        "tools.tests.test_architecture_guard",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_033_docs",
+        "tools.tests.test_m7_linux_task_graph",
+        "tools.tests.test_build_linux_http_files",
+        "tools.tests.test_build_resolver",
+        "tools.tests.test_m3_030_tls_provider_architecture",
+        "tools.tests.test_m3_031_desktop_tls_adoption",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain",
+        "tools.tests.test_m7_029_independent_security_review",
+        "tools.tests.test_m8_005_public_suffix",
+        "tools.tests.test_p1_013_development_release_gate",
+        "tools.tests.test_p1_014_evidence_digest_types",
+        "tools.tests.test_linux_tls_provider_build",
+        "tools.tests.test_validate_tls_provider_matrix",
+        "tools.tests.test_m7_022_linux_release_soak",
+        "tools.tests.test_m7_028_security_review_package",
+        "tools.tests.test_m7_030_linux_release",
+        "tools.tests.test_m8_007_final_release",
+        "tools.tests.test_m8_007_signing_authorization",
+        "-v"
+      ],
+      "detail": {
+        "code": "M7_028_RETAINED_PACKAGE_DIGEST_MISMATCH",
+        "errors": 1,
+        "failing_test": "tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_checked_in_package_is_valid",
+        "tests_run": 332
+      },
+      "exit_code": 1,
+      "id": "repository-regression-tests",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "17f2ea57ec9ec93ae58ae0a520e8fe40850b61773127a783f8864dfc6177bf09"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/regression-tests.log"
+      },
+      "observed_duration_ms": 6656.657,
+      "status": "FAIL",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "verify-api"
+      ],
+      "exit_code": 0,
+      "id": "public-api-inventory",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3cd31533ab329a24dd8c6fb07ae8ecbe606e84afd100ca72be759306cc4630b3"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/public-api-inventory.log"
+      },
+      "observed_duration_ms": 1857.553,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "verify-core"
+      ],
+      "exit_code": 0,
+      "id": "release-core-verification",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2ba5e84fb0d3f432bb46ce624e59d65ce779edaee74a8488df5b02f75abbfa0a"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/release-core-verification.log"
+      },
+      "observed_duration_ms": 2062.72,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "verify-fuzz"
+      ],
+      "exit_code": 0,
+      "id": "parser-fuzz-verification",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5afcc602c4e25f3cd18d71fd1476875718db4f4c632b7f9f6c1d1fbf66d3695b"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/parser-fuzz-verification.log"
+      },
+      "observed_duration_ms": 197.451,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "src/internal/http1",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "detail": {
+        "errors": 0,
+        "failed": 0,
+        "passed": 118,
+        "skipped": 3,
+        "total": 121
+      },
+      "exit_code": 0,
+      "id": "http1-lifecycle-tests",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "43af5f76b62edbd8dd39f3b797d9a1a1396c1c9c1ef3f099e11c5d195a4942be"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/http1-lifecycle-tests.log"
+      },
+      "observed_duration_ms": 5629.886,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "src/internal/tls_engine",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "detail": {
+        "errors": 0,
+        "failed": 0,
+        "passed": 72,
+        "skipped": 0,
+        "total": 72
+      },
+      "exit_code": 0,
+      "id": "tls-lifecycle-tests",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7763a3bdc1825e60353e74e2a49c11734ebd8d7f1c1cfcfbd01907737ffaee65"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/tls-lifecycle-tests.log"
+      },
+      "observed_duration_ms": 27033.087,
+      "status": "PASS",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "review-report"
+      ],
+      "detail": {
+        "code": "INDEPENDENT_REVIEW_MISSING",
+        "path": "docs/evidence/M8-007/linux_x86_64/independent-review.json"
+      },
+      "exit_code": 1,
+      "id": "independent-review-verification",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a3ec77c66f5c706df2794ee952c3405d238d4f8cb74505b11a02f71bf2e8d8d5"
+        },
+        "path": "docs/evidence/M8-007/commands/20260921-requalification/independent-review-verification.log"
+      },
+      "observed_duration_ms": 2277.352,
+      "status": "FAIL",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "soak",
+        "--duration-seconds",
+        "86400"
+      ],
+      "exit_code": null,
+      "id": "final-candidate-soak",
+      "reason": "Independent review gate is incomplete and protocol slice requires remediation; starting the formal soak is prohibited.",
+      "status": "NOT_RUN",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "verify-soak"
+      ],
+      "exit_code": null,
+      "id": "formal-soak-verification",
+      "reason": "No formal 86,400-second soak was started.",
+      "status": "NOT_RUN",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m8_007_final_release.py",
+        "verify-all"
+      ],
+      "exit_code": null,
+      "id": "production-signature-verification",
+      "reason": "Production signing is not authorized; no new approvals, signatures, or hosted attestations exist.",
+      "status": "NOT_RUN",
+      "timed_out": false
+    }
+  ],
+  "kind": "replacement-candidate-command-results",
+  "recorded_at_utc": "2026-09-21T19:31:50.250234Z",
+  "schema_version": 1,
+  "source_state": "UNCOMMITTED_REQUALIFICATION_WORKTREE",
+  "source_task": "M8-007",
+  "status": "INCOMPLETE",
+  "summary": {
+    "completion_claim": false,
+    "fail": 3,
+    "not_run": 3,
+    "pass": 9
+  }
+}

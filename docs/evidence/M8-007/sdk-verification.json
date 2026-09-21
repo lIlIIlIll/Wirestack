@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-007",
+  "kind": "qualified-sdk-preflight",
+  "status": "PASS",
+  "pin": "docs/references/m7-033-ci-toolchain.json",
+  "sdk_archive": {
+    "name": "cangjie-sdk-linux-x64-1.1.3.tar.gz",
+    "domain": "artifact-bytes-v1",
+    "sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a",
+    "source": "https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-x64-1.1.3.tar.gz&objectKey=6a19349d21f5a8178d6fd22b"
+  },
+  "commands": [
+    {"argv": ["curl", "--fail", "--location", "--connect-timeout", "20", "--max-time", "600", "--output", "<sdk-archive>", "<pinned-url>"], "exit_code": 0},
+    {"argv": ["sha256sum", "<sdk-archive>"], "exit_code": 0, "matches_pin": true},
+    {"argv": ["tar", "-xzf", "<sdk-archive>", "-C", "<sdk-install>"], "exit_code": 0},
+    {"argv": ["cjc", "--version"], "exit_code": 0, "stdout": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n"},
+    {"argv": ["cjpm", "--version"], "exit_code": 0, "stdout": "Cangjie Project Manager: 1.1.3\n"}
+  ],
+  "scope": "Fresh extraction of the pinned SDK archive and native tool version execution only. No Wirestack candidate qualification or cjdoc qualification is claimed."
+}

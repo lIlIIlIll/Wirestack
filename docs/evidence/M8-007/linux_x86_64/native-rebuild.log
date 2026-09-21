@@ -1,6 +1,6 @@
-git: <home>/cangjie_sdk/daily/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
-git: <home>/cangjie_sdk/daily/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
-git: <home>/cangjie_sdk/daily/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+git: <cangjie-sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+git: <cangjie-sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+git: <cangjie-sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 CMake Warning (deprecated) at CMakeLists.txt:1 (cmake_minimum_required):
   Compatibility with CMake < 3.10 will be removed from a future version of
   CMake.
@@ -11,5 +11,5 @@ CMake Warning (deprecated) at CMakeLists.txt:1 (cmake_minimum_required):
 This warning is for project developers.  Use -Wno-author or -Wno-deprecated
 to suppress it.
 
-Linux TLS provider ready: <repo-root>/target/native/cache/08df58f75caefedf09cafd021abad011fba371a320e594867f153b0835adb707
+Linux TLS provider ready: <temp>/target/native/cache/08df58f75caefedf09cafd021abad011fba371a320e594867f153b0835adb707
 TLS provider ready: linux-x86_64-glibc + aws-lc
