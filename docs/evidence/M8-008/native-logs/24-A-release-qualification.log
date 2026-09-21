@@ -1,0 +1,10 @@
+argv=["/usr/bin/python3", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo/tools/m7_021_linux_release.py", "--root", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo", "--output-dir", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/release", "--offline"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo
+timeout_seconds=2400
+returncode=0
+--- stdout ---
+M7-021 Linux release qualification: PASS
+artifact=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/release/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+sha256=7a034e5ec0288c7c9fb94e3142203fa4f027b2c86588d529243e221be8477715
+report=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/release/qualification.json
+--- stderr ---

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "task_id": "M8-004",
+  "dependencies": ["M8-002"],
+  "allowed_paths": [
+    "docs/evidence/M8-004",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "src/net",
+    "tools/tasks/M8-004.json"
+  ],
+  "platforms": ["linux-x86_64-glibc"],
+  "acceptance_commands": [
+    {
+      "id": "plan-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M8-004/test-plan.md", "--json"],
+      "timeout_seconds": 30,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "architecture-guard",
+      "argv": ["python3", "tools/architecture_guard.py", "--format", "json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "task-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-tasks", "--json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cangjie-check",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "check"],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cangjie-build",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "build"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "network-tests",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "test", "src/net", "--no-progress", "--no-color"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M8-004/plan-validation.json",
+    "docs/evidence/M8-004/architecture-guard.json",
+    "docs/evidence/M8-004/task-validation.json",
+    "docs/evidence/M8-004/network-tests.json",
+    "docs/evidence/M8-004/dns-validation.json",
+    "docs/evidence/M8-004/cangjie-build.json",
+    "docs/evidence/M8-004/evidence.json"
+  ],
+  "timeout_seconds": 900,
+  "long_running_gate": false,
+  "source_paths": [
+    "docs/evidence/M8-004/README.md",
+    "docs/evidence/M8-004/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "src/net/package.cj",
+    "src/net/package_test.cj",
+    "src/net/m8_002_test.cj",
+    "src/net/m8_003_test.cj",
+    "src/net/m8_004_test.cj",
+    "tools/tasks/M8-004.json"
+  ]
+}

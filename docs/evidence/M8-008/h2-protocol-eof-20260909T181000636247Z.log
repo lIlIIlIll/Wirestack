@@ -1,0 +1,56 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 329809785 ns, RESULT:
+    TCS: Http2ServerConnectionTest, time elapsed: 310930354 ns, RESULT:
+    [ PASSED ] CASE: explicitAbortWakesBlockedRequestBodyAndConverges (2181836 ns)
+    [ PASSED ] CASE: readerEofWakesBlockedRequestBodyWithoutInventingEof (5715163 ns)
+    [ PASSED ] CASE: serveCancellationUsesTheSameContextForHandlerBodyAndWriter (1665039 ns)
+    [ PASSED ] CASE: serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge (250524661 ns)
+    [ PASSED ] CASE: flowBackpressureStopsOnServeCancellationAndClosesResponsePlan (34105905 ns)
+    [ PASSED ] CASE: initialHeadersWriteFailureStillClosesUnopenedResponsePlan (5212363 ns)
+    [ PASSED ] CASE: completedResponseUnregistersReaderListenerBeforeNextStream (4691338 ns)
+    [ PASSED ] CASE: handlerFailureResetsStreamWithoutPublishingItsMessage (4815443 ns)
+    STDERR:
+    An exception has occurred:
+    Http2ProtocolException: HTTP/2 server handler failed
+    	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/server_mapping.cj:186)
+    TCS: Http2ServerMappingTest, time elapsed: 5947635 ns, RESULT:
+    [ PASSED ] CASE: requestHeadMapsPseudoFieldsHostAndContentLength (75578 ns)
+    [ PASSED ] CASE: connectAndOptionsTargetsAreMappedStrictly (174553 ns)
+    [ PASSED ] CASE: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity (129481 ns)
+    [ PASSED ] CASE: paddedDataReturnsAllFlowCreditAndPublishesTrailers (196762 ns)
+    [ PASSED ] CASE: requestQueueIsBoundedBeforeFlowAccountingMutates (70706 ns)
+    [ PASSED ] CASE: terminalLengthMismatchDoesNotConsumeFlowWindow (65958 ns)
+    [ PASSED ] CASE: responseHeadersBodyFlowAndTrailersMapInOrder (497545 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (828779 ns)
+    [ PASSED ] CASE: responseRulesCloseBodiesOnEveryTerminalOrFailurePath (75647 ns)
+    [ PASSED ] CASE: handlerRunsOnceAndReleasesRequestOwnership (92111 ns)
+    [ PASSED ] CASE: handlerFailureFutureDoesNotRetainArbitraryApplicationMessage (1891102 ns)
+    STDERR:
+    An exception has occurred:
+    Http2ProtocolException: HTTP/2 server handler failed
+    	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/server_mapping.cj:186)
+    [ PASSED ] CASE: readerTerminationWakesBlockedRequestBodyWithConnectionScope (84901 ns)
+    [ PASSED ] CASE: streamResetAndReaderTerminationRetainDistinctFailureScopes (108961 ns)
+    [ PASSED ] CASE: originalRequestContextWinsOverRetainedConnectionTermination (68943 ns)
+Summary: TOTAL: 168
+    PASSED: 22, SKIPPED: 146, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 337619352 ns, RESULT:
+TP: wirestack.*, time elapsed: 337528930 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 329809785 ns
+Summary: TOTAL: 168
+    PASSED: 22, SKIPPED: 146, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

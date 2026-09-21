@@ -1,0 +1,6 @@
+argv=["/usr/bin/git", "init", "--quiet", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo
+timeout_seconds=60
+returncode=0
+--- stdout ---
+--- stderr ---

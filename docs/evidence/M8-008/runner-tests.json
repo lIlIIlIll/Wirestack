@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools/tests",
+    "-p",
+    "test_m8_008_http_contracts.py",
+    "-v"
+  ],
+  "counts": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 6,
+    "skipped": 0,
+    "total": 6
+  },
+  "cwd": "<repo-root>",
+  "elapsed_seconds": 1.1658939769986318,
+  "execution_report": "docs/evidence/M8-008/runner-sealed-20260909T185413831517Z.json",
+  "execution_report_sha256": "20ee10ec9b232b40e0f8f15470a70d399172d54753fdf3c7dcd66e3e44464fbb",
+  "exit_code": 0,
+  "raw_log": "docs/evidence/M8-008/runner-sealed-20260909T185413831517Z.log",
+  "raw_log_sha256": "e8bf2a588172027c73f71a5a78717df0215df01f783ce4c2b4470fe47624f8ec",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "timed_out": false
+}

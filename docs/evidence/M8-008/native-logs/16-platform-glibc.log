@@ -1,0 +1,7 @@
+argv=["/usr/bin/getconf", "GNU_LIBC_VERSION"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+glibc 2.44
+--- stderr ---

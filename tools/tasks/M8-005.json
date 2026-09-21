@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "task_id": "M8-005",
+  "dependencies": ["M8-002", "M8-004"],
+  "allowed_paths": [
+    "docs/architecture/adr/0008-linux-network-foundation.md",
+    "docs/evidence/M8-005",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "src/http/client.cj",
+    "src/http/parity.cj",
+    "src/http/parity_test.cj",
+    "src/http/server.cj",
+    "tools/m8_005_clean_consumer.py",
+    "tools/tasks/M8-005.json"
+  ],
+  "platforms": ["linux-x86_64-glibc"],
+  "acceptance_commands": [
+    {
+      "id": "plan-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M8-005/test-plan.md", "--json"],
+      "timeout_seconds": 30,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "architecture-guard",
+      "argv": ["python3", "tools/architecture_guard.py", "--format", "json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "task-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-tasks", "--json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cangjie-check",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "check"],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cangjie-build",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "build"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "http-tests",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "test", "src/http", "--no-progress", "--no-color"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "clean-consumer",
+      "argv": ["python3", "tools/m8_005_clean_consumer.py", "--json"],
+      "timeout_seconds": 360,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M8-005/plan-validation.json",
+    "docs/evidence/M8-005/architecture-guard.json",
+    "docs/evidence/M8-005/task-validation.json",
+    "docs/evidence/M8-005/cangjie-build.json",
+    "docs/evidence/M8-005/http-tests.json",
+    "docs/evidence/M8-005/clean-consumer.json",
+    "docs/evidence/M8-005/evidence.json"
+  ],
+  "timeout_seconds": 900,
+  "long_running_gate": false,
+  "source_paths": [
+    "docs/architecture/adr/0008-linux-network-foundation.md",
+    "docs/evidence/M8-005/README.md",
+    "docs/evidence/M8-005/test-plan.md",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "src/http/client.cj",
+    "src/http/parity.cj",
+    "src/http/parity_test.cj",
+    "src/http/server.cj",
+    "tools/m8_005_clean_consumer.py",
+    "tools/tasks/M8-005.json"
+  ]
+}

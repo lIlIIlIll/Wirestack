@@ -1,0 +1,26 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 15744445 ns, RESULT:
+    TCS: Http2ServerConnectionTest, time elapsed: 4145740 ns, RESULT:
+    [ PASSED ] CASE: explicitAbortWakesBlockedRequestBodyAndConverges (3222778 ns)
+Summary: TOTAL: 168
+    PASSED: 1, SKIPPED: 167, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 23511501 ns, RESULT:
+TP: wirestack.*, time elapsed: 23454892 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 15744445 ns
+Summary: TOTAL: 168
+    PASSED: 1, SKIPPED: 167, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

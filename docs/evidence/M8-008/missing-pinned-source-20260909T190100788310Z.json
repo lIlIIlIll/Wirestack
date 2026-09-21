@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "python3",
+    "tools/m8_008_http_contracts.py",
+    "--root",
+    ".",
+    "--json"
+  ],
+  "cwd": "<repo-root>",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 0.7640433729975484,
+  "status": "FAIL",
+  "raw_log": "docs/evidence/M8-008/missing-pinned-source-20260909T190100788310Z.log"
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/http",
+    "src/internal/http1",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--filter",
+    "HttpMessageTest,Http1ServerResponseWriterTest",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 7.2303363169994554,
+  "status": "FAIL",
+  "raw_log": "docs/evidence/M8-008/red-body-writer-20260909T172925673574Z.log"
+}

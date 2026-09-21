@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "command": {
+    "argv": [
+      "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo/scripts/check"
+    ],
+    "bytes": 366331,
+    "cwd": "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/repo",
+    "log": "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/logs/35-snapshot-canonical-check.log",
+    "name": "snapshot-canonical-check",
+    "returncode": 0,
+    "sha256": "bf24d2b25a557deca60bcc7a48bdea4ab6f09bad18c976951b9d6771b574b467"
+  },
+  "durable_raw_log": "docs/evidence/M8-008/native-logs/35-snapshot-canonical-check.log",
+  "python_suites": [
+    425,
+    177,
+    24
+  ],
+  "cangjie": {
+    "total": 680,
+    "passed": 657,
+    "skipped": 23,
+    "errors": 0,
+    "failed": 0,
+    "skip_reason": "Performance tag exclusions"
+  },
+  "generated_api_archive": {
+    "path": "docs/evidence/M8-008/generated-api.tar.gz",
+    "sha256": "cebbc17866e609df9081aa58b6d3e8af8447f92b4420394926224760ce971caf"
+  },
+  "coverage": {
+    "symbols": "1316/1316",
+    "parameters": "580/580"
+  }
+}

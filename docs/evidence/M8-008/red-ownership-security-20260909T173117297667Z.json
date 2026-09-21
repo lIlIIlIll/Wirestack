@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/http",
+    "src/internal/http1",
+    "src/internal/transport_stdnet",
+    "src/internal/tls_engine",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--exclude-tags=Performance",
+    "--filter",
+    "HttpMessageTest,Http1ServerResponseWriterTest,Http1ProxyClientPipelineTest,StdNetTransportTest,TlsEnginePumpTest",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 16.54130170999997,
+  "status": "FAIL",
+  "raw_log": "docs/evidence/M8-008/red-ownership-security-20260909T173117297667Z.log"
+}

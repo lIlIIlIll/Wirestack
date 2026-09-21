@@ -1,0 +1,349 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "--version"
+      ],
+      "bytes": 153,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/01-tool-python.log",
+      "name": "tool-python",
+      "returncode": 0,
+      "sha256": "31641677f8337a7306b6a1c843c4d3e24e205a04b9ef6ab3790c85bcf083bc8b"
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "--version"
+      ],
+      "bytes": 154,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/02-tool-git.log",
+      "name": "tool-git",
+      "returncode": 0,
+      "sha256": "795a033b6c6002c2f7530ee42d34c4fa00d1a902bb1ecb0d293366831e35a430"
+    },
+    {
+      "argv": [
+        "<home>/cangjie_sdk/daily/cangjie/bin/cjc",
+        "-v"
+      ],
+      "bytes": 251,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/03-tool-cjc.log",
+      "name": "tool-cjc",
+      "returncode": 0,
+      "sha256": "c86138b6a4ec461067d5b0485d88478e12f6ddc6775e85ea4e2400be5277f612"
+    },
+    {
+      "argv": [
+        "<home>/cangjie_sdk/daily/cangjie/tools/bin/cjpm",
+        "--version"
+      ],
+      "bytes": 207,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/04-tool-cjpm.log",
+      "name": "tool-cjpm",
+      "returncode": 0,
+      "sha256": "8ad413771cd1652778b22c921c42ade944ef336500474714cd0103739be63d44"
+    },
+    {
+      "argv": [
+        "<workspace>/cjdoc/target/release/bin/main",
+        "--version"
+      ],
+      "bytes": 188,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/05-tool-cjdoc.log",
+      "name": "tool-cjdoc",
+      "returncode": 0,
+      "sha256": "11255c267ede43295790cd5f55c4d3cc5a42398816c8bc34552599325d8db58e"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/clang",
+        "--version"
+      ],
+      "bytes": 332,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/06-tool-cc.log",
+      "name": "tool-cc",
+      "returncode": 0,
+      "sha256": "4be3b0614281352beec4f89d84a998450c2c108d18265b148730b651bc450255"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/clang++",
+        "--version"
+      ],
+      "bytes": 334,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/07-tool-cxx.log",
+      "name": "tool-cxx",
+      "returncode": 0,
+      "sha256": "1215ee7cab7c9b04dfcd03e3c874ec8fa9c476e6927f06a33aec8d98735da1e9"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "--version"
+      ],
+      "bytes": 227,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/08-tool-cmake.log",
+      "name": "tool-cmake",
+      "returncode": 0,
+      "sha256": "804629823a30a3b2896456fffd81751a70ee821fdf178c917dbe0c58db66efe0"
+    },
+    {
+      "argv": [
+        "/usr/bin/ninja",
+        "--version"
+      ],
+      "bytes": 144,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/09-tool-ninja.log",
+      "name": "tool-ninja",
+      "returncode": 0,
+      "sha256": "df831d469ec422b2358d83faf0d1a3e2ec75d5c85496c7c3fdaa4bfb4e54a2e8"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/llvm-ar",
+        "--version"
+      ],
+      "bytes": 274,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/10-tool-ar.log",
+      "name": "tool-ar",
+      "returncode": 0,
+      "sha256": "be730c07f7b4c205921623d9575f8cab4a97a71913a94e1d4a7190bd9d7c4e87"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/llvm-ranlib",
+        "--version"
+      ],
+      "bytes": 278,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/11-tool-ranlib.log",
+      "name": "tool-ranlib",
+      "returncode": 0,
+      "sha256": "68896c5ac072bb6dc25a84ab65bdef4e16ec4b982ea4ed43a18e1a0e47796d91"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--version"
+      ],
+      "bytes": 416,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/12-tool-readelf.log",
+      "name": "tool-readelf",
+      "returncode": 0,
+      "sha256": "c367d2a04885d880869c839f1f56550384bf03755c4abe158b0f9f472551afdc"
+    },
+    {
+      "argv": [
+        "/usr/bin/ldd",
+        "--version"
+      ],
+      "bytes": 402,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/13-tool-ldd.log",
+      "name": "tool-ldd",
+      "returncode": 0,
+      "sha256": "eac230639d441ede21dd73f967db39dadbc9f872a469bcb789e4998937e728f6"
+    },
+    {
+      "argv": [
+        "<workspace>/cjdoc/target/release/bin/main",
+        "--version"
+      ],
+      "bytes": 188,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/14-tool-cjdoc-isolated-home.log",
+      "name": "tool-cjdoc-isolated-home",
+      "returncode": 0,
+      "sha256": "11255c267ede43295790cd5f55c4d3cc5a42398816c8bc34552599325d8db58e"
+    },
+    {
+      "argv": [
+        "/usr/bin/uname",
+        "-srm"
+      ],
+      "bytes": 159,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/15-platform-uname.log",
+      "name": "platform-uname",
+      "returncode": 0,
+      "sha256": "90557b1bdec708b854a914995b44abca77bd410459e546ad7ee4cd9c92b3f2b8"
+    },
+    {
+      "argv": [
+        "/usr/bin/getconf",
+        "GNU_LIBC_VERSION"
+      ],
+      "bytes": 157,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/16-platform-glibc.log",
+      "name": "platform-glibc",
+      "returncode": 0,
+      "sha256": "8db70de3f821636cb6ec7306bb401a640622367c2901b0335efab14ddca1dc42"
+    }
+  ],
+  "native_build_executed": false,
+  "scope": "toolchain-and-pinned-source-only",
+  "source": {
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+    "path": "<repo-root>/.local/tls-provider/source/aws-lc-5.5.0",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+  },
+  "source_task": "M8-008",
+  "status": "PASS",
+  "toolchain": {
+    "getconf": "glibc 2.44",
+    "platform": {
+      "architecture": "x86_64",
+      "libc": "glibc",
+      "libc_version": "2.44",
+      "os": "linux"
+    },
+    "profile": "linux-x86_64-glibc",
+    "runtime": {
+      "cangjie_home": "<home>/cangjie_sdk/main/linux_x64/vanilla/20260829/cangjie",
+      "libraries": [
+        "<home>/cangjie_sdk/main/linux_x64/vanilla/20260829/cangjie/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so"
+      ],
+      "library_directories": [
+        "<home>/cangjie_sdk/main/linux_x64/vanilla/20260829/cangjie/runtime/lib/linux_x86_64_cjnative",
+        "<home>/cangjie_sdk/main/linux_x64/vanilla/20260829/cangjie/runtime/lib/linux_x86_64_cjnative"
+      ]
+    },
+    "tools": {
+      "ar": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/10-tool-ar.log",
+        "path": "/usr/lib/llvm15/bin/llvm-ar",
+        "version_output": [
+          "LLVM (http://llvm.org/):",
+          "  LLVM version 15.0.7",
+          "  Optimized build.",
+          "  Default target: x86_64-pc-linux-gnu",
+          "  Host CPU: skylake"
+        ]
+      },
+      "cc": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/06-tool-cc.log",
+        "path": "/usr/lib/llvm15/bin/clang",
+        "version_output": [
+          "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+          "Target: x86_64-pc-linux-gnu",
+          "Thread model: posix",
+          "InstalledDir: /usr/lib/llvm15/bin"
+        ]
+      },
+      "cjc": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/03-tool-cjc.log",
+        "path": "<home>/cangjie_sdk/daily/cangjie/bin/cjc",
+        "version_output": [
+          "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)",
+          "Target: x86_64-unknown-linux-gnu"
+        ]
+      },
+      "cjdoc": {
+        "isolated_home_log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/14-tool-cjdoc-isolated-home.log",
+        "isolated_home_version_output": [
+          "cjdoc 0.7.2"
+        ],
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/05-tool-cjdoc.log",
+        "path": "<workspace>/cjdoc/target/release/bin/main",
+        "version_output": [
+          "cjdoc 0.7.2"
+        ]
+      },
+      "cjpm": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/04-tool-cjpm.log",
+        "path": "<home>/cangjie_sdk/daily/cangjie/tools/bin/cjpm",
+        "version_output": [
+          "Cangjie Project Manager: 1.1.3"
+        ]
+      },
+      "cmake": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/08-tool-cmake.log",
+        "path": "/usr/bin/cmake",
+        "version_output": [
+          "cmake version 4.4.3",
+          "",
+          "CMake suite maintained and supported by Kitware (kitware.com/cmake)."
+        ]
+      },
+      "cxx": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/07-tool-cxx.log",
+        "path": "/usr/lib/llvm15/bin/clang++",
+        "version_output": [
+          "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+          "Target: x86_64-pc-linux-gnu",
+          "Thread model: posix",
+          "InstalledDir: /usr/lib/llvm15/bin"
+        ]
+      },
+      "git": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/02-tool-git.log",
+        "path": "/usr/bin/git",
+        "version_output": [
+          "git version 2.55.0"
+        ]
+      },
+      "ldd": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/13-tool-ldd.log",
+        "path": "/usr/bin/ldd",
+        "version_output": [
+          "ldd (GNU libc) 2.44",
+          "Copyright (C) 2024 Free Software Foundation, Inc.",
+          "This is free software; see the source for copying conditions.  There is NO",
+          "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "Written by Roland McGrath and Ulrich Drepper."
+        ]
+      },
+      "ninja": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/09-tool-ninja.log",
+        "path": "/usr/bin/ninja",
+        "version_output": [
+          "1.13.2"
+        ]
+      },
+      "python": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/01-tool-python.log",
+        "path": "/usr/bin/python3",
+        "version_output": [
+          "Python 3.14.7"
+        ]
+      },
+      "ranlib": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/11-tool-ranlib.log",
+        "path": "/usr/lib/llvm15/bin/llvm-ranlib",
+        "version_output": [
+          "LLVM (http://llvm.org/):",
+          "  LLVM version 15.0.7",
+          "  Optimized build.",
+          "  Default target: x86_64-pc-linux-gnu",
+          "  Host CPU: skylake"
+        ]
+      },
+      "readelf": {
+        "log": "<repo-root>/build/m8-008/20260909T174827.632221Z-1664804-5d91871f/logs/12-tool-readelf.log",
+        "path": "/usr/bin/readelf",
+        "version_output": [
+          "GNU readelf (GNU Binutils) 2.47",
+          "Copyright (C) 2026 Free Software Foundation, Inc.",
+          "This program is free software; you may redistribute it under the terms of",
+          "the GNU General Public License version 3 or (at your option) any later version.",
+          "This program has absolutely no warranty."
+        ]
+      }
+    },
+    "uname": "Linux 7.2.3-arch1-3 x86_64"
+  }
+}

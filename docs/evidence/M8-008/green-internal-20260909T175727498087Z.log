@@ -1,0 +1,820 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 10.29 */                    None < TlsProviderException >[0m
+   [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 10.1 */@Attribute[TEST_GENERATED] class TlsProviderSubstitutionTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 10.2 */    @Attribute[TestCase_64][0m
+    [36m| [0m[34m|[0m /* 10.3 */    func testProviderUsesTheProductionFactoryContract(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.4 */        let provider = TestTlsProviderFactory("test-one").create()[0m
+    [36m| [0m[34m|[0m /* 10.5 */        try {[0m
+    [36m| [0m[34m|[0m /* 10.6 */            expectEqual("provider.manifest().providerId", "\"wirestack-test\"", provider.manifest().providerId, "wirestack-test", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.7 */            expectEqual("provider.manifest().fingerprint", "\"test-one\"", provider.manifest().fingerprint, "test-one", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.8 */            expectEqual("provider.capabilities().supports(TlsCapability.Tls13)", "true", provider.capabilities().supports(TlsCapability.Tls13), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.9 */            let context = TlsClientContext.builder(provider.manifest(), provider.capabilities()).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(tlsTestCertificateDer())]))).build()[0m
+    [36m| [0m[34m|[0m /* 10.10 */            let engine = provider.createClientEngine(context, ReferenceIdentity.Dns(HostName("example.com")), serverName: None < HostName >)[0m
+    [36m| [0m[34m|[0m /* 10.11 */            expectEqual("isComplete(engine.handshakeStep())", "true", isComplete(engine.handshakeStep()), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.12 */            engine.close()[0m
+    [36m| [0m[34m|[0m /* 10.13 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 10.14 */            provider.close()[0m
+    [36m| [0m[34m|[0m /* 10.15 */        }[0m
+    [36m| [0m[34m|[0m /* 10.16 */    }[0m
+    [36m| [0m[34m|[0m /* 10.17 */    [0m
+    [36m| [0m[34m|[0m /* 10.18 */    @Attribute[TestCase_65][0m
+    [36m| [0m[34m|[0m /* 10.19 */    func objectsFromDifferentProviderInstancesCannotMix(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.20 */        let first = TestTlsProvider("first")[0m
+    [36m| [0m[34m|[0m /* 10.21 */        let second = TestTlsProvider("second")[0m
+    [36m| [0m[34m|[0m /* 10.22 */        try {[0m
+    [36m| [0m[34m|[0m /* 10.23 */            let context = TlsClientContext.builder(first.manifest(), first.capabilities()).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(tlsTestCertificateDer())]))).build()[0m
+    [36m| [0m[34m|[0m /* 10.24 */            try {[0m
+    [36m| [0m[34m|[0m /* 10.25 */                try {[0m
+    [36m| [0m[34m|[0m /* 10.26 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 10.27 */                    second.createClientEngine(context, ReferenceIdentity.Dns(HostName("example.com")), serverName: None < HostName >)[0m
+    [36m| [0m[34m|[0m /* 10.28 */                    failExpect("@ExpectThrows: Expected 'TlsProviderException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 10.29 */                    None < TlsProviderException >[0m
+    [36m| [0m[34m|[0m /* 10.30 */                } catch(e: TlsProviderException) {[0m
+    [36m| [0m[34m|[0m /* 10.31 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 10.32 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 10.33 */                    }[0m
+    [36m| [0m[34m|[0m /* 10.34 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 10.35 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 10.36 */                    }[0m
+    [36m| [0m[34m|[0m /* 10.37 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 10.38 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 10.39 */                    }[0m
+    [36m| [0m[34m|[0m /* 10.40 */                    e[0m
+    [36m| [0m[34m|[0m /* 10.41 */                }[0m
+    [36m| [0m[34m|[0m /* 10.42 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 10.43 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 10.44 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 10.45 */                }[0m
+    [36m| [0m[34m|[0m /* 10.46 */                expectCaughtUnexpectedE("@ExpectThrows(TlsProviderException)", "TlsProviderException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 10.47 */                None < TlsProviderException >[0m
+    [36m| [0m[34m|[0m /* 10.48 */            }[0m
+    [36m| [0m[34m|[0m /* 10.49 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 10.50 */            first.close()[0m
+    [36m| [0m[34m|[0m /* 10.51 */            second.close()[0m
+    [36m| [0m[34m|[0m /* 10.52 */        }[0m
+    [36m| [0m[34m|[0m /* 10.53 */    }[0m
+    [36m| [0m[34m|[0m /* 10.54 */    [0m
+    [36m| [0m[34m|[0m /* 10.55 */    @Attribute[TestCase_66][0m
+    [36m| [0m[34m|[0m /* 10.56 */    func activeEngineRetainsProviderUntilItCloses(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.57 */        let provider = TestTlsProvider("lifetime")[0m
+    [36m| [0m[34m|[0m /* 10.58 */        let engine = provider.createEngine(TlsEngineRole.Client, TlsSecurityPolicy.forProfile(TlsSecurityProfile.Modern))[0m
+    [36m| [0m[34m|[0m /* 10.59 */        provider.close()[0m
+    [36m| [0m[34m|[0m /* 10.60 */        expectEqual("provider.closeRequested()", "true", provider.closeRequested(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.61 */        expectEqual("! provider.resourcesReleased()", "true", ! provider.resourcesReleased(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.62 */        expectEqual("isComplete(engine.handshakeStep())", "true", isComplete(engine.handshakeStep()), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.63 */        engine.close()[0m
+    [36m| [0m[34m|[0m /* 10.64 */        expectEqual("provider.resourcesReleased()", "true", provider.resourcesReleased(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.65 */        engine.close()[0m
+    [36m| [0m[34m|[0m /* 10.66 */        expectEqual("provider.resourcesReleased()", "true", provider.resourcesReleased(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.67 */    }[0m
+    [36m| [0m[34m|[0m /* 10.68 */    [0m
+    [36m| [0m[34m|[0m /* 10.69 */    init() {[0m
+    [36m| [0m[34m|[0m /* 10.70 */    }[0m
+    [36m| [0m[34m|[0m /* 10.71 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 10.72 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.73 */        [0m
+    [36m| [0m[34m|[0m /* 10.74 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 10.75 */    }[0m
+    [36m| [0m[34m|[0m /* 10.76 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 10.77 */        [0m
+    [36m| [0m[34m|[0m /* 10.78 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 10.79 */        let suiteBuilder = TestSuite.builder("TlsProviderSubstitutionTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 10.80 */        [0m
+    [36m| [0m[34m|[0m /* 10.81 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.82 */            [0m
+    [36m| [0m[34m|[0m /* 10.83 */            let testProviderUsesTheProductionFactoryContractTestFunc = { => testProviderUsesTheProductionFactoryContract();() }[0m
+    [36m| [0m[34m|[0m /* 10.84 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.85 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.86 */            "testProviderUsesTheProductionFactoryContract",[0m
+    [36m| [0m[34m|[0m /* 10.87 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.88 */            body: testProviderUsesTheProductionFactoryContractTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.89 */            )[0m
+    [36m| [0m[34m|[0m /* 10.90 */            )[0m
+    [36m| [0m[34m|[0m /* 10.91 */            [0m
+    [36m| [0m[34m|[0m /* 10.92 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.93 */        [0m
+    [36m| [0m[34m|[0m /* 10.94 */        [0m
+    [36m| [0m[34m|[0m /* 10.95 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.96 */            [0m
+    [36m| [0m[34m|[0m /* 10.97 */            let objectsFromDifferentProviderInstancesCannotMixTestFunc = { => objectsFromDifferentProviderInstancesCannotMix();() }[0m
+    [36m| [0m[34m|[0m /* 10.98 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.99 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.100 */            "objectsFromDifferentProviderInstancesCannotMix",[0m
+    [36m| [0m[34m|[0m /* 10.101 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.102 */            body: objectsFromDifferentProviderInstancesCannotMixTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.103 */            )[0m
+    [36m| [0m[34m|[0m /* 10.104 */            )[0m
+    [36m| [0m[34m|[0m /* 10.105 */            [0m
+    [36m| [0m[34m|[0m /* 10.106 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.107 */        [0m
+    [36m| [0m[34m|[0m /* 10.108 */        [0m
+    [36m| [0m[34m|[0m /* 10.109 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.110 */            [0m
+    [36m| [0m[34m|[0m /* 10.111 */            let activeEngineRetainsProviderUntilItClosesTestFunc = { => activeEngineRetainsProviderUntilItCloses();() }[0m
+    [36m| [0m[34m|[0m /* 10.112 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.113 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.114 */            "activeEngineRetainsProviderUntilItCloses",[0m
+    [36m| [0m[34m|[0m /* 10.115 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.116 */            body: activeEngineRetainsProviderUntilItClosesTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.117 */            )[0m
+    [36m| [0m[34m|[0m /* 10.118 */            )[0m
+    [36m| [0m[34m|[0m /* 10.119 */            [0m
+    [36m| [0m[34m|[0m /* 10.120 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.121 */        [0m
+    [36m| [0m[34m|[0m /* 10.122 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 10.123 */    }[0m
+    [36m| [0m[34m|[0m /* 10.124 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 10.125 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 10.126 */    }[0m
+    [36m| [0m[34m|[0m /* 10.127 */}[0m
+    [36m| [0m[34m|[0m /* 10.128 */[0m
+    [36m| [0m[34m|[0m /* 10.129 */[0m
+    [36m| [0m[34m|[0m /* 10.130 */interface TestPackageExtension_TlsProviderSubstitutionTest {[0m
+    [36m| [0m[34m|[0m /* 10.131 */    func registerTlsProviderSubstitutionTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 10.132 */}[0m
+    [36m| [0m[34m|[0m /* 10.133 */extend TestPackage <: TestPackageExtension_TlsProviderSubstitutionTest {[0m
+    [36m| [0m[34m|[0m /* 10.134 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 10.135 */    public func registerTlsProviderSubstitutionTest() {[0m
+    [36m| [0m[34m|[0m /* 10.136 */        registerSuite({ => TlsProviderSubstitutionTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 10.137 */    }[0m
+    [36m| [0m[34m|[0m /* 10.138 */}[0m
+    [36m| [0m[34m|[0m /* 10.139 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 10.31 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 10.32 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 10.33 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 10.34 */                    if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 10.35 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 10.36 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 10.37 */                    if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 10.38 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 10.39 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 10.47 */                None < TlsProviderException >[0m
+   [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/provider_test.cj:10:1:
+   [36m| [0m
+[36m10[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m [36m| [0m[34m|[0m class TlsProviderSubstitutionTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m79[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused variable:'serverName'
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/provider_test.cj:141:9:
+    [36m| [0m
+[36m141[0m [36m| [0m        serverName!: ?HostName[0m
+    [36m| [0m        [33m^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'containsAscii'
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/tls_engine/engine_pump_test.cj:896:1:
+    [36m| [0m
+[36m896[0m [36m| [0m  private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): Bool {[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m897[0m [36m| [0m[33m|[0m     let bytes = needle.toArray()[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m910[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+7 warnings generated, 7 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.platform.linux, time elapsed: 11063538 ns, RESULT:
+    TCS: LinuxSystemTrustAdapterTest, time elapsed: 11063538 ns, RESULT:
+    [ PASSED ] CASE: frozenSearchOrderCoversGlibcAndMuslLayouts (208569 ns)
+    [ PASSED ] CASE: currentLinuxHostSelectsOneExplicitUsableSource (9035707 ns)
+    [ PASSED ] CASE: missingCandidatesFailWithoutProviderDefaultFallback (48914 ns)
+    [ PASSED ] CASE: directoryCandidateRequiresReadableHashedCertificateEntry (272763 ns)
+    [ PASSED ] CASE: sourceIdentityChangesWhenSameSizeTrustContentChanges (294940 ns)
+Summary: TOTAL: 5
+    PASSED: 5, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 1475570165 ns, RESULT:
+    TCS: HttpAutomaticHttpsClientTest, time elapsed: 6641612 ns, RESULT:
+    [ PASSED ] CASE: h2NegotiationMultiplexesTenRequestsOnOneTlsConnection (3442223 ns)
+    [ PASSED ] CASE: http11NegotiationFallsBackAndReusesTheAdoptedConnection (2276515 ns)
+    TCS: Http1ChunkedCodecTest, time elapsed: 1502090 ns, RESULT:
+    [ PASSED ] CASE: decoderStreamsDataExtensionsTrailersAndRemainder (71587 ns)
+    [ PASSED ] CASE: decoderHandlesEveryBoundaryOneByteAtATime (51623 ns)
+    [ PASSED ] CASE: encoderProducesCanonicalChunksAndBoundedTrailers (58394 ns)
+    [ PASSED ] CASE: rejectsInvalidSizeExtensionAndTerminators (67610 ns)
+    [ PASSED ] CASE: enforcesBodyChunkLineAndTrailerBounds (53996 ns)
+    [ PASSED ] CASE: streamingResponseKeepsEachChunkBoundedWithoutALifetimeCeiling (149019 ns)
+    [ PASSED ] CASE: rejectsForbiddenOrFoldedTrailers (62857 ns)
+    [ PASSED ] CASE: eofAndPostCompletionUseFailClosedStates (49115 ns)
+    [ PASSED ] CASE: decodeBatchesOwnDataAndRemainingBytes (35682 ns)
+    TCS: Http1ClientConnectionTest, time elapsed: 24051141 ns, RESULT:
+    [ PASSED ] CASE: expectContinueWaitsForApprovalBeforeOpeningBody (790297 ns)
+    [ PASSED ] CASE: finalRejectionBeforeContinueNeverOpensRequestBody (552131 ns)
+    [ PASSED ] CASE: continueWaitTimeoutSendsBodyUnderTheOriginalBudget (20179138 ns)
+    [ PASSED ] CASE: serializesRequestsUntilBodyEofThenReusesConnection (833502 ns)
+    [ PASSED ] CASE: earlyBodyCloseClosesInsteadOfReturningConnectionForReuse (435152 ns)
+    [ PASSED ] CASE: connectionCloseResponseIsNeverReusableAfterEof (444872 ns)
+    TCS: Http1CleartextClientTest, time elapsed: 2398900 ns, RESULT:
+    [ PASSED ] CASE: resolvesConnectsAndReusesOnlyAfterBodyCompletion (1907120 ns)
+    [ PASSED ] CASE: rejectsHttpsBeforeDnsOrPoolMutation (102221 ns)
+    TCS: Http1ConnectionPoolTest, time elapsed: 5692593 ns, RESULT:
+    [ PASSED ] CASE: emitsSecretFreeAcquireAndReleaseLifecycle (893201 ns)
+    [ PASSED ] CASE: reusesOnlyTheSameCompleteKey (521070 ns)
+    [ PASSED ] CASE: enforcesTotalPerKeyIdleAndWaiterBounds (1025365 ns)
+    [ PASSED ] CASE: activeWaitHonorsCancellationAndReleasesWaiterSlot (788872 ns)
+    [ PASSED ] CASE: evictsExpiredAndClosedConnectionsInsteadOfReusingThem (990209 ns)
+    [ PASSED ] CASE: failedCreationRollsBackItsCapacityReservation (661930 ns)
+    TCS: Http1HeadParserTest, time elapsed: 3066630 ns, RESULT:
+    [ PASSED ] CASE: requestParsesIncrementallyAndReturnsBodyRemainder (324597 ns)
+    [ PASSED ] CASE: oneFeedRetainsBytesAfterTheHead (138615 ns)
+    [ PASSED ] CASE: responseParsesStatusReasonHeadersAndFraming (209756 ns)
+    [ PASSED ] CASE: acceptsOriginAbsoluteAuthorityAndAsteriskFormsOnlyWhereValid (307400 ns)
+    [ PASSED ] CASE: rejectsBareLfObsFoldAndInvalidHeaderSyntax (217314 ns)
+    [ PASSED ] CASE: requiresOneValidHostAndMatchingAbsoluteAuthority (496032 ns)
+    [ PASSED ] CASE: rejectsInvalidTargetVersionAndBoundViolations (278526 ns)
+    [ PASSED ] CASE: completedParserCannotBeReused (70708 ns)
+    TCS: Http2Streams1BenchmarkTest, time elapsed: 15655459 ns, RESULT:
+    [ PASSED ] CASE: benchmarkOneConcurrentStream (15433951 ns)
+    STDOUT:
+    HTTP2_BENCH scenario=streams_1 concurrency=1 measuredRequests=20 durationNs=11319556 connections=1 maxPendingWrites=1 maxPendingWriteBytes=31 pendingWrites=1 pendingFlowPermits=0 flowControlStalls=0 checksum=92 latenciesNs=451049,489632,449289,526432,483772,455222,446979,550446,536353,529842,504084,603871,526421,542998,616680,653783,848223,572558,571954,840912
+    TCS: Http2Streams10BenchmarkTest, time elapsed: 84088938 ns, RESULT:
+    [ PASSED ] CASE: benchmarkTenConcurrentStreams (83857062 ns)
+    STDOUT:
+    HTTP2_BENCH scenario=streams_10 concurrency=10 measuredRequests=200 durationNs=75980513 connections=1 maxPendingWrites=3 maxPendingWriteBytes=51 pendingWrites=0 pendingFlowPermits=0 flowControlStalls=0 checksum=920 latenciesNs=3628270,3596481,3502600,3286443,3378000,3144838,2928708,3260707,3017108,3434808,3742406,3617556,3581112,3494975,3124538,3083044,3437522,3336256,3400328,3679655,3583789,3483922,3407536,3352218,3269918,3129141,3072918,2578434,2458339,2630423,4149068,4059237,4019750,4030320,3982102,3957548,3779130,3818767,3723828,4101346,2293878,2250629,2187575,2120044,1880026,1917172,2097674,1944854,2081030,2196157,2396850,2405211,2390850,2232484,2105791,1991503,2302622,2057633,2185078,2489514,2706222,2127221,2594227,2466751,2518942,2444463,2066256,2010386,1958417,2745538,3336734,3291740,3192387,3137814,2851659,2996946,2957709,2598208,2827811,3103898,3047688,2859670,2980505,3051205,2855511,2813247,2654226,2687326,2611143,3107142,4065975,4016013,3797216,3498030,3961260,3741769,3846567,3471050,3691001,3929062,3449976,3397584,3189657,3309294,3323763,3388258,3099813,3155969,3071970,3404400,3058937,2972618,2804852,2883453,2833409,2580427,2650428,2519153,2630172,3086919,3296983,2575545,3202750,3246442,3148563,2791988,2785223,3043751,2708139,3091331,3545006,3516375,3400186,3121373,3265525,3031977,3391493,3044304,3319366,3457197,5156085,4754942,5101143,5001862,4906266,4607129,4974920,4762579,4816975,5060945,3713239,3650247,3698519,3428375,3641735,3425440,3350548,3615604,3479488,3780806,6506319,6362054,6131962,6386187,6034116,6444120,5914262,5772731,5980624,6304529,6012356,5827119,5728256,5740044,5511669,5618317,5970642,5546656,5854464,5904590,3931123,3867189,3351756,3787959,3410056,3742334,3457999,3230233,3133165,3971897,3642833,3615129,3123743,3502165,3380349,3361105,3424592,3074197,3099233,3301046
+    TCS: Http2Streams100BenchmarkTest, time elapsed: 1059300578 ns, RESULT:
+    [ PASSED ] CASE: benchmarkHundredConcurrentStreams (1059061713 ns)
+    STDOUT:
+    HTTP2_BENCH scenario=streams_100 concurrency=100 measuredRequests=2000 durationNs=945073652 connections=1 maxPendingWrites=7 maxPendingWriteBytes=131 pendingWrites=0 pendingFlowPermits=0 flowControlStalls=0 checksum=11000 latenciesNs=42829340,41942262,39386704,39102991,42727924,42758413,42650497,42459838,42664290,42381669,42491095,42793601,42521695,42301403,42184065,41984936,41903412,41854986,41391810,42740897,42365507,42077337,41659992,41245367,40600186,40722771,37835465,41171105,33462973,37692098,42602733,42401231,42225980,34662500,41551535,40675952,40035502,34553249,38271723,37148243,36977239,37518709,39704324,39393184,42044500,38653269,41299083,40227190,39370867,34240547,37231579,34958402,34424237,33523796,37616793,37562848,42150341,41804809,40939994,40436270,40110587,39815236,39590695,34621091,35065138,38360890,37984224,37397126,37510969,32316907,33369685,33081719,33246243,38454802,38092837,32337456,37397066,33020345,41820589,41481744,41099596,35666466,40326145,39658205,39206388,39389939,34845664,34297681,32514239,32966420,40843270,34221453,40015216,39107322,37064715,38717717,34709822,38255008,34065120,42269988,53431144,53450134,53472398,53387088,53271822,53317401,53052834,52725096,44815030,51806346,51638383,51095113,50639447,50046752,51201255,44059188,50599840,50880279,49408903,49225850,52813732,48867032,44572882,52531148,52077681,52975118,52593338,48697784,46751130,51507213,51439433,53333874,53021645,52656159,52379016,51900292,51285716,50717747,50476254,45186656,49584912,44675085,46089916,45093916,49259359,52283850,46824663,46364001,50813601,50351724,49859296,43618637,49374155,49644208,43393334,53281281,52938939,49005207,52181354,51704101,51329885,50977724,43107456,49736903,46073822,50424469,49875936,53161151,44263600,46186791,46002471,50158396,46010039,44870894,49259724,44497681,51965061,45241720,52859383,52485875,43829230,51993320,52436754,48528104,46429368,50773260,50255579,49477803,49132498,49080636,48925686,48690455,48563740,48499148,42661345,48789702,44275362,48374580,51947598,52782272,46567810,43286407,34935209,45004349,46115774,39434156,46145148,45527481,46164641,45141984,46490047,45858291,44945046,37186497,45179608,44653307,32756202,43807359,37823600,42234513,32998502,46418965,45937119,34388083,41565053,44939299,44489791,44212591,38186409,37479557,46306148,45699203,34222368,34849445,39143562,39337362,46333524,45765889,41536136,42562577,39390242,44826018,44302390,38373671,42822561,36768710,36367724,34013386,38708153,43994453,43185335,37316693,41317400,41456450,41050904,36097527,39312832,46100589,43863533,42350963,45095668,34167331,46216831,45602988,37853861,37729327,39836705,34483478,38584288,44104985,42991373,36928171,36301375,34304905,32672093,40461286,42300895,43887634,42364863,33440747,43415870,38014173,39468179,39013057,44399518,43730349,37659874,36700538,33247322,40350631,39926549,39554271,39762453,39221227,39139486,40099989,33799685,32982767,33959212,43148967,57624355,57559486,57492889,57358795,57214708,57011145,56881594,56766233,56491005,56122748,56004778,50784092,53657395,50099082,53615768,53124672,52740307,52367647,51989910,51472296,50946561,50497249,54573964,54181446,54001338,53618975,53329526,53021471,52884391,52624208,49399430,53433878,52778902,52716355,52374201,47128870,57303498,57147010,56938876,56643196,55764920,47733756,50182227,48455832,53257386,52952600,47996826,47229776,46788654,51553901,46938135,50761884,50357570,56715777,56586422,56266272,55972479,55838006,55584942,50654859,54812489,49966054,48547122,53150406,52640009,52260657,51834124,51324303,47277321,46604424,50020889,49597911,53713604,53502807,53113405,52540258,48634894,56391745,56197151,55671277,55184658,54730413,54187140,48055623,52887039,52489606,52095894,51714427,47443081,51047164,47078773,54655760,54358888,47643077,51212733,50656360,50222174,54458419,54106536,56852820,56954025,54496302,55003033,56751200,56525967,56347872,56070086,56907079,56624316,56294661,55936215,55440115,54764740,51880173,52217085,56854905,56705997,56448524,56204212,55824652,55595963,54903974,51134981,55343777,54610964,56160477,55729467,55160874,48996121,54114854,53774388,49765770,51156373,51169645,50834184,48038165,50007750,47884506,48973448,47712970,47333364,44311442,49451515,49843227,50732812,48967297,50243951,47209269,50519675,50397488,45073268,48793984,48808133,48953980,44537520,56016897,55524618,55305363,54863689,53984251,53569827,50448198,49262806,48642972,54993523,54300783,53686812,51833628,48828072,44856708,48475664,54973084,52194335,53882754,47952627,48363442,47206363,49708766,46875039,49447356,49570468,45250382,44904952,44819937,44621822,55051987,54665420,54185727,52301673,52028905,48966546,51449851,50975182,48626164,51518099,51735025,48770005,48341148,49813572,55697483,45041567,44991107,44943022,44892054,44425226,43662715,44299860,44774292,44134873,44527034,44833561,44648859,44216034,43503903,43385845,42999620,43223874,40661997,43102609,44042468,43174725,42865963,43736336,43436630,44714451,43963251,43561266,43319843,42662623,42297385,41935122,40002491,39798151,40780005,38484561,33301858,34124452,40078898,33977700,40413536,39199978,37946976,37666493,32432545,33152553,34228563,44363095,43803353,43338573,40709573,42132856,41603516,41011523,39474376,40318363,33518588,37476499,36961232,33671208,37195510,36755446,42557045,42194123,42032957,41492308,41057625,41665624,41168491,40436620,40649451,39665463,32967573,38232183,43999954,43661358,43023913,42467835,40535507,41759143,41263019,40859840,32917058,33642156,40147066,40312923,32773825,33808848,40199973,42692218,41883073,40216043,39726295,38829393,32761282,42468956,40342403,41366431,33966394,38998061,44584200,40472363,40148823,39411580,39180286,38630492,40399951,40505084,39897990,40328024,40109404,39749807,39514877,38487558,38549447,37310232,36390686,29241816,33249444,35355338,35998418,35686930,31415158,30663489,30026879,31606785,32289727,31686155,31085869,33062798,35629874,35447839,31761195,34673428,32410991,30318450,29725057,32466415,32270175,36248687,32572394,32189069,31570702,31195005,31914713,34776946,30224741,29845665,30737181,35833134,35379218,34933285,32928718,32768363,35287551,30538670,39703951,40032248,38859552,39034419,38311108,37787941,37218202,37462213,36655411,31250099,36475696,36906741,36481407,36126074,37896416,36996519,36657667,36078158,32390806,35189442,32407399,30440615,28598574,39965534,39304102,38842607,37089685,38446545,38018661,37342559,37571488,37954825,29441787,31428154,39856994,39708289,38394483,38954930,38825500,39457415,39121369,37820374,38138467,37399968,40270960,39968079,40057914,39966089,39831072,39629095,39222430,38608700,37299236,37032736,33072868,32994996,28747717,35434321,38970230,37675347,32439859,36601808,35993754,35564227,36247365,39774872,33794377,39509176,37228327,37768116,37133753,36757526,35485385,35040280,39384266,38903905,37407551,33419001,39065365,38495021,37324119,39595292,39685953,39130666,38448845,33522222,36492283,32620456,35685479,35890969,32801343,36296092,29238010,39428782,38653680,37514844,36793373,36390227,39308634,38743741,37600153,38859858,33303037,34095731,36903414,35917426,33621368,35179943,34822511,34359073,31701393,33818569,33349216,28843565,31459997,31167927,33959685,27998882,31586810,34228633,33700238,33333585,28976410,31215602,29133917,28342617,35337499,29139953,32454998,31804704,32187196,35046236,34912864,33754772,34454508,32607617,33339557,34670385,34088195,28647969,32033157,33105930,31347547,33547114,36574203,45070450,45118114,44799604,44976313,44519524,43979780,43481534,44848920,44586931,44197720,44773198,44656531,44086644,43735542,43231253,43211960,42353083,37115013,38009989,37334594,34154855,39905178,36679557,37609030,42569876,42145826,41308770,41117591,40786552,36682632,36133166,34195636,35527962,44438143,44291289,43933416,43640834,42455502,41783067,44165827,43862338,43144369,43560303,43673175,44055465,36687367,40247020,37963114,40000381,35860480,43808303,43530409,43361650,42899781,43386752,44353784,43890614,43587406,41401271,43077307,42508208,42016896,41747276,40654293,40395036,36245900,34025551,37960218,35385557,35233937,42607415,42084041,41534430,37922849,40743736,35175868,41611505,37563798,37729207,37054069,42747552,42811591,37745397,41183572,38114966,40315306,37196440,37961319,35970912,36903735,36576223,37842263,41922848,35728592,41267688,40155197,40352217,41362295,40541913,44914396,50704619,50582074,50330746,50248228,50652790,50537840,50153656,49780701,49158389,48414985,48246557,49342833,48621902,50427142,49893198,49415291,48869436,50028784,49617639,49214315,48498316,50382286,49684488,48067036,48736098,47949241,44844590,44057401,39754101,43368276,47114061,46746405,45409827,44706507,46912647,46823411,43072339,42636024,44739533,45305225,45110161,42042672,41454994,44476691,43577173,44662084,42476935,42353365,44734456,41098844,40602548,40773688,40848736,40960508,42168868,41584939,44993976,44675649,41293860,44852612,50269888,49827583,49277784,47832121,45474387,47572634,43841600,39471977,47006446,41892296,43190827,42826139,39422511,48092521,44466847,43446606,42997542,47230343,44181326,43694442,50118238,49706372,49035199,48661901,44685954,44353652,47984340,48399275,44721162,43967997,50046468,49512281,49004571,42440195,44742432,44282921,48827996,48205659,47811833,50597410,49935930,49981663,50034258,48575740,48007335,47382716,43481504,46340141,48607849,47732232,47065534,46205943,49817147,49693538,49278364,48805048,48182216,47172742,39257491,44262692,45779533,49832033,49433636,49054309,48275430,44079649,46886479,45358998,45527088,45511532,40230106,39963838,39284117,44405574,39093822,38331412,38824367,39524126,44053369,38037524,38648820,43882460,39856466,44792007,39740519,37982958,44306670,38977228,39414083,38517544,49574066,49364860,48896618,48125709,47643220,44355247,46355363,46016434,43389887,48512209,47926996,45288203,46784484,46630001,44662421,43801892,49495566,48963954,47863203,47282219,46698668,44374961,40338669,43262191,38933407,49610208,49172226,48674085,43573247,44354110,44644123,46540717,45844233,47549719,48344039,47492592,46989746,46475482,44964249,38285342,43486095,45285226,44922317,40374634,46111443,45668241,43299524,42832286,42889705,49095644,46490230,46432151,46261389,46059299,41341072,45895539,46433942,46223758,45841902,45047606,44754800,45040872,43920962,46469882,46340901,46139448,45685699,45506325,46197709,46104609,46183776,46068026,45776522,44106867,44559649,44787516,43619548,42301698,41919685,41063307,41235954,38723319,40178433,38414047,38861212,38161018,38279515,40331957,42370350,39959597,42211346,40024179,45454299,44670489,44100386,39289092,43300806,43300342,40711237,43771449,43405714,45379884,44397487,44403020,43871833,41497749,40820964,42766903,42618797,42127944,46004399,45755055,45546454,45046913,44684215,42081948,43922036,42494615,43944324,44473931,42563005,42382146,44846278,44794213,44319670,42044183,40947426,44502146,43901408,41844351,46048520,45716559,45396620,44322832,39327708,44019046,42130509,43598613,41890175,43036913,41148188,43183929,42953414,41408127,42693505,42898965,40332724,42283628,42818260,46318098,43185315,43241343,41608755,42646871,42155234,42959328,42986036,42312882,42596436,42501659,43057942,42095315,41143444,39979598,38310513,35458549,34891256,43112283,42432164,41682410,40937606,40207551,37503896,39180614,36317587,35062955,38438616,36122966,42749261,41956032,33654790,34737397,33962580,39640105,32401821,35957968,32127719,34503780,41014871,40379945,39565111,38380846,32550218,40111048,39320194,37425398,39718754,42833140,41651259,41081849,32527320,39500890,39082988,38200608,35604098,42234087,41500003,40813577,37240448,41318181,40498704,39756874,42785698,42008142,41380299,40627959,39858872,31383484,36777313,32279866,31089001,32635137,38479111,31067515,32220899,41821030,41846207,40712447,38704794,36554563,34639102,33585387,32513017,32370268,38331140,32181921,32100492,31227230,35409383,40310913,38640684,37513055,35757764,35236329,38285452,38187228,34263011,33839147,33112912,39236420,44651007,44698709,44585937,44269183,44110195,43909754,43836995,43962103,43316769,43016766,44485918,44028441,43762052,43166788,42310537,40955978,41175939,36281485,40604514,35766896,38758058,40004853,34015308,35608728,39593304,34669577,39447389,43390898,41784297,42696125,34910980,41334214,40954926,40498124,34873717,34149895,39336817,40810205,39057323,40151635,36048020,44417004,44172241,43561245,42928657,40796820,41842432,41017828,35519661,38608643,39174225,39077848,33670196,32902145,32708577,32738311,33536309,38938073,33311175,33834826,38720835,33390819,44322397,43687005,35793098,42760792,42125658,38877676,33062886,35397455,35010837,39925742,34529748,38917559,36067703,43236866,40309508,42151847,39485822,41248297,40346126,41986469,36364272,36573259,35910415,36922573,42666244,41799515,34825283,41546880,40324568,36692644,42615371,43084629,42530455,41665296,42847324,40370885,42306052,43541117,43960870,44021438,43761864,43489386,43972792,43774182,43531791,43217604,42329157,40085760,43430950,42987105,42342326,42061412,43917716,43717445,43300668,39611483,35959055,41822667,39451369,41082105,40519185,38127038,35314409,43854819,43640833,43220682,42102554,42863069,42129977,38476285,41465522,37939791,38546662,37886101,42918245,36196067,36859289,39343790,40777394,38759710,39790358,38654469,43532191,43252719,36636654,42266654,39654012,41329916,35942460,41571916,35846002,43587061,43099059,42461827,42046425,41742255,41378062,40840855,37739336,35994021,43687982,43194689,42894824,42207415,41879500,41210610,40645825,40390450,38631702,40256163,39304191,39876493,39273133,34916753,36189991,38231926,37422208,39294298,35845718,43650029,43369538,43045053,42492847,41941154,41661637,35955145,40228142,39633630,36101555,37392941,42454026,38245813,41764290,41430982,40951223,38943371,40065987,43843819,49799390,49742107,49850241,49047381,49636895,49108455,48543712,48268160,49440296,48958652,49485737,49547717,49213169,48790778,39844627,48173303,47844393,46230384,46780078,43795398,41609758,37627316,40326496,44564609,39555913,39279222,40139916,43689215,44401642,44198967,40563440,39858563,39700640,44033976,38764910,43866535,41979886,47597776,44436536,41545923,46482345,46383104,41947612,47183609,38098669,39922802,45621697,47374475,41397686,45692810,45748029,45417913,45286520,38958938,45192959,44886162,49069483,48637279,48325877,47922079,46448910,46981097,41262537,46055049,43745106,40840476,40422029,37299162,46955182,47679964,44858016,45413534,39595833,42086229,41747889,38936537,43767308,44745613,49264050,48502480,47496257,47765489,41744107,46882597,41820286,40925908,40684186,39981685,39137239,48745463,48430336,48047283,39737896,47096382,46691469,46430626,45645298,46645904,47464920,49350759,46332105,46373728,46424394,42570759,46151192,46245703,45959957,45906577,44928214,44125165,40453586,42079927,39578757,38762691,38306383,40742568,35968589,35172428,34972797,40559209,35811823,35604746,36274375,35418533,41205112,45860575,44759010,44038386,43346055,36295242,40770439,39465404,38463750,41466767,45044392,44327987,36632166,43148369,40601745,40657631,39364042,38519922,46055543,45638444,45675845,44542303,43736733,43216658,42454881,40485956,39017226,44648132,43931308,39181506,42410627,40961688,39915104,45218035,41941203,40190131,40181917,38967030,40250278,41861936,38868266,36565252,36386786,36121685,35326839,40488091,40969666,46074911,45130225,44460241,41655511,42764964,42926325,42152344,39081968,44212038,43650970,43024649,42130131,41673097,38961953,45715899,44511172,40522263,43440190,42831110,41970589,39236094,45770579,44845625,43888426,43517717,42742612,42259126,41886493,46203201,46685078,46642258,46588865,46455187,46006991,45422993,44833676,44276450,43762837,43364652,43004608,40486356,41935735,37216488,36826896,36671009,35314614,38092894,36057739,41801383,37088998,36469416,36578163,43664923,40784241,41237456,42590513,37736742,40888631,41318022,37358053,42892756,42267258,41142045,35235689,36165547,35648110,46491543,46069763,45553670,44996817,44457151,43981754,37960086,43165418,42839836,42561838,42085640,41618541,35249461,36945696,40751255,41432628,40633544,36340878,40774595,46261876,45701001,44999760,36560562,42608626,41652145,41803580,43587566,43236318,40511555,37869775,43840157,43452645,36398799,37983786,36844078,35970871,40903863,41065142,42372252,36649264,41941373,46143783,45861287,45265689,44683129,44704684,44425103,43339538,45087408,44318995,41278880,44560011,46208825,41230727,45190929,38098733,44169238,45933830,45688183,45381025,45786471,45472018,46358193,45163767,45213757,44969680,44449365,43130565,41108529,42331954,42354974,45229238,44696662,38472349,43909576,43496145,44904807,44898950,44232802,43814833,45035538,44601303,44379224,40022841,43286195,42893204,42901383,41748927,42159797,41961246,40116525,41647242,39251669,41455574,40942035,34837913,40780683,36997989,39129115,41323628,37828504,40324938,38669783,37291434,36251651,41763667,39007735,38739475,37434119,37159549,36850403,36076653,40083760,35793540,38803936,40535221,39502006,35711472,36473531,39830421,36202195,44827472,44742364,40108507,43959585,42838755,42042952,41244824,40539854,39367515,41223058,37753505,39359907,36737457,36354496,39237175,34745120,35916069,40539117,39986471,39517443,35512136,44753381,44235729,43648415,43211435,42652877,42571134,37507355,38048103,40149717,42066431,44322190,44045099,43706303,43415160,39361655,35327925,43774961,43349079,42637768,41355696,45086509,48595180,48535925,48469241,48413587,48261349,48059915,47172036,47147175,46936489,47912342,47584705,47843197,48237630,47711299,47438451,47333192,47824473,47544695,48106602,47985008,47351850,39178147,46992899,45026879,45166283,45334580,38059902,42387425,41526888,43293307,43369201,38547750,38651761,38894013,42901172,43878413,44864005,42267895,41632249,41036946,39121644,44572841,44202631,44461956,42929573,38256842,43081500,37111188,37729543,42716655,37852021,37386226,37437286,36440584,38003019,42589056,37217339,42374833,37076246,42244822,42464266,46750725,44613217,45760733,45584754,45352494,45113178,43406860,42082431,43993956,42574219,41949866,41292820,37468470,41857437,43915218,43630965,40931717,41158968,41193706,46844781,45700137,44942851,44137217,45162492,44385859,46160786,46007049,45758297,41740318,46614816,46271184,42505416,38643102,45965922,46538583,46202023,46451710,46378118,48325639
+    TCS: Http1HundredConnectionBaselineTest, time elapsed: 29638525 ns, RESULT:
+    [ PASSED ] CASE: benchmarkHundredConcurrentConnections (29380672 ns)
+    STDOUT:
+    HTTP2_BASELINE protocol=http1 concurrency=100 requests=100 durationNs=7269398 connections=100 checksum=20000
+    TCS: Http2ConnectionPoolTest, time elapsed: 2125149 ns, RESULT:
+    [ PASSED ] CASE: alpnPrefersH2AndFallsBackOnlyToHttp11 (33107 ns)
+    [ PASSED ] CASE: oneConnectionIsSharedUntilPeerStreamCapacityIsFull (316608 ns)
+    [ PASSED ] CASE: concurrentFirstUseDoesNotCreateAConnectionStampede (666327 ns)
+    [ PASSED ] CASE: newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted (57086 ns)
+    [ PASSED ] CASE: completeSecurityKeyPreventsCrossContextReuse (59294 ns)
+    [ PASSED ] CASE: drainingConnectionRetainsExistingStreamButReceivesNoNewLease (58152 ns)
+    [ PASSED ] CASE: fullBoundedPoolHonorsOneCallerDeadline (54476 ns)
+    [ PASSED ] CASE: poolCloseAbortsEverySharedConnectionExactlyOnce (52333 ns)
+    TCS: Http1FramingTest, time elapsed: 1019889 ns, RESULT:
+    [ PASSED ] CASE: requestUsesOneSharedEmptyLengthOrChunkedDecision (48321 ns)
+    [ PASSED ] CASE: identicalContentLengthsAreAcceptedAcrossFieldsAndLists (25677 ns)
+    [ PASSED ] CASE: conflictingOrInvalidContentLengthsAreRejected (101311 ns)
+    [ PASSED ] CASE: contentLengthAndTransferEncodingNeverCoexist (32848 ns)
+    [ PASSED ] CASE: ambiguousTransferEncodingIsRejected (87766 ns)
+    [ PASSED ] CASE: responseHandlesHeadStatusesConnectAndCloseDelimiting (64208 ns)
+    [ PASSED ] CASE: bodylessAndSuccessfulConnectResponsesRejectFramingFields (55689 ns)
+    TCS: HttpConnectionPoolKeyTest, time elapsed: 397810 ns, RESULT:
+    [ PASSED ] CASE: canonicalOriginProducesStableEqualityAndHash (14479 ns)
+    [ PASSED ] CASE: everySecurityAndRouteDimensionPartitionsReuse (25849 ns)
+    [ PASSED ] CASE: refusesIncompletePartitionIdentities (15229 ns)
+    TCS: Http1ProxyClientPipelineTest, time elapsed: 4065650 ns, RESULT:
+    [ PASSED ] CASE: dynamicConnectCredentialsNeverReuseAnAuthenticatedTunnel (2484383 ns)
+    STDERR:
+    An exception has occurred:
+    NetworkException: peer closed before completing the HTTP/1 request head
+    An exception has occurred:
+    NetworkException: peer closed before completing the HTTP/1 request head
+    [ PASSED ] CASE: rejectedConnectDrainsClosesAndReturnsStructuredNonRetryableFailure (1332818 ns)
+    TCS: Http1RequestWriterTest, time elapsed: 2177132 ns, RESULT:
+    [ PASSED ] CASE: twoStageWriterDoesNotOpenBodyBeforeExplicitCommit (411392 ns)
+    [ PASSED ] CASE: writesFixedBodyThroughPartialTransportOperations (325054 ns)
+    [ PASSED ] CASE: streamsUnknownLengthBodyAsCanonicalChunks (349190 ns)
+    [ PASSED ] CASE: rejectsDeclaredMismatchBeforeWritingAnything (87403 ns)
+    [ PASSED ] CASE: prematureBodyEofRetainsPartialCommitEvidence (336703 ns)
+    [ PASSED ] CASE: emptyFramingProbesSourceInsteadOfDroppingUnexpectedBytes (90480 ns)
+    TCS: Http1ResponseReaderTest, time elapsed: 6269097 ns, RESULT:
+    [ PASSED ] CASE: explicitUpgradeTransfersOnlyAMatching101Protocol (396397 ns)
+    [ PASSED ] CASE: mismatchedUpgradeResponseFailsClosed (378253 ns)
+    [ PASSED ] CASE: explicitConnectTransfersBufferedTunnelBytesAndTransportOwnership (342740 ns)
+    [ PASSED ] CASE: failedConnectRemainsAnHttpResponseAndClosesAfterBody (496277 ns)
+    [ PASSED ] CASE: readsInterimAndFixedResponseWithoutBufferingTheBody (317609 ns)
+    STDERR:
+    	 at wirestack.internal.http1::readHttp1ServerRequest(wirestack::DuplexTransport, wirestack::OperationContext, wirestack::HttpLimits, wirestack::ResponseBodyObserver, std.core::Option<...>)(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http1/server_reader.cj:52)
+    	 at wirestack.internal.http1::serveHttp1Connection(wirestack::DuplexTransport, wirestack.internal.http1::Http1ServerHandler, wirestack::OperationContext, wirestack::HttpLimits, Int64)(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http1/server_connection.cj:56)
+    	 at wirestack.internal.http1/test::ConnectPipelineTransportFactory::connect::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http1/proxy_client_pipeline_test.cj:140)
+    [ PASSED ] CASE: received4xxAnd5xxRemainHttpResponses (872995 ns)
+    STDERR:
+    	 at wirestack.internal.http1::readHttp1ServerRequest(wirestack::DuplexTransport, wirestack::OperationContext, wirestack::HttpLimits, wirestack::ResponseBodyObserver, std.core::Option<...>)(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http1/server_reader.cj:52)
+    	 at wirestack.internal.http1::serveHttp1Connection(wirestack::DuplexTransport, wirestack.internal.http1::Http1ServerHandler, wirestack::OperationContext, wirestack::HttpLimits, Int64)(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http1/server_connection.cj:56)
+    	 at wirestack.internal.http1/test::ConnectPipelineTransportFactory::connect::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http1/proxy_client_pipeline_test.cj:140)
+    [ PASSED ] CASE: decodesChunkedResponseAndPublishesTrailerAtEof (1024923 ns)
+    [ PASSED ] CASE: closeDelimitedBodyCompletesOnlyAtTransportEof (249472 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (324344 ns)
+    [ PASSED ] CASE: prematureFixedBodyEofAbandonsResponseExactlyOnce (283858 ns)
+    [ PASSED ] CASE: rejectsImplicitUpgradeAndConnectTransportTransfer (532503 ns)
+    TCS: Http1SerializerTest, time elapsed: 1344020 ns, RESULT:
+    [ PASSED ] CASE: clientRequestAddsHostAndUsesOriginForm (81289 ns)
+    [ PASSED ] CASE: forwardProxyRequestUsesAbsoluteFormAndOriginHost (71859 ns)
+    [ PASSED ] CASE: requestPreservesOrderedMultipleFieldsAndLengthFraming (62046 ns)
+    [ PASSED ] CASE: requestRejectsMissingDuplicateOrMismatchedHost (121629 ns)
+    [ PASSED ] CASE: responseSerializesStatusAndUsesSharedFraming (36886 ns)
+    [ PASSED ] CASE: responseRejectsInjectionAndForbiddenBodyFraming (43742 ns)
+    [ PASSED ] CASE: writerHandlesPartialTransportWritesUnderOneContext (89084 ns)
+    [ PASSED ] CASE: serializedBytesAreDefensiveCopies (104087 ns)
+    TCS: Http1ServerConnectionTest, time elapsed: 3092051 ns, RESULT:
+    [ PASSED ] CASE: serializesTwoKeepAliveExchanges (1699192 ns)
+    [ PASSED ] CASE: unreadRequestBodyForcesConnectionCloseAfterResponse (478763 ns)
+    [ PASSED ] CASE: handlerFailureProducesBounded500AndCloses (543654 ns)
+    TCS: Http1ServerRequestReaderTest, time elapsed: 8736884 ns, RESULT:
+    [ PASSED ] CASE: streamsFixedRequestBodyWithoutReadingPastItsLength (582113 ns)
+    [ PASSED ] CASE: decodesChunkedRequestAndPublishesTrailer (700854 ns)
+    [ PASSED ] CASE: sendsContinueOnlyWhenHandlerStartsReadingTheBody (6364986 ns)
+    [ PASSED ] CASE: rejectingWithoutReadingNeverSendsContinue (521452 ns)
+    TCS: Http1ServerTest, time elapsed: 29311787 ns, RESULT:
+    [ PASSED ] CASE: shutdownAbortsConnectionBlockedInsideTlsHandshake (8912868 ns)
+    [ PASSED ] CASE: acceptSideTlsHookOwnsConnectionAndClosesAfterShutdown (711073 ns)
+    [ PASSED ] CASE: gracefulShutdownStopsAcceptAfterCompletedConnection (739552 ns)
+    [ PASSED ] CASE: expiredShutdownAbortsBlockedConnectionAndReturnsBoundedly (8107998 ns)
+    [ PASSED ] CASE: shutdownClosesTransportReturnedAfterAcceptStopsWithoutDispatch (60774 ns)
+    [ PASSED ] CASE: connectionLimitPreventsSecondAcceptUntilCapacityReturns (9858839 ns)
+    TCS: Http1ServerResponseWriterTest, time elapsed: 2270682 ns, RESULT:
+    [ PASSED ] CASE: writesFixedResponseThroughPartialTransportOperations (297125 ns)
+    [ PASSED ] CASE: streamsChunkedResponseAndTrailer (533642 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (273741 ns)
+    [ PASSED ] CASE: headResponseNeverTransfersRepresentationBytes (66931 ns)
+    [ PASSED ] CASE: closeDelimitedResponseRequiresConnectionClose (289515 ns)
+    [ PASSED ] CASE: rejectsKnownLengthMismatchBeforeCommittingHeadAndClosesBody (70905 ns)
+    [ PASSED ] CASE: closeFailureDoesNotReplacePrecommitLengthMismatch (61880 ns)
+    TCS: Http1SmugglingCorpusTest, time elapsed: 75946373 ns, RESULT:
+    [ PASSED ] CASE: clientAndServerFramingRejectTheSameAmbiguousHeaderCorpus (1625078 ns)
+    [ PASSED ] CASE: identicalLengthsAndOneFinalChunkedCodingRemainUnambiguous (510023 ns)
+    [ PASSED ] CASE: rejectsWhitespaceTargetAndProxyDifferentialCorpus (501781 ns)
+    [ PASSED ] CASE: rejectsMalformedChunkAndTrailerCorpusAtInputOrEof (129935 ns)
+    [ PASSED ] CASE: everyAcceptedSingleByteMutationHasACanonicalReparse (66418043 ns)
+    STDOUT:
+    M7023_FUZZ target=http1-parser seed=7023 iterations=870 decision=PASS
+    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (2257519 ns)
+    STDOUT:
+    M7023_FUZZ target=chunked-decoder seed=7023 iterations=127 decision=PASS
+    [ PASSED ] CASE: validHeadParsesAtEveryTransportSplitBoundary (3702674 ns)
+    TCS: Http1HttpsClientTest, time elapsed: 1292622 ns, RESULT:
+    [ PASSED ] CASE: partitionsHandshakesAndReusesHttpsAfterBodyCompletion (1150704 ns)
+    TCS: Http1TlsServerTest, time elapsed: 103304173 ns, RESULT:
+    [ PASSED ] CASE: alpnServerRejectsAClientWithNoSharedHttpProtocol (44850131 ns)
+    [ PASSED ] CASE: automaticClientOffersH2FirstAndFallsBackToServerHttp11 (17698833 ns)
+    [ PASSED ] CASE: requiredMutualTlsCarriesAuthenticatedHttp1Exchange (22141431 ns)
+    [ PASSED ] CASE: realAwsLcHandshakeCarriesOneHttp1Exchange (17820559 ns)
+Summary: TOTAL: 117
+    PASSED: 114, SKIPPED: 3, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 2792950674 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 17811635 ns, RESULT:
+    [ PASSED ] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (3146418 ns)
+    [ PASSED ] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (4525527 ns)
+    [ PASSED ] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (3205496 ns)
+    [ PASSED ] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (1025920 ns)
+    [ PASSED ] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (884176 ns)
+    [ PASSED ] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (2826511 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (593931 ns)
+    TCS: Http2ClientMappingTest, time elapsed: 2550279 ns, RESULT:
+    [ PASSED ] CASE: requestMapsOrderedPseudoFieldsAuthorityAndSensitiveHeaders (96678 ns)
+    [ PASSED ] CASE: connectUsesOnlyMethodAndAuthorityPseudoFields (51295 ns)
+    [ PASSED ] CASE: requestRejectsAuthorityFramingAndConnectionAmbiguity (228795 ns)
+    [ PASSED ] CASE: requestHeaderListHonorsHttp2BoundsBeforeHpackMutation (55416 ns)
+    [ PASSED ] CASE: requestBodyProvesEofBeforeOneTerminalTrailerBlock (110248 ns)
+    [ PASSED ] CASE: requestBodyRejectsPrematureEofAndConfiguredOverflow (107686 ns)
+    [ PASSED ] CASE: responseMapsInformationalFinalDataAndTrailersInOrder (95400 ns)
+    [ PASSED ] CASE: responseRejectsPseudoOrderCaseAndConnectionFieldsAsStreamErrors (62859 ns)
+    [ PASSED ] CASE: responseRejectsInvalidStatusAndTooManyInformationalHeads (153578 ns)
+    [ PASSED ] CASE: responseContentLengthMustMatchExactlyAtEndStream (115069 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (30795 ns)
+    [ PASSED ] CASE: bodylessAndConnectResponseRulesAreExplicit (108354 ns)
+    [ PASSED ] CASE: responseTrailersRequireFinalEndStreamAndRegularAllowedFields (98187 ns)
+    TCS: Http2ConformanceTest, time elapsed: 5794280 ns, RESULT:
+    [ PASSED ] CASE: invalidFrameOrderMatrixFailsAtConnectionScope (218498 ns)
+    [ PASSED ] CASE: continuationSequenceCompletesOnlyOnEndHeaders (127479 ns)
+    [ PASSED ] CASE: rstStreamAndGoAwayRaceCompletesOwnerOnceAndCleansRegistrations (5073688 ns)
+    TCS: Http2ConnectionStateMachineTest, time elapsed: 5189253 ns, RESULT:
+    [ PASSED ] CASE: clientStartEmitsMagicAndSettingsThenPeerSettingsOpens (34520 ns)
+    [ PASSED ] CASE: serverConsumesIncrementalMagicBeforeItsFirstSettings (39937 ns)
+    [ PASSED ] CASE: invalidOrIncompletePrefaceFailsOnceWithProtocolEvidence (45691 ns)
+    [ PASSED ] CASE: firstPeerFrameMustBeNonAcknowledgementSettings (41997 ns)
+    [ PASSED ] CASE: openConnectionAppliesSettingsAndCompletesHeaderBlocks (37764 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsAndMayOnlyNarrowItsBoundary (50461 ns)
+    [ PASSED ] CASE: peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt (62994 ns)
+    [ PASSED ] CASE: firstPeerSettingsCannotReopenAConnectionThatAlreadyBeganDraining (43387 ns)
+    [ PASSED ] CASE: racingFinishTransitionsAndPublishesCompletionExactlyOnce (3879007 ns)
+    TCS: Http2DeterministicFuzzTest, time elapsed: 58581783 ns, RESULT:
+    [ PASSED ] CASE: frameParserDeterministicMutationCorpusStaysBounded (4860726 ns)
+    STDOUT:
+    M7023_FUZZ target=http2-frame seed=7023 iterations=289 decision=PASS
+    [ PASSED ] CASE: hpackDecoderDeterministicMutationCorpusFailsClosed (53163617 ns)
+    STDOUT:
+    M7023_FUZZ target=hpack-decoder seed=7023 iterations=280 decision=PASS
+    [ PASSED ] CASE: protocolLimitBoundaryMutationsRejectOversizedInputs (58705 ns)
+    TCS: Http2FlowControllerTest, time elapsed: 2328177984 ns, RESULT:
+    [ PASSED ] CASE: windowUpdateCodecIgnoresReservedBitAndRejectsZeroByScope (29278 ns)
+    [ PASSED ] CASE: reservationsRespectConnectionStreamAndPeerFrameCredit (43033 ns)
+    [ PASSED ] CASE: settingsShrinkPausesReservedDataAndCancellationReleasesIt (50440 ns)
+    [ PASSED ] CASE: streamWindowUpdateWakesAReservedPermitAfterSettingsShrink (39707 ns)
+    [ PASSED ] CASE: concurrentTryReserveNeverOvercommitsOneStream (536651 ns)
+    [ PASSED ] CASE: receiveCreditReturnsOnlyAfterApplicationConsumption (69659 ns)
+    [ PASSED ] CASE: smallReceiveReadsCoalesceWindowUpdates (174847 ns)
+    [ PASSED ] CASE: stalledConnectionCreditFlushesOnceWithoutChangingSmallReadCoalescing (27549 ns)
+    [ PASSED ] CASE: leastRecentlyServedStreamsReceiveCreditBeforeThePreviousOwner (2325187673 ns)
+    STDOUT:
+    M6_024_FLOW_RESULT siblings=100 connectionCredit=4096 flowControlStalls=101 pendingReservations=0 connectionWindowUpdateFrames=1
+    [ PASSED ] CASE: connectionSendWindowIsSharedAcrossStreams (34982 ns)
+    [ PASSED ] CASE: connectionAndStreamWindowViolationsHaveCorrectScope (33527 ns)
+    [ PASSED ] CASE: settingsAndWindowOverflowFailAtomically (55062 ns)
+    [ PASSED ] CASE: streamCleanupCancelsPermitsAndRestoresOnlyConnectionReceiveCredit (39499 ns)
+    [ PASSED ] CASE: dataAccountingUsesTheEntireFramePayload (18418 ns)
+    TCS: Http2FrameCodecTest, time elapsed: 1145697 ns, RESULT:
+    [ PASSED ] CASE: everyRequiredFrameEnvelopeRoundTrips (125350 ns)
+    [ PASSED ] CASE: parserAcceptsEverySingleByteBoundaryAndMultipleFrames (68804 ns)
+    [ PASSED ] CASE: incompleteInputStaysBoundedUntilCompletion (17015 ns)
+    [ PASSED ] CASE: oversizedFrameFailsBeforePayloadBufferingAndParserBecomesTerminal (27316 ns)
+    [ PASSED ] CASE: reservedBitIsIgnoredOnReadAndClearedOnWrite (20818 ns)
+    [ PASSED ] CASE: unknownFramesAndFlagsRoundTripWithoutInterpretation (23184 ns)
+    [ PASSED ] CASE: transportWriterHandlesRepeatedPartialWrites (39003 ns)
+    TCS: Http2FrameModelTest, time elapsed: 786529 ns, RESULT:
+    [ PASSED ] CASE: frameAndErrorCodesRoundTripIncludingExtensions (24116 ns)
+    [ PASSED ] CASE: streamIdentifierIgnoresReservedBitAndKeepsThirtyOneBits (11595 ns)
+    [ PASSED ] CASE: limitsAreExplicitAndFrameSizeIsBounded (32643 ns)
+    [ PASSED ] CASE: fixedFrameShapesAndStreamScopesAreValidated (28016 ns)
+    [ PASSED ] CASE: settingsRejectInvalidProtocolValuesButRetainExtensions (21472 ns)
+    [ PASSED ] CASE: unknownFlagsAndFramesRemainForwardCompatible (8789 ns)
+    TCS: Http2GoAwayManagerTest, time elapsed: 4906089 ns, RESULT:
+    [ PASSED ] CASE: peerBoundaryRetiresOnlyDefinitelyUnprocessedStreams (113568 ns)
+    [ PASSED ] CASE: narrowingBoundaryWakesEachNewlyExcludedOwnerExactlyOnce (55640 ns)
+    [ PASSED ] CASE: localDrainQueuesGoAwayAndStopsAdmissionBeforeWriterRuns (71621 ns)
+    [ PASSED ] CASE: fabricatedReceiveResultCannotDrainAnOpenCoordinator (55983 ns)
+    [ PASSED ] CASE: racingAdmissionAndGoAwayNeverLeavesAnExcludedStreamActive (3968655 ns)
+    TCS: Http2HeaderBlockAssemblerTest, time elapsed: 819840 ns, RESULT:
+    [ PASSED ] CASE: sameStreamContinuationsAssembleInExactOrder (22075 ns)
+    [ PASSED ] CASE: continuationWithoutStartWrongStreamAndInterleavingFailConnection (49523 ns)
+    [ PASSED ] CASE: paddingAndPriorityOverheadAreExcludedFromHeaderBytes (23592 ns)
+    [ PASSED ] CASE: pushPromiseRetainsPromisedStreamAndFragmentOnly (25670 ns)
+    [ PASSED ] CASE: invalidPaddingPriorityAndSelfDependencyFailClosed (41640 ns)
+    [ PASSED ] CASE: accumulatedCompressedBytesHaveOneHardLimit (19126 ns)
+    TCS: Http2ConnectionHealthTest, time elapsed: 524474 ns, RESULT:
+    [ PASSED ] CASE: pingCodecAndConnectionAckPreserveOpaqueBytes (24633 ns)
+    [ PASSED ] CASE: idleProbeIsSingleOutstandingAndMatchingAckRestoresHealth (136168 ns)
+    [ PASSED ] CASE: ordinaryActivityDefersIdleProbeWithoutAllocatingATimer (21884 ns)
+    TCS: Http2ConnectionCloserTest, time elapsed: 998498 ns, RESULT:
+    [ PASSED ] CASE: gracefulCloseSendsGoAwayWaitsForStreamAndClosesTransportOnce (106956 ns)
+    [ PASSED ] CASE: expiredCloseAbortsActiveStreamsWithoutStartingGracefulIo (42481 ns)
+    [ PASSED ] CASE: racingShorterDeadlineUpgradesInFlightGracefulCloseToOneAbort (59862 ns)
+    [ PASSED ] CASE: concurrentGracefulCallersShareOneTerminalResultAndTransportClose (123120 ns)
+    [ PASSED ] CASE: failedGracefulTransportCloseFallsBackToOneAbort (92644 ns)
+    TCS: HpackBlockTest, time elapsed: 1844094 ns, RESULT:
+    [ PASSED ] CASE: rfcRequestBlocksDecodeWithSharedDynamicState (32539 ns)
+    [ PASSED ] CASE: encoderMatchesFirstRfcHuffmanRequestExample (47699 ns)
+    [ PASSED ] CASE: literalModesPreserveNeverIndexedAndOnlyIncrementalMutatesTable (925347 ns)
+    [ PASSED ] CASE: tableSizeUpdateMustLeadBlockAndRespectAllowedMaximum (25979 ns)
+    [ PASSED ] CASE: headerCountListAndCompressedLimitsFailClosed (219747 ns)
+    [ PASSED ] CASE: peerCapacityUpdateIsEmittedBeforeHeaders (17736 ns)
+    TCS: HpackCoreTest, time elapsed: 709428 ns, RESULT:
+    [ PASSED ] CASE: rfcIntegerVectorsEncodeAndDecodeExactly (14049 ns)
+    [ PASSED ] CASE: integerRejectsTruncationOverflowAndInvalidPrefix (22912 ns)
+    [ PASSED ] CASE: rawStringRoundTripsAndOwnsItsBytes (14807 ns)
+    [ PASSED ] CASE: stringLengthLimitAndTruncationFailBeforeCopy (75483 ns)
+    [ PASSED ] CASE: staticTableMatchesRfcBoundariesAndRepresentativeEntries (20825 ns)
+    [ PASSED ] CASE: everyStaticEntryHasBoundedRfcAccounting (51583 ns)
+    TCS: HpackDynamicTableTest, time elapsed: 771914 ns, RESULT:
+    [ PASSED ] CASE: newestEntryUsesIndexSixtyTwoAndOlderEntriesShift (11655 ns)
+    [ PASSED ] CASE: exactRfcAccountingEvictsOldestEntriesFirst (18505 ns)
+    [ PASSED ] CASE: oversizedEntryClearsTheEntireTableWithoutInsertion (10106 ns)
+    [ PASSED ] CASE: capacityShrinkEvictsImmediatelyAndPeerLimitIsHard (17319 ns)
+    [ PASSED ] CASE: withoutIndexingNeverIndexedAndSensitiveNeverEnterState (19572 ns)
+    [ PASSED ] CASE: staticAndDynamicSearchReturnCanonicalLowestIndexes (103047 ns)
+    [ PASSED ] CASE: zeroCapacityRetainsNoEntries (9916 ns)
+    TCS: HpackHuffmanTest, time elapsed: 45536515 ns, RESULT:
+    [ PASSED ] CASE: rfcRequestExamplesEncodeAndDecodeExactly (2895916 ns)
+    [ PASSED ] CASE: everyOctetRoundTripsWithinAnExplicitBound (39448135 ns)
+    [ PASSED ] CASE: huffmanStringLiteralUsesFlagAndSharedBounds (1066231 ns)
+    [ PASSED ] CASE: eosInvalidPaddingAndTruncatedPrefixFailClosed (470929 ns)
+    [ PASSED ] CASE: decodedAndEncodedOutputLimitsApplyBeforeGrowth (843699 ns)
+    TCS: Http2ConnectionReaderTest, time elapsed: 3036603 ns, RESULT:
+    [ PASSED ] CASE: oneReaderDecodesEveryByteBoundaryAndDispatchesInWireOrder (397349 ns)
+    [ PASSED ] CASE: serverConsumesMagicAndFirstFrameFromTheSameRead (241200 ns)
+    [ PASSED ] CASE: eofDuringPrefaceOrFrameFailsAndWakesEveryStream (657543 ns)
+    [ PASSED ] CASE: invalidTransportProgressAndHandlerFailureBecomeTerminal (499452 ns)
+    [ PASSED ] CASE: readerLoopCanOnlyBeClaimedOnce (255986 ns)
+    [ PASSED ] CASE: terminationRegistryIsBoundedRemovableAndExactlyOnce (222728 ns)
+    [ PASSED ] CASE: readerRegistryReservesOneListenerBeyondTheStreamLimit (27541 ns)
+    TCS: Http2ServerConnectionTest, time elapsed: 295216044 ns, RESULT:
+    [ PASSED ] CASE: explicitAbortWakesBlockedRequestBodyAndConverges (1628621 ns)
+    [ PASSED ] CASE: readerEofWakesBlockedRequestBodyWithoutInventingEof (1621491 ns)
+    [ PASSED ] CASE: serveCancellationUsesTheSameContextForHandlerBodyAndWriter (1552380 ns)
+    [ PASSED ] CASE: serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge (259405145 ns)
+    [ PASSED ] CASE: flowBackpressureStopsOnServeCancellationAndClosesResponsePlan (22229889 ns)
+    [ PASSED ] CASE: initialHeadersWriteFailureStillClosesUnopenedResponsePlan (1408628 ns)
+    [ PASSED ] CASE: completedResponseUnregistersReaderListenerBeforeNextStream (2097538 ns)
+    [ PASSED ] CASE: handlerFailureResetsStreamWithoutPublishingItsMessage (3948281 ns)
+    STDERR:
+    An exception has occurred:
+    Http2ProtocolException: HTTP/2 server handler failed
+    	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/server_mapping.cj:182)
+    TCS: Http2ServerMappingTest, time elapsed: 6331570 ns, RESULT:
+    [ PASSED ] CASE: requestHeadMapsPseudoFieldsHostAndContentLength (107204 ns)
+    [ PASSED ] CASE: connectAndOptionsTargetsAreMappedStrictly (130720 ns)
+    [ PASSED ] CASE: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity (109097 ns)
+    [ PASSED ] CASE: paddedDataReturnsAllFlowCreditAndPublishesTrailers (107256 ns)
+    [ PASSED ] CASE: requestQueueIsBoundedBeforeFlowAccountingMutates (64619 ns)
+    [ PASSED ] CASE: terminalLengthMismatchDoesNotConsumeFlowWindow (100391 ns)
+    [ PASSED ] CASE: responseHeadersBodyFlowAndTrailersMapInOrder (961690 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (980191 ns)
+    [ PASSED ] CASE: responseRulesCloseBodiesOnEveryTerminalOrFailurePath (64499 ns)
+    [ PASSED ] CASE: handlerRunsOnceAndReleasesRequestOwnership (135852 ns)
+    [ PASSED ] CASE: handlerFailureFutureDoesNotRetainArbitraryApplicationMessage (1796181 ns)
+    STDERR:
+    An exception has occurred:
+    Http2ProtocolException: HTTP/2 server handler failed
+    	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/server_mapping.cj:182)
+    [ PASSED ] CASE: readerTerminationWakesBlockedRequestBodyWithConnectionScope (92408 ns)
+    [ PASSED ] CASE: streamResetAndReaderTerminationRetainDistinctFailureScopes (127661 ns)
+    [ PASSED ] CASE: originalRequestContextWinsOverRetainedConnectionTermination (67114 ns)
+    TCS: Http2SettingsTest, time elapsed: 1026249 ns, RESULT:
+    [ PASSED ] CASE: codecPreservesKnownUnknownAndRepeatedSettingsInOrder (17261 ns)
+    [ PASSED ] CASE: peerBatchAppliesAtomicallyAndReturnsAckAndWindowDelta (23826 ns)
+    [ PASSED ] CASE: invalidPeerBatchLeavesEffectiveStateUnchanged (22847 ns)
+    [ PASSED ] CASE: localBatchesAreAcknowledgedInFifoOrder (16531 ns)
+    [ PASSED ] CASE: unexpectedAckAndPendingBatchOverflowFailClosed (23956 ns)
+    [ PASSED ] CASE: advertisedResourceValuesAreCappedByLocalPolicy (29137 ns)
+    [ PASSED ] CASE: settingsFrameLengthAndAckPayloadAreRejectedByFrameLayer (35276 ns)
+    [ PASSED ] CASE: peerDefaultsAreRfcValuesCappedSeparatelyFromLocalAdvertisement (27121 ns)
+    [ PASSED ] CASE: serverEnablePushSettingIsRejectedInBothDirections (22584 ns)
+    TCS: Http2StreamLifecycleTest, time elapsed: 2437181 ns, RESULT:
+    [ PASSED ] CASE: bothEndStreamOrdersReachClosedExactlyOnce (26955 ns)
+    [ PASSED ] CASE: initialEndStreamHalfClosesTheInitiatingSide (22614 ns)
+    [ PASSED ] CASE: clientAndServerAllocateCorrectMonotonicParity (25124 ns)
+    [ PASSED ] CASE: peerParityReuseAndDecreasingIdsFailConnection (68293 ns)
+    [ PASSED ] CASE: localAndPeerConcurrencyLimitsAreIndependentAndCapacityReturns (45217 ns)
+    [ PASSED ] CASE: invalidHalfClosedDirectionsAndUnknownStreamsFailClosed (38809 ns)
+    [ PASSED ] CASE: readerTerminationClosesAndUnregistersEveryActiveStream (49894 ns)
+    [ PASSED ] CASE: racingAdmissionNeverExceedsConfiguredBoundOrDuplicatesIds (548460 ns)
+    [ PASSED ] CASE: racingEndDirectionsCompleteAndCleanupExactlyOnce (635062 ns)
+    TCS: Http2StreamResetManagerTest, time elapsed: 2446273 ns, RESULT:
+    [ PASSED ] CASE: rstCodecPreservesKnownAndExtensionCodes (43114 ns)
+    [ PASSED ] CASE: localCancelQueuesResetAndReleasesOnlyItsStream (75544 ns)
+    [ PASSED ] CASE: peerResetCancelsQueuedDataPermitsAndWakesOwnerOnce (62153 ns)
+    [ PASSED ] CASE: resetWakesBlockedServerBodyWithoutClosingConnection (81318 ns)
+    [ PASSED ] CASE: racingLocalAndPeerResetCompletesEveryStreamExactlyOnce (1492640 ns)
+    [ PASSED ] CASE: queuePressureIsAtomicAndCleanupCreditStaysBoundedForRetry (65156 ns)
+    TCS: Http2WriteSchedulerTest, time elapsed: 4359789 ns, RESULT:
+    [ PASSED ] CASE: controlPrecedesDataAndPartialWritesDrainGracefully (113216 ns)
+    [ PASSED ] CASE: controlBurstIsBoundedAndDataStreamsRotateFairly (480036 ns)
+    [ PASSED ] CASE: queueCountAndBytesAreHardAndCancellationReleasesCapacity (107629 ns)
+    [ PASSED ] CASE: concurrentProducersStillUseExactlyOneWriter (1611530 ns)
+    [ PASSED ] CASE: abortInterruptsActiveWriteAndFailsEveryTicket (83892 ns)
+    [ PASSED ] CASE: transportFailureFansOutAndTicketWaitHonorsCancellation (85771 ns)
+    [ PASSED ] CASE: reservedDataConsumesFlowOnlyWhenTheWriterClaimsIt (43666 ns)
+    [ PASSED ] CASE: serverDataEventTransfersItsPermitBeforeWriterClaim (39654 ns)
+    [ PASSED ] CASE: cancellingQueuedReservedDataReturnsAllFlowCapacity (36834 ns)
+    [ PASSED ] CASE: concurrentHeaderBatchesStayContiguousOnTheWire (522268 ns)
+Summary: TOTAL: 168
+    PASSED: 168, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 24618145595 ns, RESULT:
+    TCS: TlsConnectionTest, time elapsed: 15761821 ns, RESULT:
+    [ PASSED ] CASE: handshakeTransfersOwnershipAndPlaintextIoUsesTheEngine (1105516 ns)
+    [ PASSED ] CASE: oneReadAndOneWriteMayOverlapButSecondReadFailsImmediately (901509 ns)
+    [ PASSED ] CASE: handshakeFailureAbortsTransportAndReleasesEngineExactlyOnce (122487 ns)
+    [ PASSED ] CASE: expiredHandshakeDeadlineStillConsumesAndAbortsBothInputs (232562 ns)
+    [ PASSED ] CASE: ioFailureAbortsAndRepeatedTerminalCallsDoNotReleaseTwice (494494 ns)
+    [ PASSED ] CASE: unsupportedHalfCloseDoesNotMutateAnOpenConnection (418331 ns)
+    [ PASSED ] CASE: concurrentCloseAndAbortReleaseUnderlyingResourcesOnce (8779033 ns)
+    [ PASSED ] CASE: gracefulCloseSendsAndProcessesCloseNotifyBeforeReleasingResources (133382 ns)
+    [ PASSED ] CASE: tcpEofDuringGracefulCloseRetainsTruncationAndStillReleasesEverything (278270 ns)
+    [ PASSED ] CASE: expiredCloseBudgetStillClosesTransportAndReleasesEngine (122646 ns)
+    [ PASSED ] CASE: abortNeverAttemptsTlsShutdownAndRetainsLocalAbortEvidence (71441 ns)
+    [ PASSED ] CASE: tcpEofDuringApplicationReadRetainsTruncationBeforeAbort (453558 ns)
+    [ PASSED ] CASE: peerCloseNotifyProducesEofEvidenceAndRejectsNewApplicationWrites (575196 ns)
+    TCS: Net06TlsTransportCleanupGateTest, time elapsed: 1755189 ns, RESULT:
+    [ PASSED ] CASE: failedHandshakesDisposeEngineAndTransportExactlyOnce (1466565 ns)
+    STDOUT:
+    NET06_HEAP scenario=tls-transport-cleanup index=0 usedHeapBytes=2560000
+    NET06_HEAP scenario=tls-transport-cleanup index=3 usedHeapBytes=2580480
+    NET06_TLS_TRANSPORT requested=3 completed=3 engineClosed=3 transportAborted=3 terminalDisposals=3 backgroundTasks=0
+    TCS: TlsContextTest, time elapsed: 5301207 ns, RESULT:
+    [ PASSED ] CASE: linuxCapabilitiesAreExplicitAndNeverInferredFromProviderNames (18218 ns)
+    [ PASSED ] CASE: defaultSystemTrustFailsAtBuildUntilLinuxAdapterIsAvailable (140455 ns)
+    [ PASSED ] CASE: modernClientContextIsImmutableAndConcurrentShareable (513674 ns)
+    [ PASSED ] CASE: strictTls13RejectsAnyTls12Override (139430 ns)
+    [ PASSED ] CASE: missingTls13AndHttp2CapabilitiesFailBeforeHandshake (180741 ns)
+    [ PASSED ] CASE: alpnRejectsEmptyAndDuplicateProtocolNames (821710 ns)
+    [ PASSED ] CASE: serverRequiresServerIdentityAndMtlSTrustAtBuildTime (1399175 ns)
+    [ PASSED ] CASE: clientIdentityCapabilityIsValidatedAtBuildTime (816234 ns)
+    TCS: TlsEnginePumpTest, time elapsed: 231237543 ns, RESULT:
+    [ PASSED ] CASE: awsLcClientEngineProducesAClientHelloWithoutSocketIo (33874206 ns)
+    [ PASSED ] CASE: strictTls13PolicyIsAcceptedByTheNativeEngine (123539 ns)
+    [ PASSED ] CASE: systemTrustCompletesARealHandshakeWithDiscoveredTestOwnedPem (12235162 ns)
+    [ PASSED ] CASE: customRootChainIsLoadedIntoARealAwsLcClientEngine (400291 ns)
+    [ PASSED ] CASE: spkiPinPolicyConfiguresTheNativeVerificationPathBeforeHandshake (168455 ns)
+    [ PASSED ] CASE: matchingSpkiPinCompletesARealClientServerHandshake (10917945 ns)
+    [ PASSED ] CASE: matchingSpkiPinDoesNotBypassReferenceIdentityVerification (10520985 ns)
+    [ PASSED ] CASE: realAwsLcEnginesExchangeCloseNotifyInBothDirections (11328648 ns)
+    [ PASSED ] CASE: handshakeInfoReportsNegotiatedAlpnPeerChainAndVerificationEvidence (11197970 ns)
+    [ PASSED ] CASE: tls13TicketResumesAcrossFreshEnginesWithoutEarlyData (12280967 ns)
+    [ PASSED ] CASE: tls12TicketResumesAcrossFreshEngines (12497218 ns)
+    [ PASSED ] CASE: sniSelectsTheCompleteImmutableContextAndItsCertificate (12735996 ns)
+    [ PASSED ] CASE: sniSelectorRejectsMissingAndUnknownNamesWithStableEvidence (18459945 ns)
+    [ PASSED ] CASE: noSharedAlpnFailsTheHandshakeInsteadOfSilentlySelectingNothing (9006145 ns)
+    [ PASSED ] CASE: requiredMutualTlsUsesClientIdentityAndReturnsServerVerificationEvidence (13161731 ns)
+    [ PASSED ] CASE: requiredMutualTlsRejectsMissingClientIdentityButOptionalAllowsIt (13110902 ns)
+    [ PASSED ] CASE: mismatchedSpkiPinFailsARealClientServerHandshake (9565545 ns)
+    [ PASSED ] CASE: externalSignerCompletesARealHandshakeOutsideTheNativeCallback (16967605 ns)
+    [ PASSED ] CASE: externalSignerExceptionFailsClosedWithoutCrossingTheCAbi (8989666 ns)
+    [ PASSED ] CASE: cancellationBeforeSignerInvocationFailsThePendingNativeOperation (8780806 ns)
+    [ PASSED ] CASE: pumpHandlesWantReadWriteAndPartialIoWithBoundedBuffers (49076 ns)
+    [ PASSED ] CASE: wantWriteWithoutCiphertextFailsInsteadOfSpinning (90361 ns)
+    [ PASSED ] CASE: eofDuringWantReadRetainsTlsHandshakeEvidence (63798 ns)
+    [ PASSED ] CASE: preCancellationStopsBeforeCallingProviderOrTransport (224677 ns)
+    [ PASSED ] CASE: expiredDeadlineStopsBeforeCallingProviderOrTransport (86732 ns)
+    TCS: LocalIdentityTest, time elapsed: 5597278 ns, RESULT:
+    [ PASSED ] CASE: pkcs8InputIsExactBoundedAndZeroizable (976431 ns)
+    [ PASSED ] CASE: pkcs8FileAdapterReadsOneBoundedRegularFile (517790 ns)
+    [ PASSED ] CASE: localIdentityValidatesLeafKeyMatchAndHasStablePublicIdentity (1520737 ns)
+    [ PASSED ] CASE: mismatchedCertificateAndPrivateKeyFailAtIdentityBuild (970754 ns)
+    [ PASSED ] CASE: externalSignerAndSystemHandleShareOneOpaqueKeyContract (462073 ns)
+    [ PASSED ] CASE: duplicateSignerAlgorithmsAndMismatchedSpkiFailAtBuild (348317 ns)
+    TCS: M3028TlsFuzzTest, time elapsed: 24356437985 ns, RESULT:
+    [ PASSED ] CASE: recordMutationsHaveDeterministicTypedTerminals (9784249517 ns)
+    STDOUT:
+    M7023_FUZZ target=tls-record seed=7023 iterations=512 decision=PASS
+    [ PASSED ] CASE: handshakeMutationsHaveDeterministicTypedTerminals (9561731185 ns)
+    STDOUT:
+    M7023_FUZZ target=tls-handshake seed=7023 iterations=512 decision=PASS
+    M3028_FUZZ target=tls-record,tls-handshake seed=3028 mutations=1024 decision=PASS
+    [ PASSED ] CASE: certificateAdapterMutationsHaveDeterministicTypedTerminals (5009777019 ns)
+    STDOUT:
+    M7023_FUZZ target=certificate-adapter seed=7023 iterations=512 decision=PASS
+    M3028_FUZZ target=certificate-adapter seed=3028 mutations=512 decision=PASS
+    TCS: TlsContextSessionVersionTest, time elapsed: 165851 ns, RESULT:
+    [ PASSED ] CASE: sessionKeysSeparateContextEpochs (11039 ns)
+    TCS: TlsProviderSubstitutionTest, time elapsed: 884817 ns, RESULT:
+    [ PASSED ] CASE: testProviderUsesTheProductionFactoryContract (225523 ns)
+    [ PASSED ] CASE: objectsFromDifferentProviderInstancesCannotMix (262139 ns)
+    [ PASSED ] CASE: activeEngineRetainsProviderUntilItCloses (13125 ns)
+    TCS: TlsSessionStoreTest, time elapsed: 269270 ns, RESULT:
+    [ PASSED ] CASE: boundedLruExpiryAndSingleUseAreDeterministic (24081 ns)
+    [ PASSED ] CASE: everySecurityPartitionDimensionPreventsReuse (39801 ns)
+Summary: TOTAL: 62
+    PASSED: 62, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 211267406 ns, RESULT:
+    TCS: StdNetTransportListenerTest, time elapsed: 91473976 ns, RESULT:
+    [ PASSED ] CASE: listenerRejectsOutOfRangeBacklogBeforeBinding (206512 ns)
+    [ PASSED ] CASE: listenerPreCancelledAndExpiredAcceptsFailFast (149512 ns)
+    [ PASSED ] CASE: listenerDeadlineBoundsBlockedAcceptAndListenerRemainsUsable (39053378 ns)
+    [ PASSED ] CASE: listenerCancellationWakesActiveAcceptAndListenerRemainsUsable (40123046 ns)
+    [ PASSED ] CASE: listenerCloseWakesActiveAcceptWithStructuredErrorAndIsIdempotent (10857887 ns)
+    TCS: M123TransportDiagnosticsTest, time elapsed: 809029 ns, RESULT:
+    [ PASSED ] CASE: stdNetReportsRuntimeEndpointsAndCapabilitiesWithoutGuessingIoBackend (324880 ns)
+    [ PASSED ] CASE: deterministicTransportUsesTheSameProviderNeutralContract (62143 ns)
+    TCS: M127BackgroundFastPathTest, time elapsed: 34383332 ns, RESULT:
+    [ PASSED ] CASE: backgroundAndObservedPathsTransferEquivalentData (236283 ns)
+    [ PASSED ] CASE: backgroundPeerCloseRemainsEof (157883 ns)
+    [ PASSED ] CASE: backgroundLocalCloseRaceRemainsClosed (1209517 ns)
+    [ PASSED ] CASE: backgroundStillRejectsConcurrentReaders (1404970 ns)
+    [ PASSED ] CASE: cancellableAndDeadlineContextsRetainGenericChecks (183350 ns)
+    [ PASSED ] CASE: deadlineTimeoutIsClearedBeforeBackgroundRead (30370923 ns)
+    TCS: Net06CancellationGateTest, time elapsed: 5300147 ns, RESULT:
+    [ PASSED ] CASE: cancelledReadsReleaseSocketsWaitersAndTasks (5064942 ns)
+    STDOUT:
+    NET06_HEAP scenario=cancellation index=0 usedHeapBytes=2129920
+    NET06_HEAP scenario=cancellation index=3 usedHeapBytes=2318336
+    NET06_CANCELLATION requested=3 completed=3 joinedTasks=6 activeReads=0 backgroundTasks=0
+    TCS: StdNetTransportTest, time elapsed: 77208247 ns, RESULT:
+    [ PASSED ] CASE: activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycle (11334018 ns)
+    [ PASSED ] CASE: activityWaitersWakeWhenTransportBecomesTerminal (201033 ns)
+    [ PASSED ] CASE: writeTimeoutIsNeverRetryableWithoutZeroCommitProof (24353 ns)
+    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (301435 ns)
+    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (2076479 ns)
+    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (251361 ns)
+    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (203731 ns)
+    [ PASSED ] CASE: emptyOperationsAreImmediate (142266 ns)
+    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (272804 ns)
+    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1134342 ns)
+    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29251579 ns)
+    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (55014 ns)
+    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (285123 ns)
+    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (20502365 ns)
+    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (1338639 ns)
+    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (1355060 ns)
+    [ PASSED ] CASE: firstCloseOrAbortKeepsItsPeerVisibleTerminalResult (700244 ns)
+    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (267233 ns)
+    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (1468167 ns)
+    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (568531 ns)
+    [ FAILED ] CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof (1299441 ns)
+    Expect Failed: `(result.get(Duration.second) == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 52
+    PASSED: 34, SKIPPED: 17, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: StdNetTransportTest, CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 29173409915 ns, RESULT:
+TP: wirestack.*, time elapsed: 29173330157 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.platform.linux, time elapsed: 11063538 ns
+    TP: wirestack.internal.http2, time elapsed: 2792950674 ns
+    TP: wirestack.internal.tls_engine, time elapsed: 24618145595 ns
+    TP: wirestack.internal.http1, time elapsed: 1475570165 ns
+    FAILED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 211267406 ns, RESULT:
+        TCS: StdNetTransportListenerTest, time elapsed: 91473976 ns, RESULT:
+        TCS: M123TransportDiagnosticsTest, time elapsed: 809029 ns, RESULT:
+        TCS: M127BackgroundFastPathTest, time elapsed: 34383332 ns, RESULT:
+        TCS: Net06CancellationGateTest, time elapsed: 5300147 ns, RESULT:
+        TCS: StdNetTransportTest, time elapsed: 77208247 ns, RESULT:
+        [ FAILED ] CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof (1299441 ns)
+Summary: TOTAL: 404
+    PASSED: 383, SKIPPED: 20, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

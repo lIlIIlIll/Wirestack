@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools/tests",
+    "-p",
+    "test_m8_008_http_contracts.py",
+    "-v"
+  ],
+  "cwd": "<repo-root>",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 1.1644996870018076,
+  "status": "PASS",
+  "raw_log": "docs/evidence/M8-008/runner-tests-green-20260909T181035969490Z.log"
+}

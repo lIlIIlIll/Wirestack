@@ -1,0 +1,10 @@
+{
+  "source_task": "M8-008",
+  "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "verify-evidence", "--task", "M8-008", "--json"],
+  "exit_code": 0,
+  "issues": [],
+  "kind": "evidence-freshness",
+  "schema_version": 1,
+  "status": "PASS",
+  "tasks": [{"issues": [], "report_count": 15, "source_count": 174, "stale_paths": [], "status": "PASS", "task_id": "M8-008"}]
+}

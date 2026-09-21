@@ -1,0 +1,7 @@
+argv=["/usr/bin/python3", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+Python 3.14.7
+--- stderr ---

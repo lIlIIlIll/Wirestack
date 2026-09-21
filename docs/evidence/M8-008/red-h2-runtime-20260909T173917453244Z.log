@@ -1,0 +1,9 @@
+[31merror[0m: `is` and `as` operators cannot be chained
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:372:28:
+    [36m| [0m
+[36m372[0m [36m| [0m    match (exchange as Any as? Http2ReaderTerminationListener) {[0m
+    [36m| [0m                    [36m~~[0m     [31m^^ [0m
+    [36m| [0m
+
+1 error generated, 1 error printed.
+Error: cjpm test failed

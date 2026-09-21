@@ -1,0 +1,11 @@
+argv=["/usr/lib/llvm15/bin/llvm-ranlib", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+LLVM (http://llvm.org/):
+  LLVM version 15.0.7
+  Optimized build.
+  Default target: x86_64-pc-linux-gnu
+  Host CPU: skylake
+--- stderr ---

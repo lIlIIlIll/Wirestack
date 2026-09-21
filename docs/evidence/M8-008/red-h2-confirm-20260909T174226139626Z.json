@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/internal/http2",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--filter",
+    "Http2ConnectionStateMachineTest,Http2ServerMappingTest,Http2ServerConnectionTest",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 16.54681094099942,
+  "status": "FAIL",
+  "raw_log": "docs/evidence/M8-008/red-h2-confirm-20260909T174226139626Z.log"
+}

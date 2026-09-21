@@ -1,0 +1,5 @@
+# Task evidence must remain visible despite workstation-wide JSON/log ignores.
+!*.json
+!*.log
+!*.txt
+!*.tar.gz

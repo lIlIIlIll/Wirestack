@@ -1,0 +1,30 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 44380690 ns, RESULT:
+    TCS: Http1ServerTest, time elapsed: 33319487 ns, RESULT:
+    [ PASSED ] CASE: shutdownAbortsConnectionBlockedInsideTlsHandshake (12970351 ns)
+    [ PASSED ] CASE: acceptSideTlsHookOwnsConnectionAndClosesAfterShutdown (709424 ns)
+    [ PASSED ] CASE: gracefulShutdownStopsAcceptAfterCompletedConnection (628373 ns)
+    [ PASSED ] CASE: expiredShutdownAbortsBlockedConnectionAndReturnsBoundedly (7987435 ns)
+    [ PASSED ] CASE: shutdownClosesTransportReturnedAfterAcceptStopsWithoutDispatch (63664 ns)
+    [ PASSED ] CASE: connectionLimitPreventsSecondAcceptUntilCapacityReturns (9717140 ns)
+    TCS: Http1ServerResponseWriterTest, time elapsed: 3116747 ns, RESULT:
+    [ PASSED ] CASE: writesFixedResponseThroughPartialTransportOperations (415735 ns)
+    [ PASSED ] CASE: streamsChunkedResponseAndTrailer (631203 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (490011 ns)
+    [ PASSED ] CASE: headResponseNeverTransfersRepresentationBytes (85765 ns)
+    [ PASSED ] CASE: closeDelimitedResponseRequiresConnectionClose (252666 ns)
+    [ PASSED ] CASE: rejectsKnownLengthMismatchBeforeCommittingHeadAndClosesBody (134913 ns)
+    [ PASSED ] CASE: closeFailureDoesNotReplacePrecommitLengthMismatch (133963 ns)
+Summary: TOTAL: 117
+    PASSED: 13, SKIPPED: 104, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 52186495 ns, RESULT:
+TP: wirestack.*, time elapsed: 52096266 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http1, time elapsed: 44380690 ns
+Summary: TOTAL: 117
+    PASSED: 13, SKIPPED: 104, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

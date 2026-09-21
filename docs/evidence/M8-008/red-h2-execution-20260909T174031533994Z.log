@@ -1,0 +1,19 @@
+[31merror[0m: cannot assign to this subscript expression
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:377:39:
+    [36m| [0m
+[36m377[0m [36m| [0m            for (index in 0..count) { destination[index] = input[offset + index] }[0m
+    [36m| [0m                                      [31m^^^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: you may want to implement 'operator func[](index0: Int64, value!: UInt8)' for type 'Struct-MutableByteSpan'
+
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 error generated, 1 error printed.
+1 warning generated, 1 warning printed.
+Error: cjpm test failed

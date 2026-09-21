@@ -1,0 +1,15 @@
+argv=["<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/installed-consumer/consumer/target/release/bin/main"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/installed-consumer/consumer
+timeout_seconds=120
+returncode=0
+--- stdout ---
+HTTP1_SERVER=PASS
+SSE=PASS
+SCOPED_CANCELLATION=PASS
+CONNECT_TLS=PASS
+HTTPS_CLIENT=PASS
+CUSTOM_CA=PASS
+HTTP2_SERVER=PASS
+EXISTING_TRANSPORT_TLS=PASS
+MTLS=PASS
+--- stderr ---

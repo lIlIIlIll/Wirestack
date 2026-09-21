@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_m8_008_http_contracts.M8008HttpContractsTest.test_timeout_stops_descendants_before_returning",
+    "-v"
+  ],
+  "cwd": "<repo-root>",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 2.118040599001688,
+  "status": "FAIL",
+  "raw_log": "docs/evidence/M8-008/runner-timeout-red-20260909T180946847621Z.log"
+}

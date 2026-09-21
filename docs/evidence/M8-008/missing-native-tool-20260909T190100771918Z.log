@@ -1,0 +1,1 @@
+{"code": "TOOL_MISSING", "decision": "FAIL", "error": "required tool is unavailable: cjdoc (<repo-root>/build/m8-008/not-a-cjdoc-executable); report=<repo-root>/build/m8-008/20260909T190100.884357Z-2092792-70f9f52f/native-contracts.json", "source_task": "M8-008", "status": "FAIL", "task_id": "M8-008"}

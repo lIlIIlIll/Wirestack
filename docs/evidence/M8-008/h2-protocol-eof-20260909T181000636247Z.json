@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/internal/http2",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--filter",
+    "Http2ServerMappingTest,Http2ServerConnectionTest",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/green-repo",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 6.371604371997819,
+  "status": "PASS",
+  "raw_log": "docs/evidence/M8-008/h2-protocol-eof-20260909T181000636247Z.log"
+}

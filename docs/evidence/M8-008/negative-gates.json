@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "rejections": [
+    {
+      "expected_code": "TOOL_MISSING",
+      "execution": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "python3",
+          "tools/m8_008_http_contracts.py",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "cwd": "<repo-root>",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 0.16426983900601044,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/missing-native-tool-20260909T190100771918Z.log"
+      },
+      "native_report": "docs/evidence/M8-008/missing-native-tool-20260909T190100771918Z-native.json"
+    },
+    {
+      "expected_code": "PINNED_SOURCE_MISSING",
+      "execution": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "python3",
+          "tools/m8_008_http_contracts.py",
+          "--root",
+          ".",
+          "--json"
+        ],
+        "cwd": "<repo-root>",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 0.7640433729975484,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/missing-pinned-source-20260909T190100788310Z.log"
+      },
+      "native_report": "docs/evidence/M8-008/missing-pinned-source-20260909T190100788310Z-native.json"
+    }
+  ],
+  "elf": "docs/evidence/M8-008/elf-negative.json"
+}

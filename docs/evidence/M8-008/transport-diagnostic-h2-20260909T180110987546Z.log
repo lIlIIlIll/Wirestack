@@ -1,0 +1,961 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[31merror[0m: the type 'Enum-NetworkErrorCategory' should implement interface 'ToString' in the 'core' package
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:18506:
+    [36m| [0m
+[36m176[0m [36m| [0m@Test[0m
+    [36m| [0m      [31m^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:1:
+    [36m| [0m
+[36m176[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m177[0m [36m| [0m[34m|[0m class StdNetTransportTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m777[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+[34mnote[0m: the code after the macro is expanded as follows
+     [36m| [0m
+     [36m| [0m  /* 176.1 */@Attribute[TEST_GENERATED] class StdNetTransportTest <: TestClass {[0m
+     [36m| [0m [34m_[0m[34m^[0m
+     [36m| [0m[34m|[0m /* 176.2 */    @Attribute[TestCase_49][0m
+     [36m| [0m[34m|[0m /* 176.3 */    func activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycle(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.4 */        let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.5 */        let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.6 */        }[0m
+     [36m| [0m[34m|[0m /* 176.7 */        let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.8 */        let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.9 */        try {[0m
+     [36m| [0m[34m|[0m /* 176.10 */            expectEqual("! client.waitUntilReadActive(Duration.Zero)", "true", ! client.waitUntilReadActive(Duration.Zero), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.11 */            expectEqual("! client.waitUntilWriteActive(Duration.Zero)", "true", ! client.waitUntilWriteActive(Duration.Zero), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.12 */            expectEqual("! client.waitUntilReadActive(10 * Duration.millisecond)", "true", ! client.waitUntilReadActive(10 * Duration.millisecond), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.13 */            expectEqual("! client.isClosed()", "true", ! client.isClosed(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.14 */            let source = CancellationSource()[0m
+     [36m| [0m[34m|[0m /* 176.15 */            let reading: Future < Bool >= spawn { try {[0m
+     [36m| [0m[34m|[0m /* 176.16 */                let _ = client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)), context: OperationContext(cancellation: source.token))[0m
+     [36m| [0m[34m|[0m /* 176.17 */                false[0m
+     [36m| [0m[34m|[0m /* 176.18 */            } catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.19 */                match(error.code) {[0m
+     [36m| [0m[34m|[0m /* 176.20 */                    case NetworkErrorCode.Cancelled => true[0m
+     [36m| [0m[34m|[0m /* 176.21 */                    case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.22 */                }[0m
+     [36m| [0m[34m|[0m /* 176.23 */            }[0m
+     [36m| [0m[34m|[0m /* 176.24 */        }[0m
+     [36m| [0m[34m|[0m /* 176.25 */        expectEqual("client.waitUntilReadActive(Duration.second)", "true", client.waitUntilReadActive(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.26 */        source.cancel()[0m
+     [36m| [0m[34m|[0m /* 176.27 */        expectEqual("reading.get(Duration.second)", "true", reading.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.28 */        expectEqual("! client.waitUntilReadActive(Duration.Zero)", "true", ! client.waitUntilReadActive(Duration.Zero), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.29 */        expectEqual("! client.waitUntilWriteActive(Duration.Zero)", "true", ! client.waitUntilWriteActive(Duration.Zero), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.30 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.31 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.32 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.33 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.34 */    }[0m
+     [36m| [0m[34m|[0m /* 176.35 */}[0m
+     [36m| [0m[34m|[0m /* 176.36 */[0m
+     [36m| [0m[34m|[0m /* 176.37 */@Attribute[TestCase_50][0m
+     [36m| [0m[34m|[0m /* 176.38 */func activityWaitersWakeWhenTransportBecomesTerminal(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.39 */    let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.40 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.41 */    }[0m
+     [36m| [0m[34m|[0m /* 176.42 */    let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.43 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.44 */    let readStarted = SyncCounter(1)[0m
+     [36m| [0m[34m|[0m /* 176.45 */    let writeStarted = SyncCounter(1)[0m
+     [36m| [0m[34m|[0m /* 176.46 */    let readWaiter: Future < Bool >= spawn { readStarted.dec()[0m
+     [36m| [0m[34m|[0m /* 176.47 */        client.waitUntilReadActive(5 * Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.48 */    }[0m
+     [36m| [0m[34m|[0m /* 176.49 */    let writeWaiter: Future < Bool >= spawn { writeStarted.dec()[0m
+     [36m| [0m[34m|[0m /* 176.50 */        client.waitUntilWriteActive(5 * Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.51 */    }[0m
+     [36m| [0m[34m|[0m /* 176.52 */    readStarted.waitUntilZero()[0m
+     [36m| [0m[34m|[0m /* 176.53 */    writeStarted.waitUntilZero()[0m
+     [36m| [0m[34m|[0m /* 176.54 */    client.close()[0m
+     [36m| [0m[34m|[0m /* 176.55 */    expectEqual("! readWaiter.get(Duration.second)", "true", ! readWaiter.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.56 */    expectEqual("! writeWaiter.get(Duration.second)", "true", ! writeWaiter.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.57 */    expectEqual("client.isClosed()", "true", client.isClosed(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.58 */    server.close()[0m
+     [36m| [0m[34m|[0m /* 176.59 */    listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.60 */}[0m
+     [36m| [0m[34m|[0m /* 176.61 */[0m
+     [36m| [0m[34m|[0m /* 176.62 */@Attribute[TestCase_51][0m
+     [36m| [0m[34m|[0m /* 176.63 */func writeTimeoutIsNeverRetryableWithoutZeroCommitProof(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.64 */    let error = writeTimedOut(Exception("scripted timeout"))[0m
+     [36m| [0m[34m|[0m /* 176.65 */    expectEqual("stableWriteTimeout(error)", "true", stableWriteTimeout(error), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.66 */}[0m
+     [36m| [0m[34m|[0m /* 176.67 */[0m
+     [36m| [0m[34m|[0m /* 176.68 */@Attribute[TestCase_52][0m
+     [36m| [0m[34m|[0m /* 176.69 */func writeSomeIsPartialAndReusesBoundedConnectionStaging(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.70 */    let listener = StdNetTransportListener.bind(loopback(0), stagingBufferSize: 3)[0m
+     [36m| [0m[34m|[0m /* 176.71 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.72 */    }[0m
+     [36m| [0m[34m|[0m /* 176.73 */    let client = StdNetTransport.connect(listener.localEndpoint, stagingBufferSize: 3)[0m
+     [36m| [0m[34m|[0m /* 176.74 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.75 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.76 */        expectEqual("client.writeSome(ByteSpan([1, 2, 3, 4, 5]))", "3", client.writeSome(ByteSpan([1, 2, 3, 4, 5])), 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.77 */        let first = Array < Byte >(3, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.78 */        readExact(server, MutableByteSpan(first))[0m
+     [36m| [0m[34m|[0m /* 176.79 */        let expectedFirst: Array < Byte >=[1, 2, 3][0m
+     [36m| [0m[34m|[0m /* 176.80 */        expectEqual("first", "expectedFirst", first, expectedFirst, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.81 */        expectEqual("client.writeSome(ByteSpan([6, 7, 8, 9]))", "3", client.writeSome(ByteSpan([6, 7, 8, 9])), 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.82 */        let second = Array < Byte >(3, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.83 */        readExact(server, MutableByteSpan(second))[0m
+     [36m| [0m[34m|[0m /* 176.84 */        let expectedSecond: Array < Byte >=[6, 7, 8][0m
+     [36m| [0m[34m|[0m /* 176.85 */        expectEqual("second", "expectedSecond", second, expectedSecond, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.86 */        let tailSource: Array < Byte >=[0, 10, 11, 0][0m
+     [36m| [0m[34m|[0m /* 176.87 */        expectEqual("client.writeSome(ByteSpan(tailSource, offset: 1, length: 2))", "2", client.writeSome(ByteSpan(tailSource, offset: 1, length: 2)), 2, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.88 */        let tail = Array < Byte >(2, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.89 */        readExact(server, MutableByteSpan(tail))[0m
+     [36m| [0m[34m|[0m /* 176.90 */        let expectedTail: Array < Byte >=[10, 11][0m
+     [36m| [0m[34m|[0m /* 176.91 */        expectEqual("tail", "expectedTail", tail, expectedTail, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.92 */        let(_, writeCopies) = client.stagingCopiedBytes[0m
+     [36m| [0m[34m|[0m /* 176.93 */        expectEqual("writeCopies", "8", writeCopies, 8, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.94 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.95 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.96 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.97 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.98 */    }[0m
+     [36m| [0m[34m|[0m /* 176.99 */}[0m
+     [36m| [0m[34m|[0m /* 176.100 */[0m
+     [36m| [0m[34m|[0m /* 176.101 */@Attribute[TestCase_53][0m
+     [36m| [0m[34m|[0m /* 176.102 */func wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.103 */    let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.104 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.105 */    }[0m
+     [36m| [0m[34m|[0m /* 176.106 */    let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.107 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.108 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.109 */        let record = Array < Byte >(16 * 1024, repeat: 0x5a)[0m
+     [36m| [0m[34m|[0m /* 176.110 */        expectEqual("client.writeSome(ByteSpan(record))", "16 * 1024", client.writeSome(ByteSpan(record)), 16 * 1024, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.111 */        let received = Array < Byte >(16 * 1024, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.112 */        readExact(server, MutableByteSpan(received))[0m
+     [36m| [0m[34m|[0m /* 176.113 */        expectEqual("received", "record", received, record, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.114 */        writeAll(server, ByteSpan(received))[0m
+     [36m| [0m[34m|[0m /* 176.115 */        let echoed = Array < Byte >(16 * 1024, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.116 */        readExact(client, MutableByteSpan(echoed))[0m
+     [36m| [0m[34m|[0m /* 176.117 */        expectEqual("echoed", "record", echoed, record, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.118 */        let(clientReadCopies, clientWriteCopies) = client.stagingCopiedBytes[0m
+     [36m| [0m[34m|[0m /* 176.119 */        expectEqual("clientReadCopies", "0", clientReadCopies, 0, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.120 */        expectEqual("clientWriteCopies", "0", clientWriteCopies, 0, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.121 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.122 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.123 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.124 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.125 */    }[0m
+     [36m| [0m[34m|[0m /* 176.126 */}[0m
+     [36m| [0m[34m|[0m /* 176.127 */[0m
+     [36m| [0m[34m|[0m /* 176.128 */@Attribute[TestCase_54][0m
+     [36m| [0m[34m|[0m /* 176.129 */func subrangesRetainBoundedStagingAndCopyAccounting(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.130 */    let listener = StdNetTransportListener.bind(loopback(0), stagingBufferSize: 3)[0m
+     [36m| [0m[34m|[0m /* 176.131 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.132 */    }[0m
+     [36m| [0m[34m|[0m /* 176.133 */    let client = StdNetTransport.connect(listener.localEndpoint, stagingBufferSize: 3)[0m
+     [36m| [0m[34m|[0m /* 176.134 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.135 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.136 */        let source: Array < Byte >=[0, 1, 2, 3, 0][0m
+     [36m| [0m[34m|[0m /* 176.137 */        expectEqual("client.writeSome(ByteSpan(source, offset: 1, length: 3))", "3", client.writeSome(ByteSpan(source, offset: 1, length: 3)), 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.138 */        let destination = Array < Byte >(5, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.139 */        match(server.readSome(MutableByteSpan(destination, offset: 1, length: 3), context: OperationContext.background())) {[0m
+     [36m| [0m[34m|[0m /* 176.140 */            case ReadResult.Data(count) => expectEqual("count", "3", count, 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.141 */            case ReadResult.EndOfStream => expectEqual("false", "true", false, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.142 */        }[0m
+     [36m| [0m[34m|[0m /* 176.143 */        let expected: Array < Byte >=[0, 1, 2, 3, 0][0m
+     [36m| [0m[34m|[0m /* 176.144 */        expectEqual("destination", "expected", destination, expected, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.145 */        writeAll(server, ByteSpan(destination, offset: 1, length: 3))[0m
+     [36m| [0m[34m|[0m /* 176.146 */        let echoed = Array < Byte >(5, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.147 */        match(client.readSome(MutableByteSpan(echoed, offset: 1, length: 3))) {[0m
+     [36m| [0m[34m|[0m /* 176.148 */            case ReadResult.Data(count) => expectEqual("count", "3", count, 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.149 */            case ReadResult.EndOfStream => expectEqual("false", "true", false, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.150 */        }[0m
+     [36m| [0m[34m|[0m /* 176.151 */        expectEqual("echoed", "expected", echoed, expected, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.152 */        let(clientReadCopies, clientWriteCopies) = client.stagingCopiedBytes[0m
+     [36m| [0m[34m|[0m /* 176.153 */        expectEqual("clientWriteCopies", "3", clientWriteCopies, 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.154 */        expectEqual("clientReadCopies", "3", clientReadCopies, 3, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.155 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.156 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.157 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.158 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.159 */    }[0m
+     [36m| [0m[34m|[0m /* 176.160 */}[0m
+     [36m| [0m[34m|[0m /* 176.161 */[0m
+     [36m| [0m[34m|[0m /* 176.162 */@Attribute[TestCase_55][0m
+     [36m| [0m[34m|[0m /* 176.163 */func connectsByResolvedIpAndTransfersBothDirections(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.164 */    let listener = StdNetTransportListener.bind(loopback(0), backlog: 4, stagingBufferSize: 3)[0m
+     [36m| [0m[34m|[0m /* 176.165 */    let accepted: Future < DuplexTransport >= spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.166 */    }[0m
+     [36m| [0m[34m|[0m /* 176.167 */    let client = StdNetTransport.connect(listener.localEndpoint, stagingBufferSize: 3)[0m
+     [36m| [0m[34m|[0m /* 176.168 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.169 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.170 */        expectEqual("client.info.backend", "\"std.net\"", client.info.backend, "std.net", isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.171 */        expectEqual("client.info.localEndpoint.isSome()", "true", client.info.localEndpoint.isSome(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.172 */        expectEqual("! client.info.supportsHalfClose", "true", ! client.info.supportsHalfClose, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.173 */        writeAll(client, ByteSpan([1, 2, 3, 4, 5]))[0m
+     [36m| [0m[34m|[0m /* 176.174 */        let request = Array < Byte >(5, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.175 */        readExact(server, MutableByteSpan(request))[0m
+     [36m| [0m[34m|[0m /* 176.176 */        let expectedRequest: Array < Byte >=[1, 2, 3, 4, 5][0m
+     [36m| [0m[34m|[0m /* 176.177 */        expectEqual("request", "expectedRequest", request, expectedRequest, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.178 */        writeAll(server, ByteSpan([9, 8]))[0m
+     [36m| [0m[34m|[0m /* 176.179 */        let response = Array < Byte >(2, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.180 */        readExact(client, MutableByteSpan(response))[0m
+     [36m| [0m[34m|[0m /* 176.181 */        let expectedResponse: Array < Byte >=[9, 8][0m
+     [36m| [0m[34m|[0m /* 176.182 */        expectEqual("response", "expectedResponse", response, expectedResponse, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.183 */        let(readCopies, writeCopies) = client.stagingCopiedBytes[0m
+     [36m| [0m[34m|[0m /* 176.184 */        expectEqual("readCopies", "0", readCopies, 0, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.185 */        expectEqual("writeCopies", "5", writeCopies, 5, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.186 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.187 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.188 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.189 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.190 */    }[0m
+     [36m| [0m[34m|[0m /* 176.191 */}[0m
+     [36m| [0m[34m|[0m /* 176.192 */[0m
+     [36m| [0m[34m|[0m /* 176.193 */@Attribute[TestCase_56][0m
+     [36m| [0m[34m|[0m /* 176.194 */func emptyOperationsAreImmediate(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.195 */    let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.196 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.197 */    }[0m
+     [36m| [0m[34m|[0m /* 176.198 */    let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.199 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.200 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.201 */        match(client.readSome(MutableByteSpan(Array < Byte >()))) {[0m
+     [36m| [0m[34m|[0m /* 176.202 */            case ReadResult.Data(count) => expectEqual("count", "0", count, 0, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.203 */            case ReadResult.EndOfStream => expectEqual("false", "true", false, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.204 */        }[0m
+     [36m| [0m[34m|[0m /* 176.205 */        expectEqual("client.writeSome(ByteSpan(Array < Byte >()))", "0", client.writeSome(ByteSpan(Array < Byte >())), 0, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.206 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.207 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.208 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.209 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.210 */    }[0m
+     [36m| [0m[34m|[0m /* 176.211 */}[0m
+     [36m| [0m[34m|[0m /* 176.212 */[0m
+     [36m| [0m[34m|[0m /* 176.213 */@Attribute[TestCase_57][0m
+     [36m| [0m[34m|[0m /* 176.214 */func unsupportedHalfClosePreservesBothDirections(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.215 */    let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.216 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.217 */    }[0m
+     [36m| [0m[34m|[0m /* 176.218 */    let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.219 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.220 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.221 */        expectEqual("! client.info.supportsHalfClose", "true", ! client.info.supportsHalfClose, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.222 */        for(direction in[ShutdownDirection.Read, ShutdownDirection.Write]) {[0m
+     [36m| [0m[34m|[0m /* 176.223 */            var unsupported = false[0m
+     [36m| [0m[34m|[0m /* 176.224 */            try {[0m
+     [36m| [0m[34m|[0m /* 176.225 */                client.shutdown(direction)[0m
+     [36m| [0m[34m|[0m /* 176.226 */            } catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.227 */                let stableCategory = match(error.category) {[0m
+     [36m| [0m[34m|[0m /* 176.228 */                    case NetworkErrorCategory.Unsupported => true[0m
+     [36m| [0m[34m|[0m /* 176.229 */                    case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.230 */                }[0m
+     [36m| [0m[34m|[0m /* 176.231 */                let stablePhase = match(error.phase) {[0m
+     [36m| [0m[34m|[0m /* 176.232 */                    case NetworkPhase.TransportClose => true[0m
+     [36m| [0m[34m|[0m /* 176.233 */                    case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.234 */                }[0m
+     [36m| [0m[34m|[0m /* 176.235 */                let stableCode = match(error.code) {[0m
+     [36m| [0m[34m|[0m /* 176.236 */                    case NetworkErrorCode.Unsupported => true[0m
+     [36m| [0m[34m|[0m /* 176.237 */                    case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.238 */                }[0m
+     [36m| [0m[34m|[0m /* 176.239 */                let stableRetryability = match(error.retryability) {[0m
+     [36m| [0m[34m|[0m /* 176.240 */                    case Retryability.Never => true[0m
+     [36m| [0m[34m|[0m /* 176.241 */                    case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.242 */                }[0m
+     [36m| [0m[34m|[0m /* 176.243 */                expectEqual("stableCategory", "true", stableCategory, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.244 */                expectEqual("stablePhase", "true", stablePhase, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.245 */                expectEqual("stableCode", "true", stableCode, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.246 */                expectEqual("stableRetryability", "true", stableRetryability, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.247 */                expectEqual("error.nativeCode.isNone()", "true", error.nativeCode.isNone(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.248 */                expectEqual("error.localEndpoint", "client.info.localEndpoint", error.localEndpoint, client.info.localEndpoint, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.249 */                expectEqual("error.remoteEndpoint", "client.info.remoteEndpoint", error.remoteEndpoint, client.info.remoteEndpoint, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.250 */                unsupported = true[0m
+     [36m| [0m[34m|[0m /* 176.251 */            }[0m
+     [36m| [0m[34m|[0m /* 176.252 */            expectEqual("unsupported", "true", unsupported, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.253 */            writeAll(client, ByteSpan([1]))[0m
+     [36m| [0m[34m|[0m /* 176.254 */            let request = Array < Byte >(1, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.255 */            readExact(server, MutableByteSpan(request))[0m
+     [36m| [0m[34m|[0m /* 176.256 */            let expectedRequest: Array < Byte >=[1][0m
+     [36m| [0m[34m|[0m /* 176.257 */            expectEqual("request", "expectedRequest", request, expectedRequest, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.258 */            writeAll(server, ByteSpan([2]))[0m
+     [36m| [0m[34m|[0m /* 176.259 */            let response = Array < Byte >(1, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.260 */            readExact(client, MutableByteSpan(response))[0m
+     [36m| [0m[34m|[0m /* 176.261 */            let expectedResponse: Array < Byte >=[2][0m
+     [36m| [0m[34m|[0m /* 176.262 */            expectEqual("response", "expectedResponse", response, expectedResponse, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.263 */        }[0m
+     [36m| [0m[34m|[0m /* 176.264 */    } finally {[0m
+     [36m| [0m[34m|[0m /* 176.265 */        client.close()[0m
+     [36m| [0m[34m|[0m /* 176.266 */        server.close()[0m
+     [36m| [0m[34m|[0m /* 176.267 */        listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.268 */    }[0m
+     [36m| [0m[34m|[0m /* 176.269 */}[0m
+     [36m| [0m[34m|[0m /* 176.270 */[0m
+     [36m| [0m[34m|[0m /* 176.271 */@Attribute[TestCase_58][0m
+     [36m| [0m[34m|[0m /* 176.272 */func cancellationWakesBlockedReadAndIsNeverReportedAsEof(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.273 */    let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.274 */    let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.275 */    }[0m
+     [36m| [0m[34m|[0m /* 176.276 */    let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.277 */    let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.278 */    let source = CancellationSource()[0m
+     [36m| [0m[34m|[0m /* 176.279 */    let result: Future <(String,?NetworkException) >= spawn { try {[0m
+     [36m| [0m[34m|[0m /* 176.280 */        match(client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)), context: OperationContext(cancellation: source.token))) {[0m
+     [36m| [0m[34m|[0m /* 176.281 */            case ReadResult.Data(count) =>("data:${count}", None < NetworkException >)[0m
+     [36m| [0m[34m|[0m /* 176.282 */            case ReadResult.EndOfStream =>("eof", None < NetworkException >)[0m
+     [36m| [0m[34m|[0m /* 176.283 */        }[0m
+     [36m| [0m[34m|[0m /* 176.284 */    } catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.285 */        ("network-error", Some(error))[0m
+     [36m| [0m[34m|[0m /* 176.286 */    }[0m
+     [36m| [0m[34m|[0m /* 176.287 */}[0m
+     [36m| [0m[34m|[0m /* 176.288 */expectEqual("client.waitUntilReadActive(Duration.second)", "true", client.waitUntilReadActive(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.289 */source.cancel()[0m
+     [36m| [0m[34m|[0m /* 176.290 */let(outcome, observedError) = result.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.291 */match(observedError) {[0m
+     [36m| [0m[34m|[0m /* 176.292 */    case Some(error) => println("STDNET_CANCEL_READ outcome=${outcome} category=${error.category} " + "phase=${error.phase} code=${error.code} retryability=${error.retryability} " + "cause=${error.cause.isSome()}")[0m
+     [36m| [0m[34m|[0m /* 176.293 */    expectEqual("stableReadSocketError(error, NetworkErrorCode.Cancelled, Retryability.Never)", "true", stableReadSocketError(error, NetworkErrorCode.Cancelled, Retryability.Never), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.294 */    case None => fail("cancelled read completed with outcome ${outcome}")[0m
+     [36m| [0m[34m|[0m /* 176.295 */}[0m
+     [36m| [0m[34m|[0m /* 176.296 */expectEqual("client.isClosed()", "true", client.isClosed(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.297 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.298 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.299 */}[0m
+     [36m| [0m[34m|[0m /* 176.300 */[0m
+     [36m| [0m[34m|[0m /* 176.301 */@Attribute[TestCase_59][0m
+     [36m| [0m[34m|[0m /* 176.302 */func listenerCloseWakesBlockedAcceptAsClosed(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.303 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.304 */let started = SyncCounter(1)[0m
+     [36m| [0m[34m|[0m /* 176.305 */let result: Future < Bool >= spawn { started.dec()[0m
+     [36m| [0m[34m|[0m /* 176.306 */    try {[0m
+     [36m| [0m[34m|[0m /* 176.307 */        let _ = listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.308 */        false[0m
+     [36m| [0m[34m|[0m /* 176.309 */    } catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.310 */        match(error.code) {[0m
+     [36m| [0m[34m|[0m /* 176.311 */            case NetworkErrorCode.Closed => true[0m
+     [36m| [0m[34m|[0m /* 176.312 */            case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.313 */        }[0m
+     [36m| [0m[34m|[0m /* 176.314 */    }[0m
+     [36m| [0m[34m|[0m /* 176.315 */}[0m
+     [36m| [0m[34m|[0m /* 176.316 */started.waitUntilZero()[0m
+     [36m| [0m[34m|[0m /* 176.317 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.318 */expectEqual("result.get(Duration.second)", "true", result.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.319 */}[0m
+     [36m| [0m[34m|[0m /* 176.320 */[0m
+     [36m| [0m[34m|[0m /* 176.321 */@Attribute[TestCase_60][0m
+     [36m| [0m[34m|[0m /* 176.322 */func cancellingOneAcceptLeavesListenerReusable(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.323 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.324 */let source = CancellationSource()[0m
+     [36m| [0m[34m|[0m /* 176.325 */let cancelledAccept: Future < Bool >= spawn { try {[0m
+     [36m| [0m[34m|[0m /* 176.326 */    let _ = listener.accept(OperationContext(cancellation: source.token))[0m
+     [36m| [0m[34m|[0m /* 176.327 */    false[0m
+     [36m| [0m[34m|[0m /* 176.328 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.329 */    match(error.code) {[0m
+     [36m| [0m[34m|[0m /* 176.330 */        case NetworkErrorCode.Cancelled => true[0m
+     [36m| [0m[34m|[0m /* 176.331 */        case _ => false[0m
+     [36m| [0m[34m|[0m /* 176.332 */    }[0m
+     [36m| [0m[34m|[0m /* 176.333 */}[0m
+     [36m| [0m[34m|[0m /* 176.334 */}[0m
+     [36m| [0m[34m|[0m /* 176.335 */expectEqual("listener.waitUntilAcceptActive(Duration.second)", "true", listener.waitUntilAcceptActive(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.336 */source.cancel()[0m
+     [36m| [0m[34m|[0m /* 176.337 */expectEqual("cancelledAccept.get(Duration.second)", "true", cancelledAccept.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.338 */expectEqual("! listener.isClosed()", "true", ! listener.isClosed(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.339 */let next = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.340 */}[0m
+     [36m| [0m[34m|[0m /* 176.341 */let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.342 */let server = next.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.343 */client.close()[0m
+     [36m| [0m[34m|[0m /* 176.344 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.345 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.346 */}[0m
+     [36m| [0m[34m|[0m /* 176.347 */[0m
+     [36m| [0m[34m|[0m /* 176.348 */@Attribute[TestCase_61][0m
+     [36m| [0m[34m|[0m /* 176.349 */func preCancelledConnectDoesNotCreateASocket(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.350 */let source = CancellationSource()[0m
+     [36m| [0m[34m|[0m /* 176.351 */source.cancel()[0m
+     [36m| [0m[34m|[0m /* 176.352 */var cancelled = false[0m
+     [36m| [0m[34m|[0m /* 176.353 */try {[0m
+     [36m| [0m[34m|[0m /* 176.354 */let _ = StdNetTransport.connect(loopback(9), context: OperationContext(cancellation: source.token))[0m
+     [36m| [0m[34m|[0m /* 176.355 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.356 */match(error.code) {[0m
+     [36m| [0m[34m|[0m /* 176.357 */    case NetworkErrorCode.Cancelled => cancelled = true[0m
+     [36m| [0m[34m|[0m /* 176.358 */    case _ =>()[0m
+     [36m| [0m[34m|[0m /* 176.359 */}[0m
+     [36m| [0m[34m|[0m /* 176.360 */}[0m
+     [36m| [0m[34m|[0m /* 176.361 */expectEqual("cancelled", "true", cancelled, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.362 */}[0m
+     [36m| [0m[34m|[0m /* 176.363 */[0m
+     [36m| [0m[34m|[0m /* 176.364 */@Attribute[TestCase_62][0m
+     [36m| [0m[34m|[0m /* 176.365 */func peerGracefulCloseIsReportedAsEof(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.366 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.367 */let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.368 */}[0m
+     [36m| [0m[34m|[0m /* 176.369 */let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.370 */let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.371 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.372 */try {[0m
+     [36m| [0m[34m|[0m /* 176.373 */match(client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)))) {[0m
+     [36m| [0m[34m|[0m /* 176.374 */    case ReadResult.EndOfStream => expectEqual("true", "true", true, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.375 */    case ReadResult.Data(_) => expectEqual("false", "true", false, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.376 */}[0m
+     [36m| [0m[34m|[0m /* 176.377 */} finally {[0m
+     [36m| [0m[34m|[0m /* 176.378 */client.close()[0m
+     [36m| [0m[34m|[0m /* 176.379 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.380 */}[0m
+     [36m| [0m[34m|[0m /* 176.381 */}[0m
+     [36m| [0m[34m|[0m /* 176.382 */[0m
+     [36m| [0m[34m|[0m /* 176.383 */@Attribute[TestCase_63][0m
+     [36m| [0m[34m|[0m /* 176.384 */func deadlineBoundsBlockedReadWithoutClosingConnection(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.385 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.386 */let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.387 */}[0m
+     [36m| [0m[34m|[0m /* 176.388 */let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.389 */let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.390 */var timedOut = false[0m
+     [36m| [0m[34m|[0m /* 176.391 */try {[0m
+     [36m| [0m[34m|[0m /* 176.392 */let _ = client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)), context: OperationContext(deadline: Some(Deadline.after(20 * Duration.millisecond))))[0m
+     [36m| [0m[34m|[0m /* 176.393 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.394 */timedOut = stableReadSocketError(error, NetworkErrorCode.TimedOut, Retryability.Temporary)[0m
+     [36m| [0m[34m|[0m /* 176.395 */}[0m
+     [36m| [0m[34m|[0m /* 176.396 */expectEqual("timedOut", "true", timedOut, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.397 */expectEqual("! client.isClosed()", "true", ! client.isClosed(), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.398 */client.close()[0m
+     [36m| [0m[34m|[0m /* 176.399 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.400 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.401 */}[0m
+     [36m| [0m[34m|[0m /* 176.402 */[0m
+     [36m| [0m[34m|[0m /* 176.403 */@Attribute[TestCase_64][0m
+     [36m| [0m[34m|[0m /* 176.404 */func localCloseMapsBlockedReadWithStableEvidence(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.405 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.406 */let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.407 */}[0m
+     [36m| [0m[34m|[0m /* 176.408 */let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.409 */let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.410 */let result: Future < Bool >= spawn { try {[0m
+     [36m| [0m[34m|[0m /* 176.411 */let _ = client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)))[0m
+     [36m| [0m[34m|[0m /* 176.412 */false[0m
+     [36m| [0m[34m|[0m /* 176.413 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.414 */stableClosedRead(error)[0m
+     [36m| [0m[34m|[0m /* 176.415 */}[0m
+     [36m| [0m[34m|[0m /* 176.416 */}[0m
+     [36m| [0m[34m|[0m /* 176.417 */assertEqual("client.waitUntilReadActive(Duration.second)", "true", client.waitUntilReadActive(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.418 */client.close()[0m
+     [36m| [0m[34m|[0m /* 176.419 */expectEqual("result.get(Duration.second)", "true", result.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.420 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.421 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.422 */}[0m
+     [36m| [0m[34m|[0m /* 176.423 */[0m
+     [36m| [0m[34m|[0m /* 176.424 */@Attribute[TestCase_65][0m
+     [36m| [0m[34m|[0m /* 176.425 */func explicitAbortWakesBlockedReadWithStableEvidence(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.426 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.427 */let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.428 */}[0m
+     [36m| [0m[34m|[0m /* 176.429 */let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.430 */let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.431 */let result: Future < Bool >= spawn { try {[0m
+     [36m| [0m[34m|[0m /* 176.432 */let _ = client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)))[0m
+     [36m| [0m[34m|[0m /* 176.433 */false[0m
+     [36m| [0m[34m|[0m /* 176.434 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.435 */stableClosedRead(error)[0m
+     [36m| [0m[34m|[0m /* 176.436 */}[0m
+     [36m| [0m[34m|[0m /* 176.437 */}[0m
+     [36m| [0m[34m|[0m /* 176.438 */assertEqual("client.waitUntilReadActive(Duration.second)", "true", client.waitUntilReadActive(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.439 */client.abort(reason: Some(AbortReason.ApplicationAbort))[0m
+     [36m| [0m[34m|[0m /* 176.440 */expectEqual("result.get(Duration.second)", "true", result.get(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.441 */client.abort()[0m
+     [36m| [0m[34m|[0m /* 176.442 */client.close()[0m
+     [36m| [0m[34m|[0m /* 176.443 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.444 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.445 */}[0m
+     [36m| [0m[34m|[0m /* 176.446 */[0m
+     [36m| [0m[34m|[0m /* 176.447 */@Attribute[TestCase_66][0m
+     [36m| [0m[34m|[0m /* 176.448 */func firstCloseOrAbortKeepsItsPeerVisibleTerminalResult(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.449 */let gracefulListener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.450 */let gracefulAccepted = spawn { gracefulListener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.451 */}[0m
+     [36m| [0m[34m|[0m /* 176.452 */let gracefulClient = StdNetTransport.connect(gracefulListener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.453 */let gracefulServer = gracefulAccepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.454 */gracefulClient.close()[0m
+     [36m| [0m[34m|[0m /* 176.455 */gracefulClient.abort(reason: Some(AbortReason.ApplicationAbort))[0m
+     [36m| [0m[34m|[0m /* 176.456 */gracefulClient.close()[0m
+     [36m| [0m[34m|[0m /* 176.457 */match(gracefulServer.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)), context: OperationContext.background())) {[0m
+     [36m| [0m[34m|[0m /* 176.458 */case ReadResult.EndOfStream =>()[0m
+     [36m| [0m[34m|[0m /* 176.459 */case ReadResult.Data(_) => fail("graceful close did not produce peer EOF")[0m
+     [36m| [0m[34m|[0m /* 176.460 */}[0m
+     [36m| [0m[34m|[0m /* 176.461 */gracefulServer.close()[0m
+     [36m| [0m[34m|[0m /* 176.462 */gracefulListener.close()[0m
+     [36m| [0m[34m|[0m /* 176.463 */let abortListener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.464 */let abortAccepted = spawn { abortListener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.465 */}[0m
+     [36m| [0m[34m|[0m /* 176.466 */let abortClient = StdNetTransport.connect(abortListener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.467 */let abortServer = abortAccepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.468 */writeAll(abortClient, ByteSpan([1]))[0m
+     [36m| [0m[34m|[0m /* 176.469 */let transferred = Array < Byte >(1, repeat: 0)[0m
+     [36m| [0m[34m|[0m /* 176.470 */readExact(abortServer, MutableByteSpan(transferred))[0m
+     [36m| [0m[34m|[0m /* 176.471 */abortClient.abort(reason: Some(AbortReason.ApplicationAbort))[0m
+     [36m| [0m[34m|[0m /* 176.472 */abortClient.close()[0m
+     [36m| [0m[34m|[0m /* 176.473 */abortClient.abort()[0m
+     [36m| [0m[34m|[0m /* 176.474 */var resetObserved = false[0m
+     [36m| [0m[34m|[0m /* 176.475 */try {[0m
+     [36m| [0m[34m|[0m /* 176.476 */match(abortServer.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)), context: OperationContext.background())) {[0m
+     [36m| [0m[34m|[0m /* 176.477 */case ReadResult.EndOfStream =>()[0m
+     [36m| [0m[34m|[0m /* 176.478 */case ReadResult.Data(_) =>()[0m
+     [36m| [0m[34m|[0m /* 176.479 */}[0m
+     [36m| [0m[34m|[0m /* 176.480 */} catch(_: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.481 */resetObserved = true[0m
+     [36m| [0m[34m|[0m /* 176.482 */}[0m
+     [36m| [0m[34m|[0m /* 176.483 */expectEqual("resetObserved", "true", resetObserved, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.484 */abortServer.close()[0m
+     [36m| [0m[34m|[0m /* 176.485 */abortListener.close()[0m
+     [36m| [0m[34m|[0m /* 176.486 */}[0m
+     [36m| [0m[34m|[0m /* 176.487 */[0m
+     [36m| [0m[34m|[0m /* 176.488 */@Attribute[TestCase_67][0m
+     [36m| [0m[34m|[0m /* 176.489 */func unknownConnectFailureMapsWithoutMessageOrNativeCode(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.490 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.491 */let endpoint = listener.localEndpoint[0m
+     [36m| [0m[34m|[0m /* 176.492 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.493 */var stable = false[0m
+     [36m| [0m[34m|[0m /* 176.494 */try {[0m
+     [36m| [0m[34m|[0m /* 176.495 */let _ = StdNetTransport.connect(endpoint)[0m
+     [36m| [0m[34m|[0m /* 176.496 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.497 */stable = stableUnknownConnectError(error, endpoint)[0m
+     [36m| [0m[34m|[0m /* 176.498 */}[0m
+     [36m| [0m[34m|[0m /* 176.499 */expectEqual("stable", "true", stable, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.500 */}[0m
+     [36m| [0m[34m|[0m /* 176.501 */[0m
+     [36m| [0m[34m|[0m /* 176.502 */@Attribute[TestCase_68][0m
+     [36m| [0m[34m|[0m /* 176.503 */func concurrentReadsFailWithoutDisturbingTheActiveRead(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.504 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.505 */let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.506 */}[0m
+     [36m| [0m[34m|[0m /* 176.507 */let client = StdNetTransport.connect(listener.localEndpoint)[0m
+     [36m| [0m[34m|[0m /* 176.508 */let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.509 */let source = CancellationSource()[0m
+     [36m| [0m[34m|[0m /* 176.510 */let active = spawn { try {[0m
+     [36m| [0m[34m|[0m /* 176.511 */let _ = client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)), context: OperationContext(cancellation: source.token))[0m
+     [36m| [0m[34m|[0m /* 176.512 */} catch(_: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.513 */()[0m
+     [36m| [0m[34m|[0m /* 176.514 */}[0m
+     [36m| [0m[34m|[0m /* 176.515 */}[0m
+     [36m| [0m[34m|[0m /* 176.516 */expectEqual("client.waitUntilReadActive(Duration.second)", "true", client.waitUntilReadActive(Duration.second), true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.517 */var concurrent = false[0m
+     [36m| [0m[34m|[0m /* 176.518 */try {[0m
+     [36m| [0m[34m|[0m /* 176.519 */let _ = client.readSome(MutableByteSpan(Array < Byte >(1, repeat: 0)))[0m
+     [36m| [0m[34m|[0m /* 176.520 */} catch(error: NetworkException) {[0m
+     [36m| [0m[34m|[0m /* 176.521 */match(error.code) {[0m
+     [36m| [0m[34m|[0m /* 176.522 */case NetworkErrorCode.ConcurrentOperation => concurrent = true[0m
+     [36m| [0m[34m|[0m /* 176.523 */case _ =>()[0m
+     [36m| [0m[34m|[0m /* 176.524 */}[0m
+     [36m| [0m[34m|[0m /* 176.525 */}[0m
+     [36m| [0m[34m|[0m /* 176.526 */expectEqual("concurrent", "true", concurrent, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.527 */source.cancel()[0m
+     [36m| [0m[34m|[0m /* 176.528 */active.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.529 */client.close()[0m
+     [36m| [0m[34m|[0m /* 176.530 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.531 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.532 */}[0m
+     [36m| [0m[34m|[0m /* 176.533 */[0m
+     [36m| [0m[34m|[0m /* 176.534 */@Attribute[TestCase_69][0m
+     [36m| [0m[34m|[0m /* 176.535 */func happyEyeballsComposesWithTheDefaultStdNetFactory(): Unit {[0m
+     [36m| [0m[34m|[0m /* 176.536 */let listener = StdNetTransportListener.bind(loopback(0))[0m
+     [36m| [0m[34m|[0m /* 176.537 */let host = HostName("loopback.test")[0m
+     [36m| [0m[34m|[0m /* 176.538 */let resolver = StaticResolver(ResolveResult([listener.localEndpoint.address], host, ResolverSource.Static))[0m
+     [36m| [0m[34m|[0m /* 176.539 */let connector = HappyEyeballsConnector(resolver, StdNetTransportFactory())[0m
+     [36m| [0m[34m|[0m /* 176.540 */let accepted = spawn { listener.accept()[0m
+     [36m| [0m[34m|[0m /* 176.541 */}[0m
+     [36m| [0m[34m|[0m /* 176.542 */let connected = connector.connect(host, listener.localEndpoint.port)[0m
+     [36m| [0m[34m|[0m /* 176.543 */let server = accepted.get(Duration.second)[0m
+     [36m| [0m[34m|[0m /* 176.544 */try {[0m
+     [36m| [0m[34m|[0m /* 176.545 */expectEqual("connected.diagnostics.winner", "listener.localEndpoint", connected.diagnostics.winner, listener.localEndpoint, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.546 */expectEqual("connected.diagnostics.attempts.size", "1", connected.diagnostics.attempts.size, 1, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.547 */expectEqual("connected.diagnostics.attempts[0].won", "true", connected.diagnostics.attempts[0].won, true, isDelta: false)[0m
+     [36m| [0m[34m|[0m /* 176.548 */} finally {[0m
+     [36m| [0m[34m|[0m /* 176.549 */connected.transport.close()[0m
+     [36m| [0m[34m|[0m /* 176.550 */server.close()[0m
+     [36m| [0m[34m|[0m /* 176.551 */listener.close()[0m
+     [36m| [0m[34m|[0m /* 176.552 */}[0m
+     [36m| [0m[34m|[0m /* 176.553 */}[0m
+     [36m| [0m[34m|[0m /* 176.554 */[0m
+     [36m| [0m[34m|[0m /* 176.555 */init() {[0m
+     [36m| [0m[34m|[0m /* 176.556 */}[0m
+     [36m| [0m[34m|[0m /* 176.557 */private func classConfiguration(): Configuration {[0m
+     [36m| [0m[34m|[0m /* 176.558 */let configuration = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.559 */[0m
+     [36m| [0m[34m|[0m /* 176.560 */return configuration[0m
+     [36m| [0m[34m|[0m /* 176.561 */}[0m
+     [36m| [0m[34m|[0m /* 176.562 */public override func asTestSuite(): TestSuite {[0m
+     [36m| [0m[34m|[0m /* 176.563 */[0m
+     [36m| [0m[34m|[0m /* 176.564 */let suiteConfiguration = classConfiguration()[0m
+     [36m| [0m[34m|[0m /* 176.565 */let suiteBuilder = TestSuite.builder("StdNetTransportTest").configure(suiteConfiguration)[0m
+     [36m| [0m[34m|[0m /* 176.566 */[0m
+     [36m| [0m[34m|[0m /* 176.567 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.568 */[0m
+     [36m| [0m[34m|[0m /* 176.569 */let activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycleTestFunc = { => activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycle();() }[0m
+     [36m| [0m[34m|[0m /* 176.570 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.571 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.572 */"activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycle",[0m
+     [36m| [0m[34m|[0m /* 176.573 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.574 */body: activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycleTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.575 */)[0m
+     [36m| [0m[34m|[0m /* 176.576 */)[0m
+     [36m| [0m[34m|[0m /* 176.577 */[0m
+     [36m| [0m[34m|[0m /* 176.578 */}()[0m
+     [36m| [0m[34m|[0m /* 176.579 */[0m
+     [36m| [0m[34m|[0m /* 176.580 */[0m
+     [36m| [0m[34m|[0m /* 176.581 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.582 */[0m
+     [36m| [0m[34m|[0m /* 176.583 */let activityWaitersWakeWhenTransportBecomesTerminalTestFunc = { => activityWaitersWakeWhenTransportBecomesTerminal();() }[0m
+     [36m| [0m[34m|[0m /* 176.584 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.585 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.586 */"activityWaitersWakeWhenTransportBecomesTerminal",[0m
+     [36m| [0m[34m|[0m /* 176.587 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.588 */body: activityWaitersWakeWhenTransportBecomesTerminalTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.589 */)[0m
+     [36m| [0m[34m|[0m /* 176.590 */)[0m
+     [36m| [0m[34m|[0m /* 176.591 */[0m
+     [36m| [0m[34m|[0m /* 176.592 */}()[0m
+     [36m| [0m[34m|[0m /* 176.593 */[0m
+     [36m| [0m[34m|[0m /* 176.594 */[0m
+     [36m| [0m[34m|[0m /* 176.595 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.596 */[0m
+     [36m| [0m[34m|[0m /* 176.597 */let writeTimeoutIsNeverRetryableWithoutZeroCommitProofTestFunc = { => writeTimeoutIsNeverRetryableWithoutZeroCommitProof();() }[0m
+     [36m| [0m[34m|[0m /* 176.598 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.599 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.600 */"writeTimeoutIsNeverRetryableWithoutZeroCommitProof",[0m
+     [36m| [0m[34m|[0m /* 176.601 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.602 */body: writeTimeoutIsNeverRetryableWithoutZeroCommitProofTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.603 */)[0m
+     [36m| [0m[34m|[0m /* 176.604 */)[0m
+     [36m| [0m[34m|[0m /* 176.605 */[0m
+     [36m| [0m[34m|[0m /* 176.606 */}()[0m
+     [36m| [0m[34m|[0m /* 176.607 */[0m
+     [36m| [0m[34m|[0m /* 176.608 */[0m
+     [36m| [0m[34m|[0m /* 176.609 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.610 */[0m
+     [36m| [0m[34m|[0m /* 176.611 */let writeSomeIsPartialAndReusesBoundedConnectionStagingTestFunc = { => writeSomeIsPartialAndReusesBoundedConnectionStaging();() }[0m
+     [36m| [0m[34m|[0m /* 176.612 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.613 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.614 */"writeSomeIsPartialAndReusesBoundedConnectionStaging",[0m
+     [36m| [0m[34m|[0m /* 176.615 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.616 */body: writeSomeIsPartialAndReusesBoundedConnectionStagingTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.617 */)[0m
+     [36m| [0m[34m|[0m /* 176.618 */)[0m
+     [36m| [0m[34m|[0m /* 176.619 */[0m
+     [36m| [0m[34m|[0m /* 176.620 */}()[0m
+     [36m| [0m[34m|[0m /* 176.621 */[0m
+     [36m| [0m[34m|[0m /* 176.622 */[0m
+     [36m| [0m[34m|[0m /* 176.623 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.624 */[0m
+     [36m| [0m[34m|[0m /* 176.625 */let wholeArrayReadAndWriteBypassStagingForATypicalTlsRecordTestFunc = { => wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord();() }[0m
+     [36m| [0m[34m|[0m /* 176.626 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.627 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.628 */"wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord",[0m
+     [36m| [0m[34m|[0m /* 176.629 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.630 */body: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecordTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.631 */)[0m
+     [36m| [0m[34m|[0m /* 176.632 */)[0m
+     [36m| [0m[34m|[0m /* 176.633 */[0m
+     [36m| [0m[34m|[0m /* 176.634 */}()[0m
+     [36m| [0m[34m|[0m /* 176.635 */[0m
+     [36m| [0m[34m|[0m /* 176.636 */[0m
+     [36m| [0m[34m|[0m /* 176.637 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.638 */[0m
+     [36m| [0m[34m|[0m /* 176.639 */let subrangesRetainBoundedStagingAndCopyAccountingTestFunc = { => subrangesRetainBoundedStagingAndCopyAccounting();() }[0m
+     [36m| [0m[34m|[0m /* 176.640 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.641 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.642 */"subrangesRetainBoundedStagingAndCopyAccounting",[0m
+     [36m| [0m[34m|[0m /* 176.643 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.644 */body: subrangesRetainBoundedStagingAndCopyAccountingTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.645 */)[0m
+     [36m| [0m[34m|[0m /* 176.646 */)[0m
+     [36m| [0m[34m|[0m /* 176.647 */[0m
+     [36m| [0m[34m|[0m /* 176.648 */}()[0m
+     [36m| [0m[34m|[0m /* 176.649 */[0m
+     [36m| [0m[34m|[0m /* 176.650 */[0m
+     [36m| [0m[34m|[0m /* 176.651 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.652 */[0m
+     [36m| [0m[34m|[0m /* 176.653 */let connectsByResolvedIpAndTransfersBothDirectionsTestFunc = { => connectsByResolvedIpAndTransfersBothDirections();() }[0m
+     [36m| [0m[34m|[0m /* 176.654 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.655 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.656 */"connectsByResolvedIpAndTransfersBothDirections",[0m
+     [36m| [0m[34m|[0m /* 176.657 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.658 */body: connectsByResolvedIpAndTransfersBothDirectionsTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.659 */)[0m
+     [36m| [0m[34m|[0m /* 176.660 */)[0m
+     [36m| [0m[34m|[0m /* 176.661 */[0m
+     [36m| [0m[34m|[0m /* 176.662 */}()[0m
+     [36m| [0m[34m|[0m /* 176.663 */[0m
+     [36m| [0m[34m|[0m /* 176.664 */[0m
+     [36m| [0m[34m|[0m /* 176.665 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.666 */[0m
+     [36m| [0m[34m|[0m /* 176.667 */let emptyOperationsAreImmediateTestFunc = { => emptyOperationsAreImmediate();() }[0m
+     [36m| [0m[34m|[0m /* 176.668 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.669 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.670 */"emptyOperationsAreImmediate",[0m
+     [36m| [0m[34m|[0m /* 176.671 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.672 */body: emptyOperationsAreImmediateTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.673 */)[0m
+     [36m| [0m[34m|[0m /* 176.674 */)[0m
+     [36m| [0m[34m|[0m /* 176.675 */[0m
+     [36m| [0m[34m|[0m /* 176.676 */}()[0m
+     [36m| [0m[34m|[0m /* 176.677 */[0m
+     [36m| [0m[34m|[0m /* 176.678 */[0m
+     [36m| [0m[34m|[0m /* 176.679 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.680 */[0m
+     [36m| [0m[34m|[0m /* 176.681 */let unsupportedHalfClosePreservesBothDirectionsTestFunc = { => unsupportedHalfClosePreservesBothDirections();() }[0m
+     [36m| [0m[34m|[0m /* 176.682 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.683 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.684 */"unsupportedHalfClosePreservesBothDirections",[0m
+     [36m| [0m[34m|[0m /* 176.685 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.686 */body: unsupportedHalfClosePreservesBothDirectionsTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.687 */)[0m
+     [36m| [0m[34m|[0m /* 176.688 */)[0m
+     [36m| [0m[34m|[0m /* 176.689 */[0m
+     [36m| [0m[34m|[0m /* 176.690 */}()[0m
+     [36m| [0m[34m|[0m /* 176.691 */[0m
+     [36m| [0m[34m|[0m /* 176.692 */[0m
+     [36m| [0m[34m|[0m /* 176.693 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.694 */[0m
+     [36m| [0m[34m|[0m /* 176.695 */let cancellationWakesBlockedReadAndIsNeverReportedAsEofTestFunc = { => cancellationWakesBlockedReadAndIsNeverReportedAsEof();() }[0m
+     [36m| [0m[34m|[0m /* 176.696 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.697 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.698 */"cancellationWakesBlockedReadAndIsNeverReportedAsEof",[0m
+     [36m| [0m[34m|[0m /* 176.699 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.700 */body: cancellationWakesBlockedReadAndIsNeverReportedAsEofTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.701 */)[0m
+     [36m| [0m[34m|[0m /* 176.702 */)[0m
+     [36m| [0m[34m|[0m /* 176.703 */[0m
+     [36m| [0m[34m|[0m /* 176.704 */}()[0m
+     [36m| [0m[34m|[0m /* 176.705 */[0m
+     [36m| [0m[34m|[0m /* 176.706 */[0m
+     [36m| [0m[34m|[0m /* 176.707 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.708 */[0m
+     [36m| [0m[34m|[0m /* 176.709 */let listenerCloseWakesBlockedAcceptAsClosedTestFunc = { => listenerCloseWakesBlockedAcceptAsClosed();() }[0m
+     [36m| [0m[34m|[0m /* 176.710 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.711 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.712 */"listenerCloseWakesBlockedAcceptAsClosed",[0m
+     [36m| [0m[34m|[0m /* 176.713 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.714 */body: listenerCloseWakesBlockedAcceptAsClosedTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.715 */)[0m
+     [36m| [0m[34m|[0m /* 176.716 */)[0m
+     [36m| [0m[34m|[0m /* 176.717 */[0m
+     [36m| [0m[34m|[0m /* 176.718 */}()[0m
+     [36m| [0m[34m|[0m /* 176.719 */[0m
+     [36m| [0m[34m|[0m /* 176.720 */[0m
+     [36m| [0m[34m|[0m /* 176.721 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.722 */[0m
+     [36m| [0m[34m|[0m /* 176.723 */let cancellingOneAcceptLeavesListenerReusableTestFunc = { => cancellingOneAcceptLeavesListenerReusable();() }[0m
+     [36m| [0m[34m|[0m /* 176.724 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.725 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.726 */"cancellingOneAcceptLeavesListenerReusable",[0m
+     [36m| [0m[34m|[0m /* 176.727 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.728 */body: cancellingOneAcceptLeavesListenerReusableTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.729 */)[0m
+     [36m| [0m[34m|[0m /* 176.730 */)[0m
+     [36m| [0m[34m|[0m /* 176.731 */[0m
+     [36m| [0m[34m|[0m /* 176.732 */}()[0m
+     [36m| [0m[34m|[0m /* 176.733 */[0m
+     [36m| [0m[34m|[0m /* 176.734 */[0m
+     [36m| [0m[34m|[0m /* 176.735 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.736 */[0m
+     [36m| [0m[34m|[0m /* 176.737 */let preCancelledConnectDoesNotCreateASocketTestFunc = { => preCancelledConnectDoesNotCreateASocket();() }[0m
+     [36m| [0m[34m|[0m /* 176.738 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.739 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.740 */"preCancelledConnectDoesNotCreateASocket",[0m
+     [36m| [0m[34m|[0m /* 176.741 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.742 */body: preCancelledConnectDoesNotCreateASocketTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.743 */)[0m
+     [36m| [0m[34m|[0m /* 176.744 */)[0m
+     [36m| [0m[34m|[0m /* 176.745 */[0m
+     [36m| [0m[34m|[0m /* 176.746 */}()[0m
+     [36m| [0m[34m|[0m /* 176.747 */[0m
+     [36m| [0m[34m|[0m /* 176.748 */[0m
+     [36m| [0m[34m|[0m /* 176.749 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.750 */[0m
+     [36m| [0m[34m|[0m /* 176.751 */let peerGracefulCloseIsReportedAsEofTestFunc = { => peerGracefulCloseIsReportedAsEof();() }[0m
+     [36m| [0m[34m|[0m /* 176.752 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.753 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.754 */"peerGracefulCloseIsReportedAsEof",[0m
+     [36m| [0m[34m|[0m /* 176.755 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.756 */body: peerGracefulCloseIsReportedAsEofTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.757 */)[0m
+     [36m| [0m[34m|[0m /* 176.758 */)[0m
+     [36m| [0m[34m|[0m /* 176.759 */[0m
+     [36m| [0m[34m|[0m /* 176.760 */}()[0m
+     [36m| [0m[34m|[0m /* 176.761 */[0m
+     [36m| [0m[34m|[0m /* 176.762 */[0m
+     [36m| [0m[34m|[0m /* 176.763 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.764 */[0m
+     [36m| [0m[34m|[0m /* 176.765 */let deadlineBoundsBlockedReadWithoutClosingConnectionTestFunc = { => deadlineBoundsBlockedReadWithoutClosingConnection();() }[0m
+     [36m| [0m[34m|[0m /* 176.766 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.767 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.768 */"deadlineBoundsBlockedReadWithoutClosingConnection",[0m
+     [36m| [0m[34m|[0m /* 176.769 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.770 */body: deadlineBoundsBlockedReadWithoutClosingConnectionTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.771 */)[0m
+     [36m| [0m[34m|[0m /* 176.772 */)[0m
+     [36m| [0m[34m|[0m /* 176.773 */[0m
+     [36m| [0m[34m|[0m /* 176.774 */}()[0m
+     [36m| [0m[34m|[0m /* 176.775 */[0m
+     [36m| [0m[34m|[0m /* 176.776 */[0m
+     [36m| [0m[34m|[0m /* 176.777 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.778 */[0m
+     [36m| [0m[34m|[0m /* 176.779 */let localCloseMapsBlockedReadWithStableEvidenceTestFunc = { => localCloseMapsBlockedReadWithStableEvidence();() }[0m
+     [36m| [0m[34m|[0m /* 176.780 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.781 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.782 */"localCloseMapsBlockedReadWithStableEvidence",[0m
+     [36m| [0m[34m|[0m /* 176.783 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.784 */body: localCloseMapsBlockedReadWithStableEvidenceTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.785 */)[0m
+     [36m| [0m[34m|[0m /* 176.786 */)[0m
+     [36m| [0m[34m|[0m /* 176.787 */[0m
+     [36m| [0m[34m|[0m /* 176.788 */}()[0m
+     [36m| [0m[34m|[0m /* 176.789 */[0m
+     [36m| [0m[34m|[0m /* 176.790 */[0m
+     [36m| [0m[34m|[0m /* 176.791 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.792 */[0m
+     [36m| [0m[34m|[0m /* 176.793 */let explicitAbortWakesBlockedReadWithStableEvidenceTestFunc = { => explicitAbortWakesBlockedReadWithStableEvidence();() }[0m
+     [36m| [0m[34m|[0m /* 176.794 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.795 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.796 */"explicitAbortWakesBlockedReadWithStableEvidence",[0m
+     [36m| [0m[34m|[0m /* 176.797 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.798 */body: explicitAbortWakesBlockedReadWithStableEvidenceTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.799 */)[0m
+     [36m| [0m[34m|[0m /* 176.800 */)[0m
+     [36m| [0m[34m|[0m /* 176.801 */[0m
+     [36m| [0m[34m|[0m /* 176.802 */}()[0m
+     [36m| [0m[34m|[0m /* 176.803 */[0m
+     [36m| [0m[34m|[0m /* 176.804 */[0m
+     [36m| [0m[34m|[0m /* 176.805 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.806 */[0m
+     [36m| [0m[34m|[0m /* 176.807 */let firstCloseOrAbortKeepsItsPeerVisibleTerminalResultTestFunc = { => firstCloseOrAbortKeepsItsPeerVisibleTerminalResult();() }[0m
+     [36m| [0m[34m|[0m /* 176.808 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.809 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.810 */"firstCloseOrAbortKeepsItsPeerVisibleTerminalResult",[0m
+     [36m| [0m[34m|[0m /* 176.811 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.812 */body: firstCloseOrAbortKeepsItsPeerVisibleTerminalResultTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.813 */)[0m
+     [36m| [0m[34m|[0m /* 176.814 */)[0m
+     [36m| [0m[34m|[0m /* 176.815 */[0m
+     [36m| [0m[34m|[0m /* 176.816 */}()[0m
+     [36m| [0m[34m|[0m /* 176.817 */[0m
+     [36m| [0m[34m|[0m /* 176.818 */[0m
+     [36m| [0m[34m|[0m /* 176.819 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.820 */[0m
+     [36m| [0m[34m|[0m /* 176.821 */let unknownConnectFailureMapsWithoutMessageOrNativeCodeTestFunc = { => unknownConnectFailureMapsWithoutMessageOrNativeCode();() }[0m
+     [36m| [0m[34m|[0m /* 176.822 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.823 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.824 */"unknownConnectFailureMapsWithoutMessageOrNativeCode",[0m
+     [36m| [0m[34m|[0m /* 176.825 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.826 */body: unknownConnectFailureMapsWithoutMessageOrNativeCodeTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.827 */)[0m
+     [36m| [0m[34m|[0m /* 176.828 */)[0m
+     [36m| [0m[34m|[0m /* 176.829 */[0m
+     [36m| [0m[34m|[0m /* 176.830 */}()[0m
+     [36m| [0m[34m|[0m /* 176.831 */[0m
+     [36m| [0m[34m|[0m /* 176.832 */[0m
+     [36m| [0m[34m|[0m /* 176.833 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.834 */[0m
+     [36m| [0m[34m|[0m /* 176.835 */let concurrentReadsFailWithoutDisturbingTheActiveReadTestFunc = { => concurrentReadsFailWithoutDisturbingTheActiveRead();() }[0m
+     [36m| [0m[34m|[0m /* 176.836 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.837 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.838 */"concurrentReadsFailWithoutDisturbingTheActiveRead",[0m
+     [36m| [0m[34m|[0m /* 176.839 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.840 */body: concurrentReadsFailWithoutDisturbingTheActiveReadTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.841 */)[0m
+     [36m| [0m[34m|[0m /* 176.842 */)[0m
+     [36m| [0m[34m|[0m /* 176.843 */[0m
+     [36m| [0m[34m|[0m /* 176.844 */}()[0m
+     [36m| [0m[34m|[0m /* 176.845 */[0m
+     [36m| [0m[34m|[0m /* 176.846 */[0m
+     [36m| [0m[34m|[0m /* 176.847 */{ => let caseConfig = Configuration()[0m
+     [36m| [0m[34m|[0m /* 176.848 */[0m
+     [36m| [0m[34m|[0m /* 176.849 */let happyEyeballsComposesWithTheDefaultStdNetFactoryTestFunc = { => happyEyeballsComposesWithTheDefaultStdNetFactory();() }[0m
+     [36m| [0m[34m|[0m /* 176.850 */suiteBuilder.add([0m
+     [36m| [0m[34m|[0m /* 176.851 */UnitTestCase.create([0m
+     [36m| [0m[34m|[0m /* 176.852 */"happyEyeballsComposesWithTheDefaultStdNetFactory",[0m
+     [36m| [0m[34m|[0m /* 176.853 */configuration: caseConfig,[0m
+     [36m| [0m[34m|[0m /* 176.854 */body: happyEyeballsComposesWithTheDefaultStdNetFactoryTestFunc[0m
+     [36m| [0m[34m|[0m /* 176.855 */)[0m
+     [36m| [0m[34m|[0m /* 176.856 */)[0m
+     [36m| [0m[34m|[0m /* 176.857 */[0m
+     [36m| [0m[34m|[0m /* 176.858 */}()[0m
+     [36m| [0m[34m|[0m /* 176.859 */[0m
+     [36m| [0m[34m|[0m /* 176.860 */return suiteBuilder.build()[0m
+     [36m| [0m[34m|[0m /* 176.861 */}[0m
+     [36m| [0m[34m|[0m /* 176.862 */private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+     [36m| [0m[34m|[0m /* 176.863 */throw Exception("Unreachable code")[0m
+     [36m| [0m[34m|[0m /* 176.864 */}[0m
+     [36m| [0m[34m|[0m /* 176.865 */}[0m
+     [36m| [0m[34m|[0m /* 176.866 */[0m
+     [36m| [0m[34m|[0m /* 176.867 */[0m
+     [36m| [0m[34m|[0m /* 176.868 */interface TestPackageExtension_StdNetTransportTest {[0m
+     [36m| [0m[34m|[0m /* 176.869 */func registerStdNetTransportTest(): Unit[0m
+     [36m| [0m[34m|[0m /* 176.870 */}[0m
+     [36m| [0m[34m|[0m /* 176.871 */extend TestPackage <: TestPackageExtension_StdNetTransportTest {[0m
+     [36m| [0m[34m|[0m /* 176.872 */@Attribute[TEST_REGISTER][0m
+     [36m| [0m[34m|[0m /* 176.873 */public func registerStdNetTransportTest() {[0m
+     [36m| [0m[34m|[0m /* 176.874 */registerSuite({ => StdNetTransportTest().asTestSuite() })[0m
+     [36m| [0m[34m|[0m /* 176.875 */}[0m
+     [36m| [0m[34m|[0m /* 176.876 */}[0m
+     [36m| [0m[34m|[0m /* 176.877 */[0m
+     [36m| [0m[34m|[0m[34m_[0m[34m____________^[0m
+     [36m| [0m
+
+[31merror[0m: the type 'Enum-NetworkPhase' should implement interface 'ToString' in the 'core' package
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:18535:
+    [36m| [0m
+[36m176[0m [36m| [0m@Test[0m
+    [36m| [0m      [31m^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:1:
+    [36m| [0m
+[36m176[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m177[0m [36m| [0m[34m|[0m class StdNetTransportTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m777[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[31merror[0m: the type 'Enum-NetworkErrorCode' should implement interface 'ToString' in the 'core' package
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:18555:
+    [36m| [0m
+[36m176[0m [36m| [0m@Test[0m
+    [36m| [0m      [31m^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:1:
+    [36m| [0m
+[36m176[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m177[0m [36m| [0m[34m|[0m class StdNetTransportTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m777[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[31merror[0m: the type 'Enum-Retryability' should implement interface 'ToString' in the 'core' package
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:18582:
+    [36m| [0m
+[36m176[0m [36m| [0m@Test[0m
+    [36m| [0m      [31m^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/stdnet_transport_test.cj:176:1:
+    [36m| [0m
+[36m176[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m177[0m [36m| [0m[34m|[0m class StdNetTransportTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m777[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+4 errors generated, 4 errors printed.
+Error: cjpm test failed

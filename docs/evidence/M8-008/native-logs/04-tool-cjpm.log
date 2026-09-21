@@ -1,0 +1,7 @@
+argv=["<home>/cangjie_sdk/daily/cangjie/tools/bin/cjpm", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+Cangjie Project Manager: 1.1.3
+--- stderr ---

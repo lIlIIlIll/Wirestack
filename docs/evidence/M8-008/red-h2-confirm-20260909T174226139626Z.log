@@ -1,0 +1,139 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 6448101252 ns, RESULT:
+    TCS: Http2ConnectionStateMachineTest, time elapsed: 148861282 ns, RESULT:
+    [ PASSED ] CASE: clientStartEmitsMagicAndSettingsThenPeerSettingsOpens (227888 ns)
+    [ PASSED ] CASE: serverConsumesIncrementalMagicBeforeItsFirstSettings (42051 ns)
+    [ PASSED ] CASE: invalidOrIncompletePrefaceFailsOnceWithProtocolEvidence (75405 ns)
+    [ PASSED ] CASE: firstPeerFrameMustBeNonAcknowledgementSettings (41807 ns)
+    [ PASSED ] CASE: openConnectionAppliesSettingsAndCompletesHeaderBlocks (130416 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsAndMayOnlyNarrowItsBoundary (52204 ns)
+    [ PASSED ] CASE: racingFinishTransitionsAndPublishesCompletionExactlyOnce (3336305 ns)
+    [ ERROR  ] CASE: peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt (143340398 ns)
+    REASON: An exception has occurred:Http2ProtocolException: HTTP/2 local concurrent stream limit reached
+	at wirestack.internal.http2.Http2ProtocolException.init(wirestack.internal.http2.Http2ErrorCode, wirestack.internal.http2.Http2ErrorScope, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/frame_model.cj:204)
+	at wirestack.internal.http2.streamProtocolFailure(wirestack.internal.http2.Http2StreamId, wirestack.internal.http2.Http2ErrorCode, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/stream_lifecycle.cj:389)
+	at wirestack.internal.http2.Http2StreamRegistry.openPeer(wirestack.internal.http2.Http2StreamId, Bool)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/stream_lifecycle.cj:216)
+	at wirestack.internal.http2.Http2ConnectionStateMachine.openPeerStream(wirestack.internal.http2.Http2StreamRegistry, wirestack.internal.http2.Http2StreamId, Bool)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/connection_state.cj:199)
+	at wirestack.internal.http2/test.Http2ConnectionStateMachineTest.peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/connection_state_test.cj:99)
+	at wirestack.internal.http2/test.expectIllegalStateChange(() -> Unit)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/connection_state_test.cj:198)
+	at wirestack.internal.http2/test.Http2ConnectionStateMachineTest.peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/connection_state_test.cj:98)
+	at wirestack.internal.http2/test.Http2ConnectionStateMachineTest.asTestSuite.lambda.6.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/connection_state_test.cj:8)
+    [ FAILED ] CASE: firstPeerSettingsCannotReopenAConnectionThatAlreadyBeganDraining (64840 ns)
+    Expect Failed: `(isDrainingPhase(server.phase) == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(failed == true)`
+       left: false
+      right: true
+
+    TCS: Http2ServerConnectionTest, time elapsed: 5841220590 ns, RESULT:
+    [ PASSED ] CASE: flowBackpressureStopsOnServeCancellationAndClosesResponsePlan (19475740 ns)
+    [ PASSED ] CASE: completedResponseUnregistersReaderListenerBeforeNextStream (1750695 ns)
+    [ PASSED ] CASE: handlerFailureResetsStreamWithoutPublishingItsMessage (5897456 ns)
+    STDERR:
+    An exception has occurred:
+    Exception: handler-secret-sentinel
+    	 at wirestack.internal.http2/test::ThrowingConnectionHandler::handle(wirestack.internal.http2::Http2ServerRequest, wirestack::OperationContext)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:303)
+    	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping.cj:167)
+    [ ERROR  ] CASE: explicitAbortWakesBlockedRequestBodyAndConverges (1161585485 ns)
+    REASON: An exception has occurred:Exception: handler body read did not terminate
+	at wirestack.internal.http2/test.waitForConnectionPredicate(() -> Bool, std.sync.Mutex, std.sync.Condition, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:461)
+	at wirestack.internal.http2/test.BlockingConnectionHandler.waitForOutcome()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:260)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.explicitAbortWakesBlockedRequestBodyAndConverges()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:21)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.asTestSuite.lambda.0.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:10)
+    [ ERROR  ] CASE: readerEofWakesBlockedRequestBodyWithoutInventingEof (1155224526 ns)
+    REASON: An exception has occurred:Exception: handler body read did not terminate
+	at wirestack.internal.http2/test.waitForConnectionPredicate(() -> Bool, std.sync.Mutex, std.sync.Condition, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:461)
+	at wirestack.internal.http2/test.BlockingConnectionHandler.waitForOutcome()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:260)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.readerEofWakesBlockedRequestBodyWithoutInventingEof()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:40)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.asTestSuite.lambda.1.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:10)
+    [ ERROR  ] CASE: serveCancellationUsesTheSameContextForHandlerBodyAndWriter (1152692110 ns)
+    REASON: An exception has occurred:Exception: handler body read did not terminate
+	at wirestack.internal.http2/test.waitForConnectionPredicate(() -> Bool, std.sync.Mutex, std.sync.Condition, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:461)
+	at wirestack.internal.http2/test.BlockingConnectionHandler.waitForOutcome()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:260)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.serveCancellationUsesTheSameContextForHandlerBodyAndWriter()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:63)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.asTestSuite.lambda.2.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:10)
+    [ ERROR  ] CASE: serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge (1164802878 ns)
+    REASON: An exception has occurred:Exception: handler body read did not terminate
+	at wirestack.internal.http2/test.waitForConnectionPredicate(() -> Bool, std.sync.Mutex, std.sync.Condition, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:461)
+	at wirestack.internal.http2/test.BlockingConnectionHandler.waitForOutcome()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:260)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:85)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.asTestSuite.lambda.3.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:10)
+    [ ERROR  ] CASE: initialHeadersWriteFailureStillClosesUnopenedResponsePlan (1177791381 ns)
+    REASON: An exception has occurred:Exception: response body ownership was not closed
+	at wirestack.internal.http2/test.waitForConnectionPredicate(() -> Bool, std.sync.Mutex, std.sync.Condition, std.core.String)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:461)
+	at wirestack.internal.http2/test.TrackingConnectionBody.waitUntilClosed()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:351)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.initialHeadersWriteFailureStillClosesUnopenedResponsePlan()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:125)
+	at wirestack.internal.http2/test.Http2ServerConnectionTest.asTestSuite.lambda.5.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:10)
+    TCS: Http2ServerMappingTest, time elapsed: 446878412 ns, RESULT:
+    [ PASSED ] CASE: requestHeadMapsPseudoFieldsHostAndContentLength (88046 ns)
+    [ PASSED ] CASE: connectAndOptionsTargetsAreMappedStrictly (105878 ns)
+    [ PASSED ] CASE: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity (220213 ns)
+    [ PASSED ] CASE: paddedDataReturnsAllFlowCreditAndPublishesTrailers (201647 ns)
+    [ PASSED ] CASE: requestQueueIsBoundedBeforeFlowAccountingMutates (120971 ns)
+    [ PASSED ] CASE: terminalLengthMismatchDoesNotConsumeFlowWindow (118411 ns)
+    [ PASSED ] CASE: responseHeadersBodyFlowAndTrailersMapInOrder (585691 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (604561 ns)
+    [ PASSED ] CASE: responseRulesCloseBodiesOnEveryTerminalOrFailurePath (77366 ns)
+    [ PASSED ] CASE: handlerRunsOnceAndReleasesRequestOwnership (88203 ns)
+    [ ERROR  ] CASE: readerTerminationWakesBlockedRequestBodyWithConnectionScope (144815816 ns)
+    REASON: An exception has occurred:Exception: HTTP/2 server exchange is not registered for reader termination
+	at wirestack.internal.http2/test.serverTerminationListener(wirestack.internal.http2.Http2ServerExchange)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:375)
+	at wirestack.internal.http2/test.Http2ServerMappingTest.readerTerminationWakesBlockedRequestBodyWithConnectionScope()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:198)
+	at wirestack.internal.http2/test.Http2ServerMappingTest.asTestSuite.lambda.10.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:10)
+    [ ERROR  ] CASE: streamResetAndReaderTerminationRetainDistinctFailureScopes (148094460 ns)
+    REASON: An exception has occurred:Exception: HTTP/2 server exchange is not registered for reader termination
+	at wirestack.internal.http2/test.serverTerminationListener(wirestack.internal.http2.Http2ServerExchange)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:375)
+	at wirestack.internal.http2/test.Http2ServerMappingTest.streamResetAndReaderTerminationRetainDistinctFailureScopes()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:223)
+	at wirestack.internal.http2/test.Http2ServerMappingTest.asTestSuite.lambda.11.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:10)
+    [ ERROR  ] CASE: originalRequestContextWinsOverRetainedConnectionTermination (149624590 ns)
+    REASON: An exception has occurred:Exception: HTTP/2 server exchange is not registered for reader termination
+	at wirestack.internal.http2/test.serverTerminationListener(wirestack.internal.http2.Http2ServerExchange)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:375)
+	at wirestack.internal.http2/test.Http2ServerMappingTest.originalRequestContextWinsOverRetainedConnectionTermination()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:238)
+	at wirestack.internal.http2/test.Http2ServerMappingTest.asTestSuite.lambda.12.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:10)
+Summary: TOTAL: 167
+    PASSED: 20, SKIPPED: 137, ERROR: 9
+    FAILED: 1, listed below:
+            TCS: Http2ConnectionStateMachineTest, CASE: peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt
+            TCS: Http2ConnectionStateMachineTest, CASE: firstPeerSettingsCannotReopenAConnectionThatAlreadyBeganDraining
+            TCS: Http2ServerConnectionTest, CASE: explicitAbortWakesBlockedRequestBodyAndConverges
+            TCS: Http2ServerConnectionTest, CASE: readerEofWakesBlockedRequestBodyWithoutInventingEof
+            TCS: Http2ServerConnectionTest, CASE: serveCancellationUsesTheSameContextForHandlerBodyAndWriter
+            TCS: Http2ServerConnectionTest, CASE: serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge
+            TCS: Http2ServerConnectionTest, CASE: initialHeadersWriteFailureStillClosesUnopenedResponsePlan
+            TCS: Http2ServerMappingTest, CASE: readerTerminationWakesBlockedRequestBodyWithConnectionScope
+            TCS: Http2ServerMappingTest, CASE: streamResetAndReaderTerminationRetainDistinctFailureScopes
+            TCS: Http2ServerMappingTest, CASE: originalRequestContextWinsOverRetainedConnectionTermination
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 6455858425 ns, RESULT:
+TP: wirestack.*, time elapsed: 6455753995 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.http2, time elapsed: 6448101252 ns, RESULT:
+        TCS: Http2ConnectionStateMachineTest, time elapsed: 148861282 ns, RESULT:
+        [ ERROR  ] CASE: peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt (143340398 ns)
+        [ FAILED ] CASE: firstPeerSettingsCannotReopenAConnectionThatAlreadyBeganDraining (64840 ns)
+        TCS: Http2ServerConnectionTest, time elapsed: 5841220590 ns, RESULT:
+        [ ERROR  ] CASE: explicitAbortWakesBlockedRequestBodyAndConverges (1161585485 ns)
+        [ ERROR  ] CASE: readerEofWakesBlockedRequestBodyWithoutInventingEof (1155224526 ns)
+        [ ERROR  ] CASE: serveCancellationUsesTheSameContextForHandlerBodyAndWriter (1152692110 ns)
+        [ ERROR  ] CASE: serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge (1164802878 ns)
+        [ ERROR  ] CASE: initialHeadersWriteFailureStillClosesUnopenedResponsePlan (1177791381 ns)
+        TCS: Http2ServerMappingTest, time elapsed: 446878412 ns, RESULT:
+        [ ERROR  ] CASE: readerTerminationWakesBlockedRequestBodyWithConnectionScope (144815816 ns)
+        [ ERROR  ] CASE: streamResetAndReaderTerminationRetainDistinctFailureScopes (148094460 ns)
+        [ ERROR  ] CASE: originalRequestContextWinsOverRetainedConnectionTermination (149624590 ns)
+Summary: TOTAL: 167
+    PASSED: 20, SKIPPED: 137, ERROR: 9
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

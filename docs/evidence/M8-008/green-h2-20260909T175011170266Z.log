@@ -1,0 +1,75 @@
+[33mwarning[0m: unused function:'requirePeerInitiatedStream'
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/connection_state.cj:329:5:
+    [36m| [0m
+[36m329[0m [36m| [0m      private func requirePeerInitiatedStream(streamId: Http2StreamId): Unit {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m330[0m [36m| [0m[33m|[0m         if (!streamId.isStream()) { throw IllegalArgumentException("HTTP/2 stream id must be non-zero") }[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m332[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 328994586 ns, RESULT:
+    TCS: Http2ConnectionStateMachineTest, time elapsed: 5275206 ns, RESULT:
+    [ PASSED ] CASE: clientStartEmitsMagicAndSettingsThenPeerSettingsOpens (235090 ns)
+    [ PASSED ] CASE: serverConsumesIncrementalMagicBeforeItsFirstSettings (41746 ns)
+    [ PASSED ] CASE: invalidOrIncompletePrefaceFailsOnceWithProtocolEvidence (65897 ns)
+    [ PASSED ] CASE: firstPeerFrameMustBeNonAcknowledgementSettings (40249 ns)
+    [ PASSED ] CASE: openConnectionAppliesSettingsAndCompletesHeaderBlocks (132802 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsAndMayOnlyNarrowItsBoundary (54690 ns)
+    [ PASSED ] CASE: peerAdmissionDefinesGoAwayBoundaryAndRejectedAdmissionDoesNotAdvanceIt (71858 ns)
+    [ PASSED ] CASE: firstPeerSettingsCannotReopenAConnectionThatAlreadyBeganDraining (39764 ns)
+    [ PASSED ] CASE: racingFinishTransitionsAndPublishesCompletionExactlyOnce (3371133 ns)
+    TCS: Http2ServerConnectionTest, time elapsed: 305058537 ns, RESULT:
+    [ PASSED ] CASE: explicitAbortWakesBlockedRequestBodyAndConverges (1871796 ns)
+    [ PASSED ] CASE: readerEofWakesBlockedRequestBodyWithoutInventingEof (1604926 ns)
+    [ PASSED ] CASE: serveCancellationUsesTheSameContextForHandlerBodyAndWriter (1616767 ns)
+    [ PASSED ] CASE: serveDeadlineWakesBlockedRequestBodyAndAllOwnedTasksConverge (251383609 ns)
+    [ PASSED ] CASE: flowBackpressureStopsOnServeCancellationAndClosesResponsePlan (34061812 ns)
+    [ PASSED ] CASE: initialHeadersWriteFailureStillClosesUnopenedResponsePlan (2497160 ns)
+    [ PASSED ] CASE: completedResponseUnregistersReaderListenerBeforeNextStream (3011599 ns)
+    [ PASSED ] CASE: handlerFailureResetsStreamWithoutPublishingItsMessage (7239959 ns)
+    STDERR:
+    An exception has occurred:
+    Exception: handler-secret-sentinel
+    	 at wirestack.internal.http2/test::ThrowingConnectionHandler::handle(wirestack.internal.http2::Http2ServerRequest, wirestack::OperationContext)(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/server_connection_test.cj:303)
+    	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/http2/server_mapping.cj:167)
+    TCS: Http2ServerMappingTest, time elapsed: 6531620 ns, RESULT:
+    [ PASSED ] CASE: requestHeadMapsPseudoFieldsHostAndContentLength (121344 ns)
+    [ PASSED ] CASE: connectAndOptionsTargetsAreMappedStrictly (157677 ns)
+    [ PASSED ] CASE: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity (201012 ns)
+    [ PASSED ] CASE: paddedDataReturnsAllFlowCreditAndPublishesTrailers (184099 ns)
+    [ PASSED ] CASE: requestQueueIsBoundedBeforeFlowAccountingMutates (103950 ns)
+    [ PASSED ] CASE: terminalLengthMismatchDoesNotConsumeFlowWindow (105969 ns)
+    [ PASSED ] CASE: responseHeadersBodyFlowAndTrailersMapInOrder (975888 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (1472901 ns)
+    [ PASSED ] CASE: responseRulesCloseBodiesOnEveryTerminalOrFailurePath (251099 ns)
+    [ PASSED ] CASE: handlerRunsOnceAndReleasesRequestOwnership (165719 ns)
+    [ PASSED ] CASE: readerTerminationWakesBlockedRequestBodyWithConnectionScope (124209 ns)
+    [ PASSED ] CASE: streamResetAndReaderTerminationRetainDistinctFailureScopes (176933 ns)
+    [ PASSED ] CASE: originalRequestContextWinsOverRetainedConnectionTermination (99871 ns)
+Summary: TOTAL: 167
+    PASSED: 30, SKIPPED: 137, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 336831730 ns, RESULT:
+TP: wirestack.*, time elapsed: 336733389 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 328994586 ns
+Summary: TOTAL: 167
+    PASSED: 30, SKIPPED: 137, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

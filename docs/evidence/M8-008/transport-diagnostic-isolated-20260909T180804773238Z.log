@@ -1,0 +1,19 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 10440832 ns, RESULT:
+    TCS: StdNetTransportTest, time elapsed: 5398245 ns, RESULT:
+    [ PASSED ] CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof (1884113 ns)
+    STDOUT:
+    STDNET_CANCEL_READ outcome=network-error categoryRead=true phaseTcpRead=true codeCancelled=true retryNever=true cause=true local=true remote=true
+Summary: TOTAL: 52
+    PASSED: 1, SKIPPED: 51, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 17417820 ns, RESULT:
+TP: wirestack.*, time elapsed: 17371619 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 10440832 ns
+Summary: TOTAL: 52
+    PASSED: 1, SKIPPED: 51, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

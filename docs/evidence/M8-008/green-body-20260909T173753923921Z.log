@@ -1,0 +1,34 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 8177964 ns, RESULT:
+    TCS: HttpMessageTest, time elapsed: 2738702 ns, RESULT:
+    [ PASSED ] CASE: requestFactoriesProduceImmutableProtocolNeutralModels (278153 ns)
+    [ PASSED ] CASE: responseEofCompletesObserverExactlyOnce (32769 ns)
+    [ PASSED ] CASE: earlyCloseAbandonsObserverExactlyOnce (41570 ns)
+    [ PASSED ] CASE: readFailureClosesAndAbandonsTheBody (25071 ns)
+    [ PASSED ] CASE: emptyDestinationDoesNotMistakeNoProgressForEof (17774 ns)
+    [ PASSED ] CASE: boundedDrainCompletesOnlyWhenEofIsProven (23516 ns)
+    [ PASSED ] CASE: invalidSourceProgressFailsClosed (31220 ns)
+    [ PASSED ] CASE: unknownLengthCompletesOnlyAtStableProtocolEof (22743 ns)
+    [ PASSED ] CASE: declaredLengthPrematureEofFailsClosed (26756 ns)
+    [ PASSED ] CASE: protocolCompletionCanWaitPastDeclaredLength (16681 ns)
+    [ PASSED ] CASE: observerMayCloseStreamAtCompletionWithoutBreakingRepeatedEof (20328 ns)
+    [ PASSED ] CASE: readFailurePreservesPrimaryErrorAcrossCleanupFailures (35589 ns)
+    [ PASSED ] CASE: invalidProgressPreservesBodyFailureAcrossCleanupFailures (34943 ns)
+    [ PASSED ] CASE: explicitClosePreservesStreamFailureAndNotifiesExactlyOnce (40016 ns)
+    [ PASSED ] CASE: explicitClosePropagatesObserverFailureAfterClosingStream (21333 ns)
+    [ PASSED ] CASE: concurrentReadIsRejectedWithoutStealingActiveReader (73039 ns)
+    [ PASSED ] CASE: closeRacingActiveReadClosesStreamAndNotifiesExactlyOnce (39497 ns)
+    [ PASSED ] CASE: responseRejectsInvalidStatusAndReason (38492 ns)
+Summary: TOTAL: 89
+    PASSED: 18, SKIPPED: 71, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 16164658 ns, RESULT:
+TP: wirestack.*, time elapsed: 16059087 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 8177964 ns
+Summary: TOTAL: 89
+    PASSED: 18, SKIPPED: 71, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

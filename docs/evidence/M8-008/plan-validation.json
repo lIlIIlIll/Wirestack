@@ -1,0 +1,22 @@
+{
+  "counts": {
+    "paths": 7,
+    "scenarios": 10,
+    "tests": 8
+  },
+  "issues": [],
+  "kind": "test-plan-validation",
+  "schema_version": 1,
+  "status": "PASS",
+  "source_task": "M8-008",
+  "argv": [
+    "python3",
+    "tools/repository/repository_tooling.py",
+    "--root",
+    ".",
+    "validate-plan",
+    "docs/evidence/M8-008/test-plan.md",
+    "--json"
+  ],
+  "exit_code": 0
+}

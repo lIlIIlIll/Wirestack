@@ -6,7 +6,7 @@
     "markdown": "docs/api/generated/markdown"
   },
   "cjdoc": {
-    "path": "<home>/playground/cjdoc/cjdoc",
+    "path": "<workspace>/cjdoc/cjdoc",
     "version": "0.7.2"
   },
   "combined": {

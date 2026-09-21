@@ -1,0 +1,37 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 99061978 ns, RESULT:
+    TCS: StdNetTransportTest, time elapsed: 96250875 ns, RESULT:
+    [ PASSED ] CASE: activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycle (21784622 ns)
+    [ PASSED ] CASE: activityWaitersWakeWhenTransportBecomesTerminal (272287 ns)
+    [ PASSED ] CASE: writeTimeoutIsNeverRetryableWithoutZeroCommitProof (26770 ns)
+    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (289460 ns)
+    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (1980308 ns)
+    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (195294 ns)
+    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (234161 ns)
+    [ PASSED ] CASE: emptyOperationsAreImmediate (174871 ns)
+    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (315111 ns)
+    [ PASSED ] CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof (1212319 ns)
+    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1068702 ns)
+    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29405688 ns)
+    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (43319 ns)
+    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (155530 ns)
+    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (30465422 ns)
+    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (1402415 ns)
+    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (1272390 ns)
+    [ PASSED ] CASE: firstCloseOrAbortKeepsItsPeerVisibleTerminalResult (611193 ns)
+    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (223289 ns)
+    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (1287613 ns)
+    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (470462 ns)
+Summary: TOTAL: 52
+    PASSED: 21, SKIPPED: 31, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 106793429 ns, RESULT:
+TP: wirestack.*, time elapsed: 106683475 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 99061978 ns
+Summary: TOTAL: 52
+    PASSED: 21, SKIPPED: 31, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

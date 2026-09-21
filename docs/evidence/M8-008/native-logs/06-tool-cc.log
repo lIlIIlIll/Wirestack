@@ -1,0 +1,10 @@
+argv=["/usr/lib/llvm15/bin/clang", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/lib/llvm15/bin
+--- stderr ---

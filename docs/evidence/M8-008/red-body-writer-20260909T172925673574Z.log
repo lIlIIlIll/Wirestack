@@ -1,0 +1,9 @@
+[31merror[0m: 'Duration' is not accessible in package 'std.time'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:5:8:
+  [36m| [0m
+[36m5[0m [36m| [0mimport std.time.Duration[0m
+  [36m| [0m       [31m^^^^^^^^^^^^^^^^^ [0m
+  [36m| [0m
+
+1 error generated, 1 error printed.
+Error: cjpm test failed

@@ -1,0 +1,37 @@
+argv=["/usr/bin/python3", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo/tools/build_linux_resolver.py", "--root", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo", "--output-root", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo/target/native/resolver"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo
+timeout_seconds=300
+returncode=0
+--- stdout ---
+{
+  "artifact": "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo/target/native/resolver/cache/d64513fc06096750e5c23dc1e0c6c75a95456989a5209f0b93e1ffe0552ce571",
+  "manifest": {
+    "archive": {
+      "path": "lib/libwirestack_resolver.a",
+      "sha256": "3675d95c12d3b0b44a3f4ae93797538873b519e19914627bcf4d21f72de39768"
+    },
+    "build_fingerprint": "d64513fc06096750e5c23dc1e0c6c75a95456989a5209f0b93e1ffe0552ce571",
+    "close_model": "bounded admission stop with a process-wide cap of eight live pools and 64 workers; blocking libc/NSS calls remain quarantined until completion",
+    "inputs": {
+      "compiler": "/usr/lib/llvm15/bin/clang",
+      "compiler_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+      "flags": [
+        "-std=c11",
+        "-O2",
+        "-fPIC",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread"
+      ],
+      "header_sha256": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe",
+      "schema": 1,
+      "source_sha256": "6562244643cff8ddda28a99563040f4e1eeb9580409ee9d6c51e17b3e1cff78a",
+      "target": "x86_64-pc-linux-gnu"
+    },
+    "private_runtime_abi": false,
+    "schema_version": 1,
+    "worker_model": "fixed pthread pool with bounded FIFO admission"
+  }
+}
+--- stderr ---

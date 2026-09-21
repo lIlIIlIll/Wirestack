@@ -1,0 +1,80 @@
+{
+  "source_task": "M8-008",
+  "status": "PASS",
+  "expected_rejection": "ELF_LIBRARY_MISSING",
+  "commands": [
+    {
+      "name": "probe-library",
+      "argv": [
+        "/usr/bin/cc",
+        "-shared",
+        "-fPIC",
+        "probe.c",
+        "-o",
+        "libm8008_probe.so"
+      ],
+      "cwd": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z",
+      "returncode": 0,
+      "bytes": 228,
+      "sha256": "d3fcc5d661591d2274661e1ccfcfd823b67c907fe62b02da349548103d3ff71b",
+      "log": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/logs/01-probe-library.log"
+    },
+    {
+      "name": "probe-consumer",
+      "argv": [
+        "/usr/bin/cc",
+        "consumer.c",
+        "-L.",
+        "-Wl,-rpath,$ORIGIN",
+        "-lm8008_probe",
+        "-o",
+        "consumer"
+      ],
+      "cwd": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z",
+      "returncode": 0,
+      "bytes": 248,
+      "sha256": "ae01766d5771248c4cc5d0ed8ca4614ff3cc8bd3bb258e33b45ae0eea6eae7a9",
+      "log": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/logs/02-probe-consumer.log"
+    },
+    {
+      "name": "probe-execution",
+      "argv": [
+        "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/consumer"
+      ],
+      "cwd": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z",
+      "returncode": 0,
+      "bytes": 250,
+      "sha256": "39860f6c3ab2478f31f7566e171b6530b2462447f423a0a5f2a047029efe135a",
+      "log": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/logs/03-probe-execution.log"
+    },
+    {
+      "name": "consumer-readelf",
+      "argv": [
+        "/usr/bin/readelf",
+        "-d",
+        "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/consumer"
+      ],
+      "cwd": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z",
+      "returncode": 0,
+      "bytes": 1805,
+      "sha256": "4a0c1e6834c3b7b957a9294113150f7d2e6f1877c2b385104709c7fced04fbb1",
+      "log": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/logs/04-consumer-readelf.log"
+    },
+    {
+      "name": "consumer-ldd",
+      "argv": [
+        "/usr/bin/ldd",
+        "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/consumer"
+      ],
+      "cwd": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z",
+      "returncode": 0,
+      "bytes": 475,
+      "sha256": "0948673166272ab01f47e5e4d0487644f2d28ff41ea6753b0e01b76f69586359",
+      "log": "<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/logs/05-consumer-ldd.log"
+    }
+  ],
+  "fixture_sources": {
+    "probe.c": "int m8008_probe(void) { return 7; }\n",
+    "consumer.c": "extern int m8008_probe(void);\nint main(void) { return m8008_probe() != 7; }\n"
+  }
+}

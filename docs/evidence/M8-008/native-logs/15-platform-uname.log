@@ -1,0 +1,7 @@
+argv=["/usr/bin/uname", "-srm"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+Linux 7.2.3-arch1-3 x86_64
+--- stderr ---

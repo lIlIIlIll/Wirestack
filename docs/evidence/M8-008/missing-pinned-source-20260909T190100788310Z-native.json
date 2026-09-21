@@ -1,0 +1,209 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "--version"
+      ],
+      "bytes": 153,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/01-tool-python.log",
+      "name": "tool-python",
+      "returncode": 0,
+      "sha256": "31641677f8337a7306b6a1c843c4d3e24e205a04b9ef6ab3790c85bcf083bc8b"
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "--version"
+      ],
+      "bytes": 154,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/02-tool-git.log",
+      "name": "tool-git",
+      "returncode": 0,
+      "sha256": "795a033b6c6002c2f7530ee42d34c4fa00d1a902bb1ecb0d293366831e35a430"
+    },
+    {
+      "argv": [
+        "<home>/cangjie_sdk/daily/cangjie/bin/cjc",
+        "-v"
+      ],
+      "bytes": 251,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/03-tool-cjc.log",
+      "name": "tool-cjc",
+      "returncode": 0,
+      "sha256": "c86138b6a4ec461067d5b0485d88478e12f6ddc6775e85ea4e2400be5277f612"
+    },
+    {
+      "argv": [
+        "<home>/cangjie_sdk/daily/cangjie/tools/bin/cjpm",
+        "--version"
+      ],
+      "bytes": 207,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/04-tool-cjpm.log",
+      "name": "tool-cjpm",
+      "returncode": 0,
+      "sha256": "8ad413771cd1652778b22c921c42ade944ef336500474714cd0103739be63d44"
+    },
+    {
+      "argv": [
+        "<workspace>/cjdoc/target/release/bin/main",
+        "--version"
+      ],
+      "bytes": 188,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/05-tool-cjdoc.log",
+      "name": "tool-cjdoc",
+      "returncode": 0,
+      "sha256": "11255c267ede43295790cd5f55c4d3cc5a42398816c8bc34552599325d8db58e"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/clang",
+        "--version"
+      ],
+      "bytes": 332,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/06-tool-cc.log",
+      "name": "tool-cc",
+      "returncode": 0,
+      "sha256": "4be3b0614281352beec4f89d84a998450c2c108d18265b148730b651bc450255"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/clang++",
+        "--version"
+      ],
+      "bytes": 334,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/07-tool-cxx.log",
+      "name": "tool-cxx",
+      "returncode": 0,
+      "sha256": "1215ee7cab7c9b04dfcd03e3c874ec8fa9c476e6927f06a33aec8d98735da1e9"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "--version"
+      ],
+      "bytes": 227,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/08-tool-cmake.log",
+      "name": "tool-cmake",
+      "returncode": 0,
+      "sha256": "804629823a30a3b2896456fffd81751a70ee821fdf178c917dbe0c58db66efe0"
+    },
+    {
+      "argv": [
+        "/usr/bin/ninja",
+        "--version"
+      ],
+      "bytes": 144,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/09-tool-ninja.log",
+      "name": "tool-ninja",
+      "returncode": 0,
+      "sha256": "df831d469ec422b2358d83faf0d1a3e2ec75d5c85496c7c3fdaa4bfb4e54a2e8"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/llvm-ar",
+        "--version"
+      ],
+      "bytes": 274,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/10-tool-ar.log",
+      "name": "tool-ar",
+      "returncode": 0,
+      "sha256": "be730c07f7b4c205921623d9575f8cab4a97a71913a94e1d4a7190bd9d7c4e87"
+    },
+    {
+      "argv": [
+        "/usr/lib/llvm15/bin/llvm-ranlib",
+        "--version"
+      ],
+      "bytes": 278,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/11-tool-ranlib.log",
+      "name": "tool-ranlib",
+      "returncode": 0,
+      "sha256": "68896c5ac072bb6dc25a84ab65bdef4e16ec4b982ea4ed43a18e1a0e47796d91"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--version"
+      ],
+      "bytes": 416,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/12-tool-readelf.log",
+      "name": "tool-readelf",
+      "returncode": 0,
+      "sha256": "c367d2a04885d880869c839f1f56550384bf03755c4abe158b0f9f472551afdc"
+    },
+    {
+      "argv": [
+        "/usr/bin/ldd",
+        "--version"
+      ],
+      "bytes": 402,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/13-tool-ldd.log",
+      "name": "tool-ldd",
+      "returncode": 0,
+      "sha256": "eac230639d441ede21dd73f967db39dadbc9f872a469bcb789e4998937e728f6"
+    },
+    {
+      "argv": [
+        "<workspace>/cjdoc/target/release/bin/main",
+        "--version"
+      ],
+      "bytes": 188,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/14-tool-cjdoc-isolated-home.log",
+      "name": "tool-cjdoc-isolated-home",
+      "returncode": 0,
+      "sha256": "11255c267ede43295790cd5f55c4d3cc5a42398816c8bc34552599325d8db58e"
+    },
+    {
+      "argv": [
+        "/usr/bin/uname",
+        "-srm"
+      ],
+      "bytes": 159,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/15-platform-uname.log",
+      "name": "platform-uname",
+      "returncode": 0,
+      "sha256": "90557b1bdec708b854a914995b44abca77bd410459e546ad7ee4cd9c92b3f2b8"
+    },
+    {
+      "argv": [
+        "/usr/bin/getconf",
+        "GNU_LIBC_VERSION"
+      ],
+      "bytes": 157,
+      "cwd": "<repo-root>",
+      "log": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43/logs/16-platform-glibc.log",
+      "name": "platform-glibc",
+      "returncode": 0,
+      "sha256": "8db70de3f821636cb6ec7306bb401a640622367c2901b0335efab14ddca1dc42"
+    }
+  ],
+  "completed_at_utc": "2026-09-09T19:01:01.520814Z",
+  "decision": "FAIL",
+  "failure": {
+    "code": "PINNED_SOURCE_MISSING",
+    "detail": "verified AWS-LC 5.5.0 source is unavailable at <repo-root>/build/m8-008/not-an-aws-lc-source"
+  },
+  "run_root": "<repo-root>/build/m8-008/20260909T190100.884382Z-2092805-bf57ef43",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "started_at_utc": "2026-09-09T19:01:00.884871Z",
+  "status": "FAIL",
+  "steps": {},
+  "task_id": "M8-008"
+}

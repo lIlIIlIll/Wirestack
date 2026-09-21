@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/internal/http2",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--filter",
+    "Http2ServerConnectionTest.explicitAbortWakesBlockedRequestBodyAndConverges",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/green-repo",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 5.97652002399991,
+  "status": "PASS",
+  "raw_log": "docs/evidence/M8-008/h2-repeated-abort-20260909T180858811726Z.log"
+}

@@ -1,0 +1,273 @@
+{
+  "artifacts": {
+    "api": "docs/api/generated/api-surface.json",
+    "coverage": "docs/api/generated/coverage.json",
+    "docs": "docs/api/generated/docs.json",
+    "markdown": "docs/api/generated/markdown"
+  },
+  "cjdoc": {
+    "path": "<workspace>/cjdoc/target/release/bin/main",
+    "version": "0.7.2"
+  },
+  "combined": {
+    "apiEntries": 1316,
+    "apiSha256": "e7a9bd876f5df1fb67360e92b0cd187a929d2819791c6c8bc3ce954805be1fa8",
+    "coverage": {
+      "parameters": {
+        "documented": 580,
+        "percent": 100,
+        "total": 580
+      },
+      "symbols": {
+        "documented": 1316,
+        "percent": 100,
+        "total": 1316
+      }
+    },
+    "coverageSha256": "b181e169eba992a979d45191ed846e2b406a170f0d223ae44f3a0a70950073f1",
+    "declarations": 1758,
+    "docsSha256": "1c9627f04668b3c6ff2e2567d762a08b3ee040cc3c84b86f992b9c038e733a1b",
+    "markdownSha256": "988b54088600cbe0a4c63d442b309d59a3f11ecb93cf3db6b5ced6bd4f632518",
+    "package": "combined",
+    "status": "PASS"
+  },
+  "commands": [
+    {
+      "kind": "check",
+      "package": "wirestack",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 620/620 (100%), parameters 243/243 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated <repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/tmp/wirestack-m7-033-kv6nv5km/wirestack/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "wirestack.http",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 925/925 (100%), parameters 402/402 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack.http",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated <repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/tmp/wirestack-m7-033-kv6nv5km/wirestack-http/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "wirestack.tls",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 797/797 (100%), parameters 299/299 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack.tls",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated <repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/tmp/wirestack-m7-033-kv6nv5km/wirestack-tls/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "wirestack.net",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 834/834 (100%), parameters 365/365 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack.net",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated <repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/tmp/wirestack-m7-033-kv6nv5km/wirestack-net/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "combined",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 1316/1316 (100%), parameters 580/580 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "combined",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated <repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/A/tmp/wirestack-m7-033-kv6nv5km/combined/output\n",
+      "stdout_truncated": false
+    }
+  ],
+  "expectedCjdoc": "0.7.2",
+  "generatedAtUtc": "2026-09-09T19:14:59.999053Z",
+  "issues": [],
+  "layers": [
+    {
+      "apiEntries": 620,
+      "apiSha256": "4a50d687892a0a3a2caa30b1e126fa824a172910d17d1daec8dc5e70059c2baa",
+      "coverage": {
+        "parameters": {
+          "documented": 243,
+          "percent": 100,
+          "total": 243
+        },
+        "symbols": {
+          "documented": 620,
+          "percent": 100,
+          "total": 620
+        }
+      },
+      "coverageSha256": "de920450d0b1b632a1400bda023380ab61c0fd3682469246d1672b6cc1854dfa",
+      "declarations": 766,
+      "docsSha256": "31be040d975620acc0e34612a02a066000a1cdad005255edd9629c17bf30f510",
+      "markdownSha256": "3055a19762b460c1f977ca0ed29a1154c7af8cda9d232351ef2bba0e2b409b45",
+      "package": "wirestack",
+      "status": "PASS"
+    },
+    {
+      "apiEntries": 925,
+      "apiSha256": "1e8abca855d02e646f6d3320bcc45f08549037d45f55c2eb637749e6c36fe039",
+      "coverage": {
+        "parameters": {
+          "documented": 402,
+          "percent": 100,
+          "total": 402
+        },
+        "symbols": {
+          "documented": 925,
+          "percent": 100,
+          "total": 925
+        }
+      },
+      "coverageSha256": "05a1987e542f8721778be816b2b76e6d3021383ae7daeb10bf52375b226f03b8",
+      "declarations": 1272,
+      "docsSha256": "105c4cf6110a6e5a8789bb3a01155b93ff68df67c3d593823c907b10c7c9a4ff",
+      "markdownSha256": "b90982339ea708b7f7715aac927745b2581b6855195119690f6e0f5582139392",
+      "package": "wirestack.http",
+      "status": "PASS"
+    },
+    {
+      "apiEntries": 797,
+      "apiSha256": "f200d4535c4d1da2700ceb1d7804bfa9b5ade891ad58a8693b4bd46c0766ed4c",
+      "coverage": {
+        "parameters": {
+          "documented": 299,
+          "percent": 100,
+          "total": 299
+        },
+        "symbols": {
+          "documented": 797,
+          "percent": 100,
+          "total": 797
+        }
+      },
+      "coverageSha256": "e270de4d681534d075cd13310531d7c585a2be462a8bd3edcf8252d58a7468bc",
+      "declarations": 975,
+      "docsSha256": "18a2d0f7ea6613f70fabfbe08caa6ea99673f21ad4b903d74bd8416c30963edd",
+      "markdownSha256": "f11ae8b6080dd249c5c33562a00732f7bbd35c67e423c0bcfc39ae9935b07646",
+      "package": "wirestack.tls",
+      "status": "PASS"
+    },
+    {
+      "apiEntries": 834,
+      "apiSha256": "1ccb1b16bf59bd0402ca59e6a8e4e19261fc9fea667b185a28ea74aa5366d04f",
+      "coverage": {
+        "parameters": {
+          "documented": 365,
+          "percent": 100,
+          "total": 365
+        },
+        "symbols": {
+          "documented": 834,
+          "percent": 100,
+          "total": 834
+        }
+      },
+      "coverageSha256": "f8a28df558150c117252b22820a12915a56b201490238ba91006941d05bd154f",
+      "declarations": 1043,
+      "docsSha256": "34ec90955f4f91bf421d927b5bd77fe186a95657382ce09abec27e011e5738a0",
+      "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe",
+      "package": "wirestack.net",
+      "status": "PASS"
+    }
+  ],
+  "platform": {
+    "libc": "glibc",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "schemaVersion": 1,
+  "sourceSha256": {
+    "src/byte_span.cj": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4",
+    "src/cancellation.cj": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d",
+    "src/common.cj": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3",
+    "src/deadline.cj": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4",
+    "src/hostname_verifier.cj": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989",
+    "src/http/cancellation.cj": "b2b0c2e13a0a4c7821d3df48ee7fb1f3e6f372462c9a32826aa5bc0fa5a7d09f",
+    "src/http/client.cj": "0cc0928ee2bf350dcf70eddb504fee2a3ed7d23e196850dcdbbeaa2a0cc0b8e4",
+    "src/http/error.cj": "d88c54a157e02063ab4048c197631daba3642a9618672841e4b98d3a25d275ad",
+    "src/http/package.cj": "8281ad516f34a4e24b5e596ee4232247d10a2f2d3ce76a66e259e5e28d581af7",
+    "src/http/parity.cj": "9f7b2dfabed880a5ad659140c1bdc7ad96118b613066efb8fccad74892340ef4",
+    "src/http/proxy.cj": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d",
+    "src/http/redirect.cj": "f943c4bc7f54f66015e081d623ea8a1d04218d0a0656cb6e514c797c7f84fc2f",
+    "src/http/resolver.cj": "8c44e5ff6961122d6483c22546a26dab02e8414b88d5e18b954ddcf0b3ff29e4",
+    "src/http/retry.cj": "e889370833f2d5b7df07d4cd13aa3068ab6262e1c2252728cbcc99c788b4199b",
+    "src/http/server.cj": "6f9e288c25255a9dffacb52f5d588bba09de0fbd6bf3c28740ca5fce74aac6e9",
+    "src/http/tls.cj": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62",
+    "src/http_body.cj": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe",
+    "src/http_contract.cj": "fa3da2ecd6b024bdaf4b8bc711cb5d0b5fedaae94449f0e6e386c2b37a2d4203",
+    "src/http_message.cj": "a7211872c36aed49cfd2deac41ac5ed12aae1b4e8987650344cb1fad7417d2df",
+    "src/http_model.cj": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c",
+    "src/http_url.cj": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955",
+    "src/net/package.cj": "88b8e65f9293e0d1190534beca49e78c2f189826406b25c8bb10fe7e2d9605c9",
+    "src/network_error.cj": "2cbbc2e42e2237ed79fed8cfeda3ad11522a2ed15305beac84b37ad2919f720b",
+    "src/network_event.cj": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084",
+    "src/operation_context.cj": "523a1c1efaab2f3e6ba0755386460ea504a2caa8ef1453a18134f950c6e1234d",
+    "src/package.cj": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7",
+    "src/private_key_contract.cj": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84",
+    "src/resolver.cj": "53e8cb60103e5704a7cef52d31881031c26eca58fbf3c5b3a75154da537ee39f",
+    "src/tls/facade.cj": "95459e5275ada67621b65c564cb3dccb236c2da1a8cf47d84e91ea7aca514ed4",
+    "src/tls/identity.cj": "763b6b5f60e3afaed998a21ea7d1ca2f7db8d016255e670cab5fb96c2dfbd714",
+    "src/tls/package.cj": "fe6c700bd1d464427ec13394a26fdefe7730dcda924689fc1030a7d58a7f9b05",
+    "src/tls_contract.cj": "ad4799b647eb97bdbac24f0c603a75bcfcefd853daac1be4492f3b5576af40a5",
+    "src/transport.cj": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033",
+    "src/trust.cj": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+  },
+  "status": "PASS",
+  "taskId": "M7-033"
+}

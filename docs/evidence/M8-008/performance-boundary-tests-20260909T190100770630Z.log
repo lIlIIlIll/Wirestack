@@ -1,0 +1,13 @@
+test_campaign_manifest_is_not_in_generic_gate_runner_namespace (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_campaign_manifest_is_not_in_generic_gate_runner_namespace) ... ok
+test_domain_schema_error_and_atomic_failure_report_are_explicit (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_domain_schema_error_and_atomic_failure_report_are_explicit) ... ok
+test_http2_source_drift_fails_domain (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_http2_source_drift_fails_domain) ... ok
+test_manifest_inventory_and_digest_fail_closed (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_manifest_inventory_and_digest_fail_closed) ... ok
+test_missing_workload_and_under_sampled_raw_tcp_fail (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_missing_workload_and_under_sampled_raw_tcp_fail) ... ok
+test_path_escape_and_non_finite_json_fail_closed (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_path_escape_and_non_finite_json_fail_closed) ... ok
+test_threshold_comparisons_accept_equality_and_reject_misses (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_threshold_comparisons_accept_equality_and_reject_misses) ... ok
+test_toolchain_environment_mismatch_fails_domain (test_m7_024_linux_performance.M7024LinuxPerformanceGateTest.test_toolchain_environment_mismatch_fails_domain) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.181s
+
+OK

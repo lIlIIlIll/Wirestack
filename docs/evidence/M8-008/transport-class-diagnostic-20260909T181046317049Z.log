@@ -1,0 +1,46 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 87271641 ns, RESULT:
+    TCS: StdNetTransportTest, time elapsed: 84608034 ns, RESULT:
+    [ PASSED ] CASE: activityWaitsObserveAdmissionTerminalAndTimeoutWithoutChangingLifecycle (11817213 ns)
+    [ PASSED ] CASE: activityWaitersWakeWhenTransportBecomesTerminal (274122 ns)
+    [ PASSED ] CASE: writeTimeoutIsNeverRetryableWithoutZeroCommitProof (23761 ns)
+    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (245938 ns)
+    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (1936785 ns)
+    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (169047 ns)
+    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (181652 ns)
+    [ PASSED ] CASE: emptyOperationsAreImmediate (119400 ns)
+    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (273006 ns)
+    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1095972 ns)
+    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29284127 ns)
+    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (38027 ns)
+    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (166952 ns)
+    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (30320660 ns)
+    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (1238258 ns)
+    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (1199388 ns)
+    [ PASSED ] CASE: firstCloseOrAbortKeepsItsPeerVisibleTerminalResult (307924 ns)
+    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (175852 ns)
+    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (1213625 ns)
+    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (287215 ns)
+    [ FAILED ] CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof (1217174 ns)
+    Expect Failed: `(error.cause.isSome() == true)`
+       left: false
+      right: true
+
+    STDOUT:
+    STDNET_CANCEL_READ outcome=network-error categoryRead=true phaseTcpRead=true codeCancelled=true retryNever=true cause=false local=true remote=true
+Summary: TOTAL: 52
+    PASSED: 20, SKIPPED: 31, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: StdNetTransportTest, CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 95303335 ns, RESULT:
+TP: wirestack.*, time elapsed: 95267087 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 87271641 ns, RESULT:
+        TCS: StdNetTransportTest, time elapsed: 84608034 ns, RESULT:
+        [ FAILED ] CASE: cancellationWakesBlockedReadAndIsNeverReportedAsEof (1217174 ns)
+Summary: TOTAL: 52
+    PASSED: 20, SKIPPED: 31, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

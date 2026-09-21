@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools/gates/tests",
+    "-p",
+    "test_m7_024_linux_performance.py",
+    "-v"
+  ],
+  "counts": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 8,
+    "skipped": 0,
+    "total": 8
+  },
+  "cwd": "<repo-root>",
+  "elapsed_seconds": 0.313933706995158,
+  "execution_report": "docs/evidence/M8-008/performance-boundary-tests-20260909T190100770630Z.json",
+  "execution_report_sha256": "c11fce69e735f49910201b1bf1b782af12a7aa2ae1b92a6bff816f4e0cb8388e",
+  "exit_code": 0,
+  "raw_log": "docs/evidence/M8-008/performance-boundary-tests-20260909T190100770630Z.log",
+  "raw_log_sha256": "8ca7ef94dc9ca9c1002e050b876214749b817132e5a696fab4d9cad13db3426a",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "timed_out": false
+}

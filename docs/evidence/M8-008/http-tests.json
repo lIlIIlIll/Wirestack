@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/http",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "counts": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 101,
+    "skipped": 0,
+    "total": 101
+  },
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/green-repo",
+  "elapsed_seconds": 48.73737691799761,
+  "execution_report": "docs/evidence/M8-008/http-acceptance-20260909T181838678284Z.json",
+  "execution_report_sha256": "93a34dc136bd495e0efbd8ebba07a5c3144983e1a8ae024e08e0d07b5c83bcdd",
+  "exit_code": 0,
+  "raw_log": "docs/evidence/M8-008/http-acceptance-20260909T181838678284Z.log",
+  "raw_log_sha256": "05cd037b8cca2b2e3c87244a27359c01112f95cd1aa8a393f3882b411546c99b",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "timed_out": false
+}

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_m7_025_linux_supply_chain",
+    "tools.tests.test_m7_030_linux_release",
+    "-v"
+  ],
+  "counts": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 21,
+    "skipped": 0,
+    "total": 21
+  },
+  "cwd": "<repo-root>",
+  "elapsed_seconds": 0.7643625920027262,
+  "execution_report": "docs/evidence/M8-008/canonical-fixtures-final-20260909T184508537805Z.json",
+  "execution_report_sha256": "4d66b03b4e59d6df853af7d31e0e5629a1139fd06814e64f76792d442c4fab34",
+  "exit_code": 0,
+  "raw_log": "docs/evidence/M8-008/canonical-fixtures-final-20260909T184508537805Z.log",
+  "raw_log_sha256": "77c223974ba6dc4f398e67430bf0d466f2593e04d92a3a200b90ad14030717ce",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "timed_out": false
+}

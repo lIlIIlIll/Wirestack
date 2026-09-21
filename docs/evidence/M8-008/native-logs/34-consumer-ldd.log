@@ -1,0 +1,16 @@
+argv=["/usr/bin/ldd", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/installed-consumer/consumer/target/release/bin/main"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/installed-consumer/consumer
+timeout_seconds=60
+returncode=0
+--- stdout ---
+	linux-vdso.so.1 (0x00007fde75fe7000)
+	libcangjie-runtime.so => <home>/cangjie_sdk/daily/cangjie/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so (0x0000000000400000)
+	libboundscheck.so => <home>/cangjie_sdk/daily/cangjie/runtime/lib/linux_x86_64_cjnative/libboundscheck.so (0x00007fde74e00000)
+	libm.so.6 => /usr/lib/libm.so.6 (0x00007fde75e7f000)
+	libc.so.6 => /usr/lib/libc.so.6 (0x00007fde74a00000)
+	libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0x00007fde74600000)
+	/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007fde75fe9000)
+	libgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007fde751d3000)
+	libpthread.so.0 => /usr/lib/libpthread.so.0 (0x00007fde75e78000)
+	libdl.so.2 => /usr/lib/libdl.so.2 (0x00007fde75e73000)
+--- stderr ---

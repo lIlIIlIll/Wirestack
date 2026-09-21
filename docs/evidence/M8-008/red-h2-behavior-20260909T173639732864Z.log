@@ -1,0 +1,516 @@
+[31merror[0m: mismatched types
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:212:9:
+    [36m| [0m
+[36m212[0m [36m| [0m          while (true) {[0m
+    [36m| [0m [31m_[0m[31m________^[0m
+[36m213[0m [36m| [0m[31m|[0m             let count = match (client.readSome(MutableByteSpan(buffer), context: context)) {[0m
+    [36m| [0m[31m|[0m ...[0m
+[36m223[0m [36m| [0m[31m|[0m         }[0m
+    [36m| [0m[31m|[0m[31m_[0m[31m________^ expected 'Class-Http2Frame', found 'Unit'[0m
+    [36m| [0m
+
+[31merror[0m: 'size' is not a member of struct 'MutableByteSpan'
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:375:41:
+    [36m| [0m
+[36m375[0m [36m| [0m            let count = min(destination.size, input.size - offset)[0m
+    [36m| [0m                                        [31m^^^^ [0m
+    [36m| [0m
+
+[31merror[0m: missing argument for parameter list '(Generics-T, Generics-T, Struct-Array<Generics-T>)' in call
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_connection_test.cj:375:28:
+    [36m| [0m
+[36m375[0m [36m| [0m            let count = min(destination.size, input.size - offset)[0m
+    [36m| [0m                           [31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected 3 arguments, found 2[0m
+    [36m| [0m
+[34mnote[0m: found candidate
+   [36m==>[0m (package std.core)comparable.cj:766:13:
+
+[31merror[0m: mismatched types
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:198:50:
+    [36m| [0m
+[36m198[0m [36m| [0m        let registration = terminations.register(exchange)[0m
+    [36m| [0m                                                 [31m^ expected 'Interface-Http2ReaderTerminationListener', found 'Class-Http2ServerExchange'[0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 10.164 */        let registration = terminations.register(exchange)[0m
+    [36m| [0m                                                             [34m^^^^^^^^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m  [36m| [0m[34m|[0m class Http2ServerMappingTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m242[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 10.1 */@Attribute[TEST_GENERATED] class Http2ServerMappingTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 10.2 */    @Attribute[TestCase_138][0m
+    [36m| [0m[34m|[0m /* 10.3 */    func requestHeadMapsPseudoFieldsHostAndContentLength(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.4 */        let head = decodeHttp2ServerRequestHead([HpackHeaderField(":method", "POST"), HpackHeaderField(":scheme", "https"), HpackHeaderField(":authority", "example.com"), HpackHeaderField(":path", "/upload?q=1"), HpackHeaderField("content-length", "3, 3"), HpackHeaderField("x-test", "yes")], Http2StreamId(1u32))[0m
+    [36m| [0m[34m|[0m /* 10.5 */        expectEqual("head.method", "HttpMethod(\"POST\")", head.method, HttpMethod("POST"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.6 */        expectEqual("head.target", "\"/upload?q=1\"", head.target, "/upload?q=1", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.7 */        expectEqual("head.scheme", "Some(\"https\")", head.scheme, Some("https"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.8 */        expectEqual("head.authority", "\"example.com\"", head.authority, "example.com", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.9 */        expectEqual("head.headers.getFirst(\"host\")", "Some(\"example.com\")", head.headers.getFirst("host"), Some("example.com"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.10 */        expectEqual("head.headers.getFirst(\"x-test\")", "Some(\"yes\")", head.headers.getFirst("x-test"), Some("yes"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.11 */        expectEqual("head.expectedContentLength", "Some(3)", head.expectedContentLength, Some(3), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.12 */    }[0m
+    [36m| [0m[34m|[0m /* 10.13 */    [0m
+    [36m| [0m[34m|[0m /* 10.14 */    @Attribute[TestCase_139][0m
+    [36m| [0m[34m|[0m /* 10.15 */    func connectAndOptionsTargetsAreMappedStrictly(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.16 */        let connect = decodeHttp2ServerRequestHead([HpackHeaderField(":method", "CONNECT"), HpackHeaderField(":authority", "example.com:443")], Http2StreamId(1u32))[0m
+    [36m| [0m[34m|[0m /* 10.17 */        expectEqual("connect.target", "\"example.com:443\"", connect.target, "example.com:443", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.18 */        expectEqual("connect.scheme.isNone()", "true", connect.scheme.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.19 */        let options = decodeHttp2ServerRequestHead([HpackHeaderField(":method", "OPTIONS"), HpackHeaderField(":scheme", "https"), HpackHeaderField(":authority", "example.com"), HpackHeaderField(":path", "*")], Http2StreamId(3u32))[0m
+    [36m| [0m[34m|[0m /* 10.20 */        expectEqual("options.target", "\"*\"", options.target, "*", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.21 */        expectServerProtocol({ =>[0m
+    [36m| [0m[34m|[0m /* 10.22 */            let _ = decodeHttp2ServerRequestHead([HpackHeaderField(":method", "CONNECT"), HpackHeaderField(":authority", "example.com")], Http2StreamId(5u32))[0m
+    [36m| [0m[34m|[0m /* 10.23 */        })[0m
+    [36m| [0m[34m|[0m /* 10.24 */    }[0m
+    [36m| [0m[34m|[0m /* 10.25 */    [0m
+    [36m| [0m[34m|[0m /* 10.26 */    @Attribute[TestCase_140][0m
+    [36m| [0m[34m|[0m /* 10.27 */    func requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.28 */        for(fields in[[HpackHeaderField("x", "1"), HpackHeaderField(":method", "GET")], regularRequestFields(extra: HpackHeaderField("X-Bad", "1")), regularRequestFields(extra: HpackHeaderField("connection", "close")), regularRequestFields(extra: HpackHeaderField("te", "gzip")), regularRequestFields(extra: HpackHeaderField("host", "other.test"))]) {[0m
+    [36m| [0m[34m|[0m /* 10.29 */            expectServerProtocol({ =>[0m
+    [36m| [0m[34m|[0m /* 10.30 */                let _ = decodeHttp2ServerRequestHead(fields, Http2StreamId(1u32))[0m
+    [36m| [0m[34m|[0m /* 10.31 */            })[0m
+    [36m| [0m[34m|[0m /* 10.32 */        }[0m
+    [36m| [0m[34m|[0m /* 10.33 */    }[0m
+    [36m| [0m[34m|[0m /* 10.34 */    [0m
+    [36m| [0m[34m|[0m /* 10.35 */    @Attribute[TestCase_141][0m
+    [36m| [0m[34m|[0m /* 10.36 */    func paddedDataReturnsAllFlowCreditAndPublishesTrailers(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.37 */        let fixture = ServerFixture(http2Limits: Http2Limits(maxPendingWrites: 2u32))[0m
+    [36m| [0m[34m|[0m /* 10.38 */        let exchange = fixture.open(Some(3))[0m
+    [36m| [0m[34m|[0m /* 10.39 */        exchange.acceptData(serverData([2u8, b'a', b'b', b'c', 0u8, 0u8], padded: true))[0m
+    [36m| [0m[34m|[0m /* 10.40 */        let buffer = Array < Byte >(2, repeat: 0)[0m
+    [36m| [0m[34m|[0m /* 10.41 */        expectEqual("exchange.request.body.read(buffer)", "2", exchange.request.body.read(buffer), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.42 */        expectEqual("buffer", "[b\'a\', b\'b\']", buffer,[b'a', b'b'], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.43 */        expectEqual("exchange.request.body.read(buffer)", "1", exchange.request.body.read(buffer), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.44 */        expectEqual("buffer[0]", "b\'c\'", buffer[0], b'c', isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.45 */        exchange.acceptTrailers([HpackHeaderField("digest", "done")], true)[0m
+    [36m| [0m[34m|[0m /* 10.46 */        expectEqual("exchange.request.body.trailer.getOrThrow().headers.getFirst(\"digest\")", "Some(\"done\")", exchange.request.body.trailer.getOrThrow().headers.getFirst("digest"), Some("done"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.47 */        expectEqual("fixture.sink.totalCredit()", "0", fixture.sink.totalCredit(), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.48 */        expectEqual("fixture.registry.activeCount", "1", fixture.registry.activeCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.49 */        exchange.finishLocal()[0m
+    [36m| [0m[34m|[0m /* 10.50 */        expectEqual("fixture.sink.totalCredit()", "6", fixture.sink.totalCredit(), 6, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.51 */        expectEqual("fixture.registry.activeCount", "0", fixture.registry.activeCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.52 */        expectEqual("fixture.flow.activeStreamCount", "0", fixture.flow.activeStreamCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.53 */    }[0m
+    [36m| [0m[34m|[0m /* 10.54 */    [0m
+    [36m| [0m[34m|[0m /* 10.55 */    @Attribute[TestCase_142][0m
+    [36m| [0m[34m|[0m /* 10.56 */    func requestQueueIsBoundedBeforeFlowAccountingMutates(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.57 */        let fixture = ServerFixture(http2Limits: Http2Limits(maxPendingWrites: 2u32))[0m
+    [36m| [0m[34m|[0m /* 10.58 */        let exchange = fixture.open(None < Int64 >)[0m
+    [36m| [0m[34m|[0m /* 10.59 */        exchange.acceptData(serverData([1u8]))[0m
+    [36m| [0m[34m|[0m /* 10.60 */        exchange.acceptData(serverData([2u8]))[0m
+    [36m| [0m[34m|[0m /* 10.61 */        expectServerProtocol({ =>[0m
+    [36m| [0m[34m|[0m /* 10.62 */            exchange.acceptData(serverData([3u8]))[0m
+    [36m| [0m[34m|[0m /* 10.63 */        })[0m
+    [36m| [0m[34m|[0m /* 10.64 */        expectEqual("fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes", "2", fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.65 */        exchange.request.close()[0m
+    [36m| [0m[34m|[0m /* 10.66 */        expectEqual("fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes", "0", fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.67 */        expectEqual("fixture.sink.totalCredit()", "4", fixture.sink.totalCredit(), 4, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.68 */    }[0m
+    [36m| [0m[34m|[0m /* 10.69 */    [0m
+    [36m| [0m[34m|[0m /* 10.70 */    @Attribute[TestCase_143][0m
+    [36m| [0m[34m|[0m /* 10.71 */    func terminalLengthMismatchDoesNotConsumeFlowWindow(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.72 */        let fixture = ServerFixture()[0m
+    [36m| [0m[34m|[0m /* 10.73 */        let exchange = fixture.open(Some(2))[0m
+    [36m| [0m[34m|[0m /* 10.74 */        expectServerProtocol({ =>[0m
+    [36m| [0m[34m|[0m /* 10.75 */            exchange.acceptData(serverData([1u8], endStream: true))[0m
+    [36m| [0m[34m|[0m /* 10.76 */        })[0m
+    [36m| [0m[34m|[0m /* 10.77 */        expectEqual("fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes", "0", fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.78 */        expectEqual("fixture.flow.snapshot(Http2StreamId(1u32)).receiveWindow", "65535", fixture.flow.snapshot(Http2StreamId(1u32)).receiveWindow, 65535, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.79 */    }[0m
+    [36m| [0m[34m|[0m /* 10.80 */    [0m
+    [36m| [0m[34m|[0m /* 10.81 */    @Attribute[TestCase_144][0m
+    [36m| [0m[34m|[0m /* 10.82 */    func responseHeadersBodyFlowAndTrailersMapInOrder(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.83 */        let flow = Http2FlowController()[0m
+    [36m| [0m[34m|[0m /* 10.84 */        let id = Http2StreamId(1u32)[0m
+    [36m| [0m[34m|[0m /* 10.85 */        flow.openStream(id)[0m
+    [36m| [0m[34m|[0m /* 10.86 */        let response = HttpResponse(200, "OK", ResponseBody(RequestBody.string("abc").open()), headers: HttpHeaders.builder().add("X-Test", "yes").add("Set-Cookie", "secret").build())[0m
+    [36m| [0m[34m|[0m /* 10.87 */        let trailer = HttpTrailer(headers: HttpHeaders.builder().add("Digest", "done").build())[0m
+    [36m| [0m[34m|[0m /* 10.88 */        let plan = mapHttp2ServerResponse(id, HttpMethod("GET"), Http2ServerResponse(response, trailer: trailer), flow)[0m
+    [36m| [0m[34m|[0m /* 10.89 */        expectServerField(plan.initialHeaders, 0, ":status", "200")[0m
+    [36m| [0m[34m|[0m /* 10.90 */        expectServerField(plan.initialHeaders, 1, "x-test", "yes")[0m
+    [36m| [0m[34m|[0m /* 10.91 */        expectServerField(plan.initialHeaders, 2, "set-cookie", "secret")[0m
+    [36m| [0m[34m|[0m /* 10.92 */        expectServerField(plan.initialHeaders, 3, "content-length", "3")[0m
+    [36m| [0m[34m|[0m /* 10.93 */        expectEqual("isNeverIndexedServer(plan.initialHeaders[2].mode)", "true", isNeverIndexedServer(plan.initialHeaders[2].mode), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.94 */        expectEqual("! plan.endStreamOnHeaders", "true", ! plan.endStreamOnHeaders, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.95 */        let body = plan.openBody()[0m
+    [36m| [0m[34m|[0m /* 10.96 */        let data = body.next()[0m
+    [36m| [0m[34m|[0m /* 10.97 */        expectEqual("isServerData(data.kind)", "true", isServerData(data.kind), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.98 */        expectEqual("data.frame.getOrThrow().payload", "\"abc\".toArray()", data.frame.getOrThrow().payload, "abc".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.99 */        expectIllegalServer({ =>[0m
+    [36m| [0m[34m|[0m /* 10.100 */            let _ = body.next()[0m
+    [36m| [0m[34m|[0m /* 10.101 */        })[0m
+    [36m| [0m[34m|[0m /* 10.102 */        expectEqual("data.beginData()", "true", data.beginData(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.103 */        let terminal = body.next()[0m
+    [36m| [0m[34m|[0m /* 10.104 */        expectEqual("isServerTrailers(terminal.kind)", "true", isServerTrailers(terminal.kind), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.105 */        expectServerField(terminal.trailerFields, 0, "digest", "done")[0m
+    [36m| [0m[34m|[0m /* 10.106 */        expectEqual("body.isClosed()", "true", body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.107 */        expectEqual("flow.snapshot(id).sendWindow", "65532", flow.snapshot(id).sendWindow, 65532, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.108 */    }[0m
+    [36m| [0m[34m|[0m /* 10.109 */    [0m
+    [36m| [0m[34m|[0m /* 10.110 */    @Attribute[TestCase_145][0m
+    [36m| [0m[34m|[0m /* 10.111 */    func streamingResponseMayExceedTheConfiguredRequestBodyBound(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.112 */        let flow = Http2FlowController()[0m
+    [36m| [0m[34m|[0m /* 10.113 */        let id = Http2StreamId(1u32)[0m
+    [36m| [0m[34m|[0m /* 10.114 */        flow.openStream(id)[0m
+    [36m| [0m[34m|[0m /* 10.115 */        let response = HttpResponse(200, "OK", ResponseBody(ServerStreamingSegments("abcd".toArray(), 2)))[0m
+    [36m| [0m[34m|[0m /* 10.116 */        let plan = mapHttp2ServerResponse(id, HttpMethod("GET"), Http2ServerResponse(response), flow, limits: HttpLimits(maxBodyBytes: 2))[0m
+    [36m| [0m[34m|[0m /* 10.117 */        let body = plan.openBody()[0m
+    [36m| [0m[34m|[0m /* 10.118 */        let first = body.next()[0m
+    [36m| [0m[34m|[0m /* 10.119 */        expectEqual("first.frame.getOrThrow().payload", "\"ab\".toArray()", first.frame.getOrThrow().payload, "ab".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.120 */        expectEqual("first.beginData()", "true", first.beginData(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.121 */        let second = body.next()[0m
+    [36m| [0m[34m|[0m /* 10.122 */        expectEqual("second.frame.getOrThrow().payload", "\"cd\".toArray()", second.frame.getOrThrow().payload, "cd".toArray(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.123 */        expectEqual("second.beginData()", "true", second.beginData(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.124 */        expectEqual("isServerEndData(body.next().kind)", "true", isServerEndData(body.next().kind), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.125 */    }[0m
+    [36m| [0m[34m|[0m /* 10.126 */    [0m
+    [36m| [0m[34m|[0m /* 10.127 */    @Attribute[TestCase_146][0m
+    [36m| [0m[34m|[0m /* 10.128 */    func responseRulesCloseBodiesOnEveryTerminalOrFailurePath(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.129 */        let flow = Http2FlowController()[0m
+    [36m| [0m[34m|[0m /* 10.130 */        let id = Http2StreamId(1u32)[0m
+    [36m| [0m[34m|[0m /* 10.131 */        flow.openStream(id)[0m
+    [36m| [0m[34m|[0m /* 10.132 */        let headResponse = HttpResponse(200, "OK", ResponseBody(RequestBody.string("ignored").open()))[0m
+    [36m| [0m[34m|[0m /* 10.133 */        let head = mapHttp2ServerResponse(id, HttpMethod("HEAD"), Http2ServerResponse(headResponse), flow)[0m
+    [36m| [0m[34m|[0m /* 10.134 */        expectEqual("head.endStreamOnHeaders", "true", head.endStreamOnHeaders, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.135 */        expectEqual("headResponse.isClosed()", "true", headResponse.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.136 */        let invalid = HttpResponse(200, "OK", ResponseBody.empty(), headers: HttpHeaders.builder().add("connection", "close").build())[0m
+    [36m| [0m[34m|[0m /* 10.137 */        expectServerMessage(Http2MessageErrorCode.ForbiddenConnectionHeader, { =>[0m
+    [36m| [0m[34m|[0m /* 10.138 */            let _ = mapHttp2ServerResponse(id, HttpMethod("GET"), Http2ServerResponse(invalid), flow)[0m
+    [36m| [0m[34m|[0m /* 10.139 */        })[0m
+    [36m| [0m[34m|[0m /* 10.140 */        expectEqual("invalid.isClosed()", "true", invalid.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.141 */    }[0m
+    [36m| [0m[34m|[0m /* 10.142 */    [0m
+    [36m| [0m[34m|[0m /* 10.143 */    @Attribute[TestCase_147][0m
+    [36m| [0m[34m|[0m /* 10.144 */    func handlerRunsOnceAndReleasesRequestOwnership(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.145 */        let fixture = ServerFixture()[0m
+    [36m| [0m[34m|[0m /* 10.146 */        let exchange = Http2ServerExchange.open(Http2StreamId(1u32), regularRequestFields(), true, fixture.registry, fixture.flow, fixture.sink)[0m
+    [36m| [0m[34m|[0m /* 10.147 */        let plan = exchange.start(EmptyServerHandler()).get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 10.148 */        expectEqual("exchange.request.isClosed()", "true", exchange.request.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.149 */        expectEqual("! plan.endStreamOnHeaders", "true", ! plan.endStreamOnHeaders, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.150 */        expectIllegalServer({ =>[0m
+    [36m| [0m[34m|[0m /* 10.151 */            let _ = exchange.start(EmptyServerHandler())[0m
+    [36m| [0m[34m|[0m /* 10.152 */        })[0m
+    [36m| [0m[34m|[0m /* 10.153 */        plan.close()[0m
+    [36m| [0m[34m|[0m /* 10.154 */        exchange.finishLocal()[0m
+    [36m| [0m[34m|[0m /* 10.155 */        expectEqual("fixture.registry.activeCount", "0", fixture.registry.activeCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.156 */        expectEqual("fixture.flow.activeStreamCount", "0", fixture.flow.activeStreamCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.157 */    }[0m
+    [36m| [0m[34m|[0m /* 10.158 */    [0m
+    [36m| [0m[34m|[0m /* 10.159 */    @Attribute[TestCase_148][0m
+    [36m| [0m[34m|[0m /* 10.160 */    func readerTerminationWakesBlockedRequestBodyWithConnectionScope(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.161 */        let fixture = ServerFixture()[0m
+    [36m| [0m[34m|[0m /* 10.162 */        let exchange = fixture.open(None < Int64 >)[0m
+    [36m| [0m[34m|[0m /* 10.163 */        let terminations = Http2ReaderTerminationRegistry(1u32)[0m
+    [36m| [0m[34m|[0m /* 10.164 */        let registration = terminations.register(exchange)[0m
+    [36m| [0m[34m|[0m /* 10.165 */        let waiting = spawn { classifyServerBodyFailure(exchange.request.body)[0m
+    [36m| [0m[34m|[0m /* 10.166 */        }[0m
+    [36m| [0m[34m|[0m /* 10.167 */        let completion = Http2ConnectionCompletion(Http2ErrorCode.InternalError, "scripted reader termination")[0m
+    [36m| [0m[34m|[0m /* 10.168 */        expectEqual("terminations.terminate(completion)", "true", terminations.terminate(completion), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.169 */        expectEqual("waiting.get(Duration.second)", "\"connection\"", waiting.get(Duration.second), "connection", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.170 */        expectEqual("terminations.activeCount", "0", terminations.activeCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.171 */        registration.unregister()[0m
+    [36m| [0m[34m|[0m /* 10.172 */        registration.unregister()[0m
+    [36m| [0m[34m|[0m /* 10.173 */    }[0m
+    [36m| [0m[34m|[0m /* 10.174 */    [0m
+    [36m| [0m[34m|[0m /* 10.175 */    @Attribute[TestCase_149][0m
+    [36m| [0m[34m|[0m /* 10.176 */    func streamResetAndReaderTerminationRetainDistinctFailureScopes(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.177 */        let resetFixture = ServerFixture()[0m
+    [36m| [0m[34m|[0m /* 10.178 */        let resetExchange = resetFixture.open(None < Int64 >)[0m
+    [36m| [0m[34m|[0m /* 10.179 */        resetExchange.streamReset(Http2StreamResetEvent(Http2StreamId(1u32), Http2ErrorCode.Cancel, "scripted stream reset", true))[0m
+    [36m| [0m[34m|[0m /* 10.180 */        expectEqual("classifyServerBodyFailure(resetExchange.request.body)", "\"stream\"", classifyServerBodyFailure(resetExchange.request.body), "stream", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.181 */        let connectionFixture = ServerFixture()[0m
+    [36m| [0m[34m|[0m /* 10.182 */        let connectionExchange = connectionFixture.open(None < Int64 >)[0m
+    [36m| [0m[34m|[0m /* 10.183 */        connectionExchange.readerTerminated(Http2ConnectionCompletion(Http2ErrorCode.InternalError, "scripted connection failure"))[0m
+    [36m| [0m[34m|[0m /* 10.184 */        expectEqual("classifyServerBodyFailure(connectionExchange.request.body)", "\"connection\"", classifyServerBodyFailure(connectionExchange.request.body), "connection", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.185 */    }[0m
+    [36m| [0m[34m|[0m /* 10.186 */    [0m
+    [36m| [0m[34m|[0m /* 10.187 */    @Attribute[TestCase_150][0m
+    [36m| [0m[34m|[0m /* 10.188 */    func originalRequestContextWinsOverRetainedConnectionTermination(): Unit {[0m
+    [36m| [0m[34m|[0m /* 10.189 */        let source = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 10.190 */        let fixture = ServerFixture()[0m
+    [36m| [0m[34m|[0m /* 10.191 */        let exchange = fixture.openWithContext(None < Int64 >, OperationContext(cancellation: source.token))[0m
+    [36m| [0m[34m|[0m /* 10.192 */        exchange.readerTerminated(Http2ConnectionCompletion(Http2ErrorCode.InternalError, "scripted connection failure"))[0m
+    [36m| [0m[34m|[0m /* 10.193 */        let _ = source.cancel()[0m
+    [36m| [0m[34m|[0m /* 10.194 */        expectEqual("classifyServerBodyFailure(exchange.request.body)", "\"cancelled\"", classifyServerBodyFailure(exchange.request.body), "cancelled", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 10.195 */    }[0m
+    [36m| [0m[34m|[0m /* 10.196 */    [0m
+    [36m| [0m[34m|[0m /* 10.197 */    init() {[0m
+    [36m| [0m[34m|[0m /* 10.198 */    }[0m
+    [36m| [0m[34m|[0m /* 10.199 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 10.200 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.201 */        [0m
+    [36m| [0m[34m|[0m /* 10.202 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 10.203 */    }[0m
+    [36m| [0m[34m|[0m /* 10.204 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 10.205 */        [0m
+    [36m| [0m[34m|[0m /* 10.206 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 10.207 */        let suiteBuilder = TestSuite.builder("Http2ServerMappingTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 10.208 */        [0m
+    [36m| [0m[34m|[0m /* 10.209 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.210 */            [0m
+    [36m| [0m[34m|[0m /* 10.211 */            let requestHeadMapsPseudoFieldsHostAndContentLengthTestFunc = { => requestHeadMapsPseudoFieldsHostAndContentLength();() }[0m
+    [36m| [0m[34m|[0m /* 10.212 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.213 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.214 */            "requestHeadMapsPseudoFieldsHostAndContentLength",[0m
+    [36m| [0m[34m|[0m /* 10.215 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.216 */            body: requestHeadMapsPseudoFieldsHostAndContentLengthTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.217 */            )[0m
+    [36m| [0m[34m|[0m /* 10.218 */            )[0m
+    [36m| [0m[34m|[0m /* 10.219 */            [0m
+    [36m| [0m[34m|[0m /* 10.220 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.221 */        [0m
+    [36m| [0m[34m|[0m /* 10.222 */        [0m
+    [36m| [0m[34m|[0m /* 10.223 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.224 */            [0m
+    [36m| [0m[34m|[0m /* 10.225 */            let connectAndOptionsTargetsAreMappedStrictlyTestFunc = { => connectAndOptionsTargetsAreMappedStrictly();() }[0m
+    [36m| [0m[34m|[0m /* 10.226 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.227 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.228 */            "connectAndOptionsTargetsAreMappedStrictly",[0m
+    [36m| [0m[34m|[0m /* 10.229 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.230 */            body: connectAndOptionsTargetsAreMappedStrictlyTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.231 */            )[0m
+    [36m| [0m[34m|[0m /* 10.232 */            )[0m
+    [36m| [0m[34m|[0m /* 10.233 */            [0m
+    [36m| [0m[34m|[0m /* 10.234 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.235 */        [0m
+    [36m| [0m[34m|[0m /* 10.236 */        [0m
+    [36m| [0m[34m|[0m /* 10.237 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.238 */            [0m
+    [36m| [0m[34m|[0m /* 10.239 */            let requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguityTestFunc = { => requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity();() }[0m
+    [36m| [0m[34m|[0m /* 10.240 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.241 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.242 */            "requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity",[0m
+    [36m| [0m[34m|[0m /* 10.243 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.244 */            body: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguityTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.245 */            )[0m
+    [36m| [0m[34m|[0m /* 10.246 */            )[0m
+    [36m| [0m[34m|[0m /* 10.247 */            [0m
+    [36m| [0m[34m|[0m /* 10.248 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.249 */        [0m
+    [36m| [0m[34m|[0m /* 10.250 */        [0m
+    [36m| [0m[34m|[0m /* 10.251 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.252 */            [0m
+    [36m| [0m[34m|[0m /* 10.253 */            let paddedDataReturnsAllFlowCreditAndPublishesTrailersTestFunc = { => paddedDataReturnsAllFlowCreditAndPublishesTrailers();() }[0m
+    [36m| [0m[34m|[0m /* 10.254 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.255 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.256 */            "paddedDataReturnsAllFlowCreditAndPublishesTrailers",[0m
+    [36m| [0m[34m|[0m /* 10.257 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.258 */            body: paddedDataReturnsAllFlowCreditAndPublishesTrailersTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.259 */            )[0m
+    [36m| [0m[34m|[0m /* 10.260 */            )[0m
+    [36m| [0m[34m|[0m /* 10.261 */            [0m
+    [36m| [0m[34m|[0m /* 10.262 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.263 */        [0m
+    [36m| [0m[34m|[0m /* 10.264 */        [0m
+    [36m| [0m[34m|[0m /* 10.265 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.266 */            [0m
+    [36m| [0m[34m|[0m /* 10.267 */            let requestQueueIsBoundedBeforeFlowAccountingMutatesTestFunc = { => requestQueueIsBoundedBeforeFlowAccountingMutates();() }[0m
+    [36m| [0m[34m|[0m /* 10.268 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.269 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.270 */            "requestQueueIsBoundedBeforeFlowAccountingMutates",[0m
+    [36m| [0m[34m|[0m /* 10.271 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.272 */            body: requestQueueIsBoundedBeforeFlowAccountingMutatesTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.273 */            )[0m
+    [36m| [0m[34m|[0m /* 10.274 */            )[0m
+    [36m| [0m[34m|[0m /* 10.275 */            [0m
+    [36m| [0m[34m|[0m /* 10.276 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.277 */        [0m
+    [36m| [0m[34m|[0m /* 10.278 */        [0m
+    [36m| [0m[34m|[0m /* 10.279 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.280 */            [0m
+    [36m| [0m[34m|[0m /* 10.281 */            let terminalLengthMismatchDoesNotConsumeFlowWindowTestFunc = { => terminalLengthMismatchDoesNotConsumeFlowWindow();() }[0m
+    [36m| [0m[34m|[0m /* 10.282 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.283 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.284 */            "terminalLengthMismatchDoesNotConsumeFlowWindow",[0m
+    [36m| [0m[34m|[0m /* 10.285 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.286 */            body: terminalLengthMismatchDoesNotConsumeFlowWindowTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.287 */            )[0m
+    [36m| [0m[34m|[0m /* 10.288 */            )[0m
+    [36m| [0m[34m|[0m /* 10.289 */            [0m
+    [36m| [0m[34m|[0m /* 10.290 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.291 */        [0m
+    [36m| [0m[34m|[0m /* 10.292 */        [0m
+    [36m| [0m[34m|[0m /* 10.293 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.294 */            [0m
+    [36m| [0m[34m|[0m /* 10.295 */            let responseHeadersBodyFlowAndTrailersMapInOrderTestFunc = { => responseHeadersBodyFlowAndTrailersMapInOrder();() }[0m
+    [36m| [0m[34m|[0m /* 10.296 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.297 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.298 */            "responseHeadersBodyFlowAndTrailersMapInOrder",[0m
+    [36m| [0m[34m|[0m /* 10.299 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.300 */            body: responseHeadersBodyFlowAndTrailersMapInOrderTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.301 */            )[0m
+    [36m| [0m[34m|[0m /* 10.302 */            )[0m
+    [36m| [0m[34m|[0m /* 10.303 */            [0m
+    [36m| [0m[34m|[0m /* 10.304 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.305 */        [0m
+    [36m| [0m[34m|[0m /* 10.306 */        [0m
+    [36m| [0m[34m|[0m /* 10.307 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.308 */            [0m
+    [36m| [0m[34m|[0m /* 10.309 */            let streamingResponseMayExceedTheConfiguredRequestBodyBoundTestFunc = { => streamingResponseMayExceedTheConfiguredRequestBodyBound();() }[0m
+    [36m| [0m[34m|[0m /* 10.310 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.311 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.312 */            "streamingResponseMayExceedTheConfiguredRequestBodyBound",[0m
+    [36m| [0m[34m|[0m /* 10.313 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.314 */            body: streamingResponseMayExceedTheConfiguredRequestBodyBoundTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.315 */            )[0m
+    [36m| [0m[34m|[0m /* 10.316 */            )[0m
+    [36m| [0m[34m|[0m /* 10.317 */            [0m
+    [36m| [0m[34m|[0m /* 10.318 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.319 */        [0m
+    [36m| [0m[34m|[0m /* 10.320 */        [0m
+    [36m| [0m[34m|[0m /* 10.321 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.322 */            [0m
+    [36m| [0m[34m|[0m /* 10.323 */            let responseRulesCloseBodiesOnEveryTerminalOrFailurePathTestFunc = { => responseRulesCloseBodiesOnEveryTerminalOrFailurePath();() }[0m
+    [36m| [0m[34m|[0m /* 10.324 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.325 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.326 */            "responseRulesCloseBodiesOnEveryTerminalOrFailurePath",[0m
+    [36m| [0m[34m|[0m /* 10.327 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.328 */            body: responseRulesCloseBodiesOnEveryTerminalOrFailurePathTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.329 */            )[0m
+    [36m| [0m[34m|[0m /* 10.330 */            )[0m
+    [36m| [0m[34m|[0m /* 10.331 */            [0m
+    [36m| [0m[34m|[0m /* 10.332 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.333 */        [0m
+    [36m| [0m[34m|[0m /* 10.334 */        [0m
+    [36m| [0m[34m|[0m /* 10.335 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.336 */            [0m
+    [36m| [0m[34m|[0m /* 10.337 */            let handlerRunsOnceAndReleasesRequestOwnershipTestFunc = { => handlerRunsOnceAndReleasesRequestOwnership();() }[0m
+    [36m| [0m[34m|[0m /* 10.338 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.339 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.340 */            "handlerRunsOnceAndReleasesRequestOwnership",[0m
+    [36m| [0m[34m|[0m /* 10.341 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.342 */            body: handlerRunsOnceAndReleasesRequestOwnershipTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.343 */            )[0m
+    [36m| [0m[34m|[0m /* 10.344 */            )[0m
+    [36m| [0m[34m|[0m /* 10.345 */            [0m
+    [36m| [0m[34m|[0m /* 10.346 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.347 */        [0m
+    [36m| [0m[34m|[0m /* 10.348 */        [0m
+    [36m| [0m[34m|[0m /* 10.349 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.350 */            [0m
+    [36m| [0m[34m|[0m /* 10.351 */            let readerTerminationWakesBlockedRequestBodyWithConnectionScopeTestFunc = { => readerTerminationWakesBlockedRequestBodyWithConnectionScope();() }[0m
+    [36m| [0m[34m|[0m /* 10.352 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.353 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.354 */            "readerTerminationWakesBlockedRequestBodyWithConnectionScope",[0m
+    [36m| [0m[34m|[0m /* 10.355 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.356 */            body: readerTerminationWakesBlockedRequestBodyWithConnectionScopeTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.357 */            )[0m
+    [36m| [0m[34m|[0m /* 10.358 */            )[0m
+    [36m| [0m[34m|[0m /* 10.359 */            [0m
+    [36m| [0m[34m|[0m /* 10.360 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.361 */        [0m
+    [36m| [0m[34m|[0m /* 10.362 */        [0m
+    [36m| [0m[34m|[0m /* 10.363 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.364 */            [0m
+    [36m| [0m[34m|[0m /* 10.365 */            let streamResetAndReaderTerminationRetainDistinctFailureScopesTestFunc = { => streamResetAndReaderTerminationRetainDistinctFailureScopes();() }[0m
+    [36m| [0m[34m|[0m /* 10.366 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.367 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.368 */            "streamResetAndReaderTerminationRetainDistinctFailureScopes",[0m
+    [36m| [0m[34m|[0m /* 10.369 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.370 */            body: streamResetAndReaderTerminationRetainDistinctFailureScopesTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.371 */            )[0m
+    [36m| [0m[34m|[0m /* 10.372 */            )[0m
+    [36m| [0m[34m|[0m /* 10.373 */            [0m
+    [36m| [0m[34m|[0m /* 10.374 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.375 */        [0m
+    [36m| [0m[34m|[0m /* 10.376 */        [0m
+    [36m| [0m[34m|[0m /* 10.377 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 10.378 */            [0m
+    [36m| [0m[34m|[0m /* 10.379 */            let originalRequestContextWinsOverRetainedConnectionTerminationTestFunc = { => originalRequestContextWinsOverRetainedConnectionTermination();() }[0m
+    [36m| [0m[34m|[0m /* 10.380 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 10.381 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 10.382 */            "originalRequestContextWinsOverRetainedConnectionTermination",[0m
+    [36m| [0m[34m|[0m /* 10.383 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 10.384 */            body: originalRequestContextWinsOverRetainedConnectionTerminationTestFunc[0m
+    [36m| [0m[34m|[0m /* 10.385 */            )[0m
+    [36m| [0m[34m|[0m /* 10.386 */            )[0m
+    [36m| [0m[34m|[0m /* 10.387 */            [0m
+    [36m| [0m[34m|[0m /* 10.388 */        }()[0m
+    [36m| [0m[34m|[0m /* 10.389 */        [0m
+    [36m| [0m[34m|[0m /* 10.390 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 10.391 */    }[0m
+    [36m| [0m[34m|[0m /* 10.392 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 10.393 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 10.394 */    }[0m
+    [36m| [0m[34m|[0m /* 10.395 */}[0m
+    [36m| [0m[34m|[0m /* 10.396 */[0m
+    [36m| [0m[34m|[0m /* 10.397 */[0m
+    [36m| [0m[34m|[0m /* 10.398 */interface TestPackageExtension_Http2ServerMappingTest {[0m
+    [36m| [0m[34m|[0m /* 10.399 */    func registerHttp2ServerMappingTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 10.400 */}[0m
+    [36m| [0m[34m|[0m /* 10.401 */extend TestPackage <: TestPackageExtension_Http2ServerMappingTest {[0m
+    [36m| [0m[34m|[0m /* 10.402 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 10.403 */    public func registerHttp2ServerMappingTest() {[0m
+    [36m| [0m[34m|[0m /* 10.404 */        registerSuite({ => Http2ServerMappingTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 10.405 */    }[0m
+    [36m| [0m[34m|[0m /* 10.406 */}[0m
+    [36m| [0m[34m|[0m /* 10.407 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+
+[31merror[0m: 'readerTerminated' is not a member of class 'Http2ServerExchange'
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:223:28:
+    [36m| [0m
+[36m223[0m [36m| [0m        connectionExchange.readerTerminated(Http2ConnectionCompletion([0m
+    [36m| [0m                           [31m^ [0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 10.183 */        connectionExchange.readerTerminated(Http2ConnectionCompletion(Http2ErrorCode.InternalError, "scripted connection failure"))[0m
+    [36m| [0m                                       [34m^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m  [36m| [0m[34m|[0m class Http2ServerMappingTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m242[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[31merror[0m: 'readerTerminated' is not a member of class 'Http2ServerExchange'
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:236:18:
+    [36m| [0m
+[36m236[0m [36m| [0m        exchange.readerTerminated(Http2ConnectionCompletion([0m
+    [36m| [0m                 [31m^ [0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 10.192 */        exchange.readerTerminated(Http2ConnectionCompletion(Http2ErrorCode.InternalError, "scripted connection failure"))[0m
+    [36m| [0m                             [34m^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/server_mapping_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m11[0m  [36m| [0m[34m|[0m class Http2ServerMappingTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m242[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+6 errors generated, 6 errors printed.
+1 warning generated, 1 warning printed.
+Error: cjpm test failed

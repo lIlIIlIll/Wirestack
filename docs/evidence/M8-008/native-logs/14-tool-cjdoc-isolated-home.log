@@ -1,0 +1,7 @@
+argv=["<workspace>/cjdoc/target/release/bin/main", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+cjdoc 0.7.2
+--- stderr ---

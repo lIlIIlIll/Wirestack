@@ -1,0 +1,63 @@
+test_atomic_report_failure_preserves_previous_bytes (test_m7_030_linux_release.M7030LinuxReleaseTest.test_atomic_report_failure_preserves_previous_bytes) ... ok
+test_clean_consumer_and_malicious_archives (test_m7_030_linux_release.M7030LinuxReleaseTest.test_clean_consumer_and_malicious_archives) ... ERROR
+test_current_inputs_build_strict_deterministic_manifest (test_m7_030_linux_release.M7030LinuxReleaseTest.test_current_inputs_build_strict_deterministic_manifest) ... ERROR
+test_hosted_report_binds_three_verified_subjects (test_m7_030_linux_release.M7030LinuxReleaseTest.test_hosted_report_binds_three_verified_subjects) ... ok
+test_hosted_report_cli_returns_structured_invalid_utf8_failure (test_m7_030_linux_release.M7030LinuxReleaseTest.test_hosted_report_cli_returns_structured_invalid_utf8_failure) ... ok
+test_hosted_text_subject_separates_canonical_and_signed_payload_digests (test_m7_030_linux_release.M7030LinuxReleaseTest.test_hosted_text_subject_separates_canonical_and_signed_payload_digests) ... ok
+test_json_duplicates_unknown_schema_paths_and_subjects_are_rejected (test_m7_030_linux_release.M7030LinuxReleaseTest.test_json_duplicates_unknown_schema_paths_and_subjects_are_rejected) ... ok
+test_key_type_identity_and_location_fail_closed_without_secret_output (test_m7_030_linux_release.M7030LinuxReleaseTest.test_key_type_identity_and_location_fail_closed_without_secret_output) ... ok
+test_missing_or_stale_supply_chain_input_fails_closed (test_m7_030_linux_release.M7030LinuxReleaseTest.test_missing_or_stale_supply_chain_input_fails_closed) ... ok
+test_offline_rehearsal_verifies_and_all_subject_or_signature_mutations_fail (test_m7_030_linux_release.M7030LinuxReleaseTest.test_offline_rehearsal_verifies_and_all_subject_or_signature_mutations_fail) ... ok
+test_rehearsal_is_bounded_and_reads_hosted_gate_separately (test_m7_030_linux_release.M7030LinuxReleaseTest.test_rehearsal_is_bounded_and_reads_hosted_gate_separately) ... ERROR
+test_rollback_requires_exact_signed_unexpired_authorization (test_m7_030_linux_release.M7030LinuxReleaseTest.test_rollback_requires_exact_signed_unexpired_authorization) ... ok
+test_upgrade_requires_matching_signed_advisory_and_sbom (test_m7_030_linux_release.M7030LinuxReleaseTest.test_upgrade_requires_matching_signed_advisory_and_sbom) ... ok
+test_workflow_is_pinned_and_missing_or_wrong_hosted_report_never_passes (test_m7_030_linux_release.M7030LinuxReleaseTest.test_workflow_is_pinned_and_missing_or_wrong_hosted_report_never_passes) ... ok
+
+======================================================================
+ERROR: test_clean_consumer_and_malicious_archives (test_m7_030_linux_release.M7030LinuxReleaseTest.test_clean_consumer_and_malicious_archives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_030_linux_release.py", line 210, in test_clean_consumer_and_malicious_archives
+    extracted = release.safe_extract(artifact, root / "consumer")
+  File "<repo-root>/tools/m7_030_linux_release.py", line 441, in safe_extract
+    require(root == "wirestack-0.1.0", "ARCHIVE_ROOT", root)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo-root>/tools/m7_030_linux_release.py", line 66, in require
+    raise ReleaseError(code, detail)
+tools.m7_030_linux_release.ReleaseError: ARCHIVE_ROOT: wirestack
+
+======================================================================
+ERROR: test_current_inputs_build_strict_deterministic_manifest (test_m7_030_linux_release.M7030LinuxReleaseTest.test_current_inputs_build_strict_deterministic_manifest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_030_linux_release.py", line 50, in test_current_inputs_build_strict_deterministic_manifest
+    artifact, supply_chain, _ = self.release_inputs(Path(directory))
+                                ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "<repo-root>/tools/tests/test_m7_030_linux_release.py", line 32, in release_inputs
+    root.mkdir(parents=True)
+    ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 1011, in mkdir
+    os.mkdir(self, mode)
+    ~~~~~~~~^^^^^^^^^^^^
+FileExistsError: [Errno 17] File exists: '/tmp/tmpvqh46emy'
+
+======================================================================
+ERROR: test_rehearsal_is_bounded_and_reads_hosted_gate_separately (test_m7_030_linux_release.M7030LinuxReleaseTest.test_rehearsal_is_bounded_and_reads_hosted_gate_separately)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m7_030_linux_release.py", line 498, in test_rehearsal_is_bounded_and_reads_hosted_gate_separately
+    report = release.local_rehearsal(root / "rehearsal")
+  File "<repo-root>/tools/m7_030_linux_release.py", line 845, in local_rehearsal
+    safe_extract(ARTIFACT, consumer)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "<repo-root>/tools/m7_030_linux_release.py", line 441, in safe_extract
+    require(root == "wirestack-0.1.0", "ARCHIVE_ROOT", root)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo-root>/tools/m7_030_linux_release.py", line 66, in require
+    raise ReleaseError(code, detail)
+tools.m7_030_linux_release.ReleaseError: ARCHIVE_ROOT: wirestack
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.387s
+
+FAILED (errors=3)

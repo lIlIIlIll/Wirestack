@@ -1,0 +1,111 @@
+argv=["/usr/bin/python3", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo/tools/build_linux_tls_provider.py", "--repo", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo", "--source-dir", "<repo-root>/.local/tls-provider/source/aws-lc-5.5.0", "--offline", "--out-dir", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo/target/native", "--cache-dir", "<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/cache/provider", "--print-manifest", "--cc", "/usr/lib/llvm15/bin/clang", "--cxx", "/usr/lib/llvm15/bin/clang++", "--cmake", "/usr/bin/cmake", "--ar", "/usr/lib/llvm15/bin/llvm-ar", "--ranlib", "/usr/lib/llvm15/bin/llvm-ranlib"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo
+timeout_seconds=3600
+returncode=0
+--- stdout ---
+{
+  "abiVersion": 1,
+  "archive": {
+    "bytes": 8065334,
+    "name": "libwirestack_tls_provider.a",
+    "sha256": "b88849a1fb85fac32f9192d15d7ff19e0a7ca0c3cfc8871858c31011d2939847"
+  },
+  "backend": "aws-lc-static",
+  "build_fingerprint": "a30fdce130de2caadaef1ab1c88c4308be3c786915f0ee14b60df456f0449453",
+  "build_inputs": {
+    "abi_contract_sha256": "4f6756852e89203938ab964461993edde8dccc220bab7e5f8862e4f2b8bb3943",
+    "builder_sha256": "6db592fdce1da70351baee8db5ad5b6859e767b57faadeafb8d6bae84c86caa0",
+    "provider": {
+      "abi": {
+        "backend": "aws-lc-static",
+        "header": "native/tls/aws_lc/wirestack_tls_provider.h",
+        "name": "wirestack_tls_provider",
+        "version": 1
+      },
+      "capabilities": [
+        "customRoots",
+        "clientCert",
+        "server",
+        "tls12",
+        "tls13",
+        "http2",
+        "externalSigner",
+        "sessionResumption",
+        "secureRandom"
+      ],
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DBUILD_TOOL=OFF",
+        "-DDISABLE_GO=ON",
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      ],
+      "license_expression": "Apache-2.0 OR ISC",
+      "patches": [],
+      "provider_id": "aws-lc",
+      "provider_version": "5.5.0",
+      "schema_version": 1,
+      "source": {
+        "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+        "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+        "kind": "git",
+        "tag": "v5.5.0",
+        "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+        "url": "https://github.com/aws/aws-lc.git"
+      }
+    },
+    "shim": {
+      "header_sha256": "41e5f8d58937c87e4cfd357a10a9ca7066e2db8ff02c180c9e0120610c05eff1",
+      "source_sha256": "9b57dee65da7ecd8510999ea46f8437b7f7eb5e3c5234d2359ff8215f3d60a94"
+    },
+    "target": {
+      "architecture": "x86_64",
+      "libc": "glibc",
+      "libc_version": "2.44",
+      "os": "linux"
+    },
+    "tools": {
+      "ar": "/usr/lib/llvm15/bin/llvm-ar",
+      "ar_version": "LLVM (http://llvm.org/):",
+      "cc": "/usr/lib/llvm15/bin/clang",
+      "cc_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+      "cmake": "/usr/bin/cmake",
+      "cmake_version": "cmake version 4.4.3",
+      "cxx": "/usr/lib/llvm15/bin/clang++",
+      "cxx_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+      "ranlib": "/usr/lib/llvm15/bin/llvm-ranlib",
+      "ranlib_version": "LLVM (http://llvm.org/):"
+    }
+  },
+  "capabilities": [
+    "customRoots",
+    "clientCert",
+    "server",
+    "tls12",
+    "tls13",
+    "http2",
+    "externalSigner",
+    "sessionResumption",
+    "secureRandom"
+  ],
+  "externalOpenSslDependency": false,
+  "patchLevel": "abi-1;patches=none",
+  "providerFingerprint": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+  "providerId": "aws-lc",
+  "providerVersion": "5.5.0",
+  "runtimeLoaderLibraryStrings": [],
+  "schema_version": 1,
+  "source": {
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+  },
+  "target": {
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "os": "linux"
+  }
+}
+--- stderr ---

@@ -1,0 +1,15 @@
+test_timeout_stops_descendants_before_returning (tools.tests.test_m8_008_http_contracts.M8008HttpContractsTest.test_timeout_stops_descendants_before_returning) ... FAIL
+
+======================================================================
+FAIL: test_timeout_stops_descendants_before_returning (tools.tests.test_m8_008_http_contracts.M8008HttpContractsTest.test_timeout_stops_descendants_before_returning)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m8_008_http_contracts.py", line 76, in test_timeout_stops_descendants_before_returning
+    self.assertTrue(stopped, "timed-out command left a running descendant")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : timed-out command left a running descendant
+
+----------------------------------------------------------------------
+Ran 1 test in 2.006s
+
+FAILED (failures=1)

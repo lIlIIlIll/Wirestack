@@ -1,0 +1,29 @@
+test_raw_artifact_mismatch_rejects_pass (test_m8_008_http_contracts.M8008HttpContractsTest.test_raw_artifact_mismatch_rejects_pass) ... ok
+test_real_nonzero_subprocess_stops_ordered_chain (test_m8_008_http_contracts.M8008HttpContractsTest.test_real_nonzero_subprocess_stops_ordered_chain) ... ok
+test_run_roots_are_unique_and_outputs_cannot_escape (test_m8_008_http_contracts.M8008HttpContractsTest.test_run_roots_are_unique_and_outputs_cannot_escape) ... ok
+test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches (test_m8_008_http_contracts.M8008HttpContractsTest.test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches) ... The following paths are ignored by one of your .gitignore files:
+tracked.txt
+hint: Use -f if you really want to add them.
+hint: Disable this message with "git config set advice.addIgnoredFile false"
+ERROR
+
+======================================================================
+ERROR: test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches (test_m8_008_http_contracts.M8008HttpContractsTest.test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_m8_008_http_contracts.py", line 82, in test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches
+    subprocess.run(
+    ~~~~~~~~~~~~~~^
+        ["git", "add", ".gitignore", "tracked.txt"], cwd=repository, check=True
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['git', 'add', '.gitignore', 'tracked.txt']' returned non-zero exit status 1.
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.023s
+
+FAILED (errors=1)

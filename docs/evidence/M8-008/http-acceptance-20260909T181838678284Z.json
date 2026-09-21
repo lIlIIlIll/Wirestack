@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/http",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/green-repo",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 48.73737691799761,
+  "status": "PASS",
+  "raw_log": "docs/evidence/M8-008/http-acceptance-20260909T181838678284Z.log"
+}

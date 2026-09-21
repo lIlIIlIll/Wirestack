@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/internal/transport_stdnet",
+    "src/internal/http1",
+    "src/internal/http2",
+    "src/internal/tls_engine",
+    "src/internal/platform/linux",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--exclude-tags=Performance",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "counts": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 384,
+    "skipped": 20,
+    "total": 404
+  },
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/green-repo",
+  "elapsed_seconds": 46.726997523001046,
+  "execution_report": "docs/evidence/M8-008/internal-integrated-20260909T181700126662Z.json",
+  "execution_report_sha256": "9e3ef6ce34ebcd6bb6916f8ed4d728bc69a5935cadc82fb88626db79fb5b785f",
+  "exit_code": 0,
+  "raw_log": "docs/evidence/M8-008/internal-integrated-20260909T181700126662Z.log",
+  "raw_log_sha256": "365f6b78f2bdcafc95ea7838f4686b548a72f10d299e6d0fb0a3b3aa82562648",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "timed_out": false
+}

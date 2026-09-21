@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_p1_014_evidence_digest_types",
+    "tools.tests.test_m8_008_http_contracts",
+    "-v"
+  ],
+  "counts": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 46,
+    "skipped": 0,
+    "total": 46
+  },
+  "cwd": "<repo-root>",
+  "elapsed_seconds": 4.216572671000904,
+  "execution_report": "docs/evidence/M8-008/inventory-runner-final-20260909T185146441347Z.json",
+  "execution_report_sha256": "119eb74600db57db5b878a67d74e3b817e727486f353552ab80c73a3c3505473",
+  "exit_code": 0,
+  "raw_log": "docs/evidence/M8-008/inventory-runner-final-20260909T185146441347Z.log",
+  "raw_log_sha256": "a5ef0f8bdfc5b07d1d8137498024d94add0984219d08110c4a1b24ee4231a4a8",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "timed_out": false
+}

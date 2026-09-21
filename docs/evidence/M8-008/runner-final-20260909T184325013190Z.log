@@ -1,0 +1,12 @@
+test_canonical_environment_drops_native_compiler_overrides (test_m8_008_http_contracts.M8008HttpContractsTest.test_canonical_environment_drops_native_compiler_overrides) ... ok
+test_cjdoc_version_gate_rejects_non_exact_tool (test_m8_008_http_contracts.M8008HttpContractsTest.test_cjdoc_version_gate_rejects_non_exact_tool) ... ok
+test_raw_artifact_mismatch_rejects_pass (test_m8_008_http_contracts.M8008HttpContractsTest.test_raw_artifact_mismatch_rejects_pass) ... ok
+test_real_nonzero_subprocess_stops_ordered_chain (test_m8_008_http_contracts.M8008HttpContractsTest.test_real_nonzero_subprocess_stops_ordered_chain) ... ok
+test_run_roots_are_unique_and_outputs_cannot_escape (test_m8_008_http_contracts.M8008HttpContractsTest.test_run_roots_are_unique_and_outputs_cannot_escape) ... ok
+test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches (test_m8_008_http_contracts.M8008HttpContractsTest.test_snapshot_captures_dirty_and_nonignored_bytes_but_not_caches) ... ok
+test_timeout_stops_descendants_before_returning (test_m8_008_http_contracts.M8008HttpContractsTest.test_timeout_stops_descendants_before_returning) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 1.042s
+
+OK

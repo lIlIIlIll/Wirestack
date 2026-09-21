@@ -1,0 +1,18 @@
+test_inventory_excludes_generated_children_not_checkout_ancestors (tools.tests.test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_inventory_excludes_generated_children_not_checkout_ancestors) ... FAIL
+
+======================================================================
+FAIL: test_inventory_excludes_generated_children_not_checkout_ancestors (tools.tests.test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_inventory_excludes_generated_children_not_checkout_ancestors)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo-root>/tools/tests/test_p1_014_evidence_digest_types.py", line 237, in test_inventory_excludes_generated_children_not_checkout_ancestors
+    self.assertEqual("FAIL", report["status"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'FAIL' != 'PASS'
+- FAIL
++ PASS
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.003s
+
+FAILED (failures=1)

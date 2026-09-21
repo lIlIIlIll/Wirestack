@@ -1,0 +1,7 @@
+argv=["/usr/bin/git", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+git version 2.55.0
+--- stderr ---

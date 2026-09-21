@@ -1,0 +1,18 @@
+[31merror[0m: invalid named arguments prefix 'signalAdmission:', target is not a named parameter
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/package.cj:161:19:
+    [36m| [0m
+[36m161[0m [36m| [0m        beginRead(signalAdmission: background)[0m
+    [36m| [0m                  [31m^ [0m
+    [36m| [0m
+
+[31merror[0m: invalid named arguments prefix 'signalAdmission:', target is not a named parameter
+   [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/internal/transport_stdnet/package.cj:244:20:
+    [36m| [0m
+[36m244[0m [36m| [0m        beginWrite(signalAdmission: background)[0m
+    [36m| [0m                   [31m^ [0m
+    [36m| [0m
+
+2 errors generated, 2 errors printed.
+Error: failed to compile package `wirestack.internal.transport_stdnet`, return code is 1
+Error: please execute 'cjpm build -i -j1' successfully first
+Error: cjpm test failed

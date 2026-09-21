@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "task_id": "M8-001",
+  "dependencies": ["M7-033", "M7-032"],
+  "allowed_paths": [
+    "docs/architecture/adr/0008-linux-network-foundation.md",
+    ".gitignore",
+    "docs/api",
+    "docs/evidence/M8-001",
+    "docs/guides",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "README.md",
+    "src/internal/transport_stdnet/net_contract.cj",
+    "src/net",
+    "src/network_error.cj",
+    "src/http/parity.cj",
+    "src/http/parity_test.cj",
+    "tools/architecture_guard.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/m7_026_linux_api_freeze.py",
+    "tools/tasks/M8-001.json",
+    "tools/tests"
+  ],
+  "platforms": ["linux-x86_64-glibc"],
+  "acceptance_commands": [
+    {
+      "id": "plan-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M8-001/test-plan.md", "--json"],
+      "timeout_seconds": 30,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "architecture-guard",
+      "argv": ["python3", "tools/architecture_guard.py", "--format", "json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "task-contract-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-tasks", "--json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cangjie-check",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "check"],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cangjie-build",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "build"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "network-contract-tests",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "test", "src/net", "--no-progress", "--no-color"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "http-parity-tests",
+      "argv": ["<home>/.codex/scripts/codex_cangjie_env", "cjpm", "test", "src/http", "--no-progress", "--no-color"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "python-fault-injection-tests",
+      "argv": ["python3", "-m", "unittest", "tools.repository.tests.test_repository_tooling", "-v"],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-regression-tests",
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m7_026_linux_api_freeze", "tools.tests.test_m7_linux_task_graph", "-v"],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M8-001/plan-validation.json",
+    "docs/evidence/M8-001/architecture-guard.json",
+    "docs/evidence/M8-001/task-validation.json",
+    "docs/evidence/M8-001/python-tests.json",
+    "docs/evidence/M8-001/cangjie-build.json",
+    "docs/evidence/M8-001/network-tests.json",
+    "docs/evidence/M8-001/http-parity-tests.json",
+    "docs/evidence/M8-001/regression-tests.json",
+    "docs/evidence/M8-001/evidence.json"
+  ],
+  "timeout_seconds": 900,
+  "long_running_gate": false,
+  "source_paths": [
+    "docs/architecture/adr/0008-linux-network-foundation.md",
+    ".gitignore",
+    "docs/api/README.md",
+    "docs/evidence/M8-001/README.md",
+    "docs/evidence/M8-001/test-plan.md",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "src/internal/transport_stdnet/net_contract.cj",
+    "src/net/package.cj",
+    "src/net/package_test.cj",
+    "src/http/parity.cj",
+    "src/network_error.cj",
+    "README.md",
+    "tools/architecture_guard.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/m7_026_linux_api_freeze.py",
+    "tools/tests/test_m7_026_linux_api_freeze.py",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tasks/M8-001.json"
+  ]
+}

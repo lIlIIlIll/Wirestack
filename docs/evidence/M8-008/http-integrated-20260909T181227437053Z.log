@@ -1,0 +1,23 @@
+[31merror[0m: the type 'Enum-NetworkErrorCategory' should implement interface 'ToString' in the 'core' package
+    [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/http/facade_test.cj:2460:32:
+     [36m| [0m
+[36m2460[0m [36m| [0m        case _ => "Unexpected(${error.category})"[0m
+     [36m| [0m                               [31m^ [0m
+     [36m| [0m
+
+[31merror[0m: the type 'Enum-NetworkPhase' should implement interface 'ToString' in the 'core' package
+    [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/http/facade_test.cj:2467:32:
+     [36m| [0m
+[36m2467[0m [36m| [0m        case _ => "Unexpected(${error.phase})"[0m
+     [36m| [0m                               [31m^ [0m
+     [36m| [0m
+
+[31merror[0m: the type 'Enum-NetworkErrorCode' should implement interface 'ToString' in the 'core' package
+    [36m==>[0m <repo-root>/build/m8-008/red-20260909T172645Z/green-repo/src/http/facade_test.cj:2472:32:
+     [36m| [0m
+[36m2472[0m [36m| [0m        case _ => "Unexpected(${error.code})"[0m
+     [36m| [0m                               [31m^ [0m
+     [36m| [0m
+
+3 errors generated, 3 errors printed.
+Error: cjpm test failed

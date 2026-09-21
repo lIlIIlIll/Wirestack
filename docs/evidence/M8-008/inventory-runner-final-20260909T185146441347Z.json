@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_p1_014_evidence_digest_types",
+    "tools.tests.test_m8_008_http_contracts",
+    "-v"
+  ],
+  "cwd": "<repo-root>",
+  "exit_code": 0,
+  "timed_out": false,
+  "elapsed_seconds": 4.216572671000904,
+  "status": "PASS",
+  "raw_log": "docs/evidence/M8-008/inventory-runner-final-20260909T185146441347Z.log"
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "argv": [
+    "<home>/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/internal/transport_stdnet",
+    "src/internal/http1",
+    "src/internal/http2",
+    "src/internal/tls_engine",
+    "src/internal/platform/linux",
+    "-j",
+    "1",
+    "--parallel",
+    "1",
+    "--exclude-tags=Performance",
+    "--show-all-output",
+    "--no-progress",
+    "--no-color"
+  ],
+  "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/green-repo",
+  "exit_code": 1,
+  "timed_out": false,
+  "elapsed_seconds": 47.98712907400113,
+  "status": "FAIL",
+  "raw_log": "docs/evidence/M8-008/green-internal-20260909T175727498087Z.log"
+}

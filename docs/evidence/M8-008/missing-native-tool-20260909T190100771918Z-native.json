@@ -1,0 +1,16 @@
+{
+  "commands": [],
+  "completed_at_utc": "2026-09-09T19:01:00.885733Z",
+  "decision": "FAIL",
+  "failure": {
+    "code": "TOOL_MISSING",
+    "detail": "required tool is unavailable: cjdoc (<repo-root>/build/m8-008/not-a-cjdoc-executable)"
+  },
+  "run_root": "<repo-root>/build/m8-008/20260909T190100.884357Z-2092792-70f9f52f",
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "started_at_utc": "2026-09-09T19:01:00.884773Z",
+  "status": "FAIL",
+  "steps": {},
+  "task_id": "M8-008"
+}

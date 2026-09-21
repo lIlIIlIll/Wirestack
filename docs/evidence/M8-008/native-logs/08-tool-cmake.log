@@ -1,0 +1,9 @@
+argv=["/usr/bin/cmake", "--version"]
+cwd=<repo-root>
+timeout_seconds=30
+returncode=0
+--- stdout ---
+cmake version 4.4.3
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+--- stderr ---

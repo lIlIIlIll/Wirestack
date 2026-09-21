@@ -1,0 +1,115 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 59205390 ns, RESULT:
+    TCS: HttpMessageTest, time elapsed: 53719369 ns, RESULT:
+    [ PASSED ] CASE: requestFactoriesProduceImmutableProtocolNeutralModels (271501 ns)
+    [ PASSED ] CASE: responseEofCompletesObserverExactlyOnce (32675 ns)
+    [ PASSED ] CASE: earlyCloseAbandonsObserverExactlyOnce (41481 ns)
+    [ PASSED ] CASE: readFailureClosesAndAbandonsTheBody (22017 ns)
+    [ PASSED ] CASE: emptyDestinationDoesNotMistakeNoProgressForEof (17706 ns)
+    [ PASSED ] CASE: boundedDrainCompletesOnlyWhenEofIsProven (23420 ns)
+    [ PASSED ] CASE: invalidSourceProgressFailsClosed (23372 ns)
+    [ PASSED ] CASE: protocolCompletionCanWaitPastDeclaredLength (17226 ns)
+    [ PASSED ] CASE: concurrentReadIsRejectedWithoutStealingActiveReader (113266 ns)
+    [ PASSED ] CASE: responseRejectsInvalidStatusAndReason (72185 ns)
+    [ FAILED ] CASE: unknownLengthCompletesOnlyAtStableProtocolEof (45906 ns)
+    Expect Failed: `(source.readCount() == 2)`
+       left: 3
+      right: 2
+
+    [ FAILED ] CASE: declaredLengthPrematureEofFailsClosed (30315 ns)
+    Expect Failed: `(matched == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(body.isClosed() == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! body.isFullyConsumed() == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(source.closeCount() == 1)`
+       left: 0
+      right: 1
+
+    Expect Failed: `(observer.completions == 0)`
+       left: 1
+      right: 0
+
+    Expect Failed: `(observer.abandons == 1)`
+       left: 0
+      right: 1
+
+    [ ERROR  ] CASE: observerMayCloseStreamAtCompletionWithoutBreakingRepeatedEof (23173426 ns)
+    REASON: An exception has occurred:Exception: stream was read after close
+	at wirestack.http/test.ScriptedBodyStream.read(std.core.Array<...>)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:364)
+	at wirestack.ResponseBody.read(std.core.Array<...>)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http_message.cj:182)
+	at wirestack.http/test.HttpMessageTest.observerMayCloseStreamAtCompletionWithoutBreakingRepeatedEof()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:186)
+	at wirestack.http/test.HttpMessageTest.asTestSuite.lambda.10.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:7)
+    [ FAILED ] CASE: readFailurePreservesPrimaryErrorAcrossCleanupFailures (266962 ns)
+    Expect Failed: captureMessage({ =>
+    let _ = body.read(Array < Byte >(1, repeat: 0))
+}) != "primary read failure"
+        captureMessage({ =>
+    let _ = body.read(Array < Byte >(1, repeat: 0))
+}): "secondary observe·r failure"
+                                                            "primary read failure": "··primary ····r·ead failure"
+                                                                                     --!!!!====----=-=+!========
+
+    [ ERROR  ] CASE: invalidProgressPreservesBodyFailureAcrossCleanupFailures (26603555 ns)
+    REASON: An exception has occurred:Exception: secondary observer failure
+	at wirestack.http/test.ThrowingBodyObserver.abandoned()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:405)
+	at wirestack.ResponseBody.abandonAndClose()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http_message.cj:296)
+	at wirestack.ResponseBody.read(std.core.Array<...>)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http_message.cj:190)
+	at wirestack.http/test.HttpMessageTest.invalidProgressPreservesBodyFailureAcrossCleanupFailures.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:216)
+	at wirestack.http/test.expectMessageBodyFailure(wirestack.HttpBodyErrorCode, () -> Unit)(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:466)
+	at wirestack.http/test.HttpMessageTest.invalidProgressPreservesBodyFailureAcrossCleanupFailures()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:215)
+	at wirestack.http/test.HttpMessageTest.asTestSuite.lambda.12.lambda.0()(<repo-root>/build/m8-008/red-20260909T172645Z/repo/src/http/message_test.cj:7)
+    [ FAILED ] CASE: explicitClosePreservesStreamFailureAndNotifiesExactlyOnce (125099 ns)
+    Expect Failed: captureMessage({ =>
+    body.close()
+}) != "primary close failure"
+        captureMessage({ =>
+    body.close()
+}): "secondary ··observer failure"
+                        "primary close failure": "··primary clo·s···e· failure"
+                                                  --!!!!====++=-=---=-========
+
+    [ FAILED ] CASE: closeRacingActiveReadClosesStreamAndNotifiesExactlyOnce (85203 ns)
+    Expect Failed: `(source.closeCount() == 1)`
+       left: 2
+      right: 1
+
+    Expect Failed: `(source.closeCount() == 1)`
+       left: 2
+      right: 1
+
+Summary: TOTAL: 88
+    PASSED: 10, SKIPPED: 71, ERROR: 2
+    FAILED: 5, listed below:
+            TCS: HttpMessageTest, CASE: unknownLengthCompletesOnlyAtStableProtocolEof
+            TCS: HttpMessageTest, CASE: declaredLengthPrematureEofFailsClosed
+            TCS: HttpMessageTest, CASE: observerMayCloseStreamAtCompletionWithoutBreakingRepeatedEof
+            TCS: HttpMessageTest, CASE: readFailurePreservesPrimaryErrorAcrossCleanupFailures
+            TCS: HttpMessageTest, CASE: invalidProgressPreservesBodyFailureAcrossCleanupFailures
+            TCS: HttpMessageTest, CASE: explicitClosePreservesStreamFailureAndNotifiesExactlyOnce
+            TCS: HttpMessageTest, CASE: closeRacingActiveReadClosesStreamAndNotifiesExactlyOnce
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 67194089 ns, RESULT:
+TP: wirestack.*, time elapsed: 67091348 ns, RESULT:
+    FAILED:
+    TP: wirestack.http, time elapsed: 59205390 ns, RESULT:
+        TCS: HttpMessageTest, time elapsed: 53719369 ns, RESULT:
+        [ FAILED ] CASE: unknownLengthCompletesOnlyAtStableProtocolEof (45906 ns)
+        [ FAILED ] CASE: declaredLengthPrematureEofFailsClosed (30315 ns)
+        [ ERROR  ] CASE: observerMayCloseStreamAtCompletionWithoutBreakingRepeatedEof (23173426 ns)
+        [ FAILED ] CASE: readFailurePreservesPrimaryErrorAcrossCleanupFailures (266962 ns)
+        [ ERROR  ] CASE: invalidProgressPreservesBodyFailureAcrossCleanupFailures (26603555 ns)
+        [ FAILED ] CASE: explicitClosePreservesStreamFailureAndNotifiesExactlyOnce (125099 ns)
+        [ FAILED ] CASE: closeRacingActiveReadClosesStreamAndNotifiesExactlyOnce (85203 ns)
+Summary: TOTAL: 88
+    PASSED: 10, SKIPPED: 71, ERROR: 2
+    FAILED: 5
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

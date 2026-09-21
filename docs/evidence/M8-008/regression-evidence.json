@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-008",
+  "status": "PASS",
+  "scope": "Executed pre-fix behavioral failures followed by complete affected suites; compile-only failures are excluded. The extra TLS fixture error in the H1/proxy red run is not used as production regression proof.",
+  "regressions": [
+    {
+      "failure_first": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "cjpm",
+          "test",
+          "src/http",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "HttpMessageTest",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 6.0294326879993605,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/red-body-20260909T173324311111Z.log"
+      },
+      "fixed_suite": "http-tests.json",
+      "raw_log_sha256": "712ab0b10641b91b25ef2af4fbd1f060297906bc1e9c0741cce2140cb748c8fa"
+    },
+    {
+      "failure_first": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "cjpm",
+          "test",
+          "src/internal/http1",
+          "src/internal/transport_stdnet",
+          "src/internal/tls_engine",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--exclude-tags=Performance",
+          "--filter",
+          "Http1ServerResponseWriterTest,Http1ProxyClientPipelineTest,StdNetTransportTest,TlsEnginePumpTest",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 9.478211581998039,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/red-h1-proxy-20260909T173226172717Z.log"
+      },
+      "fixed_suite": "internal-tests.json",
+      "raw_log_sha256": "c16286b0a4e0c87132f7932bc7785dac87c8b7ab6c54f6267fcb5472fa8143a0"
+    },
+    {
+      "failure_first": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "cjpm",
+          "test",
+          "src/internal/http2",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "Http2ConnectionStateMachineTest,Http2ServerMappingTest,Http2ServerConnectionTest",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 16.54681094099942,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/red-h2-confirm-20260909T174226139626Z.log"
+      },
+      "fixed_suite": "internal-tests.json",
+      "raw_log_sha256": "8464fd5f4663695f4c83c2dc3758b99da2558aa1697a85b028238b03ce780157"
+    },
+    {
+      "failure_first": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "<home>/.codex/scripts/codex_cangjie_env",
+          "cjpm",
+          "test",
+          "src/http",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "HttpFacadeTest.afterHookFailureClosesReturnedBodiesForHttp1AndHttp2WithoutLeakingSentinel",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "cwd": "<repo-root>/build/m8-008/red-20260909T172645Z/repo",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 6.830116526001802,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/red-public-hooks-confirm-20260909T175320849190Z.log"
+      },
+      "fixed_suite": "http-tests.json",
+      "raw_log_sha256": "dcca03e624ed1d6b8d1a2cee62b34cae982c799c50861420e9127e4f87683f72"
+    },
+    {
+      "failure_first": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tools.tests.test_m8_008_http_contracts.M8008HttpContractsTest.test_timeout_stops_descendants_before_returning",
+          "-v"
+        ],
+        "cwd": "<repo-root>",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 2.118040599001688,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/runner-timeout-red-20260909T180946847621Z.log"
+      },
+      "fixed_suite": "runner-tests.json",
+      "raw_log_sha256": "b8b43927047fb077523a43fc70ef60943d8d0be6faaf86ce4881e6d72e9444a4"
+    },
+    {
+      "failure_first": {
+        "schema_version": 1,
+        "source_task": "M8-008",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tools.tests.test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_inventory_excludes_generated_children_not_checkout_ancestors",
+          "-v"
+        ],
+        "cwd": "<repo-root>",
+        "exit_code": 1,
+        "timed_out": false,
+        "elapsed_seconds": 0.1637325480041909,
+        "status": "FAIL",
+        "raw_log": "docs/evidence/M8-008/red-inventory-ancestor-20260909T185104316587Z.log"
+      },
+      "fixed_suite": "inventory-runner-tests.json",
+      "raw_log_sha256": "5a78040c06a6762088709a0c991ec9908ecc4d32fc4f46ac29c1dcd3b0bb52aa"
+    }
+  ]
+}

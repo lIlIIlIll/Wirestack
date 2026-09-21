@@ -1,0 +1,6 @@
+argv=["/usr/bin/git", "-c", "core.excludesFile=/dev/null", "add", "-f", "--all", "--", "."]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo
+timeout_seconds=120
+returncode=0
+--- stdout ---
+--- stderr ---

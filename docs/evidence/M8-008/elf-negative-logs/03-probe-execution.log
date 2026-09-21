@@ -1,0 +1,6 @@
+argv=["<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z/consumer"]
+cwd=<repo-root>/build/m8-008/elf-negative-20260909T190115053970Z
+timeout_seconds=30
+returncode=0
+--- stdout ---
+--- stderr ---

@@ -1,0 +1,7 @@
+argv=["/usr/bin/git", "rev-parse", "--show-toplevel"]
+cwd=<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo
+timeout_seconds=30
+returncode=0
+--- stdout ---
+<repo-root>/build/m8-008/20260909T191258.619736Z-2128850-2824ceb0/legs/B/repo
+--- stderr ---
