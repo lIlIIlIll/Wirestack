@@ -23,6 +23,7 @@ native = root / 'target/native'
 if native.exists():
     native.rename(backup / 'native')
 command = [sys.executable, 'tools/build_native_dependencies.py', '--root', str(root)]
+recorded_command = [sys.executable, 'tools/build_native_dependencies.py', '--root', '<repo>']
 started = time.monotonic()
 with log_path.open('w', encoding='utf-8') as stream:
     result = subprocess.run(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT)
@@ -31,7 +32,7 @@ report = {
     'source_task': 'M8-007',
     'status': 'FAIL',
     'generated_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    'command': command,
+    'command': recorded_command,
     'exit_code': result.returncode,
     'elapsed_seconds': time.monotonic() - started,
     'previous_cache_backup': backup.relative_to(root).as_posix(),

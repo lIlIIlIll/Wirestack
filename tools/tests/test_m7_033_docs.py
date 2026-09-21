@@ -84,6 +84,20 @@ class M7033DocsTests(unittest.TestCase):
         self.assertTrue(all("/internal/" not in str(path) for path in paths))
         self.assertTrue(all(not path.name.endswith("_test.cj") for path in paths))
 
+    def test_command_output_redacts_repository_and_staging_paths(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-m7-033-") as directory:
+            project = Path(directory) / "wirestack"
+            project.mkdir()
+            output = f"generated {directory}/wirestack/output\nrepo {docs.ROOT}\n".encode()
+            completed = subprocess.CompletedProcess(["cjdoc"], 0, output, b"")
+            with mock.patch.object(docs.subprocess, "run", return_value=completed):
+                result = docs._run(["cjdoc"], project, 1)
+            self.assertEqual("PASS", result["status"])
+            self.assertIn("<staging>/wirestack/output", result["stdout"])
+            self.assertIn("repo <repo>", result["stdout"])
+            self.assertNotIn(directory, result["stdout"])
+            self.assertNotIn(str(docs.ROOT), result["stdout"])
+
     def test_atomic_report_preserves_previous_file_when_replace_fails(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-m7-033-") as directory:
             path = Path(directory) / "report.json"

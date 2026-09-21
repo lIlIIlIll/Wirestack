@@ -527,19 +527,18 @@ def verify_owner_registry_controls() -> dict:
         files.extend((record(path), record(derived)))
         commands = report["commands"]
         require(set(commands) == {"build", "stale", "live", "transports"}, "owner registry command inventory changed")
-        prefix = commands["build"]["argv"][:3]
-        require(len(prefix) == 3 and Path(prefix[0]).name == "codex_cangjie_env"
-                and prefix[1] == "--sdk-root" and Path(prefix[2]).parts[-2:] == ("cangjie_sdk", "daily"),
+        prefix = commands["build"]["argv"][:1]
+        require(prefix == ["<cangjie-env-wrapper>"],
                 "owner registry SDK invocation changed")
         for mode, command in commands.items():
             argv, duration = command.get("argv"), command.get("duration_ms")
             expected_exit = 0 if mode == "build" or phase == "after" else 1
-            require(isinstance(argv, list) and len(argv) == 5 and argv[:3] == prefix
+            require(isinstance(argv, list) and len(argv) == 3 and argv[:1] == prefix
                     and command.get("exit_code") == expected_exit
                     and type(duration) in (int, float) and 0 <= duration <= 600_000,
                     f"owner registry {phase}/{mode} command changed")
-            require(argv[3:] == ["cjpm", "build"] if mode == "build" else
-                    argv[4] == mode and Path(argv[3]).parts[-5:] == ("consumer", "target", "release", "bin", "main"),
+            require(argv[1:] == ["cjpm", "build"] if mode == "build" else
+                    argv[2] == mode and Path(argv[1]).parts[-5:] == ("consumer", "target", "release", "bin", "main"),
                     "owner registry executable changed")
             capture = {f"{stream}_{field}": command[stream][field]
                        for stream in ("stdout", "stderr") for field in ("path", "digest")}

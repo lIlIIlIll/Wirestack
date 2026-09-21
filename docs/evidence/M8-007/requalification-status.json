@@ -1,0 +1,128 @@
+{
+  "candidate": {
+    "artifact": {
+      "bytes": 2804015,
+      "domain": "artifact-bytes-v1",
+      "path": "dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+      "sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1"
+    },
+    "formal_freeze": false,
+    "security_package": {
+      "domain": "text-utf8-lf-v1",
+      "package_sha256": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478",
+      "path": "docs/evidence/M8-007/linux_x86_64/security-package.json",
+      "sha256": "18f1f75682d4945f0f41cf09c715147da9b209e4f30c8e738f7db65a337930c5"
+    },
+    "selection": "PENDING_LOCAL_UNQUALIFIED_COMMIT",
+    "source_revision": null
+  },
+  "completion_claim": false,
+  "historical_evidence": {
+    "audit_status": "BLOCKED",
+    "identity_audit": "docs/evidence/M8-007/evidence-identity-audit.json",
+    "meaning": "The old sealed evidence remains historically preserved but cannot qualify this replacement candidate."
+  },
+  "independent_review": {
+    "evidence_lifecycle": {
+      "boundary": "No retry, request rewrite, replacement reviewer, self-review, or PASS synthesis was performed.",
+      "execution": {
+        "exit_code": 1,
+        "failure_class": "PROVIDER_CYBER_POLICY_REJECTION"
+      },
+      "report": null,
+      "status": "INCOMPLETE"
+    },
+    "overall": "INCOMPLETE",
+    "protocol": {
+      "blocking_finding_ids": [
+        "M8-007-PROTOCOL-001",
+        "M8-007-PROTOCOL-002"
+      ],
+      "evidence_limits": [
+        "HPACK finding uses a source operation-count probe, not a Cangjie wall-clock benchmark.",
+        "WebSocket finding is source-confirmed; no memory reproduction was executed.",
+        "HTTP/1 serializer-limit finding is LOW and source-based."
+      ],
+      "release_gate_opinion": "NOT_READY_FOR_FINAL_SECURITY_ACCEPTANCE",
+      "report": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c4fa0282d9c3fd6a339565823029a3f4c3c7b3ac51e8d25d5cba73d4178bca80"
+        },
+        "path": "docs/evidence/M8-007/security/requalification-protocol-review.json"
+      },
+      "status": "REQUIRES_REMEDIATION",
+      "unresolved_low": 1,
+      "unresolved_medium": 2
+    },
+    "tls_native": {
+      "release_certified": false,
+      "report": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a8730b4cb46e6bc610be32e48df60d17d51bc0a6d71a687b98df59e429173f36"
+        },
+        "path": "docs/evidence/M8-007/security/requalification-tls-native-review.json"
+      },
+      "source_review_result": "NO_ACTIONABLE_SECURITY_FINDINGS",
+      "status": "PASS_WITH_GAPS"
+    }
+  },
+  "kind": "replacement-candidate-requalification-status",
+  "not_run": [
+    {
+      "gate": "final-candidate-soak",
+      "reason": "Independent review is incomplete and protocol remediation is unresolved."
+    },
+    {
+      "gate": "formal-soak-verification",
+      "reason": "No formal soak exists."
+    },
+    {
+      "gate": "production-signature-verification",
+      "reason": "Production signing is not authorized and no new approval or signatures exist."
+    },
+    {
+      "gate": "evidence-sealing",
+      "reason": "No qualified committed replacement candidate exists."
+    }
+  ],
+  "ordinary_acceptance": {
+    "failing_gates": [
+      "repository-full-check",
+      "repository-regression-tests",
+      "independent-review-verification"
+    ],
+    "passing_gates": [
+      "plan-validation",
+      "architecture-guard",
+      "task-contract-validation",
+      "public-api-documentation",
+      "public-api-inventory",
+      "release-core-verification",
+      "parser-fuzz-verification",
+      "http1-lifecycle-tests",
+      "tls-lifecycle-tests"
+    ],
+    "results": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d57ff7abdb7ebeeb53a6659b8ce8ccfd9c90d54e8211d3f14b573e4d9fdfed36"
+      },
+      "path": "docs/evidence/M8-007/requalification-command-results.json"
+    },
+    "status": "INCOMPLETE"
+  },
+  "recorded_at_utc": "2026-09-21T19:32:43.773613Z",
+  "schema_version": 1,
+  "signing_boundary": {
+    "new_signatures_created": false,
+    "old_signatures_reused": false,
+    "production_signing_authorized": false,
+    "protected_settings_changed": false,
+    "publication_performed": false,
+    "source_approval_created": false
+  },
+  "source_task": "M8-007",
+  "status": "INCOMPLETE"
+}

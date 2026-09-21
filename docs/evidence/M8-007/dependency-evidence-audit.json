@@ -1,0 +1,129 @@
+{
+  "command": {
+    "argv": [
+      "python3",
+      "<inline-dependency-evidence-audit>"
+    ],
+    "exit_code": 0
+  },
+  "dependencies": [
+    {
+      "acceptance_status": "PASS",
+      "non_pass_reports": 0,
+      "public_checkout_commit_resolves": false,
+      "report_count": 25,
+      "report_digest_mismatches": 0,
+      "report_missing": 0,
+      "retained_commit_resolves": true,
+      "revision": "a1e550551c427408295d522a24deb6d71cabe41e",
+      "source_count": 30,
+      "source_digest_mismatches": 0,
+      "source_missing": 0,
+      "task_id": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "non_pass_reports": 0,
+      "public_checkout_commit_resolves": false,
+      "report_count": 21,
+      "report_digest_mismatches": 0,
+      "report_missing": 0,
+      "retained_commit_resolves": true,
+      "revision": "b58b519ae70892f1f535ab4ac9c1b27af6931ce5",
+      "source_count": 44,
+      "source_digest_mismatches": 0,
+      "source_missing": 0,
+      "task_id": "M8-002"
+    },
+    {
+      "acceptance_status": "PASS",
+      "non_pass_reports": 0,
+      "public_checkout_commit_resolves": false,
+      "report_count": 18,
+      "report_digest_mismatches": 0,
+      "report_missing": 0,
+      "retained_commit_resolves": true,
+      "revision": "a12daebbf0ab4fa95b078268148adffac6b29448",
+      "source_count": 104,
+      "source_digest_mismatches": 0,
+      "source_missing": 0,
+      "task_id": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "non_pass_reports": 0,
+      "public_checkout_commit_resolves": false,
+      "report_count": 31,
+      "report_digest_mismatches": 0,
+      "report_missing": 0,
+      "retained_commit_resolves": true,
+      "revision": "f1f5933da51d19ad13889f0a03f50c97041e6fa1",
+      "source_count": 682,
+      "source_digest_mismatches": 0,
+      "source_missing": 0,
+      "task_id": "M8-004"
+    },
+    {
+      "acceptance_status": "PASS",
+      "non_pass_reports": 0,
+      "public_checkout_commit_resolves": false,
+      "report_count": 25,
+      "report_digest_mismatches": 0,
+      "report_missing": 0,
+      "retained_commit_resolves": true,
+      "revision": "0bfe9fd43b3cd18a2dffbd5c2f6b467e8eaeda0a",
+      "source_count": 709,
+      "source_digest_mismatches": 0,
+      "source_missing": 0,
+      "task_id": "M8-005"
+    },
+    {
+      "acceptance_status": "PASS",
+      "non_pass_reports": 0,
+      "public_checkout_commit_resolves": false,
+      "report_count": 23,
+      "report_digest_mismatches": 0,
+      "report_missing": 0,
+      "retained_commit_resolves": true,
+      "revision": "6b9ad866e2a6c693d10ff34c60f761ab7b1224c8",
+      "source_count": 788,
+      "source_digest_mismatches": 0,
+      "source_missing": 0,
+      "task_id": "M8-006"
+    }
+  ],
+  "digest_contract": {
+    "canonicalization": "strict UTF-8 with CRLF and CR normalized to LF",
+    "domain": "text-utf8-lf-v1",
+    "implementation": "tools/evidence_digest.py::text_evidence_digest_bytes"
+  },
+  "generated_at_utc": "2026-09-21T17:21:21.639673Z",
+  "kind": "dependency-evidence-audit",
+  "schema_version": 1,
+  "scope": {
+    "dependencies": [
+      "M8-001",
+      "M8-002",
+      "M8-003",
+      "M8-004",
+      "M8-005",
+      "M8-006"
+    ],
+    "network_or_public_fallback_used": false,
+    "note": "The current public checkout does not retain these six rewritten evidence commits. Validation used the immutable retained commits named by each current evidence index; no object was copied into the candidate repository and no private history will be published.",
+    "object_source": "read-only retained pre-redaction Git object store"
+  },
+  "source_task": "M8-007",
+  "status": "PASS",
+  "summary": {
+    "acceptance_pass": 6,
+    "dependency_count": 6,
+    "non_pass_reports": 0,
+    "report_digest_mismatches": 0,
+    "report_missing": 0,
+    "reports": 143,
+    "source_digest_mismatches": 0,
+    "source_missing": 0,
+    "source_paths": 2357
+  }
+}

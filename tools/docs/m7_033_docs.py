@@ -111,6 +111,18 @@ def _bounded(value: bytes | str, limit: int = CAPTURE_BYTES) -> tuple[str, bool]
     return raw[:limit].decode("utf-8", errors="replace"), truncated
 
 
+def _redact_local_paths(value: str, root: Path) -> str:
+    replacements = {str(ROOT.resolve()): "<repo>"}
+    resolved = root.resolve()
+    for candidate in (resolved, *resolved.parents):
+        if candidate.name.startswith("wirestack-m7-033-"):
+            replacements[str(candidate)] = "<staging>"
+            break
+    for actual, replacement in sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True):
+        value = value.replace(actual, replacement)
+    return value
+
+
 def _safe_path(root: Path, value: str) -> Path:
     if not isinstance(value, str) or not value or Path(value).is_absolute():
         raise DocsError("PATH_INVALID", "path must be repository-relative")
@@ -209,6 +221,8 @@ def _run(argv: Sequence[str], root: Path, timeout: int) -> dict[str, Any]:
     except subprocess.TimeoutExpired as error:
         stdout, stdout_truncated = _bounded(error.stdout or b"")
         stderr, stderr_truncated = _bounded(error.stderr or b"")
+        stdout = _redact_local_paths(stdout, root)
+        stderr = _redact_local_paths(stderr, root)
         return {"status": "TIMEOUT", "returncode": 124, "stdout": stdout,
                 "stderr": stderr, "stdout_truncated": stdout_truncated,
                 "stderr_truncated": stderr_truncated}
@@ -217,6 +231,8 @@ def _run(argv: Sequence[str], root: Path, timeout: int) -> dict[str, Any]:
                 "stdout_truncated": False, "stderr_truncated": False}
     stdout, stdout_truncated = _bounded(result.stdout)
     stderr, stderr_truncated = _bounded(result.stderr)
+    stdout = _redact_local_paths(stdout, root)
+    stderr = _redact_local_paths(stderr, root)
     return {"status": "PASS" if result.returncode == 0 else "FAIL",
             "returncode": result.returncode, "stdout": stdout, "stderr": stderr,
             "stdout_truncated": stdout_truncated, "stderr_truncated": stderr_truncated}
@@ -350,7 +366,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
     }
     try:
         cjdoc, version = resolve_cjdoc(root)
-        report["cjdoc"] = {"path": cjdoc, "version": version}
+        report["cjdoc"] = {"path": "<cjdoc>", "version": version}
         files = public_source_paths(root)
         report["sourceSha256"] = _source_inventory(root, files)
         with tempfile.TemporaryDirectory(prefix="wirestack-m7-033-") as directory:
