@@ -30,6 +30,7 @@ SOURCE_NAMES = (
     "transport_tls_example.cj",
 )
 EXPECTED_MARKERS = (
+    "NO_FOLLOW_REDIRECT=PASS",
     "HTTP1_SERVER=PASS",
     "SSE=PASS",
     "SCOPED_CANCELLATION=PASS",

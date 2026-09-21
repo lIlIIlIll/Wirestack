@@ -1111,9 +1111,10 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectException::function:getClassName#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectException::variable:cause#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectException::variable:code#g0()",
-        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::constructor:init#g0(Int64,Bool,Int64)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::constructor:init#g0(Bool,Int64,Bool,Int64)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::function:nextRequest#g0(HttpRequest,HttpResponse,Int64,HttpLimits)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::variable:allowHttpsDowngrade#g0()",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::variable:followRedirects#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::variable:maximumDrainBytes#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::variable:maximumRedirects#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRequestCancellationHandle::function:cancel#g0()",
@@ -113269,7 +113270,7 @@
       "enumNonExhaustive": null
     },
     {
-      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::constructor:init#g0(Int64,Bool,Int64)",
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::constructor:init#g0(Bool,Int64,Bool,Int64)",
       "kind": "constructor",
       "name": "init",
       "qualifiedName": "wirestack.http.HttpRedirectPolicy.init",
@@ -113281,6 +113282,24 @@
         
       ],
       "parameters": [
+        {
+          "name": "followRedirects",
+          "type": {
+            "kind": "source",
+            "spelling": "Bool",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "是否自动跟随带 Location 的重定向响应。",
+          "defaultExpression": "true"
+        },
         {
           "name": "maximumRedirects",
           "type": {
@@ -113347,7 +113366,7 @@
         
       ],
       "documentation": {
-        "rawText": "/**\n * Wirestack 公开 API：构造并校验该公开值。\n * @param allowHttpsDowngrade 调用方提供的输入值。\n * @param maximumDrainBytes 调用方提供的输入值。\n * @param maximumRedirects 调用方提供的输入值。\n */",
+        "rawText": "/**\n * Wirestack 公开 API：构造并校验该公开值。\n * @param allowHttpsDowngrade 调用方提供的输入值。\n * @param followRedirects 是否自动跟随带 Location 的重定向响应。\n * @param maximumDrainBytes 调用方提供的输入值。\n * @param maximumRedirects 调用方提供的输入值。\n */",
         "summary": "Wirestack 公开 API：构造并校验该公开值。",
         "description": "",
         "markdown": {
@@ -113385,6 +113404,13 @@
           },
           {
             "name": "param",
+            "subject": "followRedirects",
+            "description": "是否自动跟随带 Location 的重定向响应。",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          },
+          {
+            "name": "param",
             "subject": "maximumDrainBytes",
             "description": "调用方提供的输入值。",
             "referenceState": "unavailable",
@@ -113402,23 +113428,30 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 79,
+          "line": 84,
           "column": 5,
-          "byteOffset": 2403
+          "byteOffset": 2620
         },
         "end": {
-          "line": 87,
+          "line": 94,
           "column": 6,
-          "byteOffset": 2867
+          "byteOffset": 3170
         }
       },
-      "headerSpelling": "public init(maximumRedirects!: Int64 = 10, allowHttpsDowngrade!: Bool = false,\n        maximumDrainBytes!: Int64 = 64 * 1024)",
+      "headerSpelling": "public init(followRedirects!: Bool = true, maximumRedirects!: Int64 = 10,\n        allowHttpsDowngrade!: Bool = false,\n        maximumDrainBytes!: Int64 = 64 * 1024)",
       "sourceApiSignature": {
         "state": "available",
         "tokens": [
           "PUBLIC:6:public",
           "INIT:4:init",
           "LPAREN:1:(",
+          "IDENTIFIER:15:followRedirects",
+          "NOT:1:!",
+          "COLON:1::",
+          "BOOLEAN:4:Bool",
+          "ASSIGN:1:=",
+          "BOOL_LITERAL:4:true",
+          "COMMA:1:,",
           "IDENTIFIER:16:maximumRedirects",
           "NOT:1:!",
           "COLON:1::",
@@ -113626,14 +113659,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 96,
+          "line": 103,
           "column": 5,
-          "byteOffset": 3174
+          "byteOffset": 3477
         },
         "end": {
-          "line": 142,
+          "line": 150,
           "column": 6,
-          "byteOffset": 5394
+          "byteOffset": 5756
         }
       },
       "headerSpelling": "public func nextRequest(request: HttpRequest, response: HttpResponse,\n        redirectsFollowed!: Int64 = 0, limits!: HttpLimits = HttpLimits()): ?HttpRequest",
@@ -113757,14 +113790,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 67,
+          "line": 71,
           "column": 5,
-          "byteOffset": 1977
+          "byteOffset": 2115
         },
         "end": {
-          "line": 67,
+          "line": 71,
           "column": 41,
-          "byteOffset": 2013
+          "byteOffset": 2151
         }
       },
       "headerSpelling": "public let allowHttpsDowngrade: Bool",
@@ -113774,6 +113807,111 @@
           "PUBLIC:6:public",
           "LET:3:let",
           "IDENTIFIER:19:allowHttpsDowngrade",
+          "COLON:1::",
+          "BOOLEAN:4:Bool"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::HttpRedirectPolicy::variable:followRedirects#g0()",
+      "kind": "variable",
+      "name": "followRedirects",
+      "qualifiedName": "wirestack.http.HttpRedirectPolicy.followRedirects",
+      "packageName": "wirestack.http",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::class:HttpRedirectPolicy#g0()",
+      "visibility": "public",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Bool",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": {
+        "rawText": "/**\n * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。\n */",
+        "summary": "Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。",
+        "description": "",
+        "markdown": {
+          "kind": "document",
+          "literal": "",
+          "source": null,
+          "metadata": null,
+          "children": [
+            {
+              "kind": "paragraph",
+              "literal": "",
+              "source": null,
+              "metadata": null,
+              "children": [
+                {
+                  "kind": "text",
+                  "literal": "Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。",
+                  "source": null,
+                  "metadata": null,
+                  "children": [
+                    
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": [
+          
+        ]
+      },
+      "source": {
+        "path": "src/http/redirect.cj",
+        "start": {
+          "line": 63,
+          "column": 5,
+          "byteOffset": 1837
+        },
+        "end": {
+          "line": 63,
+          "column": 37,
+          "byteOffset": 1869
+        }
+      },
+      "headerSpelling": "public let followRedirects: Bool",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PUBLIC:6:public",
+          "LET:3:let",
+          "IDENTIFIER:15:followRedirects",
           "COLON:1::",
           "BOOLEAN:4:Bool"
         ]
@@ -113862,14 +114000,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 71,
+          "line": 75,
           "column": 5,
-          "byteOffset": 2119
+          "byteOffset": 2257
         },
         "end": {
-          "line": 71,
+          "line": 75,
           "column": 40,
-          "byteOffset": 2154
+          "byteOffset": 2292
         }
       },
       "headerSpelling": "public let maximumDrainBytes: Int64",
@@ -113967,14 +114105,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 63,
+          "line": 67,
           "column": 5,
-          "byteOffset": 1837
+          "byteOffset": 1975
         },
         "end": {
-          "line": 63,
+          "line": 67,
           "column": 39,
-          "byteOffset": 1871
+          "byteOffset": 2009
         }
       },
       "headerSpelling": "public let maximumRedirects: Int64",
@@ -144969,9 +145107,9 @@
           "byteOffset": 1698
         },
         "end": {
-          "line": 143,
+          "line": 151,
           "column": 2,
-          "byteOffset": 5396
+          "byteOffset": 5758
         }
       },
       "headerSpelling": "public class HttpRedirectPolicy",
@@ -169705,14 +169843,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 169,
+          "line": 177,
           "column": 1,
-          "byteOffset": 6470
+          "byteOffset": 6832
         },
         "end": {
-          "line": 173,
+          "line": 181,
           "column": 2,
-          "byteOffset": 6734
+          "byteOffset": 7096
         }
       },
       "headerSpelling": "private func canonicalizeRedirectUrl(value: HttpUrl): HttpUrl",
@@ -169800,14 +169938,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 145,
+          "line": 153,
           "column": 1,
-          "byteOffset": 5398
+          "byteOffset": 5760
         },
         "end": {
-          "line": 147,
+          "line": 155,
           "column": 2,
-          "byteOffset": 5538
+          "byteOffset": 5900
         }
       },
       "headerSpelling": "private func isRedirectStatus(status: Int64): Bool",
@@ -169895,14 +170033,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 197,
+          "line": 205,
           "column": 1,
-          "byteOffset": 7399
+          "byteOffset": 7761
         },
         "end": {
-          "line": 227,
+          "line": 235,
           "column": 2,
-          "byteOffset": 8523
+          "byteOffset": 8885
         }
       },
       "headerSpelling": "private func normalizeRedirectTarget(target: String): String",
@@ -170044,14 +170182,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 239,
+          "line": 247,
           "column": 1,
-          "byteOffset": 8863
+          "byteOffset": 9225
         },
         "end": {
-          "line": 257,
+          "line": 265,
           "column": 2,
-          "byteOffset": 9566
+          "byteOffset": 9928
         }
       },
       "headerSpelling": "private func redirectedHeaders(source: HttpHeaders, crossOrigin: Bool,\n    removeBodyHeaders: Bool, limits: HttpLimits): HttpHeaders",
@@ -170151,14 +170289,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 187,
+          "line": 195,
           "column": 1,
-          "byteOffset": 7097
+          "byteOffset": 7459
         },
         "end": {
-          "line": 195,
+          "line": 203,
           "column": 2,
-          "byteOffset": 7397
+          "byteOffset": 7759
         }
       },
       "headerSpelling": "private func requestDirectory(target: String): String",
@@ -170246,14 +170384,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 175,
+          "line": 183,
           "column": 1,
-          "byteOffset": 6736
+          "byteOffset": 7098
         },
         "end": {
-          "line": 185,
+          "line": 193,
           "column": 2,
-          "byteOffset": 7095
+          "byteOffset": 7457
         }
       },
       "headerSpelling": "private func requestPathWithoutQuery(target: String): String",
@@ -170359,14 +170497,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 149,
+          "line": 157,
           "column": 1,
-          "byteOffset": 5540
+          "byteOffset": 5902
         },
         "end": {
-          "line": 167,
+          "line": 175,
           "column": 2,
-          "byteOffset": 6468
+          "byteOffset": 6830
         }
       },
       "headerSpelling": "private func resolveRedirectUrl(base: HttpUrl, location: String): HttpUrl",
@@ -170476,14 +170614,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 229,
+          "line": 237,
           "column": 1,
-          "byteOffset": 8525
+          "byteOffset": 8887
         },
         "end": {
-          "line": 231,
+          "line": 239,
           "column": 2,
-          "byteOffset": 8625
+          "byteOffset": 8987
         }
       },
       "headerSpelling": "private func stringPrefix(bytes: Array<Byte>, end: Int64): String",
@@ -170614,14 +170752,14 @@
       "source": {
         "path": "src/http/redirect.cj",
         "start": {
-          "line": 233,
+          "line": 241,
           "column": 1,
-          "byteOffset": 8627
+          "byteOffset": 8989
         },
         "end": {
-          "line": 237,
+          "line": 245,
           "column": 2,
-          "byteOffset": 8861
+          "byteOffset": 9223
         }
       },
       "headerSpelling": "private func stringRange(bytes: Array<Byte>, start: Int64, end: Int64): String",

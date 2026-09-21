@@ -15,6 +15,27 @@ private class ExampleHttpHandler <: HttpServerHandler {
         let _ = context
         let _ = request.body.read(Array<Byte>(1, repeat: 0u8))
         calls.fetchAdd(1)
+        if (request.target == "/redirect") {
+            let content = "redirect-body".toArray()
+            return HttpServerResponse(HttpResponse(
+                302,
+                "Found",
+                ResponseBody(RequestBody.bytes(content).open()),
+                headers: HttpHeaders.builder()
+                    .add("Location", "/final")
+                    .add("Content-Length", content.size.toString())
+                    .build()
+            ))
+        }
+        if (request.target == "/final") {
+            let content = "final-body".toArray()
+            return HttpServerResponse(HttpResponse(
+                200,
+                "OK",
+                ResponseBody(RequestBody.bytes(content).open()),
+                headers: HttpHeaders.builder().add("Content-Length", content.size.toString()).build()
+            ))
+        }
         if (request.target == "/events") {
             let headers = if (request.version == HttpVersion.Http11) {
                 HttpHeaders.builder()
@@ -59,8 +80,53 @@ private class FiniteSseBody <: HttpBodyStream {
 }
 
 func runHttpExamples(): Unit {
+    runNoFollowRedirectExample()
     runHttp1SseCancellationAndProxyExamples()
     runHttpsHttp2AndCustomCaExamples()
+}
+
+private func runNoFollowRedirectExample(): Unit {
+    let handler = ExampleHttpHandler()
+    let server = HttpServer.builder()
+        .listen(exampleLoopback(0))
+        .handler(handler)
+        .build()
+    let serving: Future<Unit> = spawn { server.serve() }
+    let host = HostName("redirect.test")
+    let resolver = StaticResolver(ResolveResult(
+        [server.localEndpoint.address], host, ResolverSource.Static
+    ))
+    let client = HttpClient.builder()
+        .resolver(resolver)
+        .redirectPolicy(HttpRedirectPolicy(followRedirects: false))
+        .requestTimeout(5 * Duration.second)
+        .build()
+    let context = OperationContext(
+        deadline: Some(Deadline.after(5 * Duration.second))
+    )
+    try {
+        let response = client.get(
+            "http://redirect.test:${server.localEndpoint.port}/redirect",
+            context: context
+        )
+        try {
+            exampleRequire(response.status == 302, "no-follow redirect status")
+            exampleRequire(
+                response.headers.getFirst("location") == Some("/final"),
+                "no-follow redirect location"
+            )
+            exampleRequire(
+                readExampleBody(response.body) == "redirect-body",
+                "no-follow redirect body"
+            )
+        } finally { response.close() }
+        println("NO_FOLLOW_REDIRECT=PASS")
+    } finally {
+        client.close()
+        let result = server.shutdown(context: context)
+        exampleRequire(result.activeAtReturn == 0, "no-follow redirect shutdown")
+        serving.get(5 * Duration.second)
+    }
 }
 
 private func runHttp1SseCancellationAndProxyExamples(): Unit {
