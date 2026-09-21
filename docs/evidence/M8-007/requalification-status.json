@@ -13,8 +13,8 @@
       "path": "docs/evidence/M8-007/linux_x86_64/security-package.json",
       "sha256": "18f1f75682d4945f0f41cf09c715147da9b209e4f30c8e738f7db65a337930c5"
     },
-    "selection": "PENDING_LOCAL_UNQUALIFIED_COMMIT",
-    "source_revision": null
+    "selection": "SELECTED_LOCAL_UNQUALIFIED_SOURCE",
+    "source_revision": "7f3395d6aaa0d103baf345b388f5d252dfb27e76"
   },
   "completion_claim": false,
   "historical_evidence": {
@@ -107,7 +107,7 @@
     "results": {
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d57ff7abdb7ebeeb53a6659b8ce8ccfd9c90d54e8211d3f14b573e4d9fdfed36"
+        "sha256": "196802faa5446736d6af606be499737ecaa1a7debe362fbcad8d3f36ff500959"
       },
       "path": "docs/evidence/M8-007/requalification-command-results.json"
     },
