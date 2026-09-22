@@ -1,0 +1,1 @@
+{"decision": "PASS", "gate_id": "M7-023-LINUX-FUZZ", "mode": "campaign", "output": "build/current-development-baseline/fuzz.json", "targets": 10}

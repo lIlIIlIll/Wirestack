@@ -10,6 +10,11 @@ Status values:
 - `BLOCKED`: dependency, gate, platform, upstream, or evidence requirement is missing.
 - `COMPLETE`: all acceptance criteria are satisfied and durable evidence is linked.
 
+Current development follows PRD §21.6 and P1-015. Historical M7/M8 evidence is
+retained, not repaired or reused as current qualification. A verified P1-015
+development baseline replaces M8-007 release completion as the start condition
+for planned M9-001 / #170. It does not close M8-007 or authorize publication.
+
 ## Repository bootstrap
 
 | ID | Status | Evidence | Notes |
@@ -190,6 +195,7 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | P1-012 | COMPLETE | [`docs/evidence/P1-012/README.md`](../evidence/P1-012/README.md) | Fail-closed repository diagnostics, task contracts, layered checks and source-bound evidence freshness validation pass on Linux glibc; no long-duration gate ran. |
 | P1-013 | COMPLETE | [`docs/evidence/P1-013/README.md`](../evidence/P1-013/README.md) | Development regression checks now validate frozen release records structurally, while all production M7 release validators remain strict by default and reject stale source or artifact evidence. `scripts/check` passes; no long-duration gate ran. |
 | P1-014 | COMPLETE | [`docs/evidence/P1-014/README.md`](../evidence/P1-014/README.md) | All 398 digest calls have explicit text, artifact-byte or typed-implementation domains across Python, scripts and workflows; schema v2, exact-candidate-bound Linux and hosted Windows CRLF fault injection, task-level validation and canonical repository checks pass. Historical schema-v1 evidence remains rejected rather than silently promoted. |
+| P1-015 | COMPLETE | [current development baseline](../evidence/P1-015/README.md); [bound results](../evidence/P1-015/baseline.json); [negative checks](../evidence/P1-015/verification.json); [task check](../evidence/P1-015/task-check.json) | Local Linux development acceptance passes for production commit 26c81160eacc91d7c1726e20d46c9d3aa086addc and SDK 1.1.3: 669 Python checks, 785 Cangjie cases with 23 Performance exclusions, installed consumer, ten fuzz targets and 600-second resource preflight. Nine tamper/scope mutations are rejected. M9-001 may start after baseline verification; historical M7/M8 reconstruction is not a prerequisite. Formal release remains NOT_QUALIFIED. This records development acceptance, not release qualification. |
 
 ## M8 Linux network foundation
 

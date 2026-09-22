@@ -1,0 +1,82 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/P1-015/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 164.09,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-22T02:59:04.400078Z",
+      "id": "baseline-plan",
+      "started_at_utc": "2026-09-22T02:59:04.235990Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/P1-015/baseline-plan.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 8, \"scenarios\": 7, \"tests\": 5}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/P1-015/baseline-plan.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_development_baseline",
+        "tools.tests.test_m7_028_security_review_package",
+        "tools.tests.test_p1_013_development_release_gate",
+        "tools.tests.test_m7_linux_task_graph",
+        "-v"
+      ],
+      "duration_ms": 464.456,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-22T02:59:04.864682Z",
+      "id": "gate-separation",
+      "started_at_utc": "2026-09-22T02:59:04.400236Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_development_result_cannot_claim_release (tools.tests.test_development_baseline.DevelopmentBaselineTests.test_development_result_cannot_claim_release) ... ok\ntest_direct_cli_bootstraps_outside_checkout (tools.tests.test_development_baseline.DevelopmentBaselineTests.test_direct_cli_bootstraps_outside_checkout) ... ok\ntest_missing_gate_cannot_promote_development (tools.tests.test_development_baseline.DevelopmentBaselineTests.test_missing_gate_cannot_promote_development) ... ok\ntest_partial_campaign_or_shortened_preflight_is_not_accepted (tools.tests.test_development_baseline.DevelopmentBaselineTests.test_partial_campaign_or_shortened_preflight_is_not_accepted) ... ok\ntest_paths_are_normalized_before_retention (tools.tests.test_development_baseline.DevelopmentBaselineTests.test_paths_are_normalized_before_retention) ... ok\ntest_timeout_and_nonzero_exit_cannot_be_hidden_by_pass (tools.tests.test_development_baseline.DevelopmentBaselineTests.test_timeout_and_nonzero_exit_cannot_be_hidden_by_pass) ... ok\ntest_atomic_report_failure_preserves_previous_bytes (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_atomic_report_failure_preserves_previous_bytes) ... ok\ntest_current_bound_inputs_require_pass_bundle_digest (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_current_bound_inputs_require_pass_bundle_digest) ... ok\ntest_final_task_validates_its_own_evidence_without_historical_fallback (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_final_task_validates_its_own_evidence_without_historical_fallback) ... ok\ntest_fresh_package_is_valid (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_fresh_package_is_valid) ... ok\ntest_invalid_utf8_has_stable_structured_digest_error (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_invalid_utf8_has_stable_structured_digest_error) ... ok\ntest_missing_file_and_digest_drift_are_rejected (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_missing_file_and_digest_drift_are_rejected) ... ok\ntest_path_escape_is_rejected (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_path_escape_is_rejected) ... ok\ntest_required_topic_and_compatibility_gate_are_enforced (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_required_topic_and_compatibility_gate_are_enforced) ... ok\ntest_sensitive_data_is_rejected_without_echoing_value (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_sensitive_data_is_rejected_without_echoing_value) ... ok\ntest_stale_or_skipped_evidence_cannot_claim_pass (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_stale_or_skipped_evidence_cannot_claim_pass) ... ok\ntest_unknown_schema_and_field_are_rejected (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_unknown_schema_and_field_are_rejected) ... ok\ntest_strict_modes_reject_the_same_stale_records (tools.tests.test_p1_013_development_release_gate.P1013DevelopmentReleaseGateTests.test_strict_modes_reject_the_same_stale_records) ... ok\ntest_structural_modes_accept_frozen_records_without_local_release_artifact (tools.tests.test_p1_013_development_release_gate.P1013DevelopmentReleaseGateTests.test_structural_modes_accept_frozen_records_without_local_release_artifact) ... ok\ntest_linux_dependencies_exclude_global_and_upstream_blockers (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok\ntest_linux_graph_has_the_exact_frozen_task_set (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok\ntest_task_counts_include_linux_profile_and_formal_follow_up_work (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_counts_include_linux_profile_and_formal_follow_up_work) ... ok\ntest_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 0.289s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/P1-015/gate-separation.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/P1-015/gate-separation.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/development_baseline.py",
+        "verify"
+      ],
+      "duration_ms": 7220.153,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-22T02:59:12.085011Z",
+      "id": "current-baseline",
+      "started_at_utc": "2026-09-22T02:59:04.864861Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/P1-015/current-baseline.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "P1-015 current development baseline: PASS; release NOT_QUALIFIED\n",
+      "stdout_path": "build/repository-tooling/P1-015/current-baseline.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "P1-015"
+}

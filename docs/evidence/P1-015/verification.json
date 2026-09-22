@@ -1,0 +1,89 @@
+{
+  "publication_privacy": {
+    "command": "git privacy-check",
+    "exit_code": 1,
+    "status": "BLOCKED_BY_EXISTING_M8_007_FILES",
+    "reported_paths": [
+      "docs/evidence/M8-007/commands/soak-owner-controls/1790042120606136091/before.stderr.log",
+      "docs/evidence/M8-007/soak-owner-controls.json"
+    ],
+    "new_task_findings": [],
+    "action": "Preserved existing files; no commit or publication attempted."
+  },
+  "cleanup": {
+    "temporary_probe_script_removed": true,
+    "temporary_execution_input_removed": true,
+    "post_cleanup_verify_exit_code": 0,
+    "post_cleanup_release_state": "NOT_QUALIFIED"
+  },
+  "baseline": {
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5cc37d2c99cb97e232eb25df659fb488c908a3167d44ccdab6228d9c11234f86"
+    },
+    "path": "docs/evidence/P1-015/baseline.json"
+  },
+  "initial_attempts": [
+    "Initial capture failed two Python checks: typed digest comparison and a source-spelling bootstrap assertion.",
+    "Next capture passed 467 Python tests but failed the historical performance digest setup. Fresh isolated fixtures now exercise its validator.",
+    "A 30-second outer command timeout interrupted a later run; it is not counted as a passing check.",
+    "Two diagnostic captures were cancelled while closing the execution-input inventory and exact-commit validation gaps; neither counts as PASS."
+  ],
+  "negative_cases": [
+    {
+      "case": "missing-command",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: missing or reordered development gates\n"
+    },
+    {
+      "case": "release-promotion",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: development evidence cannot confer release qualification\n"
+    },
+    {
+      "case": "missing-log",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: required captured logs missing or duplicated\n"
+    },
+    {
+      "case": "production-receipt-drift",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: production inventory drift\n"
+    },
+    {
+      "case": "tree-object-not-commit",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: candidate revision does not resolve to a commit: git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\nerror: e913788f31459c70cde254c5b50839328d6ef428^{commit}: expected commit type, but the object dereferences to tree type\nfatal: Needed a single revision\n"
+    },
+    {
+      "case": "new-execution-input",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: development input inventory drift\n"
+    },
+    {
+      "case": "wrong-sdk",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: SDK archive differs from the qualified pin\n"
+    },
+    {
+      "case": "artifact-byte-tamper",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: artifact drift\n"
+    },
+    {
+      "case": "log-byte-tamper",
+      "exit_code": 1,
+      "output": "P1-015 current development baseline: FAIL: captured log drift\n"
+    },
+    {
+      "case": "clean-restored-baseline",
+      "exit_code": 0,
+      "output": "P1-015 current development baseline: PASS; release NOT_QUALIFIED\n"
+    }
+  ],
+  "release_qualification": "NOT_QUALIFIED",
+  "schema_version": 1,
+  "source_task": "P1-015",
+  "status": "PASS",
+  "workspace_mutation": "Only a newly created execution-input probe and private build copies; all removed."
+}
