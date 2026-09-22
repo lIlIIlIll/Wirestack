@@ -54,6 +54,8 @@ private let HPACK_HUFFMAN_LENGTHS: Array<UInt8> = [
     27u8,27u8,26u8,30u8
 ]
 
+private let HPACK_HUFFMAN_TREE = buildHuffmanTree()
+
 /** Encodes with a hard output ceiling and RFC EOS-prefix padding. */
 public func encodeHpackHuffman(input: Array<Byte>, maxOutputBytes!: UInt64 = 65536u64): Array<Byte> {
     let output = ArrayList<Byte>()
@@ -86,18 +88,20 @@ public func decodeHpackHuffman(input: Array<Byte>, maxOutputBytes!: UInt64 = 655
     let output = ArrayList<Byte>()
     var code = 0u64
     var codeLength: UInt64 = 0u64
+    var node: Int64 = 0
     for (octet in input) {
         for (bitIndex in 0u64..8u64) {
-            code = (code << 1u64) | ((UInt64(octet) >> (7u64 - bitIndex)) & 1u64)
+            let bit = (UInt64(octet) >> (7u64 - bitIndex)) & 1u64
+            code = (code << 1u64) | bit
             codeLength += 1u64
-            let symbol = huffmanExactSymbol(code, codeLength)
-            if (symbol >= 0) {
+            node = HPACK_HUFFMAN_TREE[node + Int64(bit)]
+            if (node < 0) {
+                let symbol = -node - 1
                 if (symbol == 256) { throw HpackException("HPACK Huffman EOS symbol is forbidden in data") }
                 appendHuffmanByte(output, UInt8(symbol), maxOutputBytes)
+                node = 0
                 code = 0u64
                 codeLength = 0u64
-            } else if (!huffmanPrefixExists(code, codeLength)) {
-                throw HpackException("HPACK Huffman stream contains an invalid code prefix")
             }
         }
     }
@@ -108,25 +112,29 @@ public func decodeHpackHuffman(input: Array<Byte>, maxOutputBytes!: UInt64 = 655
     output.toArray()
 }
 
-private func huffmanExactSymbol(code: UInt64, length: UInt64): Int64 {
-    for (index in 0..HPACK_HUFFMAN_CODES.size) {
-        if (UInt64(HPACK_HUFFMAN_LENGTHS[index]) == length && UInt64(HPACK_HUFFMAN_CODES[index]) == code) {
-            return index
+// A full binary prefix tree with 257 leaves has 256 internal nodes.
+// Each node has two edges; negative edges encode -(symbol + 1).
+private func buildHuffmanTree(): Array<Int64> {
+    let edges = Array<Int64>(512, repeat: 0)
+    var nextNode: Int64 = 2
+    for (symbol in 0..HPACK_HUFFMAN_CODES.size) {
+        var node: Int64 = 0
+        var remaining = UInt64(HPACK_HUFFMAN_LENGTHS[symbol])
+        while (remaining > 0u64) {
+            remaining -= 1u64
+            let edge = node + Int64((UInt64(HPACK_HUFFMAN_CODES[symbol]) >> remaining) & 1u64)
+            if (remaining == 0u64) {
+                edges[edge] = -(symbol + 1)
+            } else {
+                if (edges[edge] == 0) {
+                    edges[edge] = nextNode
+                    nextNode += 2
+                }
+                node = edges[edge]
+            }
         }
     }
-    -1
-}
-
-private func huffmanPrefixExists(code: UInt64, length: UInt64): Bool {
-    if (length > 30u64) { return false }
-    for (index in 0..HPACK_HUFFMAN_CODES.size) {
-        let symbolLength = UInt64(HPACK_HUFFMAN_LENGTHS[index])
-        if (symbolLength >= length &&
-            (UInt64(HPACK_HUFFMAN_CODES[index]) >> (symbolLength - length)) == code) {
-            return true
-        }
-    }
-    false
+    edges
 }
 
 private func appendHuffmanByte(output: ArrayList<Byte>, value: Byte, maximum: UInt64): Unit {

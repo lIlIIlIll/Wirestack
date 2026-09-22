@@ -41,7 +41,7 @@ class Http1RequestWriterTest {
             body: RequestBody.bytes("data".toArray())
         )
 
-        let evidence = writeHttp1Request(writer, request)
+        let evidence = writeHttp1Request(writer, request, limits: HttpLimits(maxBodyBytes: 4))
         let expected = "POST /upload HTTP/1.1\r\nContent-Length: 4\r\nHost: example.com\r\n\r\ndata".toArray()
         let received = Array<Byte>(expected.size, repeat: 0)
         readExact(reader, MutableByteSpan(received))
@@ -87,6 +87,37 @@ class Http1RequestWriterTest {
         let error = captureWriteFailure(writer, request)
         @Expect(isWriteCode(error.code, Http1RequestWriteErrorCode.BodyLengthMismatch))
         @Expect(!error.evidence.requestCommitted)
+    }
+
+    @TestCase
+    func fixedBodyLimitRejectsBeforeConsumingOrCommittingRequest(): Unit {
+        let (writer, reader) = MemoryTransport.pair(capacity: 1024)
+        let stream = CountingOpenBodyStream("data".toArray())
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.com/upload"),
+            headers: HttpHeaders.builder().add("Content-Length", "4").build(),
+            body: RequestBody.oneShot(stream)
+        )
+        var rejected = false
+        try {
+            let _ = writeHttp1Request(writer, request, limits: HttpLimits(maxBodyBytes: 3))
+        } catch (error: Http1RequestWriteException) {
+            rejected = isWriteCode(error.code, Http1RequestWriteErrorCode.BodyTooLarge)
+            @Expect(error.evidence.wireBytesWritten, 0)
+            @Expect(error.evidence.bodyBytesWritten, 0)
+        } finally {
+            writer.close()
+        }
+        @Expect(rejected)
+        @Expect(stream.readCalls, 0)
+        @Expect(!stream.isClosed())
+        let buffer = Array<Byte>(1, repeat: 0u8)
+        match (reader.readSome(MutableByteSpan(buffer), context: OperationContext.background())) {
+            case ReadResult.EndOfStream => ()
+            case ReadResult.Data(_) => @Expect(false)
+        }
+        reader.close()
+        stream.close()
     }
 
     @TestCase

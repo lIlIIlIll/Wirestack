@@ -77,7 +77,7 @@ public class Http1RequestWriter {
         let serialized = serializeClientRequestHead(
             request.method, request.url, request.headers, targetForm: targetForm, limits: limits
         )
-        validateBodyFraming(request.body, serialized.framing)
+        validateBodyFraming(request.body, serialized.framing, limits.maxBodyBytes)
         this.request = request
         this.limits = limits
         this.trailer = trailer
@@ -128,12 +128,19 @@ private class RequestWriteTracker {
     }
 }
 
-private func validateBodyFraming(body: RequestBody, framing: Http1BodyFraming): Unit {
+private func validateBodyFraming(body: RequestBody, framing: Http1BodyFraming, maximumBodyBytes: Int64): Unit {
     match (framing) {
         case Http1BodyFraming.Empty =>
             if (body.contentLength != Some(0)) { bodyLengthMismatch(Http1RequestCommitEvidence(0, 0)) }
         case Http1BodyFraming.ContentLength(expected) =>
             if (body.contentLength != Some(expected)) { bodyLengthMismatch(Http1RequestCommitEvidence(0, 0)) }
+            if (expected > maximumBodyBytes) {
+                throw Http1RequestWriteException(
+                    Http1RequestWriteErrorCode.BodyTooLarge,
+                    "HTTP/1 request body exceeds the configured body limit",
+                    Http1RequestCommitEvidence(0, 0)
+                )
+            }
         case Http1BodyFraming.Chunked => ()
         case Http1BodyFraming.CloseDelimited | Http1BodyFraming.Tunnel =>
             throw Http1RequestWriteException(
