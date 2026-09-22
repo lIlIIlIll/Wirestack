@@ -124,6 +124,10 @@ Thumbs.db
 !docs/evidence/M9-001/**/*.json
 !docs/evidence/M9-001/**/*.log
 !docs/references/linux-network-capabilities.json
+!docs/references/m9-002-option-sdk.json
+!docs/evidence/M9-002/**/*.json
+!docs/evidence/M9-002/**/*.log
+!docs/evidence/M9-002/**/*.hex
 *.tmp
 *.prof
 *.trace

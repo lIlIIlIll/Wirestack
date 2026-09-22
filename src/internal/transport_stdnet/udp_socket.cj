@@ -50,8 +50,14 @@ public class StdNetDatagramSocket <: Resource {
      */
     public static func bind(
         endpoint: api.SocketEndpoint,
+        options!: Array<StdSocketOption> = [],
         context!: api.OperationContext = api.OperationContext.background()
     ): StdNetDatagramSocket {
+        bindConfigured(endpoint, options, context, applyNativeOption)
+    }
+
+    internal static func bindConfigured(endpoint: api.SocketEndpoint, options: Array<StdSocketOption>,
+        context: api.OperationContext, execute: (NativeOptionSocket, StdSocketOption, Bool) -> Unit): StdNetDatagramSocket {
         let local = api.NetworkEndpoint.Internet(endpoint)
         checkNetworkContext(
             context,
@@ -59,13 +65,16 @@ public class StdNetDatagramSocket <: Resource {
             api.NetworkPhase.AddressSelection,
             localEndpoint: Some(local)
         )
+        let ipv6 = match (endpoint.address.family) { case api.IpAddressFamily.Ipv6 => true case _ => false }
+        validateSocketOptions(options, StdSocketOptionTarget.Udp, ipv6, true, api.NetworkPhase.DatagramSend)
         let concrete = native.UdpSocket(bindAt: toStdEndpoint(endpoint))
         let nativeSocket: native.DatagramSocket = concrete
         bindNative(
             nativeSocket,
             StdNetDatagramKind.Internet(concrete),
             local,
-            context
+            context,
+            options: options, execute: execute
         )
     }
 
@@ -105,12 +114,17 @@ public class StdNetDatagramSocket <: Resource {
         nativeSocket: native.DatagramSocket,
         nativeKind: StdNetDatagramKind,
         requested: api.NetworkEndpoint,
-        context: api.OperationContext
+        context: api.OperationContext,
+        options!: Array<StdSocketOption> = [],
+        execute!: (NativeOptionSocket, StdSocketOption, Bool) -> Unit = applyNativeOption
     ): StdNetDatagramSocket {
         let adapter = StdNetDatagramSocket(nativeSocket, nativeKind, requested)
         try {
             match (nativeKind) {
-                case StdNetDatagramKind.Internet(value) => value.bind()
+                case StdNetDatagramKind.Internet(value) =>
+                    applySocketOptionList(options, StdSocketOptionTarget.Udp, context, api.NetworkPhase.DatagramSend, false,
+                        { option => execute(NativeOptionSocket.Udp(value), option, adapter.optionIpv6()) })
+                    value.bind()
                 case StdNetDatagramKind.Unix(value) => value.bind()
             }
             checkNetworkContext(
@@ -138,6 +152,83 @@ public class StdNetDatagramSocket <: Resource {
             adapter.abortForCleanup()
             throw error
         }
+    }
+
+    private func optionIpv6(): Bool {
+        match (localEndpoint) {
+            case api.NetworkEndpoint.Internet(endpoint) => match (endpoint.address.family) {
+                case api.IpAddressFamily.Ipv6 => true
+                case _ => false
+            }
+            case _ => throw optionError(api.NetworkErrorCode.Unsupported, api.NetworkPhase.DatagramSend)
+        }
+    }
+
+    private func optionSocket(): NativeOptionSocket {
+        match (nativeKind) {
+            case StdNetDatagramKind.Internet(value) => NativeOptionSocket.Udp(value)
+            case _ => throw optionError(api.NetworkErrorCode.Unsupported, api.NetworkPhase.DatagramSend)
+        }
+    }
+
+    private func beginOptionControl(context: api.OperationContext): Unit {
+        synchronized(lifecycleMutex) {
+            ensureOpenLocked(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpointValue)
+            if (connectActive || sendActive || receiveActive) {
+                throw networkConcurrent(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend,
+                    localEndpoint: Some(localEndpointValue), remoteEndpoint: remoteEndpointValue)
+            }
+            checkNetworkContext(context, api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend,
+                localEndpoint: Some(localEndpointValue), remoteEndpoint: remoteEndpointValue)
+            connectActive = true
+        }
+    }
+
+    private func requireOptionOpen(): Unit {
+        synchronized(lifecycleMutex) {
+            ensureOpenLocked(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpointValue)
+        }
+    }
+
+    /** Applies UDP options using the same exclusive gate as connect. */
+    public func configureOptions(options: Array<StdSocketOption>, context: api.OperationContext): Unit {
+        configureOptionsUsing(options, context, applyNativeOption)
+    }
+
+    internal func configureOptionsUsing(options: Array<StdSocketOption>, context: api.OperationContext,
+        execute: (NativeOptionSocket, StdSocketOption, Bool) -> Unit): Unit {
+        let ipv6 = optionIpv6()
+        validateSocketOptions(options, StdSocketOptionTarget.Udp, ipv6, false, api.NetworkPhase.DatagramSend)
+        beginOptionControl(context)
+        try {
+            let selected = optionSocket()
+            applySocketOptionList(options, StdSocketOptionTarget.Udp, context, api.NetworkPhase.DatagramSend, false,
+                { option => requireOptionOpen(); execute(selected, option, ipv6) })
+            requireOptionOpen()
+        } catch (error: Exception) {
+            requireOptionOpen()
+            throw error
+        } finally { endConnect() }
+    }
+
+    /** Queries a qualified native value without overlapping send or receive. */
+    public func queryOption(name: StdSocketOptionName, context: api.OperationContext): StdSocketOption {
+        queryOptionUsing(name, context, queryNativeOption)
+    }
+
+    internal func queryOptionUsing(name: StdSocketOptionName, context: api.OperationContext,
+        query: (NativeOptionSocket, StdSocketOptionName, Bool) -> StdSocketOption): StdSocketOption {
+        beginOptionControl(context)
+        try {
+            let ipv6 = optionIpv6()
+            validateOptionName(name, StdSocketOptionTarget.Udp, ipv6, false, true, api.NetworkPhase.DatagramSend)
+            let value = query(optionSocket(), name, ipv6)
+            requireOptionOpen()
+            value
+        } catch (error: native.SocketException) {
+            requireOptionOpen()
+            throw mapSocketError(error, context, api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpoint: remoteEndpoint)
+        } finally { endConnect() }
     }
 
     private func connectNative(address: native.SocketAddress): Unit {

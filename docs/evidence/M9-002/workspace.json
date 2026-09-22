@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-002",
+  "workspace": "<isolated-worktree>",
+  "original_workspace": {
+    "root": "<original-workspace>",
+    "branch": "gitbutler/workspace",
+    "head": "f101cd246efccefff77165dc0e3864d3e94d0074",
+    "merge_base_with_main": "1b11f3ec26c3c63d8e65705946f1adf7dd90af35",
+    "preexisting_dirty_paths": [
+      {
+        "status": "M",
+        "path": "docs/planning/status.md"
+      },
+      {
+        "status": "??",
+        "path": "docs/evidence/M8-007/evidence-identity-audit.json"
+      }
+    ],
+    "policy": "Untouched; all M9-002 changes are isolated"
+  },
+  "implementation_workspace": {
+    "integration_head_before_edit": "87710b1579d02a317dcfb276a7071a824f488663",
+    "preexisting_dirty_paths": [],
+    "task_branch": "m9-002-typed-socket-options",
+    "stack_base": "m9-001-capability-baseline",
+    "base_seal_commit": "3a06f66413583356acc3de6b553eb98df2298f26",
+    "prerequisite_source_commit": "410352f6ac0cc7cf4fd2924516a838d9288a2ec7"
+  },
+  "prerequisite_check": {
+    "command": "python3 tools/repository/repository_tooling.py --root . verify-evidence --task M9-001 --json",
+    "exit_code": 0,
+    "reports": 8,
+    "source_inputs": 296,
+    "stale_inputs": 0,
+    "when": "Before M9-002 editing"
+  },
+  "authorization": "Owner explicitly permitted stacked development on the sealed, unmerged M9-001 branch; no M9-002 commit, push, PR, merge or release authorization",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": "Cangjie cjc/cjpm 1.1.3"
+}

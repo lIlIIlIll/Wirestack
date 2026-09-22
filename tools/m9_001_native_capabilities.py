@@ -344,12 +344,14 @@ def parse_capability_observations(lines: Sequence[str]) -> tuple[dict[str, dict[
     for class_name in CAPABILITY_CLASSES:
         values = observations[class_name]
         require(values, f"missing capability observations for {class_name}")
-        first = values[0]["capabilities"]
-        require(all(item["capabilities"] == first for item in values),
-                f"cross-instance capability difference for {class_name}: {values}")
-        require(first == EXPECTED_CAPABILITIES[class_name],
-                f"observed capabilities differ for {class_name}: {first}")
-        collapsed[class_name] = first
+        for item in values:
+            expected = dict(EXPECTED_CAPABILITIES[class_name])
+            if class_name == "UdpSocket" and item["instance"] == "ipv4":
+                expected["broadcast"] = True
+            require(item["capabilities"] == expected,
+                    f"observed capabilities differ for {class_name}/{item['instance']}")
+        collapsed[class_name] = {field: any(item["capabilities"][field] for item in values)
+                                 for field in CAPABILITY_FIELDS}
     return collapsed, observations
 
 

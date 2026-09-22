@@ -49,13 +49,20 @@ public class TcpListener <: Resource {
      *
      * @param endpoint Resolved local Internet endpoint.
      * @param backlog Maximum pending connection backlog, from 1 through 65,535.
+     * @param options Pre-bind listener options, overriding the address-reuse default.
+     * @param acceptedOptions TCP options applied before exposing every accepted stream.
      * @param context Absolute deadline and cancellation token for bind admission.
      */
     public static func bind(
         endpoint: api.SocketEndpoint,
         backlog!: Int64 = 128,
+        options!: Array<SocketOption> = [],
+        acceptedOptions!: Array<SocketOption> = [],
         context!: api.OperationContext = api.OperationContext.background()
     ): TcpListener {
+        let encoded = encodeSocketOptions(options)
+        let accepted = encodeSocketOptions(acceptedOptions)
+
         let publicEndpoint = Some(api.NetworkEndpoint.Internet(endpoint))
         try {
             stdnet.checkContext(
@@ -74,8 +81,10 @@ public class TcpListener <: Resource {
                     localEndpoint: publicEndpoint
                 )
             }
-            TcpListener(stdnet.StdNetTransportListener.bind(endpoint, backlog: backlog))
-        } catch (error: Exception) {
+            TcpListener(stdnet.StdNetTransportListener.bind(endpoint, backlog: backlog,
+                options: encoded, acceptedOptions: accepted, context: context))
+        } catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
             throw socketFailure(
                 error,
                 api.NetworkErrorCategory.Accept,
@@ -83,6 +92,19 @@ public class TcpListener <: Resource {
                 publicEndpoint,
                 None<api.NetworkEndpoint>
             )
+        }
+    }
+
+    /** Reads an effective listener option.
+     * @param name Listener option kind.
+     * @param context Absolute deadline and cancellation token.
+     * @return The effective kernel value.
+     */
+    public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption {
+        try { decodeSocketOption(delegate.queryOption(encodeSocketOptionName(name), context)) }
+        catch (error: Exception) {
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.ServerAccept,
+                Some(api.NetworkEndpoint.Internet(localEndpoint)), None<api.NetworkEndpoint>)
         }
     }
 

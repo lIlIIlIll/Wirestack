@@ -1,0 +1,38 @@
+2987157 setsockopt(3, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+2987157 setsockopt(4, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+2987157 getsockopt(4, SOL_SOCKET, SO_REUSEADDR, [1], [4]) = 0
+2987157 setsockopt(4, SOL_SOCKET, SO_REUSEPORT, [1], 4) = 0
+2987157 getsockopt(4, SOL_SOCKET, SO_REUSEPORT, [1], [4]) = 0
+2987157 setsockopt(6, SOL_IPV6, IPV6_V6ONLY, [1], 4) = 0
+2987157 getsockopt(6, SOL_IPV6, IPV6_V6ONLY, [1], [4]) = 0
+2987157 setsockopt(4, SOL_SOCKET, SO_RCVBUF, [4096], 4) = 0
+2987157 getsockopt(4, SOL_SOCKET, SO_RCVBUF, [8192], [4]) = 0
+2987157 setsockopt(4, SOL_SOCKET, SO_SNDBUF, [4096], 4) = 0
+2987157 getsockopt(4, SOL_SOCKET, SO_SNDBUF, [8192], [4]) = 0
+2987157 setsockopt(4, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+2987157 getsockopt(4, SOL_SOCKET, SO_BROADCAST, [1], [4]) = 0
+2987157 setsockopt(4, SOL_IP, IP_MULTICAST_TTL, [255], 4) = 0
+2987157 getsockopt(4, SOL_IP, IP_MULTICAST_TTL, [255], [4]) = 0
+2987157 setsockopt(4, SOL_IP, IP_MULTICAST_LOOP, [0], 4) = 0
+2987157 getsockopt(4, SOL_IP, IP_MULTICAST_LOOP, [0], [4]) = 0
+2987157 setsockopt(6, SOL_IPV6, IPV6_MULTICAST_HOPS, [255], 4) = 0
+2987157 getsockopt(6, SOL_IPV6, IPV6_MULTICAST_HOPS, [255], [4]) = 0
+2987157 setsockopt(6, SOL_IPV6, IPV6_MULTICAST_LOOP, [0], 4) = 0
+2987157 getsockopt(6, SOL_IPV6, IPV6_MULTICAST_LOOP, [0], [4]) = 0
+2987157 setsockopt(6, SOL_IPV6, IPV6_MULTICAST_IF, [0], 4) = 0
+2987157 getsockopt(6, SOL_IPV6, IPV6_MULTICAST_IF, [0], [4]) = 0
+2987157 setsockopt(3, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+2987157 getsockopt(3, SOL_TCP, TCP_NODELAY, [1], [4]) = 0
+2987157 setsockopt(3, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
+2987157 getsockopt(3, SOL_SOCKET, SO_KEEPALIVE, [1], [4]) = 0
+2987157 setsockopt(3, SOL_TCP, TCP_KEEPIDLE, [45], 4) = 0
+2987157 getsockopt(3, SOL_TCP, TCP_KEEPIDLE, [45], [4]) = 0
+2987157 setsockopt(3, SOL_TCP, TCP_KEEPINTVL, [5], 4) = 0
+2987157 getsockopt(3, SOL_TCP, TCP_KEEPINTVL, [5], [4]) = 0
+2987157 setsockopt(3, SOL_TCP, TCP_KEEPCNT, [5], 4) = 0
+2987157 getsockopt(3, SOL_TCP, TCP_KEEPCNT, [5], [4]) = 0
+2987165 +++ exited with 0 +++
+2987160 +++ exited with 0 +++
+2987159 +++ exited with 0 +++
+2987158 +++ exited with 0 +++
+2987157 +++ exited with 0 +++

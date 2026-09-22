@@ -36,6 +36,25 @@ internal class DatagramSocketFacadeCore {
         get() { synchronized(lifecycleMutex) { remoteEndpointValue } }
     }
 
+    func configureOptions(options: Array<stdnet.StdSocketOption>, context: api.OperationContext): Unit {
+        try { delegate.configureOptions(options, context) }
+        catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
+            retainAbortOwnership()
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend,
+                Some(localEndpointValue), remoteEndpoint)
+        }
+    }
+
+    func queryOption(name: stdnet.StdSocketOptionName, context: api.OperationContext): stdnet.StdSocketOption {
+        try { delegate.queryOption(name, context) }
+        catch (error: Exception) {
+            retainAbortOwnership()
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend,
+                Some(localEndpointValue), remoteEndpoint)
+        }
+    }
+
     func connect(
         endpoint: NetworkEndpoint,
         context: api.OperationContext

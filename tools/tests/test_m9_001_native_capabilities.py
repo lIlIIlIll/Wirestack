@@ -7,7 +7,9 @@ from tools import m9_001_native_capabilities as native
 
 class NativeCapabilitiesTest(unittest.TestCase):
     def capability_line(self, class_name: str, instance: str) -> str:
-        expected = native.EXPECTED_CAPABILITIES[class_name]
+        expected = dict(native.EXPECTED_CAPABILITIES[class_name])
+        if class_name == "UdpSocket" and instance == "ipv4":
+            expected["broadcast"] = True
         flags = " ".join("true" if expected[field] else "false" for field in native.CAPABILITY_FIELDS)
         return f"CAP {class_name} {instance} {flags}"
 

@@ -13,34 +13,38 @@ import wirestack.internal.transport_stdnet as stdnet
  */
 public class UdpSocket <: DatagramSocket {
     private let core: DatagramSocketFacadeCore
-    private let capabilityValue = SocketCapabilities(
-        nonBlocking: true,
-        closeOnExec: true,
-        halfClose: false,
-        broadcast: false,
-        multicast: false,
-        raw: false,
-        ancillaryData: false,
-        zeroLengthDatagramSend: false,
-        connectedDatagramSend: true
-    )
+    private let capabilityValue: SocketCapabilities
 
     internal init(delegate: stdnet.StdNetDatagramSocket) {
         this.core = DatagramSocketFacadeCore(delegate)
+        let ipv4 = match (delegate.localEndpoint) {
+            case NetworkEndpoint.Internet(endpoint) => match (endpoint.address.family) {
+                case api.IpAddressFamily.Ipv4 => true
+                case _ => false
+            }
+            case _ => false
+        }
+        this.capabilityValue = SocketCapabilities(nonBlocking: true, closeOnExec: true,
+            halfClose: false, broadcast: ipv4, multicast: false, raw: false, ancillaryData: false,
+            zeroLengthDatagramSend: false, connectedDatagramSend: true)
     }
 
     /** Binds an Internet datagram socket without DNS.
      * @param endpoint Local resolved IP endpoint; port zero asks the kernel to allocate one.
+     * @param options Pre-bind UDP options, in caller order.
      * @param context Shared absolute deadline and cancellation token.
      * @return A bound UDP socket.
      */
     public static func bind(
         endpoint: api.SocketEndpoint,
+        options!: Array<SocketOption> = [],
         context!: api.OperationContext = api.OperationContext.background()
     ): UdpSocket {
+        let encoded = encodeSocketOptions(options)
+
         let local = Some(NetworkEndpoint.Internet(endpoint))
         try {
-            let delegate = stdnet.StdNetDatagramSocket.bind(endpoint, context: context)
+            let delegate = stdnet.StdNetDatagramSocket.bind(endpoint, context: context, options: encoded)
             try {
                 UdpSocket(delegate)
             } catch (error: Exception) {
@@ -49,7 +53,8 @@ public class UdpSocket <: DatagramSocket {
                 } catch (_: Exception) {}
                 throw error
             }
-        } catch (error: Exception) {
+        } catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
             throw socketFailure(
                 error,
                 api.NetworkErrorCategory.Address,
@@ -58,6 +63,23 @@ public class UdpSocket <: DatagramSocket {
                 None<NetworkEndpoint>
             )
         }
+    }
+
+    /** Applies an ordered UDP option list without overlapping I/O or connect.
+     * @param options At most twelve distinct typed options.
+     * @param context Absolute deadline and cancellation token.
+     */
+    public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.configureOptions(encodeSocketOptions(options), context)
+    }
+
+    /** Queries the effective kernel value. IPv4 interface-index readback is unsupported.
+     * @param name UDP option kind.
+     * @param context Absolute deadline and cancellation token.
+     * @return The typed effective value.
+     */
+    public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption {
+        decodeSocketOption(core.queryOption(encodeSocketOptionName(name), context))
     }
 
     /** Current lifecycle, including cancellation-owned abort. */

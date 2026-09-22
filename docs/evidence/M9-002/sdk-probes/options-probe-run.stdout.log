@@ -1,0 +1,2 @@
+before-bind: broadcast=1 length=4
+after-bind: broadcast=1 length=4

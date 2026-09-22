@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "source_task": "M9-001",
+  "source_task": "M9-002",
   "platform": "linux-x86_64-glibc",
   "sdk_reference": "docs/references/m7-033-ci-toolchain.json",
-  "scope": "wirestack.net socket capabilities and callable network operation families; no new option, multicast or raw implementation",
+  "scope": "Current Linux public network operations including typed socket options; multicast membership, raw sockets and ancillary data remain unavailable",
   "constructor_defaults": {
     "nonBlocking": true,
     "closeOnExec": true,
@@ -15,12 +15,13 @@
     "zeroLengthDatagramSend": false,
     "connectedDatagramSend": false
   },
-  "native_runner": "tools/m9_001_native_capabilities.py",
+  "native_runner": "tools/m9_002_native_options.py",
   "consumer_sources": [
     "examples/linux/m9_001/native_capabilities.cj",
     "examples/linux/m8_002/main.cj",
     "examples/linux/m8_003/main.cj",
-    "examples/linux/m8_004/native_dns.cj"
+    "examples/linux/m8_004/native_dns.cj",
+    "examples/linux/m9_002/socket_options.cj"
   ],
   "required_scenarios": [
     "internet-ipv4",
@@ -29,7 +30,11 @@
     "unix-abstract",
     "capability-contract",
     "dns-basic",
-    "dns-connect"
+    "dns-connect",
+    "socket-options",
+    "http-option-connector",
+    "invalid-option-admission",
+    "active-send-control"
   ],
   "environment_failure_policy": {
     "permission_denied": "ENVIRONMENT_FAILURE, never a supported PASS or permanent capability=false; preserve NetworkErrorCode.PermissionDenied/nativeCode/cause when available.",
@@ -59,7 +64,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-closeOnExec",
@@ -83,7 +88,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-halfClose",
@@ -115,7 +120,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-broadcast",
@@ -129,7 +134,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -146,7 +151,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-multicast",
@@ -160,7 +165,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -177,7 +182,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-raw",
@@ -208,7 +213,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-ancillaryData",
@@ -239,7 +244,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-zeroLengthDatagramSend",
@@ -270,7 +275,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-connectedDatagramSend",
@@ -301,7 +306,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-nonBlocking",
@@ -325,7 +330,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-closeOnExec",
@@ -349,7 +354,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-halfClose",
@@ -380,7 +385,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-broadcast",
@@ -394,7 +399,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -411,7 +416,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-multicast",
@@ -425,7 +430,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -442,7 +447,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-raw",
@@ -473,7 +478,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-ancillaryData",
@@ -504,7 +509,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-zeroLengthDatagramSend",
@@ -535,7 +540,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-connectedDatagramSend",
@@ -566,7 +571,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-nonBlocking",
@@ -590,7 +595,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-closeOnExec",
@@ -614,7 +619,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-halfClose",
@@ -645,38 +650,36 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-broadcast",
       "object": "UdpSocket",
       "label": "公开广播配置",
       "public_symbols": [
-        "wirestack.net.UdpSocket.bind",
-        "wirestack.net.UdpSocket.capabilities"
+        "wirestack.net.UdpSocket.capabilities",
+        "wirestack.net.UdpSocket.configure",
+        "wirestack.net.UdpSocket.getOption"
       ],
       "capability_field": "broadcast",
-      "supported": false,
+      "supported": true,
       "conditions": [
-        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "仅限 Linux x86_64 glibc 和固定 SDK。",
+        "IPv4 socket 可配置并查询 Broadcast；IPv6 socket 的能力值为 false，调用返回 Option/DatagramSend/Unsupported/Never。此项不代表 multicast membership。"
       ],
-      "failure": {
-        "kind": "no_public_operation",
-        "category": null,
-        "phase": null,
-        "code": null,
-        "retryability": null
-      },
+      "failure": null,
       "backend_symbols": [
-        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.configureOptions",
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.queryOption"
       ],
       "scenario_ids": [
-        "internet-ipv4",
-        "internet-ipv6",
-        "capability-contract"
+        "capability-contract",
+        "socket-options"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json",
+      "instance_support": {
+        "ipv6": false
+      }
     },
     {
       "id": "UdpSocket-multicast",
@@ -690,7 +693,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -707,7 +710,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-raw",
@@ -738,7 +741,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-ancillaryData",
@@ -769,7 +772,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-zeroLengthDatagramSend",
@@ -801,7 +804,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-connectedDatagramSend",
@@ -828,7 +831,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-nonBlocking",
@@ -852,7 +855,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-closeOnExec",
@@ -876,7 +879,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-halfClose",
@@ -908,7 +911,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-broadcast",
@@ -922,7 +925,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -939,7 +942,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-multicast",
@@ -953,7 +956,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -970,7 +973,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-raw",
@@ -1001,7 +1004,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-ancillaryData",
@@ -1032,7 +1035,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-zeroLengthDatagramSend",
@@ -1063,7 +1066,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-connectedDatagramSend",
@@ -1094,7 +1097,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-nonBlocking",
@@ -1118,7 +1121,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-closeOnExec",
@@ -1142,7 +1145,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-halfClose",
@@ -1173,7 +1176,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-broadcast",
@@ -1187,7 +1190,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -1204,7 +1207,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-multicast",
@@ -1218,7 +1221,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -1235,7 +1238,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-raw",
@@ -1266,7 +1269,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-ancillaryData",
@@ -1297,7 +1300,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-zeroLengthDatagramSend",
@@ -1328,7 +1331,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-connectedDatagramSend",
@@ -1359,7 +1362,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-nonBlocking",
@@ -1383,7 +1386,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-closeOnExec",
@@ -1407,7 +1410,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-halfClose",
@@ -1438,7 +1441,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-broadcast",
@@ -1452,7 +1455,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -1469,7 +1472,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-multicast",
@@ -1483,7 +1486,7 @@
       "supported": false,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
       ],
       "failure": {
         "kind": "no_public_operation",
@@ -1500,7 +1503,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-raw",
@@ -1531,7 +1534,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-ancillaryData",
@@ -1562,7 +1565,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-zeroLengthDatagramSend",
@@ -1594,7 +1597,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-connectedDatagramSend",
@@ -1627,7 +1630,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "tcp-ipv4",
@@ -1657,7 +1660,7 @@
       "scenario_ids": [
         "internet-ipv4"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "udp-ipv4",
@@ -1683,7 +1686,7 @@
       "scenario_ids": [
         "internet-ipv4"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "tcp-ipv6",
@@ -1713,7 +1716,7 @@
       "scenario_ids": [
         "internet-ipv6"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "udp-ipv6",
@@ -1739,7 +1742,7 @@
       "scenario_ids": [
         "internet-ipv6"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-pathname",
@@ -1769,7 +1772,7 @@
       "scenario_ids": [
         "unix-pathname"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-abstract",
@@ -1799,7 +1802,7 @@
       "scenario_ids": [
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-invalid-abstract",
@@ -1828,7 +1831,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-pathname",
@@ -1853,7 +1856,7 @@
       "scenario_ids": [
         "unix-pathname"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-abstract",
@@ -1878,7 +1881,7 @@
       "scenario_ids": [
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-invalid-abstract",
@@ -1908,7 +1911,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "unix-named-source",
@@ -1931,7 +1934,7 @@
         "unix-pathname",
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "unix-unbound-source",
@@ -1960,7 +1963,7 @@
         "unix-pathname",
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "raw-ipv4",
@@ -1989,7 +1992,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "raw-ipv6",
@@ -2018,7 +2021,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "raw-packet",
@@ -2047,7 +2050,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "raw-netlink",
@@ -2076,7 +2079,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "SocketOption-application",
@@ -2104,7 +2107,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnsafeSocketOption-application",
@@ -2132,7 +2135,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpStream-lifecycle",
@@ -2159,7 +2162,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "TcpListener-lifecycle",
@@ -2186,7 +2189,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UdpSocket-lifecycle",
@@ -2213,7 +2216,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixStream-lifecycle",
@@ -2240,7 +2243,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixListener-lifecycle",
@@ -2267,7 +2270,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "UnixDatagramSocket-lifecycle",
@@ -2294,7 +2297,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "dns-client",
@@ -2320,7 +2323,7 @@
       "scenario_ids": [
         "dns-basic"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "dns-resolver",
@@ -2346,7 +2349,7 @@
       "scenario_ids": [
         "dns-connect"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
       "id": "dns-parser",
@@ -2369,7 +2372,139 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+      "evidence": "docs/evidence/M9-002/native-options.json"
+    },
+    {
+      "id": "TcpStream-options",
+      "object": "TcpStream",
+      "label": "TCP typed 选项",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.configure",
+        "wirestack.net.TcpStream.getOption"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限受测 Linux x86_64 glibc 与固定 SDK。",
+        "NoDelay、KeepAlive、ReceiveBuffer、SendBuffer 支持创建前及打开后配置；默认 NoDelay(true)、KeepAlive(false)，KeepAlive(true) 使用 45s/5s/5。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect",
+        "wirestack.internal.transport_stdnet.StdNetTransport.configureOptions",
+        "wirestack.internal.transport_stdnet.StdNetTransport.queryOption"
+      ],
+      "scenario_ids": [
+        "socket-options", "invalid-option-admission"
+      ],
+      "evidence": "docs/evidence/M9-002/native-options.json"
+    },
+    {
+      "id": "TcpListener-options",
+      "object": "TcpListener",
+      "label": "listener 与 accepted-stream 选项",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.accept",
+        "wirestack.net.TcpListener.getOption"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限受测 Linux x86_64 glibc 与固定 SDK。",
+        "listener 绑定前支持 reuse、缓冲与 IPv6-only；默认 ReuseAddress(true)。acceptedOptions 在暴露连接前应用 TCP 默认值和调用者覆盖，失败只关闭该连接。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind",
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.accept",
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.queryOption"
+      ],
+      "scenario_ids": [
+        "socket-options", "invalid-option-admission"
+      ],
+      "evidence": "docs/evidence/M9-002/native-options.json"
+    },
+    {
+      "id": "UdpSocket-options",
+      "object": "UdpSocket",
+      "label": "UDP typed 选项",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.configure",
+        "wirestack.net.UdpSocket.getOption"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限受测 Linux x86_64 glibc 与固定 SDK。",
+        "绑定前仅 reuse、缓冲与 IPv6-only；打开后支持缓冲、IPv4 broadcast/TTL、IPv6 hop limit、组播 loopback/interface。IPv4 interface-index 查询不可靠，返回 Unsupported。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind",
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.configureOptions",
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.queryOption"
+      ],
+      "scenario_ids": [
+        "socket-options", "invalid-option-admission", "active-send-control"
+      ],
+      "evidence": "docs/evidence/M9-002/native-options.json"
+    },
+    {
+      "id": "UdpSocket-interface-readback",
+      "object": "UdpSocket",
+      "label": "IPv4 multicast interface-index 查询",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.getOption"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc。",
+        "IPv4 IP_MULTICAST_IF 不能可靠还原 interface index；不回显请求值。IPv6 interface index 可查询。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Option",
+        "phase": "DatagramSend",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.queryOption"
+      ],
+      "scenario_ids": [
+        "socket-options"
+      ],
+      "evidence": "docs/evidence/M9-002/native-options.json"
+    },
+    {
+      "id": "HttpConnector-options",
+      "object": "HttpConnector",
+      "label": "HTTP 自定义 connector 配置 TCP",
+      "public_symbols": [
+        "wirestack.http.HttpClientBuilder.connector",
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.configure",
+        "wirestack.net.TcpStream.getOption"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "使用公开 HttpConnector。",
+        "建立及配置 TCP 时传递同一个 OperationContext，再交给 HTTP；不增加 HTTP timeout owner。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect",
+        "wirestack.internal.transport_stdnet.StdNetTransport.configureOptions"
+      ],
+      "scenario_ids": [
+        "http-option-connector"
+      ],
+      "evidence": "docs/evidence/M9-002/native-options.json"
     }
   ]
 }

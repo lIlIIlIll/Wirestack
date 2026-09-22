@@ -1,0 +1,120 @@
+{
+  "baseline_artifact": {
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "105e433737f002099cff63e70ce5f932658cfec0c426778b5f03557be2c8b134"
+    },
+    "path": "dist/m9-001/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+  },
+  "baseline_compile_and_run": "PASS",
+  "baseline_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "a539fc0831bb02ae984923671074b225a7ec59fa995680c2a904e915fa322e94"
+  },
+  "binary_compatibility": "NOT_RUN; consumers must rebuild and relink",
+  "commands": [
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/baseline/wirestack_m9_002_compatibility",
+      "exit_code": 0,
+      "id": "baseline-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c1e3747de1f86b58cd0f2ff2f4f3c16d71cf47c7c86de48e3ba9b610e94efe8d"
+        },
+        "path": "docs/evidence/M9-002/compatibility/baseline-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M9-002/compatibility/baseline-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "<work>/baseline/wirestack_m9_002_compatibility/target/release/bin/main"
+      ],
+      "cwd": "<work>/baseline/wirestack_m9_002_compatibility/target/release/bin",
+      "exit_code": 0,
+      "id": "baseline-run",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/compatibility/baseline-run.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7a4298e4f9a6cefa93273d6884ed8855615c2bc7437ce776595ea2a5d5500c41"
+        },
+        "path": "docs/evidence/M9-002/compatibility/baseline-run.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/current/wirestack_m9_002_compatibility",
+      "exit_code": 1,
+      "id": "current-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "792e4f689eb3437488f7bbaaeb4a8fd323613d6844db8f23c01f143afb458343"
+        },
+        "path": "docs/evidence/M9-002/compatibility/current-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/compatibility/current-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    }
+  ],
+  "current_artifact": {
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c6e2ca177b1c5422eaf35ce4810cd7a23bf4712f5d1b558fbfa2fe5394553373"
+    },
+    "path": "dist/m9-002/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+  },
+  "current_compile": "EXPECTED_FAILURE",
+  "current_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "7e966e6096a06a0fbeb383c9366a674f8a71bcac029e4a86664beb3d29342123"
+  },
+  "forward_compatibility": "NOT_RUN",
+  "scenario_reference": {
+    "binary_verdict": "abi_behavior_compatible in that scenario only",
+    "kind": "external corpus classification only",
+    "name": "PE01_payload_enum_add_variant",
+    "source": "unversioned local compat-test corpus; not Wirestack binary proof",
+    "source_verdict": "api_compile_error"
+  },
+  "schema_version": 1,
+  "semantic_changes": [
+    "IPv4 UdpSocket broadcast capability is now true; IPv6 remains false",
+    "SocketOption has four additional variants"
+  ],
+  "source_compatibility": "INCOMPATIBLE: prior exhaustive SocketOption match requires new cases",
+  "source_state": "WORKING_TREE_UNSEALED",
+  "source_task": "M9-002",
+  "status": "PASS"
+}

@@ -63,6 +63,7 @@ public class StdNetTransport <: SocketTransport {
     private var remoteEndpoint: ?NetworkEndpoint
     private var readActive = false
     private var writeActive = false
+    private var controlActive = false
     private var closed = false
     private var aborted = false
     private var nativeClosed = false
@@ -91,8 +92,14 @@ public class StdNetTransport <: SocketTransport {
     public static func connect(
         endpoint: SocketEndpoint,
         context!: OperationContext = OperationContext.background(),
-        stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE
+        stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE,
+        options!: Array<StdSocketOption> = []
     ): StdNetTransport {
+        connectConfigured(endpoint, context, stagingBufferSize, options, applyNativeOption)
+    }
+
+    internal static func connectConfigured(endpoint: SocketEndpoint, context: OperationContext,
+        stagingBufferSize: Int64, options: Array<StdSocketOption>, execute: (NativeOptionSocket, StdSocketOption, Bool) -> Unit): StdNetTransport {
         checkContext(
             context,
             NetworkErrorCategory.Connect,
@@ -102,6 +109,7 @@ public class StdNetTransport <: SocketTransport {
         if (stagingBufferSize <= 0) {
             throw IllegalArgumentException("stagingBufferSize must be positive")
         }
+        validateSocketOptions(options, StdSocketOptionTarget.Tcp, false, true, NetworkPhase.TcpConnect)
         let socket = TcpSocket(toStdEndpoint(endpoint))
         let transport = StdNetTransport(
             socket,
@@ -111,6 +119,8 @@ public class StdNetTransport <: SocketTransport {
             false
         )
         try {
+            applySocketOptionList(options, StdSocketOptionTarget.Tcp, context, NetworkPhase.TcpConnect, true,
+                { option => execute(NativeOptionSocket.Tcp(socket), option, false) })
             transport.connectSocket(context, NetworkPhase.TcpConnect)
             transport
         } catch (error: Exception) {
@@ -208,6 +218,80 @@ public class StdNetTransport <: SocketTransport {
     public prop stagingCopiedBytes: (Int64, Int64) {
         get() {
             synchronized(lifecycleMutex) { (copiedReadBytes, copiedWriteBytes) }
+        }
+    }
+
+    /** Applies a prevalidated ordered list without racing either I/O direction. */
+    public func configureOptions(options: Array<StdSocketOption>, context: OperationContext): Unit {
+        configureOptionsUsing(options, context, applyNativeOption)
+    }
+
+    internal func configureOptionsUsing(options: Array<StdSocketOption>, context: OperationContext,
+        execute: (NativeOptionSocket, StdSocketOption, Bool) -> Unit): Unit {
+        validateSocketOptions(options, StdSocketOptionTarget.Tcp, false, false, NetworkPhase.TcpConnect)
+        beginOptionControl(context)
+        try {
+            let concrete = tcpOptionSocket()
+            applySocketOptionList(options, StdSocketOptionTarget.Tcp, context, NetworkPhase.TcpConnect, false,
+                { option =>
+                    requireOptionOpen()
+                    execute(NativeOptionSocket.Tcp(concrete), option, false)
+                })
+            requireOptionOpen()
+        } catch (error: Exception) {
+            requireOptionOpen()
+            throw error
+        } finally { synchronized(lifecycleMutex) { controlActive = false } }
+    }
+
+    /** Reads the kernel value, never the previously requested value. */
+    public func queryOption(name: StdSocketOptionName, context: OperationContext): StdSocketOption {
+        queryOptionUsing(name, context, queryNativeOption)
+    }
+
+    internal func queryOptionUsing(name: StdSocketOptionName, context: OperationContext,
+        query: (NativeOptionSocket, StdSocketOptionName, Bool) -> StdSocketOption): StdSocketOption {
+        beginOptionControl(context)
+        try {
+            validateOptionName(name, StdSocketOptionTarget.Tcp, false, false, true, NetworkPhase.TcpConnect)
+            let value = query(NativeOptionSocket.Tcp(tcpOptionSocket()), name, false)
+            requireOptionOpen()
+            value
+        } catch (error: SocketException) {
+            requireOptionOpen()
+            throw mapSocketError(error, context, NetworkErrorCategory.Option, NetworkPhase.TcpConnect)
+        } finally { synchronized(lifecycleMutex) { controlActive = false } }
+    }
+
+    private func tcpOptionSocket(): TcpSocket {
+        match (socket) {
+            case value: TcpSocket => value
+            case _ => throw optionError(NetworkErrorCode.Unsupported, NetworkPhase.TcpConnect)
+        }
+    }
+
+    private func requireOptionOpen(): Unit {
+        synchronized(lifecycleMutex) {
+            if (closed || aborted) {
+                throw networkClosedError(NetworkErrorCategory.Option, NetworkPhase.TcpConnect,
+                    localEndpoint: localEndpoint, remoteEndpoint: remoteEndpoint)
+            }
+        }
+    }
+
+    private func beginOptionControl(context: OperationContext): Unit {
+        synchronized(lifecycleMutex) {
+            if (closed || aborted) {
+                throw networkClosedError(NetworkErrorCategory.Option, NetworkPhase.TcpConnect,
+                    localEndpoint: localEndpoint, remoteEndpoint: remoteEndpoint)
+            }
+            if (readActive || writeActive || controlActive) {
+                throw networkConcurrent(NetworkErrorCategory.Option, NetworkPhase.TcpConnect,
+                    localEndpoint: localEndpoint, remoteEndpoint: remoteEndpoint)
+            }
+            checkNetworkContext(context, NetworkErrorCategory.Option, NetworkPhase.TcpConnect,
+                localEndpoint: localEndpoint, remoteEndpoint: remoteEndpoint)
+            controlActive = true
         }
     }
 
@@ -496,7 +580,7 @@ public class StdNetTransport <: SocketTransport {
 
     private func beginRead(): Unit {
         synchronized(lifecycleMutex) {
-            if (readActive) {
+            if (readActive || controlActive) {
                 throw networkConcurrent(
                     NetworkErrorCategory.Read,
                     NetworkPhase.TcpRead,
@@ -525,7 +609,7 @@ public class StdNetTransport <: SocketTransport {
 
     private func beginWrite(): Unit {
         synchronized(lifecycleMutex) {
-            if (writeActive) {
+            if (writeActive || controlActive) {
                 throw networkConcurrent(
                     NetworkErrorCategory.Write,
                     NetworkPhase.TcpWrite,
@@ -766,39 +850,91 @@ public class StdNetTransportListener <: TransportListener {
     private let mutex = Mutex()
     private var closed = false
     private let activeAccepts = AtomicInt64(0)
+    private var optionActive = false
+    private let acceptedOptions: Array<StdSocketOption>
     public let localEndpoint: SocketEndpoint
 
-    private init(server: TcpServerSocket, localEndpoint: SocketEndpoint, stagingBufferSize: Int64) {
+    private init(server: TcpServerSocket, localEndpoint: SocketEndpoint, stagingBufferSize: Int64, acceptedOptions: Array<StdSocketOption>) {
         this.server = server
         this.localEndpoint = localEndpoint
         this.stagingBufferSize = stagingBufferSize
+        this.acceptedOptions = acceptedOptions.clone()
     }
 
     public static func bind(
         endpoint: SocketEndpoint,
         backlog!: Int64 = 128,
-        stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE
+        stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE,
+        options!: Array<StdSocketOption> = [],
+        acceptedOptions!: Array<StdSocketOption> = [],
+        context!: OperationContext = OperationContext.background()
     ): StdNetTransportListener {
+        bindConfigured(endpoint, backlog, stagingBufferSize, options, acceptedOptions, context, applyNativeOption)
+    }
+
+    internal static func bindConfigured(endpoint: SocketEndpoint, backlog: Int64, stagingBufferSize: Int64,
+        options: Array<StdSocketOption>, acceptedOptions: Array<StdSocketOption>, context: OperationContext,
+        execute: (NativeOptionSocket, StdSocketOption, Bool) -> Unit): StdNetTransportListener {
         if (backlog <= 0 || backlog > MAX_LISTENER_BACKLOG) {
             throw IllegalArgumentException("listener backlog must be between 1 and 65535")
         }
         if (stagingBufferSize <= 0) {
             throw IllegalArgumentException("stagingBufferSize must be positive")
         }
+        let ipv6 = match (endpoint.address.family) { case IpAddressFamily.Ipv6 => true case _ => false }
+        validateSocketOptions(options, StdSocketOptionTarget.Listener, ipv6, true, NetworkPhase.ServerAccept)
+        validateSocketOptions(acceptedOptions, StdSocketOptionTarget.Tcp, ipv6, true, NetworkPhase.ServerAccept)
+        checkContext(context, NetworkErrorCategory.Option, NetworkPhase.ServerAccept, localEndpoint: Some(endpoint))
         let server = TcpServerSocket(bindAt: toStdEndpoint(endpoint))
         try {
             server.backlogSize = backlog
+            applySocketOptionList(options, StdSocketOptionTarget.Listener, context, NetworkPhase.ServerAccept, true,
+                { option => execute(NativeOptionSocket.Listener(server), option, ipv6) })
             server.bind()
-            StdNetTransportListener(server, fromStdEndpoint(server.localAddress), stagingBufferSize)
+            StdNetTransportListener(server, fromStdEndpoint(server.localAddress), stagingBufferSize, acceptedOptions)
         } catch (error: Exception) {
             server.close()
             throw error
         }
     }
 
+    /** Queries an effective listener option without overlapping accept. */
+    public func queryOption(name: StdSocketOptionName, context: OperationContext): StdSocketOption {
+        queryOptionUsing(name, context, queryNativeOption)
+    }
+
+    internal func queryOptionUsing(name: StdSocketOptionName, context: OperationContext,
+        query: (NativeOptionSocket, StdSocketOptionName, Bool) -> StdSocketOption): StdSocketOption {
+        synchronized(mutex) {
+            if (closed) { throw closedError(NetworkErrorCategory.Option, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint)) }
+            if (optionActive || activeAccepts.load() != 0) {
+                throw concurrent(NetworkErrorCategory.Option, NetworkPhase.ServerAccept)
+            }
+            checkContext(context, NetworkErrorCategory.Option, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint))
+            optionActive = true
+        }
+        try {
+            let ipv6 = match (localEndpoint.address.family) { case IpAddressFamily.Ipv6 => true case _ => false }
+            validateOptionName(name, StdSocketOptionTarget.Listener, ipv6, false, true, NetworkPhase.ServerAccept)
+            let value = query(NativeOptionSocket.Listener(server), name, ipv6)
+            if (isClosed()) { throw closedError(NetworkErrorCategory.Option, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint)) }
+            value
+        } catch (error: SocketException) {
+            if (isClosed()) { throw closedError(NetworkErrorCategory.Option, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint)) }
+            checkContext(context, NetworkErrorCategory.Option, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint))
+            throw NetworkException(NetworkErrorCategory.Option, NetworkPhase.ServerAccept, NetworkErrorCode.SystemFailure,
+                "native listener option query failed", retryability: Retryability.Unknown, cause: Some(error),
+                localEndpoint: Some(NetworkEndpoint.Internet(localEndpoint)))
+        } finally { synchronized(mutex) { optionActive = false } }
+    }
+
     public func accept(
         context: OperationContext
     ): DuplexTransport {
+        acceptConfigured(context, applyNativeOption)
+    }
+
+    internal func acceptConfigured(context: OperationContext, execute: (NativeOptionSocket, StdSocketOption, Bool) -> Unit): DuplexTransport {
         checkContext(
             context,
             NetworkErrorCategory.Accept,
@@ -830,12 +966,20 @@ public class StdNetTransportListener <: TransportListener {
                             NetworkPhase.ServerAccept,
                             localEndpoint: Some(localEndpoint)
                         )
-                        return StdNetTransport.fromAccepted(
-                            accepted,
-                            stagingBufferSize: stagingBufferSize
-                        )
+                        applySocketOptionList(acceptedOptions, StdSocketOptionTarget.Tcp, context, NetworkPhase.ServerAccept, true,
+                            { option => execute(NativeOptionSocket.Tcp(accepted), option, false) })
+                        synchronized(mutex) {
+                            if (closed) {
+                                throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint))
+                            }
+                            checkContext(context, NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint))
+                            return StdNetTransport.fromAccepted(accepted, stagingBufferSize: stagingBufferSize)
+                        }
                     } catch (error: Exception) {
                         accepted.close()
+                        if (isClosed()) {
+                            throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, cause: Some(error), localEndpoint: Some(localEndpoint))
+                        }
                         throw error
                     }
                 } catch (_: SocketTimeoutException) {
@@ -919,14 +1063,13 @@ public class StdNetTransportListener <: TransportListener {
     }
 
     private func beginAccept(): Unit {
-        if (isClosed()) {
-            throw closedError(
-                NetworkErrorCategory.Accept,
-                NetworkPhase.ServerAccept,
-                localEndpoint: Some(localEndpoint)
-            )
+        synchronized(mutex) {
+            if (closed) {
+                throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, localEndpoint: Some(localEndpoint))
+            }
+            if (optionActive) { throw concurrent(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept) }
+            activeAccepts.fetchAdd(1)
         }
-        activeAccepts.fetchAdd(1)
     }
 
     private func endAccept(): Unit {

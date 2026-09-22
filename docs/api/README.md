@@ -72,7 +72,13 @@ capability 契约、`TcpStream` 和 datagram 接口。M8-002 在 Linux x86_64 gl
 实现了基于 `std.net` 的公共 `TcpListener` 与 `UdpSocket`。
 M8-003 增加 `UnixListener`、`UnixStream` 与 capability-scoped `UnixDatagramSocket`。
 
-`TcpListener.bind(endpoint, backlog:, context:)` 只接受已解析的
+M9-002 增加 Internet socket 的 typed options：factory 在 bind/connect 前应用 `options`，
+listener 在发布 accepted TCP 前应用 `acceptedOptions`；TCP/UDP 提供 `configure`，
+TCP/listener/UDP 提供 `getOption(SocketOptionName, context:)` 并返回内核生效的
+`SocketOption`。值域、默认值、阶段限制、非事务失败语义和 enum/ABI 迁移见
+[配置与查询 typed socket options](../guides/network-foundation-linux.md#配置与查询-typed-socket-options)。
+
+`TcpListener.bind(endpoint, backlog:, options:, acceptedOptions:, context:)` 只接受已解析的
 `SocketEndpoint`，不执行 DNS。`backlog` 默认为 128，有效范围是 1 至 65,535。
 `localEndpoint` 返回实际绑定地址，包括内核分配的端口。listener 同时只接受一个
 `accept`；重叠调用以 `ConcurrentOperation` 失败，不建立无界等待队列。一次
@@ -106,7 +112,7 @@ method signatures or enum cases. Rebuild consumers; old binary compatibility
 has not been tested. Explicit custom capability values remain caller-owned.
 
 <!-- NETWORK_CAPABILITIES:BEGIN -->
-<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "3f57378827eb37012baf2397b068393d36d64e4f443e113737adf00b301d7744"} -->
+<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "295c45e1ed5061925a6080b840b78643ed164c88b83f000ffdd3297325f95187"} -->
 
 ## 当前 Linux 公开网络能力
 
@@ -119,8 +125,8 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | `TcpStream` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpStream` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpStream` | `halfClose` | 不支持 | 固定 SDK 无公开定向 shutdown；拒绝后保持原状态，其他读写仍可用。 | internet-ipv4, internet-ipv6, capability-contract |
-| `TcpStream` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
-| `TcpStream` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `broadcast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `multicast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpStream` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpStream` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpStream` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
@@ -128,8 +134,8 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | `TcpListener` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpListener` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpListener` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
-| `TcpListener` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
-| `TcpListener` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `broadcast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `multicast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpListener` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpListener` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `TcpListener` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
@@ -137,8 +143,8 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | `UdpSocket` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
-| `UdpSocket` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
-| `UdpSocket` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `broadcast` | 支持 | IPv4 socket 可配置并查询 Broadcast；IPv6 socket 的能力值为 false，调用返回 Option/DatagramSend/Unsupported/Never。此项不代表 multicast membership。 | capability-contract, socket-options |
+| `UdpSocket` | `multicast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `zeroLengthDatagramSend` | 不支持 | 只禁止发送空 payload；接收空报文仍是成功而非 EOF。 | internet-ipv4, internet-ipv6, capability-contract |
@@ -146,8 +152,8 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | `UnixStream` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixStream` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixStream` | `halfClose` | 不支持 | 固定 SDK 无公开定向 shutdown；拒绝后保持原状态，其他读写仍可用。 | unix-pathname, unix-abstract, capability-contract |
-| `UnixStream` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
-| `UnixStream` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `broadcast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `multicast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixStream` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixStream` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixStream` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
@@ -155,8 +161,8 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | `UnixListener` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixListener` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixListener` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
-| `UnixListener` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
-| `UnixListener` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `broadcast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `multicast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixListener` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixListener` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixListener` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
@@ -164,8 +170,8 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | `UnixDatagramSocket` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixDatagramSocket` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixDatagramSocket` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
-| `UnixDatagramSocket` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
-| `UnixDatagramSocket` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `broadcast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `multicast` | 不支持 | 此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixDatagramSocket` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixDatagramSocket` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
 | `UnixDatagramSocket` | `zeroLengthDatagramSend` | 不支持 | 只禁止发送空 payload；接收空报文仍是成功而非 EOF。 | unix-pathname, unix-abstract, capability-contract |
@@ -200,11 +206,16 @@ has not been tested. Explicit custom capability values remain caller-owned.
 | 显式 DNS query/lookup | `DnsClient.init`, `DnsClient.query`, `DnsClient.lookup`, `DnsClient.close`, `DnsClient.isClosed` | 支持；本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。 | dns-basic |
 | 显式配置的 resolve/connect | `Resolver.init`, `Resolver.resolve`, `Resolver.connect`, `Resolver.close`, `Resolver.isClosed` | 支持；hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。 | dns-connect |
 | 有界 DNS message parser | `DnsMessageParser.init`, `DnsMessageParser.parse` | 支持；受 DnsParserLimits 限制；完整报文成功，截断报文保留结构化 ResolveException；此条只声明 parser，不代表 DNS 网络可达。 | capability-contract |
+| TCP typed 选项 | `TcpStream.connect`, `TcpStream.configure`, `TcpStream.getOption` | 支持；NoDelay、KeepAlive、ReceiveBuffer、SendBuffer 支持创建前及打开后配置；默认 NoDelay(true)、KeepAlive(false)，KeepAlive(true) 使用 45s/5s/5。 | socket-options, invalid-option-admission |
+| listener 与 accepted-stream 选项 | `TcpListener.bind`, `TcpListener.accept`, `TcpListener.getOption` | 支持；listener 绑定前支持 reuse、缓冲与 IPv6-only；默认 ReuseAddress(true)。acceptedOptions 在暴露连接前应用 TCP 默认值和调用者覆盖，失败只关闭该连接。 | socket-options, invalid-option-admission |
+| UDP typed 选项 | `UdpSocket.bind`, `UdpSocket.configure`, `UdpSocket.getOption` | 支持；绑定前仅 reuse、缓冲与 IPv6-only；打开后支持缓冲、IPv4 broadcast/TTL、IPv6 hop limit、组播 loopback/interface。IPv4 interface-index 查询不可靠，返回 Unsupported。 | socket-options, invalid-option-admission, active-send-control |
+| IPv4 multicast interface-index 查询 | `UdpSocket.getOption` | 不支持；IPv4 IP_MULTICAST_IF 不能可靠还原 interface index；不回显请求值。IPv6 interface index 可查询。 `Option/DatagramSend/Unsupported/Never`。 | socket-options |
+| HTTP 自定义 connector 配置 TCP | `wirestack.http.HttpClientBuilder.connector`, `TcpStream.connect`, `TcpStream.configure`, `TcpStream.getOption` | 支持；建立及配置 TCP 时传递同一个 OperationContext，再交给 HTTP；不增加 HTTP timeout owner。 | http-option-connector |
 
 ENVIRONMENT_FAILURE, never a supported PASS or permanent capability=false; preserve NetworkErrorCode.PermissionDenied/nativeCode/cause when available.
 Public SDK errors without a stable native code remain SystemFailure/Unknown with cause; never classify from message text.
 NOT_RUN, never native PASS
-[当前原生收据](../evidence/M9-001/native-capabilities.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。
+[当前原生收据](../evidence/M9-002/native-options.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。
 
 <!-- NETWORK_CAPABILITIES:END -->
 

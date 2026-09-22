@@ -85,7 +85,7 @@ PUBLIC_PACKAGE_FILES = {
     ),
     "wirestack.tls": ("facade.cj", "identity.cj", "package.cj"),
     "wirestack.net": (
-        "package.cj", "datagram_socket_core.cj", "tcp_listener.cj", "udp_socket.cj",
+        "package.cj", "socket_options.cj", "datagram_socket_core.cj", "tcp_listener.cj", "udp_socket.cj",
         "unix_stream.cj", "unix_listener.cj", "unix_datagram_socket.cj",
         "dns_wire.cj", "dns_client.cj", "dns_resolver.cj",
     ),

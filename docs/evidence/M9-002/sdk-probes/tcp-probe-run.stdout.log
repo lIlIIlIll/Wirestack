@@ -1,0 +1,2 @@
+before-bind: reuse=1 length=4
+after-bind: reuse=1 length=4

@@ -1,0 +1,6 @@
+2987421 setsockopt(3, SOL_IP, IP_MULTICAST_IF, "\0\0\0\0\0\0\0\0\0\0\0\0", 12) = 0
+2987431 +++ exited with 0 +++
+2987424 +++ exited with 0 +++
+2987423 +++ exited with 0 +++
+2987422 +++ exited with 0 +++
+2987421 +++ exited with 0 +++

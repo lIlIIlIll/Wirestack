@@ -1,0 +1,46 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 217945586 ns, RESULT:
+    TCS: M9002OptionExecutionTest, time elapsed: 212837308 ns, RESULT:
+    [ PASSED ] CASE: factoriesCloseTheirSocketAtEveryExecutorFailurePosition (861890 ns)
+    [ PASSED ] CASE: acceptedFailureClosesOnlyAcceptedSocketAndListenerContinues (898467 ns)
+    [ PASSED ] CASE: cancellationBetweenOptionsRetainsEarlierKernelEffectWithoutAbort (256082 ns)
+    [ PASSED ] CASE: tcpReadAndControlExcludeEachOtherWithoutStoppingRead (20475825 ns)
+    [ PASSED ] CASE: udpControlExcludesSendReceiveConnectAndOtherControl (20564686 ns)
+    [ PASSED ] CASE: closeRacingControlRetainsCloseRatherThanLaterAbort (40496139 ns)
+    [ PASSED ] CASE: blockedAcceptRejectsQueryAndRemainsUsable (10138250 ns)
+    [ PASSED ] CASE: queryControlExcludesListenerAcceptAndTcpIo (40253432 ns)
+    [ PASSED ] CASE: udpReceiveAndQueryControlExcludeEachOther (30412689 ns)
+    [ PASSED ] CASE: blockedTcpWriteRejectsControlAndCompletesAfterPeerReads (24005426 ns)
+    [ PASSED ] CASE: listenerCloseDuringAcceptedOptionsPreventsPublication (20523428 ns)
+    [ PASSED ] CASE: runtimeFailurePreservesExactlyTheSuccessfulPrefix (627250 ns)
+    [ PASSED ] CASE: acceptedOptionPolicyDoesNotRetainCallerArray (185537 ns)
+Summary: TOTAL: 63
+    PASSED: 13, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 12637654 ns, RESULT:
+    TCS: M9002SocketOptionTest, time elapsed: 3809431 ns, RESULT:
+    [ PASSED ] CASE: udpReadsEffectiveBuffersAndAppliesIpv4Controls (412228 ns)
+    [ PASSED ] CASE: ipv6ControlsRejectIpv4OptionsAndPostBindMutation (180439 ns)
+    [ PASSED ] CASE: wholeListValidationPrecedesAnyMutation (110408 ns)
+    [ PASSED ] CASE: nativeFailureRetainsEarlierEffectsAndSkipsLaterOptions (343857 ns)
+    [ PASSED ] CASE: cancelledControlDoesNotAbortHealthySocket (254540 ns)
+    [ PASSED ] CASE: acceptedOptionsOverrideDefaultsBeforePublication (256541 ns)
+    [ PASSED ] CASE: reusePortAllowsTwoNativeListeners (96602 ns)
+    [ PASSED ] CASE: bufferExtremesAreClampedAndInvalidDomainsDoNotMutate (87930 ns)
+    [ PASSED ] CASE: optionKindsRejectWrongTargetsFamiliesAndCreationStages (516476 ns)
+    [ PASSED ] CASE: ipv6OnlyChangesRealDualStackBindBehavior (232954 ns)
+Summary: TOTAL: 115
+    PASSED: 10, SKIPPED: 105, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 245905727 ns, RESULT:
+TP: wirestack.*, time elapsed: 245854368 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 217945586 ns
+    TP: wirestack.net, time elapsed: 12637654 ns
+Summary: TOTAL: 178
+    PASSED: 23, SKIPPED: 155, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
