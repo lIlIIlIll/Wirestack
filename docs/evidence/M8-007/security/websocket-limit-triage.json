@@ -1,0 +1,90 @@
+{
+  "verdict": "No mismatch with the existing public per-frame/per-message contract. M8-007-PROTOCOL-002 is accurately restated as a bounded eager-allocation/slow-peer tradeoff; the current evidence does not establish uncontrolled allocation or a memory leak.",
+  "contract_evidence": [
+    {
+      "path": "src/http/websocket.cj",
+      "lines": "88-123",
+      "finding": "WebSocketLimits defaults maximumFrameBytes to 1 MiB, caps it at 1 GiB, requires maximumMessageBytes >= maximumFrameBytes, and caps message bytes at 1 GiB."
+    },
+    {
+      "path": "src/http/websocket.cj",
+      "lines": "555-593",
+      "finding": "readWireFrame decodes the declared length, rejects length > maximumFrameBytes, validates control-frame length, then allocates exactly Array<Byte>(length). The payload allocation cannot exceed the admitted frame cap."
+    },
+    {
+      "path": "src/http/websocket.cj",
+      "lines": "454-471,708-765",
+      "finding": "The aggregate fragmented-message check occurs after readWireFrame returns. A continuation may therefore allocate/read a complete frame up to maximumFrameBytes even when it exceeds the message's remaining allowance; it is then rejected with MessageTooLarge/1009. Since maximumMessageBytes >= maximumFrameBytes and the connection retains only an Int64 byte count, fragment opcode, and UTF-8 validator—not prior payload arrays—one internal payload allocation never exceeds either absolute cap."
+    },
+    {
+      "path": "src/http/websocket.cj",
+      "lines": "126-170,269-315",
+      "finding": "A successful receive transfers the sole wire payload array into WebSocketFrame without cloning; caller access through payload makes a documented defensive copy. The connection itself does not retain successful frame payloads."
+    },
+    {
+      "path": "docs/api/generated/markdown/.../WebSocketLimits",
+      "lines": "9-32,59-79",
+      "finding": "Generated API documentation describes maximumFrameBytes as maximum payload bytes retained or sent for one frame and maximumMessageBytes as combined data payload across a fragmented message."
+    },
+    {
+      "path": "docs/api/generated/markdown/.../WebSocketConnection",
+      "lines": "9-12,61-77",
+      "finding": "Generated API documentation promises bounded uncompressed framing and says receive retains only the bounded payload; it does not promise incremental allocation, aggregate process memory admission, or immediate heap reclamation."
+    }
+  ],
+  "cleanup_evidence": {
+    "logical_ownership": "On cancellation, deadline, EOF, transport failure, invalid progress, invalid UTF-8, or message-limit failure, the payload/frame remains local to receive/readWireFrame. No connection field receives it. The catch path aborts or protocol-closes the transport, finally releases the reader gate, and rethrows; after receive unwinds the array is unreachable and GC-eligible.",
+    "timing_limit": "There is no explicit free and no public promise of prompt physical heap/RSS reclamation. A protocol-error path can retain the local frame while terminateProtocol performs a close bounded by closeTimeout (default 5 seconds); transport/cancellation failures abort and unwind directly. A peer that advertises an admitted length and then stalls under the default background context can keep the cap-sized allocation live indefinitely until cancellation, deadline, peer failure, or external close wakes the read.",
+    "classification": "This proves ownership release, not deterministic physical deallocation. The original recommendation's demand to prove prompt memory release is stronger than the present public contract."
+  },
+  "bounded_concurrency": {
+    "server": "HttpServerBuilder defaults connectionLimit to 1024; Http1ServerConfig permits 1..65536 and admission waits while active.size reaches the configured limit.",
+    "http2": "The server defaults http2StreamLimit to 100 per connection and advertises/enforces that bound. These make concurrency finite but do not constitute an aggregate byte budget.",
+    "implication": "Worst-case concurrent pressure can still be large when operators choose high frame/connection/stream limits. That is the documented operational tradeoff; no future M10 aggregate-budget API is required or proposed here."
+  },
+  "test_evidence": {
+    "command": "TMPDIR=<scratch> DISABLE_ZOXIDE=1 <qualified-sdk-wrapper> cjpm test src/http --target-dir <scratch-target> -j 1 --parallel 1 --filter WebSocketConnectionTest --timeout-each=30s --no-progress --no-color",
+    "exit_status": 0,
+    "result": "9 passed, 105 skipped, 0 error, 0 failed; cjpm test success.",
+    "covered": "One-byte transport reads, ownership/defensive copies, frame/message progression, fail-closed protocol handling, declared 64-bit length above a 128-byte custom frame cap, and a fragmented 100+40-byte message exceeding a 128-byte custom message cap.",
+    "not_covered": "No active receive-cancellation test observes a partially filled payload, and no test can establish GC timing or RSS return. The source ownership proof is therefore the precise evidence for cleanup; no high-memory or OOM experiment was run."
+  },
+  "source_probe": {
+    "command": "A read-only source-order assertion checked length-read < frame-cap-check < payload-allocation and message-check after frame read.",
+    "exit_status": 0,
+    "result": "PASS default-frame=1048576 hard-frame=1073741824 message>=frame"
+  },
+  "typed_digests": [
+    {
+      "path": "src/http/websocket.cj",
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1eafd0d9f728592adea31d4397a8173c98d6ad3551ab4ed84d3b77623b787ba7"
+    },
+    {
+      "path": "src/http/websocket_test.cj",
+      "domain": "text-utf8-lf-v1",
+      "sha256": "daf3672f6e36b6bef7f1d17bae1c7bfaee68baf65f8ba4eb97397687639147a9"
+    },
+    {
+      "path": "generated WebSocketConnection API page",
+      "domain": "text-utf8-lf-v1",
+      "sha256": "91c2c3fab2ca4b0b946788ff1b1f10e570d7e11d7d1b4b1b89d84b1232a0755b"
+    },
+    {
+      "path": "generated WebSocketLimits API page",
+      "domain": "text-utf8-lf-v1",
+      "sha256": "382c115daedeeb6d17f9d3cad8a63517940048054664327811ffb74711364175"
+    }
+  ],
+  "recommended_finding_text": "WebSocket receive eagerly reserves the already-admitted frame payload size after validating maximumFrameBytes. A stalled peer can keep up to that configured per-receive cap live for the operation's duration; fragmented-message overflow is detected only after the complete continuation frame is read, so the remaining message allowance does not reduce that allocation. Cancellation/error removes all connection-owned references when receive unwinds, but Cangjie GC does not provide a prompt physical-release guarantee. This is a documented bounded-memory/latency tradeoff, not evidence that an allocation exceeds the public frame/message caps or leaks after terminal cleanup.",
+  "repository_mutation": "None. Build/test output was confined to the designated scratch target.",
+  "task_id": "M8-007",
+  "finding_id": "M8-007-PROTOCOL-002",
+  "release_disposition": "PENDING_INDEPENDENT_REVIEW_OR_AUTHORIZED_RISK_DECISION",
+  "reviewer": {
+    "agent": "WebSocketLimitContractTriage",
+    "type": "process-isolated-agent",
+    "model": "openai-codex/gpt-5.6-sol",
+    "shared_parent_context": true
+  }
+}

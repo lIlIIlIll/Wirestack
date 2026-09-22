@@ -1,0 +1,8 @@
+RAW scenario=above-output-limit sample=0 inner=1 encodedBytes=40961 maxOutputBytes=65536 durationNs=50866262 status=EXPECTED_REJECTION
+RAW scenario=above-output-limit sample=1 inner=1 encodedBytes=40961 maxOutputBytes=65536 durationNs=61384338 status=EXPECTED_REJECTION
+RAW scenario=above-output-limit sample=2 inner=1 encodedBytes=40961 maxOutputBytes=65536 durationNs=36438622 status=EXPECTED_REJECTION
+RAW scenario=above-output-limit sample=3 inner=1 encodedBytes=40961 maxOutputBytes=65536 durationNs=30010538 status=EXPECTED_REJECTION
+RAW scenario=above-output-limit sample=4 inner=1 encodedBytes=40961 maxOutputBytes=65536 durationNs=36440109 status=EXPECTED_REJECTION
+
+
+Wall time: 0.33 seconds

@@ -1,0 +1,63 @@
+{
+  "artifacts": {
+    "benchmark_executable": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f1d3f69f4b2569a2e0a0112d60d8d378d25c31b20fbc993f0cc095ef3ea53aa1"
+    }
+  },
+  "schema_version": 1,
+  "text": {
+    "above_output_raw": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "75dfbf320f067fe85d2ecb76ce08b31f5bee618e953a2c15e23c9ab01b8ce36a"
+    },
+    "exact_output_raw": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aa48f7cfb8dd017709ca4440a7541978b3909d4184ad5e5f1909e83c3cdc10fe"
+    },
+    "max_compressed_raw": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ac7d69fcb9a8a680f4885f2501e3d78f92166d624283cf9010af5c6c7b859e4d"
+    },
+    "measurement_harness": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "03109bffb3f2cfb308a115d5ffd7820450abaed37100fc19aba65e1874711e72"
+    },
+    "normal_raw": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e1cfadaea7787a62b880772f6c8314351390488d6a0d664c214211f43c9c243b"
+    },
+    "small_raw": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b5bdec62304c69c70c7d9dfad14423c810cedb43738664744743f41634c1d220"
+    },
+    "source_copy_hpack_core": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    "source_copy_hpack_huffman": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78c1f32c35219f4f309e82cb93f6960952b1e2e6b1ad4de106eda13e4235b585"
+    },
+    "source_original_hpack_core": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    "source_original_hpack_huffman": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78c1f32c35219f4f309e82cb93f6960952b1e2e6b1ad4de106eda13e4235b585"
+    },
+    "summary": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b37ffde5dbce9f2c205d5c22e6ee44b10c130abd07681b9e131e8b4c0ccd84c"
+    },
+    "summary_script": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6514fd92af175c58b337ae1c19b649f9147d7d9d4815f5df2cb329b2d6261421"
+    },
+    "toolchain_log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5cdd9606958d67262d4b1255370619f00efd1ada78902139d4e2d60ba2a76973"
+    }
+  }
+}

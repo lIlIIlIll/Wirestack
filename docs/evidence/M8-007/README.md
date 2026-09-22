@@ -1,6 +1,14 @@
 # M8-007 Linux release qualification
 
+M8-007 remains BLOCKED. The archived final-acceptance claims below describe historical runs; they do not qualify the replacement candidate. See [replacement status](requalification-status.json) and [the identity audit](evidence-identity-audit.json).
+
 M8-007 qualifies the final Linux x86_64 glibc artifact after M8-001 through M8-006. Acceptance requires the frozen candidate's own 86,400-second soak, independent security review, and production signature verification.
+
+The replacement review found a separate outbound fixed-length request limit bypass. The correction rejects a known body larger than `HttpLimits.maxBodyBytes` before writing headers or opening the body. The [remediation record](reproductions/request-body-limit-remediation.json) records the failing regression and the corrected HTTP/1 suite.
+
+The [HPACK measurement](reproductions/hpack-cost/remediation.json) confirms excessive per-bit symbol scanning. A fixed 512-edge decoding tree reduces the same maximum-input sample median from 5,590 ms to 49 ms with the default SDK 1.1.3 compiler invocation; the 182-case HTTP/2 suite passes. These local samples do not establish a universal latency bound or replace independent security acceptance.
+
+The [WebSocket assessment](security/websocket-limit-triage.json) confirms existing per-frame bounds and records the eager-allocation tradeoff without claiming risk acceptance. The [M7 provenance audit](security/m7-evidence-provenance-triage.json) identifies two privacy-redacted paths whose historical bindings require a separately owned repair and fresh review. Historical review, soak and signature reports do not qualify these corrected sources.
 
 ## Qualification inputs
 

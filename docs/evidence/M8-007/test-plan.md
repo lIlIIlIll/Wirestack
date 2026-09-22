@@ -35,6 +35,8 @@ Failures reject qualification. Package extraction must not publish unsafe member
 | P021 | Successful or failed compiler emits large or invalid-UTF-8 diagnostics | File-backed capture and encoded excerpt limit | Reachable | Complete decoded raw logs remain available |
 | P022 | Cancellation registry fills between samples | Reclamation, bounded admission wait, and live-reference preservation | Reachable | Sampling cannot be the only capacity control |
 | P023 | Transport observation table is full before or during connect | Admission check and cleanup of a rejected new transport | Reachable | Closed but strongly retained wrappers cannot be evicted |
+| P024 | Outbound fixed-length body exceeds configured request bound | Writer admission before header write or body open | Reachable | Exact boundary and body ownership remain unchanged |
+| P025 | Valid, EOS, padding or output-limit Huffman input | Fixed 512-edge prefix tree and byte ceiling | Reachable | No per-bit symbol scan; no new wall-time guarantee |
 
 ## Input domains and state
 
@@ -79,6 +81,8 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | S021 | Large successful, failed, or invalid-UTF-8 compiler output | Build capture starts | P021 | Bound report memory without losing decoded raw diagnostics | Excerpt is at most 16 KiB; terminal marker and complete decoded capture remain; failure stays a failure | boundary,regression | P0 |
 | S022 | More claims than registry capacity between samples | No sample-triggered collection | P022 | Keep at most 1,024 slots and reject excess live ownership | Observe peak slots during 4,096 claims; retain all 1,024 live sentinels when extra admission fails | boundary,regression | P0 |
 | S023 | Full transport observation table | 1,024 closed wrappers remain strongly reachable | P023 | Reject an extra transport without evicting an existing reference | Observe rejection and all 1,024 retained wrappers; complete fixture shutdown | boundary,regression | P0 |
+| S024 | One-shot outbound body at limit or one byte above | Nothing committed | P024 | Accept exact limit; reject excess before opening body | Zero wire/body commit evidence and no body read or close on rejection | boundary,regression | P0 |
+| S025 | RFC vectors, all octets, malformed padding/EOS, maximum valid payload and output +1 | Immutable codebook | P025 | Preserve decoded bytes and failures while removing linear symbol scans | Byte equality; expected exceptions; retain native before/after timings | boundary,regression | P0 |
 
 ## Test-plan matrix
 
@@ -107,6 +111,8 @@ The formal run owns its private candidate copies, installed consumer, native pro
 | T021 | S021 | P021 | `build-output-controls.py.txt` against `8a603905` and corrected source | Three baseline failures and three corrected passes | Bind exact test outcomes, full decoded logs, source, driver, and the encoded excerpt limit | strengthened |
 | T022 | S022 | P022 | `owner-registry-probe.py.txt` in stale and live modes | Baseline exceeds capacity; correction bounds or rejects admission | Canonically derive the consumer; keep intended roots live; verify raw peak-slot and retained-owner observations | strengthened,platform |
 | T023 | S023 | P023 | Native transport mode and 600-second preflight with 60-second application sampling | Full-table rejection without live-reference eviction; real workload meets unchanged gates | Bind native execution and raw observations; require terminal cleanup and existing trend and latency limits | strengthened,platform |
+| T024 | S024 | P024 | HTTP1 request-writer regression | Baseline fails and corrected writer passes | Exact bound accepts; excessive body remains unopened and uncommitted | boundary |
+| T025 | S025 | P025 | Existing Huffman/HTTP2 suite, mutation campaign and retained native driver | Correct output and limits with reduced measured work | All 182 HTTP2 cases pass; maximum-input samples retain exact output; timings are not a release latency promise | strengthened |
 
 ## Feedback and gaps
 
@@ -116,4 +122,4 @@ The 600-second diagnostic is a preflight. It does not close T007. Hosted signatu
 
 The interrupted formal run on `14a9925` remains `INCOMPLETE` and does not close T007. Its frozen inputs and partial workload output are retained under `reproductions/formal-soak-14a9925`.
 
-The bounded-owner preflight passed with 60-second application sampling, 5,909 cycles, and zero terminal owners; T007 remains open. The transport control exercises full-table rejection before connection. The concurrent post-connect admission-abort branch has no controlled race reproduction.
+The previously recorded bounded-owner preflight is historical. Corrected-candidate execution is recorded in `requalification-status.json` and the linked current preflight report; T007 remains open until its own formal run. The transport control exercises full-table rejection before connection. The concurrent post-connect admission-abort branch has no controlled race reproduction.

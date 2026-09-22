@@ -3,7 +3,7 @@
   "phase": "after",
   "status": "PASS",
   "baseline_revision": "8a79209e6471b343774fe54a99f251f5b273352e",
-  "artifact_sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1",
+  "artifact_sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643",
   "source_digest": {
     "domain": "text-utf8-lf-v1",
     "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
@@ -23,7 +23,7 @@
     }
   },
   "derived_source": {
-    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/consumer.cj.txt",
+    "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/consumer.cj.txt",
     "digest": {
       "domain": "text-utf8-lf-v1",
       "sha256": "669408df856080d342df911d62c0dff15da01c3956c1b2b31fa6159d13b22eaf"
@@ -38,39 +38,39 @@
         "build"
       ],
       "exit_code": 0,
-      "duration_ms": 12230.395211954601,
+      "duration_ms": 17498.24666202767,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/build.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/build.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/build.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/build.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "be9a786f5b929856f1ce5a2b5dc2469083ad2a49e2b4db6ad11ac3d869d8a319"
+          "sha256": "e1f25059bf207662c8b00bd6d5619ff890e22bd5de7c15fca8d62ea1c244a899"
         }
       }
     },
     "stale": {
       "argv": [
         "<cangjie-env-wrapper>",
-        "<workspace>/consumer/target/release/bin/main",
+        "/var/tmp/wirestack-m8-007-tmp/wirestack-owner-registry-j8rg9ur9/consumer/target/release/bin/main",
         "stale"
       ],
       "exit_code": 0,
-      "duration_ms": 113.60636004246771,
+      "duration_ms": 113.70107700349763,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/stale.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/stale.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "cd351b0298deed7768c04a33198db5c6ad7753185aabf684558be62a1f9ada3c"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/stale.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/stale.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -80,20 +80,20 @@
     "live": {
       "argv": [
         "<cangjie-env-wrapper>",
-        "<workspace>/consumer/target/release/bin/main",
+        "/var/tmp/wirestack-m8-007-tmp/wirestack-owner-registry-j8rg9ur9/consumer/target/release/bin/main",
         "live"
       ],
       "exit_code": 0,
-      "duration_ms": 2065.3092249995098,
+      "duration_ms": 2066.621658974327,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/live.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/live.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "1d870f8b698efb87c219b4c42f283792c63c934906d2977fb55701916cc09854"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/live.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/live.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -103,20 +103,20 @@
     "transports": {
       "argv": [
         "<cangjie-env-wrapper>",
-        "<workspace>/consumer/target/release/bin/main",
+        "/var/tmp/wirestack-m8-007-tmp/wirestack-owner-registry-j8rg9ur9/consumer/target/release/bin/main",
         "transports"
       ],
       "exit_code": 0,
-      "duration_ms": 163.65846095141023,
+      "duration_ms": 163.99000998353586,
       "stdout": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/transports.stdout.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/transports.stdout.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "f6a8e09fa642394cb00258e407a6d99df7e8762520067763c3e987a87508e627"
         }
       },
       "stderr": {
-        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790013337779862968/transports.stderr.log",
+        "path": "docs/evidence/M8-007/commands/owner-registry-controls/1790041942992247305/transports.stderr.log",
         "digest": {
           "domain": "text-utf8-lf-v1",
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"

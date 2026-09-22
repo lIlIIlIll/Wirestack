@@ -1,0 +1,128 @@
+{
+  "assignment": "M8-007-PROTOCOL-001 native HPACK Huffman wall-time validation",
+  "result": "CONFIRMED_AVAILABILITY_BLOCKER",
+  "conclusion": "The finding is not merely a speculative optimization opportunity. With the actual SDK 1.1.3 native compiler and the repository/CJPM default invocation (no explicit optimization flag), a valid 65,536-byte Huffman payload decoded synchronously in a median 5.590 s and could not observe cancellation or deadline while running. This materially validates the remotely triggerable CPU-consumption concern and supports retaining the existing release blocker. There is no frozen codec-specific latency threshold, and this isolated run did not exercise a network peer or sibling stream, so it does not quantify end-to-end amplification; formal blocker ownership/reclassification still belongs to the security gate owner.",
+  "proven": [
+    "`decodeHpackHuffman` performs the reported per-bit linear exact-symbol scan and usually a second linear prefix scan over 257 entries.",
+    "The maximum valid direct-codec corpus produced correct output in every measured run; median latency was 5.590 s, range 5.442–5.879 s, n=5.",
+    "Decoding is synchronous from the HTTP/2 connection reader dispatch, and the decoder has no OperationContext, cancellation, deadline, or time/work-budget parameter/check. Closing transport or cancelling another task cannot preempt its inner CPU loop.",
+    "Compressed bytes, decoded bytes, header-list bytes, and field count are bounded; output limit +1 fails closed. Those bounds cap memory but do not make CPU cost operationally small.",
+    "The source copies compiled in scratch match the current repository sources byte-for-byte under typed text digests."
+  ],
+  "not_proven": [
+    "No end-to-end network flood, multi-connection saturation, or sibling-stream responsiveness experiment was run.",
+    "No project document defines a codec-specific wall-time/work ceiling. The PRD's 50 ms cancellation P99 applies to blackhole connect, blocked read/write, and pool wait—not HPACK decode.",
+    "A full HPACK block spends a few bytes on literal/length framing, so a wire-reachable Huffman payload is a few bytes below the direct function's 65,536-byte input ceiling; this does not materially change the measured cost but should be stated in final wording."
+  ],
+  "measurement": {
+    "toolchain": "Cangjie Compiler 1.1.3 (cjnative)",
+    "target": "x86_64-unknown-linux-gnu",
+    "source_revision": "ef78b57bfe0d509f3ded8ff9c98d2e8c00077046",
+    "build": "cjc src/hpack_core.cj src/hpack_huffman.cj src/main.cj -o hpack_measure; matches observed `cjpm build -V` default with no explicit optimization flag",
+    "controls": "CPU affinity 2; no network; per-scenario external timeout 30 or 60 seconds; warmups before recorded samples",
+    "cases": [
+      {
+        "case": "small RFC `www.example.com`",
+        "encoded_bytes": 12,
+        "decoded_bytes": 15,
+        "samples": 7,
+        "inner_decodes_per_sample": 1000,
+        "median_ms_per_decode": 1.288129,
+        "range_ms_per_decode": [
+          1.012117,
+          1.701005
+        ],
+        "status": "PASS byte-for-byte"
+      },
+      {
+        "case": "normal repeated symbol 253",
+        "encoded_bytes": 4094,
+        "decoded_bytes": 1213,
+        "samples": 7,
+        "median_ms_per_decode": 371.111551,
+        "range_ms_per_decode": [
+          310.267546,
+          572.854181
+        ],
+        "status": "PASS byte-for-byte"
+      },
+      {
+        "case": "maximum direct compressed limit, repeated symbol 253",
+        "encoded_bytes": 65536,
+        "decoded_bytes": 19418,
+        "samples": 5,
+        "median_ms_per_decode": 5590.283822,
+        "range_ms_per_decode": [
+          5441.511987,
+          5878.842325
+        ],
+        "status": "PASS byte-for-byte"
+      },
+      {
+        "case": "exact decoded-output limit",
+        "encoded_bytes": 40960,
+        "decoded_bytes": 65536,
+        "samples": 5,
+        "median_ms_per_decode": 3473.678364,
+        "range_ms_per_decode": [
+          3171.59142,
+          3817.3233
+        ],
+        "status": "PASS byte-for-byte"
+      },
+      {
+        "case": "decoded-output limit +1",
+        "encoded_bytes": 40961,
+        "max_output_bytes": 65536,
+        "samples": 5,
+        "median_ms_to_rejection": 3961.669738,
+        "range_ms": [
+          3714.207696,
+          4171.737453
+        ],
+        "status": "EXPECTED HpackException"
+      }
+    ]
+  },
+  "contracts": {
+    "bounds": "Http2Limits defaults: maxHeaderBlockBytes=65,536, maxHeaderListBytes=65,536, maxHeaderFields=128. HpackDecoder rejects oversized blocks before decode; decodeHpackString applies encoded and decoded ceilings; appendHuffmanByte checks before every output byte; final field accounting adds RFC table overhead.",
+    "cancellation_timing": "Global request stages share a request Deadline, but HPACK decode has no context/checkpoint. The only explicit P99<=50 ms cancellation target is scoped to blackhole connect, blocked read/write, and pool wait. No HPACK-specific latency ceiling exists.",
+    "reader_impact": "HTTP/2 requires one reader loop per connection; client and server invoke decoder.decode synchronously after assembling a complete header block, so decode delays all subsequent frame dispatch on that connection."
+  },
+  "evidence": {
+    "directory": "docs/evidence/M8-007/reproductions/hpack-cost/before",
+    "summary": "summary.json",
+    "typed_digest_manifest": "digests.json",
+    "typed_digests": {
+      "summary": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7b37ffde5dbce9f2c205d5c22e6ee44b10c130abd07681b9e131e8b4c0ccd84c"
+      },
+      "benchmark_executable": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f1d3f69f4b2569a2e0a0112d60d8d378d25c31b20fbc993f0cc095ef3ea53aa1"
+      },
+      "hpack_huffman_source": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "78c1f32c35219f4f309e82cb93f6960952b1e2e6b1ad4de106eda13e4235b585"
+      },
+      "hpack_core_source": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+      },
+      "max_compressed_raw": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ac7d69fcb9a8a680f4885f2501e3d78f92166d624283cf9010af5c6c7b859e4d"
+      },
+      "exact_output_raw": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "aa48f7cfb8dd017709ca4440a7541978b3909d4184ad5e5f1909e83c3cdc10fe"
+      },
+      "above_output_raw": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "75dfbf320f067fe85d2ecb76ce08b31f5bee618e953a2c15e23c9ab01b8ce36a"
+      }
+    }
+  },
+  "repository_mutations": "None; only isolated scratch files were created."
+}

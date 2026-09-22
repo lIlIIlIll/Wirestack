@@ -1,0 +1,4 @@
+{"decision": "PASS", "gate_id": "M7-023-LINUX-FUZZ", "mode": "campaign", "output": "<repo>/docs/evidence/M8-007/linux_x86_64/fuzz-report.json", "targets": 10}
+{"decision": "PASS", "evidence": {"digest": {"domain": "text-utf8-lf-v1", "sha256": "f13e66f24f377079b91b4634db463076b5c52fdbbbf7095d446fa57332befc7e"}, "path": "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"}, "source_task": "M8-007", "targets": 10}
+
+Wall time: 158.90 seconds

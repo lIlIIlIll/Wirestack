@@ -3,27 +3,27 @@
   "artifact": {
     "digest": {
       "domain": "artifact-bytes-v1",
-      "sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1"
+      "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
     },
     "installed_as_only_wirestack_dependency": true,
     "path": "dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
-    "payload_sha256": "6816c0b2ef52c50712272d4bc8fe9615fa89c91c0ef9f68a47d1f052b1e4070b",
+    "payload_sha256": "5c545fc84becd2b51a59ef19f87f4dcaeae756fe568f1c253cc0fc6a7f894cb3",
     "qualification_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "de108f43b85e0536ff282afeae1e466c1238b6b35b8ab092826f9d7464569e0f"
+      "sha256": "7e9fc5bac9c790be63412572c0bcddeffc523024c58de74061301a5c9840299c"
     },
-    "qualification_sha256": "de108f43b85e0536ff282afeae1e466c1238b6b35b8ab092826f9d7464569e0f",
-    "sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1"
+    "qualification_sha256": "7e9fc5bac9c790be63412572c0bcddeffc523024c58de74061301a5c9840299c",
+    "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
   },
   "decision": "INCOMPLETE",
   "formal_parameters_met": false,
-  "generated_at_utc": "2026-09-21T18:22:02.647120+00:00",
+  "generated_at_utc": "2026-09-22T01:54:13.035306+00:00",
   "input_identities": {
     "artifact": {
-      "bytes": 2804015,
+      "bytes": 2804200,
       "digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1"
+        "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
       },
       "path": "dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
     },
@@ -47,7 +47,7 @@
       "bytes": 18256,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7a8481fba4f152c3073fb9430056a8bedc84775fa6e1243d329939107b30a6f0"
+        "sha256": "7e9fc5bac9c790be63412572c0bcddeffc523024c58de74061301a5c9840299c"
       },
       "path": "docs/evidence/M8-007/linux_x86_64/qualification.json"
     },
@@ -70,7 +70,7 @@
     "duration_seconds": 600,
     "idle_milliseconds": 10,
     "minimum_formal_seconds": 86400,
-    "resource_sample_seconds": 5.0,
+    "resource_sample_seconds": 60.0,
     "teardown_seconds": 300
   },
   "platform": {
@@ -82,26 +82,26 @@
   "preflight_status": "PASS",
   "private_candidate_copies": {
     "artifact": {
-      "bytes": 2804015,
+      "bytes": 2804200,
       "digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1"
+        "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
       }
     },
     "qualification": {
       "bytes": 18256,
       "digest": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "de108f43b85e0536ff282afeae1e466c1238b6b35b8ab092826f9d7464569e0f"
+        "sha256": "7e9fc5bac9c790be63412572c0bcddeffc523024c58de74061301a5c9840299c"
       }
     }
   },
   "process": {
     "binary": {
-      "bytes": 17638312,
+      "bytes": 17647688,
       "digest": {
         "domain": "artifact-bytes-v1",
-        "sha256": "b07c1861e28e539ad1c5815bdf2980fc3682cca494ba2cb117987e52e30af7e2"
+        "sha256": "2e4d2937989a7b7865243fc5140076a708f307e2f86a8cbbd9bfee439471252e"
       },
       "path": "<consumer>/target/release/bin/main"
     },
@@ -123,21 +123,21 @@
     ],
     "exit_code": 0,
     "timed_out": false,
-    "wall_elapsed_ms": 600123
+    "wall_elapsed_ms": 600230
   },
   "raw_log": {
-    "bytes": 3661,
+    "bytes": 3657,
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "815794f15aef176b006394cd2bc204bf54ab471ec49f9ac66222dca9571f1e20"
+      "sha256": "121e22b0fa3f963696051c01285a83aee81e48135bac1603257768d9ebf6a8e3"
     },
     "path": "docs/evidence/M8-007/reproductions/bounded-owner-preflight-600s.log",
-    "sha256": "815794f15aef176b006394cd2bc204bf54ab471ec49f9ac66222dca9571f1e20",
-    "tail": "SOAK_READY cycles=1 elapsedMs=132\nM7022_SAMPLE index=0 elapsedMs=60046 usedHeapBytes=9089024 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=600 h1Requests=750 h2Requests=1876 sseEvents=4800\nM7022_SAMPLE index=1 elapsedMs=120023 usedHeapBytes=8527872 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=1199 h1Requests=1499 h2Requests=3748 sseEvents=9592\nM7022_SAMPLE index=2 elapsedMs=180100 usedHeapBytes=10289152 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=4 retainedCancellations=6 serverServeTasks=2 cycles=1798 h1Requests=2248 h2Requests=5620 sseEvents=14384\nM7022_SAMPLE index=3 elapsedMs=240088 usedHeapBytes=8994816 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=4 retainedCancellations=6 serverServeTasks=2 cycles=2398 h1Requests=2998 h2Requests=7495 sseEvents=19185\nM7022_SAMPLE index=4 elapsedMs=300098 usedHeapBytes=10686464 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=2998 h1Requests=3748 h2Requests=9370 sseEvents=23985\nM7022_SAMPLE index=5 elapsedMs=360044 usedHeapBytes=9310208 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=4 serverServeTasks=2 cycles=3598 h1Requests=4498 h2Requests=11245 sseEvents=28785\nM7022_SAMPLE index=6 elapsedMs=420058 usedHeapBytes=10076160 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=4194 h1Requests=5243 h2Requests=13108 sseEvents=33553\nM7022_SAMPLE index=7 elapsedMs=480059 usedHeapBytes=9203712 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=4792 h1Requests=5990 h2Requests=14976 sseEvents=38337\nM7022_SAMPLE index=8 elapsedMs=540090 usedHeapBytes=10227712 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=5392 h1Requests=6740 h2Requests=16851 sseEvents=43137\nM7022_SAMPLE index=9 elapsedMs=600004 usedHeapBytes=9990144 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=5988 h1Requests=7485 h2Requests=18714 sseEvents=47905\nM7022_SAMPLE index=10 elapsedMs=600006 usedHeapBytes=7184384 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=5988 h1Requests=7485 h2Requests=18714 sseEvents=47905\nM7022_RESULT durationSeconds=600 elapsedMs=600019 cycles=5988 activePhases=5988 idlePhases=5988 connects=2248 h1Requests=7485 h2Requests=18714 h2MultiplexBatches=5988 sseH1Events=23953 sseH2Events=23952 requestCancels=5988 streamResets=5988 connectionCancels=749 reconnects=749 spawnedTasks=11976 joinedTasks=11976 sequenceErrors=0 maxCancelLatencyNs=2265018 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=0 retainedTransports=0 retainedCancellations=0 serverServeTasks=0 serverConnections=0 clientsClosed=2 serversClosed=2 tlsConfigsClosed=2 poolAcquires=13473 poolReleases=13473 poolSequenceErrors=0\n"
+    "sha256": "121e22b0fa3f963696051c01285a83aee81e48135bac1603257768d9ebf6a8e3",
+    "tail": "SOAK_READY cycles=1 elapsedMs=118\nM7022_SAMPLE index=0 elapsedMs=60048 usedHeapBytes=9465856 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=587 h1Requests=734 h2Requests=1836 sseEvents=4696\nM7022_SAMPLE index=1 elapsedMs=120031 usedHeapBytes=8548352 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=1172 h1Requests=1465 h2Requests=3664 sseEvents=9376\nM7022_SAMPLE index=2 elapsedMs=180014 usedHeapBytes=9150464 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=1760 h1Requests=2200 h2Requests=5501 sseEvents=14080\nM7022_SAMPLE index=3 elapsedMs=240082 usedHeapBytes=8491008 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=2350 h1Requests=2938 h2Requests=7345 sseEvents=18800\nM7022_SAMPLE index=4 elapsedMs=300059 usedHeapBytes=8613888 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=2939 h1Requests=3674 h2Requests=9186 sseEvents=23512\nM7022_SAMPLE index=5 elapsedMs=360018 usedHeapBytes=8744960 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=3527 h1Requests=4409 h2Requests=11023 sseEvents=28216\nM7022_SAMPLE index=6 elapsedMs=420087 usedHeapBytes=8908800 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=4 serverServeTasks=2 cycles=4114 h1Requests=5143 h2Requests=12858 sseEvents=32912\nM7022_SAMPLE index=7 elapsedMs=480072 usedHeapBytes=9428992 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=4699 h1Requests=5874 h2Requests=14686 sseEvents=37595\nM7022_SAMPLE index=8 elapsedMs=540034 usedHeapBytes=8908800 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=5276 h1Requests=6595 h2Requests=16489 sseEvents=42219\nM7022_SAMPLE index=9 elapsedMs=600087 usedHeapBytes=8466432 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=5862 h1Requests=7328 h2Requests=18320 sseEvents=46907\nM7022_SAMPLE index=10 elapsedMs=600089 usedHeapBytes=8466432 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=5862 h1Requests=7328 h2Requests=18320 sseEvents=46907\nM7022_RESULT durationSeconds=600 elapsedMs=600102 cycles=5862 activePhases=5862 idlePhases=5862 connects=2201 h1Requests=7328 h2Requests=18320 h2MultiplexBatches=5862 sseH1Events=23459 sseH2Events=23448 requestCancels=5862 streamResets=5862 connectionCancels=733 reconnects=733 spawnedTasks=11724 joinedTasks=11724 sequenceErrors=0 maxCancelLatencyNs=6382026 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=0 retainedTransports=0 retainedCancellations=0 serverServeTasks=0 serverConnections=0 clientsClosed=2 serversClosed=2 tlsConfigsClosed=2 poolAcquires=13190 poolReleases=13190 poolSequenceErrors=0\n"
   },
   "readiness": {
     "cycles": 1,
-    "elapsedMs": 132,
+    "elapsedMs": 118,
     "marker": "SOAK_READY",
     "observed_by_parent": true
   },
@@ -149,176 +149,176 @@
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 600,
-          "elapsedMs": 60046,
-          "h1Requests": 750,
-          "h2Requests": 1876,
+          "cycles": 587,
+          "elapsedMs": 60048,
+          "h1Requests": 734,
+          "h2Requests": 1836,
           "index": 0,
-          "retainedCancellations": 3,
-          "retainedTransports": 2,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
           "serverServeTasks": 2,
-          "sseEvents": 4800,
-          "usedHeapBytes": 9089024
+          "sseEvents": 4696,
+          "usedHeapBytes": 9465856
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 1199,
-          "elapsedMs": 120023,
-          "h1Requests": 1499,
-          "h2Requests": 3748,
+          "cycles": 1172,
+          "elapsedMs": 120031,
+          "h1Requests": 1465,
+          "h2Requests": 3664,
           "index": 1,
           "retainedCancellations": 3,
           "retainedTransports": 2,
           "serverServeTasks": 2,
-          "sseEvents": 9592,
-          "usedHeapBytes": 8527872
+          "sseEvents": 9376,
+          "usedHeapBytes": 8548352
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 1798,
-          "elapsedMs": 180100,
-          "h1Requests": 2248,
-          "h2Requests": 5620,
+          "cycles": 1760,
+          "elapsedMs": 180014,
+          "h1Requests": 2200,
+          "h2Requests": 5501,
           "index": 2,
-          "retainedCancellations": 6,
-          "retainedTransports": 4,
-          "serverServeTasks": 2,
-          "sseEvents": 14384,
-          "usedHeapBytes": 10289152
-        },
-        {
-          "activeApplicationTasks": 0,
-          "activePoolLeases": 0,
-          "activeResponseOwners": 0,
-          "activeTransportIo": 1,
-          "cycles": 2398,
-          "elapsedMs": 240088,
-          "h1Requests": 2998,
-          "h2Requests": 7495,
-          "index": 3,
-          "retainedCancellations": 6,
-          "retainedTransports": 4,
-          "serverServeTasks": 2,
-          "sseEvents": 19185,
-          "usedHeapBytes": 8994816
-        },
-        {
-          "activeApplicationTasks": 0,
-          "activePoolLeases": 0,
-          "activeResponseOwners": 0,
-          "activeTransportIo": 1,
-          "cycles": 2998,
-          "elapsedMs": 300098,
-          "h1Requests": 3748,
-          "h2Requests": 9370,
-          "index": 4,
-          "retainedCancellations": 2,
-          "retainedTransports": 1,
-          "serverServeTasks": 2,
-          "sseEvents": 23985,
-          "usedHeapBytes": 10686464
-        },
-        {
-          "activeApplicationTasks": 0,
-          "activePoolLeases": 0,
-          "activeResponseOwners": 0,
-          "activeTransportIo": 1,
-          "cycles": 3598,
-          "elapsedMs": 360044,
-          "h1Requests": 4498,
-          "h2Requests": 11245,
-          "index": 5,
-          "retainedCancellations": 4,
+          "retainedCancellations": 3,
           "retainedTransports": 2,
           "serverServeTasks": 2,
-          "sseEvents": 28785,
-          "usedHeapBytes": 9310208
+          "sseEvents": 14080,
+          "usedHeapBytes": 9150464
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 4194,
-          "elapsedMs": 420058,
-          "h1Requests": 5243,
-          "h2Requests": 13108,
-          "index": 6,
+          "cycles": 2350,
+          "elapsedMs": 240082,
+          "h1Requests": 2938,
+          "h2Requests": 7345,
+          "index": 3,
           "retainedCancellations": 2,
           "retainedTransports": 1,
           "serverServeTasks": 2,
-          "sseEvents": 33553,
-          "usedHeapBytes": 10076160
+          "sseEvents": 18800,
+          "usedHeapBytes": 8491008
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 4792,
-          "elapsedMs": 480059,
-          "h1Requests": 5990,
-          "h2Requests": 14976,
-          "index": 7,
+          "cycles": 2939,
+          "elapsedMs": 300059,
+          "h1Requests": 3674,
+          "h2Requests": 9186,
+          "index": 4,
           "retainedCancellations": 5,
           "retainedTransports": 2,
           "serverServeTasks": 2,
-          "sseEvents": 38337,
-          "usedHeapBytes": 9203712
+          "sseEvents": 23512,
+          "usedHeapBytes": 8613888
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 5392,
-          "elapsedMs": 540090,
-          "h1Requests": 6740,
-          "h2Requests": 16851,
+          "cycles": 3527,
+          "elapsedMs": 360018,
+          "h1Requests": 4409,
+          "h2Requests": 11023,
+          "index": 5,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 28216,
+          "usedHeapBytes": 8744960
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 4114,
+          "elapsedMs": 420087,
+          "h1Requests": 5143,
+          "h2Requests": 12858,
+          "index": 6,
+          "retainedCancellations": 4,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 32912,
+          "usedHeapBytes": 8908800
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 4699,
+          "elapsedMs": 480072,
+          "h1Requests": 5874,
+          "h2Requests": 14686,
+          "index": 7,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 37595,
+          "usedHeapBytes": 9428992
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 5276,
+          "elapsedMs": 540034,
+          "h1Requests": 6595,
+          "h2Requests": 16489,
           "index": 8,
-          "retainedCancellations": 3,
+          "retainedCancellations": 5,
           "retainedTransports": 2,
           "serverServeTasks": 2,
-          "sseEvents": 43137,
-          "usedHeapBytes": 10227712
+          "sseEvents": 42219,
+          "usedHeapBytes": 8908800
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 5988,
-          "elapsedMs": 600004,
-          "h1Requests": 7485,
-          "h2Requests": 18714,
+          "cycles": 5862,
+          "elapsedMs": 600087,
+          "h1Requests": 7328,
+          "h2Requests": 18320,
           "index": 9,
-          "retainedCancellations": 3,
-          "retainedTransports": 2,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
           "serverServeTasks": 2,
-          "sseEvents": 47905,
-          "usedHeapBytes": 9990144
+          "sseEvents": 46907,
+          "usedHeapBytes": 8466432
         },
         {
           "activeApplicationTasks": 0,
           "activePoolLeases": 0,
           "activeResponseOwners": 0,
           "activeTransportIo": 1,
-          "cycles": 5988,
-          "elapsedMs": 600006,
-          "h1Requests": 7485,
-          "h2Requests": 18714,
+          "cycles": 5862,
+          "elapsedMs": 600089,
+          "h1Requests": 7328,
+          "h2Requests": 18320,
           "index": 10,
-          "retainedCancellations": 3,
-          "retainedTransports": 2,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
           "serverServeTasks": 2,
-          "sseEvents": 47905,
-          "usedHeapBytes": 7184384
+          "sseEvents": 46907,
+          "usedHeapBytes": 8466432
         }
       ],
       "trend": {
@@ -326,12 +326,12 @@
         "decision": "PASS",
         "heavy_gc_heap": {
           "decision": "PASS",
-          "first_median": 10289152,
-          "growth": -3104768,
+          "first_median": 9150464,
+          "growth": -684032,
           "growth_limit": 33554432,
-          "last_median": 7184384,
+          "last_median": 8466432,
           "monotonic_growth": false,
-          "positive_steps": 3
+          "positive_steps": 4
         },
         "in_flight_transport_io": {
           "decision": "PASS",
@@ -345,21 +345,21 @@
         "minimum_samples": 5,
         "retained_cancellation_sentinels": {
           "decision": "PASS",
-          "first_median": 6,
-          "growth": -3,
+          "first_median": 3,
+          "growth": 2,
           "growth_limit": 2,
-          "last_median": 3,
+          "last_median": 5,
           "monotonic_growth": false,
-          "positive_steps": 2
+          "positive_steps": 3
         },
         "retained_transport_owners": {
           "decision": "PASS",
-          "first_median": 4,
-          "growth": -2,
+          "first_median": 2,
+          "growth": 1,
           "growth_limit": 2,
-          "last_median": 2,
+          "last_median": 3,
           "monotonic_growth": false,
-          "positive_steps": 2
+          "positive_steps": 3
         },
         "sample_count": 11,
         "transport_owners_observed": true,
@@ -397,1078 +397,88 @@
           "elapsed_ms": 0,
           "fd_count": 5,
           "process_count": 1,
-          "rss_kib": 23348,
+          "rss_kib": 23392,
           "socket_count": 1,
           "thread_count": 5,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 5028,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33836,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 10067,
+          "elapsed_ms": 60035,
           "fd_count": 8,
           "process_count": 1,
-          "rss_kib": 33052,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 15094,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33356,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 20138,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 35560,
-          "socket_count": 5,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 25195,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35352,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 30254,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 35836,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 35308,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 31484,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 40335,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32652,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 45376,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 31380,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 50404,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32252,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 55463,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33796,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 60490,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 30516,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 65517,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 30692,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 70554,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 31732,
-          "socket_count": 5,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 75581,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33188,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 80619,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33088,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 85668,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34752,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 90694,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34420,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 95722,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 30676,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 100751,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 31060,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 105814,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 31900,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 110842,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32948,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 115870,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32976,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 120899,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 29872,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 125958,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 31384,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 131004,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32640,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 136031,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32708,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 141098,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 32780,
-          "socket_count": 5,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 146126,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35308,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 151153,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35336,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 156215,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 30424,
-          "socket_count": 6,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 161280,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32128,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 166334,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 32468,
-          "socket_count": 5,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 171362,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33688,
-          "socket_count": 4,
-          "thread_count": 10,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 176389,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34484,
-          "socket_count": 6,
-          "thread_count": 11,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 181417,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 31972,
-          "socket_count": 6,
-          "thread_count": 11,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 186476,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 31284,
+          "rss_kib": 36440,
           "socket_count": 4,
           "thread_count": 11,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 191503,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32256,
-          "socket_count": 4,
-          "thread_count": 11,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 196537,
+          "elapsed_ms": 120086,
           "fd_count": 10,
           "process_count": 1,
-          "rss_kib": 33392,
+          "rss_kib": 33480,
           "socket_count": 6,
           "thread_count": 11,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 201565,
+          "elapsed_ms": 180126,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 33928,
+          "socket_count": 4,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 240163,
           "fd_count": 10,
           "process_count": 1,
-          "rss_kib": 34300,
+          "rss_kib": 33124,
           "socket_count": 6,
           "thread_count": 11,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 206593,
+          "elapsed_ms": 300198,
           "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33892,
-          "socket_count": 6,
-          "thread_count": 11,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 211622,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34444,
-          "socket_count": 6,
-          "thread_count": 11,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 216649,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32940,
-          "socket_count": 6,
-          "thread_count": 11,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 221678,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33284,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 226770,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33540,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 231798,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 35580,
-          "socket_count": 5,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 236861,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35056,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 241888,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 31656,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 246920,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32932,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 251947,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33108,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 256992,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34352,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 262055,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 36024,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 267082,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 36684,
-          "socket_count": 5,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 272108,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 37180,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 277161,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33632,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 282216,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33464,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 287243,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 35164,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 292280,
-          "fd_count": 8,
           "process_count": 1,
           "rss_kib": 34856,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 297313,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 36360,
           "socket_count": 6,
-          "thread_count": 12,
+          "thread_count": 11,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 302371,
+          "elapsed_ms": 360236,
           "fd_count": 8,
           "process_count": 1,
-          "rss_kib": 32044,
+          "rss_kib": 32632,
           "socket_count": 4,
-          "thread_count": 12,
+          "thread_count": 11,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 307425,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32720,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 312454,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33980,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 317480,
+          "elapsed_ms": 420319,
           "fd_count": 8,
           "process_count": 1,
           "rss_kib": 35408,
           "socket_count": 4,
-          "thread_count": 12,
+          "thread_count": 11,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 322535,
+          "elapsed_ms": 480357,
           "fd_count": 8,
           "process_count": 1,
-          "rss_kib": 34964,
+          "rss_kib": 36100,
           "socket_count": 4,
           "thread_count": 12,
           "timerfd_count": 0
         },
         {
-          "elapsed_ms": 327580,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 36032,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 332607,
+          "elapsed_ms": 540392,
           "fd_count": 10,
           "process_count": 1,
-          "rss_kib": 36756,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 337651,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32728,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 342679,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32692,
-          "socket_count": 5,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 347705,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35352,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 352732,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 35616,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 357765,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35760,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 362794,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 31496,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 367822,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34112,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 372854,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34556,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 377894,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34256,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 382934,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 35664,
-          "socket_count": 5,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 387961,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 36528,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 392989,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33820,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 398024,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33372,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 403051,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33820,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 408080,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 35672,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 413119,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 36132,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 418163,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 36544,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 423192,
-          "fd_count": 9,
-          "process_count": 1,
-          "rss_kib": 32248,
-          "socket_count": 5,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 428220,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34216,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 433247,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34584,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 438274,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35032,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 443301,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 36572,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 448329,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 38020,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 453394,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32620,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 458421,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33252,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 463458,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34364,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 468521,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34840,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 473552,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35908,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 478615,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 35428,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 483643,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33424,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 488681,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32660,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 493723,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33060,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 498768,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34924,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 503797,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34760,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 508846,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 35732,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 513874,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33360,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 518914,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34092,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 523942,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34844,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 528989,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 36144,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 534015,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 36664,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 539082,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 37672,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 544110,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32800,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 549138,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 32980,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 554165,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 34276,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 559193,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 34776,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 564220,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 35484,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 569274,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 37164,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 574307,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 32168,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 579365,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 33416,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 584393,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 33988,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 589427,
-          "fd_count": 8,
-          "process_count": 1,
-          "rss_kib": 36252,
-          "socket_count": 4,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 594470,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 36784,
-          "socket_count": 6,
-          "thread_count": 12,
-          "timerfd_count": 0
-        },
-        {
-          "elapsed_ms": 599535,
-          "fd_count": 10,
-          "process_count": 1,
-          "rss_kib": 36428,
+          "rss_kib": 34740,
           "socket_count": 6,
           "thread_count": 12,
           "timerfd_count": 0
@@ -1480,11 +490,11 @@
           "fd_count": {
             "decision": "PASS",
             "first_median": 10,
-            "growth": -2,
+            "growth": 0,
             "growth_limit": 2,
-            "last_median": 8,
+            "last_median": 10,
             "monotonic_growth": false,
-            "positive_steps": 24
+            "positive_steps": 2
           },
           "process_count": {
             "decision": "PASS",
@@ -1497,30 +507,30 @@
           },
           "rss_kib": {
             "decision": "PASS",
-            "first_median": 32708,
-            "growth": 2136,
+            "first_median": 33480,
+            "growth": 1260,
             "growth_limit": 65536,
-            "last_median": 34844,
+            "last_median": 34740,
             "monotonic_growth": false,
-            "positive_steps": 67
+            "positive_steps": 4
           },
           "socket_count": {
             "decision": "PASS",
             "first_median": 6,
-            "growth": -2,
+            "growth": 0,
             "growth_limit": 2,
-            "last_median": 4,
+            "last_median": 6,
             "monotonic_growth": false,
-            "positive_steps": 24
+            "positive_steps": 2
           },
           "thread_count": {
             "decision": "PASS",
-            "first_median": 10,
-            "growth": 2,
+            "first_median": 11,
+            "growth": 1,
             "growth_limit": 2,
             "last_median": 12,
             "monotonic_growth": false,
-            "positive_steps": 2
+            "positive_steps": 1
           },
           "timerfd_count": {
             "decision": "PASS",
@@ -1533,7 +543,7 @@
           }
         },
         "minimum_samples": 5,
-        "sample_count": 120
+        "sample_count": 10
       }
     }
   },
@@ -1569,7 +579,7 @@
         "bytes": 475,
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "a207250e21fd94e6929e965bab3b59d2b168668de010288ecccc4cdd22114a4a"
+          "sha256": "c3d2bb314280abaad0d781272257289c8bf377044d6af8d85005ae5c867938f3"
         }
       }
     },
@@ -1667,37 +677,37 @@
     "decision": "PASS",
     "result": {
       "activeApplicationTasks": 0,
-      "activePhases": 5988,
+      "activePhases": 5862,
       "activePoolLeases": 0,
       "activeResponseOwners": 0,
       "activeTransportIo": 0,
       "clientsClosed": 2,
-      "connectionCancels": 749,
-      "connects": 2248,
-      "cycles": 5988,
+      "connectionCancels": 733,
+      "connects": 2201,
+      "cycles": 5862,
       "durationSeconds": 600,
-      "elapsedMs": 600019,
-      "h1Requests": 7485,
-      "h2MultiplexBatches": 5988,
-      "h2Requests": 18714,
-      "idlePhases": 5988,
-      "joinedTasks": 11976,
-      "maxCancelLatencyNs": 2265018,
-      "poolAcquires": 13473,
-      "poolReleases": 13473,
+      "elapsedMs": 600102,
+      "h1Requests": 7328,
+      "h2MultiplexBatches": 5862,
+      "h2Requests": 18320,
+      "idlePhases": 5862,
+      "joinedTasks": 11724,
+      "maxCancelLatencyNs": 6382026,
+      "poolAcquires": 13190,
+      "poolReleases": 13190,
       "poolSequenceErrors": 0,
-      "reconnects": 749,
-      "requestCancels": 5988,
+      "reconnects": 733,
+      "requestCancels": 5862,
       "retainedCancellations": 0,
       "retainedTransports": 0,
       "sequenceErrors": 0,
       "serverConnections": 0,
       "serverServeTasks": 0,
       "serversClosed": 2,
-      "spawnedTasks": 11976,
-      "sseH1Events": 23953,
-      "sseH2Events": 23952,
-      "streamResets": 5988,
+      "spawnedTasks": 11724,
+      "sseH1Events": 23459,
+      "sseH2Events": 23448,
+      "streamResets": 5862,
       "tlsConfigsClosed": 2
     }
   }

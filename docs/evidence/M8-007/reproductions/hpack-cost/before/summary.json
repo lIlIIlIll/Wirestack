@@ -1,0 +1,437 @@
+{
+  "build_profile_note": "Matches cjpm build verbose cjc invocation: no explicit optimization flag",
+  "compile_flags": [],
+  "cpu_affinity": [
+    2
+  ],
+  "network_used": false,
+  "purpose": "M8-007-PROTOCOL-001 bounded native wall-clock measurement",
+  "scenario_timeout_seconds": {
+    "above-output": 60,
+    "exact-output": 60,
+    "max-compressed": 60,
+    "normal": 30,
+    "small": 30
+  },
+  "scenarios": {
+    "above-output-limit": {
+      "decoded_bytes": null,
+      "encoded_bytes": 40961,
+      "exit_status": 0,
+      "latency_ns_per_decode": {
+        "maximum": 4171737453.0,
+        "mean": 3927697811.8,
+        "median": 3961669738.0,
+        "minimum": 3714207696.0,
+        "population_stdev": 154048321.55503753
+      },
+      "max_output_bytes": 65536,
+      "raw_log": "above-output.log",
+      "result_statuses": [
+        "EXPECTED_REJECTION"
+      ],
+      "rows": [
+        {
+          "durationNs": 3961669738,
+          "encodedBytes": 40961,
+          "inner": 1,
+          "maxOutputBytes": 65536,
+          "perDecodeNs": 3961669738.0,
+          "sample": 0,
+          "scenario": "above-output-limit",
+          "status": "EXPECTED_REJECTION"
+        },
+        {
+          "durationNs": 3714207696,
+          "encodedBytes": 40961,
+          "inner": 1,
+          "maxOutputBytes": 65536,
+          "perDecodeNs": 3714207696.0,
+          "sample": 1,
+          "scenario": "above-output-limit",
+          "status": "EXPECTED_REJECTION"
+        },
+        {
+          "durationNs": 3967149882,
+          "encodedBytes": 40961,
+          "inner": 1,
+          "maxOutputBytes": 65536,
+          "perDecodeNs": 3967149882.0,
+          "sample": 2,
+          "scenario": "above-output-limit",
+          "status": "EXPECTED_REJECTION"
+        },
+        {
+          "durationNs": 3823724290,
+          "encodedBytes": 40961,
+          "inner": 1,
+          "maxOutputBytes": 65536,
+          "perDecodeNs": 3823724290.0,
+          "sample": 3,
+          "scenario": "above-output-limit",
+          "status": "EXPECTED_REJECTION"
+        },
+        {
+          "durationNs": 4171737453,
+          "encodedBytes": 40961,
+          "inner": 1,
+          "maxOutputBytes": 65536,
+          "perDecodeNs": 4171737453.0,
+          "sample": 4,
+          "scenario": "above-output-limit",
+          "status": "EXPECTED_REJECTION"
+        }
+      ],
+      "samples": 5
+    },
+    "exact-output-limit": {
+      "decoded_bytes": 65536,
+      "encoded_bytes": 40960,
+      "exit_status": 0,
+      "latency_ns_per_decode": {
+        "maximum": 3817323300.0,
+        "mean": 3477455853.8,
+        "median": 3473678364.0,
+        "minimum": 3171591420.0,
+        "population_stdev": 252985415.18162602
+      },
+      "max_output_bytes": null,
+      "raw_log": "exact-output.log",
+      "result_statuses": [
+        "PASS"
+      ],
+      "rows": [
+        {
+          "checksum": 65536,
+          "decodedBytes": 65536,
+          "durationNs": 3171591420,
+          "encodedBytes": 40960,
+          "inner": 1,
+          "perDecodeNs": 3171591420.0,
+          "sample": 0,
+          "scenario": "exact-output-limit",
+          "status": "PASS"
+        },
+        {
+          "checksum": 65536,
+          "decodedBytes": 65536,
+          "durationNs": 3227317447,
+          "encodedBytes": 40960,
+          "inner": 1,
+          "perDecodeNs": 3227317447.0,
+          "sample": 1,
+          "scenario": "exact-output-limit",
+          "status": "PASS"
+        },
+        {
+          "checksum": 65536,
+          "decodedBytes": 65536,
+          "durationNs": 3473678364,
+          "encodedBytes": 40960,
+          "inner": 1,
+          "perDecodeNs": 3473678364.0,
+          "sample": 2,
+          "scenario": "exact-output-limit",
+          "status": "PASS"
+        },
+        {
+          "checksum": 65536,
+          "decodedBytes": 65536,
+          "durationNs": 3697368738,
+          "encodedBytes": 40960,
+          "inner": 1,
+          "perDecodeNs": 3697368738.0,
+          "sample": 3,
+          "scenario": "exact-output-limit",
+          "status": "PASS"
+        },
+        {
+          "checksum": 65536,
+          "decodedBytes": 65536,
+          "durationNs": 3817323300,
+          "encodedBytes": 40960,
+          "inner": 1,
+          "perDecodeNs": 3817323300.0,
+          "sample": 4,
+          "scenario": "exact-output-limit",
+          "status": "PASS"
+        }
+      ],
+      "samples": 5
+    },
+    "max-compressed-long-code": {
+      "decoded_bytes": 19418,
+      "encoded_bytes": 65536,
+      "exit_status": 0,
+      "latency_ns_per_decode": {
+        "maximum": 5878842325.0,
+        "mean": 5657624916.4,
+        "median": 5590283822.0,
+        "minimum": 5441511987.0,
+        "population_stdev": 165749616.96274447
+      },
+      "max_output_bytes": null,
+      "raw_log": "max-compressed.log",
+      "result_statuses": [
+        "PASS"
+      ],
+      "rows": [
+        {
+          "checksum": 19418,
+          "decodedBytes": 19418,
+          "durationNs": 5821504695,
+          "encodedBytes": 65536,
+          "inner": 1,
+          "perDecodeNs": 5821504695.0,
+          "sample": 0,
+          "scenario": "max-compressed-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 19418,
+          "decodedBytes": 19418,
+          "durationNs": 5878842325,
+          "encodedBytes": 65536,
+          "inner": 1,
+          "perDecodeNs": 5878842325.0,
+          "sample": 1,
+          "scenario": "max-compressed-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 19418,
+          "decodedBytes": 19418,
+          "durationNs": 5590283822,
+          "encodedBytes": 65536,
+          "inner": 1,
+          "perDecodeNs": 5590283822.0,
+          "sample": 2,
+          "scenario": "max-compressed-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 19418,
+          "decodedBytes": 19418,
+          "durationNs": 5441511987,
+          "encodedBytes": 65536,
+          "inner": 1,
+          "perDecodeNs": 5441511987.0,
+          "sample": 3,
+          "scenario": "max-compressed-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 19418,
+          "decodedBytes": 19418,
+          "durationNs": 5555981753,
+          "encodedBytes": 65536,
+          "inner": 1,
+          "perDecodeNs": 5555981753.0,
+          "sample": 4,
+          "scenario": "max-compressed-long-code",
+          "status": "PASS"
+        }
+      ],
+      "samples": 5
+    },
+    "normal-long-code": {
+      "decoded_bytes": 1213,
+      "encoded_bytes": 4094,
+      "exit_status": 0,
+      "latency_ns_per_decode": {
+        "maximum": 572854181.0,
+        "mean": 396014650.85714287,
+        "median": 371111551.0,
+        "minimum": 310267546.0,
+        "population_stdev": 77137532.16436918
+      },
+      "max_output_bytes": null,
+      "raw_log": "normal.log",
+      "result_statuses": [
+        "PASS"
+      ],
+      "rows": [
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 409469347,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 409469347.0,
+          "sample": 0,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 365723289,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 365723289.0,
+          "sample": 1,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 364629956,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 364629956.0,
+          "sample": 2,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 572854181,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 572854181.0,
+          "sample": 3,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 378046686,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 378046686.0,
+          "sample": 4,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 310267546,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 310267546.0,
+          "sample": 5,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        },
+        {
+          "checksum": 1213,
+          "decodedBytes": 1213,
+          "durationNs": 371111551,
+          "encodedBytes": 4094,
+          "inner": 1,
+          "perDecodeNs": 371111551.0,
+          "sample": 6,
+          "scenario": "normal-long-code",
+          "status": "PASS"
+        }
+      ],
+      "samples": 7
+    },
+    "small-rfc": {
+      "decoded_bytes": 15,
+      "encoded_bytes": 12,
+      "exit_status": 0,
+      "latency_ns_per_decode": {
+        "maximum": 1701004.582,
+        "mean": 1326793.6300000001,
+        "median": 1288128.946,
+        "minimum": 1012117.109,
+        "population_stdev": 234080.07621961727
+      },
+      "max_output_bytes": null,
+      "raw_log": "small.log",
+      "result_statuses": [
+        "PASS"
+      ],
+      "rows": [
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1012117109,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1012117.109,
+          "sample": 0,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        },
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1062163563,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1062163.563,
+          "sample": 1,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        },
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1288128946,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1288128.946,
+          "sample": 2,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        },
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1701004582,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1701004.582,
+          "sample": 3,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        },
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1573434853,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1573434.853,
+          "sample": 4,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        },
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1403260663,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1403260.663,
+          "sample": 5,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        },
+        {
+          "checksum": 15000,
+          "decodedBytes": 15,
+          "durationNs": 1247445694,
+          "encodedBytes": 12,
+          "inner": 1000,
+          "perDecodeNs": 1247445.694,
+          "sample": 6,
+          "scenario": "small-rfc",
+          "status": "PASS"
+        }
+      ],
+      "samples": 7
+    }
+  },
+  "schema_version": 1,
+  "sdk": "Cangjie Compiler 1.1.3 (cjnative)",
+  "source_copy_cmp_equal": true,
+  "source_revision": "ef78b57bfe0d509f3ded8ff9c98d2e8c00077046",
+  "target": "x86_64-unknown-linux-gnu"
+}
