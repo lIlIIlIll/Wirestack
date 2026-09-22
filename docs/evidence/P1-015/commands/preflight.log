@@ -1,0 +1,714 @@
+{
+  "acceptance_status": "INCOMPLETE",
+  "artifact": {
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
+    },
+    "installed_as_only_wirestack_dependency": true,
+    "path": "dist/p1-015/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "payload_sha256": "5c545fc84becd2b51a59ef19f87f4dcaeae756fe568f1c253cc0fc6a7f894cb3",
+    "qualification_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8d2641343fce270d428cab011b7212c8ea50fb502565d3e4ae18dcb5a1aa65cf"
+    },
+    "qualification_sha256": "8d2641343fce270d428cab011b7212c8ea50fb502565d3e4ae18dcb5a1aa65cf",
+    "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
+  },
+  "decision": "INCOMPLETE",
+  "formal_parameters_met": false,
+  "generated_at_utc": "2026-09-22T02:55:45.677660+00:00",
+  "input_identities": {
+    "artifact": {
+      "bytes": 2804200,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
+      },
+      "path": "dist/p1-015/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+    },
+    "driver": {
+      "bytes": 52675,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "043390146828cd03e6ecd7a685bbbbe2e56edab10055752dc8a7898ca43e3bc8"
+      },
+      "path": "tools/m7_022_linux_release_soak.py"
+    },
+    "fixture": {
+      "bytes": 4025,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+      },
+      "path": "examples/linux/m7_027/fixtures.cj"
+    },
+    "qualification": {
+      "bytes": 13921,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8d2641343fce270d428cab011b7212c8ea50fb502565d3e4ae18dcb5a1aa65cf"
+      },
+      "path": "dist/p1-015/qualification.json"
+    },
+    "source": {
+      "bytes": 32626,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
+      },
+      "path": "tools/release_soak/main.cj"
+    }
+  },
+  "non_claims": [
+    "This result applies only to native Linux x86_64 glibc.",
+    "A short preflight is not 24-hour acceptance evidence.",
+    "This task does not sign the artifact or close the independent security review."
+  ],
+  "parameters": {
+    "application_sample_seconds": 60.0,
+    "duration_seconds": 600,
+    "idle_milliseconds": 10,
+    "minimum_formal_seconds": 86400,
+    "resource_sample_seconds": 60.0,
+    "teardown_seconds": 300
+  },
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "preflight_status": "PASS",
+  "private_candidate_copies": {
+    "artifact": {
+      "bytes": 2804200,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
+      }
+    },
+    "qualification": {
+      "bytes": 13921,
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8d2641343fce270d428cab011b7212c8ea50fb502565d3e4ae18dcb5a1aa65cf"
+      }
+    }
+  },
+  "process": {
+    "binary": {
+      "bytes": 17649224,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ac9c51e3d3dc64f3c193c80cbcf4f6ab13f9f129a09a57111265513b83c6f187"
+      },
+      "path": "<consumer>/target/release/bin/main"
+    },
+    "build_command": [
+      "<cangjie-sdk>/tools/bin/cjpm",
+      "build"
+    ],
+    "build_output": "\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m <workspace>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:612:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m612\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m613\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m622\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m <workspace>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:910:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m910\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m911\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m919\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m <workspace>/install/wirestack-0.1.0/src/internal/http2/server_connection.cj:411:28:\n    \u001b[36m| \u001b[0m\n\u001b[36m411\u001b[0m \u001b[36m| \u001b[0m            if (slotOwned) { releasePushSlot() }\u001b[0m\n    \u001b[36m| \u001b[0m                           \u001b[33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m <workspace>/install/wirestack-0.1.0/src/internal/http1/server_connection.cj:116:23:\n    \u001b[36m| \u001b[0m\n\u001b[36m116\u001b[0m \u001b[36m| \u001b[0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }\u001b[0m\n    \u001b[36m| \u001b[0m                      \u001b[33m^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m <workspace>/install/wirestack-0.1.0/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m==>\u001b[0m <consumer>/src/main.cj:100:28:\n    \u001b[36m| \u001b[0m\n\u001b[36m100\u001b[0m \u001b[36m| \u001b[0m            if (!retained) { transport.abort() }\u001b[0m\n    \u001b[36m| \u001b[0m                           \u001b[33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\ncjpm build success\n",
+    "build_output_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bcb50e6a2796d2a71d77757dcb371da011e3ea13b3144b6d9a87db123c3a7b94"
+    },
+    "clean_consumer_build": "PASS",
+    "command": [
+      "<consumer>/target/release/bin/main",
+      "600",
+      "60000",
+      "10"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_elapsed_ms": 600262
+  },
+  "raw_log": {
+    "bytes": 3657,
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "28d1bea6e76374f1b405149906c02f087b8abe9b1efab643f19725d1095d73da"
+    },
+    "path": "build/current-development-baseline/preflight.log",
+    "sha256": "28d1bea6e76374f1b405149906c02f087b8abe9b1efab643f19725d1095d73da",
+    "tail": "SOAK_READY cycles=1 elapsedMs=131\nM7022_SAMPLE index=0 elapsedMs=60073 usedHeapBytes=8855552 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=5 serverServeTasks=2 cycles=583 h1Requests=729 h2Requests=1823 sseEvents=4665\nM7022_SAMPLE index=1 elapsedMs=120059 usedHeapBytes=9244672 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=1171 h1Requests=1464 h2Requests=3661 sseEvents=9369\nM7022_SAMPLE index=2 elapsedMs=180107 usedHeapBytes=8740864 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=4 retainedCancellations=4 serverServeTasks=2 cycles=1761 h1Requests=2202 h2Requests=5505 sseEvents=14089\nM7022_SAMPLE index=3 elapsedMs=240078 usedHeapBytes=9031680 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=2349 h1Requests=2937 h2Requests=7342 sseEvents=18793\nM7022_SAMPLE index=4 elapsedMs=300008 usedHeapBytes=8933376 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=3 serverServeTasks=2 cycles=2940 h1Requests=3675 h2Requests=9189 sseEvents=23521\nM7022_SAMPLE index=5 elapsedMs=360061 usedHeapBytes=8859648 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=4 serverServeTasks=2 cycles=3530 h1Requests=4413 h2Requests=11033 sseEvents=28241\nM7022_SAMPLE index=6 elapsedMs=420082 usedHeapBytes=8626176 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=6 serverServeTasks=2 cycles=4120 h1Requests=5150 h2Requests=12876 sseEvents=32961\nM7022_SAMPLE index=7 elapsedMs=480046 usedHeapBytes=9224192 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=1 retainedCancellations=2 serverServeTasks=2 cycles=4708 h1Requests=5885 h2Requests=14714 sseEvents=37665\nM7022_SAMPLE index=8 elapsedMs=540038 usedHeapBytes=8372224 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=2 retainedCancellations=4 serverServeTasks=2 cycles=5296 h1Requests=6620 h2Requests=16551 sseEvents=42369\nM7022_SAMPLE index=9 elapsedMs=600096 usedHeapBytes=8798208 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=5885 h1Requests=7357 h2Requests=18392 sseEvents=47081\nM7022_SAMPLE index=10 elapsedMs=600098 usedHeapBytes=8798208 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=1 retainedTransports=3 retainedCancellations=5 serverServeTasks=2 cycles=5885 h1Requests=7357 h2Requests=18392 sseEvents=47081\nM7022_RESULT durationSeconds=600 elapsedMs=600111 cycles=5885 activePhases=5885 idlePhases=5885 connects=2210 h1Requests=7357 h2Requests=18392 h2MultiplexBatches=5885 sseH1Events=23541 sseH2Events=23540 requestCancels=5885 streamResets=5885 connectionCancels=736 reconnects=736 spawnedTasks=11770 joinedTasks=11770 sequenceErrors=0 maxCancelLatencyNs=3644871 activePoolLeases=0 activeResponseOwners=0 activeApplicationTasks=0 activeTransportIo=0 retainedTransports=0 retainedCancellations=0 serverServeTasks=0 serverConnections=0 clientsClosed=2 serversClosed=2 tlsConfigsClosed=2 poolAcquires=13242 poolReleases=13242 poolSequenceErrors=0\n"
+  },
+  "readiness": {
+    "cycles": 1,
+    "elapsedMs": 131,
+    "marker": "SOAK_READY",
+    "observed_by_parent": true
+  },
+  "resources": {
+    "application": {
+      "samples": [
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 583,
+          "elapsedMs": 60073,
+          "h1Requests": 729,
+          "h2Requests": 1823,
+          "index": 0,
+          "retainedCancellations": 5,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 4665,
+          "usedHeapBytes": 8855552
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 1171,
+          "elapsedMs": 120059,
+          "h1Requests": 1464,
+          "h2Requests": 3661,
+          "index": 1,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 9369,
+          "usedHeapBytes": 9244672
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 1761,
+          "elapsedMs": 180107,
+          "h1Requests": 2202,
+          "h2Requests": 5505,
+          "index": 2,
+          "retainedCancellations": 4,
+          "retainedTransports": 4,
+          "serverServeTasks": 2,
+          "sseEvents": 14089,
+          "usedHeapBytes": 8740864
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 2349,
+          "elapsedMs": 240078,
+          "h1Requests": 2937,
+          "h2Requests": 7342,
+          "index": 3,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 18793,
+          "usedHeapBytes": 9031680
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 2940,
+          "elapsedMs": 300008,
+          "h1Requests": 3675,
+          "h2Requests": 9189,
+          "index": 4,
+          "retainedCancellations": 3,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 23521,
+          "usedHeapBytes": 8933376
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 3530,
+          "elapsedMs": 360061,
+          "h1Requests": 4413,
+          "h2Requests": 11033,
+          "index": 5,
+          "retainedCancellations": 4,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 28241,
+          "usedHeapBytes": 8859648
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 4120,
+          "elapsedMs": 420082,
+          "h1Requests": 5150,
+          "h2Requests": 12876,
+          "index": 6,
+          "retainedCancellations": 6,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 32961,
+          "usedHeapBytes": 8626176
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 4708,
+          "elapsedMs": 480046,
+          "h1Requests": 5885,
+          "h2Requests": 14714,
+          "index": 7,
+          "retainedCancellations": 2,
+          "retainedTransports": 1,
+          "serverServeTasks": 2,
+          "sseEvents": 37665,
+          "usedHeapBytes": 9224192
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 5296,
+          "elapsedMs": 540038,
+          "h1Requests": 6620,
+          "h2Requests": 16551,
+          "index": 8,
+          "retainedCancellations": 4,
+          "retainedTransports": 2,
+          "serverServeTasks": 2,
+          "sseEvents": 42369,
+          "usedHeapBytes": 8372224
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 5885,
+          "elapsedMs": 600096,
+          "h1Requests": 7357,
+          "h2Requests": 18392,
+          "index": 9,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 47081,
+          "usedHeapBytes": 8798208
+        },
+        {
+          "activeApplicationTasks": 0,
+          "activePoolLeases": 0,
+          "activeResponseOwners": 0,
+          "activeTransportIo": 1,
+          "cycles": 5885,
+          "elapsedMs": 600098,
+          "h1Requests": 7357,
+          "h2Requests": 18392,
+          "index": 10,
+          "retainedCancellations": 5,
+          "retainedTransports": 3,
+          "serverServeTasks": 2,
+          "sseEvents": 47081,
+          "usedHeapBytes": 8798208
+        }
+      ],
+      "trend": {
+        "bounded_application_owners": true,
+        "decision": "PASS",
+        "heavy_gc_heap": {
+          "decision": "PASS",
+          "first_median": 8740864,
+          "growth": 57344,
+          "growth_limit": 33554432,
+          "last_median": 8798208,
+          "monotonic_growth": false,
+          "positive_steps": 3
+        },
+        "in_flight_transport_io": {
+          "decision": "PASS",
+          "first_median": 1,
+          "growth": 0,
+          "growth_limit": 2,
+          "last_median": 1,
+          "monotonic_growth": false,
+          "positive_steps": 0
+        },
+        "minimum_samples": 5,
+        "retained_cancellation_sentinels": {
+          "decision": "PASS",
+          "first_median": 4,
+          "growth": 1,
+          "growth_limit": 2,
+          "last_median": 5,
+          "monotonic_growth": false,
+          "positive_steps": 5
+        },
+        "retained_transport_owners": {
+          "decision": "PASS",
+          "first_median": 4,
+          "growth": -1,
+          "growth_limit": 2,
+          "last_median": 3,
+          "monotonic_growth": false,
+          "positive_steps": 3
+        },
+        "sample_count": 11,
+        "transport_owners_observed": true,
+        "workload_progress": true
+      }
+    },
+    "coverage": {
+      "buffer": "runtime-wide heavy-GC heap trend; no per-buffer public inventory exists",
+      "callback": "weak cancellation sentinels rooted by retained typed handles",
+      "fd": "process-tree file descriptors",
+      "gc_root": "heavy-GC used heap and weak-reference owner observations",
+      "rss": "process-tree VmRSS",
+      "socket": "process-tree socket descriptors plus weak transport reachability",
+      "task": "workload and serve Future state with terminal joins",
+      "thread": "process-tree thread trend, reported only as runtime-wide evidence",
+      "timer": "process-tree timerfd descriptors",
+      "waiter": "application Future, pool-lease, and in-flight transport I/O observations; no runtime-wide waiter inventory is claimed"
+    },
+    "ownership_scopes": {
+      "application_owned": {
+        "cancellation_links": "typed cancellation handles retained while weak event-sink sentinels prove response-owned callback graphs were released",
+        "controlled_responses": "HttpResponse.isClosed observed through weak response references",
+        "pool_leases": "actual HttpConnectionPoolHook acquire/release callbacks",
+        "servers": "HttpServer shutdown activeAtReturn, isClosed, and serve Future joins",
+        "tasks": "actual Future.tryGet samples and terminal Future.get joins"
+      },
+      "runtime_wide": {
+        "process_tree": "RSS, descriptors, timerfds, processes, and threads are complementary runtime-wide trends, not substitutes for in-process owner cleanup",
+        "protocol_workers": "custom-connector transport in-flight I/O and post-close weak reachability while the child remains alive"
+      }
+    },
+    "process_tree": {
+      "samples": [
+        {
+          "elapsed_ms": 0,
+          "fd_count": 5,
+          "process_count": 1,
+          "rss_kib": 23332,
+          "socket_count": 1,
+          "thread_count": 5,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 60049,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 35552,
+          "socket_count": 6,
+          "thread_count": 11,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 120087,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 38016,
+          "socket_count": 4,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 180123,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 37284,
+          "socket_count": 4,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 240157,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 40132,
+          "socket_count": 6,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 300192,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 37924,
+          "socket_count": 6,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 360230,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 37284,
+          "socket_count": 6,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 420268,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 36720,
+          "socket_count": 4,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 480307,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 34312,
+          "socket_count": 4,
+          "thread_count": 12,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 540347,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 35236,
+          "socket_count": 6,
+          "thread_count": 12,
+          "timerfd_count": 0
+        }
+      ],
+      "trend": {
+        "decision": "PASS",
+        "metrics": {
+          "fd_count": {
+            "decision": "PASS",
+            "first_median": 8,
+            "growth": 2,
+            "growth_limit": 2,
+            "last_median": 10,
+            "monotonic_growth": false,
+            "positive_steps": 2
+          },
+          "process_count": {
+            "decision": "PASS",
+            "first_median": 1,
+            "growth": 0,
+            "growth_limit": 0,
+            "last_median": 1,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          },
+          "rss_kib": {
+            "decision": "PASS",
+            "first_median": 38016,
+            "growth": -2780,
+            "growth_limit": 65536,
+            "last_median": 35236,
+            "monotonic_growth": false,
+            "positive_steps": 2
+          },
+          "socket_count": {
+            "decision": "PASS",
+            "first_median": 4,
+            "growth": 2,
+            "growth_limit": 2,
+            "last_median": 6,
+            "monotonic_growth": false,
+            "positive_steps": 2
+          },
+          "thread_count": {
+            "decision": "PASS",
+            "first_median": 12,
+            "growth": 0,
+            "growth_limit": 2,
+            "last_median": 12,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          },
+          "timerfd_count": {
+            "decision": "PASS",
+            "first_median": 0,
+            "growth": 0,
+            "growth_limit": 2,
+            "last_median": 0,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          }
+        },
+        "minimum_samples": 5,
+        "sample_count": 10
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "consumer": "tools/release_soak/main.cj",
+    "consumer_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
+    },
+    "consumer_sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922",
+    "driver": "tools/m7_022_linux_release_soak.py",
+    "driver_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "043390146828cd03e6ecd7a685bbbbe2e56edab10055752dc8a7898ca43e3bc8"
+    },
+    "executed": {
+      "consumer": {
+        "bytes": 32626,
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "12cc6ffe7156867ff9328539579414bdf7492ce2ff6a6101fef44ef0e6e30922"
+        }
+      },
+      "fixture": {
+        "bytes": 4021,
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "59d05655f956c3226693cd048cce2653580935ed2aec7d02be3af08f4b810512"
+        }
+      },
+      "manifest": {
+        "bytes": 475,
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3676463c7fb0d2f0a3d63f4d9dee4e8ac5ed6a6e3439749ed9be91a727da3427"
+        }
+      }
+    },
+    "fixture": "examples/linux/m7_027/fixtures.cj",
+    "fixture_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+    },
+    "fixture_sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+  },
+  "source_task": "P1-015",
+  "status": "INCOMPLETE",
+  "toolchain": {
+    "at_build_boundary": {
+      "cjc": {
+        "bytes": 277701984,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+        },
+        "executable": "<cangjie-sdk>/bin/cjc",
+        "path": "<cangjie-sdk>/bin/cjc",
+        "version": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu"
+      },
+      "cjpm": {
+        "bytes": 15031040,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "32ab13ead318414ab1b9ef9bf6dee06f210f9d12c1cd31bdd5ce15b42c929cba"
+        },
+        "executable": "<cangjie-sdk>/tools/bin/cjpm",
+        "path": "<cangjie-sdk>/tools/bin/cjpm",
+        "version": "Cangjie Project Manager: 1.1.3"
+      },
+      "environment": {
+        "cangjie_home": "<cangjie-sdk>",
+        "cangjie_sdk_root": null,
+        "cj_sdk_libpath": null,
+        "ld_library_path": "<cangjie-sdk>/runtime/lib/linux_x86_64_cjnative:<cangjie-sdk>/tools/lib:"
+      }
+    },
+    "at_run_boundary": {
+      "cjc": {
+        "bytes": 277701984,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+        },
+        "executable": "<cangjie-sdk>/bin/cjc",
+        "path": "<cangjie-sdk>/bin/cjc",
+        "version": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu"
+      },
+      "cjpm": {
+        "bytes": 15031040,
+        "digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "32ab13ead318414ab1b9ef9bf6dee06f210f9d12c1cd31bdd5ce15b42c929cba"
+        },
+        "executable": "<cangjie-sdk>/tools/bin/cjpm",
+        "path": "<cangjie-sdk>/tools/bin/cjpm",
+        "version": "Cangjie Project Manager: 1.1.3"
+      },
+      "environment": {
+        "cangjie_home": "<cangjie-sdk>",
+        "cangjie_sdk_root": null,
+        "cj_sdk_libpath": null,
+        "ld_library_path": "<cangjie-sdk>/runtime/lib/linux_x86_64_cjnative:<cangjie-sdk>/tools/lib:"
+      }
+    },
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  },
+  "workload": {
+    "checks": {
+      "active_idle_mix": true,
+      "cancellation_latency": true,
+      "child_duration": true,
+      "connection_recovery": true,
+      "connections": true,
+      "cycles": true,
+      "h1_pool": true,
+      "h2_multiplex": true,
+      "parent_duration": true,
+      "pool_owner_balance": true,
+      "request_cancellation": true,
+      "requested_duration": true,
+      "sequence_integrity": true,
+      "sse": true,
+      "stream_reset": true,
+      "task_join": true,
+      "terminal_application_owners": true,
+      "terminal_resources_closed": true,
+      "terminal_transport_owners": true
+    },
+    "decision": "PASS",
+    "result": {
+      "activeApplicationTasks": 0,
+      "activePhases": 5885,
+      "activePoolLeases": 0,
+      "activeResponseOwners": 0,
+      "activeTransportIo": 0,
+      "clientsClosed": 2,
+      "connectionCancels": 736,
+      "connects": 2210,
+      "cycles": 5885,
+      "durationSeconds": 600,
+      "elapsedMs": 600111,
+      "h1Requests": 7357,
+      "h2MultiplexBatches": 5885,
+      "h2Requests": 18392,
+      "idlePhases": 5885,
+      "joinedTasks": 11770,
+      "maxCancelLatencyNs": 3644871,
+      "poolAcquires": 13242,
+      "poolReleases": 13242,
+      "poolSequenceErrors": 0,
+      "reconnects": 736,
+      "requestCancels": 5885,
+      "retainedCancellations": 0,
+      "retainedTransports": 0,
+      "sequenceErrors": 0,
+      "serverConnections": 0,
+      "serverServeTasks": 0,
+      "serversClosed": 2,
+      "spawnedTasks": 11770,
+      "sseH1Events": 23541,
+      "sseH2Events": 23540,
+      "streamResets": 5885,
+      "tlsConfigsClosed": 2
+    }
+  }
+}

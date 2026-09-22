@@ -519,6 +519,16 @@ must rebuild the final artifact and run its own final 86,400-second candidate so
 | M8-006 | 完成 TLS context versioning 与外部密钥 hooks | TLS/安全 | C4 | M8-002,M8-005 | ADR-0003/0008；PRD §13/§17 | Immutable contexts, future-handshake-only replacement, versioned session/resumption state, ExternalSigner/ExternalDecryptor/KeyLogSink context inheritance, provider-neutral AWS-LC Linux evidence and no provider leakage. |
 | M8-007 | 生成 Linux 网络底座 release artifact 与证据 | 发布/质量 | C4 | M8-001..M8-006 | ADR-0002/0004/0008；PRD §18/§19/§21/§23/§26 | Rebuild final artifact, API baseline, SBOM, license/NOTICE, install and security evidence; run affected gates and one final 86,400-second candidate soak. No development run substitutes for the final long gate. |
 
+### 当前开发的前置规则
+
+P1-015 是当前 Linux 开发基线，取代后续功能开发对 M8-007 正式发布完成的依赖。
+已批准 #169 路线的 M9-001 / #170 开始前置改为 P1-015 COMPLETE 且
+当前基线验证通过；该项仍负责登记完整 M9–M12 任务图，不在 P1-015 实现新网络能力。
+M9-001 的清单和 manifest 必须采用这个前置，不能继续要求补齐 M7/M8 历史资格链。
+其余功能任务保留真实功能依赖；新的发布候选仍须满足其自身全部正式发布门禁。
+M7/M8 旧报告与状态只描述历史任务，不作为当前版本正常或已发布的证明。
+M8-007 的原发布验收范围不变，不因开发基线通过而标记 COMPLETE。
+
 ---
 
 ## 7. 远期上游增强
@@ -573,6 +583,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 | P1-012 | AI 友好型仓库基础设施 | Repository control plane | M7-024 已完成；提供诚实的环境诊断、机器可读任务契约、分层验证入口和源码绑定的证据新鲜度检查。长时间门禁只能显式运行，不得由 fast/full 隐式触发。 |
 | P1-013 | 分离开发回归与发布证据新鲜度门禁 | Repository control plane | 依赖 P1-012,M3-031；`scripts/check` 验证当前代码、结构和故障注入，不因预期过期的点时 release evidence 产生级联假失败；M7 release CLI 仍默认校验当前源码并 fail closed；修正 Darwin resolver 已受支持后的过时回归断言；不得刷新、复用或伪造旧 artifact、soak、性能、安全审查、SBOM 或签名 PASS。 |
 | P1-014 | 建立 evidence 摘要类型边界并禁止文本回退到原始字节 | Repository control plane | 依赖 P1-012,P1-013；引入不可互换的 `TextEvidenceDigest` 与 `ArtifactByteDigest` 类型及显式入口：JSON、Markdown、日志和其他声明为文本的 evidence 只能按 UTF-8 与规范化 LF 计算文本摘要，禁止回退到原始字节摘要；二进制 artifact、归档和签名 payload 必须显式使用原始字节摘要。迁移并盘点全部现有调用点，schema 记录摘要域，architecture guard 阻止文本路径调用 byte-digest、无类型摘要比较和隐式 fallback；非法 UTF-8、未知摘要域、旧 schema、CRLF/裸 CR、源码漂移和 digest-kind 混用均 fail closed。Linux 与 GitHub Windows runner 的 CRLF 故障注入必须证明同一文本跨 checkout 摘要一致，且文本正确性不依赖 `.gitattributes -text`；旧 PASS 不得因迁移被静默沿用或重写，长时间门禁不得运行。 |
+| P1-015 | 建立当前版本 Linux 开发基线 | PRD §21.6；项目所有者批准 | 依赖 P1-013,P1-014；保留历史记录但停止追补历史完整资格链。绑定真实生产源码提交、已固定 SDK 和当前安装制品；完整短回归、架构/文档、安装 consumer、十目标 fuzz 和 600 秒资源 preflight 必须通过。缺失、失败、源码/SDK/制品/执行输入/日志漂移必须非零；不得产生正式发布资格、长稳或签名 PASS。 |
 
 ---
 
@@ -664,8 +675,8 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 - Linux 稳定版收口任务：**16**
 - Linux 网络底座任务：**7**
 - 远期上游任务：**7**
-- 稳定版后 P1/独立项目：**14**
+- 稳定版后 P1/独立项目：**15**
 - 当前发布相关任务总数：**208**
-- 全部已记录任务总数：**229**
+- 全部已记录任务总数：**230**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

@@ -23,10 +23,22 @@ class M7024LinuxPerformanceGateTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.manifest = gate.load_manifest(ROOT, MANIFEST_PATH)
-        cls.documents, cls.artifacts = gate.load_artifacts(ROOT, cls.manifest)
+        temporary = tempfile.TemporaryDirectory(prefix="wirestack-performance-fixture-")
+        cls.addClassCleanup(temporary.cleanup)
+        cls.root = Path(temporary.name)
+        # Retained data is only sample input for gate logic, not current qualification.
+        for artifact in cls.manifest["artifacts"].values():
+            path = cls.root / artifact["path"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((ROOT / artifact["path"]).read_bytes())
+            artifact["sha256"] = gate.evidence_digest.text_evidence_sha256(path)
+        source = cls.root / "src/internal/http2/current.cj"
+        source.parent.mkdir(parents=True)
+        source.write_text("// Deliberately different source in an isolated gate fixture.\n")
+        cls.documents, cls.artifacts = gate.load_artifacts(cls.root, cls.manifest)
 
-    def test_historical_http2_baseline_does_not_qualify_changed_sources(self):
-        report = gate.evaluate(ROOT, self.manifest)
+    def test_changed_sources_do_not_qualify_from_fixture_reports(self):
+        report = gate.evaluate(self.root, self.manifest)
         self.assertEqual("FAIL", report["decision"])
         self.assertIn("http2", report["failed_domains"])
 
@@ -39,7 +51,7 @@ class M7024LinuxPerformanceGateTest(unittest.TestCase):
         manifest = copy.deepcopy(self.manifest)
         manifest["artifacts"]["raw_tcp"]["sha256"] = "0" * 64
         with self.assertRaises(gate.GateError):
-            gate.load_artifacts(ROOT, manifest)
+            gate.load_artifacts(self.root, manifest)
 
     def test_path_escape_and_non_finite_json_fail_closed(self):
         with self.assertRaises(gate.GateError):

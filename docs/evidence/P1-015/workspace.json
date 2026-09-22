@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "source_task": "P1-015",
+  "authorization": "Project owner approved stopping historical qualification reconstruction and establishing a current development baseline; no publication or production-signing authorization.",
+  "original_workspace": {
+    "root": "<original-repo>",
+    "branch": "gitbutler/workspace",
+    "head": "f101cd246efccefff77165dc0e3864d3e94d0074",
+    "merge_base_origin_main": "1b11f3ec26c3c63d8e65705946f1adf7dd90af35",
+    "existing_dirty_paths": [
+      "docs/planning/status.md",
+      "docs/evidence/M8-007/evidence-identity-audit.json"
+    ],
+    "edited_by_this_task": false
+  },
+  "implementation_workspace": {
+    "root": "<isolated-repo>",
+    "integration_branch": "gitbutler/workspace",
+    "initial_head": "ada6a2c64d54718e9466b377346428d579c4be66",
+    "merge_base_origin_main": "1b11f3ec26c3c63d8e65705946f1adf7dd90af35",
+    "task_branch": "p1-015-current-development-baseline",
+    "parent_branch": "m8-007-requalification",
+    "initial_dirty_summary": "23 modified and 18 untracked entries from M8-007 requalification, under docs/evidence/M8-007, docs/planning/status.md and tools/tasks/M8-007.json. Retained; planning policy additions preserve the existing status rows.",
+    "production_source_revision": "26c81160eacc91d7c1726e20d46c9d3aa086addc"
+  },
+  "toolchain": {
+    "cjc": "1.1.3 (cjnative)",
+    "cjpm": "1.1.3",
+    "target": "x86_64-unknown-linux-gnu",
+    "platform_scope": "native Linux x86_64 glibc",
+    "documentation_tool": "Previously verified cjdoc 0.7.2 build from revision 582a95278c95024dc2cf3dfe9f011259c1002fc2 with SDK compatibility patches; not the original pinned binary."
+  },
+  "publication": {
+    "new_commit": false,
+    "push": false,
+    "pull_request": false,
+    "github_mutation": false,
+    "production_signing": false
+  }
+}
