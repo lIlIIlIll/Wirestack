@@ -1,0 +1,87 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-22T06:36:51.792067Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-015/baseline.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5cc37d2c99cb97e232eb25df659fb488c908a3167d44ccdab6228d9c11234f86"
+      },
+      "source_task": "P1-015"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-015/verification.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d30c84eb5d084a99d7557d125dc7cdf92d2ecbc7b557cffebe95f9df5f8b73ef"
+      },
+      "source_task": "P1-015"
+    }
+  ],
+  "revision": "990873c6669e6d63881a3a943d467146fb562d6d",
+  "schema_version": 2,
+  "source_sha256": {
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d158937789403d0e1986917116d1f38c744e6a5a86b186afc88aca4a1fa74f5d"
+    },
+    "docs/evidence/P1-015/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c4ac59cb361ddcffadf680420605c1f924a266f30e6276be6cbf28017a7bdd0"
+    },
+    "docs/evidence/P1-015/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ede9170550284d7085baed7f23e6995db5bcf21fd53b1b33039361104f78ee47"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "432218117ea4dcbade1741b93643635c12608743b16218fca1f7c926f9a18b2f"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c7a10dc708cf314557084512a423ff6eed9344d5b6332de87e01c40dd817472c"
+    },
+    "docs/product/prd.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1386dd23c83a6244733ec812d19f1b9a0ba871076a2df93978c3d8ac52b4fb45"
+    },
+    "tools/development_baseline.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "294de9f4f3bbae6f24b3f551ed05a14fe16335e5d15a48d46341f45d4390ef1f"
+    },
+    "tools/gates/tests/test_m7_024_linux_performance.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f1931ae200e40446188b2f21404194d6aaf0f860053bd356c0494772e5606f53"
+    },
+    "tools/tasks/P1-015.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c1e03b1c081f7228a7b16ba404331a5730db84d6e02f03a666df68d52b9b1b05"
+    },
+    "tools/tests/test_development_baseline.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b9b411fd2dbe81cb21dba0c78197dc36c05798e6313dae2efc78550a9dc68083"
+    },
+    "tools/tests/test_m7_028_security_review_package.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08365b6c159782012b5e805dc84df435a6ad2fdf9069b7285b06038c1445c3bf"
+    },
+    "tools/tests/test_p1_014_evidence_digest_types.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "93f21fa9febaee18480774ad0ec096a3073b2a9644655d306e7fe9822e93246d"
+    }
+  },
+  "source_task": "P1-015",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
