@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "status": "PASS",
+  "scope": "Local functional acceptance only; not source sealing or release qualification",
+  "task_status": "INCOMPLETE",
+  "planning_status": "IN_PROGRESS",
+  "source_state": "WORKING_TREE_UNSEALED",
+  "prerequisite": {
+    "task": "P1-015",
+    "command": "python3 tools/development_baseline.py verify",
+    "exit_code": 0,
+    "timing": "Before M9-001 source edits; not reissued after the source changed"
+  },
+  "canonical_task": {
+    "command": "scripts/check-task M9-001 --json --output docs/evidence/M9-001/task-check.json",
+    "exit_code": 0,
+    "commands": 6,
+    "passed_commands": 6,
+    "timed_out_commands": 0,
+    "report": "docs/evidence/M9-001/task-check.json"
+  },
+  "checks": [
+    {
+      "command": "python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M9-001/test-plan.md --json",
+      "exit_code": 0,
+      "status": "PASS",
+      "paths": 13,
+      "scenarios": 13,
+      "tests": 7
+    },
+    {
+      "command": "python3 -m unittest tools.tests.test_network_capabilities tools.tests.test_m9_001_native_capabilities tools.tests.test_m7_linux_task_graph -v",
+      "exit_code": 0,
+      "passed": 28
+    },
+    {
+      "command": "python3 tools/m9_001_native_capabilities.py --offline --report docs/evidence/M9-001/native-capabilities.json",
+      "exit_code": 0,
+      "native_scenarios_passed": 7,
+      "bounded_commands_passed": 15,
+      "execution_inputs": 183,
+      "socket_classes": 6,
+      "capability_fields_per_class": 9,
+      "installed_source_matches_checkout": true,
+      "report": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "command": "python3 tools/check_network_capabilities.py --check --require-native --native-report docs/evidence/M9-001/native-capabilities.json --report docs/evidence/M9-001/capabilities.json --api-report docs/evidence/M9-001/api-inventory.json",
+      "exit_code": 0,
+      "rows": 81,
+      "capability_rows": 54,
+      "operation_rows": 27,
+      "final_post_gate_source_binding_check": "PASS"
+    },
+    {
+      "command": "scripts/check",
+      "exit_code": 0,
+      "python_passed": 693,
+      "python_groups": [491, 178, 24],
+      "architecture_guard": "PASS",
+      "cjpm_check": "PASS",
+      "cjpm_build": "PASS",
+      "cangjie_total": 809,
+      "cangjie_passed": 786,
+      "cangjie_performance_exclusions": 23,
+      "cangjie_failed": 0,
+      "cangjie_errors": 0,
+      "note": "Performance exclusions are not counted as passed"
+    },
+    {
+      "command": "scripts/check-docs --html --json --output docs/evidence/M9-001/docs-report.json",
+      "exit_code": 0,
+      "status": "PASS",
+      "visual_confirmation": "Rendered constructor shows both corrected false defaults",
+      "visual_report": "docs/evidence/M9-001/documentation-visual.json"
+    }
+  ],
+  "regression": {
+    "case": "M8002UdpSocketTest.unavailableOptionOperationsAreNotAdvertised",
+    "before": "Exit 1; one selected case fails four expectations",
+    "after": "Exit 0; one selected case passes",
+    "filtered_cases_per_focused_run": 104,
+    "report": "docs/evidence/M9-001/regression.json"
+  },
+  "environment": {
+    "platform": "linux-x86_64-glibc",
+    "cjc": "1.1.3",
+    "cjpm": "1.1.3",
+    "sdk_identity": "docs/evidence/M9-001/native-capabilities.json",
+    "cjdoc": "SDK-compatible rebuilt 0.7.2, not the untouched historical release binary",
+    "cjdoc_heap": "cjHeapSize=1GB, scoped to the documentation launcher only",
+    "native_consumer_heap": "Unchanged SDK defaults",
+    "documentation_environment_proof": "docs/evidence/M9-001/documentation-heap/bounded-heap.json"
+  },
+  "earlier_failures": [
+    {
+      "report": "docs/evidence/M9-001/first-attempt/task-check.json",
+      "cause": "Digest audit followed four executable-builder source arguments and classified their hashes as text",
+      "resolution": "The builder returns the executable and its typed artifact-byte digest; the audit remains unchanged"
+    },
+    {
+      "report": "docs/evidence/M9-001/second-attempt/task-check.json",
+      "cause": "Combined cjdoc generation exited 1 with Out of memory under SDK defaults",
+      "resolution": "Reduced target and full canonical gate pass with a documented, bounded documentation-only heap"
+    }
+  ],
+  "compatibility": {
+    "report": "docs/evidence/M9-001/api-compatibility.json",
+    "old_binary_execution": "NOT_RUN",
+    "other_sdk_and_platform_execution": "NOT_RUN"
+  },
+  "publication": {
+    "source_commit": "NOT_CREATED",
+    "evidence_seal": "NOT_CREATED",
+    "commit_push_pull_request_issue_write": "M9-001 commit, push and pull request authorized; prerequisite publication scope unresolved",
+    "privacy": "PASS after authorized inherited evidence path repair and dependent digest validation",
+    "privacy_report": "docs/evidence/M9-001/privacy.json",
+    "release_qualification": "NOT_QUALIFIED",
+    "signing": "NOT_AUTHORIZED"
+  },
+  "next_task": "No new M9-M12 task is READY while M9-001 remains unsealed. After authorized completion, M9-002 is the suggested next task."
+}

@@ -186411,12 +186411,12 @@
         "start": {
           "line": 162,
           "column": 5,
-          "byteOffset": 5773
+          "byteOffset": 5869
         },
         "end": {
           "line": 169,
           "column": 6,
-          "byteOffset": 6110
+          "byteOffset": 6206
         }
       },
       "headerSpelling": "internal init(source: ?NetworkEndpoint, truncated: Bool, ownedPayload!: Array<Byte>)",
@@ -186592,12 +186592,12 @@
         "start": {
           "line": 153,
           "column": 5,
-          "byteOffset": 5440
+          "byteOffset": 5536
         },
         "end": {
           "line": 160,
           "column": 6,
-          "byteOffset": 5767
+          "byteOffset": 5863
         }
       },
       "headerSpelling": "public init(payload: Array<Byte>, source: ?NetworkEndpoint, truncated: Bool)",
@@ -186711,12 +186711,12 @@
         "start": {
           "line": 141,
           "column": 5,
-          "byteOffset": 4928
+          "byteOffset": 5024
         },
         "end": {
           "line": 141,
           "column": 36,
-          "byteOffset": 4959
+          "byteOffset": 5055
         }
       },
       "headerSpelling": "public let payload: Array<Byte>",
@@ -186819,12 +186819,12 @@
         "start": {
           "line": 143,
           "column": 5,
-          "byteOffset": 5010
+          "byteOffset": 5106
         },
         "end": {
           "line": 143,
           "column": 40,
-          "byteOffset": 5045
+          "byteOffset": 5141
         }
       },
       "headerSpelling": "public let source: ?NetworkEndpoint",
@@ -186925,12 +186925,12 @@
         "start": {
           "line": 145,
           "column": 5,
-          "byteOffset": 5118
+          "byteOffset": 5214
         },
         "end": {
           "line": 145,
           "column": 31,
-          "byteOffset": 5144
+          "byteOffset": 5240
         }
       },
       "headerSpelling": "public let truncated: Bool",
@@ -187053,12 +187053,12 @@
         "start": {
           "line": 245,
           "column": 5,
-          "byteOffset": 9489
+          "byteOffset": 9585
         },
         "end": {
           "line": 245,
           "column": 48,
-          "byteOffset": 9532
+          "byteOffset": 9628
         }
       },
       "headerSpelling": "func abort(reason!: ?api.AbortReason): Unit",
@@ -187189,12 +187189,12 @@
         "start": {
           "line": 240,
           "column": 5,
-          "byteOffset": 9303
+          "byteOffset": 9399
         },
         "end": {
           "line": 240,
           "column": 53,
-          "byteOffset": 9351
+          "byteOffset": 9447
         }
       },
       "headerSpelling": "func close(context!: api.OperationContext): Unit",
@@ -187366,12 +187366,12 @@
         "start": {
           "line": 198,
           "column": 5,
-          "byteOffset": 7286
+          "byteOffset": 7382
         },
         "end": {
           "line": 198,
           "column": 82,
-          "byteOffset": 7363
+          "byteOffset": 7459
         }
       },
       "headerSpelling": "func connect(endpoint: NetworkEndpoint, context!: api.OperationContext): Unit",
@@ -187583,12 +187583,12 @@
         "start": {
           "line": 234,
           "column": 5,
-          "byteOffset": 9077
+          "byteOffset": 9173
         },
         "end": {
           "line": 235,
           "column": 63,
-          "byteOffset": 9169
+          "byteOffset": 9265
         }
       },
       "headerSpelling": "func receive(capacity: Int64,\n        context!: api.OperationContext): DatagramReceiveResult",
@@ -187944,12 +187944,12 @@
         "start": {
           "line": 212,
           "column": 5,
-          "byteOffset": 8065
+          "byteOffset": 8161
         },
         "end": {
           "line": 212,
           "column": 75,
-          "byteOffset": 8135
+          "byteOffset": 8231
         }
       },
       "headerSpelling": "func send(source: api.ByteSpan, context!: api.OperationContext): Int64",
@@ -188188,12 +188188,12 @@
         "start": {
           "line": 223,
           "column": 5,
-          "byteOffset": 8571
+          "byteOffset": 8667
         },
         "end": {
           "line": 224,
           "column": 47,
-          "byteOffset": 8678
+          "byteOffset": 8774
         }
       },
       "headerSpelling": "func sendTo(endpoint: NetworkEndpoint, source: api.ByteSpan,\n        context!: api.OperationContext): Int64",
@@ -188310,12 +188310,12 @@
         "start": {
           "line": 185,
           "column": 5,
-          "byteOffset": 6763
+          "byteOffset": 6859
         },
         "end": {
           "line": 185,
           "column": 42,
-          "byteOffset": 6800
+          "byteOffset": 6896
         }
       },
       "headerSpelling": "prop capabilities: SocketCapabilities",
@@ -188414,12 +188414,12 @@
         "start": {
           "line": 187,
           "column": 5,
-          "byteOffset": 6843
+          "byteOffset": 6939
         },
         "end": {
           "line": 187,
           "column": 41,
-          "byteOffset": 6879
+          "byteOffset": 6975
         }
       },
       "headerSpelling": "prop localEndpoint: ?NetworkEndpoint",
@@ -188519,12 +188519,12 @@
         "start": {
           "line": 189,
           "column": 5,
-          "byteOffset": 6934
+          "byteOffset": 7030
         },
         "end": {
           "line": 189,
           "column": 42,
-          "byteOffset": 6971
+          "byteOffset": 7067
         }
       },
       "headerSpelling": "prop remoteEndpoint: ?NetworkEndpoint",
@@ -188624,12 +188624,12 @@
         "start": {
           "line": 183,
           "column": 5,
-          "byteOffset": 6665
+          "byteOffset": 6761
         },
         "end": {
           "line": 183,
           "column": 28,
-          "byteOffset": 6688
+          "byteOffset": 6784
         }
       },
       "headerSpelling": "prop state: SocketState",
@@ -204086,12 +204086,12 @@
         "start": {
           "line": 1030,
           "column": 5,
-          "byteOffset": 39740
+          "byteOffset": 39836
         },
         "end": {
           "line": 1033,
           "column": 6,
-          "byteOffset": 39937
+          "byteOffset": 40033
         }
       },
       "headerSpelling": "public init(bytes: Array<Byte>)",
@@ -204196,12 +204196,12 @@
         "start": {
           "line": 1035,
           "column": 5,
-          "byteOffset": 40000
+          "byteOffset": 40096
         },
         "end": {
           "line": 1035,
           "column": 55,
-          "byteOffset": 40050
+          "byteOffset": 40146
         }
       },
       "headerSpelling": "public func bytes(): Array<Byte>",
@@ -204274,12 +204274,12 @@
         "start": {
           "line": 1026,
           "column": 5,
-          "byteOffset": 39591
+          "byteOffset": 39687
         },
         "end": {
           "line": 1026,
           "column": 35,
-          "byteOffset": 39621
+          "byteOffset": 39717
         }
       },
       "headerSpelling": "private let value: Array<Byte>",
@@ -204338,12 +204338,12 @@
         "start": {
           "line": 1046,
           "column": 5,
-          "byteOffset": 40336
+          "byteOffset": 40432
         },
         "end": {
           "line": 1046,
           "column": 22,
-          "byteOffset": 40353
+          "byteOffset": 40449
         }
       },
       "headerSpelling": "private init()",
@@ -204525,12 +204525,12 @@
         "start": {
           "line": 1056,
           "column": 5,
-          "byteOffset": 40723
+          "byteOffset": 40819
         },
         "end": {
           "line": 1069,
           "column": 6,
-          "byteOffset": 41216
+          "byteOffset": 41312
         }
       },
       "headerSpelling": "public static func open(\n        domain: RawSocketDomain,\n        protocolValue: RawSocketProtocol\n    ): RawSocket",
@@ -204628,12 +204628,12 @@
         "start": {
           "line": 998,
           "column": 5,
-          "byteOffset": 38559
+          "byteOffset": 38655
         },
         "end": {
           "line": 998,
           "column": 11,
-          "byteOffset": 38565
+          "byteOffset": 38661
         }
       },
       "headerSpelling": "| Ipv4",
@@ -204718,12 +204718,12 @@
         "start": {
           "line": 1000,
           "column": 5,
-          "byteOffset": 38601
+          "byteOffset": 38697
         },
         "end": {
           "line": 1000,
           "column": 11,
-          "byteOffset": 38607
+          "byteOffset": 38703
         }
       },
       "headerSpelling": "| Ipv6",
@@ -204808,12 +204808,12 @@
         "start": {
           "line": 1004,
           "column": 5,
-          "byteOffset": 38752
+          "byteOffset": 38848
         },
         "end": {
           "line": 1004,
           "column": 14,
-          "byteOffset": 38761
+          "byteOffset": 38857
         }
       },
       "headerSpelling": "| Netlink",
@@ -204898,12 +204898,12 @@
         "start": {
           "line": 1002,
           "column": 5,
-          "byteOffset": 38675
+          "byteOffset": 38771
         },
         "end": {
           "line": 1002,
           "column": 13,
-          "byteOffset": 38683
+          "byteOffset": 38779
         }
       },
       "headerSpelling": "| Packet",
@@ -205011,12 +205011,12 @@
         "start": {
           "line": 1014,
           "column": 5,
-          "byteOffset": 39044
+          "byteOffset": 39140
         },
         "end": {
           "line": 1017,
           "column": 6,
-          "byteOffset": 39224
+          "byteOffset": 39320
         }
       },
       "headerSpelling": "public init(number: Int32)",
@@ -205118,12 +205118,12 @@
         "start": {
           "line": 1019,
           "column": 5,
-          "byteOffset": 39279
+          "byteOffset": 39375
         },
         "end": {
           "line": 1019,
           "column": 74,
-          "byteOffset": 39348
+          "byteOffset": 39444
         }
       },
       "headerSpelling": "public static func icmp(): RawSocketProtocol",
@@ -205226,12 +205226,12 @@
         "start": {
           "line": 1021,
           "column": 5,
-          "byteOffset": 39403
+          "byteOffset": 39499
         },
         "end": {
           "line": 1021,
           "column": 77,
-          "byteOffset": 39475
+          "byteOffset": 39571
         }
       },
       "headerSpelling": "public static func icmpv6(): RawSocketProtocol",
@@ -205334,12 +205334,12 @@
         "start": {
           "line": 1010,
           "column": 5,
-          "byteOffset": 38880
+          "byteOffset": 38976
         },
         "end": {
           "line": 1010,
           "column": 29,
-          "byteOffset": 38904
+          "byteOffset": 39000
         }
       },
       "headerSpelling": "public let number: Int32",
@@ -205444,12 +205444,12 @@
         "start": {
           "line": 299,
           "column": 5,
-          "byteOffset": 11533
+          "byteOffset": 11629
         },
         "end": {
           "line": 299,
           "column": 18,
-          "byteOffset": 11546
+          "byteOffset": 11642
         }
       },
       "headerSpelling": "| Data(Int64)",
@@ -205537,12 +205537,12 @@
         "start": {
           "line": 301,
           "column": 5,
-          "byteOffset": 11576
+          "byteOffset": 11672
         },
         "end": {
           "line": 301,
           "column": 18,
-          "byteOffset": 11589
+          "byteOffset": 11685
         }
       },
       "headerSpelling": "| EndOfStream",
@@ -207587,7 +207587,7 @@
             }
           },
           "documentation": "Broadcast capability.",
-          "defaultExpression": "true"
+          "defaultExpression": "false"
         },
         {
           "name": "multicast",
@@ -207605,7 +207605,7 @@
             }
           },
           "documentation": "Multicast capability.",
-          "defaultExpression": "true"
+          "defaultExpression": "false"
         },
         {
           "name": "raw",
@@ -207790,15 +207790,15 @@
         "start": {
           "line": 66,
           "column": 5,
-          "byteOffset": 2391
+          "byteOffset": 2485
         },
         "end": {
           "line": 86,
           "column": 6,
-          "byteOffset": 3114
+          "byteOffset": 3210
         }
       },
-      "headerSpelling": "public init(\n        nonBlocking!: Bool = true,\n        closeOnExec!: Bool = true,\n        halfClose!: Bool = false,\n        broadcast!: Bool = true,\n        multicast!: Bool = true,\n        raw!: Bool = false,\n        ancillaryData!: Bool = false,\n        zeroLengthDatagramSend!: Bool = false,\n        connectedDatagramSend!: Bool = false\n    )",
+      "headerSpelling": "public init(\n        nonBlocking!: Bool = true,\n        closeOnExec!: Bool = true,\n        halfClose!: Bool = false,\n        broadcast!: Bool = false,\n        multicast!: Bool = false,\n        raw!: Bool = false,\n        ancillaryData!: Bool = false,\n        zeroLengthDatagramSend!: Bool = false,\n        connectedDatagramSend!: Bool = false\n    )",
       "sourceApiSignature": {
         "state": "available",
         "tokens": [
@@ -207831,14 +207831,14 @@
           "COLON:1::",
           "BOOLEAN:4:Bool",
           "ASSIGN:1:=",
-          "BOOL_LITERAL:4:true",
+          "BOOL_LITERAL:5:false",
           "COMMA:1:,",
           "IDENTIFIER:9:multicast",
           "NOT:1:!",
           "COLON:1::",
           "BOOLEAN:4:Bool",
           "ASSIGN:1:=",
-          "BOOL_LITERAL:4:true",
+          "BOOL_LITERAL:5:false",
           "COMMA:1:,",
           "IDENTIFIER:3:raw",
           "NOT:1:!",
@@ -207956,12 +207956,12 @@
         "start": {
           "line": 48,
           "column": 5,
-          "byteOffset": 1490
+          "byteOffset": 1584
         },
         "end": {
           "line": 48,
           "column": 35,
-          "byteOffset": 1520
+          "byteOffset": 1614
         }
       },
       "headerSpelling": "public let ancillaryData: Bool",
@@ -208024,8 +208024,8 @@
         
       ],
       "documentation": {
-        "rawText": "/** Whether broadcast is available. */",
-        "summary": "Whether broadcast is available.",
+        "rawText": "/** Whether broadcast is configurable through this socket's public operations. */",
+        "summary": "Whether broadcast is configurable through this socket's public operations.",
         "description": "",
         "markdown": {
           "kind": "document",
@@ -208041,7 +208041,7 @@
               "children": [
                 {
                   "kind": "text",
-                  "literal": "Whether broadcast is available.",
+                  "literal": "Whether broadcast is configurable through this socket's public operations.",
                   "source": null,
                   "metadata": null,
                   "children": [
@@ -208061,12 +208061,12 @@
         "start": {
           "line": 42,
           "column": 5,
-          "byteOffset": 1268
+          "byteOffset": 1311
         },
         "end": {
           "line": 42,
           "column": 31,
-          "byteOffset": 1294
+          "byteOffset": 1337
         }
       },
       "headerSpelling": "public let broadcast: Bool",
@@ -208271,12 +208271,12 @@
         "start": {
           "line": 52,
           "column": 5,
-          "byteOffset": 1772
+          "byteOffset": 1866
         },
         "end": {
           "line": 52,
           "column": 43,
-          "byteOffset": 1810
+          "byteOffset": 1904
         }
       },
       "headerSpelling": "public let connectedDatagramSend: Bool",
@@ -208444,8 +208444,8 @@
         
       ],
       "documentation": {
-        "rawText": "/** Whether multicast is available. */",
-        "summary": "Whether multicast is available.",
+        "rawText": "/** Whether multicast membership is available through this socket's public operations. */",
+        "summary": "Whether multicast membership is available through this socket's public operations.",
         "description": "",
         "markdown": {
           "kind": "document",
@@ -208461,7 +208461,7 @@
               "children": [
                 {
                   "kind": "text",
-                  "literal": "Whether multicast is available.",
+                  "literal": "Whether multicast membership is available through this socket's public operations.",
                   "source": null,
                   "metadata": null,
                   "children": [
@@ -208481,12 +208481,12 @@
         "start": {
           "line": 44,
           "column": 5,
-          "byteOffset": 1338
+          "byteOffset": 1432
         },
         "end": {
           "line": 44,
           "column": 31,
-          "byteOffset": 1364
+          "byteOffset": 1458
         }
       },
       "headerSpelling": "public let multicast: Bool",
@@ -208691,12 +208691,12 @@
         "start": {
           "line": 46,
           "column": 5,
-          "byteOffset": 1421
+          "byteOffset": 1515
         },
         "end": {
           "line": 46,
           "column": 25,
-          "byteOffset": 1441
+          "byteOffset": 1535
         }
       },
       "headerSpelling": "public let raw: Bool",
@@ -208796,12 +208796,12 @@
         "start": {
           "line": 50,
           "column": 5,
-          "byteOffset": 1627
+          "byteOffset": 1721
         },
         "end": {
           "line": 50,
           "column": 44,
-          "byteOffset": 1666
+          "byteOffset": 1760
         }
       },
       "headerSpelling": "public let zeroLengthDatagramSend: Bool",
@@ -208886,12 +208886,12 @@
         "start": {
           "line": 854,
           "column": 5,
-          "byteOffset": 33523
+          "byteOffset": 33619
         },
         "end": {
           "line": 862,
           "column": 6,
-          "byteOffset": 33765
+          "byteOffset": 33861
         }
       },
       "headerSpelling": "func complete(value: ?api.NetworkException): Unit",
@@ -209019,12 +209019,12 @@
         "start": {
           "line": 864,
           "column": 5,
-          "byteOffset": 33771
+          "byteOffset": 33867
         },
         "end": {
           "line": 910,
           "column": 6,
-          "byteOffset": 35512
+          "byteOffset": 35608
         }
       },
       "headerSpelling": "func wait(\n        context: api.OperationContext,\n        localEndpoint: ?NetworkEndpoint,\n        remoteEndpoint: ?NetworkEndpoint\n    ): Unit",
@@ -209108,12 +209108,12 @@
         "start": {
           "line": 912,
           "column": 5,
-          "byteOffset": 35518
+          "byteOffset": 35614
         },
         "end": {
           "line": 914,
           "column": 6,
-          "byteOffset": 35603
+          "byteOffset": 35699
         }
       },
       "headerSpelling": "private func wake(): Unit",
@@ -209171,12 +209171,12 @@
         "start": {
           "line": 850,
           "column": 5,
-          "byteOffset": 33344
+          "byteOffset": 33440
         },
         "end": {
           "line": 850,
           "column": 68,
-          "byteOffset": 33407
+          "byteOffset": 33503
         }
       },
       "headerSpelling": "private let changed = synchronized(mutex) { mutex.condition() }",
@@ -209242,12 +209242,12 @@
         "start": {
           "line": 851,
           "column": 5,
-          "byteOffset": 33412
+          "byteOffset": 33508
         },
         "end": {
           "line": 851,
           "column": 34,
-          "byteOffset": 33441
+          "byteOffset": 33537
         }
       },
       "headerSpelling": "private var completed = false",
@@ -209315,12 +209315,12 @@
         "start": {
           "line": 852,
           "column": 5,
-          "byteOffset": 33446
+          "byteOffset": 33542
         },
         "end": {
           "line": 852,
           "column": 76,
-          "byteOffset": 33517
+          "byteOffset": 33613
         }
       },
       "headerSpelling": "private var failure: ?api.NetworkException = None<api.NetworkException>",
@@ -209386,12 +209386,12 @@
         "start": {
           "line": 849,
           "column": 5,
-          "byteOffset": 33312
+          "byteOffset": 33408
         },
         "end": {
           "line": 849,
           "column": 32,
-          "byteOffset": 33339
+          "byteOffset": 33435
         }
       },
       "headerSpelling": "private let mutex = Mutex()",
@@ -209498,12 +209498,12 @@
         "start": {
           "line": 100,
           "column": 5,
-          "byteOffset": 3484
+          "byteOffset": 3580
         },
         "end": {
           "line": 100,
           "column": 22,
-          "byteOffset": 3501
+          "byteOffset": 3597
         }
       },
       "headerSpelling": "| Broadcast(Bool)",
@@ -209608,12 +209608,12 @@
         "start": {
           "line": 98,
           "column": 5,
-          "byteOffset": 3427
+          "byteOffset": 3523
         },
         "end": {
           "line": 98,
           "column": 22,
-          "byteOffset": 3444
+          "byteOffset": 3540
         }
       },
       "headerSpelling": "| KeepAlive(Bool)",
@@ -209718,12 +209718,12 @@
         "start": {
           "line": 106,
           "column": 5,
-          "byteOffset": 3663
+          "byteOffset": 3759
         },
         "end": {
           "line": 106,
           "column": 26,
-          "byteOffset": 3684
+          "byteOffset": 3780
         }
       },
       "headerSpelling": "| MulticastTtl(UInt8)",
@@ -209828,12 +209828,12 @@
         "start": {
           "line": 96,
           "column": 5,
-          "byteOffset": 3373
+          "byteOffset": 3469
         },
         "end": {
           "line": 96,
           "column": 20,
-          "byteOffset": 3388
+          "byteOffset": 3484
         }
       },
       "headerSpelling": "| NoDelay(Bool)",
@@ -209938,12 +209938,12 @@
         "start": {
           "line": 102,
           "column": 5,
-          "byteOffset": 3545
+          "byteOffset": 3641
         },
         "end": {
           "line": 102,
           "column": 27,
-          "byteOffset": 3567
+          "byteOffset": 3663
         }
       },
       "headerSpelling": "| ReceiveBuffer(Int64)",
@@ -210048,12 +210048,12 @@
         "start": {
           "line": 92,
           "column": 5,
-          "byteOffset": 3270
+          "byteOffset": 3366
         },
         "end": {
           "line": 92,
           "column": 25,
-          "byteOffset": 3290
+          "byteOffset": 3386
         }
       },
       "headerSpelling": "| ReuseAddress(Bool)",
@@ -210158,12 +210158,12 @@
         "start": {
           "line": 94,
           "column": 5,
-          "byteOffset": 3322
+          "byteOffset": 3418
         },
         "end": {
           "line": 94,
           "column": 22,
-          "byteOffset": 3339
+          "byteOffset": 3435
         }
       },
       "headerSpelling": "| ReusePort(Bool)",
@@ -210268,12 +210268,12 @@
         "start": {
           "line": 104,
           "column": 5,
-          "byteOffset": 3608
+          "byteOffset": 3704
         },
         "end": {
           "line": 104,
           "column": 24,
-          "byteOffset": 3627
+          "byteOffset": 3723
         }
       },
       "headerSpelling": "| SendBuffer(Int64)",
@@ -211296,12 +211296,12 @@
         "start": {
           "line": 293,
           "column": 5,
-          "byteOffset": 11368
+          "byteOffset": 11464
         },
         "end": {
           "line": 293,
           "column": 48,
-          "byteOffset": 11411
+          "byteOffset": 11507
         }
       },
       "headerSpelling": "func abort(reason!: ?api.AbortReason): Unit",
@@ -211432,12 +211432,12 @@
         "start": {
           "line": 289,
           "column": 5,
-          "byteOffset": 11223
+          "byteOffset": 11319
         },
         "end": {
           "line": 289,
           "column": 53,
-          "byteOffset": 11271
+          "byteOffset": 11367
         }
       },
       "headerSpelling": "func close(context!: api.OperationContext): Unit",
@@ -211592,12 +211592,12 @@
         "start": {
           "line": 263,
           "column": 5,
-          "byteOffset": 10124
+          "byteOffset": 10220
         },
         "end": {
           "line": 263,
           "column": 92,
-          "byteOffset": 10211
+          "byteOffset": 10307
         }
       },
       "headerSpelling": "func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult",
@@ -211758,12 +211758,12 @@
         "start": {
           "line": 275,
           "column": 5,
-          "byteOffset": 10638
+          "byteOffset": 10734
         },
         "end": {
           "line": 275,
           "column": 91,
-          "byteOffset": 10724
+          "byteOffset": 10820
         }
       },
       "headerSpelling": "func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit",
@@ -211899,12 +211899,12 @@
         "start": {
           "line": 285,
           "column": 5,
-          "byteOffset": 11069
+          "byteOffset": 11165
         },
         "end": {
           "line": 285,
           "column": 58,
-          "byteOffset": 11122
+          "byteOffset": 11218
         }
       },
       "headerSpelling": "func shutdown(direction: api.ShutdownDirection): Unit",
@@ -212058,12 +212058,12 @@
         "start": {
           "line": 269,
           "column": 5,
-          "byteOffset": 10392
+          "byteOffset": 10488
         },
         "end": {
           "line": 269,
           "column": 76,
-          "byteOffset": 10463
+          "byteOffset": 10559
         }
       },
       "headerSpelling": "func write(source: api.ByteSpan, context!: api.OperationContext): Int64",
@@ -212224,12 +212224,12 @@
         "start": {
           "line": 281,
           "column": 5,
-          "byteOffset": 10894
+          "byteOffset": 10990
         },
         "end": {
           "line": 281,
           "column": 78,
-          "byteOffset": 10967
+          "byteOffset": 11063
         }
       },
       "headerSpelling": "func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit",
@@ -212342,12 +212342,12 @@
         "start": {
           "line": 253,
           "column": 5,
-          "byteOffset": 9734
+          "byteOffset": 9830
         },
         "end": {
           "line": 253,
           "column": 42,
-          "byteOffset": 9771
+          "byteOffset": 9867
         }
       },
       "headerSpelling": "prop capabilities: SocketCapabilities",
@@ -212446,12 +212446,12 @@
         "start": {
           "line": 255,
           "column": 5,
-          "byteOffset": 9814
+          "byteOffset": 9910
         },
         "end": {
           "line": 255,
           "column": 41,
-          "byteOffset": 9850
+          "byteOffset": 9946
         }
       },
       "headerSpelling": "prop localEndpoint: ?NetworkEndpoint",
@@ -212551,12 +212551,12 @@
         "start": {
           "line": 257,
           "column": 5,
-          "byteOffset": 9894
+          "byteOffset": 9990
         },
         "end": {
           "line": 257,
           "column": 42,
-          "byteOffset": 9931
+          "byteOffset": 10027
         }
       },
       "headerSpelling": "prop remoteEndpoint: ?NetworkEndpoint",
@@ -212656,12 +212656,12 @@
         "start": {
           "line": 251,
           "column": 5,
-          "byteOffset": 9665
+          "byteOffset": 9761
         },
         "end": {
           "line": 251,
           "column": 28,
-          "byteOffset": 9688
+          "byteOffset": 9784
         }
       },
       "headerSpelling": "prop state: SocketState",
@@ -215812,12 +215812,12 @@
         "start": {
           "line": 319,
           "column": 5,
-          "byteOffset": 12335
+          "byteOffset": 12431
         },
         "end": {
           "line": 340,
           "column": 6,
-          "byteOffset": 13113
+          "byteOffset": 13209
         }
       },
       "headerSpelling": "internal init(\n        delegate: stdnet.SocketTransport,\n        nonBlocking!: Bool = false,\n        closeOnExec!: Bool = false,\n        streamLabel!: String = \"TCP\"\n    )",
@@ -215965,12 +215965,12 @@
         "start": {
           "line": 569,
           "column": 5,
-          "byteOffset": 22873
+          "byteOffset": 22969
         },
         "end": {
           "line": 585,
           "column": 6,
-          "byteOffset": 23534
+          "byteOffset": 23630
         }
       },
       "headerSpelling": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit",
@@ -216071,12 +216071,12 @@
         "start": {
           "line": 659,
           "column": 5,
-          "byteOffset": 25997
+          "byteOffset": 26093
         },
         "end": {
           "line": 667,
           "column": 6,
-          "byteOffset": 26392
+          "byteOffset": 26488
         }
       },
       "headerSpelling": "private func alreadyShutDown(direction: api.ShutdownDirection): Bool",
@@ -216168,12 +216168,12 @@
         "start": {
           "line": 688,
           "column": 5,
-          "byteOffset": 27295
+          "byteOffset": 27391
         },
         "end": {
           "line": 712,
           "column": 6,
-          "byteOffset": 28410
+          "byteOffset": 28506
         }
       },
       "headerSpelling": "private func beginClose(coordinated: Bool): (Bool, ?SocketCloseCoordination)",
@@ -216283,12 +216283,12 @@
         "start": {
           "line": 565,
           "column": 5,
-          "byteOffset": 22648
+          "byteOffset": 22744
         },
         "end": {
           "line": 565,
           "column": 84,
-          "byteOffset": 22727
+          "byteOffset": 22823
         }
       },
       "headerSpelling": "public func close(): Unit",
@@ -216502,12 +216502,12 @@
         "start": {
           "line": 514,
           "column": 5,
-          "byteOffset": 20515
+          "byteOffset": 20611
         },
         "end": {
           "line": 563,
           "column": 6,
-          "byteOffset": 22566
+          "byteOffset": 22662
         }
       },
       "headerSpelling": "public func close(context!: api.OperationContext): Unit",
@@ -216663,12 +216663,12 @@
         "start": {
           "line": 346,
           "column": 5,
-          "byteOffset": 13295
+          "byteOffset": 13391
         },
         "end": {
           "line": 357,
           "column": 6,
-          "byteOffset": 13840
+          "byteOffset": 13936
         }
       },
       "headerSpelling": "public static func connect(\n        endpoint: api.SocketEndpoint,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): TcpStream",
@@ -216812,12 +216812,12 @@
         "start": {
           "line": 625,
           "column": 5,
-          "byteOffset": 24865
+          "byteOffset": 24961
         },
         "end": {
           "line": 639,
           "column": 6,
-          "byteOffset": 25324
+          "byteOffset": 25420
         }
       },
       "headerSpelling": "private func directionClosedError(\n        category: api.NetworkErrorCategory,\n        phase: api.NetworkPhase,\n        message: String\n    ): api.NetworkException",
@@ -216904,12 +216904,12 @@
         "start": {
           "line": 739,
           "column": 5,
-          "byteOffset": 29292
+          "byteOffset": 29388
         },
         "end": {
           "line": 756,
           "column": 6,
-          "byteOffset": 29943
+          "byteOffset": 30039
         }
       },
       "headerSpelling": "private func failClose(): Unit",
@@ -216979,12 +216979,12 @@
         "start": {
           "line": 727,
           "column": 5,
-          "byteOffset": 28889
+          "byteOffset": 28985
         },
         "end": {
           "line": 737,
           "column": 6,
-          "byteOffset": 29286
+          "byteOffset": 29382
         }
       },
       "headerSpelling": "private func finishClose(): Unit",
@@ -217086,12 +217086,12 @@
         "start": {
           "line": 587,
           "column": 5,
-          "byteOffset": 23624
+          "byteOffset": 23720
         },
         "end": {
           "line": 587,
           "column": 57,
-          "byteOffset": 23676
+          "byteOffset": 23772
         }
       },
       "headerSpelling": "public func isClosed(): Bool",
@@ -217161,12 +217161,12 @@
         "start": {
           "line": 770,
           "column": 5,
-          "byteOffset": 30335
+          "byteOffset": 30431
         },
         "end": {
           "line": 777,
           "column": 6,
-          "byteOffset": 30606
+          "byteOffset": 30702
         }
       },
       "headerSpelling": "private func isTerminalLifecycle(): Bool",
@@ -217253,12 +217253,12 @@
         "start": {
           "line": 758,
           "column": 5,
-          "byteOffset": 29949
+          "byteOffset": 30045
         },
         "end": {
           "line": 768,
           "column": 6,
-          "byteOffset": 30329
+          "byteOffset": 30425
         }
       },
       "headerSpelling": "private func publishCloseResult(result: ?api.NetworkException): Unit",
@@ -217414,12 +217414,12 @@
         "start": {
           "line": 375,
           "column": 5,
-          "byteOffset": 14688
+          "byteOffset": 14784
         },
         "end": {
           "line": 389,
           "column": 6,
-          "byteOffset": 15437
+          "byteOffset": 15533
         }
       },
       "headerSpelling": "public func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult",
@@ -217581,12 +217581,12 @@
         "start": {
           "line": 452,
           "column": 5,
-          "byteOffset": 17860
+          "byteOffset": 17956
         },
         "end": {
           "line": 463,
           "column": 6,
-          "byteOffset": 18423
+          "byteOffset": 18519
         }
       },
       "headerSpelling": "public func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit",
@@ -217748,12 +217748,12 @@
         "start": {
           "line": 395,
           "column": 5,
-          "byteOffset": 15629
+          "byteOffset": 15725
         },
         "end": {
           "line": 409,
           "column": 6,
-          "byteOffset": 16276
+          "byteOffset": 16372
         }
       },
       "headerSpelling": "public func readSome(\n        destination: api.MutableByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): api.ReadResult",
@@ -217845,12 +217845,12 @@
         "start": {
           "line": 831,
           "column": 5,
-          "byteOffset": 32682
+          "byteOffset": 32778
         },
         "end": {
           "line": 845,
           "column": 6,
-          "byteOffset": 33263
+          "byteOffset": 33359
         }
       },
       "headerSpelling": "private func recordFailure(): Unit",
@@ -217955,12 +217955,12 @@
         "start": {
           "line": 790,
           "column": 5,
-          "byteOffset": 30991
+          "byteOffset": 31087
         },
         "end": {
           "line": 818,
           "column": 6,
-          "byteOffset": 32258
+          "byteOffset": 32354
         }
       },
       "headerSpelling": "private func recordIoNetworkFailure(\n        error: api.NetworkException,\n        direction: api.ShutdownDirection\n    ): Unit",
@@ -218058,12 +218058,12 @@
         "start": {
           "line": 820,
           "column": 5,
-          "byteOffset": 32264
+          "byteOffset": 32360
         },
         "end": {
           "line": 829,
           "column": 6,
-          "byteOffset": 32676
+          "byteOffset": 32772
         }
       },
       "headerSpelling": "private func recordNetworkFailure(error: api.NetworkException): Unit",
@@ -218155,12 +218155,12 @@
         "start": {
           "line": 669,
           "column": 5,
-          "byteOffset": 26398
+          "byteOffset": 26494
         },
         "end": {
           "line": 686,
           "column": 6,
-          "byteOffset": 27289
+          "byteOffset": 27385
         }
       },
       "headerSpelling": "private func recordShutdown(direction: api.ShutdownDirection): Unit",
@@ -218252,12 +218252,12 @@
         "start": {
           "line": 650,
           "column": 5,
-          "byteOffset": 25663
+          "byteOffset": 25759
         },
         "end": {
           "line": 657,
           "column": 6,
-          "byteOffset": 25991
+          "byteOffset": 26087
         }
       },
       "headerSpelling": "private func recordShutdownFinished(direction: api.ShutdownDirection): Unit",
@@ -218349,12 +218349,12 @@
         "start": {
           "line": 641,
           "column": 5,
-          "byteOffset": 25330
+          "byteOffset": 25426
         },
         "end": {
           "line": 648,
           "column": 6,
-          "byteOffset": 25657
+          "byteOffset": 25753
         }
       },
       "headerSpelling": "private func recordShutdownStarted(direction: api.ShutdownDirection): Unit",
@@ -218429,12 +218429,12 @@
         "start": {
           "line": 592,
           "column": 5,
-          "byteOffset": 23832
+          "byteOffset": 23928
         },
         "end": {
           "line": 606,
           "column": 6,
-          "byteOffset": 24341
+          "byteOffset": 24437
         }
       },
       "headerSpelling": "private func requireReadable(): Unit",
@@ -218504,12 +218504,12 @@
         "start": {
           "line": 608,
           "column": 5,
-          "byteOffset": 24347
+          "byteOffset": 24443
         },
         "end": {
           "line": 622,
           "column": 6,
-          "byteOffset": 24858
+          "byteOffset": 24954
         }
       },
       "headerSpelling": "private func requireWritable(): Unit",
@@ -218579,12 +218579,12 @@
         "start": {
           "line": 779,
           "column": 5,
-          "byteOffset": 30612
+          "byteOffset": 30708
         },
         "end": {
           "line": 788,
           "column": 6,
-          "byteOffset": 30985
+          "byteOffset": 31081
         }
       },
       "headerSpelling": "private func retainAbortOwnership(): Bool",
@@ -218671,12 +218671,12 @@
         "start": {
           "line": 714,
           "column": 5,
-          "byteOffset": 28416
+          "byteOffset": 28512
         },
         "end": {
           "line": 725,
           "column": 6,
-          "byteOffset": 28883
+          "byteOffset": 28979
         }
       },
       "headerSpelling": "private func runClose(context: api.OperationContext): ?api.NetworkException",
@@ -218844,12 +218844,12 @@
         "start": {
           "line": 488,
           "column": 5,
-          "byteOffset": 19374
+          "byteOffset": 19470
         },
         "end": {
           "line": 503,
           "column": 6,
-          "byteOffset": 20040
+          "byteOffset": 20136
         }
       },
       "headerSpelling": "public func shutdown(direction: api.ShutdownDirection): Unit",
@@ -219004,12 +219004,12 @@
         "start": {
           "line": 415,
           "column": 5,
-          "byteOffset": 16417
+          "byteOffset": 16513
         },
         "end": {
           "line": 426,
           "column": 6,
-          "byteOffset": 16955
+          "byteOffset": 17051
         }
       },
       "headerSpelling": "public func write(source: api.ByteSpan, context!: api.OperationContext): Int64",
@@ -219171,12 +219171,12 @@
         "start": {
           "line": 469,
           "column": 5,
-          "byteOffset": 18575
+          "byteOffset": 18671
         },
         "end": {
           "line": 480,
           "column": 6,
-          "byteOffset": 19117
+          "byteOffset": 19213
         }
       },
       "headerSpelling": "public func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit",
@@ -219338,12 +219338,12 @@
         "start": {
           "line": 432,
           "column": 5,
-          "byteOffset": 17098
+          "byteOffset": 17194
         },
         "end": {
           "line": 446,
           "column": 6,
-          "byteOffset": 17698
+          "byteOffset": 17794
         }
       },
       "headerSpelling": "public func writeSome(\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -219465,12 +219465,12 @@
         "start": {
           "line": 364,
           "column": 5,
-          "byteOffset": 14146
+          "byteOffset": 14242
         },
         "end": {
           "line": 364,
           "column": 79,
-          "byteOffset": 14220
+          "byteOffset": 14316
         }
       },
       "headerSpelling": "public prop capabilities: SocketCapabilities",
@@ -219570,12 +219570,12 @@
         "start": {
           "line": 590,
           "column": 5,
-          "byteOffset": 23762
+          "byteOffset": 23858
         },
         "end": {
           "line": 590,
           "column": 69,
-          "byteOffset": 23826
+          "byteOffset": 23922
         }
       },
       "headerSpelling": "public prop info: api.TransportInfo",
@@ -219677,12 +219677,12 @@
         "start": {
           "line": 366,
           "column": 5,
-          "byteOffset": 14301
+          "byteOffset": 14397
         },
         "end": {
           "line": 366,
           "column": 81,
-          "byteOffset": 14377
+          "byteOffset": 14473
         }
       },
       "headerSpelling": "public prop localEndpoint: ?NetworkEndpoint",
@@ -219783,12 +219783,12 @@
         "start": {
           "line": 368,
           "column": 5,
-          "byteOffset": 14459
+          "byteOffset": 14555
         },
         "end": {
           "line": 368,
           "column": 83,
-          "byteOffset": 14537
+          "byteOffset": 14633
         }
       },
       "headerSpelling": "public prop remoteEndpoint: ?NetworkEndpoint",
@@ -219889,12 +219889,12 @@
         "start": {
           "line": 360,
           "column": 5,
-          "byteOffset": 13938
+          "byteOffset": 14034
         },
         "end": {
           "line": 362,
           "column": 6,
-          "byteOffset": 14042
+          "byteOffset": 14138
         }
       },
       "headerSpelling": "public prop state: SocketState",
@@ -219962,12 +219962,12 @@
         "start": {
           "line": 310,
           "column": 5,
-          "byteOffset": 11930
+          "byteOffset": 12026
         },
         "end": {
           "line": 310,
           "column": 52,
-          "byteOffset": 11977
+          "byteOffset": 12073
         }
       },
       "headerSpelling": "private let capabilityValue: SocketCapabilities",
@@ -220023,12 +220023,12 @@
         "start": {
           "line": 314,
           "column": 5,
-          "byteOffset": 12109
+          "byteOffset": 12205
         },
         "end": {
           "line": 314,
           "column": 36,
-          "byteOffset": 12140
+          "byteOffset": 12236
         }
       },
       "headerSpelling": "private var closeActive = false",
@@ -220096,12 +220096,12 @@
         "start": {
           "line": 315,
           "column": 5,
-          "byteOffset": 12145
+          "byteOffset": 12241
         },
         "end": {
           "line": 315,
           "column": 92,
-          "byteOffset": 12232
+          "byteOffset": 12328
         }
       },
       "headerSpelling": "private var closeCoordination: ?SocketCloseCoordination = None<SocketCloseCoordination>",
@@ -220175,12 +220175,12 @@
         "start": {
           "line": 307,
           "column": 5,
-          "byteOffset": 11773
+          "byteOffset": 11869
         },
         "end": {
           "line": 307,
           "column": 50,
-          "byteOffset": 11818
+          "byteOffset": 11914
         }
       },
       "headerSpelling": "private let connectionInfo: api.TransportInfo",
@@ -220250,12 +220250,12 @@
         "start": {
           "line": 306,
           "column": 5,
-          "byteOffset": 11724
+          "byteOffset": 11820
         },
         "end": {
           "line": 306,
           "column": 49,
-          "byteOffset": 11768
+          "byteOffset": 11864
         }
       },
       "headerSpelling": "private let delegate: stdnet.SocketTransport",
@@ -220313,12 +220313,12 @@
         "start": {
           "line": 312,
           "column": 5,
-          "byteOffset": 12018
+          "byteOffset": 12114
         },
         "end": {
           "line": 312,
           "column": 41,
-          "byteOffset": 12054
+          "byteOffset": 12150
         }
       },
       "headerSpelling": "private let lifecycleMutex = Mutex()",
@@ -220376,12 +220376,12 @@
         "start": {
           "line": 313,
           "column": 5,
-          "byteOffset": 12059
+          "byteOffset": 12155
         },
         "end": {
           "line": 313,
           "column": 50,
-          "byteOffset": 12104
+          "byteOffset": 12200
         }
       },
       "headerSpelling": "private var lifecycleState = SocketState.Open",
@@ -220451,12 +220451,12 @@
         "start": {
           "line": 308,
           "column": 5,
-          "byteOffset": 11823
+          "byteOffset": 11919
         },
         "end": {
           "line": 308,
           "column": 53,
-          "byteOffset": 11871
+          "byteOffset": 11967
         }
       },
       "headerSpelling": "private let localEndpointValue: ?NetworkEndpoint",
@@ -220525,12 +220525,12 @@
         "start": {
           "line": 316,
           "column": 5,
-          "byteOffset": 12237
+          "byteOffset": 12333
         },
         "end": {
           "line": 316,
           "column": 48,
-          "byteOffset": 12280
+          "byteOffset": 12376
         }
       },
       "headerSpelling": "private var readShutdownInFlight: Int64 = 0",
@@ -220600,12 +220600,12 @@
         "start": {
           "line": 309,
           "column": 5,
-          "byteOffset": 11876
+          "byteOffset": 11972
         },
         "end": {
           "line": 309,
           "column": 54,
-          "byteOffset": 11925
+          "byteOffset": 12021
         }
       },
       "headerSpelling": "private let remoteEndpointValue: ?NetworkEndpoint",
@@ -220674,12 +220674,12 @@
         "start": {
           "line": 311,
           "column": 5,
-          "byteOffset": 11982
+          "byteOffset": 12078
         },
         "end": {
           "line": 311,
           "column": 36,
-          "byteOffset": 12013
+          "byteOffset": 12109
         }
       },
       "headerSpelling": "private let streamLabel: String",
@@ -220747,12 +220747,12 @@
         "start": {
           "line": 317,
           "column": 5,
-          "byteOffset": 12285
+          "byteOffset": 12381
         },
         "end": {
           "line": 317,
           "column": 49,
-          "byteOffset": 12329
+          "byteOffset": 12425
         }
       },
       "headerSpelling": "private var writeShutdownInFlight: Int64 = 0",
@@ -220827,12 +220827,12 @@
         "start": {
           "line": 28,
           "column": 5,
-          "byteOffset": 845
+          "byteOffset": 847
         },
         "end": {
           "line": 30,
           "column": 6,
-          "byteOffset": 960
+          "byteOffset": 962
         }
       },
       "headerSpelling": "internal init(delegate: stdnet.StdNetDatagramSocket)",
@@ -220959,12 +220959,12 @@
         "start": {
           "line": 140,
           "column": 5,
-          "byteOffset": 5540
+          "byteOffset": 5542
         },
         "end": {
           "line": 142,
           "column": 6,
-          "byteOffset": 5649
+          "byteOffset": 5651
         }
       },
       "headerSpelling": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit",
@@ -221135,12 +221135,12 @@
         "start": {
           "line": 37,
           "column": 5,
-          "byteOffset": 1229
+          "byteOffset": 1231
         },
         "end": {
           "line": 61,
           "column": 6,
-          "byteOffset": 2071
+          "byteOffset": 2073
         }
       },
       "headerSpelling": "public static func bind(\n        endpoint: api.SocketEndpoint,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): UdpSocket",
@@ -221263,12 +221263,12 @@
         "start": {
           "line": 135,
           "column": 5,
-          "byteOffset": 5318
+          "byteOffset": 5320
         },
         "end": {
           "line": 135,
           "column": 80,
-          "byteOffset": 5393
+          "byteOffset": 5395
         }
       },
       "headerSpelling": "public func close(): Unit",
@@ -221429,12 +221429,12 @@
         "start": {
           "line": 132,
           "column": 5,
-          "byteOffset": 5167
+          "byteOffset": 5169
         },
         "end": {
           "line": 132,
           "column": 84,
-          "byteOffset": 5246
+          "byteOffset": 5248
         }
       },
       "headerSpelling": "public func close(context!: api.OperationContext): Unit",
@@ -221590,12 +221590,12 @@
         "start": {
           "line": 79,
           "column": 5,
-          "byteOffset": 2935
+          "byteOffset": 2937
         },
         "end": {
           "line": 85,
           "column": 6,
-          "byteOffset": 3219
+          "byteOffset": 3221
         }
       },
       "headerSpelling": "public func connect(\n        endpoint: NetworkEndpoint,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Unit",
@@ -221715,12 +221715,12 @@
         "start": {
           "line": 145,
           "column": 5,
-          "byteOffset": 5720
+          "byteOffset": 5722
         },
         "end": {
           "line": 145,
           "column": 53,
-          "byteOffset": 5768
+          "byteOffset": 5770
         }
       },
       "headerSpelling": "public func isClosed(): Bool",
@@ -221877,12 +221877,12 @@
         "start": {
           "line": 119,
           "column": 5,
-          "byteOffset": 4678
+          "byteOffset": 4680
         },
         "end": {
           "line": 124,
           "column": 6,
-          "byteOffset": 4875
+          "byteOffset": 4877
         }
       },
       "headerSpelling": "public func receive(\n        capacity: Int64,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): DatagramReceiveResult",
@@ -222057,12 +222057,12 @@
         "start": {
           "line": 92,
           "column": 5,
-          "byteOffset": 3485
+          "byteOffset": 3487
         },
         "end": {
           "line": 97,
           "column": 6,
-          "byteOffset": 3663
+          "byteOffset": 3665
         }
       },
       "headerSpelling": "public func send(\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -222264,12 +222264,12 @@
         "start": {
           "line": 105,
           "column": 5,
-          "byteOffset": 4044
+          "byteOffset": 4046
         },
         "end": {
           "line": 112,
           "column": 6,
-          "byteOffset": 4365
+          "byteOffset": 4367
         }
       },
       "headerSpelling": "public func sendTo(\n        endpoint: NetworkEndpoint,\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -222395,12 +222395,12 @@
         "start": {
           "line": 67,
           "column": 5,
-          "byteOffset": 2288
+          "byteOffset": 2290
         },
         "end": {
           "line": 67,
           "column": 79,
-          "byteOffset": 2362
+          "byteOffset": 2364
         }
       },
       "headerSpelling": "public prop capabilities: SocketCapabilities",
@@ -222500,12 +222500,12 @@
         "start": {
           "line": 70,
           "column": 5,
-          "byteOffset": 2439
+          "byteOffset": 2441
         },
         "end": {
           "line": 70,
           "column": 87,
-          "byteOffset": 2521
+          "byteOffset": 2523
         }
       },
       "headerSpelling": "public prop localEndpoint: ?NetworkEndpoint",
@@ -222606,12 +222606,12 @@
         "start": {
           "line": 73,
           "column": 5,
-          "byteOffset": 2597
+          "byteOffset": 2599
         },
         "end": {
           "line": 73,
           "column": 83,
-          "byteOffset": 2675
+          "byteOffset": 2677
         }
       },
       "headerSpelling": "public prop remoteEndpoint: ?NetworkEndpoint",
@@ -222712,12 +222712,12 @@
         "start": {
           "line": 64,
           "column": 5,
-          "byteOffset": 2143
+          "byteOffset": 2145
         },
         "end": {
           "line": 64,
           "column": 60,
-          "byteOffset": 2198
+          "byteOffset": 2200
         }
       },
       "headerSpelling": "public prop state: SocketState",
@@ -222778,10 +222778,10 @@
         "end": {
           "line": 26,
           "column": 6,
-          "byteOffset": 839
+          "byteOffset": 841
         }
       },
-      "headerSpelling": "private let capabilityValue = SocketCapabilities(\n        nonBlocking: true,\n        closeOnExec: true,\n        halfClose: false,\n        broadcast: true,\n        multicast: true,\n        raw: false,\n        ancillaryData: false,\n        zeroLengthDatagramSend: false,\n        connectedDatagramSend: true\n    )",
+      "headerSpelling": "private let capabilityValue = SocketCapabilities(\n        nonBlocking: true,\n        closeOnExec: true,\n        halfClose: false,\n        broadcast: false,\n        multicast: false,\n        raw: false,\n        ancillaryData: false,\n        zeroLengthDatagramSend: false,\n        connectedDatagramSend: true\n    )",
       "sourceApiSignature": {
         "state": "available",
         "tokens": [
@@ -222805,11 +222805,11 @@
           "COMMA:1:,",
           "IDENTIFIER:9:broadcast",
           "COLON:1::",
-          "BOOL_LITERAL:4:true",
+          "BOOL_LITERAL:5:false",
           "COMMA:1:,",
           "IDENTIFIER:9:multicast",
           "COLON:1::",
-          "BOOL_LITERAL:4:true",
+          "BOOL_LITERAL:5:false",
           "COMMA:1:,",
           "IDENTIFIER:3:raw",
           "COLON:1::",
@@ -231440,12 +231440,12 @@
         "start": {
           "line": 123,
           "column": 5,
-          "byteOffset": 4186
+          "byteOffset": 4282
         },
         "end": {
           "line": 132,
           "column": 6,
-          "byteOffset": 4652
+          "byteOffset": 4748
         }
       },
       "headerSpelling": "public init(level: Int32, option: Int32, value: api.ByteSpan)",
@@ -231557,12 +231557,12 @@
         "start": {
           "line": 135,
           "column": 5,
-          "byteOffset": 4717
+          "byteOffset": 4813
         },
         "end": {
           "line": 135,
           "column": 55,
-          "byteOffset": 4767
+          "byteOffset": 4863
         }
       },
       "headerSpelling": "public func value(): Array<Byte>",
@@ -231635,12 +231635,12 @@
         "start": {
           "line": 115,
           "column": 5,
-          "byteOffset": 3953
+          "byteOffset": 4049
         },
         "end": {
           "line": 115,
           "column": 35,
-          "byteOffset": 3983
+          "byteOffset": 4079
         }
       },
       "headerSpelling": "private let bytes: Array<Byte>",
@@ -231743,12 +231743,12 @@
         "start": {
           "line": 112,
           "column": 5,
-          "byteOffset": 3867
+          "byteOffset": 3963
         },
         "end": {
           "line": 112,
           "column": 28,
-          "byteOffset": 3890
+          "byteOffset": 3986
         }
       },
       "headerSpelling": "public let level: Int32",
@@ -231848,12 +231848,12 @@
         "start": {
           "line": 114,
           "column": 5,
-          "byteOffset": 3924
+          "byteOffset": 4020
         },
         "end": {
           "line": 114,
           "column": 29,
-          "byteOffset": 3948
+          "byteOffset": 4044
         }
       },
       "headerSpelling": "public let option: Int32",
@@ -232400,12 +232400,12 @@
         "start": {
           "line": 1045,
           "column": 1,
-          "byteOffset": 40307
+          "byteOffset": 40403
         },
         "end": {
           "line": 1070,
           "column": 2,
-          "byteOffset": 41218
+          "byteOffset": 41314
         }
       },
       "headerSpelling": "public class RawSocket",
@@ -232623,12 +232623,12 @@
         "start": {
           "line": 848,
           "column": 1,
-          "byteOffset": 33267
+          "byteOffset": 33363
         },
         "end": {
           "line": 915,
           "column": 2,
-          "byteOffset": 35605
+          "byteOffset": 35701
         }
       },
       "headerSpelling": "internal class SocketCloseCoordination",
@@ -232906,12 +232906,12 @@
         "start": {
           "line": 305,
           "column": 1,
-          "byteOffset": 11657
+          "byteOffset": 11753
         },
         "end": {
           "line": 846,
           "column": 2,
-          "byteOffset": 33265
+          "byteOffset": 33361
         }
       },
       "headerSpelling": "public class TcpStream <: StreamSocket & api.DuplexTransport",
@@ -233076,7 +233076,7 @@
         "end": {
           "line": 146,
           "column": 2,
-          "byteOffset": 5770
+          "byteOffset": 5772
         }
       },
       "headerSpelling": "public class UdpSocket <: DatagramSocket",
@@ -234064,12 +234064,12 @@
         "start": {
           "line": 996,
           "column": 1,
-          "byteOffset": 38494
+          "byteOffset": 38590
         },
         "end": {
           "line": 1005,
           "column": 2,
-          "byteOffset": 38763
+          "byteOffset": 38859
         }
       },
       "headerSpelling": "public enum RawSocketDomain",
@@ -234155,12 +234155,12 @@
         "start": {
           "line": 297,
           "column": 1,
-          "byteOffset": 11464
+          "byteOffset": 11560
         },
         "end": {
           "line": 302,
           "column": 2,
-          "byteOffset": 11591
+          "byteOffset": 11687
         }
       },
       "headerSpelling": "public enum ReadResult",
@@ -234246,12 +234246,12 @@
         "start": {
           "line": 90,
           "column": 1,
-          "byteOffset": 3209
+          "byteOffset": 3305
         },
         "end": {
           "line": 107,
           "column": 2,
-          "byteOffset": 3686
+          "byteOffset": 3782
         }
       },
       "headerSpelling": "public enum SocketOption",
@@ -242408,12 +242408,12 @@
         "start": {
           "line": 932,
           "column": 1,
-          "byteOffset": 36061
+          "byteOffset": 36157
         },
         "end": {
           "line": 960,
           "column": 2,
-          "byteOffset": 37104
+          "byteOffset": 37200
         }
       },
       "headerSpelling": "private func closeContextFailure(\n    context: api.OperationContext,\n    localEndpoint: ?NetworkEndpoint,\n    remoteEndpoint: ?NetworkEndpoint\n): ?api.NetworkException",
@@ -242769,12 +242769,12 @@
         "start": {
           "line": 148,
           "column": 1,
-          "byteOffset": 5772
+          "byteOffset": 5774
         },
         "end": {
           "line": 164,
           "column": 2,
-          "byteOffset": 6437
+          "byteOffset": 6439
         }
       },
       "headerSpelling": "private func requireUdpInternetEndpoint(\n    endpoint: NetworkEndpoint,\n    localEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>\n): api.SocketEndpoint",
@@ -243272,12 +243272,12 @@
         "start": {
           "line": 921,
           "column": 1,
-          "byteOffset": 35762
+          "byteOffset": 35858
         },
         "end": {
           "line": 930,
           "column": 2,
-          "byteOffset": 36059
+          "byteOffset": 36155
         }
       },
       "headerSpelling": "internal func checkCloseContext(\n    context: api.OperationContext,\n    localEndpoint: ?NetworkEndpoint,\n    remoteEndpoint: ?NetworkEndpoint\n): Unit",
@@ -244280,12 +244280,12 @@
         "start": {
           "line": 917,
           "column": 1,
-          "byteOffset": 35607
+          "byteOffset": 35703
         },
         "end": {
           "line": 919,
           "column": 2,
-          "byteOffset": 35760
+          "byteOffset": 35856
         }
       },
       "headerSpelling": "internal func requiresCloseCoordination(context: api.OperationContext): Bool",
@@ -244449,12 +244449,12 @@
         "start": {
           "line": 962,
           "column": 1,
-          "byteOffset": 37106
+          "byteOffset": 37202
         },
         "end": {
           "line": 993,
           "column": 2,
-          "byteOffset": 38409
+          "byteOffset": 38505
         }
       },
       "headerSpelling": "internal func socketFailure(\n    error: Exception,\n    category: api.NetworkErrorCategory,\n    phase: api.NetworkPhase,\n    localEndpoint: ?NetworkEndpoint,\n    remoteEndpoint: ?NetworkEndpoint\n): api.NetworkException",
@@ -244675,12 +244675,12 @@
         "start": {
           "line": 181,
           "column": 1,
-          "byteOffset": 6579
+          "byteOffset": 6675
         },
         "end": {
           "line": 246,
           "column": 2,
-          "byteOffset": 9534
+          "byteOffset": 9630
         }
       },
       "headerSpelling": "public interface DatagramSocket <: Resource",
@@ -244783,12 +244783,12 @@
         "start": {
           "line": 249,
           "column": 1,
-          "byteOffset": 9581
+          "byteOffset": 9677
         },
         "end": {
           "line": 294,
           "column": 2,
-          "byteOffset": 11413
+          "byteOffset": 11509
         }
       },
       "headerSpelling": "public interface StreamSocket <: Resource",
@@ -244876,12 +244876,12 @@
         "start": {
           "line": 139,
           "column": 1,
-          "byteOffset": 4854
+          "byteOffset": 4950
         },
         "end": {
           "line": 170,
           "column": 2,
-          "byteOffset": 6112
+          "byteOffset": 6208
         }
       },
       "headerSpelling": "public struct DatagramReceiveResult",
@@ -245422,12 +245422,12 @@
         "start": {
           "line": 1025,
           "column": 1,
-          "byteOffset": 39560
+          "byteOffset": 39656
         },
         "end": {
           "line": 1036,
           "column": 2,
-          "byteOffset": 40052
+          "byteOffset": 40148
         }
       },
       "headerSpelling": "public struct RawAddress",
@@ -245513,12 +245513,12 @@
         "start": {
           "line": 1008,
           "column": 1,
-          "byteOffset": 38802
+          "byteOffset": 38898
         },
         "end": {
           "line": 1022,
           "column": 2,
-          "byteOffset": 39477
+          "byteOffset": 39573
         }
       },
       "headerSpelling": "public struct RawSocketProtocol",
@@ -245609,7 +245609,7 @@
         "end": {
           "line": 87,
           "column": 2,
-          "byteOffset": 3116
+          "byteOffset": 3212
         }
       },
       "headerSpelling": "public struct SocketCapabilities",
@@ -245695,12 +245695,12 @@
         "start": {
           "line": 110,
           "column": 1,
-          "byteOffset": 3793
+          "byteOffset": 3889
         },
         "end": {
           "line": 136,
           "column": 2,
-          "byteOffset": 4769
+          "byteOffset": 4865
         }
       },
       "headerSpelling": "public struct UnsafeSocketOption",

@@ -54,6 +54,109 @@ operation-local cancellation。`close` 和 `abort` 才会唤醒接受者并终�
 终态。接受成功后返回 `TcpStream`，其 `localEndpoint` 和 `remoteEndpoint` 都是已解析
 endpoint。
 
+<!-- NETWORK_CAPABILITIES:BEGIN -->
+<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "3f57378827eb37012baf2397b068393d36d64e4f443e113737adf00b301d7744"} -->
+
+## 当前 Linux 公开网络能力
+
+此表由 [linux-network-capabilities.json](../references/linux-network-capabilities.json) 生成。
+`支持` 仅指所列公开入口和条件；OS/SDK 有同名能力不等于 Wirestack 已提供入口。
+静态一致性不等于原生 PASS；原生证据必须另外核验 source、SDK、target 和安装产物。
+
+| 对象 | 能力字段 | 支持 | 条件 / 失败边界 | 原生场景 |
+|---|---|---|---|---|
+| `TcpStream` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `halfClose` | 不支持 | 固定 SDK 无公开定向 shutdown；拒绝后保持原状态，其他读写仍可用。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpStream` | `connectedDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `TcpListener` | `connectedDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `zeroLengthDatagramSend` | 不支持 | 只禁止发送空 payload；接收空报文仍是成功而非 EOF。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UdpSocket` | `connectedDatagramSend` | 支持 | IPv4/IPv6 Internet peer 必须先 connect；未连接为 NotConnected，sendTo 不改接收过滤。 | internet-ipv4, internet-ipv6, capability-contract |
+| `UnixStream` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `halfClose` | 不支持 | 固定 SDK 无公开定向 shutdown；拒绝后保持原状态，其他读写仍可用。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixStream` | `connectedDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `zeroLengthDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixListener` | `connectedDatagramSend` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `broadcast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `multicast` | 不支持 | SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `zeroLengthDatagramSend` | 不支持 | 只禁止发送空 payload；接收空报文仍是成功而非 EOF。 | unix-pathname, unix-abstract, capability-contract |
+| `UnixDatagramSocket` | `connectedDatagramSend` | 不支持 | 先 connect 后 send 为 Unsupported；SDK 会重新解析 Unix 名称，不能保证原 peer identity；显式 sendTo 独立可用。 | unix-pathname, unix-abstract, capability-contract |
+
+| 操作 / 地址形式 | 公开入口 | 支持条件或失败 | 原生场景 |
+|---|---|---|---|
+| TCP ipv4 connect/accept 与双向 I/O | `TcpStream.connect`, `TcpListener.bind`, `TcpListener.accept`, `TcpStream.read`, `TcpStream.readSome`, `TcpStream.readExact`, `TcpStream.write`, `TcpStream.writeSome`, `TcpStream.writeAll` | 支持；仅接受已解析 Internet endpoint；不做隐式 DNS；partial I/O 和 EOF 后反向写保持独立。 | internet-ipv4 |
+| UDP ipv4 bind/connect/send/sendTo/receive | `UdpSocket.bind`, `UdpSocket.connect`, `UdpSocket.send`, `UdpSocket.sendTo`, `UdpSocket.receive` | 支持；非空发送最多 65,507 字节；receive capacity 1..65,507，保留 source/截断边界；可接收空报文。 | internet-ipv4 |
+| TCP ipv6 connect/accept 与双向 I/O | `TcpStream.connect`, `TcpListener.bind`, `TcpListener.accept`, `TcpStream.read`, `TcpStream.readSome`, `TcpStream.readExact`, `TcpStream.write`, `TcpStream.writeSome`, `TcpStream.writeAll` | 支持；仅接受已解析 Internet endpoint；不做隐式 DNS；partial I/O 和 EOF 后反向写保持独立。 | internet-ipv6 |
+| UDP ipv6 bind/connect/send/sendTo/receive | `UdpSocket.bind`, `UdpSocket.connect`, `UdpSocket.send`, `UdpSocket.sendTo`, `UdpSocket.receive` | 支持；非空发送最多 65,507 字节；receive capacity 1..65,507，保留 source/截断边界；可接收空报文。 | internet-ipv6 |
+| Unix pathname | `UnixListener.bind`, `UnixListener.accept`, `UnixStream.connect`, `UnixStream.read`, `UnixStream.readSome`, `UnixStream.readExact`, `UnixStream.write`, `UnixStream.writeSome`, `UnixStream.writeAll` | 支持；pathname 文件由调用者拥有并 unlink；close 不删除节点；stream 的未命名 peer 保留 unnamed。 | unix-pathname |
+| Unix outgoing abstract | `UnixListener.bind`, `UnixListener.accept`, `UnixStream.connect`, `UnixStream.read`, `UnixStream.readSome`, `UnixStream.readExact`, `UnixStream.write`, `UnixStream.writeSome`, `UnixStream.writeAll` | 支持；名称必须恰好 107 字节且为有效 UTF-8，可包含 NUL；不补零、不重写名称。 | unix-abstract |
+| 短或非 UTF-8 outgoing abstract | `UnixListener.bind`, `UnixStream.connect` | 不支持；短名称或非 UTF-8 名称在 native socket 创建或 I/O 前被拒绝。 `Unsupported/UnixSocket/Unsupported/Never`。 | capability-contract |
+| Unix pathname | `UnixDatagramSocket.bind`, `UnixDatagramSocket.connect`, `UnixDatagramSocket.sendTo`, `UnixDatagramSocket.receive` | 支持；pathname 文件由调用者拥有并 unlink；close 不删除节点；stream 的未命名 peer 保留 unnamed。 | unix-pathname |
+| Unix outgoing abstract | `UnixDatagramSocket.bind`, `UnixDatagramSocket.connect`, `UnixDatagramSocket.sendTo`, `UnixDatagramSocket.receive` | 支持；名称必须恰好 107 字节且为有效 UTF-8，可包含 NUL；不补零、不重写名称。 | unix-abstract |
+| 短或非 UTF-8 outgoing abstract | `UnixDatagramSocket.bind`, `UnixDatagramSocket.connect`, `UnixDatagramSocket.sendTo` | 不支持；短名称或非 UTF-8 名称在 native socket 创建或 I/O 前被拒绝。 `Unsupported/UnixSocket/Unsupported/Never`。 | capability-contract |
+| 接收任意字节的 named abstract source | `UnixDatagramSocket.receive` | 支持；接收时以 native 地址实际长度保留 named abstract 字节，包括短名称和非 UTF-8；不能套用 outgoing 的 107 字节限制。 | unix-pathname, unix-abstract |
+| 接收未绑定 datagram sender | `UnixDatagramSocket.receive` | 不支持；固定 SDK 消费报文后无法转换未绑定来源；保留失败和 cause，不伪造 unnamed，也不能恢复该报文。 `Read/DatagramReceive/SystemFailure/Unknown`。 | unix-pathname, unix-abstract |
+| Raw Ipv4 open | `RawSocket.open`, `RawSocketDomain.Ipv4` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
+| Raw Ipv6 open | `RawSocket.open`, `RawSocketDomain.Ipv6` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
+| Raw Packet open | `RawSocket.open`, `RawSocketDomain.Packet` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
+| Raw Netlink open | `RawSocket.open`, `RawSocketDomain.Netlink` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
+| SocketOption 仅值描述 | `SocketOption` | 不支持；构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。 无公开调用入口，不能虚构运行时 Unsupported 方法。 | capability-contract |
+| UnsafeSocketOption 仅值描述 | `UnsafeSocketOption` | 不支持；构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。 无公开调用入口，不能虚构运行时 Unsupported 方法。 | capability-contract |
+| 幂等 close/abort 与终态 | `TcpStream.close`, `TcpStream.abort`, `TcpStream.isClosed`, `TcpStream.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | internet-ipv4, internet-ipv6, capability-contract |
+| 幂等 close/abort 与终态 | `TcpListener.close`, `TcpListener.abort`, `TcpListener.isClosed`, `TcpListener.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | internet-ipv4, internet-ipv6, capability-contract |
+| 幂等 close/abort 与终态 | `UdpSocket.close`, `UdpSocket.abort`, `UdpSocket.isClosed`, `UdpSocket.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | internet-ipv4, internet-ipv6, capability-contract |
+| 幂等 close/abort 与终态 | `UnixStream.close`, `UnixStream.abort`, `UnixStream.isClosed`, `UnixStream.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | unix-pathname, unix-abstract, capability-contract |
+| 幂等 close/abort 与终态 | `UnixListener.close`, `UnixListener.abort`, `UnixListener.isClosed`, `UnixListener.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | unix-pathname, unix-abstract, capability-contract |
+| 幂等 close/abort 与终态 | `UnixDatagramSocket.close`, `UnixDatagramSocket.abort`, `UnixDatagramSocket.isClosed`, `UnixDatagramSocket.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | unix-pathname, unix-abstract, capability-contract |
+| 显式 DNS query/lookup | `DnsClient.init`, `DnsClient.query`, `DnsClient.lookup`, `DnsClient.close`, `DnsClient.isClosed` | 支持；本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。 | dns-basic |
+| 显式配置的 resolve/connect | `Resolver.init`, `Resolver.resolve`, `Resolver.connect`, `Resolver.close`, `Resolver.isClosed` | 支持；hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。 | dns-connect |
+| 有界 DNS message parser | `DnsMessageParser.init`, `DnsMessageParser.parse` | 支持；受 DnsParserLimits 限制；完整报文成功，截断报文保留结构化 ResolveException；此条只声明 parser，不代表 DNS 网络可达。 | capability-contract |
+
+ENVIRONMENT_FAILURE, never a supported PASS or permanent capability=false; preserve NetworkErrorCode.PermissionDenied/nativeCode/cause when available.
+Public SDK errors without a stable native code remain SystemFailure/Unknown with cause; never classify from message text.
+NOT_RUN, never native PASS
+[当前原生收据](../evidence/M9-001/native-capabilities.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。
+
+<!-- NETWORK_CAPABILITIES:END -->
+
 ## 生命周期与能力边界
 
 流式 `read`/`write` 可以部分完成；需要完整缓冲区时使用 `readExact`/`writeAll`。
