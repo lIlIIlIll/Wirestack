@@ -38,9 +38,9 @@ public struct SocketCapabilities {
     public let closeOnExec: Bool
 /** Whether directional half-close is available. */
     public let halfClose: Bool
-/** Whether broadcast is available. */
+/** Whether broadcast is configurable through this socket's public operations. */
     public let broadcast: Bool
-/** Whether multicast is available. */
+/** Whether multicast membership is available through this socket's public operations. */
     public let multicast: Bool
 /** Whether raw socket operations are available. */
     public let raw: Bool
@@ -67,8 +67,8 @@ public struct SocketCapabilities {
         nonBlocking!: Bool = true,
         closeOnExec!: Bool = true,
         halfClose!: Bool = false,
-        broadcast!: Bool = true,
-        multicast!: Bool = true,
+        broadcast!: Bool = false,
+        multicast!: Bool = false,
         raw!: Bool = false,
         ancillaryData!: Bool = false,
         zeroLengthDatagramSend!: Bool = false,

@@ -1,0 +1,36 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 11736012 ns, RESULT:
+    TCS: M8002UdpSocketTest, time elapsed: 1461078 ns, RESULT:
+    [ FAILED ] CASE: unavailableOptionOperationsAreNotAdvertised (181847 ns)
+    Expect Failed: `(! defaults.broadcast == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! defaults.multicast == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! socket.capabilities.broadcast == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! socket.capabilities.multicast == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 105
+    PASSED: 0, SKIPPED: 104, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: M8002UdpSocketTest, CASE: unavailableOptionOperationsAreNotAdvertised
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 19223192 ns, RESULT:
+TP: wirestack.*, time elapsed: 19092399 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 11736012 ns, RESULT:
+        TCS: M8002UdpSocketTest, time elapsed: 1461078 ns, RESULT:
+        [ FAILED ] CASE: unavailableOptionOperationsAreNotAdvertised (181847 ns)
+Summary: TOTAL: 105
+    PASSED: 0, SKIPPED: 104, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

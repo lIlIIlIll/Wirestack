@@ -1,0 +1,2375 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "platform": "linux-x86_64-glibc",
+  "sdk_reference": "docs/references/m7-033-ci-toolchain.json",
+  "scope": "wirestack.net socket capabilities and callable network operation families; no new option, multicast or raw implementation",
+  "constructor_defaults": {
+    "nonBlocking": true,
+    "closeOnExec": true,
+    "halfClose": false,
+    "broadcast": false,
+    "multicast": false,
+    "raw": false,
+    "ancillaryData": false,
+    "zeroLengthDatagramSend": false,
+    "connectedDatagramSend": false
+  },
+  "native_runner": "tools/m9_001_native_capabilities.py",
+  "consumer_sources": [
+    "examples/linux/m9_001/native_capabilities.cj",
+    "examples/linux/m8_002/main.cj",
+    "examples/linux/m8_003/main.cj",
+    "examples/linux/m8_004/native_dns.cj"
+  ],
+  "required_scenarios": [
+    "internet-ipv4",
+    "internet-ipv6",
+    "unix-pathname",
+    "unix-abstract",
+    "capability-contract",
+    "dns-basic",
+    "dns-connect"
+  ],
+  "environment_failure_policy": {
+    "permission_denied": "ENVIRONMENT_FAILURE, never a supported PASS or permanent capability=false; preserve NetworkErrorCode.PermissionDenied/nativeCode/cause when available.",
+    "missing_native_error": "Public SDK errors without a stable native code remain SystemFailure/Unknown with cause; never classify from message text.",
+    "cross_compile": "NOT_RUN, never native PASS"
+  },
+  "rows": [
+    {
+      "id": "TcpStream-nonBlocking",
+      "object": "TcpStream",
+      "label": "非阻塞描述符",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "nonBlocking",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-closeOnExec",
+      "object": "TcpStream",
+      "label": "close-on-exec 描述符",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "closeOnExec",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-halfClose",
+      "object": "TcpStream",
+      "label": "定向 half-close",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities",
+        "wirestack.net.TcpStream.shutdown"
+      ],
+      "capability_field": "halfClose",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "固定 SDK 无公开定向 shutdown；拒绝后保持原状态，其他读写仍可用。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "TransportClose",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-broadcast",
+      "object": "TcpStream",
+      "label": "公开广播配置",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "broadcast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-multicast",
+      "object": "TcpStream",
+      "label": "公开组播 membership",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "multicast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-raw",
+      "object": "TcpStream",
+      "label": "raw 操作",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "raw",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-ancillaryData",
+      "object": "TcpStream",
+      "label": "ancillary data",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "ancillaryData",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-zeroLengthDatagramSend",
+      "object": "TcpStream",
+      "label": "空 datagram 发送",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "zeroLengthDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-connectedDatagramSend",
+      "object": "TcpStream",
+      "label": "保持 peer identity 的 connected send",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.capabilities"
+      ],
+      "capability_field": "connectedDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-nonBlocking",
+      "object": "TcpListener",
+      "label": "非阻塞描述符",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "nonBlocking",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-closeOnExec",
+      "object": "TcpListener",
+      "label": "close-on-exec 描述符",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "closeOnExec",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-halfClose",
+      "object": "TcpListener",
+      "label": "定向 half-close",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "halfClose",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-broadcast",
+      "object": "TcpListener",
+      "label": "公开广播配置",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "broadcast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-multicast",
+      "object": "TcpListener",
+      "label": "公开组播 membership",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "multicast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-raw",
+      "object": "TcpListener",
+      "label": "raw 操作",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "raw",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-ancillaryData",
+      "object": "TcpListener",
+      "label": "ancillary data",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "ancillaryData",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-zeroLengthDatagramSend",
+      "object": "TcpListener",
+      "label": "空 datagram 发送",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "zeroLengthDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-connectedDatagramSend",
+      "object": "TcpListener",
+      "label": "保持 peer identity 的 connected send",
+      "public_symbols": [
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.capabilities"
+      ],
+      "capability_field": "connectedDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-nonBlocking",
+      "object": "UdpSocket",
+      "label": "非阻塞描述符",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "nonBlocking",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-closeOnExec",
+      "object": "UdpSocket",
+      "label": "close-on-exec 描述符",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "closeOnExec",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-halfClose",
+      "object": "UdpSocket",
+      "label": "定向 half-close",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "halfClose",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-broadcast",
+      "object": "UdpSocket",
+      "label": "公开广播配置",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "broadcast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-multicast",
+      "object": "UdpSocket",
+      "label": "公开组播 membership",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "multicast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-raw",
+      "object": "UdpSocket",
+      "label": "raw 操作",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "raw",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-ancillaryData",
+      "object": "UdpSocket",
+      "label": "ancillary data",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities"
+      ],
+      "capability_field": "ancillaryData",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-zeroLengthDatagramSend",
+      "object": "UdpSocket",
+      "label": "空 datagram 发送",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities",
+        "wirestack.net.UdpSocket.sendTo"
+      ],
+      "capability_field": "zeroLengthDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "只禁止发送空 payload；接收空报文仍是成功而非 EOF。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "DatagramSend",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-connectedDatagramSend",
+      "object": "UdpSocket",
+      "label": "保持 peer identity 的 connected send",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.capabilities",
+        "wirestack.net.UdpSocket.connect",
+        "wirestack.net.UdpSocket.send"
+      ],
+      "capability_field": "connectedDatagramSend",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "IPv4/IPv6 Internet peer 必须先 connect；未连接为 NotConnected，sendTo 不改接收过滤。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-nonBlocking",
+      "object": "UnixStream",
+      "label": "非阻塞描述符",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "nonBlocking",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-closeOnExec",
+      "object": "UnixStream",
+      "label": "close-on-exec 描述符",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "closeOnExec",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-halfClose",
+      "object": "UnixStream",
+      "label": "定向 half-close",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities",
+        "wirestack.net.UnixStream.shutdown"
+      ],
+      "capability_field": "halfClose",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "固定 SDK 无公开定向 shutdown；拒绝后保持原状态，其他读写仍可用。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "TransportClose",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-broadcast",
+      "object": "UnixStream",
+      "label": "公开广播配置",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "broadcast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-multicast",
+      "object": "UnixStream",
+      "label": "公开组播 membership",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "multicast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-raw",
+      "object": "UnixStream",
+      "label": "raw 操作",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "raw",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-ancillaryData",
+      "object": "UnixStream",
+      "label": "ancillary data",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "ancillaryData",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-zeroLengthDatagramSend",
+      "object": "UnixStream",
+      "label": "空 datagram 发送",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "zeroLengthDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-connectedDatagramSend",
+      "object": "UnixStream",
+      "label": "保持 peer identity 的 connected send",
+      "public_symbols": [
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.capabilities"
+      ],
+      "capability_field": "connectedDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-nonBlocking",
+      "object": "UnixListener",
+      "label": "非阻塞描述符",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "nonBlocking",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-closeOnExec",
+      "object": "UnixListener",
+      "label": "close-on-exec 描述符",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "closeOnExec",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-halfClose",
+      "object": "UnixListener",
+      "label": "定向 half-close",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "halfClose",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-broadcast",
+      "object": "UnixListener",
+      "label": "公开广播配置",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "broadcast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-multicast",
+      "object": "UnixListener",
+      "label": "公开组播 membership",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "multicast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-raw",
+      "object": "UnixListener",
+      "label": "raw 操作",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "raw",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-ancillaryData",
+      "object": "UnixListener",
+      "label": "ancillary data",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "ancillaryData",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-zeroLengthDatagramSend",
+      "object": "UnixListener",
+      "label": "空 datagram 发送",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "zeroLengthDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-connectedDatagramSend",
+      "object": "UnixListener",
+      "label": "保持 peer identity 的 connected send",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.capabilities"
+      ],
+      "capability_field": "connectedDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-nonBlocking",
+      "object": "UnixDatagramSocket",
+      "label": "非阻塞描述符",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "nonBlocking",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-closeOnExec",
+      "object": "UnixDatagramSocket",
+      "label": "close-on-exec 描述符",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "closeOnExec",
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-halfClose",
+      "object": "UnixDatagramSocket",
+      "label": "定向 half-close",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "halfClose",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-broadcast",
+      "object": "UnixDatagramSocket",
+      "label": "公开广播配置",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "broadcast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-multicast",
+      "object": "UnixDatagramSocket",
+      "label": "公开组播 membership",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "multicast",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "SocketOption 是值描述，没有公开 apply/configure/join 入口；不能由 OS 或 SDK 的能力推出 Wirestack 支持。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-raw",
+      "object": "UnixDatagramSocket",
+      "label": "raw 操作",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "raw",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-ancillaryData",
+      "object": "UnixDatagramSocket",
+      "label": "ancillary data",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities"
+      ],
+      "capability_field": "ancillaryData",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-zeroLengthDatagramSend",
+      "object": "UnixDatagramSocket",
+      "label": "空 datagram 发送",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities",
+        "wirestack.net.UnixDatagramSocket.sendTo"
+      ],
+      "capability_field": "zeroLengthDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "只禁止发送空 payload；接收空报文仍是成功而非 EOF。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "DatagramSend",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-connectedDatagramSend",
+      "object": "UnixDatagramSocket",
+      "label": "保持 peer identity 的 connected send",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.capabilities",
+        "wirestack.net.UnixDatagramSocket.connect",
+        "wirestack.net.UnixDatagramSocket.send"
+      ],
+      "capability_field": "connectedDatagramSend",
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "先 connect 后 send 为 Unsupported；SDK 会重新解析 Unix 名称，不能保证原 peer identity；显式 sendTo 独立可用。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Write",
+        "phase": "DatagramSend",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "tcp-ipv4",
+      "object": "TcpStream",
+      "label": "TCP ipv4 connect/accept 与双向 I/O",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.accept",
+        "wirestack.net.TcpStream.read",
+        "wirestack.net.TcpStream.readSome",
+        "wirestack.net.TcpStream.readExact",
+        "wirestack.net.TcpStream.write",
+        "wirestack.net.TcpStream.writeSome",
+        "wirestack.net.TcpStream.writeAll"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "仅接受已解析 Internet endpoint；不做隐式 DNS；partial I/O 和 EOF 后反向写保持独立。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "udp-ipv4",
+      "object": "UdpSocket",
+      "label": "UDP ipv4 bind/connect/send/sendTo/receive",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.connect",
+        "wirestack.net.UdpSocket.send",
+        "wirestack.net.UdpSocket.sendTo",
+        "wirestack.net.UdpSocket.receive"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "非空发送最多 65,507 字节；receive capacity 1..65,507，保留 source/截断边界；可接收空报文。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "tcp-ipv6",
+      "object": "TcpStream",
+      "label": "TCP ipv6 connect/accept 与双向 I/O",
+      "public_symbols": [
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.accept",
+        "wirestack.net.TcpStream.read",
+        "wirestack.net.TcpStream.readSome",
+        "wirestack.net.TcpStream.readExact",
+        "wirestack.net.TcpStream.write",
+        "wirestack.net.TcpStream.writeSome",
+        "wirestack.net.TcpStream.writeAll"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "仅接受已解析 Internet endpoint；不做隐式 DNS；partial I/O 和 EOF 后反向写保持独立。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv6"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "udp-ipv6",
+      "object": "UdpSocket",
+      "label": "UDP ipv6 bind/connect/send/sendTo/receive",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.connect",
+        "wirestack.net.UdpSocket.send",
+        "wirestack.net.UdpSocket.sendTo",
+        "wirestack.net.UdpSocket.receive"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "非空发送最多 65,507 字节；receive capacity 1..65,507，保留 source/截断边界；可接收空报文。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv6"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-pathname",
+      "object": "UnixStream",
+      "label": "Unix pathname",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.accept",
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.read",
+        "wirestack.net.UnixStream.readSome",
+        "wirestack.net.UnixStream.readExact",
+        "wirestack.net.UnixStream.write",
+        "wirestack.net.UnixStream.writeSome",
+        "wirestack.net.UnixStream.writeAll"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "pathname 文件由调用者拥有并 unlink；close 不删除节点；stream 的未命名 peer 保留 unnamed。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-abstract",
+      "object": "UnixStream",
+      "label": "Unix outgoing abstract",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixListener.accept",
+        "wirestack.net.UnixStream.connect",
+        "wirestack.net.UnixStream.read",
+        "wirestack.net.UnixStream.readSome",
+        "wirestack.net.UnixStream.readExact",
+        "wirestack.net.UnixStream.write",
+        "wirestack.net.UnixStream.writeSome",
+        "wirestack.net.UnixStream.writeAll"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "名称必须恰好 107 字节且为有效 UTF-8，可包含 NUL；不补零、不重写名称。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-abstract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-invalid-abstract",
+      "object": "UnixStream",
+      "label": "短或非 UTF-8 outgoing abstract",
+      "public_symbols": [
+        "wirestack.net.UnixListener.bind",
+        "wirestack.net.UnixStream.connect"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "短名称或非 UTF-8 名称在 native socket 创建或 I/O 前被拒绝。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "UnixSocket",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-pathname",
+      "object": "UnixDatagramSocket",
+      "label": "Unix pathname",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.connect",
+        "wirestack.net.UnixDatagramSocket.sendTo",
+        "wirestack.net.UnixDatagramSocket.receive"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "pathname 文件由调用者拥有并 unlink；close 不删除节点；stream 的未命名 peer 保留 unnamed。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-abstract",
+      "object": "UnixDatagramSocket",
+      "label": "Unix outgoing abstract",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.connect",
+        "wirestack.net.UnixDatagramSocket.sendTo",
+        "wirestack.net.UnixDatagramSocket.receive"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "名称必须恰好 107 字节且为有效 UTF-8，可包含 NUL；不补零、不重写名称。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-abstract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-invalid-abstract",
+      "object": "UnixDatagramSocket",
+      "label": "短或非 UTF-8 outgoing abstract",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.bind",
+        "wirestack.net.UnixDatagramSocket.connect",
+        "wirestack.net.UnixDatagramSocket.sendTo"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "短名称或非 UTF-8 名称在 native socket 创建或 I/O 前被拒绝。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "UnixSocket",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "unix-named-source",
+      "object": "UnixDatagramSocket",
+      "label": "接收任意字节的 named abstract source",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.receive"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "接收时以 native 地址实际长度保留 named abstract 字节，包括短名称和非 UTF-8；不能套用 outgoing 的 107 字节限制。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "unix-unbound-source",
+      "object": "UnixDatagramSocket",
+      "label": "接收未绑定 datagram sender",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.receive"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "固定 SDK 消费报文后无法转换未绑定来源；保留失败和 cause，不伪造 unnamed，也不能恢复该报文。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Read",
+        "phase": "DatagramReceive",
+        "code": "SystemFailure",
+        "retryability": "Unknown"
+      },
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "raw-ipv4",
+      "object": "RawSocket",
+      "label": "Raw Ipv4 open",
+      "public_symbols": [
+        "wirestack.net.RawSocket.open",
+        "wirestack.net.RawSocketDomain.Ipv4"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "RawSocket",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.net.RawSocket.open"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "raw-ipv6",
+      "object": "RawSocket",
+      "label": "Raw Ipv6 open",
+      "public_symbols": [
+        "wirestack.net.RawSocket.open",
+        "wirestack.net.RawSocketDomain.Ipv6"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "RawSocket",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.net.RawSocket.open"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "raw-packet",
+      "object": "RawSocket",
+      "label": "Raw Packet open",
+      "public_symbols": [
+        "wirestack.net.RawSocket.open",
+        "wirestack.net.RawSocketDomain.Packet"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "RawSocket",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.net.RawSocket.open"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "raw-netlink",
+      "object": "RawSocket",
+      "label": "Raw Netlink open",
+      "public_symbols": [
+        "wirestack.net.RawSocket.open",
+        "wirestack.net.RawSocketDomain.Netlink"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。"
+      ],
+      "failure": {
+        "kind": "structured_error",
+        "category": "Unsupported",
+        "phase": "RawSocket",
+        "code": "Unsupported",
+        "retryability": "Never"
+      },
+      "backend_symbols": [
+        "wirestack.net.RawSocket.open"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "SocketOption-application",
+      "object": "SocketOption",
+      "label": "SocketOption 仅值描述",
+      "public_symbols": [
+        "wirestack.net.SocketOption"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.net.SocketOption"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnsafeSocketOption-application",
+      "object": "UnsafeSocketOption",
+      "label": "UnsafeSocketOption 仅值描述",
+      "public_symbols": [
+        "wirestack.net.UnsafeSocketOption"
+      ],
+      "capability_field": null,
+      "supported": false,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。"
+      ],
+      "failure": {
+        "kind": "no_public_operation",
+        "category": null,
+        "phase": null,
+        "code": null,
+        "retryability": null
+      },
+      "backend_symbols": [
+        "wirestack.net.UnsafeSocketOption"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpStream-lifecycle",
+      "object": "TcpStream",
+      "label": "幂等 close/abort 与终态",
+      "public_symbols": [
+        "wirestack.net.TcpStream.close",
+        "wirestack.net.TcpStream.abort",
+        "wirestack.net.TcpStream.isClosed",
+        "wirestack.net.TcpStream.state"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connect"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "TcpListener-lifecycle",
+      "object": "TcpListener",
+      "label": "幂等 close/abort 与终态",
+      "public_symbols": [
+        "wirestack.net.TcpListener.close",
+        "wirestack.net.TcpListener.abort",
+        "wirestack.net.TcpListener.isClosed",
+        "wirestack.net.TcpListener.state"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UdpSocket-lifecycle",
+      "object": "UdpSocket",
+      "label": "幂等 close/abort 与终态",
+      "public_symbols": [
+        "wirestack.net.UdpSocket.close",
+        "wirestack.net.UdpSocket.abort",
+        "wirestack.net.UdpSocket.isClosed",
+        "wirestack.net.UdpSocket.state"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+      ],
+      "scenario_ids": [
+        "internet-ipv4",
+        "internet-ipv6",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixStream-lifecycle",
+      "object": "UnixStream",
+      "label": "幂等 close/abort 与终态",
+      "public_symbols": [
+        "wirestack.net.UnixStream.close",
+        "wirestack.net.UnixStream.abort",
+        "wirestack.net.UnixStream.isClosed",
+        "wirestack.net.UnixStream.state"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetTransport.connectUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixListener-lifecycle",
+      "object": "UnixListener",
+      "label": "幂等 close/abort 与终态",
+      "public_symbols": [
+        "wirestack.net.UnixListener.close",
+        "wirestack.net.UnixListener.abort",
+        "wirestack.net.UnixListener.isClosed",
+        "wirestack.net.UnixListener.state"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetUnixTransportListener.bind"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "UnixDatagramSocket-lifecycle",
+      "object": "UnixDatagramSocket",
+      "label": "幂等 close/abort 与终态",
+      "public_symbols": [
+        "wirestack.net.UnixDatagramSocket.close",
+        "wirestack.net.UnixDatagramSocket.abort",
+        "wirestack.net.UnixDatagramSocket.isClosed",
+        "wirestack.net.UnixDatagramSocket.state"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bindUnix"
+      ],
+      "scenario_ids": [
+        "unix-pathname",
+        "unix-abstract",
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "dns-client",
+      "object": "DnsClient",
+      "label": "显式 DNS query/lookup",
+      "public_symbols": [
+        "wirestack.net.DnsClient.init",
+        "wirestack.net.DnsClient.query",
+        "wirestack.net.DnsClient.lookup",
+        "wirestack.net.DnsClient.close",
+        "wirestack.net.DnsClient.isClosed"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.net.DnsClient.query"
+      ],
+      "scenario_ids": [
+        "dns-basic"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "dns-resolver",
+      "object": "Resolver",
+      "label": "显式配置的 resolve/connect",
+      "public_symbols": [
+        "wirestack.net.Resolver.init",
+        "wirestack.net.Resolver.resolve",
+        "wirestack.net.Resolver.connect",
+        "wirestack.net.Resolver.close",
+        "wirestack.net.Resolver.isClosed"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.net.Resolver.connect"
+      ],
+      "scenario_ids": [
+        "dns-connect"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    },
+    {
+      "id": "dns-parser",
+      "object": "DnsMessageParser",
+      "label": "有界 DNS message parser",
+      "public_symbols": [
+        "wirestack.net.DnsMessageParser.init",
+        "wirestack.net.DnsMessageParser.parse"
+      ],
+      "capability_field": null,
+      "supported": true,
+      "conditions": [
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
+        "受 DnsParserLimits 限制；完整报文成功，截断报文保留结构化 ResolveException；此条只声明 parser，不代表 DNS 网络可达。"
+      ],
+      "failure": null,
+      "backend_symbols": [
+        "wirestack.net.DnsMessageParser.parse"
+      ],
+      "scenario_ids": [
+        "capability-contract"
+      ],
+      "evidence": "docs/evidence/M9-001/native-capabilities.json"
+    }
+  ]
+}
