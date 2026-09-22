@@ -1,0 +1,18 @@
+1624107 sendto(9, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+1624107 recvfrom(9, "\2", 1, 0, NULL, NULL) = 1
+1624107 sendto(10, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+1624107 recvfrom(10, 0x7fcc00021490, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+1624107 recvfrom(10, "\2", 1, 0, NULL, NULL) = 1
+1624107 sendto(11, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+1624107 recvfrom(11, 0x7fcc1504e478, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+1624107 recvfrom(11, "\2", 1, 0, NULL, NULL) = 1
+1624107 sendto(12, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+1624107 recvfrom(12, "\2", 1, 0, NULL, NULL) = 1
+1624107 sendto(5, "\2", 1, 0, {sa_family=AF_INET, sin_port=htons(49902), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+1624107 recvfrom(5, 0x5592cd2545c0, 2, 0, 0x7fcc00065c20, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+1624107 recvfrom(5, "\2", 2, 0, {sa_family=AF_INET, sin_port=htons(49902), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
+1624107 sendto(6, "\2", 1, 0, {sa_family=AF_INET6, sin6_port=htons(39679), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
+1624107 recvfrom(6, 0x5592cd274b80, 2, 0, 0x7fcc00065c20, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+1624108 recvfrom(6, "\2", 2, 0, {sa_family=AF_INET6, sin6_port=htons(39679), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
+1624108 sendto(8, "\2", 1, 0, {sa_family=AF_UNIX, sun_path="<scratch>"}, 110) = 1
+1624108 recvfrom(8, "\2", 2, 0, {sa_family=AF_UNIX, sun_path="<scratch>"}, [120 => 77]) = 1

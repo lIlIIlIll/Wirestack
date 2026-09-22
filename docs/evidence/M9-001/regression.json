@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "status": "PASS",
+  "case": "M8002UdpSocketTest.unavailableOptionOperationsAreNotAdvertised",
+  "before": {
+    "command": "cjpm test src/net --skip-build --filter=M8002UdpSocketTest.unavailableOptionOperationsAreNotAdvertised --no-progress --no-color",
+    "exit_code": 1,
+    "selected_cases": 1,
+    "failed_cases": 1,
+    "failed_expectations": 4,
+    "filtered_cases": 104,
+    "log": {
+      "path": "docs/evidence/M9-001/regression/red.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "924f1174d5ee12550c7899efe243187ce97b37075e00a7dd1397346a693a2044"
+      }
+    }
+  },
+  "after": {
+    "command": "cjpm test src/net --filter=M8002UdpSocketTest.unavailableOptionOperationsAreNotAdvertised --no-progress --no-color",
+    "exit_code": 0,
+    "selected_cases": 1,
+    "passed_cases": 1,
+    "filtered_cases": 104,
+    "log": {
+      "path": "docs/evidence/M9-001/regression/green.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5aacd0b50909786b2316fa8a5d50e15d60409bd8e1389e713f53d512f51695f4"
+      }
+    }
+  },
+  "scope": "Constructor and factory broadcast/multicast claims; connected Internet UDP capability remains true. Filtered cases are not reported as passed."
+}

@@ -213,3 +213,27 @@ M8-005 and M8-006 have qualified Linux HTTP and TLS evidence. M8-007 retains
 historical frozen-artifact, formal-soak, independent-approval, and hosted-attestation
 reports, but its post-rewrite schema-2 identity seal fails closed and therefore does
 not currently close the Linux glibc release gate.
+## M9–M12 Linux evolution
+
+Readiness is determined only by the completed dependencies in the backlog. Later
+integration requirements remain completion conditions and do not become artificial
+prerequisites.
+
+| Task | Status | Issue | Notes |
+|---|---|---|---|
+| M9-001 | COMPLETE | [#170](https://github.com/lIlIIlIll/Wirestack/issues/170); [acceptance evidence](../evidence/M9-001/README.md); [source seal](../evidence/M9-001/evidence.json) | P1-015 baseline verified before editing. Callable capability map, all 16 roadmap rows, seven installed native scenarios, regression checks and HTML documentation pass. The schema-2 index binds the exact committed source candidate. No later task, merge, signing or release qualification is included. |
+| M9-002 | BLOCKED | [#171](https://github.com/lIlIIlIll/Wirestack/issues/171) | Blocked on M9-001. Typed TCP/UDP options must cover factories, accepted TCP and effective-value queries; Unix option APIs are out of scope. |
+| M9-003 | BLOCKED | [#172](https://github.com/lIlIIlIll/Wirestack/issues/172) | Blocked on M9-002. UDP disconnect, IPv4 broadcast and every declared IPv4/IPv6 membership path require native evidence. |
+| M10-001 | BLOCKED | [#173](https://github.com/lIlIIlIll/Wirestack/issues/173) | Blocked on M9-001. One total deadline must bound stage budgets and stream-level progress timeouts. |
+| M10-002 | BLOCKED | [#174](https://github.com/lIlIIlIll/Wirestack/issues/174) | Blocked on M9-001. Aggregate and route/origin connection, request, stream and buffer accounting must follow real ownership. |
+| M10-003 | BLOCKED | [#175](https://github.com/lIlIIlIll/Wirestack/issues/175) | Blocked on M10-001 and M10-002. Completion requires fair pooling, bounded cleanup and submission-aware safe retry. |
+| M10-004 | BLOCKED | [#176](https://github.com/lIlIIlIll/Wirestack/issues/176) | Blocked on M10-003. TLS/DNS generations must drive client and server normal/security rotation online. |
+| M10-005 | BLOCKED | [#177](https://github.com/lIlIIlIll/Wirestack/issues/177) | Blocked on M9-001. Existing-API observability may start first; completion integrates the real stages and owners from M10-001 through M10-004. |
+| M11-001 | BLOCKED | [#178](https://github.com/lIlIIlIll/Wirestack/issues/178) | Blocked on M9-001. The SSE codec may land first; session completion integrates M10-001, M10-002, M10-003 and M10-005. |
+| M11-002 | BLOCKED | [#179](https://github.com/lIlIIlIll/Wirestack/issues/179) | Blocked on M9-001. Optional gzip may land first; completion integrates M10-001, M10-002 and M10-003. This is the P1-004 implementation. |
+| M11-003 | BLOCKED | [#180](https://github.com/lIlIIlIll/Wirestack/issues/180) | Blocked on M9-001. ws/wss URL work may land first; lifecycle completion integrates M10-001 and M10-005. |
+| M11-004 | BLOCKED | [#181](https://github.com/lIlIIlIll/Wirestack/issues/181) | Blocked on M9-001. Initial installed apps use current APIs; completion covers M9-002/M9-003, every M10 task and M11-001 through M11-003. Server TLS rotation belongs to M10-004. |
+| M12-001 | BLOCKED | [#182](https://github.com/lIlIIlIll/Wirestack/issues/182) | Blocked on M9-001. Current full-layer measurement comes first; completion adds M10 observation, M11 feature baselines, attribution and measured candidates. This is the P1-001 implementation. |
+| M12-002 | BLOCKED | [#183](https://github.com/lIlIIlIll/Wirestack/issues/183) | Blocked on M9-001. Native CPU/kernel/glibc/SDK source and binary matrices must include every dependency actually shipped by the selected candidate. |
+| M12-003 | BLOCKED | [#184](https://github.com/lIlIIlIll/Wirestack/issues/184) | Blocked on M9-001. Current fault and low-resource profiles come first; completion covers M10 budgets/rotation and M11 streams. |
+| M12-004 | BLOCKED | [#185](https://github.com/lIlIIlIll/Wirestack/issues/185) | Blocked on M9-001. Inventory, upgrade and non-production rollback come first; selected-candidate completion requires consumer, performance, matrix, fuzz, independent review and 86,400-second soak evidence. Production signing remains separately authorized. |

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "status": "PASS",
+  "surface": "Generated cjdoc HTML, managed Chromium",
+  "page": "wirestack.net.SocketCapabilities",
+  "observed": {
+    "title": "wirestack.net.SocketCapabilities",
+    "signature": "public init(\n        nonBlocking!: Bool = true,\n        closeOnExec!: Bool = true,\n        halfClose!: Bool = false,\n        broadcast!: Bool = false,\n        multicast!: Bool = false,\n        raw!: Bool = false,\n        ancillaryData!: Bool = false,\n        zeroLengthDatagramSend!: Bool = false,\n        connectedDatagramSend!: Bool = false\n    )"
+  },
+  "checks": [
+    "Package navigation reaches the capability struct",
+    "Rendered constructor shows broadcast=false and multicast=false",
+    "All nine constructor parameters remain present"
+  ],
+  "scope": "Visual confirmation of the first successful HTML generation; public Cangjie source remains unchanged during final gate rerun"
+}

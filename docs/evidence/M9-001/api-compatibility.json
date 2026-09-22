@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "status": "PASS",
+  "scope": "Compatibility classification, not binary execution qualification",
+  "baseline": "docs/api/baselines/wirestack-linux-pre1-m8-007.json",
+  "current_inventory": "docs/evidence/M9-001/api-inventory.json",
+  "inventory_comparison": {
+    "added_declarations": [],
+    "removed_declarations": [],
+    "changed_declarations": ["wirestack.net.SocketCapabilities"],
+    "changed_members": ["SocketCapabilities.init defaults: broadcast true -> false; multicast true -> false"],
+    "field_names_types_and_order": "UNCHANGED",
+    "method_parameter_types_and_return_types": "UNCHANGED",
+    "enum_cases": "UNCHANGED"
+  },
+  "source": {
+    "classification": "COMPATIBLE_DECLARATION_CHANGE",
+    "basis": "PDF-rule-derived: Cangjie API declaration compatibility specification, struct constructor parameter-default rule, example 28; non-const, non-Frozen default-value changes are compatible.",
+    "scenario_tool": "compat-agent unavailable; no compatibility-corpus execution claimed"
+  },
+  "exhaustive_match": "No enum case added, removed or changed",
+  "semantic": {
+    "classification": "CHANGED",
+    "default_value": "SocketCapabilities() no longer offers broadcast or multicast",
+    "native_factory": "UdpSocket.capabilities reports broadcast=false and multicast=false because no public configuration or membership operation exists",
+    "preserved": "Connected Internet UDP send remains available; explicit caller-supplied capability values and all existing operation signatures remain unchanged"
+  },
+  "abi": {
+    "declaration_shape": "UNCHANGED",
+    "old_binary_execution": "NOT_RUN",
+    "claim": "No promise of old-binary or cross-SDK compatibility; rebuild static-package consumers"
+  },
+  "forward_compatibility": "NOT_RUN across other SDK versions",
+  "migration": "Read capabilities from the actual factory-created object. Do not infer callable broadcast/multicast support from SocketOption values or OS/SDK facilities. M9-002 and M9-003 own future operations and their native evidence."
+}

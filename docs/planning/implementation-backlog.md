@@ -4,8 +4,9 @@
 **文档类型：** Issue/PR 级实施 backlog  
 **全平台主线任务数：** 185
 **Linux 稳定版收口任务数：** 16<br>
+**Linux 后续演进任务数：** 16  
 **远期上游任务数：** 7  
-**当前发布任务数：** 208
+**当前发布任务数：** 224
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -519,6 +520,29 @@ must rebuild the final artifact and run its own final 86,400-second candidate so
 | M8-006 | 完成 TLS context versioning 与外部密钥 hooks | TLS/安全 | C4 | M8-002,M8-005 | ADR-0003/0008；PRD §13/§17 | Immutable contexts, future-handshake-only replacement, versioned session/resumption state, ExternalSigner/ExternalDecryptor/KeyLogSink context inheritance, provider-neutral AWS-LC Linux evidence and no provider leakage. |
 | M8-007 | 生成 Linux 网络底座 release artifact 与证据 | 发布/质量 | C4 | M8-001..M8-006 | ADR-0002/0004/0008；PRD §18/§19/§21/§23/§26 | Rebuild final artifact, API baseline, SBOM, license/NOTICE, install and security evidence; run affected gates and one final 86,400-second candidate soak. No development run substitutes for the final long gate. |
 
+## 6.1 M9–M12：Linux 后续演进
+
+M9–M12 在已验证的当前 Linux 开发基线上推进。依赖列只表示任务开始所需的
+已完成前置项；后续集成要求只写在完成条件中，不用于提前阻塞可独立实施的工作。
+
+| ID | Issue | 任务 | 责任域 | 复杂度 | 开始依赖 | 完成条件 |
+|---|---|---|---|---:|---|---|
+| M9-001 | [#170](https://github.com/lIlIIlIll/Wirestack/issues/170) | 对齐公开网络能力、原生证据与正式计划 | 网络/API/质量 | C4 | P1-015；开始前验证当前开发基线 | 公开可调用操作、Linux x86_64 glibc 上的 SDK/backend 前提、原生场景证据、API/指南和全部 M9–M12 路线登记一致；未执行能力不得标记为支持。 |
+| M9-002 | [#171](https://github.com/lIlIIlIll/Wirestack/issues/171) | 实现 typed socket option 应用与有效值查询 | 网络/传输 | C4 | M9-001 | TCP/UDP factory、accepted TCP 与现有 HttpConnector consumer 可应用并查询受支持 option；不增加 Unix option API。 |
+| M9-003 | [#172](https://github.com/lIlIIlIll/Wirestack/issues/172) | 完成 UDP disconnect、广播与组播生命周期 | 网络/传输 | C4 | M9-002 | disconnect、IPv4 广播以及声明支持的 IPv4/IPv6 组播 membership 全部取得原生证据；缺项不得以 Unsupported 直接关闭任务。 |
+| M10-001 | [#173](https://github.com/lIlIIlIll/Wirestack/issues/173) | 统一总 deadline、阶段预算与流级进展超时 | HTTP/时间 | C4 | M9-001 | DNS 到 body、retry/redirect 和 HTTP/2 流级路径共享只会缩短的总期限，并区分阶段预算与无进展超时。 |
+| M10-002 | [#174](https://github.com/lIlIIlIll/Wirestack/issues/174) | 建立聚合资源预算与真实所有权 | HTTP/资源 | C4 | M9-001 | 实例、route、origin、connection、request、stream 与 managed buffer 的 admission/release 使用真实 owner，并提供有界等待与快照。 |
+| M10-003 | [#175](https://github.com/lIlIIlIll/Wirestack/issues/175) | 完成连接池公平性、清理与安全重试 | HTTP/连接池 | C4 | M10-001,M10-002 | 公平排队、失效连接淘汰、有限 body 清理和基于提交证据的安全重试在 H1/H2 路径通过原生验收。 |
+| M10-004 | [#176](https://github.com/lIlIIlIll/Wirestack/issues/176) | 实现 TLS/DNS 配置代际与在线轮换 | HTTP/TLS/DNS | C4 | M10-003 | client 与 server 的 TLS、direct/proxy DNS generation 接入连接池；普通轮换和安全替换均按 in-flight policy 原生通过。 |
+| M10-005 | [#177](https://github.com/lIlIIlIll/Wirestack/issues/177) | 导出可关联事件与真实资源快照 | 可观测性 | C4 | M9-001 | 先覆盖现有 API；完成时必须接入 M10-001～M10-004 的真实阶段、超时原因和 owner 计数，而非只导出 facade 计数。 |
+| M11-001 | [#178](https://github.com/lIlIIlIll/Wirestack/issues/178) | 实现有界 SSE codec 与显式重连会话 | HTTP/SSE | C4 | M9-001 | codec 可先独立交付；会话完成时接入 M10-001、M10-002、M10-003、M10-005 的时间、资源、连接池与事件语义。 |
+| M11-002 | [#179](https://github.com/lIlIIlIll/Wirestack/issues/179) | 提供显式可选 gzip 内容解压 | HTTP/内容编码 | C4 | M9-001 | gzip wrapper 可先独立交付；完成时接入 M10-001、M10-002、M10-003 的时间、预算和 body ownership。P1-004 映射到本任务，不建立重复实现。 |
+| M11-003 | [#180](https://github.com/lIlIIlIll/Wirestack/issues/180) | 完成 ws/wss URL 与 WebSocket 生命周期 | HTTP/WebSocket | C4 | M9-001 | ws/wss URL 可先独立交付；完整生命周期必须接入 M10-001 的时间语义与 M10-005 的诊断事件。 |
+| M11-004 | [#181](https://github.com/lIlIIlIll/Wirestack/issues/181) | 交付安装后 CLI、长流客户端与小型服务 | Consumer/集成 | C4 | M9-001 | 先使用当前公开 API；完成时覆盖 M9-002/M9-003、全部 M10 和 M11-001～M11-003。server TLS 在线轮换由 M10-004 提供。 |
+| M12-001 | [#182](https://github.com/lIlIIlIll/Wirestack/issues/182) | 建立端到端性能基线、归因与测量驱动优化 | 性能 | C4 | M9-001 | 先测当前完整层级；完成时加入 M10 观测和 M11 SSE/WebSocket feature baseline，形成可靠归因并只保留数据支持的候选。P1-001 映射到本任务。 |
+| M12-002 | [#183](https://github.com/lIlIIlIll/Wirestack/issues/183) | 验证 Linux source 与 binary 兼容矩阵 | 平台/兼容性 | C4 | M9-001 | 在原生 x86_64 runner 验证 CPU、kernel、glibc、SDK 的 source/binary 矩阵，并纳入所选候选实际交付的全部 native 与可选依赖。 |
+| M12-003 | [#184](https://github.com/lIlIIlIll/Wirestack/issues/184) | 验证低资源、网络故障、取消与恢复 | 韧性/质量 | C4 | M9-001 | 先覆盖当前能力；完成时纳入 M10 预算与轮换以及 M11 长流，在隔离 profile 中证明故障施加、恢复和资源回落。 |
+| M12-004 | [#185](https://github.com/lIlIIlIll/Wirestack/issues/185) | 执行依赖升级与非生产回滚演练 | 供应链/发布 | C4 | M9-001 | 先完成 inventory、升级和非生产回滚流程；所选候选须取得 consumer、性能、矩阵、fuzz、独立审查和 86,400 秒 soak 证据。生产签名须另行授权。 |
 ### 当前开发的前置规则
 
 P1-015 是当前 Linux 开发基线，取代后续功能开发对 M8-007 正式发布完成的依赖。
@@ -571,7 +595,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 |---|---|---|---|
 | P1-001 | Vectored I/O | TR-BUF-002 | 在不改变 P0 正确性的前提下减少 header+body/TLS record copy。 |
 | P1-002 | 系统代理与 PAC | PRD §15.5/§28 | 在显式 proxy 稳定后实现；不得进入 M5 P0 关键路径。 |
-| P1-003 | Cookie 可选包 | PRD §28 | 与核心 HTTP 解耦；不扩大默认敏感数据处理面。 |
+| P1-003 | Cookie 可选包 | PRD §28 | `src/http/cookie.cj` 已提供 `CookieJar`；仅剩把 cookie 能力从核心 HTTP 拆为可选模块，且不得扩大默认敏感数据处理面。 |
 | P1-004 | 内容解压可选包 | PRD §28 | 带压缩炸弹和输出上限；不在核心 parser 内隐式启用。 |
 | P1-005 | FIPS 路径决策与实现 | PRD §28 | 先冻结 provider/认证边界，再决定是否提供独立构建配置。 |
 | P1-006 | 用户可替换 Resolver 扩展点 | PRD §28 | 保持默认 SystemResolver；扩展点不得泄漏平台类型。 |
@@ -674,9 +698,10 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 - 全平台主线任务：**185**
 - Linux 稳定版收口任务：**16**
 - Linux 网络底座任务：**7**
+- Linux 后续演进任务：**16**
 - 远期上游任务：**7**
 - 稳定版后 P1/独立项目：**15**
-- 当前发布相关任务总数：**208**
-- 全部已记录任务总数：**230**
+- 当前发布相关任务总数：**224**
+- 全部已记录任务总数：**246**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

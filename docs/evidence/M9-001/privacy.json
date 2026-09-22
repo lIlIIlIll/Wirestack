@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-001",
+  "status": "PASS",
+  "scope": "Worktree publication hygiene, not release qualification",
+  "command": "git privacy-check",
+  "exit_code": 0,
+  "findings": [],
+  "authorization": "The project owner authorized publication and repair of the inherited evidence files.",
+  "repaired_paths": [
+    "docs/evidence/M8-007/commands/soak-owner-controls/1790042120606136091/before.stderr.log",
+    "docs/evidence/M8-007/soak-owner-controls.json"
+  ],
+  "dependent_bindings_updated": [
+    "docs/evidence/M8-007/linux_x86_64/security-index.json",
+    "docs/evidence/M8-007/linux_x86_64/security-package.json",
+    "docs/evidence/M8-007/linux_x86_64/review-request.json",
+    "docs/evidence/M8-007/requalification-status.json"
+  ],
+  "validation": {
+    "command": "Python invocation of verify_owner_controls, security.validate with the existing M8-007 input lists, review.build_request comparison, and status digest comparisons",
+    "exit_code": 0,
+    "result": "PASS",
+    "historical_failure_outcome_preserved": true,
+    "historical_seal_modified": false,
+    "release_qualification": "NOT_QUALIFIED",
+    "review_status": "AWAITING_INDEPENDENT_REVIEW"
+  }
+}
