@@ -2,19 +2,23 @@
   "schema_version": 1,
   "source_task": "M9-001",
   "status": "PASS",
-  "scope": "Local functional acceptance only; not source sealing or release qualification",
-  "task_status": "INCOMPLETE",
-  "planning_status": "IN_PROGRESS",
-  "source_state": "WORKING_TREE_UNSEALED",
+  "scope": "Source-bound task acceptance; not release qualification",
+  "task_status": "COMPLETE",
+  "planning_status": "COMPLETE",
+  "source_state": "COMMITTED_SOURCE_CANDIDATE",
   "prerequisite": {
     "task": "P1-015",
     "command": "python3 tools/development_baseline.py verify",
     "exit_code": 0,
-    "timing": "Before M9-001 source edits; not reissued after the source changed"
+    "timing": "Verified again in an archive of P1-015 source commit 990873c6669e6d63881a3a943d467146fb562d6d; its separate seal verifies 12 source files and two reports",
+    "branch_head": "182c3c49818cd2be578b089ad42dd6d858b33312"
   },
   "canonical_task": {
-    "command": "scripts/check-task M9-001 --json --output docs/evidence/M9-001/task-check.json",
-    "exit_code": 0,
+    "initial_command": "scripts/check-task M9-001 --json --output docs/evidence/M9-001/task-check.json",
+    "initial_exit_code": 1,
+    "retry": "After restoring execute permission on the documentation launcher, replay only repository-check and public-api-html through repository_tooling.run_command",
+    "retry_exit_code": 0,
+    "initial_report": "docs/evidence/M9-001/publication-first-attempt/task-check.json",
     "commands": 6,
     "passed_commands": 6,
     "timed_out_commands": 0,
@@ -111,13 +115,14 @@
     "other_sdk_and_platform_execution": "NOT_RUN"
   },
   "publication": {
-    "source_commit": "NOT_CREATED",
-    "evidence_seal": "NOT_CREATED",
-    "commit_push_pull_request_issue_write": "M9-001 commit, push and pull request authorized; prerequisite publication scope unresolved",
+    "source_commit": "410352f6ac0cc7cf4fd2924516a838d9288a2ec7",
+    "evidence_seal": "docs/evidence/M9-001/evidence.json",
+    "committed_candidate_report": "docs/evidence/M9-001/publication.json",
+    "commit_push_pull_request_issue_write": "Separate M8-007, P1-015 and M9-001 commits, pushes and stacked pull requests authorized; no automatic merge or issue writes",
     "privacy": "PASS after authorized inherited evidence path repair and dependent digest validation",
     "privacy_report": "docs/evidence/M9-001/privacy.json",
     "release_qualification": "NOT_QUALIFIED",
     "signing": "NOT_AUTHORIZED"
   },
-  "next_task": "No new M9-M12 task is READY while M9-001 remains unsealed. After authorized completion, M9-002 is the suggested next task."
+  "next_task": "M9-002 is the suggested next task after M9-001 acceptance. No subsequent task was started."
 }

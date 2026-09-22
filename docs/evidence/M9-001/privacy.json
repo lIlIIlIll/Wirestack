@@ -6,7 +6,14 @@
   "command": "git privacy-check",
   "exit_code": 0,
   "findings": [],
-  "authorization": "The project owner authorized publication and repair of the inherited evidence files.",
+  "authorization": "The project owner authorized separate task publication and repair of the inherited evidence files.",
+  "history_diagnostic": {
+    "command": "git privacy-check --history",
+    "exit_code": 1,
+    "scope": "All reachable history, not only outgoing commits",
+    "findings": "One pre-existing third-party sign-off outside the pending task stack; no unrelated history rewritten",
+    "outbound_gate": "Mandatory pre-push hook remains enabled"
+  },
   "repaired_paths": [
     "docs/evidence/M8-007/commands/soak-owner-controls/1790042120606136091/before.stderr.log",
     "docs/evidence/M8-007/soak-owner-controls.json"
