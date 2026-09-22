@@ -1,0 +1,12 @@
+RAW scenario=normal-long-code sample=0 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=409469347 checksum=1213 status=PASS
+RAW scenario=normal-long-code sample=1 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=365723289 checksum=1213 status=PASS
+RAW scenario=normal-long-code sample=2 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=364629956 checksum=1213 status=PASS
+RAW scenario=normal-long-code sample=3 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=572854181 checksum=1213 status=PASS
+RAW scenario=normal-long-code sample=4 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=378046686 checksum=1213 status=PASS
+RAW scenario=normal-long-code sample=5 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=310267546 checksum=1213 status=PASS
+RAW scenario=normal-long-code sample=6 inner=1 encodedBytes=4094 decodedBytes=1213 durationNs=371111551 checksum=1213 status=PASS
+
+real	0m3.723s
+user	0m3.988s
+sys	0m0.219s
+EXIT scenario=normal status=0

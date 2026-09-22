@@ -1,0 +1,57 @@
+{
+  "verdict": "The failure is a real retained-evidence integrity break, not a bad M7-028 test fixture. It needs an explicitly owned M7 evidence-repair/review task. Do not fix it in M8-007 and do not replace recorded hashes by hand.",
+  "failure_trace": [
+    "Recorded full-check and regression logs show one error: tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_checked_in_package_is_valid. Every test in test_m7_029_independent_security_review passed.",
+    "test_m7_028_security_review_package.py:35-38 calls review.validate on the checked-in index and report. m7_028_security_review_package.py:193-197 computes the current text-evidence digest and compares it to the index entry, then raises DIGEST_MISMATCH. This is the intended fail-closed behavior.",
+    "tools/evidence_digest.py:98-107 defines text-utf8-lf-v1 as UTF-8 with CRLF/CR normalized to LF. Both historical and current qualification files contain no CR and one LF, so their raw SHA-256 and typed text digest are identical. The mismatch is not a line-ending artifact."
+  ],
+  "root_cause": {
+    "producer": "tools/m7_021_linux_release.py:672-684 records absolute ldd-resolved paths directly. The tool has no path-normalization step for this report.",
+    "history": "The unfiltered backup shows the final pre-redaction qualification at commit 9feda15726a69c46f0fd86b119af3f13e8de608a with digest c6a463895c20960229242d6ea11419d45704de37209f361d1d7b60426c58a01c. The privacy rewrite changed it to 07db22cf3aadd49e63c40e88b553e410fb89adcdbf3c44aee871429a1349b404. Current base 1b11f3ec26c3c63d8e65705946f1adf7dd90af35 and the working file both have 07db22....",
+    "exact_payload_change": [
+      "$.dependency_scan.resolved[1].resolved: developer-home SDK runtime path to the same path under <home>",
+      "$.dependency_scan.resolved[2].resolved: developer-home SDK runtime path to the same path under <home>"
+    ],
+    "change_scope": "A recursive JSON comparison found exactly those two changed scalar values. Replacing those two values with one sentinel makes the historical and current canonical JSON byte-identical; normalized typed digest 6dfe09fb39e866fbc3b035401b5000541ae7d7aea1a583a8991fcb275da554e4.",
+    "break": "The rewrite did not rebuild docs/security/review/linux-1.0/evidence-index.json or any outer M7-028/M7-029 binding. The index therefore still expects c6a463... while the retained file is 07db22...."
+  },
+  "integrity_proof": {
+    "privacy_commit_comparison": {
+      "qualification": "c6a463895c20960229242d6ea11419d45704de37209f361d1d7b60426c58a01c -> 07db22cf3aadd49e63c40e88b553e410fb89adcdbf3c44aee871429a1349b404",
+      "evidence_index": "47da664a9d0e9450a9fe38c0a7fea3f39f4afba721f064a4a5fd917f2d3ea70e -> unchanged",
+      "M7_028_review_package": "32e58d94359c0e2fa865f5ad94c745eb0e43c8152801f74e37afa909ad5e0d26 -> unchanged",
+      "M7_029_request_review_validation": "unchanged; all still bind package 47da664a9d0e9450a9fe38c0a7fea3f39f4afba721f064a4a5fd917f2d3ea70e"
+    },
+    "fresh_index_projection": "Calling m7_028_security_review_package.build_index against current files differs from the checked-in index only at $.evidence[6].sha256. Its deterministic typed digest is 95da4c25cc30b65b7d1e124b69462664bf830f020cf96d46e9b2cb38d03c37a0. This is a projected repair input, not a PASS or reviewer attestation.",
+    "M7_029_scope": "test_m7_029_independent_security_review.py:25-31 copies the index bytes and builds an outer request digest; lines 59-63 validate a synthetic review against that request. It does not validate index members. This is why its tests pass. The checked-in M7-029 request, review target, and validation report are internally consistent with 47da664..., but that package is no longer internally valid against the retained qualification."
+  },
+  "why_hash_swapping_is_invalid": [
+    "Changing only $.evidence[6].sha256 would change the package digest from 47da664... to 95da4c25.... The existing M7-029 request and independent review would then be stale by m7_029_independent_security_review.py:119-133 and 212-218.",
+    "The independent review explicitly records c6a463... as the digest of the PASS regression command scripts/qualify-m7-021-linux-release --offline. Replacing it with 07db22... would falsely claim that the old execution emitted the privacy-rewritten bytes.",
+    "M7-022 soak, M3-031/M7-030/M7-031 seals, and the M7-031 release-candidate report truthfully bind the old c6a463... evidence. They must remain historical records or be superseded; they must not be rewritten to 07db22... without rerunning/resealing the owning gates."
+  ],
+  "smallest_honest_fix": {
+    "ownership": "Assign a new M7 task ID before any repository change. Its evidence must describe this as a privacy-redaction provenance repair and current security-package requalification. Do not fold it into M8-007.",
+    "required_changes": [
+      "tools/m7_021_linux_release.py around parse_ldd/report assembly at lines 672-684 and 839-877: normalize developer-specific resolved paths before evidence serialization so a rerun cannot recreate the leak.",
+      "tools/tests/test_m7_021_linux_release.py around lines 338-350: add a generated-report behavior test proving a home-local SDK runtime path is emitted with the approved placeholder while the library identity is retained.",
+      "docs/evidence/M7-021/linux_x86_64/qualification.json: either regenerate through the repaired M7-021 command against an authorized selected commit and qualified SDK, or produce a task-sealed migration attestation binding c6a463... to 07db22... and proving the exact two-field transformation. The latter is less work but needs an explicit evidence-policy decision; it must not claim the old command produced 07db22....",
+      "docs/security/review/linux-1.0/evidence-index.json: rebuild with build_index, never edit the hash literal manually.",
+      "docs/evidence/M7-028/linux_x86_64/review-package.json: regenerate from the rebuilt index.",
+      "docs/evidence/M7-029/review-request.json: prepare a new request bound to the rebuilt package.",
+      "docs/evidence/M7-029/independent-review.json: obtain a fresh independent review of the rebuilt package. Do not change only target.packageSha256 or the old regression digest.",
+      "docs/evidence/M7-029/linux_x86_64/review-validation.json: regenerate from the fresh request and review.",
+      "tools/tasks/<new-M7-ID>.json, docs/evidence/<new-M7-ID>/..., docs/planning/implementation-backlog.md, and docs/planning/status.md: record ownership, commands, supersession, and the new seal."
+    ],
+    "test_policy": "Keep test_m7_028_security_review_package.py:test_checked_in_package_is_valid unchanged; it caught the corruption correctly. An additional checked-in chain test may run M7-028 package validation before M7-029 outer-review validation, but that is preventive coverage, not the fix."
+  },
+  "historical_records_to_preserve": [
+    "docs/evidence/M7-022/linux_x86_64/soak.json $.artifact.qualification_sha256",
+    "docs/evidence/M3-031/evidence.json, M7-030/evidence.json, and M7-031/evidence.json qualification source digests",
+    "docs/evidence/M7-031/linux_x86_64/release-candidate.json old qualification and review-package bindings",
+    "the existing M7-029 review and its c6a463... regression record, unless replaced by an actual fresh independent review",
+    "docs/evidence/M8-007/requalification-command-results.json, which accurately records this blocker"
+  ],
+  "workload_boundary": "Proven: the retained qualification's semantic drift is limited to two path redactions, and no artifact, payload, command result, or acceptance field changed. Policy choice: a sealed migration attestation plus fresh M7-028/M7-029 review is the minimum evidence workload; a full M7-021 native rerun is stricter if current PASS evidence must be command-origin fresh. A fresh review of the rebuilt package is mandatory either way.",
+  "repository_edits": "None."
+}

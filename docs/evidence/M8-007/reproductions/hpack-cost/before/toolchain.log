@@ -1,0 +1,9 @@
+BUILD cjc src/hpack_core.cj src/hpack_huffman.cj src/main.cj -o hpack_measure
+CJPM_DEFAULT_VERBOSE cjc -p <source> --import-path=<target-release> --no-sub-pkg --output-dir=<target-release-bin> --output-type=exe -o=main
+Cangjie Compiler: 1.1.3 (cjnative)
+Target: x86_64-unknown-linux-gnu
+SOURCE_REVISION ef78b57bfe0d509f3ded8ff9c98d2e8c00077046
+SOURCE_COPY_CMP_EQUAL true
+CPU_AFFINITY 2
+SCENARIO_TIMEOUT_SECONDS small=30 normal=30 max-compressed=60 exact-output=60 above-output=60
+NETWORK_USED false

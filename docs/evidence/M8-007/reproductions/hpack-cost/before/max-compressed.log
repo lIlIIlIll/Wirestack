@@ -1,0 +1,10 @@
+RAW scenario=max-compressed-long-code sample=0 inner=1 encodedBytes=65536 decodedBytes=19418 durationNs=5821504695 checksum=19418 status=PASS
+RAW scenario=max-compressed-long-code sample=1 inner=1 encodedBytes=65536 decodedBytes=19418 durationNs=5878842325 checksum=19418 status=PASS
+RAW scenario=max-compressed-long-code sample=2 inner=1 encodedBytes=65536 decodedBytes=19418 durationNs=5590283822 checksum=19418 status=PASS
+RAW scenario=max-compressed-long-code sample=3 inner=1 encodedBytes=65536 decodedBytes=19418 durationNs=5441511987 checksum=19418 status=PASS
+RAW scenario=max-compressed-long-code sample=4 inner=1 encodedBytes=65536 decodedBytes=19418 durationNs=5555981753 checksum=19418 status=PASS
+
+real	0m34.212s
+user	6m41.364s
+sys	0m32.786s
+EXIT scenario=max-compressed status=0

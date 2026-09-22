@@ -1,0 +1,8 @@
+RAW scenario=exact-output-limit sample=0 inner=1 encodedBytes=40960 decodedBytes=65536 durationNs=47887301 checksum=65536 status=PASS
+RAW scenario=exact-output-limit sample=1 inner=1 encodedBytes=40960 decodedBytes=65536 durationNs=28598256 checksum=65536 status=PASS
+RAW scenario=exact-output-limit sample=2 inner=1 encodedBytes=40960 decodedBytes=65536 durationNs=23991191 checksum=65536 status=PASS
+RAW scenario=exact-output-limit sample=3 inner=1 encodedBytes=40960 decodedBytes=65536 durationNs=49055722 checksum=65536 status=PASS
+RAW scenario=exact-output-limit sample=4 inner=1 encodedBytes=40960 decodedBytes=65536 durationNs=37960728 checksum=65536 status=PASS
+
+
+Wall time: 0.31 seconds

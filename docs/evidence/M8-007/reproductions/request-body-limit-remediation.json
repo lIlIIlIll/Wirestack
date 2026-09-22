@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "task_id": "M8-007",
+  "finding_id": "M8-007-PROTOCOL-003",
+  "status": "FIXED_PENDING_INDEPENDENT_REVIEW",
+  "scope": "Reject outbound Content-Length bodies exceeding HttpLimits.maxBodyBytes before wire commitment or body opening; preserve declared-length mismatch precedence.",
+  "sdk": "Cangjie 1.1.3 x86_64-unknown-linux-gnu",
+  "baseline": {
+    "source_revision": "7f3395d6aaa0d103baf345b388f5d252dfb27e76",
+    "test_added": true,
+    "command": "TMPDIR=<scratch> <qualified-sdk-wrapper> cjpm test src/internal/http1 --filter \"Http1RequestWriterTest.*\" --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+    "exit_code": 1,
+    "passed": 6,
+    "failed": 1,
+    "skipped": 115,
+    "evidence_kind": "Observed command result; raw baseline log was not retained",
+    "observed_failures": [
+      "No BodyTooLarge rejection",
+      "Body stream read twice and closed",
+      "Request bytes reached peer"
+    ]
+  },
+  "corrected": {
+    "focused": {
+      "exit_code": 0,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 115,
+      "log": "docs/evidence/M8-007/commands/20260921-requalification/http1-body-limit-green.log"
+    },
+    "suite": {
+      "command": "TMPDIR=<scratch> <qualified-sdk-wrapper> cjpm test src/internal/http1 --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 0,
+      "passed": 119,
+      "failed": 0,
+      "skipped": 3,
+      "log": "docs/evidence/M8-007/commands/20260921-requalification/http1-body-limit-suite.log"
+    }
+  },
+  "assertions": [
+    "Oversized one-shot body is not read or closed",
+    "Zero header/body bytes committed on rejection",
+    "Exact configured boundary remains accepted through partial writes"
+  ],
+  "release_qualified": false
+}

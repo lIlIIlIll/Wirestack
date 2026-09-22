@@ -1,20 +1,23 @@
 {
   "candidate": {
     "artifact": {
-      "bytes": 2804015,
+      "bytes": 2804200,
       "domain": "artifact-bytes-v1",
       "path": "dist/m8-007/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
-      "sha256": "d3688a3a0c212b0d772d35c27c930528ce908592d53c9aa2549e8477ecefcac1"
+      "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
     },
     "formal_freeze": false,
     "security_package": {
+      "status": "CURRENT_PACKAGE_REVIEW_PENDING",
       "domain": "text-utf8-lf-v1",
-      "package_sha256": "7b4d4c4baf3c4da6ae8172af791d0f089d8523bf527513bfd572491558683478",
+      "package_sha256": "a152e4421253310dccc10fc0df10bcee5ad466e4bc0c52975df95bfd3f21a0d5",
       "path": "docs/evidence/M8-007/linux_x86_64/security-package.json",
-      "sha256": "18f1f75682d4945f0f41cf09c715147da9b209e4f30c8e738f7db65a337930c5"
+      "sha256": "1c437920637cde4017a770352ca548dad9956bc4dc51b170dc932d82e351e856"
     },
     "selection": "SELECTED_LOCAL_UNQUALIFIED_SOURCE",
-    "source_revision": "7f3395d6aaa0d103baf345b388f5d252dfb27e76"
+    "source_revision": "26c81160eacc91d7c1726e20d46c9d3aa086addc",
+    "previous_source_revision": "7f3395d6aaa0d103baf345b388f5d252dfb27e76",
+    "production_source_binding": {"checked_files": 140, "mismatches": [], "status": "PASS", "method": "Compare every production source plus cjpm.toml and cjpm.lock with git cat-file blobs at the selected source revision."}
   },
   "completion_claim": false,
   "historical_evidence": {
@@ -87,7 +90,17 @@
       "reason": "No qualified committed replacement candidate exists."
     }
   ],
+  "remediation": {
+    "http1": "docs/evidence/M8-007/reproductions/request-body-limit-remediation.json",
+    "websocket": "docs/evidence/M8-007/security/websocket-limit-triage.json",
+    "hpack": "docs/evidence/M8-007/reproductions/hpack-cost/remediation.json",
+    "historical_integrity": "docs/evidence/M8-007/security/m7-evidence-provenance-triage.json",
+    "qualification_scope": "Corrected artifact installation, ten-target fuzz campaign, runtime negative/positive controls, owner registry boundaries and 600-second owner preflight pass; prior review, formal soak and signatures do not qualify it.",
+    "preflight": {"duration_seconds": 600, "cycles": 5862, "maximum_cancellation_latency_ns": 6382026, "terminal_owners": 0, "status": "PASS", "formal_acceptance": false},
+    "evidence_publication": "LOCAL_UNCOMMITTED: generated qualification and registry logs retain scratch paths; publication requires privacy-safe collection and refreshed dependent bindings, not historical hash substitution."
+  },
   "ordinary_acceptance": {
+    "applies_to": "PREVIOUS_SOURCE_CANDIDATE; see remediation for subsequent execution",
     "failing_gates": [
       "repository-full-check",
       "repository-regression-tests",
@@ -113,7 +126,7 @@
     },
     "status": "INCOMPLETE"
   },
-  "recorded_at_utc": "2026-09-21T19:32:43.773613Z",
+  "recorded_at_utc": "2026-09-22T01:57:24.326Z",
   "schema_version": 1,
   "signing_boundary": {
     "new_signatures_created": false,
@@ -124,5 +137,5 @@
     "source_approval_created": false
   },
   "source_task": "M8-007",
-  "status": "INCOMPLETE"
+  "status": "BLOCKED"
 }

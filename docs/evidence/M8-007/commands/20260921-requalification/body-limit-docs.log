@@ -1,0 +1,8 @@
+Command result summary (not raw stdout):
+Command: TMPDIR=<scratch> CJDOC_BIN=<patched-cjdoc> <qualified-sdk-wrapper> scripts/check-docs --html --json --output docs/evidence/M8-007/docs-report.json
+Exit status: 0
+Wall time: 343.75 seconds
+Documented symbols: 1482/1482
+Documented parameters: 718/718
+Complete structured result: docs/evidence/M8-007/docs-report.json
+Generator provenance: docs/evidence/M8-007/cjdoc-verification.json

@@ -1,0 +1,70 @@
+{
+  "task_id": "M8-007",
+  "finding_id": "M8-007-PROTOCOL-001",
+  "status": "FIXED_PENDING_INDEPENDENT_REVIEW",
+  "change": "Replace two per-bit symbol scans with one edge lookup in a 512-entry table, initialized once from the unchanged RFC codebook. Preserve EOS, padding and output limits.",
+  "sdk": "Cangjie 1.1.3 x86_64-unknown-linux-gnu",
+  "environment": {"os": "Linux x86_64", "cpu": "Intel Core i7-8700", "cpu_affinity": [2], "frequency_governor_controlled": false, "concurrent_host_load_controlled": false},
+  "compile": "cjc src/hpack_core.cj src/hpack_huffman.cj src/main.cj -o hpack_measure",
+  "run": "timeout 60s taskset -c 2 ./hpack_measure <scenario>",
+  "optimization_flags": [],
+  "comparison": "Same retained driver, compiler, CPU affinity, payloads, warmups and sample counts; separate process runs, not an end-to-end network benchmark.",
+  "baseline": "before/summary.json",
+  "after": [
+    {
+      "scenario": "small",
+      "samples": 7,
+      "median_ms": 0.009360536000000001,
+      "min_ms": 0.007736649999999999,
+      "max_ms": 0.026708011,
+      "exit_code": 0
+    },
+    {
+      "scenario": "normal",
+      "samples": 7,
+      "median_ms": 3.091227,
+      "min_ms": 1.909266,
+      "max_ms": 4.423051,
+      "exit_code": 0
+    },
+    {
+      "scenario": "max-compressed",
+      "samples": 5,
+      "median_ms": 49.018695,
+      "min_ms": 39.42005,
+      "max_ms": 72.062848,
+      "exit_code": 0
+    },
+    {
+      "scenario": "exact-output",
+      "samples": 5,
+      "median_ms": 37.960728,
+      "min_ms": 23.991191,
+      "max_ms": 49.055722,
+      "exit_code": 0
+    },
+    {
+      "scenario": "above-output",
+      "samples": 5,
+      "median_ms": 36.440109,
+      "min_ms": 30.010538,
+      "max_ms": 61.384338,
+      "exit_code": 0
+    }
+  ],
+  "decision": "PASS functional equivalence for measured corpus and removal of per-bit table scans; maximum-input median falls from 5590.283822 ms to 49.018695 ms. No new universal latency guarantee or security gate approval.",
+  "suite": {
+    "command": "cjpm test src/internal/http2 --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+    "passed": 182,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "log": "docs/evidence/M8-007/commands/20260921-requalification/http2-tree-suite.log"
+  },
+  "non_claims": [
+    "No network saturation or sibling-stream latency measurement",
+    "No cancellation preemption inside the decoder",
+    "Timing samples do not prove a 50ms bound",
+    "Independent review remains incomplete"
+  ]
+}

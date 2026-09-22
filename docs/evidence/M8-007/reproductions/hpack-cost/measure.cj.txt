@@ -1,0 +1,123 @@
+package wirestack.internal.http2
+
+import std.time.*
+
+private func requireEqual(actual: Array<Byte>, expected: Array<Byte>): Unit {
+    if (actual.size != expected.size) {
+        throw IllegalStateException("decoded size mismatch: ${actual.size} != ${expected.size}")
+    }
+    for (index in 0..actual.size) {
+        if (actual[index] != expected[index]) {
+            throw IllegalStateException("decoded byte mismatch at ${index}")
+        }
+    }
+}
+
+private func measure(
+    scenario: String,
+    encoded: Array<Byte>,
+    expected: Array<Byte>,
+    maximum: UInt64,
+    warmups: Int64,
+    samples: Int64,
+    inner: Int64
+): Unit {
+    for (_ in 0..warmups) {
+        for (_ in 0..inner) {
+            requireEqual(decodeHpackHuffman(encoded, maxOutputBytes: maximum), expected)
+        }
+    }
+    for (sample in 0..samples) {
+        let started = MonoTime.now()
+        var checksum = 0
+        for (_ in 0..inner) {
+            let decoded = decodeHpackHuffman(encoded, maxOutputBytes: maximum)
+            requireEqual(decoded, expected)
+            checksum += decoded.size
+        }
+        let duration = (MonoTime.now() - started).toNanoseconds()
+        println("RAW scenario=${scenario} sample=${sample} inner=${inner} encodedBytes=${encoded.size} decodedBytes=${expected.size} durationNs=${duration} checksum=${checksum} status=PASS")
+    }
+}
+
+private func measureRejected(
+    scenario: String,
+    encoded: Array<Byte>,
+    maximum: UInt64,
+    warmups: Int64,
+    samples: Int64
+): Unit {
+    for (_ in 0..warmups) {
+        var rejected = false
+        try {
+            let _ = decodeHpackHuffman(encoded, maxOutputBytes: maximum)
+        } catch (_: HpackException) {
+            rejected = true
+        }
+        if (!rejected) { throw IllegalStateException("warmup did not reject") }
+    }
+    for (sample in 0..samples) {
+        let started = MonoTime.now()
+        var rejected = false
+        try {
+            let _ = decodeHpackHuffman(encoded, maxOutputBytes: maximum)
+        } catch (_: HpackException) {
+            rejected = true
+        }
+        let duration = (MonoTime.now() - started).toNanoseconds()
+        if (!rejected) { throw IllegalStateException("output-limit case did not reject") }
+        println("RAW scenario=${scenario} sample=${sample} inner=1 encodedBytes=${encoded.size} maxOutputBytes=${maximum} durationNs=${duration} status=EXPECTED_REJECTION")
+    }
+}
+
+private func rfcExample(): Unit {
+    let encoded: Array<Byte> = [
+        0xf1u8, 0xe3u8, 0xc2u8, 0xe5u8, 0xf2u8, 0x3au8,
+        0x6bu8, 0xa0u8, 0xabu8, 0x90u8, 0xf4u8, 0xffu8
+    ]
+    let expected: Array<Byte> = [
+        0x77u8, 0x77u8, 0x77u8, 0x2eu8, 0x65u8, 0x78u8, 0x61u8,
+        0x6du8, 0x70u8, 0x6cu8, 0x65u8, 0x2eu8, 0x63u8, 0x6fu8, 0x6du8
+    ]
+    measure("small-rfc", encoded, expected, 65536u64, 2, 7, 1000)
+}
+
+private func repeatedLongCode(scenario: String, decodedBytes: Int64, warmups: Int64, samples: Int64): Unit {
+    let expected = Array<Byte>(decodedBytes, repeat: 253u8)
+    let encoded = encodeHpackHuffman(expected, maxOutputBytes: 65536u64)
+    measure(scenario, encoded, expected, 65536u64, warmups, samples, 1)
+}
+
+private func exactOutputLimit(): Unit {
+    let expected = Array<Byte>(65536, repeat: 0x30u8)
+    let encoded = encodeHpackHuffman(expected, maxOutputBytes: 65536u64)
+    measure("exact-output-limit", encoded, expected, 65536u64, 1, 5, 1)
+}
+
+private func aboveOutputLimit(): Unit {
+    let source = Array<Byte>(65537, repeat: 0x30u8)
+    let encoded = encodeHpackHuffman(source, maxOutputBytes: 65536u64)
+    measureRejected("above-output-limit", encoded, 65536u64, 1, 5)
+}
+
+main(args: Array<String>): Int64 {
+    if (args.size != 1) {
+        println("usage: hpack_measure <small|normal|max-compressed|exact-output|above-output>")
+        return 2
+    }
+    if (args[0] == "small") {
+        rfcExample()
+    } else if (args[0] == "normal") {
+        repeatedLongCode("normal-long-code", 1213, 2, 7)
+    } else if (args[0] == "max-compressed") {
+        repeatedLongCode("max-compressed-long-code", 19418, 1, 5)
+    } else if (args[0] == "exact-output") {
+        exactOutputLimit()
+    } else if (args[0] == "above-output") {
+        aboveOutputLimit()
+    } else {
+        println("unknown scenario")
+        return 2
+    }
+    0
+}

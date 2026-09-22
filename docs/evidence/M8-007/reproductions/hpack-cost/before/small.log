@@ -1,0 +1,12 @@
+RAW scenario=small-rfc sample=0 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1012117109 checksum=15000 status=PASS
+RAW scenario=small-rfc sample=1 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1062163563 checksum=15000 status=PASS
+RAW scenario=small-rfc sample=2 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1288128946 checksum=15000 status=PASS
+RAW scenario=small-rfc sample=3 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1701004582 checksum=15000 status=PASS
+RAW scenario=small-rfc sample=4 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1573434853 checksum=15000 status=PASS
+RAW scenario=small-rfc sample=5 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1403260663 checksum=15000 status=PASS
+RAW scenario=small-rfc sample=6 inner=1000 encodedBytes=12 decodedBytes=15 durationNs=1247445694 checksum=15000 status=PASS
+
+real	0m11.507s
+user	0m12.448s
+sys	0m0.359s
+EXIT scenario=small status=0

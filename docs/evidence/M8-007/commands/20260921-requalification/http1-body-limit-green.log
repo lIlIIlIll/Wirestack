@@ -1,0 +1,35 @@
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http1/server_connection.cj:116:23:
+    | 
+116 |         try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }
+    |                       ^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 13017074 ns, RESULT:
+    TCS: Http1RequestWriterTest, time elapsed: 3909633 ns, RESULT:
+    [ PASSED ] CASE: twoStageWriterDoesNotOpenBodyBeforeExplicitCommit (770384 ns)
+    [ PASSED ] CASE: writesFixedBodyThroughPartialTransportOperations (429442 ns)
+    [ PASSED ] CASE: streamsUnknownLengthBodyAsCanonicalChunks (678198 ns)
+    [ PASSED ] CASE: rejectsDeclaredMismatchBeforeWritingAnything (180908 ns)
+    [ PASSED ] CASE: fixedBodyLimitRejectsBeforeConsumingOrCommittingRequest (203159 ns)
+    [ PASSED ] CASE: prematureBodyEofRetainsPartialCommitEvidence (379752 ns)
+    [ PASSED ] CASE: emptyFramingProbesSourceInsteadOfDroppingUnexpectedBytes (97245 ns)
+Summary: TOTAL: 122
+    PASSED: 7, SKIPPED: 115, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 20714104 ns, RESULT:
+TP: wirestack.*, time elapsed: 20675004 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http1, time elapsed: 13017074 ns
+Summary: TOTAL: 122
+    PASSED: 7, SKIPPED: 115, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
+
+
+Wall time: 8.33 seconds
