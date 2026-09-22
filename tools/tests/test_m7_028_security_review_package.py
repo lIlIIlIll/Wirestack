@@ -32,8 +32,12 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
     def digest(path: Path) -> str:
         return evidence_digest.text_evidence_bytes_sha256(path.read_bytes())
 
-    def test_checked_in_package_is_valid(self) -> None:
-        report = review.validate(ROOT, review.DEFAULT_INDEX, review.DEFAULT_REPORT)
+    def test_fresh_package_is_valid(self) -> None:
+        temporary, root, index = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        index_path = root / "security-index.json"
+        review.atomic_json(index_path, index)
+        report = review.validate(root, index_path)
         self.assertEqual("PASS", report["status"])
         self.assertEqual("DISABLED_PRE_1_0", report["checks"]["compatibilityGate"])
 
