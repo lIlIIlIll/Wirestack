@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-23T08:15:21.598298Z",
+  "generated_at_utc": "2026-09-23T16:17:56.177870Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M9-003/publication.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "203339a4329bcec8a6c19dd2a4e133b97226b007e21d660df99f9c8b1b32f8b0"
+        "sha256": "daf46c2ae85fb9ce640172c13809d616c7199d69549f019191c648283d2a19d4"
       },
       "source_task": "M9-003"
     },
@@ -117,12 +117,12 @@
       "source_task": "M9-003"
     }
   ],
-  "revision": "890fd78111bc6dea5aeb67ead968a70118c65601",
+  "revision": "b6cb4bfdf05b242133a980ddf0834848d3ac6578",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "88a5e97c3456f2ca614c45735a4d8b46506e32c90769c19986ca91142b8f6e03"
+      "sha256": "73d02e7f0b8ee3fce3b28a5f2e4c8ae5c6c540ae33a5ac23dec8e3c39e234b9b"
     },
     "LICENSE": {
       "domain": "text-utf8-lf-v1",
@@ -154,7 +154,7 @@
     },
     "docs/evidence/M9-003/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0157ba567a9be692b4484e875e4940e47aa06f673340bdb3eca2747420622148"
+      "sha256": "3f1f0358c31b7279db77c81b6d7d79c77cca1816cf9a0dbf8d8d79ab8907762f"
     },
     "docs/evidence/M9-003/api-compatibility.json": {
       "domain": "text-utf8-lf-v1",
@@ -526,11 +526,11 @@
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "3d2dc1df9044535f426f403e844017222ead46741e64fc21e6871f3652f61064"
+      "sha256": "2a673da46632cc42ff2dc86dd9909803b78cbaeac6fd8291e33dbcbf6f02ac9b"
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "be568bde8f78a2046cc918f8ad47f3b22d6d7be8ea8e6df13d12c850a2222792"
+      "sha256": "319f7d9dcf2e2217f70a51a2ad3ded2a7e44719d54dadf7e1ba5e9eb83e0bac4"
     },
     "docs/references/linux-network-capabilities.json": {
       "domain": "text-utf8-lf-v1",
@@ -563,6 +563,10 @@
     "examples/linux/m9_002/socket_options.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "1db761c6baecebc1f3b5ec80aac608fab4de8158fae8881f54d314d9c4e8006d"
+    },
+    "examples/linux/m9_003/udp_lifecycle.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9bef771e0048b9dd977c606e3927cd3f543080a7b5443696b78140a230aef019"
     },
     "native/http_files/wirestack_http_files.c": {
       "domain": "text-utf8-lf-v1",
@@ -1044,6 +1048,10 @@
       "domain": "text-utf8-lf-v1",
       "sha256": "5d8fc8b47e56c7d5b9519c2cbf1ed4e58b6df951f72a3e303afd356adff84c64"
     },
+    "src/internal/transport_stdnet/m9_003_udp_lifecycle_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fc0a254e54f467b372e8bc24d763d1b009ef9731e55b7d92fc70476bec5fc054"
+    },
     "src/internal/transport_stdnet/net_contract.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
@@ -1099,6 +1107,10 @@
     "src/net/m9_002_socket_option_test.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "a81e8f6eaa1702704fc9e6af069def7238922fedfdfcc9686c4a6fcb0ce3afb7"
+    },
+    "src/net/m9_003_udp_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "619948d3265d444c5cb29026fe718b36f57e4aef905d89adb26ff2d3d5449b4a"
     },
     "src/net/package.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1280,6 +1292,10 @@
       "domain": "text-utf8-lf-v1",
       "sha256": "d0dfa424593363f1fb2cbb651f43e3b6689b56aad938165143bc9be4cf80afc5"
     },
+    "tools/m9_003_native_udp.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c7eb596260c97d735a8652cb222a5efcac0a0e7041042307f25f4668bfcfbef"
+    },
     "tools/release_smoke/main.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "f2cafa9f57c9ee01fc06f74bed9e53a55888fc6278e0017f2b991d3515a8cdca"
@@ -1298,7 +1314,7 @@
     },
     "tools/tasks/M9-003.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "dccdc8cfe934512bb1ec4b5d55830e502fb0696afba1236918577d712fda8453"
+      "sha256": "917f0f39f57a93d8cee18aa067c832a5109882d2b8d80a768d3d049c73aa17b3"
     },
     "tools/tests/test_m7_linux_task_graph.py": {
       "domain": "text-utf8-lf-v1",

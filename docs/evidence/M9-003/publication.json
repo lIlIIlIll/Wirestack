@@ -4,8 +4,8 @@
     "local_source_commit": true,
     "merge": false,
     "production_release": false,
-    "pull_request": false,
-    "push": false
+    "pull_request": true,
+    "push": true
   },
   "candidate_artifacts": {
     "docs/evidence/M9-003/candidate/api-compatibility.json": {
@@ -626,15 +626,16 @@
     },
     "path": "docs/evidence/M9-003/candidate/native-udp.json"
   },
+  "qualification_revision": "890fd78111bc6dea5aeb67ead968a70118c65601",
   "release_qualification": "NOT_QUALIFIED",
-  "revision": "890fd78111bc6dea5aeb67ead968a70118c65601",
+  "revision": "b6cb4bfdf05b242133a980ddf0834848d3ac6578",
   "schema_version": 1,
   "source_state": "COMMITTED_SOURCE_VERIFIED",
   "source_task": "M9-003",
   "source_tree_checks": {
     "after": "PASS",
     "before": "PASS",
-    "file_count": 302
+    "file_count": 306
   },
   "status": "PASS"
 }
