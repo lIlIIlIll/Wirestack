@@ -53,12 +53,13 @@ func emitCapabilities(className: String, instance: String, value: SocketCapabili
         "${value.halfClose} ${value.broadcast} ${value.multicast} ${value.raw} " +
         "${value.ancillaryData} ${value.zeroLengthDatagramSend} ${value.connectedDatagramSend}")
 }
-func requireCapabilities(value: SocketCapabilities, connectedDatagramSend!: Bool = false, broadcast!: Bool = false): Unit {
+func requireCapabilities(value: SocketCapabilities, connectedDatagramSend!: Bool = false,
+    broadcast!: Bool = false, multicast!: Bool = false): Unit {
     require(value.nonBlocking, "non-blocking capability was not reported")
     require(value.closeOnExec, "close-on-exec capability was not reported")
     require(!value.halfClose, "half-close capability was overclaimed")
     require(value.broadcast == broadcast, "broadcast capability differs from the qualified address family")
-    require(!value.multicast, "multicast capability was overclaimed")
+    require(value.multicast == multicast, "multicast capability differs from the qualified backend")
     require(!value.raw, "raw capability was overclaimed")
     require(!value.ancillaryData, "ancillary-data capability was overclaimed")
     require(!value.zeroLengthDatagramSend, "zero-length-send capability was overclaimed")
@@ -199,8 +200,8 @@ main(): Int64 {
             requireCapabilities(tcpListener.capabilities)
             requireCapabilities(tcpAccepted.capabilities)
             requireCapabilities(tcpOutgoing.capabilities)
-            requireCapabilities(udp4.capabilities, connectedDatagramSend: true, broadcast: true)
-            requireCapabilities(udp6.capabilities, connectedDatagramSend: true)
+            requireCapabilities(udp4.capabilities, connectedDatagramSend: true, broadcast: true, multicast: true)
+            requireCapabilities(udp6.capabilities, connectedDatagramSend: true, multicast: true)
             requireCapabilities(unixListener.capabilities)
             requireCapabilities(unixAccepted.capabilities)
             requireCapabilities(unixOutgoing.capabilities)

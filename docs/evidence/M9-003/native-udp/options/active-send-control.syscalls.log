@@ -1,0 +1,12 @@
+982023 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+982023 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+982023 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+982031 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(60676), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+982032 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+982030 +++ exited with 0 +++
+982026 +++ exited with 0 +++
+982025 +++ exited with 0 +++
+982024 +++ exited with 0 +++
+982032 +++ exited with 0 +++
+982031 +++ exited with 0 +++
+982023 +++ exited with 0 +++

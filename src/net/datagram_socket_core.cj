@@ -92,6 +92,57 @@ internal class DatagramSocketFacadeCore {
         }
     }
 
+    func disconnect(context: api.OperationContext): Unit {
+        let peer = remoteEndpoint
+        beginDisconnect(peer)
+        try {
+            delegate.disconnect(context: context)
+            let completed = synchronized(lifecycleMutex) {
+                match (lifecycleState) {
+                    case SocketState.Connecting =>
+                        remoteEndpointValue = None<NetworkEndpoint>
+                        lifecycleState = SocketState.Open
+                        true
+                    case _ => false
+                }
+            }
+            if (!completed) {
+                throw closedFacadeError(api.NetworkErrorCategory.Connect,
+                    api.NetworkPhase.DatagramSend, peer)
+            }
+        } catch (error: Exception) {
+            finishConnectFailure()
+            let reported = socketFailure(error, api.NetworkErrorCategory.Connect,
+                api.NetworkPhase.DatagramSend, Some(localEndpointValue), peer)
+            retainAbortOwnership()
+            throw reported
+        }
+    }
+
+    func joinMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32,
+        context: api.OperationContext): Unit {
+        requireOpen(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend)
+        try { delegate.joinMulticastGroup(group, interfaceIndex, context) }
+        catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
+            retainAbortOwnership()
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend,
+                Some(localEndpointValue), remoteEndpoint)
+        }
+    }
+
+    func leaveMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32,
+        context: api.OperationContext): Unit {
+        requireOpen(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend)
+        try { delegate.leaveMulticastGroup(group, interfaceIndex, context) }
+        catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
+            retainAbortOwnership()
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend,
+                Some(localEndpointValue), remoteEndpoint)
+        }
+    }
+
     func send(source: api.ByteSpan, context: api.OperationContext): Int64 {
         validatePayload(source, remoteEndpoint)
         requireOpen(api.NetworkErrorCategory.Write, api.NetworkPhase.DatagramSend)
@@ -237,6 +288,25 @@ internal class DatagramSocketFacadeCore {
         match (state) {
             case SocketState.Closed | SocketState.Aborted | SocketState.Failed => true
             case _ => false
+        }
+    }
+
+    private func beginDisconnect(remote: ?NetworkEndpoint): Unit {
+        synchronized(lifecycleMutex) {
+            match (lifecycleState) {
+                case SocketState.Open => lifecycleState = SocketState.Connecting
+                case SocketState.Connecting => throw api.NetworkException(
+                    api.NetworkErrorCategory.Connect,
+                    api.NetworkPhase.DatagramSend,
+                    api.NetworkErrorCode.ConcurrentOperation,
+                    "datagram peer control is already active",
+                    retryability: api.Retryability.Never,
+                    localEndpoint: Some(localEndpointValue),
+                    remoteEndpoint: remote
+                )
+                case _ => throw closedFacadeError(api.NetworkErrorCategory.Connect,
+                    api.NetworkPhase.DatagramSend, remote)
+            }
         }
     }
 
