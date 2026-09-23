@@ -1,0 +1,8 @@
+1651718 sendto(5, "e", 1, 0, {sa_family=AF_INET, sin_port=htons(51951), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+1651717 +++ exited with 0 +++
+1651716 +++ exited with 0 +++
+1651715 +++ exited with 0 +++
+1651714 +++ exited with 0 +++
+1651719 +++ exited with 0 +++
+1651718 +++ exited with 0 +++
+1651713 +++ exited with 0 +++

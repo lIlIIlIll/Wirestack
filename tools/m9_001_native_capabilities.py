@@ -77,7 +77,7 @@ CAPABILITY_CLASSES = (
 EXPECTED_CAPABILITIES = {
     name: {
         field: field in {"nonBlocking", "closeOnExec"}
-        or (name == "UdpSocket" and field == "connectedDatagramSend")
+        or (name == "UdpSocket" and field in {"connectedDatagramSend", "multicast"})
         for field in CAPABILITY_FIELDS
     }
     for name in CAPABILITY_CLASSES

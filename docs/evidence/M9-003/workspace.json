@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-003",
+  "workspace": "<isolated-worktree>",
+  "original_workspace": {
+    "root": "<original-workspace>",
+    "policy": "Untouched; all M9-003 implementation and generated evidence are confined to the isolated worktree."
+  },
+  "implementation_workspace": {
+    "task_branch": "m9-003-udp-lifecycle",
+    "pre_edit_head": "6ee7d2df3bc2b8db7b13987793b79be9a2e6643b",
+    "pre_edit_dirty_paths": [],
+    "stack_base": "m9-002-typed-socket-options",
+    "common_base_with_main": "91f0514a10ff41b443bb62c70bcc7c142402d7a5",
+    "task_commit_created": false
+  },
+  "prerequisite_check": {
+    "task": "M9-002",
+    "status": "COMPLETE",
+    "evidence": "docs/evidence/M9-002/evidence.json",
+    "when": "Before M9-003 edits"
+  },
+  "authorization": "The user authorized the stacked baseline integration and M9-003 implementation, then explicitly authorized local M9-003 source and evidence-seal commits. Push, pull request, M9-003 merge and release are not authorized.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": "Cangjie cjc/cjpm 1.1.3"
+}

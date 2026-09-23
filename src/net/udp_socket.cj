@@ -25,7 +25,7 @@ public class UdpSocket <: DatagramSocket {
             case _ => false
         }
         this.capabilityValue = SocketCapabilities(nonBlocking: true, closeOnExec: true,
-            halfClose: false, broadcast: ipv4, multicast: false, raw: false, ancillaryData: false,
+            halfClose: false, broadcast: ipv4, multicast: stdnet.multicastMembershipQualified(), raw: false, ancillaryData: false,
             zeroLengthDatagramSend: false, connectedDatagramSend: true)
     }
 
@@ -104,6 +104,33 @@ public class UdpSocket <: DatagramSocket {
     ): Unit {
         let _ = requireUdpInternetEndpoint(endpoint, localEndpoint: Some(core.localEndpoint))
         core.connect(endpoint, context)
+    }
+
+    /** Disconnects the selected peer while preserving the bound UDP socket. Repeated calls are idempotent.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.disconnect(context)
+    }
+
+    /** Joins an IPv4 or IPv6 multicast group on this socket family. At most sixteen memberships are tracked.
+     * @param group Multicast IP address without a zone.
+     * @param interfaceIndex Native interface index; zero selects the kernel default.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,
+        context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.joinMulticastGroup(group, interfaceIndex, context)
+    }
+
+    /** Leaves a previously joined group/interface pair; duplicate joins and unmatched leaves fail InvalidState.
+     * @param group Multicast IP address without a zone.
+     * @param interfaceIndex Native interface index used for the join.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,
+        context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.leaveMulticastGroup(group, interfaceIndex, context)
     }
 
     /** Sends one atomic datagram to the selected peer.
