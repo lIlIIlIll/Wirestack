@@ -1,6 +1,6 @@
 # M9-003 — UDP lifecycle
 
-M9-003 adds UDP disconnect and IPv4/IPv6 multicast membership to the Linux StdNet transport. Acceptance is complete when [evidence.json](evidence.json) verifies against the exact source candidate. [publication.json](publication.json) records the candidate rerun. The source and evidence commits are local; this task does not include a push, pull request, merge or release. The original dirty workspace remains unchanged.
+M9-003 adds UDP disconnect and IPv4/IPv6 multicast membership to the Linux StdNet transport. Acceptance is complete when [evidence.json](evidence.json) verifies against the exact source candidate. The 18-scenario native qualification remains bound to source candidate `890fd78111bc6dea5aeb67ead968a70118c65601`. This seal refresh adds the native runner, installed consumer, public lifecycle test and StdNet lifecycle test to `source_paths`; all four are byte-identical to that candidate. `publication.json` records the current seal candidate, and `evidence.json` verifies 306 source inputs. The current candidate and seal are published in PR #192; merge and production release are not included. The original dirty workspace remains unchanged.
 
 ## Scope
 
@@ -19,7 +19,7 @@ M9-003 adds UDP disconnect and IPv4/IPv6 multicast membership to the Linux StdNe
 | API compatibility | [api-compatibility.json](api-compatibility.json) reports three added `UdpSocket` members and 325 unchanged declarations. Binary and forward compatibility were not run. |
 | Repository regressions | [task-check.json](task-check.json) and [long-check.json](long-check.json). The full run passed 699 Python checks and 814 Cangjie cases; 23 Cangjie performance cases were skipped. |
 | Public API documentation | [docs-report.json](docs-report.json) and generated API HTML. All 1,507 symbols and 739 parameters are documented. |
-| Candidate rerun and seal | Candidate receipts and [publication.json](publication.json) bind the rerun to the committed source candidate. [evidence.json](evidence.json) is the canonical task index. |
+| Candidate rerun and seal | Native receipts remain bound to the qualified source candidate; [publication.json](publication.json) binds the current seal-refresh candidate, and [evidence.json](evidence.json) is the canonical index of 306 source inputs. |
 
 The native qualification uses Cangjie SDK 1.1.3 on Linux x86_64 glibc. It does not qualify another operating system, CPU, libc or SDK. The API report is source-compatibility evidence only.
 
