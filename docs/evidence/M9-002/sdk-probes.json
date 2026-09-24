@@ -1,0 +1,236 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "cjc",
+        "<repo>/docs/evidence/M9-002/sdk-probes/options-probe.cj",
+        "-o",
+        "<repo>/build/m9-002-sdk-probes/options-probe"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "options-probe-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/options-probe-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/options-probe-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "strace",
+        "-f",
+        "-e",
+        "trace=setsockopt,getsockopt",
+        "-o",
+        "<repo>/docs/evidence/M9-002/sdk-probes/options-probe.strace",
+        "<repo>/build/m9-002-sdk-probes/options-probe"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "options-probe-run",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/options-probe-run.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2d1964c50ebf18fd26434ec1f0a8bdb4143c5981cc887f07d9a803c45c3cab95"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/options-probe-run.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "cjc",
+        "<repo>/docs/evidence/M9-002/sdk-probes/tcp-probe.cj",
+        "-o",
+        "<repo>/build/m9-002-sdk-probes/tcp-probe"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "tcp-probe-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/tcp-probe-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/tcp-probe-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "strace",
+        "-f",
+        "-e",
+        "trace=setsockopt,getsockopt",
+        "-o",
+        "<repo>/docs/evidence/M9-002/sdk-probes/tcp-probe.strace",
+        "<repo>/build/m9-002-sdk-probes/tcp-probe"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "tcp-probe-run",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/tcp-probe-run.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9cd8deb5db63c4680e6d2a553771ea3c848117454cdcb76367c374d189742919"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/tcp-probe-run.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "cjc",
+        "<repo>/docs/evidence/M9-002/sdk-probes/sdk-matrix.cj",
+        "-o",
+        "<repo>/build/m9-002-sdk-probes/sdk-matrix"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "sdk-matrix-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/sdk-matrix-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/sdk-matrix-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "strace",
+        "-f",
+        "-e",
+        "trace=setsockopt,getsockopt",
+        "-o",
+        "<repo>/docs/evidence/M9-002/sdk-probes/sdk-matrix.strace",
+        "<repo>/build/m9-002-sdk-probes/sdk-matrix"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "sdk-matrix-run",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/sdk-matrix-run.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4fb3e60b50e96107f2ae58737f86c21466bc558fd4d704eabb6c69a8ecf200fc"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/sdk-matrix-run.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "cjc",
+        "<repo>/docs/evidence/M9-002/sdk-probes/interface-probe.cj",
+        "-o",
+        "<repo>/build/m9-002-sdk-probes/interface-probe"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "interface-probe-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/interface-probe-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/interface-probe-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "strace",
+        "-f",
+        "-e",
+        "trace=setsockopt,getsockopt",
+        "-o",
+        "<repo>/docs/evidence/M9-002/sdk-probes/interface-probe.strace",
+        "<repo>/build/m9-002-sdk-probes/interface-probe"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "interface-probe-run",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/interface-probe-run.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1b5a9e52509c571811a07825a47dae6a4f7d99c590e5c34382b1765be15d51c3"
+        },
+        "path": "docs/evidence/M9-002/sdk-probes/interface-probe-run.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Public SDK prerequisite probes, not Wirestack acceptance",
+  "source_task": "M9-002",
+  "status": "PASS"
+}

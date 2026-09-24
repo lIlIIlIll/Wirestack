@@ -16,7 +16,8 @@ from tools import m7_021_linux_release as release
 from tools import m7_026_linux_api_freeze as api
 
 ROOT = Path(__file__).resolve().parents[1]
-TASK = "M9-001"
+TASK = "M9-002"
+NATIVE_REPORT = f"docs/evidence/{TASK}/native-options.json"
 DESCRIPTION = "docs/references/linux-network-capabilities.json"
 DOCS = ("docs/api/README.md", "docs/guides/network-foundation-linux.md")
 BEGIN = "<!-- NETWORK_CAPABILITIES:BEGIN -->"
@@ -110,7 +111,7 @@ def validate_description(root: Path, description: dict, inventory: dict) -> dict
         require(cases and len(cases) == len(set(cases)) and set(cases) <= set(scenarios),
                 f"{name}: missing/unknown native scenario")
         used_scenarios.update(cases)
-        require(row.get("evidence") == "docs/evidence/M9-001/native-capabilities.json",
+        require(row.get("evidence") == NATIVE_REPORT,
                 f"{name}: missing task-bound native evidence reference")
         field = row.get("capability_field")
         if field is not None:
@@ -118,6 +119,9 @@ def validate_description(root: Path, description: dict, inventory: dict) -> dict
             require(row["object"] in SOCKETS and field in fields and key not in coverage,
                     f"{name}: unknown/duplicate capability field")
             coverage.add(key)
+            overrides = row.get("instance_support", {})
+            require(isinstance(overrides, dict) and all(isinstance(key, str) and key and type(value) is bool
+                    for key, value in overrides.items()), f"{name}: invalid instance support conditions")
         failure = row.get("failure")
         if row["supported"]:
             require(failure is None, f"{name}: supported operation cannot have an unavailable-operation failure")
@@ -175,7 +179,7 @@ def render(description: dict, document: str) -> str:
                 conditions += " `" + "/".join(failure[key] for key in ("category", "phase", "code", "retryability")) + "`。"
         lines.append(f"| {row['label']} | {methods} | {'支持；' if row['supported'] else '不支持；'}{conditions} | {', '.join(row['scenario_ids'])} |")
     lines += ["", *description["environment_failure_policy"].values(),
-              "[当前原生收据](../evidence/M9-001/native-capabilities.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。", "", END]
+              f"[当前原生收据](../evidence/{TASK}/native-options.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。", "", END]
     return "\n".join(lines)
 
 
@@ -197,7 +201,7 @@ def native_inputs(root: Path, description: dict) -> set[str]:
     return ({path.relative_to(root).as_posix() for path in release.production_sources(root)}
             | set(release.QUALIFICATION_INPUTS)
             | {DESCRIPTION, description["sdk_reference"], description["native_runner"], *description["consumer_sources"],
-               "tools/check_network_capabilities.py", "tools/development_baseline.py",
+               "tools/check_network_capabilities.py", "tools/development_baseline.py", "tools/m9_001_native_capabilities.py",
                "tools/evidence_digest.py", "tools/m7_026_linux_api_freeze.py",
                "tools/m7_027_linux_examples.py", "tools/m8_002_native_sockets.py",
                "tools/m8_003_native_sockets.py", "tools/m8_004_native_dns.py",
@@ -254,6 +258,16 @@ def validate_native(root: Path, description: dict, report: dict) -> None:
         if field is not None:
             require(observed[row["object"]].get(field) is row["supported"],
                     f"{row['id']}: public capability contradicts installed execution")
+            overrides = row.get("instance_support", {})
+            if overrides:
+                observations = report.get("capability_observations", {}).get(row["object"], [])
+                names = [item.get("instance") for item in observations]
+                require(len(names) == len(set(names)) and set(overrides) <= set(names),
+                        f"{row['id']}: missing or duplicate conditional native instance")
+                for item in observations:
+                    expected = overrides.get(item["instance"], row["supported"])
+                    require(item.get("capabilities", {}).get(field) is expected,
+                            f"{row['id']}: address-family capability contradicts execution")
     artifact = report.get("artifact", {})
     require(digest.artifact_byte_sha256_equal(artifact.get("digest", {}),
             digest.artifact_byte_digest(relative_file(root, artifact.get("path"))).to_json()),

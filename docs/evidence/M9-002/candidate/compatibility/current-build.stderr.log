@@ -1,0 +1,69 @@
+warning: unused function:'waitUntilWriteActive'
+   ==> <work>/release/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:696:5:
+    | 
+696 |       internal func waitUntilWriteActive(timeout: Duration): Bool {
+    |  _____^
+697 | |         let expiresAt = MonoTime.now() + timeout
+    | | ...
+706 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'waitUntilAcceptActive'
+    ==> <work>/release/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:1054:5:
+     | 
+1054 |       func waitUntilAcceptActive(timeout: Duration): Bool {
+     |  _____^
+1055 | |         let expiresAt = MonoTime.now() + timeout
+     | | ...
+1063 | |     }
+     | |_____^ unused function
+     | 
+     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+warning: unreachable block in 'if' expression
+   ==> <work>/release/wirestack-0.1.0/src/internal/http2/server_connection.cj:411:28:
+    | 
+411 |             if (slotOwned) { releasePushSlot() }
+    |                            ^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+error: non-exhaustive patterns
+ ==> <work>/consumer/src/main.cj:6:12:
+  | 
+6 |     match (option) {
+  |            ^^^^^^ the selector is of type 'Enum-SocketOption'
+  | 
+  # note: Ipv6Only(_) is not covered
+  # note: MulticastInterface(_) is not covered
+  # note: MulticastHopLimit(_) is not covered
+  # note: MulticastLoopback(_) is not covered
+
+1 error generated, 1 error printed.
+Error: failed to compile package `wirestack_m9_002_compatibility`, return code is 1
+warning: unreachable block in 'if' expression
+   ==> <work>/release/wirestack-0.1.0/src/internal/http1/server_connection.cj:116:23:
+    | 
+116 |         try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }
+    |                       ^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'waitUntilWaiters'
+   ==> <work>/release/wirestack-0.1.0/src/internal/http1/connection_pool.cj:374:5:
+    | 
+374 |       internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {
+    |  _____^
+375 | |         let expiresAt = MonoTime.now() + timeout
+    | | ...
+384 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+Error: cjpm build failed

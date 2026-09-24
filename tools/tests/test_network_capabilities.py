@@ -54,6 +54,17 @@ class NetworkCapabilityTests(unittest.TestCase):
             "input_digests": {name: digest.text_evidence_digest(self.root / name).to_json()
                               for name in gate.native_inputs(self.root, self.data)},
         }
+        self.receipt["capability_observations"] = {
+            owner: [{"instance": "ipv4", "capabilities": dict(values)}]
+            for owner, values in observations.items()
+        }
+        for row in self.data["rows"]:
+            for instance, supported in row.get("instance_support", {}).items():
+                values = dict(observations[row["object"]])
+                values[row["capability_field"]] = supported
+                self.receipt["capability_observations"][row["object"]].append(
+                    {"instance": instance, "capabilities": values})
+
         gate.validate_description(self.root, self.data, self.inventory)
         gate.validate_native(self.root, self.data, self.receipt)
 
@@ -73,7 +84,7 @@ class NetworkCapabilityTests(unittest.TestCase):
         inventory = copy.deepcopy(self.inventory)
         udp = next(item for item in inventory["declarations"]
                    if item["package"] == "wirestack.net" and item["name"] == "UdpSocket")
-        udp["members"].append({"kind": "func", "name": "configure", "signature": "public func configure(): Unit"})
+        udp["members"].append({"kind": "func", "name": "unmappedOperation", "signature": "public func unmappedOperation(): Unit"})
         with self.assertRaises(ValueError):
             gate.validate_description(self.root, self.data, inventory)
 
@@ -102,7 +113,7 @@ class NetworkCapabilityTests(unittest.TestCase):
 
     def test_supported_claim_cannot_contradict_observed_socket(self) -> None:
         gate.validate_native(self.root, self.data, self.receipt)
-        self.receipt["observed_capabilities"]["UdpSocket"]["broadcast"] = True
+        self.receipt["observed_capabilities"]["UdpSocket"]["broadcast"] = False
         self.reject_receipt()
 
     def test_missing_and_skipped_scenarios_do_not_inherit_top_level_pass(self) -> None:
@@ -174,6 +185,17 @@ class NetworkCapabilityTests(unittest.TestCase):
         target.symlink_to(gate.ROOT / "LICENSE")
         self.receipt["commands"][0]["stdout"] = {
             "path": "build/outside.log", "digest": digest.text_evidence_digest(gate.ROOT / "LICENSE").to_json()}
+        self.reject_receipt()
+
+    def test_missing_ipv6_observation_cannot_hide_conditional_support(self) -> None:
+        self.receipt["capability_observations"]["UdpSocket"] = [
+            item for item in self.receipt["capability_observations"]["UdpSocket"] if item["instance"] != "ipv6"]
+        self.reject_receipt()
+
+    def test_ipv6_cannot_inherit_ipv4_broadcast_support(self) -> None:
+        for item in self.receipt["capability_observations"]["UdpSocket"]:
+            if item["instance"] == "ipv6":
+                item["capabilities"]["broadcast"] = True
         self.reject_receipt()
 
 

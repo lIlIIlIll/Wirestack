@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-002",
+  "status": "PASS",
+  "revision": "5968f4dc65a3c64f888b2b81f18386216bbd3608",
+  "commands": [
+    {
+      "argv": ["scripts/verify-evidence", "M9-002", "--json"],
+      "environment": "Unwrapped shell invocation",
+      "exit_code": 1,
+      "status": "FAIL",
+      "error_code": "TOOLCHAIN_DRIFT",
+      "detail": "evidence toolchain does not match current toolchain"
+    },
+    {
+      "argv": ["<qualified-sdk-wrapper>", "scripts/verify-evidence", "M9-002", "--json"],
+      "environment": "Qualified Cangjie 1.1.3 environment used for source-candidate execution and sealing",
+      "exit_code": 0,
+      "status": "PASS",
+      "report_count": 12,
+      "source_count": 311,
+      "stale_paths": []
+    }
+  ],
+  "resolution": "Re-executed only the failed verification command in the qualified SDK environment; source, reports and acceptance criteria were unchanged.",
+  "digest_audit": {
+    "status": "PASS",
+    "source_inputs": 311,
+    "linked_evidence_artifacts": 181,
+    "python_passed": 695,
+    "cangjie_passed": 809,
+    "performance_excluded": 23,
+    "cangjie_failed": 0,
+    "cangjie_errors": 0
+  },
+  "scope": "Local source and seal commits only. No push, PR, merge, release or next task."
+}

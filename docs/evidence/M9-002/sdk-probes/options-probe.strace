@@ -1,0 +1,9 @@
+2986673 setsockopt(3, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+2986673 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [1], [4]) = 0
+2986673 setsockopt(3, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+2986673 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [1], [4]) = 0
+2986677 +++ exited with 0 +++
+2986676 +++ exited with 0 +++
+2986675 +++ exited with 0 +++
+2986674 +++ exited with 0 +++
+2986673 +++ exited with 0 +++

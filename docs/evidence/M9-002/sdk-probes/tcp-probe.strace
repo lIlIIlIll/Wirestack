@@ -1,0 +1,9 @@
+2986907 setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+2986907 setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+2986907 getsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], [4]) = 0
+2986907 getsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], [4]) = 0
+2986912 +++ exited with 0 +++
+2986910 +++ exited with 0 +++
+2986909 +++ exited with 0 +++
+2986908 +++ exited with 0 +++
+2986907 +++ exited with 0 +++

@@ -1,0 +1,2372 @@
+{
+  "artifact": {
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1cb9475f59aabc90e7c7f1aaf868b37a86dbfa10db29e8ca5d88f8f5b3c1d040"
+    },
+    "path": "dist/m9-002/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "payload_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4c095d45ac03b902b7b50101846dabb5b4985a259ff20514c0ae1a794fc80a7c"
+    }
+  },
+  "base_revision": "4ec16b4856b601bc718935d072c9b6686cb31fa5",
+  "capability_description_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "298ad029325f8f7884f9623dca0aa4e6cbf95e9e99f53929dbe952c1e851e370"
+  },
+  "capability_observations": {
+    "TcpListener": [
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "ipv4-listener"
+      }
+    ],
+    "TcpStream": [
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "accepted-ipv4"
+      },
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "outgoing-ipv4"
+      }
+    ],
+    "UdpSocket": [
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": true,
+          "closeOnExec": true,
+          "connectedDatagramSend": true,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "ipv4"
+      },
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": true,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "ipv6"
+      }
+    ],
+    "UnixDatagramSocket": [
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "pathname"
+      }
+    ],
+    "UnixListener": [
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "pathname-listener"
+      }
+    ],
+    "UnixStream": [
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "accepted-pathname"
+      },
+      {
+        "capabilities": {
+          "ancillaryData": false,
+          "broadcast": false,
+          "closeOnExec": true,
+          "connectedDatagramSend": false,
+          "halfClose": false,
+          "multicast": false,
+          "nonBlocking": true,
+          "raw": false,
+          "zeroLengthDatagramSend": false
+        },
+        "instance": "outgoing-pathname"
+      }
+    ]
+  },
+  "commands": [
+    {
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "toolchain",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/toolchain.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        },
+        "path": "docs/evidence/M9-002/native-options/toolchain.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "<repo>/tools/build_tls_provider.py",
+        "--offline"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "tls-native-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/tls-native-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1ecb91b029d81d00ae9c752bf5761ce2d7293f57e2e60a79cea2b50d936dcb07"
+        },
+        "path": "docs/evidence/M9-002/native-options/tls-native-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 1800
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "<repo>/tools/build_linux_resolver.py",
+        "--quiet"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "resolver-native-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/resolver-native-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/resolver-native-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 1800
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "<repo>/tools/build_linux_http_files.py",
+        "--root",
+        "<repo>",
+        "--quiet"
+      ],
+      "cwd": "<repo>",
+      "exit_code": 0,
+      "id": "http-files-native-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/http-files-native-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/http-files-native-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 1800
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/wirestack_m8_002_native",
+      "exit_code": 0,
+      "id": "internet-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "766517ae66330d20714f6443c141c1789581c25dbc7a2cfab13a374f9a2ab8ef"
+        },
+        "path": "docs/evidence/M9-002/native-options/internet-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M9-002/native-options/internet-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/wirestack_m8_003_native",
+      "exit_code": 0,
+      "id": "unix-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "766517ae66330d20714f6443c141c1789581c25dbc7a2cfab13a374f9a2ab8ef"
+        },
+        "path": "docs/evidence/M9-002/native-options/unix-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M9-002/native-options/unix-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/wirestack_m8_004_native_dns",
+      "exit_code": 0,
+      "id": "dns-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "766517ae66330d20714f6443c141c1789581c25dbc7a2cfab13a374f9a2ab8ef"
+        },
+        "path": "docs/evidence/M9-002/native-options/dns-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M9-002/native-options/dns-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/wirestack_m9_001_native_capabilities",
+      "exit_code": 0,
+      "id": "capabilities-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ba0d90a7c75922134083522f9b620b2dda2ff71e79717b152ddcff4b6cb17995"
+        },
+        "path": "docs/evidence/M9-002/native-options/capabilities-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M9-002/native-options/capabilities-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<work>/wirestack_m9_002_socket_options",
+      "exit_code": 0,
+      "id": "options-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "766517ae66330d20714f6443c141c1789581c25dbc7a2cfab13a374f9a2ab8ef"
+        },
+        "path": "docs/evidence/M9-002/native-options/options-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M9-002/native-options/options-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "<installed-consumer>",
+        "internet-ipv4"
+      ],
+      "cwd": "<consumer>",
+      "exit_code": 0,
+      "id": "scenario-internet-ipv4",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/internet/ipv4.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e2a9deb9c832b048383ea537de7daf7b24c9eea8423426c5cebd612dce8bc579"
+        },
+        "path": "docs/evidence/M9-002/native-options/internet/ipv4.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "<installed-consumer>",
+        "internet-ipv6"
+      ],
+      "cwd": "<consumer>",
+      "exit_code": 0,
+      "id": "scenario-internet-ipv6",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/internet/ipv6.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fb52663f87b2f1dda5e92625fd1ef55c157d413142f8a6eb6e1fbc798999c074"
+        },
+        "path": "docs/evidence/M9-002/native-options/internet/ipv6.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "<installed-consumer>",
+        "unix-pathname"
+      ],
+      "cwd": "<consumer>",
+      "exit_code": 0,
+      "id": "scenario-unix-pathname",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/unix/pathname.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "47004a17a2ed2c69008175e6e6259004bf3e15b5920d624b6216e50a5d69956e"
+        },
+        "path": "docs/evidence/M9-002/native-options/unix/pathname.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "<installed-consumer>",
+        "unix-abstract"
+      ],
+      "cwd": "<consumer>",
+      "exit_code": 0,
+      "id": "scenario-unix-abstract",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/unix/abstract.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9aa2fb43c62bd0803e592f875f2b0f43c85e91af029db88aa137228c1df76689"
+        },
+        "path": "docs/evidence/M9-002/native-options/unix/abstract.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "<installed-consumer>",
+        "capability-contract"
+      ],
+      "cwd": "<consumer>",
+      "exit_code": 0,
+      "id": "scenario-capability-contract",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/contract/capability-contract.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a08db3e773969931503b0d3ec0d3cf03a92bb43379b0e3ebeada52aaf89c7f85"
+        },
+        "path": "docs/evidence/M9-002/native-options/contract/capability-contract.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "<work>/wirestack_m8_004_native_dns/target/release/bin/main",
+        "basic"
+      ],
+      "cwd": "<work>/wirestack_m8_004_native_dns/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "43443"
+      },
+      "exit_code": 0,
+      "id": "consumer-basic",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/dns/basic.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+        },
+        "path": "docs/evidence/M9-002/native-options/dns/basic.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "<work>/wirestack_m8_004_native_dns/target/release/bin/main",
+        "connect"
+      ],
+      "cwd": "<work>/wirestack_m8_004_native_dns/target/release/bin",
+      "environment": {
+        "WIRESTACK_DNS_PORT": "43149",
+        "WIRESTACK_SERVICE_PORT": "45635"
+      },
+      "exit_code": 0,
+      "id": "consumer-connect",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/dns/connect.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+        },
+        "path": "docs/evidence/M9-002/native-options/dns/connect.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "<work>/wirestack_m9_002_socket_options/target/release/bin/main",
+        "options"
+      ],
+      "cwd": "<work>/wirestack_m9_002_socket_options/target/release/bin",
+      "exit_code": 0,
+      "id": "socket-options",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/socket-options.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3bc6fe409429db0a8c90f3dbe30343fba763b9cfcb8b7f2f59ddb8639daf4a2b"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/socket-options.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "<work>/wirestack_m9_002_socket_options/target/release/bin/main",
+        "http"
+      ],
+      "cwd": "<work>/wirestack_m9_002_socket_options/target/release/bin",
+      "exit_code": 0,
+      "id": "http-option-connector",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/http-option-connector.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "46e97c25f25969c07e43b12694d3b2976f91ae7d13a4ca8e9287d82ef557d9ff"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/http-option-connector.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "strace",
+        "-f",
+        "-e",
+        "trace=socket,sendto,setsockopt,getsockopt",
+        "-o",
+        "<repo>/docs/evidence/M9-002/native-options/options/invalid-option-admission.syscalls.log",
+        "<work>/wirestack_m9_002_socket_options/target/release/bin/main",
+        "invalid"
+      ],
+      "cwd": "<work>/wirestack_m9_002_socket_options/target/release/bin",
+      "exit_code": 0,
+      "id": "invalid-option-admission",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/invalid-option-admission.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6ed6b7755624b08725e7469de51ed3b86fe118870ea3dcb108baac2a7d8c8f42"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/invalid-option-admission.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "strace",
+        "-f",
+        "-e",
+        "trace=socket,sendto,setsockopt,getsockopt",
+        "-o",
+        "<repo>/docs/evidence/M9-002/native-options/options/active-send-control.syscalls.log",
+        "-e",
+        "inject=sendto:delay_enter=500ms:when=1",
+        "<work>/wirestack_m9_002_socket_options/target/release/bin/main",
+        "send-control"
+      ],
+      "cwd": "<work>/wirestack_m9_002_socket_options/target/release/bin",
+      "exit_code": 0,
+      "id": "active-send-control",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/active-send-control.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e7e8cd0d019df6a79a8b66067c313d36966858c076d7f868b024d63613b9caea"
+        },
+        "path": "docs/evidence/M9-002/native-options/options/active-send-control.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 30
+    }
+  ],
+  "consumer_binaries": {
+    "capabilities": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "69edba62d81cda00c39457c7e40714473afe90cd553a3ca3e26c52cd6a7b5a14"
+    },
+    "dns": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a12b569729849fca6965883d721edd12cfc3c844fff6aac9652c90bbe9ed4b3d"
+    },
+    "internet": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8a45e34166beefef09551e6f9db159bdcda9285e4d709f2a6d8c542422a57f6e"
+    },
+    "options": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "16ddc58ba7a70aa93ed30181f16175ab4653e874027be3bb2bb95c81c4cb0042"
+    },
+    "unix": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e60d2e74d402b6a07e7a5136e481da4819f9627bf239279c982f43a7bebdd7e1"
+    }
+  },
+  "cross_compiled": false,
+  "input_digests": {
+    "LICENSE": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ff2bfac16f9884d002e66b1b2c75c20c626bc41ff31cdf411c5acdf224288295"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05824589b86f4356f827aa48eaeacc6b17413e2054f2f0404d39d4e96c8e3585"
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ba1355fd0bcb5bf4186deb77b6227c090bc750fbe44f680e34dcda7cb78b22c8"
+    },
+    "build.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "64a28c71b2e9f0b610286142f41dc1651adfbb5c3b3098bef90f2c36aad2e2a0"
+    },
+    "cjpm.lock": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0"
+    },
+    "cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1cdbca893f8cc158b618281cb4bbd9d3479f4d297194a73df0e2bffcb5fc9378"
+    },
+    "docs/references/linux-network-capabilities.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "298ad029325f8f7884f9623dca0aa4e6cbf95e9e99f53929dbe952c1e851e370"
+    },
+    "docs/references/m7-033-ci-toolchain.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "16d6f77c82efc27a3b090ac866644bc28788782fd416682de724488c9c8eaa66"
+    },
+    "examples/linux/m8_002/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6dc853eaa8c27e10bbeeb209cca1eb22a011841983e5418edd466a0b007ba912"
+    },
+    "examples/linux/m8_003/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9f15e5a6e3eff1b8477ac8b80b79d4d43ab03669e351b73c5fc23bf1bf4576ba"
+    },
+    "examples/linux/m8_004/native_dns.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ddb9c88e5db2be784ee9bccf70e2af53ceb4bee4dd1f9e49afcbe6a166ee86d6"
+    },
+    "examples/linux/m9_001/native_capabilities.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c5be2897b47f46282a7c2baf934caec14c771357ef8501bf0b95d1574227a391"
+    },
+    "examples/linux/m9_002/socket_options.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1db761c6baecebc1f3b5ec80aac608fab4de8158fae8881f54d314d9c4e8006d"
+    },
+    "native/http_files/wirestack_http_files.c": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2f3f936cdf63dc8157b962f18d250e45cfe89f1dab520a1c06bba528baf801d0"
+    },
+    "native/http_files/wirestack_http_files.h": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2b2580c2d124cf4a1ffdbc178262745d94e7d99f6b03042220b8cee6e6035b6e"
+    },
+    "native/resolver/linux/wirestack_resolver.c": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f8bdb11af530e4e84cbdbf374afe93e5493dc74886500c6b26acbc3adaf9abae"
+    },
+    "native/resolver/linux/wirestack_resolver.h": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe"
+    },
+    "native/tls/aws_lc/provider.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c6b37f608117277c75383457b204c97b0d82c15c06c0f9ba0b0ed42035efa30"
+    },
+    "native/tls/aws_lc/wirestack_tls_provider.c": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9e62e56accb050a77b553e72e07c23f9180cbf7e5a1aadb8541a6c7cfe2f5358"
+    },
+    "native/tls/aws_lc/wirestack_tls_provider.h": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "89bfa537e931d670712aeaeef65a484c9060f25dff9468164cd0c21d04310c68"
+    },
+    "src/byte_span.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+    },
+    "src/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d"
+    },
+    "src/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3"
+    },
+    "src/deadline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+    },
+    "src/hostname_verifier.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+    },
+    "src/http/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8ff94be6a771af4c56dab7dc982fca0a16e6df1da4d1a14303dfc179f9225537"
+    },
+    "src/http/client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "97131a36c964f68cbc6697a87a4fd5fe81a5a0d146dee3355b4386a47f97c628"
+    },
+    "src/http/cookie.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+    },
+    "src/http/duplex.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e81f52f4efbc0b728a1891d67bc0f3a6292af471d16d992b65e2055e44ffac24"
+    },
+    "src/http/error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d88c54a157e02063ab4048c197631daba3642a9618672841e4b98d3a25d275ad"
+    },
+    "src/http/file_handler.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+    },
+    "src/http/hooks.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0b6016a645fd69bbb8743e5abfed22b4c325286a450587b4ff87b722ef04f2ed"
+    },
+    "src/http/multipart.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+    },
+    "src/http/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+    },
+    "src/http/proxy.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+    },
+    "src/http/redirect.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+    },
+    "src/http/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8c44e5ff6961122d6483c22546a26dab02e8414b88d5e18b954ddcf0b3ff29e4"
+    },
+    "src/http/retry.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e889370833f2d5b7df07d4cd13aa3068ab6262e1c2252728cbcc99c788b4199b"
+    },
+    "src/http/server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "52ede5995cf2b5ac64948b36334eadd9782cdcaa26e4c2bf3914a85e25cdb529"
+    },
+    "src/http/tls.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+    },
+    "src/http/upgrade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+    },
+    "src/http/websocket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1eafd0d9f728592adea31d4397a8173c98d6ad3551ab4ed84d3b77623b787ba7"
+    },
+    "src/http/websocket_handshake.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "db5d899be8d22022db1e7aed502ad36c3cc5e52d6dbae8dce53112f797276d59"
+    },
+    "src/http_body.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+    },
+    "src/http_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+    },
+    "src/http_message.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4033d25f42135e43f498f11d2b459512dcb7c45bce6e91efaa85b18a053e8ef1"
+    },
+    "src/http_model.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+    },
+    "src/http_push.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+    },
+    "src/http_url.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955"
+    },
+    "src/internal/common/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+    },
+    "src/internal/connector/happy_eyeballs.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4b6b64967d02c6bc852bc652eaccf2376da085ab27a32e8f64d2efb5b9e60945"
+    },
+    "src/internal/connector/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+    },
+    "src/internal/connector/route.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+    },
+    "src/internal/http1/chunked.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+    },
+    "src/internal/http1/client_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce519a5cad21bb2d48a1af3a8bdde4dae1fc212c56e33f86e60bd78722967af5"
+    },
+    "src/internal/http1/client_pipeline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "570b7e88728caa65fce6c62a6793a408a80da4a2de2a5d5ece4888b32cd5dc3d"
+    },
+    "src/internal/http1/connection_pool.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b5a9954b60927852e31eed79beae4cbb1ae1993582beef5f94379bbc4686aedb"
+    },
+    "src/internal/http1/head_parser.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+    },
+    "src/internal/http1/http2_connection_pool.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a232a1b026c10457136d48910f3520afd15a518a779af0770f7b9ac123e47d1f"
+    },
+    "src/internal/http1/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+    },
+    "src/internal/http1/pool_key.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "011de2ef3701875f8d7a0438ed8b328ac396fd5f17a4f879a968425675535a46"
+    },
+    "src/internal/http1/protocol_upgrade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "11dd5d4bcec8b1517a7f6b49f59475a8b19829cbc5abfa07220434be060f4b16"
+    },
+    "src/internal/http1/proxy_client_pipeline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3e0a0d723d40aff4a75fb76b032748a012ae31df1cd3db614029ddb54bc41736"
+    },
+    "src/internal/http1/request_writer.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0908b55b23287ee85895108e476328aba815af1ab25cafbe8a99b267efc53bda"
+    },
+    "src/internal/http1/response_reader.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdc6783fd1d3d385a0422645ddd302afa5d138e74fb9009160995b972f7a1329"
+    },
+    "src/internal/http1/serializer.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+    },
+    "src/internal/http1/server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+    },
+    "src/internal/http1/server_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05c4f82ddab1f6b52eabeeff4574f32b96d6475547f4e91051326c604d582720"
+    },
+    "src/internal/http1/server_reader.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+    },
+    "src/internal/http1/server_writer.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+    },
+    "src/internal/http1/tls_client_pipeline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "426f3a9136f8e9eae42ffa7518125567652ea1c78255f2835735b48f0f156aa6"
+    },
+    "src/internal/http1/tls_server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "38d2dad9d5b5b0cde4130d10f35c628f44b71693c5d9791365cf678e5b26a780"
+    },
+    "src/internal/http2/client_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "83fcfdec69c703a7aab7b1915206a988733b82c4beec4799ed26be1b3720f50e"
+    },
+    "src/internal/http2/client_mapping.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+    },
+    "src/internal/http2/client_push.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2f032bf9bfad7f79b0fbe20b17ed820eca6f5103a1e8d56e9111d3feb4e01fca"
+    },
+    "src/internal/http2/connection_state.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+    },
+    "src/internal/http2/duplex_stream.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+    },
+    "src/internal/http2/flow_control.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e07e39e44bb2019e9ef457cd19c6be8c677fb7201cc9842915bdcc219c77adef"
+    },
+    "src/internal/http2/frame_codec.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "948752fca32d6bc5df031c61fdea5112cac4f0572c518740fea13f04a34c7a65"
+    },
+    "src/internal/http2/frame_model.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+    },
+    "src/internal/http2/goaway.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+    },
+    "src/internal/http2/header_block.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+    },
+    "src/internal/http2/health_close.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+    },
+    "src/internal/http2/hpack_block.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+    },
+    "src/internal/http2/hpack_core.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    "src/internal/http2/hpack_dynamic_table.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+    },
+    "src/internal/http2/hpack_huffman.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+    },
+    "src/internal/http2/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+    },
+    "src/internal/http2/reader_loop.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "25167203ff7662a7206fd857915686a22a21fc2e94e3f1b00ab0ab6a53c1356b"
+    },
+    "src/internal/http2/server_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "61d326fb5bf16891963e6bceb885a3c68f93ffe608e92b174392101b8394e70b"
+    },
+    "src/internal/http2/server_mapping.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "518dda231a6a79f9fb970a38c523d754d703d577b49d157834d9bdc23cd287c3"
+    },
+    "src/internal/http2/settings.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+    },
+    "src/internal/http2/stream_lifecycle.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+    },
+    "src/internal/http2/stream_reset.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "056345fed53e9fecff452bc6366b7a9bfe9d0b715aabb940f8c0ceeece4ebf34"
+    },
+    "src/internal/http2/write_scheduler.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d119eaf62ef252950207ab896c9d69bea9c14aee4fc374dbb199547713830356"
+    },
+    "src/internal/http_files/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+    },
+    "src/internal/http_model/body.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+    },
+    "src/internal/http_model/message.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+    },
+    "src/internal/http_model/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+    },
+    "src/internal/http_model/public_suffix.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+    },
+    "src/internal/http_model/public_suffix_data.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+    },
+    "src/internal/http_model/url.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+    },
+    "src/internal/identity/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+    },
+    "src/internal/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+    },
+    "src/internal/platform/linux/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+    },
+    "src/internal/platform/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+    },
+    "src/internal/resolver/bounded_backend.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ad49a33fdce5823d5afbae43fc5b366d429d56f0ed207ec9145bbe9d0b5f2eab"
+    },
+    "src/internal/resolver/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+    },
+    "src/internal/resolver/system_resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cc35345eef32af804135ae5bfa7f99a09b90a30afdb336dfc1615e26937ba3f4"
+    },
+    "src/internal/tls_engine/connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+    },
+    "src/internal/tls_engine/context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+    },
+    "src/internal/tls_engine/engine.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+    },
+    "src/internal/tls_engine/identity.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+    },
+    "src/internal/tls_engine/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+    },
+    "src/internal/tls_engine/server_name.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+    },
+    "src/internal/tls_engine/session.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+    },
+    "src/internal/tls_engine/websocket_crypto.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+    },
+    "src/internal/transport/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+    },
+    "src/internal/transport/completion.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+    },
+    "src/internal/transport/deadline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+    },
+    "src/internal/transport/lifecycle.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+    },
+    "src/internal/transport/memory_transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+    },
+    "src/internal/transport/memory_transport_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+    },
+    "src/internal/transport/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+    },
+    "src/internal/transport/network_event.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+    },
+    "src/internal/transport/operation_context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "537fc48f05b252c9be41ac792df49c4256ac36780f08336a748a8397e8c9c35b"
+    },
+    "src/internal/transport/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+    },
+    "src/internal/transport/scripted_transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+    },
+    "src/internal/transport/transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    "src/internal/transport_stdnet/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+    },
+    "src/internal/transport_stdnet/socket_options.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a9dd53b019c41c1a265b317e9bf82e3b1a0c2dc90087f27905bfe062a49dd812"
+    },
+    "src/internal/transport_stdnet/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ed0714fdc79180afe6bd02c16cb5768333da0b83960d734894c5094b2f21dff8"
+    },
+    "src/internal/transport_stdnet/unix_address.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    "src/internal/transport_stdnet/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    "src/internal/trust/hostname.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+    },
+    "src/internal/trust/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+    },
+    "src/net/datagram_socket_core.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aee0829c506089423e1c4582026e45cd229e085c314698fa5b3bd0580ea1615f"
+    },
+    "src/net/dns_client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a63095f98489b93b83f76cebc878678391d338f9080e15cf2ea7277ff6562622"
+    },
+    "src/net/dns_resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65b410bda4ed26d315848f68bdd70b432101153b12e3c5d6dcccd8bea14ec183"
+    },
+    "src/net/dns_wire.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+    },
+    "src/net/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+    },
+    "src/net/socket_options.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+    },
+    "src/net/tcp_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+    },
+    "src/net/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b0ad619399741abf670f0d953acec578b579dfed80bf12c6605ce14e3ccd832d"
+    },
+    "src/net/unix_datagram_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    "src/net/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    "src/net/unix_stream.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    "src/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+    },
+    "src/network_event.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084"
+    },
+    "src/operation_context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "523a1c1efaab2f3e6ba0755386460ea504a2caa8ef1453a18134f950c6e1234d"
+    },
+    "src/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+    },
+    "src/private_key_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+    },
+    "src/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+    },
+    "src/tls/facade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+    },
+    "src/tls/identity.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+    },
+    "src/tls/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+    },
+    "src/tls_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+    },
+    "src/transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+    },
+    "src/trust.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+    },
+    "third_party/aws-lc/LICENSE": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "977c541bd25ffe36975dde25c028c0cd15ddf3d08243983b58e8a6a3d9447523"
+    },
+    "third_party/aws-lc/NOTICE": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f97c469fa666b51b3dae2e1530504a5ee73bbf47b980aa76746d26c271dd591d"
+    },
+    "third_party/public_suffix/LICENSE.MPL-2.0": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+    },
+    "third_party/public_suffix/generate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "958e63597111ce351798ebc14865802a1a00cb8ec2cc3e19d7188bfa62947cee"
+    },
+    "third_party/public_suffix/public_suffix_list.dat": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4b673689999dbaca60b93fa3e1da5752505ef9717b1c4dc44acbfdafd35679ea"
+    },
+    "third_party/public_suffix/source.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0a46867d31592e1b40868c3277417fd5d46480c7b6bb23cfbbf8e5587bfd475e"
+    },
+    "tools/build_linux_http_files.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0562017adad454142837e3b44a12b89c711e5ed348d98deb1dd1db01922aea2d"
+    },
+    "tools/build_linux_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "22d176ad6c9de3d89e20c050b834585a56a42726a80474062a3328ded879dd95"
+    },
+    "tools/build_linux_tls_provider.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "98f15142646222112c37aeb4fbe5408848f1141388e3a1635f2d2eec0926934a"
+    },
+    "tools/build_native_dependencies.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "68ee2dd6c1f3788f8c9f5d2f67e6068575608e0da8b1b7b99f1f11c479e10c32"
+    },
+    "tools/build_tls_provider.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f389f418a8f1de7195c4469a8427b8a11c0d80e0fcc221f403c87f05ca878ed7"
+    },
+    "tools/check_network_capabilities.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a7735c4cd673571d2e0a7bb1f9b2735d87675d25239aa4efce78f1b69c5795cc"
+    },
+    "tools/development_baseline.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "294de9f4f3bbae6f24b3f551ed05a14fe16335e5d15a48d46341f45d4390ef1f"
+    },
+    "tools/evidence_digest.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44f03ada4f369f4b1d74f48312c71b32696094f4d9e3f6adb1a9f879b8b1db84"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a3672d2fb9eea8a5930d7e7c97269f027842aea8bdc9e90bd5c98720a90dd4f9"
+    },
+    "tools/m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e8ac807861efc8dd31184ec2983350b4deff8a9b71316a2407b8d260827606a4"
+    },
+    "tools/m7_027_linux_examples.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f501cce03dea7cfa2ee8843d49ecd77611c7f5a3f1945613754ee489381945c3"
+    },
+    "tools/m8_002_native_sockets.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c62543dababb14d336ff71e78e3836df4277afdb641ebc08f93fd4d54573fb90"
+    },
+    "tools/m8_003_native_sockets.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6caf6ae365502d53b6a0d8f0b6bec037a72017e593825752d6caf249d961d313"
+    },
+    "tools/m8_004_native_dns.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a9e39da8ed7b54c11dbce7df2f562ca301056087d099ec90aa83df8ee2e5aa1"
+    },
+    "tools/m8_005_native_http.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7f989a0a0a515cba2f8de379ce12180dbe49736451096f56fd94eafb778b82bd"
+    },
+    "tools/m9_001_native_capabilities.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c83f89b29c0043c54f5316edc02d2caa93223c5915fb28897df92e6122dd8619"
+    },
+    "tools/m9_002_native_options.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "013fb2c18fcbd6fa7a45f338277ef6cadd071a7258cc15b3df2a79a806b7bd2d"
+    },
+    "tools/release_smoke/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2cafa9f57c9ee01fc06f74bed9e53a55888fc6278e0017f2b991d3515a8cdca"
+    },
+    "tools/tls_provider/abi-v1.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "09b0d582ac3345bbb120a593220bda1046bad5b26350f3d6e864f76bfece9d30"
+    },
+    "tools/tls_provider/selection.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "de802ea6839e42327a6d30df4ac5fcdca6f60205f04ed223082346833203dc0b"
+    },
+    "tools/tls_provider/selection.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "228b2d4c67aeb22cb7b8722e8825950e2d95c8f81a8f9989011038bf417378e6"
+    }
+  },
+  "installation": {
+    "checkout_path_dependency": false,
+    "method": "fresh archive outside checkout; sole dependency is extracted Wirestack",
+    "release_manifest_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "35df6b0d70dd301dc6410ec7cb5db631bebf811b3ad01408ba19b2598df8a7a0"
+    }
+  },
+  "installed_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "f3fdcdf9d268c1c8eb57f7aa67794b8c677c0254bffee64f6d2c6bf2b05a414b"
+  },
+  "native_execution": true,
+  "observed_capabilities": {
+    "TcpListener": {
+      "ancillaryData": false,
+      "broadcast": false,
+      "closeOnExec": true,
+      "connectedDatagramSend": false,
+      "halfClose": false,
+      "multicast": false,
+      "nonBlocking": true,
+      "raw": false,
+      "zeroLengthDatagramSend": false
+    },
+    "TcpStream": {
+      "ancillaryData": false,
+      "broadcast": false,
+      "closeOnExec": true,
+      "connectedDatagramSend": false,
+      "halfClose": false,
+      "multicast": false,
+      "nonBlocking": true,
+      "raw": false,
+      "zeroLengthDatagramSend": false
+    },
+    "UdpSocket": {
+      "ancillaryData": false,
+      "broadcast": true,
+      "closeOnExec": true,
+      "connectedDatagramSend": true,
+      "halfClose": false,
+      "multicast": false,
+      "nonBlocking": true,
+      "raw": false,
+      "zeroLengthDatagramSend": false
+    },
+    "UnixDatagramSocket": {
+      "ancillaryData": false,
+      "broadcast": false,
+      "closeOnExec": true,
+      "connectedDatagramSend": false,
+      "halfClose": false,
+      "multicast": false,
+      "nonBlocking": true,
+      "raw": false,
+      "zeroLengthDatagramSend": false
+    },
+    "UnixListener": {
+      "ancillaryData": false,
+      "broadcast": false,
+      "closeOnExec": true,
+      "connectedDatagramSend": false,
+      "halfClose": false,
+      "multicast": false,
+      "nonBlocking": true,
+      "raw": false,
+      "zeroLengthDatagramSend": false
+    },
+    "UnixStream": {
+      "ancillaryData": false,
+      "broadcast": false,
+      "closeOnExec": true,
+      "connectedDatagramSend": false,
+      "halfClose": false,
+      "multicast": false,
+      "nonBlocking": true,
+      "raw": false,
+      "zeroLengthDatagramSend": false
+    }
+  },
+  "platform": "linux-x86_64-glibc",
+  "platform_details": {
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "os": "linux"
+  },
+  "scenarios": [
+    {
+      "details": {
+        "active_receive_cancellation": "PASS",
+        "active_receive_graceful_close": "PASS",
+        "connected_peer_filter": "PASS",
+        "descriptor_creation": {
+          "tcp_accepted": 1,
+          "tcp_created": 66,
+          "udp_created": 67
+        },
+        "empty_receive": "PASS",
+        "empty_send": "UNSUPPORTED_BACKEND",
+        "empty_send_rejection_and_reuse": "PASS",
+        "family": "ipv4",
+        "opposite_direction_send_during_receive": "PASS",
+        "overlapping_receive_and_connect_rejection": "PASS",
+        "resource_cycles": 64,
+        "socket_fds": {
+          "after": [],
+          "baseline": []
+        },
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/internet/ipv4.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e2a9deb9c832b048383ea537de7daf7b24c9eea8423426c5cebd612dce8bc579"
+          },
+          "path": "docs/evidence/M9-002/native-options/internet/ipv4.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "fae6c3a8765687fe2a857b31caa8b060f125e607ae0aedc6ccf1ac16d3770483"
+          },
+          "path": "docs/evidence/M9-002/native-options/internet/ipv4.syscalls.log"
+        }
+      },
+      "id": "internet-ipv4",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "active_receive_cancellation": "PASS",
+        "active_receive_graceful_close": "PASS",
+        "connected_peer_filter": "PASS",
+        "descriptor_creation": {
+          "tcp_accepted": 1,
+          "tcp_created": 66,
+          "udp_created": 67
+        },
+        "empty_receive": "PASS",
+        "empty_send": "UNSUPPORTED_BACKEND",
+        "empty_send_rejection_and_reuse": "PASS",
+        "family": "ipv6",
+        "opposite_direction_send_during_receive": "PASS",
+        "overlapping_receive_and_connect_rejection": "PASS",
+        "resource_cycles": 64,
+        "socket_fds": {
+          "after": [],
+          "baseline": []
+        },
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/internet/ipv6.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "fb52663f87b2f1dda5e92625fd1ef55c157d413142f8a6eb6e1fbc798999c074"
+          },
+          "path": "docs/evidence/M9-002/native-options/internet/ipv6.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "d19cf6c6df1e5b3b911550d54e15f77a7d81b67ec179176830ea151f670f1a79"
+          },
+          "path": "docs/evidence/M9-002/native-options/internet/ipv6.syscalls.log"
+        }
+      },
+      "id": "internet-ipv6",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "arbitrary_non_utf8_outgoing_names": "BLOCKED_SDK",
+        "backpressured_write_timeout": "PASS_NON_REPLAYABLE",
+        "connected_datagram_send": "BLOCKED_SDK_PEER_IDENTITY",
+        "connected_peer_filter": "kernel rejected unselected peer with errno 1",
+        "connected_send_guard": "PASS_FAIL_CLOSED",
+        "descriptor_creation": {
+          "datagram_created": 68,
+          "stream_accepted": 5,
+          "stream_created": 70
+        },
+        "empty_receive": "PASS",
+        "empty_send": "UNSUPPORTED_BACKEND",
+        "incoming_non_utf8_sender": "PASS",
+        "native_wait_admission": [
+          {
+            "native_eagain_before_action": true,
+            "operation": "sendto",
+            "trace_offset": 2819
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "accept4",
+            "trace_offset": 8510
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 45330
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 46040
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 46693
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 47265
+          }
+        ],
+        "pathname_replacement_guard": "PASS",
+        "profile": "pathname",
+        "raw_native_io": "BLOCKED_NO_ADAPTER",
+        "resource_cycles": 64,
+        "short_abstract_outgoing_names": "BLOCKED_SDK_IDENTITY_PADDING",
+        "socket_fds": {
+          "after": [],
+          "baseline": []
+        },
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/unix/pathname.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "47004a17a2ed2c69008175e6e6259004bf3e15b5920d624b6216e50a5d69956e"
+          },
+          "path": "docs/evidence/M9-002/native-options/unix/pathname.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "7cb2059ed4af08519849d9bea78d2f1932a20bb4ab7815325dfc45e0f717d54e"
+          },
+          "path": "docs/evidence/M9-002/native-options/unix/pathname.syscalls.log"
+        },
+        "unnamed_datagram_sender": "BLOCKED_SDK"
+      },
+      "id": "unix-pathname",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "arbitrary_non_utf8_outgoing_names": "BLOCKED_SDK",
+        "backpressured_write_timeout": "PASS_NON_REPLAYABLE",
+        "connected_datagram_send": "BLOCKED_SDK_PEER_IDENTITY",
+        "connected_peer_filter": "kernel rejected unselected peer with errno 1",
+        "connected_send_guard": "PASS_FAIL_CLOSED",
+        "descriptor_creation": {
+          "datagram_created": 67,
+          "stream_accepted": 5,
+          "stream_created": 70
+        },
+        "empty_receive": "PASS",
+        "empty_send": "UNSUPPORTED_BACKEND",
+        "incoming_non_utf8_sender": "PASS",
+        "native_wait_admission": [
+          {
+            "native_eagain_before_action": true,
+            "operation": "sendto",
+            "trace_offset": 2968
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "accept4",
+            "trace_offset": 8030
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 48356
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 49091
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 49770
+          },
+          {
+            "native_eagain_before_action": true,
+            "operation": "recvfrom",
+            "trace_offset": 50404
+          }
+        ],
+        "pathname_replacement_guard": "NOT_APPLICABLE",
+        "profile": "abstract",
+        "raw_native_io": "BLOCKED_NO_ADAPTER",
+        "resource_cycles": 64,
+        "short_abstract_outgoing_names": "BLOCKED_SDK_IDENTITY_PADDING",
+        "socket_fds": {
+          "after": [],
+          "baseline": []
+        },
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/unix/abstract.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "9aa2fb43c62bd0803e592f875f2b0f43c85e91af029db88aa137228c1df76689"
+          },
+          "path": "docs/evidence/M9-002/native-options/unix/abstract.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "742d998b2b334d9bb0d0fa87809a2f58a33fe0b0bb32983d2ec0415b03233f51"
+          },
+          "path": "docs/evidence/M9-002/native-options/unix/abstract.syscalls.log"
+        },
+        "unnamed_datagram_sender": "BLOCKED_SDK"
+      },
+      "id": "unix-abstract",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "capability_observations": {
+          "TcpListener": [
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "ipv4-listener"
+            }
+          ],
+          "TcpStream": [
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "accepted-ipv4"
+            },
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "outgoing-ipv4"
+            }
+          ],
+          "UdpSocket": [
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": true,
+                "closeOnExec": true,
+                "connectedDatagramSend": true,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "ipv4"
+            },
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": true,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "ipv6"
+            }
+          ],
+          "UnixDatagramSocket": [
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "pathname"
+            }
+          ],
+          "UnixListener": [
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "pathname-listener"
+            }
+          ],
+          "UnixStream": [
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "accepted-pathname"
+            },
+            {
+              "capabilities": {
+                "ancillaryData": false,
+                "broadcast": false,
+                "closeOnExec": true,
+                "connectedDatagramSend": false,
+                "halfClose": false,
+                "multicast": false,
+                "nonBlocking": true,
+                "raw": false,
+                "zeroLengthDatagramSend": false
+              },
+              "instance": "outgoing-pathname"
+            }
+          ]
+        },
+        "checks": [
+          "all_nine_fields",
+          "default_no_broadcast_multicast",
+          "typed_unsupported_errors",
+          "healthy_state_and_io_after_rejection",
+          "dns_parser_positive_negative",
+          "no_socket_allocation",
+          "no_background_task_growth",
+          "no_privileged_raw_syscall"
+        ],
+        "raw_ipv4": "UNSUPPORTED_BEFORE_NATIVE_IO",
+        "raw_ipv6": "UNSUPPORTED_BEFORE_NATIVE_IO",
+        "raw_netlink": "UNSUPPORTED_BEFORE_NATIVE_IO",
+        "raw_packet": "UNSUPPORTED_BEFORE_NATIVE_IO",
+        "resource_proof": {
+          "fd_inventory_after": [
+            {
+              "fd": "0",
+              "target": "pipe:[25818449]"
+            },
+            {
+              "fd": "1",
+              "target": "pipe:[25818450]"
+            },
+            {
+              "fd": "2",
+              "target": "file:capability-contract.stderr.log"
+            },
+            {
+              "fd": "3",
+              "target": "socket:[25818456]"
+            },
+            {
+              "fd": "4",
+              "target": "anon_inode:[eventpoll]"
+            },
+            {
+              "fd": "5",
+              "target": "socket:[25818457]"
+            },
+            {
+              "fd": "6",
+              "target": "socket:[25818458]"
+            },
+            {
+              "fd": "7",
+              "target": "socket:[25818459]"
+            },
+            {
+              "fd": "8",
+              "target": "socket:[25814819]"
+            },
+            {
+              "fd": "9",
+              "target": "socket:[25821477]"
+            },
+            {
+              "fd": "10",
+              "target": "socket:[25821478]"
+            },
+            {
+              "fd": "11",
+              "target": "socket:[25821479]"
+            },
+            {
+              "fd": "12",
+              "target": "socket:[25821480]"
+            }
+          ],
+          "fd_inventory_before": [
+            {
+              "fd": "0",
+              "target": "pipe:[25818449]"
+            },
+            {
+              "fd": "1",
+              "target": "pipe:[25818450]"
+            },
+            {
+              "fd": "2",
+              "target": "file:capability-contract.stderr.log"
+            },
+            {
+              "fd": "3",
+              "target": "socket:[25818456]"
+            },
+            {
+              "fd": "4",
+              "target": "anon_inode:[eventpoll]"
+            },
+            {
+              "fd": "5",
+              "target": "socket:[25818457]"
+            },
+            {
+              "fd": "6",
+              "target": "socket:[25818458]"
+            },
+            {
+              "fd": "7",
+              "target": "socket:[25818459]"
+            },
+            {
+              "fd": "8",
+              "target": "socket:[25814819]"
+            },
+            {
+              "fd": "9",
+              "target": "socket:[25821477]"
+            },
+            {
+              "fd": "10",
+              "target": "socket:[25821478]"
+            },
+            {
+              "fd": "11",
+              "target": "socket:[25821479]"
+            },
+            {
+              "fd": "12",
+              "target": "socket:[25821480]"
+            }
+          ],
+          "native_shutdown_calls": 0,
+          "no_privileged_raw_syscall": true,
+          "socket_allocations": 0,
+          "syscalls": {
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "f34d9d3c9eeefe4b34ad9a38d7ca3b0cf862bfea31d65a7a9c7b01e3c6b5b5c5"
+            },
+            "path": "docs/evidence/M9-002/native-options/contract/unsupported.syscalls.log"
+          },
+          "task_allocations": 0,
+          "task_inventory_after": [
+            {
+              "count": 1,
+              "name": "gc-helper"
+            },
+            {
+              "count": 1,
+              "name": "gc-main-thread"
+            },
+            {
+              "count": 1,
+              "name": "gc-pool-t1"
+            },
+            {
+              "count": 1,
+              "name": "main"
+            },
+            {
+              "count": 1,
+              "name": "schd-worker"
+            },
+            {
+              "count": 1,
+              "name": "schmon"
+            }
+          ],
+          "task_inventory_before": [
+            {
+              "count": 1,
+              "name": "gc-helper"
+            },
+            {
+              "count": 1,
+              "name": "gc-main-thread"
+            },
+            {
+              "count": 1,
+              "name": "gc-pool-t1"
+            },
+            {
+              "count": 1,
+              "name": "main"
+            },
+            {
+              "count": 1,
+              "name": "schd-worker"
+            },
+            {
+              "count": 1,
+              "name": "schmon"
+            }
+          ],
+          "unchanged": true
+        },
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/contract/capability-contract.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "a08db3e773969931503b0d3ec0d3cf03a92bb43379b0e3ebeada52aaf89c7f85"
+          },
+          "path": "docs/evidence/M9-002/native-options/contract/capability-contract.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "d9f345756e964f52d30756fd737e21d0a70c3c69b16d8fe69f5db515a5c668cc"
+          },
+          "path": "docs/evidence/M9-002/native-options/contract/capability-contract.syscalls.log"
+        }
+      },
+      "id": "capability-contract",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "checks": [
+          "udp_a",
+          "udp_aaaa",
+          "cname_answer_owner",
+          "compressed_ns_glue_excluded_from_answer"
+        ],
+        "mode": "basic",
+        "queries": [
+          {
+            "at_monotonic_ns_from_case_start": 10222814,
+            "class": 1,
+            "id": 21303,
+            "name": "a.native.test",
+            "source_address": "127.0.0.1",
+            "source_port": 40970,
+            "transport": "UDP",
+            "type": 1
+          },
+          {
+            "at_monotonic_ns_from_case_start": 11295098,
+            "class": 1,
+            "id": 49941,
+            "name": "a.native.test",
+            "source_address": "127.0.0.1",
+            "source_port": 59156,
+            "transport": "UDP",
+            "type": 1
+          },
+          {
+            "at_monotonic_ns_from_case_start": 12292556,
+            "class": 1,
+            "id": 21405,
+            "name": "aaaa.native.test",
+            "source_address": "127.0.0.1",
+            "source_port": 43056,
+            "transport": "UDP",
+            "type": 28
+          },
+          {
+            "at_monotonic_ns_from_case_start": 13230943,
+            "class": 1,
+            "id": 61050,
+            "name": "owner.native.test",
+            "source_address": "127.0.0.1",
+            "source_port": 60369,
+            "transport": "UDP",
+            "type": 1
+          }
+        ],
+        "query_count": 4,
+        "status": "PASS",
+        "tcp_connections": 0,
+        "udp_response_datagrams": 4
+      },
+      "id": "dns-basic",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "checks": [
+          "resolver_connect_dns_to_real_tcp_service",
+          "single_operation_context"
+        ],
+        "dns_response_at_ns_from_start": 109751682,
+        "mode": "connect",
+        "operation_deadline_seconds": 2,
+        "queries": [
+          {
+            "at_monotonic_ns_from_case_start": 10778360,
+            "class": 1,
+            "id": 44529,
+            "name": "service.native.test",
+            "source_address": "127.0.0.1",
+            "source_port": 45946,
+            "transport": "UDP",
+            "type": 1
+          }
+        ],
+        "query_count": 1,
+        "service_accept_at_ns_from_start": 110307292,
+        "service_connections": 1,
+        "service_remote_address": "127.0.0.1",
+        "service_remote_port": 37156,
+        "status": "PASS",
+        "tcp_connections": 0,
+        "udp_response_datagrams": 1
+      },
+      "id": "dns-connect",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/socket-options.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "3bc6fe409429db0a8c90f3dbe30343fba763b9cfcb8b7f2f59ddb8639daf4a2b"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/socket-options.stdout.log"
+        }
+      },
+      "id": "socket-options",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/http-option-connector.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "46e97c25f25969c07e43b12694d3b2976f91ae7d13a4ca8e9287d82ef557d9ff"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/http-option-connector.stdout.log"
+        }
+      },
+      "id": "http-option-connector",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/invalid-option-admission.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "6ed6b7755624b08725e7469de51ed3b86fe118870ea3dcb108baac2a7d8c8f42"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/invalid-option-admission.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "2c4bfc2a1cf13eb27f11f40713424c14a71289be102bcb497c91dc6fab2faa5c"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/invalid-option-admission.syscalls.log"
+        }
+      },
+      "id": "invalid-option-admission",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "status": "PASS",
+        "stderr": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/active-send-control.stderr.log"
+        },
+        "stdout": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e7e8cd0d019df6a79a8b66067c313d36966858c076d7f868b024d63613b9caea"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/active-send-control.stdout.log"
+        },
+        "syscalls": {
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "20873a7459618e83b81f154b603dcf450e4e5670244d8f53671c95f2816ea0c4"
+          },
+          "path": "docs/evidence/M9-002/native-options/options/active-send-control.syscalls.log"
+        }
+      },
+      "id": "active-send-control",
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "sdk": {
+    "archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a"
+    },
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "matched_archive_files": 497
+  },
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "f3fdcdf9d268c1c8eb57f7aa67794b8c677c0254bffee64f6d2c6bf2b05a414b"
+  },
+  "source_state": "WORKING_TREE_UNSEALED",
+  "source_task": "M9-002",
+  "status": "PASS"
+}

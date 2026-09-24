@@ -63,13 +63,13 @@ private func m8002StateIs(actual: SocketState, expected: SocketState): Bool {
 @Test
 class M8002UdpSocketTest {
     @TestCase
-    func unavailableOptionOperationsAreNotAdvertised(): Unit {
+    func capabilitiesSeparateBroadcastConfigurationFromMembership(): Unit {
         let defaults = SocketCapabilities()
         @Expect(!defaults.broadcast)
         @Expect(!defaults.multicast)
         let socket = UdpSocket.bind(m8002Loopback(0), context: m8002DeadlineContext())
         try {
-            @Expect(!socket.capabilities.broadcast)
+            @Expect(socket.capabilities.broadcast)
             @Expect(!socket.capabilities.multicast)
             @Expect(socket.capabilities.connectedDatagramSend)
         } finally {

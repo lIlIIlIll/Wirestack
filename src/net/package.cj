@@ -86,25 +86,7 @@ public struct SocketCapabilities {
     }
 }
 
-/** Typed socket-option values. M8-001 does not expose an option application operation. */
-public enum SocketOption {
-/** Enables address reuse. */
-    | ReuseAddress(Bool)
-/** Enables port reuse. */
-    | ReusePort(Bool)
-/** Enables TCP no-delay. */
-    | NoDelay(Bool)
-/** Enables keep-alive probes. */
-    | KeepAlive(Bool)
-/** Enables datagram broadcast. */
-    | Broadcast(Bool)
-/** Requests a receive buffer size. */
-    | ReceiveBuffer(Int64)
-/** Requests a send buffer size. */
-    | SendBuffer(Int64)
-/** Sets the multicast TTL. */
-    | MulticastTtl(UInt8)
-}
+
 
 /** A bounded opaque option value for a future capability adapter. Constructing it does not apply it. */
 public struct UnsafeSocketOption {
@@ -342,17 +324,63 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     /** Connects to an already-resolved endpoint without invoking DNS.
      * @param context Shared operation context.
      * @param endpoint Remote Internet endpoint.
+     * @param options Pre-connect options overriding NoDelay(true) and KeepAlive(false).
      */
     public static func connect(
         endpoint: api.SocketEndpoint,
+        options!: Array<SocketOption> = [],
         context!: api.OperationContext = api.OperationContext.background()
     ): TcpStream {
+        let encoded = encodeSocketOptions(options)
+
         try {
-            TcpStream(stdnet.StdNetTransport.connect(endpoint, context: context),
+            TcpStream(stdnet.StdNetTransport.connect(endpoint, context: context, options: encoded),
                 nonBlocking: true, closeOnExec: true)
-        } catch (error: Exception) {
+        } catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
             throw socketFailure(error, api.NetworkErrorCategory.Connect, api.NetworkPhase.TcpConnect,
                 None<NetworkEndpoint>, Some(NetworkEndpoint.Internet(endpoint)))
+        }
+    }
+
+    /** Applies options in order; successful earlier options remain after a later failure.
+     * @param options At most twelve distinct typed options.
+     * @param context Absolute deadline and cancellation token.
+     */
+    public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit {
+        let encoded = encodeSocketOptions(options)
+        try {
+            match (delegate) {
+                case value: stdnet.StdNetTransport => value.configureOptions(encoded, context)
+                case _ => throw api.NetworkException(api.NetworkErrorCategory.Option, api.NetworkPhase.TcpConnect,
+                    api.NetworkErrorCode.Unsupported, "socket options require the qualified TCP backend",
+                    retryability: api.Retryability.Never, localEndpoint: localEndpointValue, remoteEndpoint: remoteEndpointValue)
+            }
+        } catch (error: IllegalArgumentException) { throw error }
+        catch (error: Exception) {
+            let _ = retainAbortOwnership()
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.TcpConnect,
+                localEndpointValue, remoteEndpointValue)
+        }
+    }
+
+    /** Reads the effective kernel option, not the requested value.
+     * @param name Supported TCP option kind.
+     * @param context Absolute deadline and cancellation token.
+     * @return The typed effective value.
+     */
+    public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption {
+        try {
+            match (delegate) {
+                case value: stdnet.StdNetTransport => decodeSocketOption(value.queryOption(encodeSocketOptionName(name), context))
+                case _ => throw api.NetworkException(api.NetworkErrorCategory.Option, api.NetworkPhase.TcpConnect,
+                    api.NetworkErrorCode.Unsupported, "socket options require the qualified TCP backend",
+                    retryability: api.Retryability.Never, localEndpoint: localEndpointValue, remoteEndpoint: remoteEndpointValue)
+            }
+        } catch (error: Exception) {
+            let _ = retainAbortOwnership()
+            throw socketFailure(error, api.NetworkErrorCategory.Option, api.NetworkPhase.TcpConnect,
+                localEndpointValue, remoteEndpointValue)
         }
     }
 
