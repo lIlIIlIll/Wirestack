@@ -1,3 +1,12 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/server_connection.cj:411:28:
+    [36m| [0m
+[36m411[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
 [33mwarning[0m: unused function:'waitUntilWriteActive'
    [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:696:5:
     [36m| [0m
@@ -23,15 +32,6 @@
      [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 2 warnings generated, 2 warnings printed.
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/server_connection.cj:411:28:
-    [36m| [0m
-[36m411[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
-    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-1 warning generated, 1 warning printed.
 [33mwarning[0m: unreachable block in 'if' expression
    [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/server_connection.cj:116:23:
     [36m| [0m

@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-22T11:29:38.122407Z",
+  "generated_at_utc": "2026-09-24T16:10:34.800292Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M9-002/native-options.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6f244cb361288591ef348cc8817111da5f857f90039cf384c63399076ffb7ea0"
+        "sha256": "406abb2b54406e998aa7acd57eb15c0fbd08d86e12db38943c35f8c5d9e2502f"
       },
       "source_task": "M9-002"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M9-002/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "049452dbac1334e22cb4c47f199140659c1476aba1979d30f371635f229de7ee"
+        "sha256": "920ccfc63c4011b1c47df42d884039b62849a3b7914e4f43d04c84810e6d3e3e"
       },
       "source_task": "M9-002"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M9-002/verification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "f5a8686b27f7c2681056fc3105ddd066866560f20c791140b7ebd64530c29625"
+        "sha256": "65f578bfcc7436385fccd202dde3d717823b9d04ae51e8cf375f45f7b3dffc33"
       },
       "source_task": "M9-002"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M9-002/privacy.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6f8c1297fa8518dce19407960464c48f467fb7bc572f5f9a6c148406014d6044"
+        "sha256": "2da1f441589bb7d82380aba322c988995c5aa89b966b16ba9d3ac5cbc0e8d280"
       },
       "source_task": "M9-002"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M9-002/publication.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "72fb0227ab797f8188111a46acf8a9aeddc76671d360900ddf9c839dc53bca1a"
+        "sha256": "e1a873009f4314351bf79e8e3e276ae8051d42e58c4e699be5a03b21225d72d7"
       },
       "source_task": "M9-002"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M9-002/candidate/native-options.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "c29a6e9ff9d93f0c7c37fd50155f7e57ed35ed8dbe217583e374d95be43ae081"
+        "sha256": "7580640070a1ddfe95cd1cbd2ef5873f9143d6366d5b8c94ab0eecd423985722"
       },
       "source_task": "M9-002"
     },
@@ -112,21 +112,12 @@
       "path": "docs/evidence/M9-002/candidate/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d3422b3dccfa873def7ec521a9de061496f1c79a9455a87765ae878f1ac9f104"
-      },
-      "source_task": "M9-002"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M9-002/local-seal-check.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "a93251d556f444c8ee9c166d4e1eed5a41b8f4718f35f266ebecd512cb38fe58"
+        "sha256": "791539a317fba9398f4fc1647905715388ba241abaa1ef065816b6fba660faf6"
       },
       "source_task": "M9-002"
     }
   ],
-  "revision": "5968f4dc65a3c64f888b2b81f18386216bbd3608",
+  "revision": "16e61c91b82357916e7d1fa3424436330f4b6eea",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -163,7 +154,7 @@
     },
     "docs/evidence/M9-002/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c7290bbe30b488f6bd2583844ff7a5b072cbd121305d036b4947822a57cb02e8"
+      "sha256": "74bebd8804aa60fc3afb775cbc4f032254cbe51ee82fe873f12c75d901f4326d"
     },
     "docs/evidence/M9-002/api-compatibility.json": {
       "domain": "text-utf8-lf-v1",
@@ -187,7 +178,7 @@
     },
     "docs/evidence/M9-002/commands/capability-negative-regressions.stderr.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "26cc2774726a75393991187f6ea1120f2a7ac7e98f125b4d6ca459cb2de6b96f"
+      "sha256": "40c5b243e73c3e752e77a322a7c5f14cf40496a91b27bf576a0238c71503a9d7"
     },
     "docs/evidence/M9-002/commands/capability-negative-regressions.stdout.log": {
       "domain": "text-utf8-lf-v1",
@@ -199,7 +190,7 @@
     },
     "docs/evidence/M9-002/commands/installed-native-options.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "dee90c4a889fe00ce2e430d701a947ea00d03e81f8feb968d2a0d78a537ed7a7"
+      "sha256": "1c75e1cbe5eadb3314edc6c0dc046f626c7d990ed65a02698e61a2a39475528b"
     },
     "docs/evidence/M9-002/commands/option-plan.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -207,7 +198,7 @@
     },
     "docs/evidence/M9-002/commands/option-plan.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "811eeb8afa3d2ea30ff1996dcea05adcf649c42211a3cb46ab6079da49a0a48a"
+      "sha256": "273c48fa01d00e6b6f7d597f763d1c4703690510137e22783cff43fcf63d67dd"
     },
     "docs/evidence/M9-002/commands/option-regressions.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -215,7 +206,7 @@
     },
     "docs/evidence/M9-002/commands/option-regressions.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d24d0e05f14cf5e67ade1270a728993ddb4ec7b9295c87e10bdc7a28b1125dd7"
+      "sha256": "8f4270e7023b6714ddbda493387c5728deb75605941226bd492c470ee93d9db9"
     },
     "docs/evidence/M9-002/commands/public-api-html.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -223,15 +214,15 @@
     },
     "docs/evidence/M9-002/commands/public-api-html.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "123f7c7b78a97b63a9f11e5927eee5f973417b10f4c3c52e1c7c98da35ba1081"
+      "sha256": "caf691d99cc26ae1fced7a7156004c41013f7a4c90dddd91a7092da450061a76"
     },
     "docs/evidence/M9-002/commands/repository-check.stderr.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "fd20019d8b0554fb2aa9186bc210edd105cefda7cf225946c8d7851cc78aeb92"
+      "sha256": "fc091897f69ef167b0f4af1a7638896249235c066483bea6d0b1dbbaeb5a0f07"
     },
     "docs/evidence/M9-002/commands/repository-check.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6fef03cec5c777f36e8fd81692f9815ca47656e92d63cdf90c4c725cf65dcad7"
+      "sha256": "a09b03c8958a5b88678b73ace37c9343749c6b553cbd3e5c825d9848b5bb0d41"
     },
     "docs/evidence/M9-002/compatibility/baseline-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -267,11 +258,11 @@
     },
     "docs/evidence/M9-002/docs-report.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "049452dbac1334e22cb4c47f199140659c1476aba1979d30f371635f229de7ee"
+      "sha256": "920ccfc63c4011b1c47df42d884039b62849a3b7914e4f43d04c84810e6d3e3e"
     },
     "docs/evidence/M9-002/native-options.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6f244cb361288591ef348cc8817111da5f857f90039cf384c63399076ffb7ea0"
+      "sha256": "406abb2b54406e998aa7acd57eb15c0fbd08d86e12db38943c35f8c5d9e2502f"
     },
     "docs/evidence/M9-002/native-options/capabilities-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -287,15 +278,15 @@
     },
     "docs/evidence/M9-002/native-options/contract/capability-contract.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "172a4a031aabd4d569d1d790c9b7d0d7e47924d0b889a5417140ff213dc38225"
+      "sha256": "a08db3e773969931503b0d3ec0d3cf03a92bb43379b0e3ebeada52aaf89c7f85"
     },
     "docs/evidence/M9-002/native-options/contract/capability-contract.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c723c859df088c54e9efc6cda7e77c67654a60494109fba7f8a817eb11ad55b5"
+      "sha256": "d9f345756e964f52d30756fd737e21d0a70c3c69b16d8fe69f5db515a5c668cc"
     },
     "docs/evidence/M9-002/native-options/contract/unsupported.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f002ec73b3579b2d4f78eaa45f10096e881d76c0071f8b9987e8d075b4942beb"
+      "sha256": "f34d9d3c9eeefe4b34ad9a38d7ca3b0cf862bfea31d65a7a9c7b01e3c6b5b5c5"
     },
     "docs/evidence/M9-002/native-options/dns-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -343,11 +334,11 @@
     },
     "docs/evidence/M9-002/native-options/internet/ipv4.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "cd200db585420dede9c508e3327fe21d2910167fca2bf554e3e75976e3263531"
+      "sha256": "e2a9deb9c832b048383ea537de7daf7b24c9eea8423426c5cebd612dce8bc579"
     },
     "docs/evidence/M9-002/native-options/internet/ipv4.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "95987de4e9b983b5d916d917cad530fe59990d24879633038696651ca8d20017"
+      "sha256": "fae6c3a8765687fe2a857b31caa8b060f125e607ae0aedc6ccf1ac16d3770483"
     },
     "docs/evidence/M9-002/native-options/internet/ipv6.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -355,11 +346,11 @@
     },
     "docs/evidence/M9-002/native-options/internet/ipv6.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "88f44b074a6d082847ceeed3164e3d0515a150270e279014682de3ba6fd0c78d"
+      "sha256": "fb52663f87b2f1dda5e92625fd1ef55c157d413142f8a6eb6e1fbc798999c074"
     },
     "docs/evidence/M9-002/native-options/internet/ipv6.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "fbea76d8e76e4a51e4bdaeed7eac2e30f9f8f8f3457bc4a4be1e93e3030905fd"
+      "sha256": "d19cf6c6df1e5b3b911550d54e15f77a7d81b67ec179176830ea151f670f1a79"
     },
     "docs/evidence/M9-002/native-options/options-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -379,7 +370,7 @@
     },
     "docs/evidence/M9-002/native-options/options/active-send-control.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "af749ab66c9709ae1f435a64ab877931f0fdbd12baab76845a3608b1f0628461"
+      "sha256": "20873a7459618e83b81f154b603dcf450e4e5670244d8f53671c95f2816ea0c4"
     },
     "docs/evidence/M9-002/native-options/options/http-option-connector.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -399,7 +390,7 @@
     },
     "docs/evidence/M9-002/native-options/options/invalid-option-admission.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "1c69ffaba5d05ab57dde992d00f743140c3d007830fb76850404b3161a7bc58f"
+      "sha256": "2c4bfc2a1cf13eb27f11f40713424c14a71289be102bcb497c91dc6fab2faa5c"
     },
     "docs/evidence/M9-002/native-options/options/socket-options.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -451,7 +442,7 @@
     },
     "docs/evidence/M9-002/native-options/unix/abstract.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "fcdd913562fef5dfa3c8dacfea4d7c711cfd331a22b2657a4a6f0ef8f5b101ca"
+      "sha256": "742d998b2b334d9bb0d0fa87809a2f58a33fe0b0bb32983d2ec0415b03233f51"
     },
     "docs/evidence/M9-002/native-options/unix/pathname.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -463,7 +454,7 @@
     },
     "docs/evidence/M9-002/native-options/unix/pathname.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d5913e21d318a9315dcb432bf0e026d6f4c36525cad7d2c1eb1c1a90afb98c9b"
+      "sha256": "7cb2059ed4af08519849d9bea78d2f1932a20bb4ab7815325dfc45e0f717d54e"
     },
     "docs/evidence/M9-002/sdk-probes.json": {
       "domain": "text-utf8-lf-v1",
@@ -567,11 +558,11 @@
     },
     "docs/evidence/M9-002/task-check.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "3b632cd0b79893d93657bf68f3b32a5ddb0ee746f9f029f8b69e10521ed8f2ce"
+      "sha256": "a9fe3cbb2864b2a563e590be5be156a19acd8194a01c480c9ed033998e789b5b"
     },
     "docs/evidence/M9-002/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "43a6d96c01f7e4e875bcf6c0f492ad9c5ea84c95ef972fc4647463d1ba29156d"
+      "sha256": "aa9287aec947b6d1118d0f0981a6d5363eb37d4605dc72992f30a31392d2cced"
     },
     "docs/evidence/M9-002/workspace.json": {
       "domain": "text-utf8-lf-v1",
@@ -587,7 +578,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0763951a06b2189b7b6e923d3835fd4a8878348ee543bd25061e290c1858ba78"
+      "sha256": "7f5df651734f4bfdd396ae67fbdb8f5e12e871362bf9b1f63676f8c18ed9bb4b"
     },
     "docs/references/linux-network-capabilities.json": {
       "domain": "text-utf8-lf-v1",
@@ -1099,7 +1090,7 @@
     },
     "src/internal/transport_stdnet/m9_002_option_execution_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "5d8fc8b47e56c7d5b9519c2cbf1ed4e58b6df951f72a3e303afd356adff84c64"
+      "sha256": "94da6110878acf9d66f2228ee9dc570e37a46e894069b2c0f08b620f95d21d5a"
     },
     "src/internal/transport_stdnet/net_contract.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1111,7 +1102,7 @@
     },
     "src/internal/transport_stdnet/socket_options.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9ba11923b5fc7b45d027768f042ac84eda9772edb8ed4b0be2ad0c4c7d1bdb6b"
+      "sha256": "a9dd53b019c41c1a265b317e9bf82e3b1a0c2dc90087f27905bfe062a49dd812"
     },
     "src/internal/transport_stdnet/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1376,7 +1367,7 @@
   },
   "source_task": "M9-002",
   "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-    "cjpm": "Cangjie Project Manager: 1.1.3"
+    "cjc": null,
+    "cjpm": null
   }
 }

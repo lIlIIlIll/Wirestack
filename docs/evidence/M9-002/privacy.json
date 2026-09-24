@@ -1,11 +1,11 @@
 {
-  "authorization": "Local source and seal commits only; no push, PR, merge or release",
-  "command": "git privacy-check",
-  "exit_code": 0,
   "schema_version": 1,
-  "scope": "Isolated M9-002 worktree; original workspace untouched",
   "source_task": "M9-002",
   "status": "PASS",
-  "stderr": "",
-  "stdout": ""
+  "command": "git privacy-check",
+  "exit_code": 0,
+  "scope": "Isolated M9-002 worktree; original workspace untouched",
+  "authorization": "Local source and seal commits, push, PR publication, and merge authorized after required checks; production release not authorized",
+  "stdout": "",
+  "stderr": ""
 }

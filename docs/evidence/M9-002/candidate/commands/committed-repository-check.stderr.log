@@ -260,7 +260,7 @@ test_native_dependency_plan_uses_fail_closed_platform_selection (test_m7_029_ind
 test_open_high_and_critical_findings_block_release (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_open_high_and_critical_findings_block_release) ... ok
 test_prepare_cli_returns_structured_invalid_utf8_failure (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_prepare_cli_returns_structured_invalid_utf8_failure) ... ok
 test_process_isolated_agent_requires_conflict_disclosure (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_process_isolated_agent_requires_conflict_disclosure) ... ok
-test_provider_manifest_is_a_repository_input (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_provider_manifest_is_a_repository_input) ... git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_provider_manifest_is_a_repository_input (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_provider_manifest_is_a_repository_input) ... git: $HOME/.cache/agent-tmp/<task-tmp>/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 ok
 test_review_path_outside_package_root_is_a_controlled_failure (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_review_path_outside_package_root_is_a_controlled_failure) ... ok
 test_reviewer_dates_conflicts_and_set_fields_are_strict (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_reviewer_dates_conflicts_and_set_fields_are_strict) ... ok
@@ -361,7 +361,7 @@ test_strict_modes_reject_the_same_stale_records (test_p1_013_development_release
 test_structural_modes_accept_frozen_records_without_local_release_artifact (test_p1_013_development_release_gate.P1013DevelopmentReleaseGateTests.test_structural_modes_accept_frozen_records_without_local_release_artifact) ... ok
 test_atomic_report_preserves_target_on_injected_failure (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_atomic_report_preserves_target_on_injected_failure) ... ok
 test_crlf_report_is_bounded_and_uses_actual_platform (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_is_bounded_and_uses_actual_platform) ... ok
-test_crlf_report_reads_tracked_checkout_fixture_without_text_override (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_reads_tracked_checkout_fixture_without_text_override) ... git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_crlf_report_reads_tracked_checkout_fixture_without_text_override (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_reads_tracked_checkout_fixture_without_text_override) ... git: $HOME/.cache/agent-tmp/<task-tmp>/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 ok
 test_crlf_report_rejects_claimed_revision_different_from_checkout (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_rejects_claimed_revision_different_from_checkout) ... ok
 test_crlf_report_rejects_wrong_architecture_and_libc (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_rejects_wrong_architecture_and_libc) ... ok
@@ -396,7 +396,7 @@ test_inventory_traces_assigned_digest_field_into_comparison (test_p1_014_evidenc
 test_line_endings_share_text_digest_but_not_byte_digest (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_line_endings_share_text_digest_but_not_byte_digest) ... ok
 test_text_inventory_rejects_nul_framing_ambiguity (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_text_inventory_rejects_nul_framing_ambiguity) ... ok
 test_untyped_unknown_and_malformed_digest_documents_fail_closed (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_untyped_unknown_and_malformed_digest_documents_fail_closed) ... ok
-test_windows_crlf_report_requires_actual_crlf_checkout (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_windows_crlf_report_requires_actual_crlf_checkout) ... git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_windows_crlf_report_requires_actual_crlf_checkout (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_windows_crlf_report_requires_actual_crlf_checkout) ... git: $HOME/.cache/agent-tmp/<task-tmp>/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 ok
 test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks) ... ok
 test_archive_provider_requires_exact_commit (test_tls_provider_poc.ProviderPocValidationTests.test_archive_provider_requires_exact_commit) ... ok
@@ -497,7 +497,7 @@ test_third_party_comparison_source_rejected (test_validate_tls_provider_matrix.T
 test_unknown_schema_fails_closed (test_validate_tls_provider_matrix.Tests.test_unknown_schema_fails_closed) ... ok
 
 ----------------------------------------------------------------------
-Ran 493 tests in 15.000s
+Ran 493 tests in 15.213s
 
 OK
 test_classification_detects_sustained_starvation (test_dns_carrier_thread.DnsCarrierThreadTests.test_classification_detects_sustained_starvation) ... ok
@@ -680,7 +680,7 @@ test_resource_trend_checks_every_resource_class (test_sse_streaming_profile.Test
 test_short_runs_cannot_be_formal (test_sse_streaming_profile.Tests.test_short_runs_cannot_be_formal) ... ok
 
 ----------------------------------------------------------------------
-Ran 178 tests in 3.951s
+Ran 178 tests in 3.323s
 
 OK
 test_baseline_threshold_is_ninety_percent (test_http1_benchmark.Http1BenchmarkTest.test_baseline_threshold_is_ninety_percent) ... ok
@@ -709,7 +709,7 @@ test_parses_exact_wirestack_marker (test_m3_028_tls.M3028TlsGateTest.test_parses
 test_rejects_duplicate_or_wrong_marker (test_m3_028_tls.M3028TlsGateTest.test_rejects_duplicate_or_wrong_marker) ... ok
 
 ----------------------------------------------------------------------
-Ran 24 tests in 0.004s
+Ran 24 tests in 0.006s
 
 OK
 [33mwarning[0m: unused function:'waitUntilWriteActive'
@@ -783,6 +783,15 @@ OK
     [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
     [36m| [0m
     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 1 warning generated, 1 warning printed.
 [33mwarning[0m: unreachable block in 'if' expression
@@ -1419,15 +1428,1246 @@ OK
     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 15 warnings generated, 15 warnings printed.
-[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
- [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:7:1:
-  [36m| [0m
-[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
-  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
-  [36m| [0m
-  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.10 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.11 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.12 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 6.1 */@Attribute[TEST_GENERATED] class PublicTlsFacadeTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 6.2 */    @Attribute[TestCase_0][0m
+    [36m| [0m[34m|[0m /* 6.3 */    func clientBuilderRejectsReversedVersionRangeBeforeTransportIo(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.4 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.5 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.6 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.7 */                TlsClientContext.builder().versions(TlsVersion.Tls13, TlsVersion.Tls12).build()[0m
+    [36m| [0m[34m|[0m /* 6.8 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.9 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.10 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.11 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.12 */                }[0m
+    [36m| [0m[34m|[0m /* 6.13 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.14 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.15 */                }[0m
+    [36m| [0m[34m|[0m /* 6.16 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.17 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.18 */                }[0m
+    [36m| [0m[34m|[0m /* 6.19 */                e[0m
+    [36m| [0m[34m|[0m /* 6.20 */            }[0m
+    [36m| [0m[34m|[0m /* 6.21 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.22 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.23 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.24 */            }[0m
+    [36m| [0m[34m|[0m /* 6.25 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.26 */        }[0m
+    [36m| [0m[34m|[0m /* 6.27 */    }[0m
+    [36m| [0m[34m|[0m /* 6.28 */    [0m
+    [36m| [0m[34m|[0m /* 6.29 */    @Attribute[TestCase_1][0m
+    [36m| [0m[34m|[0m /* 6.30 */    func serverBuilderRequiresAnIdentityBeforeTransportIo(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.31 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.32 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.33 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.34 */                TlsServerContext.builder().build()[0m
+    [36m| [0m[34m|[0m /* 6.35 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.36 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.37 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.38 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.39 */                }[0m
+    [36m| [0m[34m|[0m /* 6.40 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.41 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.42 */                }[0m
+    [36m| [0m[34m|[0m /* 6.43 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.44 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.45 */                }[0m
+    [36m| [0m[34m|[0m /* 6.46 */                e[0m
+    [36m| [0m[34m|[0m /* 6.47 */            }[0m
+    [36m| [0m[34m|[0m /* 6.48 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.49 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.50 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.51 */            }[0m
+    [36m| [0m[34m|[0m /* 6.52 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.53 */        }[0m
+    [36m| [0m[34m|[0m /* 6.54 */    }[0m
+    [36m| [0m[34m|[0m /* 6.55 */    [0m
+    [36m| [0m[34m|[0m /* 6.56 */    @Attribute[TestCase_2][0m
+    [36m| [0m[34m|[0m /* 6.57 */    func clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.58 */        let protocols =["h2", "http/1.1"][0m
+    [36m| [0m[34m|[0m /* 6.59 */        let context = TlsClientContext.builder().alpn(protocols).build()[0m
+    [36m| [0m[34m|[0m /* 6.60 */        protocols[0] = "mutated"[0m
+    [36m| [0m[34m|[0m /* 6.61 */        expectEqual("context.alpnProtocols()", "[\"h2\", \"http/1.1\"]", context.alpnProtocols(),["h2", "http/1.1"], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.62 */        expectEqual("context.capabilities.supports(TlsCapability.Tls13)", "true", context.capabilities.supports(TlsCapability.Tls13), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.63 */        expectEqual("context.capabilities.supports(TlsCapability.ServerMode)", "true", context.capabilities.supports(TlsCapability.ServerMode), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.64 */    }[0m
+    [36m| [0m[34m|[0m /* 6.65 */    [0m
+    [36m| [0m[34m|[0m /* 6.66 */    @Attribute[TestCase_3][0m
+    [36m| [0m[34m|[0m /* 6.67 */    func preCancelledHandshakeConsumesAndAbortsTheTransport(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.68 */        let source = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 6.69 */        source.cancel()[0m
+    [36m| [0m[34m|[0m /* 6.70 */        let transport = CountingTransport()[0m
+    [36m| [0m[34m|[0m /* 6.71 */        let context = OperationContext(cancellation: source.token)[0m
+    [36m| [0m[34m|[0m /* 6.72 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.73 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.74 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.75 */                TlsClientContext.builder().build().handshake(transport, HostName("example.com"), context: context)[0m
+    [36m| [0m[34m|[0m /* 6.76 */                fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.77 */            } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 6.78 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.79 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.80 */                }[0m
+    [36m| [0m[34m|[0m /* 6.81 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.82 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.83 */                }[0m
+    [36m| [0m[34m|[0m /* 6.84 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.85 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.86 */                }[0m
+    [36m| [0m[34m|[0m /* 6.87 */                e[0m
+    [36m| [0m[34m|[0m /* 6.88 */            }[0m
+    [36m| [0m[34m|[0m /* 6.89 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.90 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.91 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.92 */            }[0m
+    [36m| [0m[34m|[0m /* 6.93 */            assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.94 */        }[0m
+    [36m| [0m[34m|[0m /* 6.95 */        expectEqual("transport.abortCalls", "1", transport.abortCalls, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.96 */        expectEqual("transport.closeCalls", "0", transport.closeCalls, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.97 */    }[0m
+    [36m| [0m[34m|[0m /* 6.98 */    [0m
+    [36m| [0m[34m|[0m /* 6.99 */    init() {[0m
+    [36m| [0m[34m|[0m /* 6.100 */    }[0m
+    [36m| [0m[34m|[0m /* 6.101 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 6.102 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.103 */        [0m
+    [36m| [0m[34m|[0m /* 6.104 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 6.105 */    }[0m
+    [36m| [0m[34m|[0m /* 6.106 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 6.107 */        [0m
+    [36m| [0m[34m|[0m /* 6.108 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 6.109 */        let suiteBuilder = TestSuite.builder("PublicTlsFacadeTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 6.110 */        [0m
+    [36m| [0m[34m|[0m /* 6.111 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.112 */            [0m
+    [36m| [0m[34m|[0m /* 6.113 */            let clientBuilderRejectsReversedVersionRangeBeforeTransportIoTestFunc = { => clientBuilderRejectsReversedVersionRangeBeforeTransportIo();() }[0m
+    [36m| [0m[34m|[0m /* 6.114 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.115 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.116 */            "clientBuilderRejectsReversedVersionRangeBeforeTransportIo",[0m
+    [36m| [0m[34m|[0m /* 6.117 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.118 */            body: clientBuilderRejectsReversedVersionRangeBeforeTransportIoTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.119 */            )[0m
+    [36m| [0m[34m|[0m /* 6.120 */            )[0m
+    [36m| [0m[34m|[0m /* 6.121 */            [0m
+    [36m| [0m[34m|[0m /* 6.122 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.123 */        [0m
+    [36m| [0m[34m|[0m /* 6.124 */        [0m
+    [36m| [0m[34m|[0m /* 6.125 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.126 */            [0m
+    [36m| [0m[34m|[0m /* 6.127 */            let serverBuilderRequiresAnIdentityBeforeTransportIoTestFunc = { => serverBuilderRequiresAnIdentityBeforeTransportIo();() }[0m
+    [36m| [0m[34m|[0m /* 6.128 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.129 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.130 */            "serverBuilderRequiresAnIdentityBeforeTransportIo",[0m
+    [36m| [0m[34m|[0m /* 6.131 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.132 */            body: serverBuilderRequiresAnIdentityBeforeTransportIoTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.133 */            )[0m
+    [36m| [0m[34m|[0m /* 6.134 */            )[0m
+    [36m| [0m[34m|[0m /* 6.135 */            [0m
+    [36m| [0m[34m|[0m /* 6.136 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.137 */        [0m
+    [36m| [0m[34m|[0m /* 6.138 */        [0m
+    [36m| [0m[34m|[0m /* 6.139 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.140 */            [0m
+    [36m| [0m[34m|[0m /* 6.141 */            let clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilitiesTestFunc = { => clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities();() }[0m
+    [36m| [0m[34m|[0m /* 6.142 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.143 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.144 */            "clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities",[0m
+    [36m| [0m[34m|[0m /* 6.145 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.146 */            body: clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilitiesTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.147 */            )[0m
+    [36m| [0m[34m|[0m /* 6.148 */            )[0m
+    [36m| [0m[34m|[0m /* 6.149 */            [0m
+    [36m| [0m[34m|[0m /* 6.150 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.151 */        [0m
+    [36m| [0m[34m|[0m /* 6.152 */        [0m
+    [36m| [0m[34m|[0m /* 6.153 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.154 */            [0m
+    [36m| [0m[34m|[0m /* 6.155 */            let preCancelledHandshakeConsumesAndAbortsTheTransportTestFunc = { => preCancelledHandshakeConsumesAndAbortsTheTransport();() }[0m
+    [36m| [0m[34m|[0m /* 6.156 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.157 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.158 */            "preCancelledHandshakeConsumesAndAbortsTheTransport",[0m
+    [36m| [0m[34m|[0m /* 6.159 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.160 */            body: preCancelledHandshakeConsumesAndAbortsTheTransportTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.161 */            )[0m
+    [36m| [0m[34m|[0m /* 6.162 */            )[0m
+    [36m| [0m[34m|[0m /* 6.163 */            [0m
+    [36m| [0m[34m|[0m /* 6.164 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.165 */        [0m
+    [36m| [0m[34m|[0m /* 6.166 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 6.167 */    }[0m
+    [36m| [0m[34m|[0m /* 6.168 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 6.169 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 6.170 */    }[0m
+    [36m| [0m[34m|[0m /* 6.171 */}[0m
+    [36m| [0m[34m|[0m /* 6.172 */[0m
+    [36m| [0m[34m|[0m /* 6.173 */[0m
+    [36m| [0m[34m|[0m /* 6.174 */interface TestPackageExtension_PublicTlsFacadeTest {[0m
+    [36m| [0m[34m|[0m /* 6.175 */    func registerPublicTlsFacadeTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 6.176 */}[0m
+    [36m| [0m[34m|[0m /* 6.177 */extend TestPackage <: TestPackageExtension_PublicTlsFacadeTest {[0m
+    [36m| [0m[34m|[0m /* 6.178 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 6.179 */    public func registerPublicTlsFacadeTest() {[0m
+    [36m| [0m[34m|[0m /* 6.180 */        registerSuite({ => PublicTlsFacadeTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 6.181 */    }[0m
+    [36m| [0m[34m|[0m /* 6.182 */}[0m
+    [36m| [0m[34m|[0m /* 6.183 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
 
-1 warning generated, 1 warning printed.
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:17:13:
+   [36m| [0m
+[36m17[0m [36m| [0m            ExternalDecryptionRequest("RSA_PKCS1", [1u8])[0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 6.1 */@Attribute[TEST_GENERATED] class TlsM8006ContractTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 6.2 */    @Attribute[TestCase_5][0m
+    [36m| [0m[34m|[0m /* 6.3 */    func externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.4 */        let input =[1u8, 2u8, 3u8][0m
+    [36m| [0m[34m|[0m /* 6.5 */        let request = ExternalDecryptionRequest("RSA_RAW", input)[0m
+    [36m| [0m[34m|[0m /* 6.6 */        input[0] = 9u8[0m
+    [36m| [0m[34m|[0m /* 6.7 */        expectEqual("request.algorithm", "\"RSA_RAW\"", request.algorithm, "RSA_RAW", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.8 */        expectEqual("request.ciphertextBytes()", "[1u8, 2u8, 3u8]", request.ciphertextBytes(),[1u8, 2u8, 3u8], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.9 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.10 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.11 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.12 */                ExternalDecryptionRequest("RSA_PKCS1",[1u8])[0m
+    [36m| [0m[34m|[0m /* 6.13 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.14 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.15 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.16 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.17 */                }[0m
+    [36m| [0m[34m|[0m /* 6.18 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.19 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.20 */                }[0m
+    [36m| [0m[34m|[0m /* 6.21 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.22 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.23 */                }[0m
+    [36m| [0m[34m|[0m /* 6.24 */                e[0m
+    [36m| [0m[34m|[0m /* 6.25 */            }[0m
+    [36m| [0m[34m|[0m /* 6.26 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.27 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.28 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.29 */            }[0m
+    [36m| [0m[34m|[0m /* 6.30 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.31 */        }[0m
+    [36m| [0m[34m|[0m /* 6.32 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.33 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.34 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.35 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >())[0m
+    [36m| [0m[34m|[0m /* 6.36 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.37 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.38 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.39 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.40 */                }[0m
+    [36m| [0m[34m|[0m /* 6.41 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.42 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.43 */                }[0m
+    [36m| [0m[34m|[0m /* 6.44 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.45 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.46 */                }[0m
+    [36m| [0m[34m|[0m /* 6.47 */                e[0m
+    [36m| [0m[34m|[0m /* 6.48 */            }[0m
+    [36m| [0m[34m|[0m /* 6.49 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.50 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.51 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.52 */            }[0m
+    [36m| [0m[34m|[0m /* 6.53 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.54 */        }[0m
+    [36m| [0m[34m|[0m /* 6.55 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.56 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.57 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.58 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >(1025, repeat: 0))[0m
+    [36m| [0m[34m|[0m /* 6.59 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.60 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.61 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.62 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.63 */                }[0m
+    [36m| [0m[34m|[0m /* 6.64 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.65 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.66 */                }[0m
+    [36m| [0m[34m|[0m /* 6.67 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.68 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.69 */                }[0m
+    [36m| [0m[34m|[0m /* 6.70 */                e[0m
+    [36m| [0m[34m|[0m /* 6.71 */            }[0m
+    [36m| [0m[34m|[0m /* 6.72 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.73 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.74 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.75 */            }[0m
+    [36m| [0m[34m|[0m /* 6.76 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.77 */        }[0m
+    [36m| [0m[34m|[0m /* 6.78 */    }[0m
+    [36m| [0m[34m|[0m /* 6.79 */    [0m
+    [36m| [0m[34m|[0m /* 6.80 */    @Attribute[TestCase_6][0m
+    [36m| [0m[34m|[0m /* 6.81 */    func keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.82 */        let random = Array < Byte >(32, repeat: 1)[0m
+    [36m| [0m[34m|[0m /* 6.83 */        let secret = Array < Byte >(64, repeat: 2)[0m
+    [36m| [0m[34m|[0m /* 6.84 */        let line = TlsKeyLogLine("CLIENT_TRAFFIC_SECRET_0", random, secret)[0m
+    [36m| [0m[34m|[0m /* 6.85 */        random[0] = 8[0m
+    [36m| [0m[34m|[0m /* 6.86 */        secret[0] = 9[0m
+    [36m| [0m[34m|[0m /* 6.87 */        expectEqual("line.clientRandomBytes()[0]", "1", line.clientRandomBytes()[0], 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.88 */        expectEqual("line.secretBytes()[0]", "2", line.secretBytes()[0], 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.89 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.90 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.91 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.92 */                TlsKeyLogLine("client secret", Array < Byte >(32, repeat: 0),[1u8])[0m
+    [36m| [0m[34m|[0m /* 6.93 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.94 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.95 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.96 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.97 */                }[0m
+    [36m| [0m[34m|[0m /* 6.98 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.99 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.100 */                }[0m
+    [36m| [0m[34m|[0m /* 6.101 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.102 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.103 */                }[0m
+    [36m| [0m[34m|[0m /* 6.104 */                e[0m
+    [36m| [0m[34m|[0m /* 6.105 */            }[0m
+    [36m| [0m[34m|[0m /* 6.106 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.107 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.108 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.109 */            }[0m
+    [36m| [0m[34m|[0m /* 6.110 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.111 */        }[0m
+    [36m| [0m[34m|[0m /* 6.112 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.113 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.114 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.115 */                TlsKeyLogLine(String.fromUtf8(Array < Byte >(129, repeat: b'A')), Array < Byte >(32, repeat: 0),[1u8])[0m
+    [36m| [0m[34m|[0m /* 6.116 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.117 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.118 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.119 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.120 */                }[0m
+    [36m| [0m[34m|[0m /* 6.121 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.122 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.123 */                }[0m
+    [36m| [0m[34m|[0m /* 6.124 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.125 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.126 */                }[0m
+    [36m| [0m[34m|[0m /* 6.127 */                e[0m
+    [36m| [0m[34m|[0m /* 6.128 */            }[0m
+    [36m| [0m[34m|[0m /* 6.129 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.130 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.131 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.132 */            }[0m
+    [36m| [0m[34m|[0m /* 6.133 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.134 */        }[0m
+    [36m| [0m[34m|[0m /* 6.135 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.136 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.137 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.138 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(31, repeat: 0),[1u8])[0m
+    [36m| [0m[34m|[0m /* 6.139 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.140 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.141 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.142 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.143 */                }[0m
+    [36m| [0m[34m|[0m /* 6.144 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.145 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.146 */                }[0m
+    [36m| [0m[34m|[0m /* 6.147 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.148 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.149 */                }[0m
+    [36m| [0m[34m|[0m /* 6.150 */                e[0m
+    [36m| [0m[34m|[0m /* 6.151 */            }[0m
+    [36m| [0m[34m|[0m /* 6.152 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.153 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.154 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.155 */            }[0m
+    [36m| [0m[34m|[0m /* 6.156 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.157 */        }[0m
+    [36m| [0m[34m|[0m /* 6.158 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.159 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.160 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.161 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(32, repeat: 0), Array < Byte >(65, repeat: 0))[0m
+    [36m| [0m[34m|[0m /* 6.162 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.163 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.164 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.165 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.166 */                }[0m
+    [36m| [0m[34m|[0m /* 6.167 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.168 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.169 */                }[0m
+    [36m| [0m[34m|[0m /* 6.170 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.171 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.172 */                }[0m
+    [36m| [0m[34m|[0m /* 6.173 */                e[0m
+    [36m| [0m[34m|[0m /* 6.174 */            }[0m
+    [36m| [0m[34m|[0m /* 6.175 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.176 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.177 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.178 */            }[0m
+    [36m| [0m[34m|[0m /* 6.179 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.180 */        }[0m
+    [36m| [0m[34m|[0m /* 6.181 */    }[0m
+    [36m| [0m[34m|[0m /* 6.182 */    [0m
+    [36m| [0m[34m|[0m /* 6.183 */    @Attribute[TestCase_7][0m
+    [36m| [0m[34m|[0m /* 6.184 */    func clientContextRejectsExternalDecryptionBeforeHandshake(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.185 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 6.186 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.187 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.188 */                TlsClientContext.builder().withExternalDecryptor(M8006Decryptor()).build()[0m
+    [36m| [0m[34m|[0m /* 6.189 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.190 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.191 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.192 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.193 */                }[0m
+    [36m| [0m[34m|[0m /* 6.194 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.195 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.196 */                }[0m
+    [36m| [0m[34m|[0m /* 6.197 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.198 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.199 */                }[0m
+    [36m| [0m[34m|[0m /* 6.200 */                e[0m
+    [36m| [0m[34m|[0m /* 6.201 */            }[0m
+    [36m| [0m[34m|[0m /* 6.202 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.203 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.204 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.205 */            }[0m
+    [36m| [0m[34m|[0m /* 6.206 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.207 */        }[0m
+    [36m| [0m[34m|[0m /* 6.208 */        [0m
+    [36m| [0m[34m|[0m /* 6.209 */        match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 6.210 */            case TlsContextErrorCode.InvalidHook =>()[0m
+    [36m| [0m[34m|[0m /* 6.211 */            case _ => fail("client decryptor did not fail with InvalidHook")[0m
+    [36m| [0m[34m|[0m /* 6.212 */        }[0m
+    [36m| [0m[34m|[0m /* 6.213 */    }[0m
+    [36m| [0m[34m|[0m /* 6.214 */    [0m
+    [36m| [0m[34m|[0m /* 6.215 */    init() {[0m
+    [36m| [0m[34m|[0m /* 6.216 */    }[0m
+    [36m| [0m[34m|[0m /* 6.217 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 6.218 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.219 */        [0m
+    [36m| [0m[34m|[0m /* 6.220 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 6.221 */    }[0m
+    [36m| [0m[34m|[0m /* 6.222 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 6.223 */        [0m
+    [36m| [0m[34m|[0m /* 6.224 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 6.225 */        let suiteBuilder = TestSuite.builder("TlsM8006ContractTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 6.226 */        [0m
+    [36m| [0m[34m|[0m /* 6.227 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.228 */            [0m
+    [36m| [0m[34m|[0m /* 6.229 */            let externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwnedTestFunc = { => externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned();() }[0m
+    [36m| [0m[34m|[0m /* 6.230 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.231 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.232 */            "externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned",[0m
+    [36m| [0m[34m|[0m /* 6.233 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.234 */            body: externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwnedTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.235 */            )[0m
+    [36m| [0m[34m|[0m /* 6.236 */            )[0m
+    [36m| [0m[34m|[0m /* 6.237 */            [0m
+    [36m| [0m[34m|[0m /* 6.238 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.239 */        [0m
+    [36m| [0m[34m|[0m /* 6.240 */        [0m
+    [36m| [0m[34m|[0m /* 6.241 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.242 */            [0m
+    [36m| [0m[34m|[0m /* 6.243 */            let keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecretsTestFunc = { => keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets();() }[0m
+    [36m| [0m[34m|[0m /* 6.244 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.245 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.246 */            "keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets",[0m
+    [36m| [0m[34m|[0m /* 6.247 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.248 */            body: keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecretsTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.249 */            )[0m
+    [36m| [0m[34m|[0m /* 6.250 */            )[0m
+    [36m| [0m[34m|[0m /* 6.251 */            [0m
+    [36m| [0m[34m|[0m /* 6.252 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.253 */        [0m
+    [36m| [0m[34m|[0m /* 6.254 */        [0m
+    [36m| [0m[34m|[0m /* 6.255 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.256 */            [0m
+    [36m| [0m[34m|[0m /* 6.257 */            let clientContextRejectsExternalDecryptionBeforeHandshakeTestFunc = { => clientContextRejectsExternalDecryptionBeforeHandshake();() }[0m
+    [36m| [0m[34m|[0m /* 6.258 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.259 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.260 */            "clientContextRejectsExternalDecryptionBeforeHandshake",[0m
+    [36m| [0m[34m|[0m /* 6.261 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.262 */            body: clientContextRejectsExternalDecryptionBeforeHandshakeTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.263 */            )[0m
+    [36m| [0m[34m|[0m /* 6.264 */            )[0m
+    [36m| [0m[34m|[0m /* 6.265 */            [0m
+    [36m| [0m[34m|[0m /* 6.266 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.267 */        [0m
+    [36m| [0m[34m|[0m /* 6.268 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 6.269 */    }[0m
+    [36m| [0m[34m|[0m /* 6.270 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 6.271 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 6.272 */    }[0m
+    [36m| [0m[34m|[0m /* 6.273 */}[0m
+    [36m| [0m[34m|[0m /* 6.274 */[0m
+    [36m| [0m[34m|[0m /* 6.275 */[0m
+    [36m| [0m[34m|[0m /* 6.276 */interface TestPackageExtension_TlsM8006ContractTest {[0m
+    [36m| [0m[34m|[0m /* 6.277 */    func registerTlsM8006ContractTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 6.278 */}[0m
+    [36m| [0m[34m|[0m /* 6.279 */extend TestPackage <: TestPackageExtension_TlsM8006ContractTest {[0m
+    [36m| [0m[34m|[0m /* 6.280 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 6.281 */    public func registerTlsM8006ContractTest() {[0m
+    [36m| [0m[34m|[0m /* 6.282 */        registerSuite({ => TlsM8006ContractTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 6.283 */    }[0m
+    [36m| [0m[34m|[0m /* 6.284 */}[0m
+    [36m| [0m[34m|[0m /* 6.285 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: which is expanded as follows
+   [36m| [0m
+   [36m| [0m/* 6.12 */                ExternalDecryptionRequest("RSA_PKCS1",[1u8])[0m
+   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.13 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.14 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.15 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:20:13:
+   [36m| [0m
+[36m20[0m [36m| [0m            ExternalDecryptionRequest("RSA_RAW", Array<Byte>())[0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+   [36m| [0m
+   [36m| [0m/* 6.35 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >())[0m
+   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.15 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.16 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.17 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.16 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.17 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.18 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:23:13:
+   [36m| [0m
+[36m23[0m [36m| [0m            ExternalDecryptionRequest("RSA_RAW", Array<Byte>(1025, repeat: 0))[0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+   [36m| [0m
+   [36m| [0m/* 6.58 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >(1025, repeat: 0))[0m
+   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.18 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.19 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.20 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.21 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.22 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.23 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:38:13:
+   [36m| [0m
+[36m38[0m [36m| [0m            TlsKeyLogLine("client secret", Array<Byte>(32, repeat: 0), [1u8])[0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+   [36m| [0m
+   [36m| [0m/* 6.92 */                TlsKeyLogLine("client secret", Array < Byte >(32, repeat: 0),[1u8])[0m
+   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:41:13:
+   [36m| [0m
+[36m41[0m [36m| [0m            TlsKeyLogLine([0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 6.115 */                TlsKeyLogLine(String.fromUtf8(Array < Byte >(129, repeat: b'A')), Array < Byte >(32, repeat: 0),[1u8])[0m
+    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.37 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.38 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.39 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.38 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.39 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.40 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.40 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.41 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.42 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.41 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.42 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.43 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:48:13:
+   [36m| [0m
+[36m48[0m [36m| [0m            TlsKeyLogLine("CLIENT_RANDOM", Array<Byte>(31, repeat: 0), [1u8])[0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 6.138 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(31, repeat: 0),[1u8])[0m
+    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.43 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.44 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.45 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.44 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.45 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.46 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:51:13:
+   [36m| [0m
+[36m51[0m [36m| [0m            TlsKeyLogLine("CLIENT_RANDOM", Array<Byte>(32, repeat: 0), Array<Byte>(65, repeat: 0))[0m
+   [36m| [0m            [33m^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+    [36m| [0m
+    [36m| [0m/* 6.161 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(32, repeat: 0), Array < Byte >(65, repeat: 0))[0m
+    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.61 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.62 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.63 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.64 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.65 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.66 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.67 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.68 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.69 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.95 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.96 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.97 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.98 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.99 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.100 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.101 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.102 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.103 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.118 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.119 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.120 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.121 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.122 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.123 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.124 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.125 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.126 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.141 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.142 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.143 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.144 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.145 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.146 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.147 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.148 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.149 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.164 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.165 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.166 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.167 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.168 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.169 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.170 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.171 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.172 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.191 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.192 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.193 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.194 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.195 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.196 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.197 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.198 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.199 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m67[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+37 warnings generated, 37 warnings printed.
 [33mwarning[0m: unreachable block in 'if' expression
   [36m==>[0m <repo>/src/net/dns_client_test.cj:37:28:
    [36m| [0m
@@ -6775,1246 +8015,6 @@ OK
      [36m| [0m
 
 100 warnings generated, 100 warnings printed.
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.10 */                if(e is AssertException) {[0m
-   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.11 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.12 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the code after the macro is expanded as follows
-    [36m| [0m
-    [36m| [0m  /* 6.1 */@Attribute[TEST_GENERATED] class PublicTlsFacadeTest <: TestClass {[0m
-    [36m| [0m [34m_[0m[34m^[0m
-    [36m| [0m[34m|[0m /* 6.2 */    @Attribute[TestCase_0][0m
-    [36m| [0m[34m|[0m /* 6.3 */    func clientBuilderRejectsReversedVersionRangeBeforeTransportIo(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.4 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.5 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.6 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.7 */                TlsClientContext.builder().versions(TlsVersion.Tls13, TlsVersion.Tls12).build()[0m
-    [36m| [0m[34m|[0m /* 6.8 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.9 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.10 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.11 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.12 */                }[0m
-    [36m| [0m[34m|[0m /* 6.13 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.14 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.15 */                }[0m
-    [36m| [0m[34m|[0m /* 6.16 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.17 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.18 */                }[0m
-    [36m| [0m[34m|[0m /* 6.19 */                e[0m
-    [36m| [0m[34m|[0m /* 6.20 */            }[0m
-    [36m| [0m[34m|[0m /* 6.21 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.22 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.23 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.24 */            }[0m
-    [36m| [0m[34m|[0m /* 6.25 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.26 */        }[0m
-    [36m| [0m[34m|[0m /* 6.27 */    }[0m
-    [36m| [0m[34m|[0m /* 6.28 */    [0m
-    [36m| [0m[34m|[0m /* 6.29 */    @Attribute[TestCase_1][0m
-    [36m| [0m[34m|[0m /* 6.30 */    func serverBuilderRequiresAnIdentityBeforeTransportIo(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.31 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.32 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.33 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.34 */                TlsServerContext.builder().build()[0m
-    [36m| [0m[34m|[0m /* 6.35 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.36 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.37 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.38 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.39 */                }[0m
-    [36m| [0m[34m|[0m /* 6.40 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.41 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.42 */                }[0m
-    [36m| [0m[34m|[0m /* 6.43 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.44 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.45 */                }[0m
-    [36m| [0m[34m|[0m /* 6.46 */                e[0m
-    [36m| [0m[34m|[0m /* 6.47 */            }[0m
-    [36m| [0m[34m|[0m /* 6.48 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.49 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.50 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.51 */            }[0m
-    [36m| [0m[34m|[0m /* 6.52 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.53 */        }[0m
-    [36m| [0m[34m|[0m /* 6.54 */    }[0m
-    [36m| [0m[34m|[0m /* 6.55 */    [0m
-    [36m| [0m[34m|[0m /* 6.56 */    @Attribute[TestCase_2][0m
-    [36m| [0m[34m|[0m /* 6.57 */    func clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.58 */        let protocols =["h2", "http/1.1"][0m
-    [36m| [0m[34m|[0m /* 6.59 */        let context = TlsClientContext.builder().alpn(protocols).build()[0m
-    [36m| [0m[34m|[0m /* 6.60 */        protocols[0] = "mutated"[0m
-    [36m| [0m[34m|[0m /* 6.61 */        expectEqual("context.alpnProtocols()", "[\"h2\", \"http/1.1\"]", context.alpnProtocols(),["h2", "http/1.1"], isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.62 */        expectEqual("context.capabilities.supports(TlsCapability.Tls13)", "true", context.capabilities.supports(TlsCapability.Tls13), true, isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.63 */        expectEqual("context.capabilities.supports(TlsCapability.ServerMode)", "true", context.capabilities.supports(TlsCapability.ServerMode), true, isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.64 */    }[0m
-    [36m| [0m[34m|[0m /* 6.65 */    [0m
-    [36m| [0m[34m|[0m /* 6.66 */    @Attribute[TestCase_3][0m
-    [36m| [0m[34m|[0m /* 6.67 */    func preCancelledHandshakeConsumesAndAbortsTheTransport(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.68 */        let source = CancellationSource()[0m
-    [36m| [0m[34m|[0m /* 6.69 */        source.cancel()[0m
-    [36m| [0m[34m|[0m /* 6.70 */        let transport = CountingTransport()[0m
-    [36m| [0m[34m|[0m /* 6.71 */        let context = OperationContext(cancellation: source.token)[0m
-    [36m| [0m[34m|[0m /* 6.72 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.73 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.74 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.75 */                TlsClientContext.builder().build().handshake(transport, HostName("example.com"), context: context)[0m
-    [36m| [0m[34m|[0m /* 6.76 */                fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.77 */            } catch(e: NetworkException) {[0m
-    [36m| [0m[34m|[0m /* 6.78 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.79 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.80 */                }[0m
-    [36m| [0m[34m|[0m /* 6.81 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.82 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.83 */                }[0m
-    [36m| [0m[34m|[0m /* 6.84 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.85 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.86 */                }[0m
-    [36m| [0m[34m|[0m /* 6.87 */                e[0m
-    [36m| [0m[34m|[0m /* 6.88 */            }[0m
-    [36m| [0m[34m|[0m /* 6.89 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.90 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.91 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.92 */            }[0m
-    [36m| [0m[34m|[0m /* 6.93 */            assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.94 */        }[0m
-    [36m| [0m[34m|[0m /* 6.95 */        expectEqual("transport.abortCalls", "1", transport.abortCalls, 1, isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.96 */        expectEqual("transport.closeCalls", "0", transport.closeCalls, 0, isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.97 */    }[0m
-    [36m| [0m[34m|[0m /* 6.98 */    [0m
-    [36m| [0m[34m|[0m /* 6.99 */    init() {[0m
-    [36m| [0m[34m|[0m /* 6.100 */    }[0m
-    [36m| [0m[34m|[0m /* 6.101 */    private func classConfiguration(): Configuration {[0m
-    [36m| [0m[34m|[0m /* 6.102 */        let configuration = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.103 */        [0m
-    [36m| [0m[34m|[0m /* 6.104 */        return configuration[0m
-    [36m| [0m[34m|[0m /* 6.105 */    }[0m
-    [36m| [0m[34m|[0m /* 6.106 */    public override func asTestSuite(): TestSuite {[0m
-    [36m| [0m[34m|[0m /* 6.107 */        [0m
-    [36m| [0m[34m|[0m /* 6.108 */        let suiteConfiguration = classConfiguration()[0m
-    [36m| [0m[34m|[0m /* 6.109 */        let suiteBuilder = TestSuite.builder("PublicTlsFacadeTest").configure(suiteConfiguration)[0m
-    [36m| [0m[34m|[0m /* 6.110 */        [0m
-    [36m| [0m[34m|[0m /* 6.111 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.112 */            [0m
-    [36m| [0m[34m|[0m /* 6.113 */            let clientBuilderRejectsReversedVersionRangeBeforeTransportIoTestFunc = { => clientBuilderRejectsReversedVersionRangeBeforeTransportIo();() }[0m
-    [36m| [0m[34m|[0m /* 6.114 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.115 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.116 */            "clientBuilderRejectsReversedVersionRangeBeforeTransportIo",[0m
-    [36m| [0m[34m|[0m /* 6.117 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.118 */            body: clientBuilderRejectsReversedVersionRangeBeforeTransportIoTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.119 */            )[0m
-    [36m| [0m[34m|[0m /* 6.120 */            )[0m
-    [36m| [0m[34m|[0m /* 6.121 */            [0m
-    [36m| [0m[34m|[0m /* 6.122 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.123 */        [0m
-    [36m| [0m[34m|[0m /* 6.124 */        [0m
-    [36m| [0m[34m|[0m /* 6.125 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.126 */            [0m
-    [36m| [0m[34m|[0m /* 6.127 */            let serverBuilderRequiresAnIdentityBeforeTransportIoTestFunc = { => serverBuilderRequiresAnIdentityBeforeTransportIo();() }[0m
-    [36m| [0m[34m|[0m /* 6.128 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.129 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.130 */            "serverBuilderRequiresAnIdentityBeforeTransportIo",[0m
-    [36m| [0m[34m|[0m /* 6.131 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.132 */            body: serverBuilderRequiresAnIdentityBeforeTransportIoTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.133 */            )[0m
-    [36m| [0m[34m|[0m /* 6.134 */            )[0m
-    [36m| [0m[34m|[0m /* 6.135 */            [0m
-    [36m| [0m[34m|[0m /* 6.136 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.137 */        [0m
-    [36m| [0m[34m|[0m /* 6.138 */        [0m
-    [36m| [0m[34m|[0m /* 6.139 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.140 */            [0m
-    [36m| [0m[34m|[0m /* 6.141 */            let clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilitiesTestFunc = { => clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities();() }[0m
-    [36m| [0m[34m|[0m /* 6.142 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.143 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.144 */            "clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities",[0m
-    [36m| [0m[34m|[0m /* 6.145 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.146 */            body: clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilitiesTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.147 */            )[0m
-    [36m| [0m[34m|[0m /* 6.148 */            )[0m
-    [36m| [0m[34m|[0m /* 6.149 */            [0m
-    [36m| [0m[34m|[0m /* 6.150 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.151 */        [0m
-    [36m| [0m[34m|[0m /* 6.152 */        [0m
-    [36m| [0m[34m|[0m /* 6.153 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.154 */            [0m
-    [36m| [0m[34m|[0m /* 6.155 */            let preCancelledHandshakeConsumesAndAbortsTheTransportTestFunc = { => preCancelledHandshakeConsumesAndAbortsTheTransport();() }[0m
-    [36m| [0m[34m|[0m /* 6.156 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.157 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.158 */            "preCancelledHandshakeConsumesAndAbortsTheTransport",[0m
-    [36m| [0m[34m|[0m /* 6.159 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.160 */            body: preCancelledHandshakeConsumesAndAbortsTheTransportTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.161 */            )[0m
-    [36m| [0m[34m|[0m /* 6.162 */            )[0m
-    [36m| [0m[34m|[0m /* 6.163 */            [0m
-    [36m| [0m[34m|[0m /* 6.164 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.165 */        [0m
-    [36m| [0m[34m|[0m /* 6.166 */        return suiteBuilder.build()[0m
-    [36m| [0m[34m|[0m /* 6.167 */    }[0m
-    [36m| [0m[34m|[0m /* 6.168 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
-    [36m| [0m[34m|[0m /* 6.169 */        throw Exception("Unreachable code")[0m
-    [36m| [0m[34m|[0m /* 6.170 */    }[0m
-    [36m| [0m[34m|[0m /* 6.171 */}[0m
-    [36m| [0m[34m|[0m /* 6.172 */[0m
-    [36m| [0m[34m|[0m /* 6.173 */[0m
-    [36m| [0m[34m|[0m /* 6.174 */interface TestPackageExtension_PublicTlsFacadeTest {[0m
-    [36m| [0m[34m|[0m /* 6.175 */    func registerPublicTlsFacadeTest(): Unit[0m
-    [36m| [0m[34m|[0m /* 6.176 */}[0m
-    [36m| [0m[34m|[0m /* 6.177 */extend TestPackage <: TestPackageExtension_PublicTlsFacadeTest {[0m
-    [36m| [0m[34m|[0m /* 6.178 */    @Attribute[TEST_REGISTER][0m
-    [36m| [0m[34m|[0m /* 6.179 */    public func registerPublicTlsFacadeTest() {[0m
-    [36m| [0m[34m|[0m /* 6.180 */        registerSuite({ => PublicTlsFacadeTest().asTestSuite() })[0m
-    [36m| [0m[34m|[0m /* 6.181 */    }[0m
-    [36m| [0m[34m|[0m /* 6.182 */}[0m
-    [36m| [0m[34m|[0m /* 6.183 */[0m
-    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
-    [36m| [0m
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m48[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:17:13:
-   [36m| [0m
-[36m17[0m [36m| [0m            ExternalDecryptionRequest("RSA_PKCS1", [1u8])[0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: the code after the macro is expanded as follows
-    [36m| [0m
-    [36m| [0m  /* 6.1 */@Attribute[TEST_GENERATED] class TlsM8006ContractTest <: TestClass {[0m
-    [36m| [0m [34m_[0m[34m^[0m
-    [36m| [0m[34m|[0m /* 6.2 */    @Attribute[TestCase_5][0m
-    [36m| [0m[34m|[0m /* 6.3 */    func externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.4 */        let input =[1u8, 2u8, 3u8][0m
-    [36m| [0m[34m|[0m /* 6.5 */        let request = ExternalDecryptionRequest("RSA_RAW", input)[0m
-    [36m| [0m[34m|[0m /* 6.6 */        input[0] = 9u8[0m
-    [36m| [0m[34m|[0m /* 6.7 */        expectEqual("request.algorithm", "\"RSA_RAW\"", request.algorithm, "RSA_RAW", isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.8 */        expectEqual("request.ciphertextBytes()", "[1u8, 2u8, 3u8]", request.ciphertextBytes(),[1u8, 2u8, 3u8], isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.9 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.10 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.11 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.12 */                ExternalDecryptionRequest("RSA_PKCS1",[1u8])[0m
-    [36m| [0m[34m|[0m /* 6.13 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.14 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.15 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.16 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.17 */                }[0m
-    [36m| [0m[34m|[0m /* 6.18 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.19 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.20 */                }[0m
-    [36m| [0m[34m|[0m /* 6.21 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.22 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.23 */                }[0m
-    [36m| [0m[34m|[0m /* 6.24 */                e[0m
-    [36m| [0m[34m|[0m /* 6.25 */            }[0m
-    [36m| [0m[34m|[0m /* 6.26 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.27 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.28 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.29 */            }[0m
-    [36m| [0m[34m|[0m /* 6.30 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.31 */        }[0m
-    [36m| [0m[34m|[0m /* 6.32 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.33 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.34 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.35 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >())[0m
-    [36m| [0m[34m|[0m /* 6.36 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.37 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.38 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.39 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.40 */                }[0m
-    [36m| [0m[34m|[0m /* 6.41 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.42 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.43 */                }[0m
-    [36m| [0m[34m|[0m /* 6.44 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.45 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.46 */                }[0m
-    [36m| [0m[34m|[0m /* 6.47 */                e[0m
-    [36m| [0m[34m|[0m /* 6.48 */            }[0m
-    [36m| [0m[34m|[0m /* 6.49 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.50 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.51 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.52 */            }[0m
-    [36m| [0m[34m|[0m /* 6.53 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.54 */        }[0m
-    [36m| [0m[34m|[0m /* 6.55 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.56 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.57 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.58 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >(1025, repeat: 0))[0m
-    [36m| [0m[34m|[0m /* 6.59 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.60 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.61 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.62 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.63 */                }[0m
-    [36m| [0m[34m|[0m /* 6.64 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.65 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.66 */                }[0m
-    [36m| [0m[34m|[0m /* 6.67 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.68 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.69 */                }[0m
-    [36m| [0m[34m|[0m /* 6.70 */                e[0m
-    [36m| [0m[34m|[0m /* 6.71 */            }[0m
-    [36m| [0m[34m|[0m /* 6.72 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.73 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.74 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.75 */            }[0m
-    [36m| [0m[34m|[0m /* 6.76 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.77 */        }[0m
-    [36m| [0m[34m|[0m /* 6.78 */    }[0m
-    [36m| [0m[34m|[0m /* 6.79 */    [0m
-    [36m| [0m[34m|[0m /* 6.80 */    @Attribute[TestCase_6][0m
-    [36m| [0m[34m|[0m /* 6.81 */    func keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.82 */        let random = Array < Byte >(32, repeat: 1)[0m
-    [36m| [0m[34m|[0m /* 6.83 */        let secret = Array < Byte >(64, repeat: 2)[0m
-    [36m| [0m[34m|[0m /* 6.84 */        let line = TlsKeyLogLine("CLIENT_TRAFFIC_SECRET_0", random, secret)[0m
-    [36m| [0m[34m|[0m /* 6.85 */        random[0] = 8[0m
-    [36m| [0m[34m|[0m /* 6.86 */        secret[0] = 9[0m
-    [36m| [0m[34m|[0m /* 6.87 */        expectEqual("line.clientRandomBytes()[0]", "1", line.clientRandomBytes()[0], 1, isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.88 */        expectEqual("line.secretBytes()[0]", "2", line.secretBytes()[0], 2, isDelta: false)[0m
-    [36m| [0m[34m|[0m /* 6.89 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.90 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.91 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.92 */                TlsKeyLogLine("client secret", Array < Byte >(32, repeat: 0),[1u8])[0m
-    [36m| [0m[34m|[0m /* 6.93 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.94 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.95 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.96 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.97 */                }[0m
-    [36m| [0m[34m|[0m /* 6.98 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.99 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.100 */                }[0m
-    [36m| [0m[34m|[0m /* 6.101 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.102 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.103 */                }[0m
-    [36m| [0m[34m|[0m /* 6.104 */                e[0m
-    [36m| [0m[34m|[0m /* 6.105 */            }[0m
-    [36m| [0m[34m|[0m /* 6.106 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.107 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.108 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.109 */            }[0m
-    [36m| [0m[34m|[0m /* 6.110 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.111 */        }[0m
-    [36m| [0m[34m|[0m /* 6.112 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.113 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.114 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.115 */                TlsKeyLogLine(String.fromUtf8(Array < Byte >(129, repeat: b'A')), Array < Byte >(32, repeat: 0),[1u8])[0m
-    [36m| [0m[34m|[0m /* 6.116 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.117 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.118 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.119 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.120 */                }[0m
-    [36m| [0m[34m|[0m /* 6.121 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.122 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.123 */                }[0m
-    [36m| [0m[34m|[0m /* 6.124 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.125 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.126 */                }[0m
-    [36m| [0m[34m|[0m /* 6.127 */                e[0m
-    [36m| [0m[34m|[0m /* 6.128 */            }[0m
-    [36m| [0m[34m|[0m /* 6.129 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.130 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.131 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.132 */            }[0m
-    [36m| [0m[34m|[0m /* 6.133 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.134 */        }[0m
-    [36m| [0m[34m|[0m /* 6.135 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.136 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.137 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.138 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(31, repeat: 0),[1u8])[0m
-    [36m| [0m[34m|[0m /* 6.139 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.140 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.141 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.142 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.143 */                }[0m
-    [36m| [0m[34m|[0m /* 6.144 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.145 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.146 */                }[0m
-    [36m| [0m[34m|[0m /* 6.147 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.148 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.149 */                }[0m
-    [36m| [0m[34m|[0m /* 6.150 */                e[0m
-    [36m| [0m[34m|[0m /* 6.151 */            }[0m
-    [36m| [0m[34m|[0m /* 6.152 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.153 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.154 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.155 */            }[0m
-    [36m| [0m[34m|[0m /* 6.156 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.157 */        }[0m
-    [36m| [0m[34m|[0m /* 6.158 */        try {[0m
-    [36m| [0m[34m|[0m /* 6.159 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.160 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.161 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(32, repeat: 0), Array < Byte >(65, repeat: 0))[0m
-    [36m| [0m[34m|[0m /* 6.162 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.163 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.164 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.165 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.166 */                }[0m
-    [36m| [0m[34m|[0m /* 6.167 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.168 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.169 */                }[0m
-    [36m| [0m[34m|[0m /* 6.170 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.171 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.172 */                }[0m
-    [36m| [0m[34m|[0m /* 6.173 */                e[0m
-    [36m| [0m[34m|[0m /* 6.174 */            }[0m
-    [36m| [0m[34m|[0m /* 6.175 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.176 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.177 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.178 */            }[0m
-    [36m| [0m[34m|[0m /* 6.179 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.180 */        }[0m
-    [36m| [0m[34m|[0m /* 6.181 */    }[0m
-    [36m| [0m[34m|[0m /* 6.182 */    [0m
-    [36m| [0m[34m|[0m /* 6.183 */    @Attribute[TestCase_7][0m
-    [36m| [0m[34m|[0m /* 6.184 */    func clientContextRejectsExternalDecryptionBeforeHandshake(): Unit {[0m
-    [36m| [0m[34m|[0m /* 6.185 */        let error = try {[0m
-    [36m| [0m[34m|[0m /* 6.186 */            try {[0m
-    [36m| [0m[34m|[0m /* 6.187 */                assertEqual("true", "true", true, true)[0m
-    [36m| [0m[34m|[0m /* 6.188 */                TlsClientContext.builder().withExternalDecryptor(M8006Decryptor()).build()[0m
-    [36m| [0m[34m|[0m /* 6.189 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
-    [36m| [0m[34m|[0m /* 6.190 */            } catch(e: TlsContextException) {[0m
-    [36m| [0m[34m|[0m /* 6.191 */                if(e is AssertException) {[0m
-    [36m| [0m[34m|[0m /* 6.192 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.193 */                }[0m
-    [36m| [0m[34m|[0m /* 6.194 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m[34m|[0m /* 6.195 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.196 */                }[0m
-    [36m| [0m[34m|[0m /* 6.197 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.198 */                    throw e[0m
-    [36m| [0m[34m|[0m /* 6.199 */                }[0m
-    [36m| [0m[34m|[0m /* 6.200 */                e[0m
-    [36m| [0m[34m|[0m /* 6.201 */            }[0m
-    [36m| [0m[34m|[0m /* 6.202 */        } catch(e: Exception) {[0m
-    [36m| [0m[34m|[0m /* 6.203 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
-    [36m| [0m[34m|[0m /* 6.204 */                throw e[0m
-    [36m| [0m[34m|[0m /* 6.205 */            }[0m
-    [36m| [0m[34m|[0m /* 6.206 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
-    [36m| [0m[34m|[0m /* 6.207 */        }[0m
-    [36m| [0m[34m|[0m /* 6.208 */        [0m
-    [36m| [0m[34m|[0m /* 6.209 */        match(error.code) {[0m
-    [36m| [0m[34m|[0m /* 6.210 */            case TlsContextErrorCode.InvalidHook =>()[0m
-    [36m| [0m[34m|[0m /* 6.211 */            case _ => fail("client decryptor did not fail with InvalidHook")[0m
-    [36m| [0m[34m|[0m /* 6.212 */        }[0m
-    [36m| [0m[34m|[0m /* 6.213 */    }[0m
-    [36m| [0m[34m|[0m /* 6.214 */    [0m
-    [36m| [0m[34m|[0m /* 6.215 */    init() {[0m
-    [36m| [0m[34m|[0m /* 6.216 */    }[0m
-    [36m| [0m[34m|[0m /* 6.217 */    private func classConfiguration(): Configuration {[0m
-    [36m| [0m[34m|[0m /* 6.218 */        let configuration = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.219 */        [0m
-    [36m| [0m[34m|[0m /* 6.220 */        return configuration[0m
-    [36m| [0m[34m|[0m /* 6.221 */    }[0m
-    [36m| [0m[34m|[0m /* 6.222 */    public override func asTestSuite(): TestSuite {[0m
-    [36m| [0m[34m|[0m /* 6.223 */        [0m
-    [36m| [0m[34m|[0m /* 6.224 */        let suiteConfiguration = classConfiguration()[0m
-    [36m| [0m[34m|[0m /* 6.225 */        let suiteBuilder = TestSuite.builder("TlsM8006ContractTest").configure(suiteConfiguration)[0m
-    [36m| [0m[34m|[0m /* 6.226 */        [0m
-    [36m| [0m[34m|[0m /* 6.227 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.228 */            [0m
-    [36m| [0m[34m|[0m /* 6.229 */            let externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwnedTestFunc = { => externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned();() }[0m
-    [36m| [0m[34m|[0m /* 6.230 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.231 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.232 */            "externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwned",[0m
-    [36m| [0m[34m|[0m /* 6.233 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.234 */            body: externalDecryptionRequestIsStrictlyRawRsaBoundedAndOwnedTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.235 */            )[0m
-    [36m| [0m[34m|[0m /* 6.236 */            )[0m
-    [36m| [0m[34m|[0m /* 6.237 */            [0m
-    [36m| [0m[34m|[0m /* 6.238 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.239 */        [0m
-    [36m| [0m[34m|[0m /* 6.240 */        [0m
-    [36m| [0m[34m|[0m /* 6.241 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.242 */            [0m
-    [36m| [0m[34m|[0m /* 6.243 */            let keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecretsTestFunc = { => keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets();() }[0m
-    [36m| [0m[34m|[0m /* 6.244 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.245 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.246 */            "keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecrets",[0m
-    [36m| [0m[34m|[0m /* 6.247 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.248 */            body: keyLogLineAcceptsOnlyBoundedNssShapeAndOwnsSecretsTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.249 */            )[0m
-    [36m| [0m[34m|[0m /* 6.250 */            )[0m
-    [36m| [0m[34m|[0m /* 6.251 */            [0m
-    [36m| [0m[34m|[0m /* 6.252 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.253 */        [0m
-    [36m| [0m[34m|[0m /* 6.254 */        [0m
-    [36m| [0m[34m|[0m /* 6.255 */        { => let caseConfig = Configuration()[0m
-    [36m| [0m[34m|[0m /* 6.256 */            [0m
-    [36m| [0m[34m|[0m /* 6.257 */            let clientContextRejectsExternalDecryptionBeforeHandshakeTestFunc = { => clientContextRejectsExternalDecryptionBeforeHandshake();() }[0m
-    [36m| [0m[34m|[0m /* 6.258 */            suiteBuilder.add([0m
-    [36m| [0m[34m|[0m /* 6.259 */            UnitTestCase.create([0m
-    [36m| [0m[34m|[0m /* 6.260 */            "clientContextRejectsExternalDecryptionBeforeHandshake",[0m
-    [36m| [0m[34m|[0m /* 6.261 */            configuration: caseConfig,[0m
-    [36m| [0m[34m|[0m /* 6.262 */            body: clientContextRejectsExternalDecryptionBeforeHandshakeTestFunc[0m
-    [36m| [0m[34m|[0m /* 6.263 */            )[0m
-    [36m| [0m[34m|[0m /* 6.264 */            )[0m
-    [36m| [0m[34m|[0m /* 6.265 */            [0m
-    [36m| [0m[34m|[0m /* 6.266 */        }()[0m
-    [36m| [0m[34m|[0m /* 6.267 */        [0m
-    [36m| [0m[34m|[0m /* 6.268 */        return suiteBuilder.build()[0m
-    [36m| [0m[34m|[0m /* 6.269 */    }[0m
-    [36m| [0m[34m|[0m /* 6.270 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
-    [36m| [0m[34m|[0m /* 6.271 */        throw Exception("Unreachable code")[0m
-    [36m| [0m[34m|[0m /* 6.272 */    }[0m
-    [36m| [0m[34m|[0m /* 6.273 */}[0m
-    [36m| [0m[34m|[0m /* 6.274 */[0m
-    [36m| [0m[34m|[0m /* 6.275 */[0m
-    [36m| [0m[34m|[0m /* 6.276 */interface TestPackageExtension_TlsM8006ContractTest {[0m
-    [36m| [0m[34m|[0m /* 6.277 */    func registerTlsM8006ContractTest(): Unit[0m
-    [36m| [0m[34m|[0m /* 6.278 */}[0m
-    [36m| [0m[34m|[0m /* 6.279 */extend TestPackage <: TestPackageExtension_TlsM8006ContractTest {[0m
-    [36m| [0m[34m|[0m /* 6.280 */    @Attribute[TEST_REGISTER][0m
-    [36m| [0m[34m|[0m /* 6.281 */    public func registerTlsM8006ContractTest() {[0m
-    [36m| [0m[34m|[0m /* 6.282 */        registerSuite({ => TlsM8006ContractTest().asTestSuite() })[0m
-    [36m| [0m[34m|[0m /* 6.283 */    }[0m
-    [36m| [0m[34m|[0m /* 6.284 */}[0m
-    [36m| [0m[34m|[0m /* 6.285 */[0m
-    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
-    [36m| [0m
-[34mnote[0m: which is expanded as follows
-   [36m| [0m
-   [36m| [0m/* 6.12 */                ExternalDecryptionRequest("RSA_PKCS1",[1u8])[0m
-   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.13 */                if(e is AssertIntermediateException) {[0m
-   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.14 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.15 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m48[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:20:13:
-   [36m| [0m
-[36m20[0m [36m| [0m            ExternalDecryptionRequest("RSA_RAW", Array<Byte>())[0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: which is expanded as follows
-   [36m| [0m
-   [36m| [0m/* 6.35 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >())[0m
-   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.15 */                if(e is AssertException) {[0m
-   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.16 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.17 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.16 */                if(e is UnittestTimeoutException) {[0m
-   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.17 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.18 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m48[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:23:13:
-   [36m| [0m
-[36m23[0m [36m| [0m            ExternalDecryptionRequest("RSA_RAW", Array<Byte>(1025, repeat: 0))[0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: which is expanded as follows
-   [36m| [0m
-   [36m| [0m/* 6.58 */                ExternalDecryptionRequest("RSA_RAW", Array < Byte >(1025, repeat: 0))[0m
-   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.18 */                if(e is AssertIntermediateException) {[0m
-   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.19 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.20 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.21 */                if(e is UnittestTimeoutException) {[0m
-   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.22 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.23 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:38:13:
-   [36m| [0m
-[36m38[0m [36m| [0m            TlsKeyLogLine("client secret", Array<Byte>(32, repeat: 0), [1u8])[0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: which is expanded as follows
-   [36m| [0m
-   [36m| [0m/* 6.92 */                TlsKeyLogLine("client secret", Array < Byte >(32, repeat: 0),[1u8])[0m
-   [36m| [0m                          [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:41:13:
-   [36m| [0m
-[36m41[0m [36m| [0m            TlsKeyLogLine([0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: which is expanded as follows
-    [36m| [0m
-    [36m| [0m/* 6.115 */                TlsKeyLogLine(String.fromUtf8(Array < Byte >(129, repeat: b'A')), Array < Byte >(32, repeat: 0),[1u8])[0m
-    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-    [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.37 */                if(e is AssertException) {[0m
-   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.38 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.39 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m48[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.38 */                if(e is AssertException) {[0m
-   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.39 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.40 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.40 */                if(e is AssertIntermediateException) {[0m
-   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.41 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.42 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m48[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.41 */                if(e is AssertIntermediateException) {[0m
-   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.42 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.43 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:48:13:
-   [36m| [0m
-[36m48[0m [36m| [0m            TlsKeyLogLine("CLIENT_RANDOM", Array<Byte>(31, repeat: 0), [1u8])[0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: which is expanded as follows
-    [36m| [0m
-    [36m| [0m/* 6.138 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(31, repeat: 0),[1u8])[0m
-    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-    [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.43 */                if(e is UnittestTimeoutException) {[0m
-   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.44 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.45 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/facade_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m48[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.44 */                if(e is UnittestTimeoutException) {[0m
-   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.45 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.46 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unused expression
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:51:13:
-   [36m| [0m
-[36m51[0m [36m| [0m            TlsKeyLogLine("CLIENT_RANDOM", Array<Byte>(32, repeat: 0), Array<Byte>(65, repeat: 0))[0m
-   [36m| [0m            [33m^ unused expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-[34mnote[0m: which is expanded as follows
-    [36m| [0m
-    [36m| [0m/* 6.161 */                TlsKeyLogLine("CLIENT_RANDOM", Array < Byte >(32, repeat: 0), Array < Byte >(65, repeat: 0))[0m
-    [36m| [0m                           [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [0m
-    [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.61 */                if(e is AssertException) {[0m
-   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.62 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.63 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.64 */                if(e is AssertIntermediateException) {[0m
-   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.65 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.66 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-   [36m| [0m
-   [36m| [0m  /* 6.67 */                if(e is UnittestTimeoutException) {[0m
-   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
-   [36m| [0m[33m|[0m /* 6.68 */                    throw e[0m
-   [36m| [0m[33m|[0m /* 6.69 */                }[0m
-   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-   [36m| [0m
-   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.95 */                if(e is AssertException) {[0m
-    [36m| [0m [33m_[0m[33m___________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.96 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.97 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.98 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.99 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.100 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.101 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.102 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.103 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.118 */                if(e is AssertException) {[0m
-    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.119 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.120 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.121 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.122 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.123 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.124 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.125 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.126 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.141 */                if(e is AssertException) {[0m
-    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.142 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.143 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.144 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.145 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.146 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.147 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.148 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.149 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.164 */                if(e is AssertException) {[0m
-    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.165 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.166 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.167 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.168 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.169 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.170 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.171 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.172 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.191 */                if(e is AssertException) {[0m
-    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.192 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.193 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.194 */                if(e is AssertIntermediateException) {[0m
-    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.195 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.196 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-[33mwarning[0m: unreachable block in 'if' expression
-    [36m| [0m
-    [36m| [0m  /* 6.197 */                if(e is UnittestTimeoutException) {[0m
-    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
-    [36m| [0m[33m|[0m /* 6.198 */                    throw e[0m
-    [36m| [0m[33m|[0m /* 6.199 */                }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-[34mnote[0m: the warning occurs after the macro is expanded
-  [36m==>[0m <repo>/src/tls/m8_006_test.cj:6:1:
-   [36m| [0m
-[36m6[0m  [36m| [0m  @Test[0m
-   [36m| [0m [34m_[0m[34m^[0m
-[36m7[0m  [36m| [0m[34m|[0m class TlsM8006ContractTest {[0m
-   [36m| [0m[34m|[0m ...[0m
-[36m67[0m [36m| [0m[34m|[0m }[0m
-   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
-   [36m| [0m
-
-37 warnings generated, 37 warnings printed.
 [33mwarning[0m: unreachable block in 'if' expression
    [36m| [0m
    [36m| [0m  /* 9.45 */                    if(e is AssertException) {[0m
