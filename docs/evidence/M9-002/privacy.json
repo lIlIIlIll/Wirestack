@@ -4,7 +4,7 @@
   "status": "PASS",
   "command": "git privacy-check",
   "exit_code": 0,
-  "scope": "Isolated M9-002 worktree; original workspace untouched",
+  "scope": "C3 M9-002 source candidate and evidence outputs; original workspace untouched",
   "authorization": "Local source and seal commits, push, PR publication, and merge authorized after required checks; production release not authorized",
   "stdout": "",
   "stderr": ""

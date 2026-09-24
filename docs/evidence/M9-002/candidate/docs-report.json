@@ -26,8 +26,8 @@
       }
     },
     "coverageSha256": "111a89364ff59863ac0ab77e699b8105f9bb46e2398a207fb1b3bd22b0526ae5",
-    "declarations": 2478,
-    "docsSha256": "8a812c4e8533f8bccef7fcb517681e3be87b9fb471b4d2f08ea6304a29e33040",
+    "declarations": 2479,
+    "docsSha256": "d7a00b025ccaed15cb9261dd34c40e31e414491de165b9935eab4e236b49e560",
     "htmlPages": [
       "packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b.html",
       "packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e68747470.html",
@@ -1657,7 +1657,7 @@
     }
   ],
   "expectedCjdoc": "0.7.2",
-  "generatedAtUtc": "2026-09-24T10:03:50.131579Z",
+  "generatedAtUtc": "2026-09-24T20:52:33.801716Z",
   "issues": [],
   "layers": [
     {
@@ -1742,8 +1742,8 @@
         }
       },
       "coverageSha256": "c1f1fdaa53fb63c79490b0a48c433f32da42d15944db2d232721b2c4db496c6a",
-      "declarations": 1347,
-      "docsSha256": "26786a93c4f4955b3bf010d72b75ed5b69161f22cf99fd5124d5f9c9b7e694e0",
+      "declarations": 1348,
+      "docsSha256": "3b984f8073d29d870d69eec47f1ff8efa7a86f2344006d84f07bb2cd342bddda",
       "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe",
       "package": "wirestack.net",
       "status": "PASS"
@@ -1792,7 +1792,7 @@
     "src/net/package.cj": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77",
     "src/net/socket_options.cj": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4",
     "src/net/tcp_listener.cj": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8",
-    "src/net/udp_socket.cj": "b0ad619399741abf670f0d953acec578b579dfed80bf12c6605ce14e3ccd832d",
+    "src/net/udp_socket.cj": "51e7b68373e5d6de492644e2134b6333de5eb58051a6c7f6852f0369035e0aac",
     "src/net/unix_datagram_socket.cj": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511",
     "src/net/unix_listener.cj": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967",
     "src/net/unix_stream.cj": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b",

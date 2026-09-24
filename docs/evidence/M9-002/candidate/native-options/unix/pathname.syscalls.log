@@ -1,570 +1,567 @@
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 close(3)                         = 0
-293039 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293039 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/listener"}, 110) = 0
-293039 listen(3, 128)                   = 0
-293039 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293039 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/datagram"}, 110) = 0
-293044 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
-293044 recvfrom(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, 0, NULL, NULL) = 16384
-293044 recvfrom(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, 0, NULL, NULL) = 16384
-293044 sendto(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 close(6)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 connect(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-stream"}, 110) = 0
-293044 sendto(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(3, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 recvfrom(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, 0, NULL, NULL) = 16384
-293044 recvfrom(3, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, 0, NULL, NULL) = 16384
-293044 recvfrom(3, "", 1, 0, NULL, NULL) = 0
-293044 recvfrom(3, "", 1, 0, NULL, NULL) = 0
-293044 sendto(3, "after", 5, MSG_NOSIGNAL, NULL, 0) = 5
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/write-timeout"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 accept4(3, 0x7f6280021360, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
-293044 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
-293044 sendto(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\31\32\33\34\35\36\37 !\"#$%&'()*+,-./012345678"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "^_`abcdefghijklmnopqrstuvwxyz{|}"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\0\1\2\3\4\5\6\7\10\t\n\v\f"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "23456789:;<=>?@ABCDEFGHIJKLMNOPQ"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "wxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37 !\"#$%"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "KLMNOPQRSTUVWXYZ[\\]^_`abcdefghij"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
-293044 sendto(6, "\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257"..., 16384, MSG_NOSIGNAL, NULL, 0) = -1 EAGAIN (Resource temporarily unavailable)
-293044 sendto(6, "\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257"..., 16384, MSG_NOSIGNAL, NULL, 0) = -1 EAGAIN (Resource temporarily unavailable)
-293044 close(6)                         = 0
-293044 close(3)                         = 0
-293044 close(3)                         = 0
-293044 recvfrom(5, "", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, [120 => 88]) = 0
-293044 recvfrom(5, "\1\2\3\4\5", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, [120 => 88]) = 5
-293044 recvfrom(5, "\t\n\v\f", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, [120 => 88]) = 4
-293044 recvfrom(5, "raw", 5, 0, {sa_family=AF_UNIX, sun_path=@"$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h-arbitrary-\377"}, [120 => 86]) = 3
-293044 connect(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, 110) = 0
-293044 sendto(5, "AB", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, 110) = 2
-293044 recvfrom(5, 0x5635e583e200, 5, 0, 0x7f6280032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 recvfrom(5, 0x5635e583e200, 5, 0, 0x7f6280032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 recvfrom(5, "D", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, [120 => 88]) = 1
-293044 sendto(5, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 65507, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, 110) = 65507
-293044 recvfrom(5, 0x5635e583e200, 65508, 0, 0x7f6280032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 recvfrom(5, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 65508, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, [120 => 88]) = 65507
-293044 recvfrom(5, 0x5635e583e200, 5, 0, 0x7f6280032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 close(5)                         = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/connected-identity"}, 110) = 0
-293044 connect(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/identity-peer"}, 110) = 0
-293044 recvfrom(3, 0x7f6280021520, 9, 0, 0x7f6280032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 recvfrom(3, "right", 9, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/identity-peer"}, [120 => 88]) = 5
-293044 sendto(3, "override", 8, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/identity-peer"}, 110) = 8
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-0"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-0"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-1"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-1"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-2"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-2"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-3"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-3"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-4"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-4"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-5"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-5"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-6"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-6"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-7"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-7"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-8"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-8"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-9"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-9"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-10"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-10"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-11"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-11"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-12"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-12"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-13"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-13"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-14"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-14"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-15"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-15"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-16"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-16"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-17"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-17"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-18"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-18"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-19"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-19"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-20"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-20"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-21"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-21"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-22"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-22"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-23"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-23"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-24"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-24"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-25"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-25"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-26"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-26"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-27"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-27"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-28"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-28"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-29"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-29"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-30"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-30"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-31"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-31"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-32"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-32"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-33"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-33"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-34"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-34"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-35"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-35"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-36"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-36"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-37"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-37"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-38"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-38"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-39"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-39"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-40"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-40"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-41"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-41"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-42"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-42"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-43"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-43"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-44"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-44"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-45"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-45"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-46"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-46"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-47"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-47"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-48"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-48"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-49"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-49"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-50"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-50"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-51"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-51"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-52"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-52"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-53"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-53"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-54"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-54"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-55"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-55"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-56"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-56"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-57"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-57"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-58"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-58"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-59"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-59"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-60"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-60"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-61"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-61"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-62"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-62"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-stream-63"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
-293044 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/cycle-datagram-63"}, 110) = 0
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/wait-listener"}, 110) = 0
-293044 listen(3, 128)                   = 0
-293039 accept4(3, 0x5635e581da40, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
-293044 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 5
-293140 recvfrom(5, "ok", 2, 0, NULL, NULL) = 2
-293140 close(5)                         = 0
-293140 close(3)                         = 0
-293140 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293140 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/wait-stream-cancel"}, 110) = 0
-293140 listen(3, 128)                   = 0
-293039 accept4(3, 0x5635e581dac0, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
-293039 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 5
-293044 recvfrom(5, 0x5635e581dc60, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
-293039 sendto(5, "live", 4, MSG_NOSIGNAL, NULL, 0) = 4
-293039 close(5)                         = 0
-293039 close(3)                         = 0
-293039 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293039 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/wait-stream-close"}, 110) = 0
-293039 listen(3, 128)                   = 0
-293039 accept4(3, 0x5635e581dac0, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
-293039 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 5
-293140 recvfrom(5, 0x5635e58715f0, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
-293044 close(5)                         = 0
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/wait-cancel"}, 110) = 0
-293140 recvfrom(3, 0x7f6280021520, 2, 0, 0x5635e581da40, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 sendto(3, "live", 4, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/peer-datagram"}, 110) = 4
-293044 close(3)                         = 0
-293044 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
-293044 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-76zl6y5h/wait-close"}, 110) = 0
-293140 recvfrom(3, 0x7f6280021520, 2, 0, 0x5635e581da40, [120]) = -1 EAGAIN (Resource temporarily unavailable)
-293044 close(3)                         = 0
-293043 +++ exited with 0 +++
-293042 +++ exited with 0 +++
-293041 +++ exited with 0 +++
-293040 +++ exited with 0 +++
-293044 close(4)                         = 0
-293044 +++ exited with 0 +++
-293140 +++ exited with 0 +++
-293045 +++ exited with 0 +++
-293039 +++ exited with 0 +++
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 close(3)                        = 0
+2331372 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331372 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/listener"}, 110) = 0
+2331372 listen(3, 128)                  = 0
+2331372 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331372 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/datagram"}, 110) = 0
+2331378 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
+2331378 recvfrom(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, 0, NULL, NULL) = 16384
+2331378 recvfrom(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, 0, NULL, NULL) = 16384
+2331378 sendto(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331378 sendto(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331378 close(6)                        = 0
+2331378 close(3)                        = 0
+2331378 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331378 connect(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-stream"}, 110) = 0
+2331378 sendto(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331378 sendto(3, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331378 recvfrom(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, 0, NULL, NULL) = 16384
+2331378 recvfrom(3, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, 0, NULL, NULL) = 16384
+2331378 recvfrom(3, "", 1, 0, NULL, NULL) = 0
+2331378 recvfrom(3, "", 1, 0, NULL, NULL) = 0
+2331378 sendto(3, "after", 5, MSG_NOSIGNAL, NULL, 0) = 5
+2331378 close(3)                        = 0
+2331378 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331378 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/write-timeout"}, 110) = 0
+2331378 listen(3, 128)                  = 0
+2331378 accept4(3, 0x7f6770021360, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
+2331379 sendto(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\31\32\33\34\35\36\37 !\"#$%&'()*+,-./012345678"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "^_`abcdefghijklmnopqrstuvwxyz{|}"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\0\1\2\3\4\5\6\7\10\t\n\v\f"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "23456789:;<=>?@ABCDEFGHIJKLMNOPQ"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "wxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37 !\"#$%"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "KLMNOPQRSTUVWXYZ[\\]^_`abcdefghij"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+2331379 sendto(6, "\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257"..., 16384, MSG_NOSIGNAL, NULL, 0) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 sendto(6, "\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257"..., 16384, MSG_NOSIGNAL, NULL, 0) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 close(6)                        = 0
+2331379 close(3)                        = 0
+2331379 recvfrom(5, "", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, [120 => 88]) = 0
+2331379 recvfrom(5, "\1\2\3\4\5", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, [120 => 88]) = 5
+2331379 recvfrom(5, "\t\n\v\f", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, [120 => 88]) = 4
+2331379 recvfrom(5, "raw", 5, 0, {sa_family=AF_UNIX, sun_path=@"$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32-arbitrary-\377"}, [120 => 86]) = 3
+2331379 connect(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, 110) = 0
+2331379 sendto(5, "AB", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, 110) = 2
+2331379 recvfrom(5, 0x5654a0e892e0, 5, 0, 0x7f6768020df0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 recvfrom(5, 0x5654a0e892e0, 5, 0, 0x7f6768020df0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 recvfrom(5, "D", 5, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, [120 => 88]) = 1
+2331379 sendto(5, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 65507, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, 110) = 65507
+2331379 recvfrom(5, 0x5654a0e892e0, 65508, 0, 0x7f6768020df0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 recvfrom(5, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 65508, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, [120 => 88]) = 65507
+2331379 recvfrom(5, 0x5654a0e892e0, 5, 0, 0x7f6768020df0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 close(5)                        = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/connected-identity"}, 110) = 0
+2331379 connect(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/identity-peer"}, 110) = 0
+2331379 recvfrom(3, 0x7f6768000ad0, 9, 0, 0x7f6768020df0, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331379 recvfrom(3, "right", 9, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/identity-peer"}, [120 => 88]) = 5
+2331379 sendto(3, "override", 8, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/identity-peer"}, 110) = 8
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-0"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-0"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-1"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-1"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-2"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-2"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-3"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-3"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-4"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-4"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-5"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-5"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-6"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-6"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-7"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-7"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-8"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-8"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-9"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-9"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-10"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-10"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-11"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-11"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-12"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-12"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-13"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-13"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-14"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-14"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-15"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-15"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-16"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-16"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-17"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-17"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-18"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-18"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-19"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-19"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-20"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-20"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-21"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-21"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-22"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-22"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-23"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-23"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-24"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-24"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-25"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-25"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-26"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-26"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-27"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-27"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-28"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-28"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-29"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-29"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-30"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-30"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-31"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-31"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-32"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-32"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-33"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-33"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-34"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-34"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-35"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-35"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-36"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-36"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-37"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-37"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-38"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-38"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-39"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-39"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-40"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-40"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-41"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-41"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-42"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-42"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-43"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-43"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-44"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-44"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-45"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-45"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-46"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-46"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-47"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-47"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-48"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-48"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-49"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-49"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-50"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-50"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-51"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-51"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-52"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-52"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-53"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-53"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-54"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-54"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-55"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-55"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-56"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-56"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-57"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-57"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-58"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-58"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-59"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-59"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-60"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-60"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-61"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-61"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-62"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-62"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-stream-63"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331379 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+2331379 bind(5, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/cycle-datagram-63"}, 110) = 0
+2331379 close(5)                        = 0
+2331379 close(3)                        = 0
+2331379 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331379 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/wait-listener"}, 110) = 0
+2331379 listen(3, 128)                  = 0
+2331378 accept4(3, 0x7f6770032e70, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
+2331378 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 5
+2331378 recvfrom(5, "ok", 2, 0, NULL, NULL) = 2
+2331378 close(5)                        = 0
+2331378 close(3)                        = 0
+2331378 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331378 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/wait-stream-cancel"}, 110) = 0
+2331378 listen(3, 128)                  = 0
+2331378 accept4(3, 0x7f6770032e70, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
+2331372 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 5
+2331378 recvfrom(5, 0x5654a0e68850, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+2331372 sendto(5, "live", 4, MSG_NOSIGNAL, NULL, 0) = 4
+2331372 close(5)                        = 0
+2331372 close(3)                        = 0
+2331372 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331372 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/wait-stream-close"}, 110) = 0
+2331372 listen(3, 128)                  = 0
+2331372 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 5
+2331378 recvfrom(5, 0x5654a0ebc6d0, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+2331372 close(5)                        = 0
+2331372 close(3)                        = 0
+2331372 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331372 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/wait-cancel"}, 110) = 0
+2331378 recvfrom(3, 0x5654a0e68850, 2, 0, 0x7f6770032f30, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331372 sendto(3, "live", 4, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/peer-datagram"}, 110) = 4
+2331372 close(3)                        = 0
+2331372 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+2331372 bind(3, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m8-003-peer-rtrmjj32/wait-close"}, 110) = 0
+2331378 recvfrom(3, 0x5654a0e68810, 2, 0, 0x7f6770032f30, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331372 close(3)                        = 0
+2331377 +++ exited with 0 +++
+2331376 +++ exited with 0 +++
+2331375 +++ exited with 0 +++
+2331374 +++ exited with 0 +++
+2331372 close(4)                        = 0
+2331379 +++ exited with 0 +++
+2331378 +++ exited with 0 +++
+2331372 +++ exited with 0 +++

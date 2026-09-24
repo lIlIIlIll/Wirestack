@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-24T16:10:34.800292Z",
+  "generated_at_utc": "2026-09-24T21:07:31.305233Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M9-002/verification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "65f578bfcc7436385fccd202dde3d717823b9d04ae51e8cf375f45f7b3dffc33"
+        "sha256": "a35665da8afcc915962e869fc7c031fd048e9475b4ce0dfd72f339b05555913c"
       },
       "source_task": "M9-002"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M9-002/privacy.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "2da1f441589bb7d82380aba322c988995c5aa89b966b16ba9d3ac5cbc0e8d280"
+        "sha256": "f86ab1401ca8a9c146fa59e9fe32d37bc7a850cdca720c6425b2532d204a9dee"
       },
       "source_task": "M9-002"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M9-002/publication.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e1a873009f4314351bf79e8e3e276ae8051d42e58c4e699be5a03b21225d72d7"
+        "sha256": "ceb16b7ad6c2f44c8507f497229e08f0d2fe19ba56623ff3a12dad09fa11a8bb"
       },
       "source_task": "M9-002"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M9-002/candidate/native-options.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7580640070a1ddfe95cd1cbd2ef5873f9143d6366d5b8c94ab0eecd423985722"
+        "sha256": "916359059a777fb7ec7474d2c7f9d57273bf02382b1937a39b6e5676e25d0e12"
       },
       "source_task": "M9-002"
     },
@@ -94,7 +94,7 @@
       "path": "docs/evidence/M9-002/candidate/capabilities.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e2dc2feac8aad41f3446acb67a5c81f42291b6aee741a89e6ee4a1c16d0d4f16"
+        "sha256": "c154f20c5bcd93c378fec4b965129beb33996276df9b49c8832b6d8a4e2ed8c7"
       },
       "source_task": "M9-002"
     },
@@ -103,7 +103,7 @@
       "path": "docs/evidence/M9-002/candidate/api-compatibility.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "8003cc46e7bd79941eb7b205adb0f8ba98eeb1e344d59fa92564b1a25b8c2ea8"
+        "sha256": "b7f432a2003bff1db0a9fbb862e791146af3b88b654ee8d9f5e222f85c4e5d9b"
       },
       "source_task": "M9-002"
     },
@@ -112,12 +112,12 @@
       "path": "docs/evidence/M9-002/candidate/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "791539a317fba9398f4fc1647905715388ba241abaa1ef065816b6fba660faf6"
+        "sha256": "ba0909f970912918a3dc9cb18af2bf2e00da50c2046bbf80fa54b5531d3a8cff"
       },
       "source_task": "M9-002"
     }
   ],
-  "revision": "16e61c91b82357916e7d1fa3424436330f4b6eea",
+  "revision": "1e2f86677c8439a186ec326dca0aef9f30ef202f",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -150,11 +150,11 @@
     },
     "docs/api/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "dc9e4abc8d348fda430abdecda1d676d7ee752e3ff0b45857135ae8f7b8ede6f"
+      "sha256": "bba1ba3713eb2562d1728978220bb819984deefaa5f69e578a41bd9ea86b3812"
     },
     "docs/evidence/M9-002/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "74bebd8804aa60fc3afb775cbc4f032254cbe51ee82fe873f12c75d901f4326d"
+      "sha256": "e6d7d7b7d461da43ce84372183ba4bafe8fc9b6f6c9fc7528eb8f4f5824c834d"
     },
     "docs/evidence/M9-002/api-compatibility.json": {
       "domain": "text-utf8-lf-v1",
@@ -562,7 +562,7 @@
     },
     "docs/evidence/M9-002/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "aa9287aec947b6d1118d0f0981a6d5363eb37d4605dc72992f30a31392d2cced"
+      "sha256": "365b8cc137ad043aaea3713ffbc069c7758c49f9cb08078d0e0f93ec914b543c"
     },
     "docs/evidence/M9-002/workspace.json": {
       "domain": "text-utf8-lf-v1",
@@ -570,7 +570,7 @@
     },
     "docs/guides/network-foundation-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b04fde849512be266cf84f4d62ac05e954e08ffdb95e01a453c3270530805ec3"
+      "sha256": "9cfada8fafe6560519fe884713b1d85b23edae9ceaea35e73b35f6fce64e27dc"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
@@ -582,7 +582,7 @@
     },
     "docs/references/linux-network-capabilities.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "298ad029325f8f7884f9623dca0aa4e6cbf95e9e99f53929dbe952c1e851e370"
+      "sha256": "39d340e9ef10c38b9786d1b7977b408f1805803017bf1f46f1990d30822e675e"
     },
     "docs/references/m7-033-ci-toolchain.json": {
       "domain": "text-utf8-lf-v1",
@@ -1102,7 +1102,7 @@
     },
     "src/internal/transport_stdnet/socket_options.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a9dd53b019c41c1a265b317e9bf82e3b1a0c2dc90087f27905bfe062a49dd812"
+      "sha256": "647d3f766397a072d352fc8eee3e7f8a443604abd24ea4f849111ad2a9f8f378"
     },
     "src/internal/transport_stdnet/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1146,7 +1146,7 @@
     },
     "src/net/m9_002_socket_option_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a81e8f6eaa1702704fc9e6af069def7238922fedfdfcc9686c4a6fcb0ce3afb7"
+      "sha256": "9f88622564742fcbccad09db1b7e4e5cbd1e7a971e4605f4e7d0d47ac665d149"
     },
     "src/net/package.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1162,7 +1162,7 @@
     },
     "src/net/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b0ad619399741abf670f0d953acec578b579dfed80bf12c6605ce14e3ccd832d"
+      "sha256": "51e7b68373e5d6de492644e2134b6333de5eb58051a6c7f6852f0369035e0aac"
     },
     "src/net/unix_datagram_socket.cj": {
       "domain": "text-utf8-lf-v1",

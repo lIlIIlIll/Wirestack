@@ -7,6 +7,22 @@
     "path": "dist/m9-001/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
   },
   "baseline_compile_and_run": "PASS",
+  "baseline_evidence_provenance": {
+    "baseline_artifact_sha256": "105e433737f002099cff63e70ce5f932658cfec0c426778b5f03557be2c8b134",
+    "baseline_compile_and_run": "PASS",
+    "client_fixture_path": "docs/evidence/M9-002/compatibility/old-exhaustive-client.cj",
+    "client_fixture_sha256": "fe12ea9a65778912e2d7176a7e832a28798842fcd87a9508f72e73cc7555f81e",
+    "evidence_seal_revision": "ac4a489ce86f87018cb959250578726ed9ef3cd7",
+    "kind": "REUSED_FROM_SEALED_C2_CANDIDATE",
+    "offline_rebuild": {
+      "qualified_archive_sha256": "105e433737f002099cff63e70ce5f932658cfec0c426778b5f03557be2c8b134",
+      "rebuilt_archive_sha256": "1f6b16ec39f41f5d9adf783dae7e95491b2f84dd3819da7128507a5391f464a8",
+      "status": "REJECTED_NONIDENTICAL",
+      "used_for_baseline_proof": false
+    },
+    "sealed_compatibility_report_sha256": "8003cc46e7bd79941eb7b205adb0f8ba98eeb1e344d59fa92564b1a25b8c2ea8",
+    "source_revision": "16e61c91b82357916e7d1fa3424436330f4b6eea"
+  },
   "baseline_source_digest": {
     "domain": "text-utf8-lf-v1",
     "sha256": "a539fc0831bb02ae984923671074b225a7ec59fa995680c2a904e915fa322e94"
@@ -68,12 +84,15 @@
         "build"
       ],
       "cwd": "<work>/current/consumer",
+      "duration_ms": 9626.104,
       "exit_code": 1,
+      "finished_at_utc": "2026-09-24T20:40:50.674063Z",
       "id": "current-build",
+      "started_at_utc": "2026-09-24T20:40:41.048459Z",
       "stderr": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "ad8a2087cabd9f7629a91e630630e19f6696de90df209686371e6b922de06ba5"
+          "sha256": "2d3b4a2f725b729d7f22cdd73d53a4a84e7c1e60d2b7f55f00d2a48c34eee042"
         },
         "path": "docs/evidence/M9-002/candidate/compatibility/current-build.stderr.log"
       },
@@ -91,17 +110,17 @@
   "current_artifact": {
     "digest": {
       "domain": "artifact-bytes-v1",
-      "sha256": "c6e2ca177b1c5422eaf35ce4810cd7a23bf4712f5d1b558fbfa2fe5394553373"
+      "sha256": "5f630b7a5b19de75017fd29681cf97882636a4dc06e87f36c100eca0d840bf29"
     },
     "path": "dist/m9-002/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
   },
   "current_compile": "EXPECTED_FAILURE",
   "current_source_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "7e966e6096a06a0fbeb383c9366a674f8a71bcac029e4a86664beb3d29342123"
+    "sha256": "666487da0432b4546512316df60b7f8b3d9db5ef03b4841bac52c7ba5e1dbcea"
   },
   "forward_compatibility": "NOT_RUN",
-  "revision": "5968f4dc65a3c64f888b2b81f18386216bbd3608",
+  "revision": "1e2f86677c8439a186ec326dca0aef9f30ef202f",
   "scenario_reference": {
     "binary_verdict": "abi_behavior_compatible in that scenario only",
     "kind": "external corpus classification only",
@@ -111,7 +130,7 @@
   },
   "schema_version": 1,
   "semantic_changes": [
-    "IPv4 UdpSocket broadcast capability is now true; IPv6 remains false",
+    "IPv4 UdpSocket broadcast capability is true only when the endpoint is IPv4 and socket-option support is qualified; IPv6 remains false",
     "SocketOption has four additional variants"
   ],
   "source_compatibility": "INCOMPATIBLE: prior exhaustive SocketOption match requires new cases",
