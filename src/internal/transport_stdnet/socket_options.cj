@@ -75,7 +75,16 @@ public func validateSocketOptions(
     options: Array<StdSocketOption>, target: StdSocketOptionTarget, ipv6: Bool,
     creation: Bool, phase: api.NetworkPhase
 ): Unit {
-    if (!socketOptionsQualified()) { throw optionError(api.NetworkErrorCode.Unsupported, phase) }
+    validateSocketOptionsForPlatform(options, target, ipv6, creation, phase, socketOptionsQualified())
+}
+
+internal func validateSocketOptionsForPlatform(
+    options: Array<StdSocketOption>, target: StdSocketOptionTarget, ipv6: Bool,
+    creation: Bool, phase: api.NetworkPhase, platformQualified: Bool
+): Unit {
+    if (!platformQualified && options.size > 0) {
+        throw optionError(api.NetworkErrorCode.Unsupported, phase)
+    }
     if (options.size > 12) { throw IllegalArgumentException("at most twelve socket options are permitted") }
     var seen: UInt16 = 0
     for (option in options) {
@@ -221,7 +230,15 @@ internal func applySocketOptionList(
     context: api.OperationContext, phase: api.NetworkPhase, defaults: Bool,
     execute: (StdSocketOption) -> Unit
 ): Unit {
-    if (defaults) {
+    applySocketOptionListForPlatform(options, target, context, phase, defaults, socketOptionsQualified(), execute)
+}
+
+internal func applySocketOptionListForPlatform(
+    options: Array<StdSocketOption>, target: StdSocketOptionTarget,
+    context: api.OperationContext, phase: api.NetworkPhase, defaults: Bool,
+    platformQualified: Bool, execute: (StdSocketOption) -> Unit
+): Unit {
+    if (defaults && platformQualified) {
         var seen: UInt16 = 0
         for (option in options) { seen = seen | (1u16 << UInt64(optionIndex(option.name))) }
         let requested: UInt16 = match (target) {

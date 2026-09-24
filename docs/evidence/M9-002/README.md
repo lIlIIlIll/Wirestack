@@ -1,10 +1,11 @@
 # M9-002 — typed Internet socket options
 
-Task acceptance is complete when the [source-bound evidence index](evidence.json)
-verifies. The owner authorized local source and seal commits on the sealed,
-unmerged M9-001 branch. Push, PR creation, merge and release remain unauthorized.
-[publication.json](publication.json) records execution against the exact committed
-candidate. The original dirty workspace remains untouched.
+M9-002 acceptance is bound by the [source-bound evidence index](evidence.json),
+which must verify against the exact candidate. The owner authorized this repair's
+source/seal commits, publication of PR #191 and merge after required gates.
+[publication.json](publication.json) records the candidate and authorization
+boundary; it is not release qualification. The original dirty workspace remains
+untouched.
 
 ## Scope
 
@@ -13,6 +14,8 @@ candidate. The original dirty workspace remains untouched.
   accepted-TCP policy, runtime TCP/UDP configuration and effective native queries.
 - Complete list validation before native allocation/mutation; bounded option
   count and value domains; default overrides; deterministic application order.
+- On unqualified targets, empty options preserve basic factories, explicit lists
+  remain Unsupported, and Linux-specific defaults are skipped.
 - First/middle/last failure cleanup for factories and accepted sockets; runtime
   successful-prefix retention rather than rollback. Accepted failure leaves the
   listener usable. Listener close before publication closes the private accepted
@@ -37,19 +40,19 @@ OperationContext or adding a timeout owner.
 | Workspace and prerequisite safety | [workspace.json](workspace.json): clean isolated worktree, preserved original dirt, exact base commits, successful pre-edit M9-001 seal verification |
 | Exact public SDK capability | [SDK reference](../../references/m9-002-option-sdk.json), [four compiled and executed probes](sdk-probes.json), raw `sdk-probes/*.strace` |
 | Boundaries, target/family/stage rejection, native readback | `M9002SocketOptionTest`: 10 cases; [test plan](test-plan.md) |
-| Ordered faults, cleanup, ownership and concurrency | `M9002OptionExecutionTest`: 13 cases; accepted-close regression fails before the fix and passes after it |
+| Ordered faults, cleanup, ownership and concurrency | `M9002OptionExecutionTest`: 15 cases, including two qualification-injected fallback regressions; accepted-close regression fails before the fix and passes after it |
 | Installed public-only consumers | [native-options.json](native-options.json): 11 native scenarios, five independently built consumers, exact SDK/archive/source/input digests |
 | No socket allocation for invalid factory input | `native-options/options/invalid-option-admission.syscalls.log`: no `socket()` calls |
 | Active UDP send excludes query/configure without losing data | `native-options/options/active-send-control.syscalls.log`: actual delayed `sendto`; consumer verifies typed rejection, exact payload and unchanged Broadcast |
 | Effective buffers, not requested-value echoes | IPv4 and IPv6 installed consumers request 4096 and read 8192 |
 | Capability and API correspondence | [capabilities.json](capabilities.json), [api-inventory.json](api-inventory.json); 86 rows and all 11 required scenarios |
 | Conditional claims and receipt tamper rejection | 24 focused Python cases, including missing IPv6 observation and false IPv6 broadcast claims |
-| Existing lifecycle/protocol regressions | Canonical `scripts/check`: 695 Python checks; 809 Cangjie cases pass, 23 Performance cases excluded, zero failures/errors |
+| Existing lifecycle/protocol regressions | Canonical `scripts/check`: 695 Python checks; 811 Cangjie cases pass, 23 Performance cases excluded, zero failures/errors |
 | API source compatibility | [api-compatibility.json](api-compatibility.json): old exhaustive client builds and runs on the retained M9-001 archive; compilation against the new archive fails specifically on four uncovered cases |
 | Generated API and HTML | [docs-report.json](docs-report.json), generated API artifacts; exact task-level result in [task-check.json](task-check.json) |
 | Final command, source and privacy record | [verification.json](verification.json), [privacy.json](privacy.json) |
 
-Focused Cangjie selection passes 23 cases; its 155 filtered cases are not called
+Focused Cangjie selection passes 25 cases; its 155 filtered cases are not called
 passed. The canonical repository run excludes only its existing 23 Performance
 cases. Diagnostic text such as `SOAK_ALREADY_RUNNING` appears in negative Python
 fixtures; it is not a new long-duration gate execution or a release result.

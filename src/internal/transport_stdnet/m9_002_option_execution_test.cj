@@ -55,6 +55,11 @@ private class OptionTestFault {
     func reset(): Unit { observed = None; calls = 0 }
 }
 
+private class OptionTestCounter {
+    var calls: Int64 = 0
+    func record(): Unit { calls++ }
+}
+
 private class OptionTestBarrier {
     private let entered = AtomicBool(false)
     private let released = AtomicBool(false)
@@ -81,6 +86,48 @@ private class OptionTestBarrier {
 
 @Test
 class M9002OptionExecutionTest {
+    @TestCase
+    func unqualifiedTargetsAllowEmptyOptionsAndRejectExplicitOptions(): Unit {
+        for (target in [StdSocketOptionTarget.Listener, StdSocketOptionTarget.Tcp, StdSocketOptionTarget.Udp]) {
+            validateSocketOptionsForPlatform([], target, false, true, api.NetworkPhase.TcpConnect, false)
+        }
+        var rejected = false
+        try {
+            validateSocketOptionsForPlatform(
+                [StdSocketOption(StdSocketOptionName.NoDelay, 1)], StdSocketOptionTarget.Tcp,
+                false, true, api.NetworkPhase.TcpConnect, false)
+        } catch (error: api.NetworkException) {
+            rejected = match ((error.code, error.category, error.phase)) {
+                case (api.NetworkErrorCode.Unsupported, api.NetworkErrorCategory.Option,
+                    api.NetworkPhase.TcpConnect) => true
+                case _ => false
+            }
+        }
+        @Expect(rejected, true)
+    }
+
+    @TestCase
+    func unqualifiedTargetsSkipOptionDefaults(): Unit {
+        let unqualifiedTcp = OptionTestCounter()
+        applySocketOptionListForPlatform([], StdSocketOptionTarget.Tcp, optionTestContext(),
+            api.NetworkPhase.TcpConnect, true, false, { _ => unqualifiedTcp.record() })
+        @Expect(unqualifiedTcp.calls, 0)
+
+        let unqualifiedListener = OptionTestCounter()
+        applySocketOptionListForPlatform([], StdSocketOptionTarget.Listener, optionTestContext(),
+            api.NetworkPhase.TcpConnect, true, false, { _ => unqualifiedListener.record() })
+        @Expect(unqualifiedListener.calls, 0)
+
+        let qualifiedTcp = OptionTestCounter()
+        applySocketOptionListForPlatform([], StdSocketOptionTarget.Tcp, optionTestContext(),
+            api.NetworkPhase.TcpConnect, true, true, { _ => qualifiedTcp.record() })
+        @Expect(qualifiedTcp.calls, 2)
+
+        let qualifiedListener = OptionTestCounter()
+        applySocketOptionListForPlatform([], StdSocketOptionTarget.Listener, optionTestContext(),
+            api.NetworkPhase.TcpConnect, true, true, { _ => qualifiedListener.record() })
+        @Expect(qualifiedListener.calls, 1)
+    }
     @TestCase
     func factoriesCloseTheirSocketAtEveryExecutorFailurePosition(): Unit {
         for (failure in 1..=3) {
