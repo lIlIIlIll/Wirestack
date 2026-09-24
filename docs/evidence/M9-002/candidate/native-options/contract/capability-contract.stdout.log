@@ -1,6 +1,6 @@
 DEFAULT_CAPABILITIES_PASS
 DNS_PARSER_PASS
-READY 43301
+READY 42627
 CAP TcpListener ipv4-listener true true false false false false false false false
 CAP TcpStream accepted-ipv4 true true false false false false false false false
 CAP TcpStream outgoing-ipv4 true true false false false false false false false

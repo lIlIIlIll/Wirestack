@@ -3,6 +3,7 @@ package wirestack.net
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
+import wirestack.internal.transport_stdnet as stdnet
 
 private func m9002Endpoint(ipv6!: Bool = false): api.SocketEndpoint {
     let bytes = if (ipv6) { Array<Byte>(16, { i => if (i == 15) { 1u8 } else { 0u8 } }) }
@@ -75,6 +76,21 @@ class M9002SocketOptionTest {
             @Expect(m9002Value(socket.getOption(SocketOptionName.MulticastTtl)), 0)
             @Expect(m9002Value(socket.getOption(SocketOptionName.Broadcast)), 0)
             @Expect(m9002Value(socket.getOption(SocketOptionName.MulticastLoopback)), 1)
+        } finally { socket.close() }
+    }
+
+    @TestCase
+    func udpBroadcastCapabilityRequiresQualifiedIpv4Support(): Unit {
+        let ipv4 = api.NetworkEndpoint.Internet(m9002Endpoint())
+        let ipv6 = api.NetworkEndpoint.Internet(m9002Endpoint(ipv6: true))
+        @Expect(udpSocketCapabilities(ipv4, true).broadcast, true)
+        @Expect(udpSocketCapabilities(ipv4, false).broadcast, false)
+        @Expect(udpSocketCapabilities(ipv6, true).broadcast, false)
+        @Expect(udpSocketCapabilities(ipv6, false).broadcast, false)
+
+        let socket = UdpSocket.bind(m9002Endpoint(), context: m9002Context())
+        try {
+            @Expect(socket.capabilities.broadcast, stdnet.socketOptionsQualified())
         } finally { socket.close() }
     }
 

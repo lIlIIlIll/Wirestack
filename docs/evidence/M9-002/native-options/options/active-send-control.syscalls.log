@@ -1,12 +1,12 @@
-3075994 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
-3075994 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
-3075994 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
-3075999 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(49766), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
-3075999 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
-3075998 +++ exited with 0 +++
-3075997 +++ exited with 0 +++
-3075996 +++ exited with 0 +++
-3075995 +++ exited with 0 +++
-3075999 +++ exited with 0 +++
-3076000 +++ exited with 0 +++
-3075994 +++ exited with 0 +++
+4168547 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+4168547 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+4168547 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+4168570 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(53546), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+4168570 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+4168569 +++ exited with 0 +++
+4168557 +++ exited with 0 +++
+4168556 +++ exited with 0 +++
+4168554 +++ exited with 0 +++
+4168571 +++ exited with 0 +++
+4168570 +++ exited with 0 +++
+4168547 +++ exited with 0 +++

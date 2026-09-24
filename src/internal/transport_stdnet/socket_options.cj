@@ -75,7 +75,16 @@ public func validateSocketOptions(
     options: Array<StdSocketOption>, target: StdSocketOptionTarget, ipv6: Bool,
     creation: Bool, phase: api.NetworkPhase
 ): Unit {
-    if (!socketOptionsQualified()) { throw optionError(api.NetworkErrorCode.Unsupported, phase) }
+    validateSocketOptionsForPlatform(options, target, ipv6, creation, phase, socketOptionsQualified())
+}
+
+internal func validateSocketOptionsForPlatform(
+    options: Array<StdSocketOption>, target: StdSocketOptionTarget, ipv6: Bool,
+    creation: Bool, phase: api.NetworkPhase, platformQualified: Bool
+): Unit {
+    if (!platformQualified && options.size > 0) {
+        throw optionError(api.NetworkErrorCode.Unsupported, phase)
+    }
     if (options.size > 12) { throw IllegalArgumentException("at most twelve socket options are permitted") }
     var seen: UInt16 = 0
     for (option in options) {
@@ -283,10 +292,13 @@ private func executeSocketOption(option: StdSocketOption, context: api.Operation
 }
 
 @When[os == "Linux" && arch == "x86_64" && env == "gnu"]
-private func socketOptionsQualified(): Bool { true }
+private func socketOptionsQualifiedImpl(): Bool { true }
 
 @When[os != "Linux" || arch != "x86_64" || env != "gnu"]
-private func socketOptionsQualified(): Bool { false }
+private func socketOptionsQualifiedImpl(): Bool { false }
+
+/** Provider SPI: whether this build target has native socket-option qualification. */
+public func socketOptionsQualified(): Bool { socketOptionsQualifiedImpl() }
 
 public func multicastMembershipQualified(): Bool { socketOptionsQualified() }
 
@@ -296,7 +308,15 @@ internal func applySocketOptionList(
     context: api.OperationContext, phase: api.NetworkPhase, defaults: Bool,
     execute: (StdSocketOption) -> Unit
 ): Unit {
-    if (defaults) {
+    applySocketOptionListForPlatform(options, target, context, phase, defaults, socketOptionsQualified(), execute)
+}
+
+internal func applySocketOptionListForPlatform(
+    options: Array<StdSocketOption>, target: StdSocketOptionTarget,
+    context: api.OperationContext, phase: api.NetworkPhase, defaults: Bool,
+    platformQualified: Bool, execute: (StdSocketOption) -> Unit
+): Unit {
+    if (defaults && platformQualified) {
         var seen: UInt16 = 0
         for (option in options) { seen = seen | (1u16 << UInt64(optionIndex(option.name))) }
         let requested: UInt16 = match (target) {

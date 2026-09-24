@@ -113,15 +113,15 @@ UDP connect、send 或 receive 发出取消会由该操作取得 abortive close 
 socket。TCP `accept` 的活动取消不会采用这条 UDP 所有权规则。
 
 SocketCapabilities reports public callable capabilities, not OS potential.
-On the qualified Linux x86_64 glibc backend, IPv4 UdpSocket supports broadcast
-and IPv4/IPv6 UdpSocket support multicast membership. IPv6 broadcast is false.
+On the qualified Linux x86_64 glibc backend, IPv4 UdpSocket reports broadcast=true only after native socket-option qualification passes; unqualified targets and IPv6 report false.
+The same qualified backend supports IPv4/IPv6 multicast membership.
 The SocketCapabilities constructor default for multicast remains false; the
 UDP factory reports the backend-qualified value. Rebuild consumers after API
 changes; the false-to-true multicast capability is an observable semantic
 change, while the new UdpSocket methods are additive.
 
 <!-- NETWORK_CAPABILITIES:BEGIN -->
-<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "6890e273c4d8f677c7de9434bcfcfac91819e4e072370c2871c293f1f6ae3489"} -->
+<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "756a2de14180cd58be797964654e7537c4385a356e585909cb9a223572d10a8e"} -->
 
 ## 当前 Linux 公开网络能力
 
@@ -152,7 +152,7 @@ change, while the new UdpSocket methods are additive.
 | `UdpSocket` | `nonBlocking` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `closeOnExec` | 支持 | 仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `halfClose` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
-| `UdpSocket` | `broadcast` | 支持 | IPv4 socket 可配置并查询 Broadcast；IPv6 socket 的能力值为 false，调用返回 Option/DatagramSend/Unsupported/Never。此项不代表 multicast membership。 | capability-contract, socket-options, udp-broadcast |
+| `UdpSocket` | `broadcast` | 支持 | 仅在 native socket-option qualification 通过时，IPv4 socket 的 broadcast capability 为 true；未通过 qualification 的 target 即使空选项 bind 成功也报告 false。IPv4 可配置并查询 Broadcast；IPv6 capability 为 false，调用返回 Option/DatagramSend/Unsupported/Never。此项不代表 multicast membership。 | capability-contract, socket-options, udp-broadcast |
 | `UdpSocket` | `multicast` | 支持 | IPv4/IPv6 membership 通过 std.net setsockopt；每个 socket 最多 16 个组/interface 配对，zone 必须通过 interfaceIndex 选择，零表示内核默认接口。 重复 join 或 unmatched leave 返回 Option/DatagramSend/InvalidState/Never；底层错误保留结构化分类。 | internet-ipv4, internet-ipv6, capability-contract, udp-multicast-ipv4, udp-multicast-ipv6, udp-membership-errors |
 | `UdpSocket` | `raw` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
 | `UdpSocket` | `ancillaryData` | 不支持 | 该对象不提供这种公开操作；不存在一个会伪装成功的 callable stub。 | internet-ipv4, internet-ipv6, capability-contract |
@@ -204,7 +204,7 @@ change, while the new UdpSocket methods are additive.
 | Raw Ipv6 open | `RawSocket.open`, `RawSocketDomain.Ipv6` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
 | Raw Packet open | `RawSocket.open`, `RawSocketDomain.Packet` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
 | Raw Netlink open | `RawSocket.open`, `RawSocketDomain.Netlink` | 不支持；未安装 raw adapter；在 native I/O 前稳定拒绝，与权限是否足够无关；不得尝试私有 ABI 或 raw syscall。 `Unsupported/RawSocket/Unsupported/Never`。 | capability-contract |
-| SocketOption 仅值描述 | `SocketOption` | 不支持；构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。 无公开调用入口，不能虚构运行时 Unsupported 方法。 | capability-contract |
+| SocketOption 应用与查询 | `SocketOption`, `TcpListener.bind`, `TcpListener.getOption`, `TcpStream.connect`, `TcpStream.configure`, `TcpStream.getOption`, `UdpSocket.bind`, `UdpSocket.configure`, `UdpSocket.getOption` | 支持；M9-002 已实现 typed factory options、运行期 configure 与 getOption；各 option 的 target、family、stage 见 TCP listener/stream 与 UDP typed 选项条目。未通过 qualification 的目标允许空 factory 列表；显式 option application 和查询返回 Option/Unsupported。 | capability-contract, socket-options |
 | UnsafeSocketOption 仅值描述 | `UnsafeSocketOption` | 不支持；构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。 无公开调用入口，不能虚构运行时 Unsupported 方法。 | capability-contract |
 | 幂等 close/abort 与终态 | `TcpStream.close`, `TcpStream.abort`, `TcpStream.isClosed`, `TcpStream.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | internet-ipv4, internet-ipv6, capability-contract |
 | 幂等 close/abort 与终态 | `TcpListener.close`, `TcpListener.abort`, `TcpListener.isClosed`, `TcpListener.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | internet-ipv4, internet-ipv6, capability-contract |

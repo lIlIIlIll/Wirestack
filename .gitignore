@@ -121,7 +121,6 @@ Thumbs.db
 !docs/evidence/M8-007/**/*.txt
 !docs/evidence/P1-015/**/*.json
 !docs/evidence/P1-015/**/*.log
-!docs/evidence/P1-016/**/*.json
 !docs/evidence/M9-001/**/*.json
 !docs/evidence/M9-001/**/*.log
 !docs/references/linux-network-capabilities.json
