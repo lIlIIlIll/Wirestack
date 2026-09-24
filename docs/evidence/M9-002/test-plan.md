@@ -19,6 +19,8 @@ Scope: Native socket-option support is qualified only on Linux x86_64 glibc for 
 | P011 | Installed consumer uses options via public API and HttpConnector | No checkout or internal API dependency; real traffic and cleanup |
 | P012 | API, capability, documentation or source evidence changes | Current task reports agree; historical reports remain unchanged |
 | P013 | Empty or explicit caller list on an unqualified platform | Accept empty lists and preserve basic networking; reject explicit options as Unsupported before allocation; omit Linux defaults |
+| P014 | IPv4 UDP on provider-qualified versus unqualified target | `socket.capabilities.broadcast` is true only when native option qualification is true; empty-option bind still works on an unqualified target |
+| P015 | IPv6 UDP on provider-qualified versus unqualified target | `socket.capabilities.broadcast` is false in both cases; Broadcast apply/query remains Unsupported |
 
 ## Semantics and scenario matrix
 
@@ -34,6 +36,7 @@ Scope: Native socket-option support is qualified only on Linux x86_64 glibc for 
 | S008 | Installed public-only application with TCP, UDP and custom HttpConnector | P011 | Actual configure/connect/query/traffic/close from extracted package | Source/archive/SDK binding and resource recovery | installed |
 | S009 | New enum cases, named parameters, docs and capability map | P012 | Source/exhaustive-match/ABI effects documented separately | Inventory and architecture/documentation checks; no untested ABI claim | compatibility |
 | S010 | Simulated unqualified target with empty and explicit TCP lists | P001,P002,P013 | Empty list passes for listener/TCP/UDP; explicit option returns Option/Unsupported; provider defaults are skipped | Validation classification and zero default-executor calls when unqualified; qualified TCP/listener still apply two/one defaults | regression |
+| S011 | Internet UDP IPv4 and IPv6 with provider option qualification on and off | P014,P015 | Broadcast capability true only for qualified IPv4; unqualified IPv4 and all IPv6 false; multicast membership remains unsupported | All four address/qualification combinations and bound facade reflect capability contract | regression |
 
 ## Test-plan matrix
 
@@ -44,6 +47,7 @@ Scope: Native socket-option support is qualified only on Linux x86_64 glibc for 
 | T003 | S008 | P011 | Installed socket option consumer | PASS | TCP/UDP and HttpConnector behavior with public APIs and bounded cleanup | installed |
 | T004 | S009 | P012 | API inventory, architecture guard, HTML docs and canonical checks | PASS | No native type leakage; docs/capability facts match implementation | integration |
 | T005 | S010 | P001,P002,P013 | Qualification-injected validator and default-application tests | PASS | Empty lists remain accepted for all factory targets; explicit options preserve stable Unsupported; unqualified TCP/listener defaults produce no calls while qualified TCP/listener retain two/one defaults | regression |
+| T006 | S011 | P014,P015 | `udpBroadcastCapabilityRequiresQualifiedIpv4Support` | PASS | Qualified IPv4 true; unqualified IPv4 and both IPv6 qualification cases false; live facade matches provider qualification | regression |
 
 ## Evidence boundaries
 
@@ -51,10 +55,11 @@ The SDK probes are prerequisite checks, not Wirestack acceptance. Compilation al
 
 ## Executed mapping
 
-- T001: `M9002SocketOptionTest`, 10 cases. Includes buffer -1/0/1/Int32.Max/+1, interface 0/max/+1, Bool toggles, TTL/hop endpoints, complete-list rejection, type/family/stage errors, real ReusePort and IPv6-only/dual-stack behavior. Bool and UInt8 invalid domains are excluded by the public types rather than fabricated runtime inputs.
-- T002: `M9002OptionExecutionTest`, 13 cases. All factory and accepted first/middle/last executor failures reclaim the owned socket; runtime failures preserve exactly the successful prefix. Caller mutation cannot change accepted policy. Barrier-controlled tests cover TCP read/write, UDP receive, listener accept, query/configuration in both directions, cancellation between options, and first close/abort ownership. Listener-close-before-publication is a retained red/green regression.
+- T001: `M9002SocketOptionTest`, 11 cases. Includes buffer -1/0/1/Int32.Max/+1, interface 0/max/+1, Bool toggles, TTL/hop endpoints, complete-list rejection, type/family/stage errors, real ReusePort and IPv6-only/dual-stack behavior. Bool and UInt8 invalid domains are excluded by the public types rather than fabricated runtime inputs.
+- T002: `M9002OptionExecutionTest`, 15 cases. All factory and accepted first/middle/last executor failures reclaim the owned socket; runtime failures preserve exactly the successful prefix. Caller mutation cannot change accepted policy. Barrier-controlled tests cover TCP read/write, UDP receive, listener accept, query/configuration in both directions, cancellation between options, and first close/abort ownership. Listener-close-before-publication is a retained red/green regression.
 - T003: installed `socket-options`, `http-option-connector`, `invalid-option-admission` and `active-send-control`, plus the seven requalified baseline native scenarios. Invalid factory inputs cause no native socket allocation; delayed real `sendto` holds admission while query/configure reject and the packet still arrives intact.
 - T004: 24 focused capability receipt mutation checks; API inventory, architecture guard, full canonical repository gate and generated HTML. The old exhaustive-match client executes on the M9-001 archive and fails compilation on precisely the four added variants in the current archive. Old-binary and cross-SDK execution are NOT_RUN.
 - T005: two internal qualification-injected regressions accept empty option lists for TCP, listener and UDP targets, preserve Option/Unsupported for explicit options, skip TCP/listener defaults on an unqualified target, and retain two TCP plus one listener default on a qualified target. No non-Linux native result is claimed.
+- T006: Focused Cangjie regression `udpBroadcastCapabilityRequiresQualifiedIpv4Support` verifies all four address-family/qualification combinations and the live bound `UdpSocket` capability on this Linux-qualified build; no non-Linux native claim.
 
 Exact command results and normalized logs are linked from `task-check.json` and `verification.json`; no filtered or unavailable case is counted as passed.

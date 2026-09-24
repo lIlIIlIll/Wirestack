@@ -4,6 +4,20 @@ import wirestack as api
 import wirestack.NetworkEndpoint
 import wirestack.internal.transport_stdnet as stdnet
 
+/** Builds endpoint-specific advisory capabilities for the UDP facade. */
+internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint, optionSupportQualified: Bool): SocketCapabilities {
+    let ipv4 = match (localEndpoint) {
+        case NetworkEndpoint.Internet(endpoint) => match (endpoint.address.family) {
+            case api.IpAddressFamily.Ipv4 => true
+            case _ => false
+        }
+        case _ => false
+    }
+    SocketCapabilities(nonBlocking: true, closeOnExec: true, halfClose: false,
+        broadcast: ipv4 && optionSupportQualified, multicast: false, raw: false, ancillaryData: false,
+        zeroLengthDatagramSend: false, connectedDatagramSend: true)
+}
+
 /**
  * Linux Internet datagram socket backed by the shared std.net datagram adapter.
  *
@@ -17,16 +31,7 @@ public class UdpSocket <: DatagramSocket {
 
     internal init(delegate: stdnet.StdNetDatagramSocket) {
         this.core = DatagramSocketFacadeCore(delegate)
-        let ipv4 = match (delegate.localEndpoint) {
-            case NetworkEndpoint.Internet(endpoint) => match (endpoint.address.family) {
-                case api.IpAddressFamily.Ipv4 => true
-                case _ => false
-            }
-            case _ => false
-        }
-        this.capabilityValue = SocketCapabilities(nonBlocking: true, closeOnExec: true,
-            halfClose: false, broadcast: ipv4, multicast: false, raw: false, ancillaryData: false,
-            zeroLengthDatagramSend: false, connectedDatagramSend: true)
+        this.capabilityValue = udpSocketCapabilities(delegate.localEndpoint, stdnet.socketOptionsQualified())
     }
 
     /** Binds an Internet datagram socket without DNS.

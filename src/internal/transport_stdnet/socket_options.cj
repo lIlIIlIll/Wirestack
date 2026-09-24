@@ -219,10 +219,13 @@ private func executeSocketOption(option: StdSocketOption, context: api.Operation
 }
 
 @When[os == "Linux" && arch == "x86_64" && env == "gnu"]
-private func socketOptionsQualified(): Bool { true }
+private func socketOptionsQualifiedImpl(): Bool { true }
 
 @When[os != "Linux" || arch != "x86_64" || env != "gnu"]
-private func socketOptionsQualified(): Bool { false }
+private func socketOptionsQualifiedImpl(): Bool { false }
+
+/** Provider SPI: whether this build target has native socket-option qualification. */
+public func socketOptionsQualified(): Bool { socketOptionsQualifiedImpl() }
 
 /** Executes defaults not overridden by the caller, followed by caller order. */
 internal func applySocketOptionList(

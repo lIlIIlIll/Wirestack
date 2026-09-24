@@ -23,9 +23,9 @@ untouched.
 - Bidirectional exclusion between control and I/O, including a real UDP send
   delayed at the syscall boundary. Cancellation/expiry do not gratuitously abort
   healthy sockets; existing terminal ownership is retained.
-- IPv4/IPv6-specific support and structured unsupported results. IPv4 UDP now
-  advertises broadcast configuration; IPv6 does not. Multicast membership, Unix
-  options, arbitrary raw options and M9-003 remain outside this task.
+- IPv4/IPv6-specific support and structured unsupported results. `UdpSocket.capabilities.broadcast`
+  is true only for qualified IPv4; unqualified targets and IPv6 report false. Multicast
+  membership, Unix options, arbitrary raw options and M9-003 remain outside this task.
 
 The complete public contract, value/stage matrix and migration instructions are
 in the [network guide](../../guides/network-foundation-linux.md#配置与查询-typed-socket-options).
@@ -39,7 +39,7 @@ OperationContext or adding a timeout owner.
 |---|---|
 | Workspace and prerequisite safety | [workspace.json](workspace.json): clean isolated worktree, preserved original dirt, exact base commits, successful pre-edit M9-001 seal verification |
 | Exact public SDK capability | [SDK reference](../../references/m9-002-option-sdk.json), [four compiled and executed probes](sdk-probes.json), raw `sdk-probes/*.strace` |
-| Boundaries, target/family/stage rejection, native readback | `M9002SocketOptionTest`: 10 cases; [test plan](test-plan.md) |
+| Boundaries, target/family/stage rejection, native readback | `M9002SocketOptionTest`: 11 cases; [test plan](test-plan.md) |
 | Ordered faults, cleanup, ownership and concurrency | `M9002OptionExecutionTest`: 15 cases, including two qualification-injected fallback regressions; accepted-close regression fails before the fix and passes after it |
 | Installed public-only consumers | [native-options.json](native-options.json): 11 native scenarios, five independently built consumers, exact SDK/archive/source/input digests |
 | No socket allocation for invalid factory input | `native-options/options/invalid-option-admission.syscalls.log`: no `socket()` calls |
@@ -47,12 +47,12 @@ OperationContext or adding a timeout owner.
 | Effective buffers, not requested-value echoes | IPv4 and IPv6 installed consumers request 4096 and read 8192 |
 | Capability and API correspondence | [capabilities.json](capabilities.json), [api-inventory.json](api-inventory.json); 86 rows and all 11 required scenarios |
 | Conditional claims and receipt tamper rejection | 24 focused Python cases, including missing IPv6 observation and false IPv6 broadcast claims |
-| Existing lifecycle/protocol regressions | Canonical `scripts/check`: 695 Python checks; 811 Cangjie cases pass, 23 Performance cases excluded, zero failures/errors |
-| API source compatibility | [api-compatibility.json](api-compatibility.json): old exhaustive client builds and runs on the retained M9-001 archive; compilation against the new archive fails specifically on four uncovered cases |
+| Existing lifecycle/protocol regressions | Canonical `scripts/check`: 695 Python checks; 812 Cangjie cases pass, 23 Performance cases excluded, zero failures/errors |
+| API source compatibility | [candidate report](candidate/api-compatibility.json): old exhaustive client builds and runs on the retained M9-001 archive; compilation against the committed M9-002 source-candidate archive fails specifically on the four uncovered `SocketOption` cases |
 | Generated API and HTML | [docs-report.json](docs-report.json), generated API artifacts; exact task-level result in [task-check.json](task-check.json) |
 | Final command, source and privacy record | [verification.json](verification.json), [privacy.json](privacy.json) |
 
-Focused Cangjie selection passes 25 cases; its 155 filtered cases are not called
+Focused Cangjie selection passes 26 cases; its 155 filtered cases are not called
 passed. The canonical repository run excludes only its existing 23 Performance
 cases. Diagnostic text such as `SOAK_ALREADY_RUNNING` appears in negative Python
 fixtures; it is not a new long-duration gate execution or a release result.

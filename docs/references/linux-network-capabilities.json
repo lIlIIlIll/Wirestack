@@ -665,7 +665,7 @@
       "supported": true,
       "conditions": [
         "仅限 Linux x86_64 glibc 和固定 SDK。",
-        "IPv4 socket 可配置并查询 Broadcast；IPv6 socket 的能力值为 false，调用返回 Option/DatagramSend/Unsupported/Never。此项不代表 multicast membership。"
+        "仅在 native socket-option qualification 通过时，IPv4 socket 的 broadcast capability 为 true；未通过 qualification 的 target 即使空选项 bind 成功也报告 false。IPv4 可配置并查询 Broadcast；IPv6 capability 为 false，调用返回 Option/DatagramSend/Unsupported/Never。此项不代表 multicast membership。"
       ],
       "failure": null,
       "backend_symbols": [
@@ -2084,29 +2084,32 @@
     {
       "id": "SocketOption-application",
       "object": "SocketOption",
-      "label": "SocketOption 仅值描述",
+      "label": "SocketOption 应用与查询",
       "public_symbols": [
-        "wirestack.net.SocketOption"
+        "wirestack.net.SocketOption",
+        "wirestack.net.TcpListener.bind",
+        "wirestack.net.TcpListener.getOption",
+        "wirestack.net.TcpStream.connect",
+        "wirestack.net.TcpStream.configure",
+        "wirestack.net.TcpStream.getOption",
+        "wirestack.net.UdpSocket.bind",
+        "wirestack.net.UdpSocket.configure",
+        "wirestack.net.UdpSocket.getOption"
       ],
       "capability_field": null,
-      "supported": false,
+      "supported": true,
       "conditions": [
-        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "构造或保存值不会调用 setsockopt；尚无公开 application/query 入口；本任务不实现后续 M9-002。"
+        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的 Internet socket，操作结果仍是权威。",
+        "M9-002 已实现 typed factory options、运行期 configure 与 getOption；各 option 的 target、family、stage 见 TCP listener/stream 与 UDP typed 选项条目。未通过 qualification 的目标允许空 factory 列表；显式 option application 和查询返回 Option/Unsupported。"
       ],
-      "failure": {
-        "kind": "no_public_operation",
-        "category": null,
-        "phase": null,
-        "code": null,
-        "retryability": null
-      },
       "backend_symbols": [
         "wirestack.net.SocketOption"
       ],
       "scenario_ids": [
-        "capability-contract"
+        "capability-contract",
+        "socket-options"
       ],
+      "failure": null,
       "evidence": "docs/evidence/M9-002/native-options.json"
     },
     {
