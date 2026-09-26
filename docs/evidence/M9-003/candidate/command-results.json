@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "commands": [
+    {
+      "id": "committed-udp-plan",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M9-003/test-plan.md",
+        "--json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-udp-plan.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-udp-plan.stderr.log"
+    },
+    {
+      "id": "committed-udp-regressions",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "src/internal/transport_stdnet",
+        "--filter=M9003*.*",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-udp-regressions.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-udp-regressions.stderr.log"
+    },
+    {
+      "id": "committed-capability-negative-regressions",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_network_capabilities",
+        "tools.tests.test_m9_001_native_capabilities",
+        "tools.tests.test_m9_003_api_compatibility",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-capability-negative-regressions.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-capability-negative-regressions.stderr.log"
+    },
+    {
+      "id": "committed-installed-native-udp",
+      "argv": [
+        "python3",
+        "tools/m9_003_native_udp.py",
+        "--offline",
+        "--report",
+        "docs/evidence/M9-003/candidate/native-udp.json",
+        "--output-dir",
+        "docs/evidence/M9-003/candidate/native-udp"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-installed-native-udp.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-installed-native-udp.stderr.log"
+    },
+    {
+      "id": "committed-api-compatibility",
+      "argv": [
+        "python3",
+        "tools/m9_003_api_compatibility.py",
+        "--root",
+        ".",
+        "--report",
+        "docs/evidence/M9-003/candidate/api-compatibility.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-api-compatibility.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-api-compatibility.stderr.log"
+    },
+    {
+      "id": "committed-capability-correspondence",
+      "argv": [
+        "python3",
+        "tools/check_network_capabilities.py",
+        "--check",
+        "--require-native",
+        "--native-report",
+        "docs/evidence/M9-003/candidate/native-udp.json",
+        "--report",
+        "docs/evidence/M9-003/candidate/capabilities.json",
+        "--api-report",
+        "docs/evidence/M9-003/candidate/api-inventory.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-capability-correspondence.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-capability-correspondence.stderr.log"
+    },
+    {
+      "id": "committed-repository-check",
+      "argv": [
+        "scripts/check"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-repository-check.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-repository-check.stderr.log"
+    },
+    {
+      "id": "committed-public-api-html",
+      "argv": [
+        "scripts/check-docs",
+        "--html",
+        "--json",
+        "--output",
+        "docs/evidence/M9-003/candidate/docs-report.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-public-api-html.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-public-api-html.stderr.log"
+    }
+  ]
+}

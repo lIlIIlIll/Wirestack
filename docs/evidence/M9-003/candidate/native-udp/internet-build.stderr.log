@@ -1,0 +1,67 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http2/server_connection.cj:411:28:
+    [36m| [0m
+[36m411[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused function:'waitUntilWriteActive'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:696:5:
+    [36m| [0m
+[36m696[0m [36m| [0m      internal func waitUntilWriteActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m697[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m706[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilReceiveActive'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/udp_socket.cj:718:5:
+    [36m| [0m
+[36m718[0m [36m| [0m      func waitUntilReceiveActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m719[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m725[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilAcceptActive'
+    [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:1054:5:
+     [36m| [0m
+[36m1054[0m [36m| [0m      func waitUntilAcceptActive(timeout: Duration): Bool {[0m
+     [36m| [0m [33m_[0m[33m____^[0m
+[36m1055[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+     [36m| [0m[33m|[0m ...[0m
+[36m1063[0m [36m| [0m[33m|[0m     }[0m
+     [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+     [36m| [0m
+     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+3 warnings generated, 3 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/server_connection.cj:116:23:
+    [36m| [0m
+[36m116[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m <work>/install/wirestack-0.1.0/src/internal/http1/connection_pool.cj:374:5:
+    [36m| [0m
+[36m374[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m375[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m384[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.

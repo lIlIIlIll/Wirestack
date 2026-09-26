@@ -1879,15 +1879,19 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:abort#g0(?api.AbortReason)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:beginClose#g0(Bool)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:beginConnect#g0(NetworkEndpoint)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:beginDisconnect#g0(?NetworkEndpoint)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:close#g0(api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:closedFacadeError#g0(api.NetworkErrorCategory,api.NetworkPhase,?NetworkEndpoint)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:configureOptions#g0(Array<stdnet.StdSocketOption>,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:connect#g0(NetworkEndpoint,api.OperationContext)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:disconnect#g0(api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:failClose#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:finishClose#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:finishConnectFailure#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:isClosed#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:isTerminalLifecycle#g0()",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:joinMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:leaveMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:publishCloseResult#g0(?api.NetworkException)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:queryOption#g0(stdnet.StdSocketOptionName,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:receive#g0(Int64,api.OperationContext)",
@@ -2182,8 +2186,11 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:close#g0(api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:configure#g0(Array<SocketOption>,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:connect#g0(NetworkEndpoint,api.OperationContext)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:disconnect#g0(api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:getOption#g0(SocketOptionName,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:isClosed#g0()",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:joinMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:leaveMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:receive#g0(Int64,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:send#g0(api.ByteSpan,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:sendTo#g0(NetworkEndpoint,api.ByteSpan,api.OperationContext)",
@@ -188826,14 +188833,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 215,
+          "line": 266,
           "column": 5,
-          "byteOffset": 7911
+          "byteOffset": 10147
         },
         "end": {
-          "line": 234,
+          "line": 285,
           "column": 6,
-          "byteOffset": 8535
+          "byteOffset": 10771
         }
       },
       "headerSpelling": "func abort(reason: ?api.AbortReason): Unit",
@@ -188923,14 +188930,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 311,
+          "line": 381,
           "column": 5,
-          "byteOffset": 11220
+          "byteOffset": 14339
         },
         "end": {
-          "line": 334,
+          "line": 404,
           "column": 6,
-          "byteOffset": 12280
+          "byteOffset": 15399
         }
       },
       "headerSpelling": "private func beginClose(coordinated: Bool): (Bool, ?SocketCloseCoordination)",
@@ -189023,14 +189030,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 243,
+          "line": 313,
           "column": 5,
-          "byteOffset": 8725
+          "byteOffset": 11844
         },
         "end": {
-          "line": 263,
+          "line": 333,
           "column": 6,
-          "byteOffset": 9669
+          "byteOffset": 12788
         }
       },
       "headerSpelling": "private func beginConnect(endpoint: NetworkEndpoint): Unit",
@@ -189043,6 +189050,102 @@
           "LPAREN:1:(",
           "IDENTIFIER:8:endpoint",
           "COLON:1::",
+          "IDENTIFIER:15:NetworkEndpoint",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:beginDisconnect#g0(?NetworkEndpoint)",
+      "kind": "function",
+      "name": "beginDisconnect",
+      "qualifiedName": "wirestack.net.DatagramSocketFacadeCore.beginDisconnect",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:DatagramSocketFacadeCore#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "remote",
+          "type": {
+            "kind": "source",
+            "spelling": "?NetworkEndpoint",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/datagram_socket_core.cj",
+        "start": {
+          "line": 294,
+          "column": 5,
+          "byteOffset": 10961
+        },
+        "end": {
+          "line": 311,
+          "column": 6,
+          "byteOffset": 11838
+        }
+      },
+      "headerSpelling": "private func beginDisconnect(remote: ?NetworkEndpoint): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:15:beginDisconnect",
+          "LPAREN:1:(",
+          "IDENTIFIER:6:remote",
+          "COLON:1::",
+          "QUEST:1:?",
           "IDENTIFIER:15:NetworkEndpoint",
           "RPAREN:1:)",
           "COLON:1::",
@@ -189118,14 +189221,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 156,
+          "line": 207,
           "column": 5,
-          "byteOffset": 5641
+          "byteOffset": 7877
         },
         "end": {
-          "line": 213,
+          "line": 264,
           "column": 6,
-          "byteOffset": 7905
+          "byteOffset": 10141
         }
       },
       "headerSpelling": "func close(context: api.OperationContext): Unit",
@@ -189250,14 +189353,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 295,
+          "line": 365,
           "column": 5,
-          "byteOffset": 10736
+          "byteOffset": 13855
         },
         "end": {
-          "line": 309,
+          "line": 379,
           "column": 6,
-          "byteOffset": 11214
+          "byteOffset": 14333
         }
       },
       "headerSpelling": "private func closedFacadeError(\n        category: api.NetworkErrorCategory,\n        phase: api.NetworkPhase,\n        remote: ?NetworkEndpoint\n    ): api.NetworkException",
@@ -189544,6 +189647,102 @@
       "enumNonExhaustive": null
     },
     {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:disconnect#g0(api.OperationContext)",
+      "kind": "function",
+      "name": "disconnect",
+      "qualifiedName": "wirestack.net.DatagramSocketFacadeCore.disconnect",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:DatagramSocketFacadeCore#g0()",
+      "visibility": "internal",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "context",
+          "type": {
+            "kind": "source",
+            "spelling": "api.OperationContext",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/datagram_socket_core.cj",
+        "start": {
+          "line": 95,
+          "column": 5,
+          "byteOffset": 3398
+        },
+        "end": {
+          "line": 120,
+          "column": 6,
+          "byteOffset": 4440
+        }
+      },
+      "headerSpelling": "func disconnect(context: api.OperationContext): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "FUNC:4:func",
+          "IDENTIFIER:10:disconnect",
+          "LPAREN:1:(",
+          "IDENTIFIER:7:context",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
       "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:failClose#g0()",
       "kind": "function",
       "name": "failClose",
@@ -189584,14 +189783,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 366,
+          "line": 436,
           "column": 5,
-          "byteOffset": 13241
+          "byteOffset": 16360
         },
         "end": {
-          "line": 387,
+          "line": 457,
           "column": 6,
-          "byteOffset": 14022
+          "byteOffset": 17141
         }
       },
       "headerSpelling": "private func failClose(): Unit",
@@ -189659,14 +189858,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 354,
+          "line": 424,
           "column": 5,
-          "byteOffset": 12838
+          "byteOffset": 15957
         },
         "end": {
-          "line": 364,
+          "line": 434,
           "column": 6,
-          "byteOffset": 13235
+          "byteOffset": 16354
         }
       },
       "headerSpelling": "private func finishClose(): Unit",
@@ -189734,14 +189933,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 265,
+          "line": 335,
           "column": 5,
-          "byteOffset": 9675
+          "byteOffset": 12794
         },
         "end": {
-          "line": 272,
+          "line": 342,
           "column": 6,
-          "byteOffset": 9934
+          "byteOffset": 13053
         }
       },
       "headerSpelling": "private func finishConnectFailure(): Unit",
@@ -189809,14 +190008,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 236,
+          "line": 287,
           "column": 5,
-          "byteOffset": 8541
+          "byteOffset": 10777
         },
         "end": {
-          "line": 241,
+          "line": 292,
           "column": 6,
-          "byteOffset": 8719
+          "byteOffset": 10955
         }
       },
       "headerSpelling": "func isClosed(): Bool",
@@ -189883,14 +190082,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 401,
+          "line": 471,
           "column": 5,
-          "byteOffset": 14414
+          "byteOffset": 17533
         },
         "end": {
-          "line": 409,
+          "line": 479,
           "column": 6,
-          "byteOffset": 14716
+          "byteOffset": 17835
         }
       },
       "headerSpelling": "private func isTerminalLifecycle(): Bool",
@@ -189904,6 +190103,290 @@
           "RPAREN:1:)",
           "COLON:1::",
           "BOOLEAN:4:Bool"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:joinMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
+      "kind": "function",
+      "name": "joinMulticastGroup",
+      "qualifiedName": "wirestack.net.DatagramSocketFacadeCore.joinMulticastGroup",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:DatagramSocketFacadeCore#g0()",
+      "visibility": "internal",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "group",
+          "type": {
+            "kind": "source",
+            "spelling": "api.IpAddress",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "interfaceIndex",
+          "type": {
+            "kind": "source",
+            "spelling": "UInt32",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "context",
+          "type": {
+            "kind": "source",
+            "spelling": "api.OperationContext",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/datagram_socket_core.cj",
+        "start": {
+          "line": 122,
+          "column": 5,
+          "byteOffset": 4446
+        },
+        "end": {
+          "line": 132,
+          "column": 6,
+          "byteOffset": 5033
+        }
+      },
+      "headerSpelling": "func joinMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32,\n        context: api.OperationContext): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "FUNC:4:func",
+          "IDENTIFIER:18:joinMulticastGroup",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:group",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:9:IpAddress",
+          "COMMA:1:,",
+          "IDENTIFIER:14:interfaceIndex",
+          "COLON:1::",
+          "UINT32:6:UInt32",
+          "COMMA:1:,",
+          "IDENTIFIER:7:context",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::DatagramSocketFacadeCore::function:leaveMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
+      "kind": "function",
+      "name": "leaveMulticastGroup",
+      "qualifiedName": "wirestack.net.DatagramSocketFacadeCore.leaveMulticastGroup",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:DatagramSocketFacadeCore#g0()",
+      "visibility": "internal",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "group",
+          "type": {
+            "kind": "source",
+            "spelling": "api.IpAddress",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "interfaceIndex",
+          "type": {
+            "kind": "source",
+            "spelling": "UInt32",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "context",
+          "type": {
+            "kind": "source",
+            "spelling": "api.OperationContext",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/datagram_socket_core.cj",
+        "start": {
+          "line": 134,
+          "column": 5,
+          "byteOffset": 5039
+        },
+        "end": {
+          "line": 144,
+          "column": 6,
+          "byteOffset": 5628
+        }
+      },
+      "headerSpelling": "func leaveMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32,\n        context: api.OperationContext): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "FUNC:4:func",
+          "IDENTIFIER:19:leaveMulticastGroup",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:group",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:9:IpAddress",
+          "COMMA:1:,",
+          "IDENTIFIER:14:interfaceIndex",
+          "COLON:1::",
+          "UINT32:6:UInt32",
+          "COMMA:1:,",
+          "IDENTIFIER:7:context",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
         ]
       },
       "semantic": {
@@ -189975,14 +190458,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 389,
+          "line": 459,
           "column": 5,
-          "byteOffset": 14028
+          "byteOffset": 17147
         },
         "end": {
-          "line": 399,
+          "line": 469,
           "column": 6,
-          "byteOffset": 14408
+          "byteOffset": 17527
         }
       },
       "headerSpelling": "private func publishCloseResult(result: ?api.NetworkException): Unit",
@@ -190213,14 +190696,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 135,
+          "line": 186,
           "column": 5,
-          "byteOffset": 4741
+          "byteOffset": 6977
         },
         "end": {
-          "line": 154,
+          "line": 205,
           "column": 6,
-          "byteOffset": 5635
+          "byteOffset": 7871
         }
       },
       "headerSpelling": "func receive(capacity: Int64, context: api.OperationContext): DatagramReceiveResult",
@@ -190331,14 +190814,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 274,
+          "line": 344,
           "column": 5,
-          "byteOffset": 9940
+          "byteOffset": 13059
         },
         "end": {
-          "line": 293,
+          "line": 363,
           "column": 6,
-          "byteOffset": 10730
+          "byteOffset": 13849
         }
       },
       "headerSpelling": "private func requireOpen(\n        category: api.NetworkErrorCategory,\n        phase: api.NetworkPhase\n    ): Unit",
@@ -190417,14 +190900,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 411,
+          "line": 481,
           "column": 5,
-          "byteOffset": 14722
+          "byteOffset": 17841
         },
         "end": {
-          "line": 420,
+          "line": 490,
           "column": 6,
-          "byteOffset": 15095
+          "byteOffset": 18214
         }
       },
       "headerSpelling": "private func retainAbortOwnership(): Bool",
@@ -190509,14 +190992,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 336,
+          "line": 406,
           "column": 5,
-          "byteOffset": 12286
+          "byteOffset": 15405
         },
         "end": {
-          "line": 352,
+          "line": 422,
           "column": 6,
-          "byteOffset": 12832
+          "byteOffset": 15951
         }
       },
       "headerSpelling": "private func runClose(context: api.OperationContext): ?api.NetworkException",
@@ -190627,14 +191110,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 95,
+          "line": 146,
           "column": 5,
-          "byteOffset": 3398
+          "byteOffset": 5634
         },
         "end": {
-          "line": 111,
+          "line": 162,
           "column": 6,
-          "byteOffset": 4028
+          "byteOffset": 6264
         }
       },
       "headerSpelling": "func send(source: api.ByteSpan, context: api.OperationContext): Int64",
@@ -190765,14 +191248,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 113,
+          "line": 164,
           "column": 5,
-          "byteOffset": 4034
+          "byteOffset": 6270
         },
         "end": {
-          "line": 133,
+          "line": 184,
           "column": 6,
-          "byteOffset": 4735
+          "byteOffset": 6971
         }
       },
       "headerSpelling": "func sendTo(\n        endpoint: NetworkEndpoint,\n        source: api.ByteSpan,\n        context: api.OperationContext\n    ): Int64",
@@ -190889,14 +191372,14 @@
       "source": {
         "path": "src/net/datagram_socket_core.cj",
         "start": {
-          "line": 422,
+          "line": 492,
           "column": 5,
-          "byteOffset": 15101
+          "byteOffset": 18220
         },
         "end": {
-          "line": 448,
+          "line": 518,
           "column": 6,
-          "byteOffset": 16188
+          "byteOffset": 19307
         }
       },
       "headerSpelling": "private func validatePayload(\n        source: api.ByteSpan,\n        diagnosticPeer: ?NetworkEndpoint\n    ): Unit",
@@ -223268,14 +223751,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 32,
+          "line": 33,
           "column": 5,
-          "byteOffset": 1271
+          "byteOffset": 1307
         },
         "end": {
-          "line": 35,
+          "line": 37,
           "column": 6,
-          "byteOffset": 1496
+          "byteOffset": 1544
         }
       },
       "headerSpelling": "internal init(delegate: stdnet.StdNetDatagramSocket)",
@@ -223400,14 +223883,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 167,
+          "line": 196,
           "column": 5,
-          "byteOffset": 7200
+          "byteOffset": 8714
         },
         "end": {
-          "line": 169,
+          "line": 198,
           "column": 6,
-          "byteOffset": 7309
+          "byteOffset": 8823
         }
       },
       "headerSpelling": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit",
@@ -223601,14 +224084,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 43,
+          "line": 45,
           "column": 5,
-          "byteOffset": 1826
+          "byteOffset": 1874
         },
         "end": {
-          "line": 71,
+          "line": 73,
           "column": 6,
-          "byteOffset": 2846
+          "byteOffset": 2894
         }
       },
       "headerSpelling": "public static func bind(\n        endpoint: api.SocketEndpoint,\n        options!: Array<SocketOption> = [],\n        context!: api.OperationContext = api.OperationContext.background()\n    ): UdpSocket",
@@ -223740,14 +224223,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 162,
+          "line": 191,
           "column": 5,
-          "byteOffset": 6978
+          "byteOffset": 8492
         },
         "end": {
-          "line": 162,
+          "line": 191,
           "column": 80,
-          "byteOffset": 7053
+          "byteOffset": 8567
         }
       },
       "headerSpelling": "public func close(): Unit",
@@ -223906,14 +224389,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 159,
+          "line": 188,
           "column": 5,
-          "byteOffset": 6827
+          "byteOffset": 8341
         },
         "end": {
-          "line": 159,
+          "line": 188,
           "column": 84,
-          "byteOffset": 6906
+          "byteOffset": 8420
         }
       },
       "headerSpelling": "public func close(context!: api.OperationContext): Unit",
@@ -224067,14 +224550,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 77,
+          "line": 79,
           "column": 5,
-          "byteOffset": 3064
+          "byteOffset": 3112
         },
         "end": {
-          "line": 79,
+          "line": 81,
           "column": 6,
-          "byteOffset": 3266
+          "byteOffset": 3314
         }
       },
       "headerSpelling": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit",
@@ -224243,14 +224726,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 106,
+          "line": 108,
           "column": 5,
-          "byteOffset": 4595
+          "byteOffset": 4643
         },
         "end": {
-          "line": 112,
+          "line": 114,
           "column": 6,
-          "byteOffset": 4879
+          "byteOffset": 4927
         }
       },
       "headerSpelling": "public func connect(\n        endpoint: NetworkEndpoint,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Unit",
@@ -224265,6 +224748,150 @@
           "COLON:1::",
           "IDENTIFIER:15:NetworkEndpoint",
           "COMMA:1:,",
+          "IDENTIFIER:7:context",
+          "NOT:1:!",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "ASSIGN:1:=",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "DOT:1:.",
+          "IDENTIFIER:10:background",
+          "LPAREN:1:(",
+          "RPAREN:1:)",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:disconnect#g0(api.OperationContext)",
+      "kind": "function",
+      "name": "disconnect",
+      "qualifiedName": "wirestack.net.UdpSocket.disconnect",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:UdpSocket#g0()",
+      "visibility": "public",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "context",
+          "type": {
+            "kind": "source",
+            "spelling": "api.OperationContext",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Shared absolute deadline and cancellation token.",
+          "defaultExpression": "api.OperationContext.background()"
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": {
+        "rawText": "/** Disconnects the selected peer while preserving the bound UDP socket. Repeated calls are idempotent.\n     * @param context Shared absolute deadline and cancellation token.\n     */",
+        "summary": "Disconnects the selected peer while preserving the bound UDP socket. Repeated calls are idempotent.",
+        "description": "",
+        "markdown": {
+          "kind": "document",
+          "literal": "",
+          "source": null,
+          "metadata": null,
+          "children": [
+            {
+              "kind": "paragraph",
+              "literal": "",
+              "source": null,
+              "metadata": null,
+              "children": [
+                {
+                  "kind": "text",
+                  "literal": "Disconnects the selected peer while preserving the bound UDP socket. Repeated calls are idempotent.",
+                  "source": null,
+                  "metadata": null,
+                  "children": [
+                    
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": [
+          {
+            "name": "param",
+            "subject": "context",
+            "description": "Shared absolute deadline and cancellation token.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          }
+        ]
+      },
+      "source": {
+        "path": "src/net/udp_socket.cj",
+        "start": {
+          "line": 119,
+          "column": 5,
+          "byteOffset": 5120
+        },
+        "end": {
+          "line": 121,
+          "column": 6,
+          "byteOffset": 5257
+        }
+      },
+      "headerSpelling": "public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PUBLIC:6:public",
+          "FUNC:4:func",
+          "IDENTIFIER:10:disconnect",
+          "LPAREN:1:(",
           "IDENTIFIER:7:context",
           "NOT:1:!",
           "COLON:1::",
@@ -224423,14 +225050,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 86,
+          "line": 88,
           "column": 5,
-          "byteOffset": 3512
+          "byteOffset": 3560
         },
         "end": {
-          "line": 88,
+          "line": 90,
           "column": 6,
-          "byteOffset": 3731
+          "byteOffset": 3779
         }
       },
       "headerSpelling": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption",
@@ -224548,14 +225175,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 172,
+          "line": 201,
           "column": 5,
-          "byteOffset": 7380
+          "byteOffset": 8894
         },
         "end": {
-          "line": 172,
+          "line": 201,
           "column": 53,
-          "byteOffset": 7428
+          "byteOffset": 8942
         }
       },
       "headerSpelling": "public func isClosed(): Bool",
@@ -224569,6 +225196,420 @@
           "RPAREN:1:)",
           "COLON:1::",
           "BOOLEAN:4:Bool"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:joinMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
+      "kind": "function",
+      "name": "joinMulticastGroup",
+      "qualifiedName": "wirestack.net.UdpSocket.joinMulticastGroup",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:UdpSocket#g0()",
+      "visibility": "public",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "group",
+          "type": {
+            "kind": "source",
+            "spelling": "api.IpAddress",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Multicast IP address without a zone.",
+          "defaultExpression": null
+        },
+        {
+          "name": "interfaceIndex",
+          "type": {
+            "kind": "source",
+            "spelling": "UInt32",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Native interface index; zero selects the kernel default.",
+          "defaultExpression": "0"
+        },
+        {
+          "name": "context",
+          "type": {
+            "kind": "source",
+            "spelling": "api.OperationContext",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Shared absolute deadline and cancellation token.",
+          "defaultExpression": "api.OperationContext.background()"
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": {
+        "rawText": "/** Joins an IPv4 or IPv6 multicast group on this socket family. At most sixteen memberships are tracked.\n     * @param group Multicast IP address without a zone.\n     * @param interfaceIndex Native interface index; zero selects the kernel default.\n     * @param context Shared absolute deadline and cancellation token.\n     */",
+        "summary": "Joins an IPv4 or IPv6 multicast group on this socket family. At most sixteen memberships are tracked.",
+        "description": "",
+        "markdown": {
+          "kind": "document",
+          "literal": "",
+          "source": null,
+          "metadata": null,
+          "children": [
+            {
+              "kind": "paragraph",
+              "literal": "",
+              "source": null,
+              "metadata": null,
+              "children": [
+                {
+                  "kind": "text",
+                  "literal": "Joins an IPv4 or IPv6 multicast group on this socket family. At most sixteen memberships are tracked.",
+                  "source": null,
+                  "metadata": null,
+                  "children": [
+                    
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": [
+          {
+            "name": "param",
+            "subject": "group",
+            "description": "Multicast IP address without a zone.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          },
+          {
+            "name": "param",
+            "subject": "interfaceIndex",
+            "description": "Native interface index; zero selects the kernel default.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          },
+          {
+            "name": "param",
+            "subject": "context",
+            "description": "Shared absolute deadline and cancellation token.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          }
+        ]
+      },
+      "source": {
+        "path": "src/net/udp_socket.cj",
+        "start": {
+          "line": 128,
+          "column": 5,
+          "byteOffset": 5595
+        },
+        "end": {
+          "line": 131,
+          "column": 6,
+          "byteOffset": 5830
+        }
+      },
+      "headerSpelling": "public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,\n        context!: api.OperationContext = api.OperationContext.background()): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PUBLIC:6:public",
+          "FUNC:4:func",
+          "IDENTIFIER:18:joinMulticastGroup",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:group",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:9:IpAddress",
+          "COMMA:1:,",
+          "IDENTIFIER:14:interfaceIndex",
+          "NOT:1:!",
+          "COLON:1::",
+          "UINT32:6:UInt32",
+          "ASSIGN:1:=",
+          "INTEGER_LITERAL:1:0",
+          "COMMA:1:,",
+          "IDENTIFIER:7:context",
+          "NOT:1:!",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "ASSIGN:1:=",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "DOT:1:.",
+          "IDENTIFIER:10:background",
+          "LPAREN:1:(",
+          "RPAREN:1:)",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UdpSocket::function:leaveMulticastGroup#g0(api.IpAddress,UInt32,api.OperationContext)",
+      "kind": "function",
+      "name": "leaveMulticastGroup",
+      "qualifiedName": "wirestack.net.UdpSocket.leaveMulticastGroup",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:UdpSocket#g0()",
+      "visibility": "public",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "group",
+          "type": {
+            "kind": "source",
+            "spelling": "api.IpAddress",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Multicast IP address without a zone.",
+          "defaultExpression": null
+        },
+        {
+          "name": "interfaceIndex",
+          "type": {
+            "kind": "source",
+            "spelling": "UInt32",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Native interface index used for the join.",
+          "defaultExpression": "0"
+        },
+        {
+          "name": "context",
+          "type": {
+            "kind": "source",
+            "spelling": "api.OperationContext",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": "Shared absolute deadline and cancellation token.",
+          "defaultExpression": "api.OperationContext.background()"
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": {
+        "rawText": "/** Leaves a previously joined group/interface pair; duplicate joins and unmatched leaves fail InvalidState.\n     * @param group Multicast IP address without a zone.\n     * @param interfaceIndex Native interface index used for the join.\n     * @param context Shared absolute deadline and cancellation token.\n     */",
+        "summary": "Leaves a previously joined group/interface pair; duplicate joins and unmatched leaves fail InvalidState.",
+        "description": "",
+        "markdown": {
+          "kind": "document",
+          "literal": "",
+          "source": null,
+          "metadata": null,
+          "children": [
+            {
+              "kind": "paragraph",
+              "literal": "",
+              "source": null,
+              "metadata": null,
+              "children": [
+                {
+                  "kind": "text",
+                  "literal": "Leaves a previously joined group/interface pair; duplicate joins and unmatched leaves fail InvalidState.",
+                  "source": null,
+                  "metadata": null,
+                  "children": [
+                    
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": [
+          {
+            "name": "param",
+            "subject": "group",
+            "description": "Multicast IP address without a zone.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          },
+          {
+            "name": "param",
+            "subject": "interfaceIndex",
+            "description": "Native interface index used for the join.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          },
+          {
+            "name": "param",
+            "subject": "context",
+            "description": "Shared absolute deadline and cancellation token.",
+            "referenceState": "unavailable",
+            "targetSymbolId": null
+          }
+        ]
+      },
+      "source": {
+        "path": "src/net/udp_socket.cj",
+        "start": {
+          "line": 138,
+          "column": 5,
+          "byteOffset": 6156
+        },
+        "end": {
+          "line": 141,
+          "column": 6,
+          "byteOffset": 6393
+        }
+      },
+      "headerSpelling": "public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,\n        context!: api.OperationContext = api.OperationContext.background()): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PUBLIC:6:public",
+          "FUNC:4:func",
+          "IDENTIFIER:19:leaveMulticastGroup",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:group",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:9:IpAddress",
+          "COMMA:1:,",
+          "IDENTIFIER:14:interfaceIndex",
+          "NOT:1:!",
+          "COLON:1::",
+          "UINT32:6:UInt32",
+          "ASSIGN:1:=",
+          "INTEGER_LITERAL:1:0",
+          "COMMA:1:,",
+          "IDENTIFIER:7:context",
+          "NOT:1:!",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "ASSIGN:1:=",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:OperationContext",
+          "DOT:1:.",
+          "IDENTIFIER:10:background",
+          "LPAREN:1:(",
+          "RPAREN:1:)",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
         ]
       },
       "semantic": {
@@ -224710,14 +225751,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 146,
+          "line": 175,
           "column": 5,
-          "byteOffset": 6338
+          "byteOffset": 7852
         },
         "end": {
-          "line": 151,
+          "line": 180,
           "column": 6,
-          "byteOffset": 6535
+          "byteOffset": 8049
         }
       },
       "headerSpelling": "public func receive(\n        capacity: Int64,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): DatagramReceiveResult",
@@ -224890,14 +225931,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 119,
+          "line": 148,
           "column": 5,
-          "byteOffset": 5145
+          "byteOffset": 6659
         },
         "end": {
-          "line": 124,
+          "line": 153,
           "column": 6,
-          "byteOffset": 5323
+          "byteOffset": 6837
         }
       },
       "headerSpelling": "public func send(\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -225097,14 +226138,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 132,
+          "line": 161,
           "column": 5,
-          "byteOffset": 5704
+          "byteOffset": 7218
         },
         "end": {
-          "line": 139,
+          "line": 168,
           "column": 6,
-          "byteOffset": 6025
+          "byteOffset": 7539
         }
       },
       "headerSpelling": "public func sendTo(\n        endpoint: NetworkEndpoint,\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -225228,14 +226269,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 94,
+          "line": 96,
           "column": 5,
-          "byteOffset": 3948
+          "byteOffset": 3996
         },
         "end": {
-          "line": 94,
+          "line": 96,
           "column": 79,
-          "byteOffset": 4022
+          "byteOffset": 4070
         }
       },
       "headerSpelling": "public prop capabilities: SocketCapabilities",
@@ -225333,14 +226374,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 97,
+          "line": 99,
           "column": 5,
-          "byteOffset": 4099
+          "byteOffset": 4147
         },
         "end": {
-          "line": 97,
+          "line": 99,
           "column": 87,
-          "byteOffset": 4181
+          "byteOffset": 4229
         }
       },
       "headerSpelling": "public prop localEndpoint: ?NetworkEndpoint",
@@ -225439,14 +226480,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 100,
+          "line": 102,
           "column": 5,
-          "byteOffset": 4257
+          "byteOffset": 4305
         },
         "end": {
-          "line": 100,
+          "line": 102,
           "column": 83,
-          "byteOffset": 4335
+          "byteOffset": 4383
         }
       },
       "headerSpelling": "public prop remoteEndpoint: ?NetworkEndpoint",
@@ -225545,14 +226586,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 91,
+          "line": 93,
           "column": 5,
-          "byteOffset": 3803
+          "byteOffset": 3851
         },
         "end": {
-          "line": 91,
+          "line": 93,
           "column": 60,
-          "byteOffset": 3858
+          "byteOffset": 3906
         }
       },
       "headerSpelling": "public prop state: SocketState",
@@ -225618,14 +226659,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 30,
+          "line": 31,
           "column": 5,
-          "byteOffset": 1218
+          "byteOffset": 1254
         },
         "end": {
-          "line": 30,
+          "line": 31,
           "column": 52,
-          "byteOffset": 1265
+          "byteOffset": 1301
         }
       },
       "headerSpelling": "private let capabilityValue: SocketCapabilities",
@@ -225691,14 +226732,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 29,
+          "line": 30,
           "column": 5,
-          "byteOffset": 1171
+          "byteOffset": 1207
         },
         "end": {
-          "line": 29,
+          "line": 30,
           "column": 47,
-          "byteOffset": 1213
+          "byteOffset": 1249
         }
       },
       "headerSpelling": "private let core: DatagramSocketFacadeCore",
@@ -234754,9 +235795,9 @@
           "byteOffset": 282
         },
         "end": {
-          "line": 449,
+          "line": 519,
           "column": 2,
-          "byteOffset": 16190
+          "byteOffset": 19309
         }
       },
       "headerSpelling": "internal class DatagramSocketFacadeCore",
@@ -235879,14 +236920,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 28,
+          "line": 29,
           "column": 1,
-          "byteOffset": 1124
+          "byteOffset": 1160
         },
         "end": {
-          "line": 173,
+          "line": 202,
           "column": 2,
-          "byteOffset": 7430
+          "byteOffset": 8944
         }
       },
       "headerSpelling": "public class UdpSocket <: DatagramSocket",
@@ -245668,14 +246709,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 175,
+          "line": 204,
           "column": 1,
-          "byteOffset": 7432
+          "byteOffset": 8946
         },
         "end": {
-          "line": 191,
+          "line": 220,
           "column": 2,
-          "byteOffset": 8097
+          "byteOffset": 9611
         }
       },
       "headerSpelling": "private func requireUdpInternetEndpoint(\n    endpoint: NetworkEndpoint,\n    localEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>\n): api.SocketEndpoint",
@@ -247819,12 +248860,12 @@
           "byteOffset": 208
         },
         "end": {
-          "line": 19,
+          "line": 20,
           "column": 2,
-          "byteOffset": 821
+          "byteOffset": 857
         }
       },
-      "headerSpelling": "internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint, optionSupportQualified: Bool): SocketCapabilities",
+      "headerSpelling": "internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint,\n    optionSupportQualified: Bool): SocketCapabilities",
       "sourceApiSignature": {
         "state": "available",
         "tokens": [

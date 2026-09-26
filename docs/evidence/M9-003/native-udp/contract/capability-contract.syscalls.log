@@ -1,0 +1,88 @@
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 close(3)                        = 0
+3681005 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f672dfffce8, parent_tid=0x7f672dfff990, exit_signal=0, stack=0x7f672cfff000, stack_size=0xfffec0, tls=0x7f672dfff6c0} => {parent_tid=[3681006]}, 88) = 3681006
+3681005 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f672cffece8, parent_tid=0x7f672cffe990, exit_signal=0, stack=0x7f672bffe000, stack_size=0xfffec0, tls=0x7f672cffe6c0} => {parent_tid=[3681007]}, 88) = 3681007
+3681005 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f672bffdce8, parent_tid=0x7f672bffd990, exit_signal=0, stack=0x7f672befd000, stack_size=0xffec0, tls=0x7f672bffd6c0} => {parent_tid=[3681008]}, 88) = 3681008
+3681005 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f672bcfcce8, parent_tid=0x7f672bcfc990, exit_signal=0, stack=0x7f672acfc000, stack_size=0xfffec0, tls=0x7f672bcfc6c0} => {parent_tid=[3681015]}, 88) = 3681015
+3681005 close(3)                        = 0
+3681005 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+3681005 bind(3, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+3681005 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+3681005 bind(5, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+3681005 socket(AF_INET6, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 6
+3681005 bind(6, {sa_family=AF_INET6, sin6_port=htons(0), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 0
+3681005 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 7
+3681005 bind(7, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/listener"}, 110) = 0
+3681005 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 8
+3681005 bind(8, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/datagram"}, 110) = 0
+3681005 accept4(3, 0x55dfc113eb10, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
+3681005 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f672acfbce8, parent_tid=0x7f672acfb990, exit_signal=0, stack=0x7f672abfb000, stack_size=0xffec0, tls=0x7f672acfb6c0} => {parent_tid=[3681030]}, 88) = 3681030
+3681005 accept4(3, {sa_family=AF_INET, sin_port=htons(44314), sin_addr=inet_addr("127.0.0.1")}, [120 => 16], SOCK_CLOEXEC|SOCK_NONBLOCK) = 9
+3681005 accept4(7, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 10
+3681030 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f672abface8, parent_tid=0x7f672abfa990, exit_signal=0, stack=0x7f672aafa000, stack_size=0xffec0, tls=0x7f672abfa6c0} => {parent_tid=[3681031]}, 88) = 3681031
+3681030 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 11
+3681030 connect(11, {sa_family=AF_INET, sin_port=htons(57391), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+3681030 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 12
+3681030 connect(12, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/outgoing-stream"}, 110) = 0
+3681030 recvfrom(9, "\1", 1, 0, NULL, NULL) = 1
+3681030 sendto(9, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(10, "\1", 1, 0, NULL, NULL) = 1
+3681030 sendto(10, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 sendto(11, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(11, 0x7f67316463f8, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+3681030 recvfrom(11, "\1", 1, 0, NULL, NULL) = 1
+3681030 sendto(12, "\1", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(12, 0x7f671c022df0, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+3681030 recvfrom(12, "\1", 1, 0, NULL, NULL) = 1
+3681030 connect(5, {sa_family=AF_INET, sin_port=htons(56278), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+3681030 connect(6, {sa_family=AF_INET6, sin6_port=htons(51112), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 0
+3681030 sendto(5, "\1", 1, 0, {sa_family=AF_INET, sin_port=htons(56278), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+3681030 recvfrom(5, "\1", 2, 0, {sa_family=AF_INET, sin_port=htons(56278), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
+3681030 sendto(6, "\1", 1, 0, {sa_family=AF_INET6, sin6_port=htons(51112), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
+3681030 recvfrom(6, 0x55dfc10dd100, 2, 0, 0x7f671c043a20, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3681030 recvfrom(6, "\1", 2, 0, {sa_family=AF_INET6, sin6_port=htons(51112), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
+3681030 sendto(8, "\1", 1, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/datagram-peer"}, 110) = 1
+3681030 recvfrom(8, "\1", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/datagram-peer"}, [120 => 90]) = 1
+3681030 connect(8, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/datagram-peer"}, 110) = 0
+3681030 sendto(9, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(9, "\2", 1, 0, NULL, NULL) = 1
+3681030 sendto(10, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(10, "\2", 1, 0, NULL, NULL) = 1
+3681030 sendto(11, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(11, "\2", 1, 0, NULL, NULL) = 1
+3681030 sendto(12, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+3681030 recvfrom(12, "\2", 1, 0, NULL, NULL) = 1
+3681030 sendto(5, "\2", 1, 0, {sa_family=AF_INET, sin_port=htons(56278), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+3681030 recvfrom(5, 0x55dfc10bcb40, 2, 0, 0x7f671c045860, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3681030 recvfrom(5, "\2", 2, 0, {sa_family=AF_INET, sin_port=htons(56278), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
+3681030 sendto(6, "\2", 1, 0, {sa_family=AF_INET6, sin6_port=htons(51112), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
+3681030 recvfrom(6, "\2", 2, 0, {sa_family=AF_INET6, sin6_port=htons(51112), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
+3681030 sendto(8, "\2", 1, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/datagram-peer"}, 110) = 1
+3681030 recvfrom(8, "\2", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/m9u-ivls4z6c/wirestack-m9-001-peer-vr9ybyqp/datagram-peer"}, [120 => 90]) = 1
+3681030 close(9)                        = 0
+3681030 close(11)                       = 0
+3681030 close(10)                       = 0
+3681030 close(12)                       = 0
+3681030 close(3)                        = 0
+3681030 close(5)                        = 0
+3681030 close(6)                        = 0
+3681030 close(7)                        = 0
+3681030 close(8)                        = 0
+3681015 +++ exited with 0 +++
+3681008 +++ exited with 0 +++
+3681007 +++ exited with 0 +++
+3681006 +++ exited with 0 +++
+3681030 close(4)                        = 0
+3681030 +++ exited with 0 +++
+3681031 +++ exited with 0 +++
+3681005 +++ exited with 0 +++

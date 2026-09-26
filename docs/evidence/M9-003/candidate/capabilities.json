@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-003",
+  "status": "PASS",
+  "native": "PASS",
+  "rows": 86,
+  "socket_objects": [
+    "TcpListener",
+    "TcpStream",
+    "UdpSocket",
+    "UnixDatagramSocket",
+    "UnixListener",
+    "UnixStream"
+  ],
+  "capability_fields": [
+    "ancillaryData",
+    "broadcast",
+    "closeOnExec",
+    "connectedDatagramSend",
+    "halfClose",
+    "multicast",
+    "nonBlocking",
+    "raw",
+    "zeroLengthDatagramSend"
+  ],
+  "native_scenarios": [
+    "internet-ipv4",
+    "internet-ipv6",
+    "unix-pathname",
+    "unix-abstract",
+    "capability-contract",
+    "dns-basic",
+    "dns-connect",
+    "socket-options",
+    "http-option-connector",
+    "invalid-option-admission",
+    "active-send-control",
+    "udp-disconnect",
+    "udp-broadcast",
+    "udp-multicast-ipv4",
+    "udp-multicast-ipv6",
+    "udp-membership-errors",
+    "udp-active-receive",
+    "udp-active-send"
+  ],
+  "description_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "ce464427b1871c4cdd4f92e0db7c38f702a77b6c166f334a9b642fc2b4b3fb04"
+  },
+  "inventory_sha256": "0bf9cc089fc9000308fe9453d228500db72fca09b07d4d06d95a4e8e646e703d"
+}

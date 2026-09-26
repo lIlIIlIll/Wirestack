@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-003",
+  "workspace": "<isolated-worktree>",
+  "original_workspace": {
+    "root": "<original-workspace>",
+    "branch": "gitbutler/workspace",
+    "head": "f101cd246efccefff77165dc0e3864d3e94d0074",
+    "merge_base_with_main": "1b11f3ec26c3c63d8e65705946f1adf7dd90af35",
+    "dirty_paths": [
+      "M docs/planning/status.md",
+      "?? docs/evidence/M8-007/evidence-identity-audit.json"
+    ],
+    "policy": "Untouched; all M9-003 implementation and generated evidence are confined to the isolated worktree."
+  },
+  "implementation_workspace": {
+    "task_branch": "m9-003-mainline",
+    "pre_edit_head": "21bafe6f625140159d757d857dd974b2289552c9",
+    "pre_edit_dirty_paths": [],
+    "stack_base": "main",
+    "common_base_with_main": "21bafe6f625140159d757d857dd974b2289552c9",
+    "task_commit_created": true
+  },
+  "prerequisite_check": {
+    "task": "M9-002",
+    "status": "COMPLETE",
+    "evidence": "docs/evidence/M9-002/evidence.json",
+    "when": "Before M9-003 edits"
+  },
+  "authorization": "The user authorized a dedicated M9-003 integration branch and pull request against current main. Merge and release are not authorized.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": "Cangjie cjc/cjpm 1.1.3; cjdoc 0.7.2"
+}

@@ -1,0 +1,91 @@
+{
+  "api_diff": {
+    "added_declarations": [],
+    "added_members": [
+      {
+        "declaration": "UdpSocket",
+        "kind": "func",
+        "name": "disconnect",
+        "package": "wirestack.net",
+        "signature": "public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit"
+      },
+      {
+        "declaration": "UdpSocket",
+        "kind": "func",
+        "name": "joinMulticastGroup",
+        "package": "wirestack.net",
+        "signature": "public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+      },
+      {
+        "declaration": "UdpSocket",
+        "kind": "func",
+        "name": "leaveMulticastGroup",
+        "package": "wirestack.net",
+        "signature": "public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0, context!: api.OperationContext = api.OperationContext.background()): Unit"
+      }
+    ],
+    "changed_declarations": [],
+    "removed_declarations": [],
+    "removed_members": [],
+    "source_compatible": true
+  },
+  "baseline": {
+    "api_inventory": "docs/evidence/M9-002/api-inventory.json",
+    "inventory_sha256": "6a98ae61414126b5f4e7afc42fed6d1865df09bd0394c50927f30cdea323f35e",
+    "receipt_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0140937c02546a31328c742e31afd9cff8607994c21635b713643e2400ce650f"
+    },
+    "source_task": "M9-002"
+  },
+  "binary_compatibility": "NOT_RUN; consumers must rebuild and relink",
+  "binary_compatibility_nonclaim": "No old binary was loaded against this package; source compatibility does not imply ABI compatibility.",
+  "current": {
+    "api_inventory": "docs/evidence/M9-003/api-inventory.json",
+    "inventory_sha256": "0bf9cc089fc9000308fe9453d228500db72fca09b07d4d06d95a4e8e646e703d",
+    "receipt_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b34e0a60819f6323467849ba18c5ac5282f865a56e5b3dc514d7d97d6658b744"
+    },
+    "source_task": "M9-003"
+  },
+  "forward_compatibility": "NOT_RUN",
+  "input_digests": {
+    "docs/evidence/M9-002/api-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0140937c02546a31328c742e31afd9cff8607994c21635b713643e2400ce650f"
+    },
+    "docs/evidence/M9-002/native-options.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "406abb2b54406e998aa7acd57eb15c0fbd08d86e12db38943c35f8c5d9e2502f"
+    },
+    "docs/evidence/M9-003/api-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b34e0a60819f6323467849ba18c5ac5282f865a56e5b3dc514d7d97d6658b744"
+    },
+    "docs/evidence/M9-003/native-udp.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c28846d8ede157a016f8aa8eae1324d7f48e994be6d50ba9f6d46d66a101000d"
+    }
+  },
+  "platform": "linux-x86_64-glibc",
+  "schema_version": 1,
+  "semantic_changes": [
+    {
+      "evidence": [
+        "docs/evidence/M9-003/native-udp.json",
+        "udp-multicast-ipv4",
+        "udp-multicast-ipv6"
+      ],
+      "from": false,
+      "member": "UdpSocket.capabilities.multicast",
+      "qualification": "IPv4 and IPv6 native membership and packet delivery passed",
+      "to": true
+    }
+  ],
+  "source_compatibility": "ADDITIVE_ONLY",
+  "source_state": "WORKING_TREE_UNSEALED",
+  "source_task": "M9-003",
+  "status": "PASS",
+  "unchanged_api_declaration_count": 325
+}

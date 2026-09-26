@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "source_task": "M9-002",
+  "source_task": "M9-003",
   "platform": "linux-x86_64-glibc",
   "sdk_reference": "docs/references/m7-033-ci-toolchain.json",
-  "scope": "Current Linux public network operations including typed socket options; multicast membership, raw sockets and ancillary data remain unavailable",
+  "scope": "Current Linux public network operations including typed socket options, UDP disconnect, IPv4 broadcast and bounded IPv4/IPv6 multicast membership; raw sockets and ancillary data remain unavailable",
   "constructor_defaults": {
     "nonBlocking": true,
     "closeOnExec": true,
@@ -15,13 +15,14 @@
     "zeroLengthDatagramSend": false,
     "connectedDatagramSend": false
   },
-  "native_runner": "tools/m9_002_native_options.py",
+  "native_runner": "tools/m9_003_native_udp.py",
   "consumer_sources": [
     "examples/linux/m9_001/native_capabilities.cj",
     "examples/linux/m8_002/main.cj",
     "examples/linux/m8_003/main.cj",
     "examples/linux/m8_004/native_dns.cj",
-    "examples/linux/m9_002/socket_options.cj"
+    "examples/linux/m9_002/socket_options.cj",
+    "examples/linux/m9_003/udp_lifecycle.cj"
   ],
   "required_scenarios": [
     "internet-ipv4",
@@ -34,7 +35,14 @@
     "socket-options",
     "http-option-connector",
     "invalid-option-admission",
-    "active-send-control"
+    "active-send-control",
+    "udp-disconnect",
+    "udp-broadcast",
+    "udp-multicast-ipv4",
+    "udp-multicast-ipv6",
+    "udp-membership-errors",
+    "udp-active-receive",
+    "udp-active-send"
   ],
   "environment_failure_policy": {
     "permission_denied": "ENVIRONMENT_FAILURE, never a supported PASS or permanent capability=false; preserve NetworkErrorCode.PermissionDenied/nativeCode/cause when available.",
@@ -64,7 +72,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-closeOnExec",
@@ -88,7 +96,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-halfClose",
@@ -120,7 +128,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-broadcast",
@@ -151,7 +159,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-multicast",
@@ -182,7 +190,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-raw",
@@ -213,7 +221,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-ancillaryData",
@@ -244,7 +252,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-zeroLengthDatagramSend",
@@ -275,7 +283,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-connectedDatagramSend",
@@ -306,7 +314,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-nonBlocking",
@@ -330,7 +338,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-closeOnExec",
@@ -354,7 +362,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-halfClose",
@@ -385,7 +393,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-broadcast",
@@ -416,7 +424,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-multicast",
@@ -447,7 +455,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-raw",
@@ -478,7 +486,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-ancillaryData",
@@ -509,7 +517,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-zeroLengthDatagramSend",
@@ -540,7 +548,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-connectedDatagramSend",
@@ -571,7 +579,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-nonBlocking",
@@ -595,7 +603,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-closeOnExec",
@@ -619,7 +627,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-halfClose",
@@ -650,7 +658,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-broadcast",
@@ -674,9 +682,10 @@
       ],
       "scenario_ids": [
         "capability-contract",
-        "socket-options"
+        "socket-options",
+        "udp-broadcast"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json",
+      "evidence": "docs/evidence/M9-003/native-udp.json",
       "instance_support": {
         "ipv6": false
       }
@@ -687,30 +696,32 @@
       "label": "公开组播 membership",
       "public_symbols": [
         "wirestack.net.UdpSocket.bind",
-        "wirestack.net.UdpSocket.capabilities"
+        "wirestack.net.UdpSocket.capabilities",
+        "wirestack.net.UdpSocket.joinMulticastGroup",
+        "wirestack.net.UdpSocket.leaveMulticastGroup"
       ],
       "capability_field": "multicast",
-      "supported": false,
+      "supported": true,
       "conditions": [
-        "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "此对象的该能力不受支持；IPv4 UDP Broadcast 配置不适用于其他对象，multicast 选项也不代表 membership join/leave。"
+        "仅限 Linux x86_64 glibc 和固定 SDK；公开 factory 创建的对象，实际 membership 结果仍是权威。",
+        "IPv4/IPv6 membership 通过 std.net setsockopt；每个 socket 最多 16 个组/interface 配对，zone 必须通过 interfaceIndex 选择，零表示内核默认接口。",
+        "重复 join 或 unmatched leave 返回 Option/DatagramSend/InvalidState/Never；底层错误保留结构化分类。"
       ],
-      "failure": {
-        "kind": "no_public_operation",
-        "category": null,
-        "phase": null,
-        "code": null,
-        "retryability": null
-      },
+      "failure": null,
       "backend_symbols": [
-        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind",
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.joinMulticastGroup",
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.leaveMulticastGroup"
       ],
       "scenario_ids": [
         "internet-ipv4",
         "internet-ipv6",
-        "capability-contract"
+        "capability-contract",
+        "udp-multicast-ipv4",
+        "udp-multicast-ipv6",
+        "udp-membership-errors"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-raw",
@@ -741,7 +752,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-ancillaryData",
@@ -772,7 +783,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-zeroLengthDatagramSend",
@@ -804,7 +815,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-connectedDatagramSend",
@@ -831,7 +842,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-nonBlocking",
@@ -855,7 +866,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-closeOnExec",
@@ -879,7 +890,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-halfClose",
@@ -911,7 +922,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-broadcast",
@@ -942,7 +953,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-multicast",
@@ -973,7 +984,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-raw",
@@ -1004,7 +1015,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-ancillaryData",
@@ -1035,7 +1046,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-zeroLengthDatagramSend",
@@ -1066,7 +1077,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-connectedDatagramSend",
@@ -1097,7 +1108,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-nonBlocking",
@@ -1121,7 +1132,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-closeOnExec",
@@ -1145,7 +1156,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-halfClose",
@@ -1176,7 +1187,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-broadcast",
@@ -1207,7 +1218,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-multicast",
@@ -1238,7 +1249,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-raw",
@@ -1269,7 +1280,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-ancillaryData",
@@ -1300,7 +1311,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-zeroLengthDatagramSend",
@@ -1331,7 +1342,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-connectedDatagramSend",
@@ -1362,7 +1373,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-nonBlocking",
@@ -1386,7 +1397,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-closeOnExec",
@@ -1410,7 +1421,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-halfClose",
@@ -1441,7 +1452,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-broadcast",
@@ -1472,7 +1483,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-multicast",
@@ -1503,7 +1514,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-raw",
@@ -1534,7 +1545,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-ancillaryData",
@@ -1565,7 +1576,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-zeroLengthDatagramSend",
@@ -1597,7 +1608,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-connectedDatagramSend",
@@ -1630,7 +1641,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "tcp-ipv4",
@@ -1660,33 +1671,38 @@
       "scenario_ids": [
         "internet-ipv4"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "udp-ipv4",
       "object": "UdpSocket",
-      "label": "UDP ipv4 bind/connect/send/sendTo/receive",
+      "label": "UDP ipv4 bind/connect/disconnect/send/sendTo/receive",
       "public_symbols": [
         "wirestack.net.UdpSocket.bind",
         "wirestack.net.UdpSocket.connect",
         "wirestack.net.UdpSocket.send",
         "wirestack.net.UdpSocket.sendTo",
-        "wirestack.net.UdpSocket.receive"
+        "wirestack.net.UdpSocket.receive",
+        "wirestack.net.UdpSocket.disconnect"
       ],
       "capability_field": null,
       "supported": true,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "非空发送最多 65,507 字节；receive capacity 1..65,507，保留 source/截断边界；可接收空报文。"
+        "非空发送最多 65,507 字节；disconnect 保留 bind 并清除 peer，未连接 send 返回 NotConnected，sendTo 继续可用；receive capacity 1..65,507，保留 source/截断边界并可接收空报文。"
       ],
       "failure": null,
       "backend_symbols": [
-        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind"
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.bind",
+        "wirestack.internal.transport_stdnet.StdNetDatagramSocket.disconnect"
       ],
       "scenario_ids": [
-        "internet-ipv4"
+        "internet-ipv4",
+        "udp-disconnect",
+        "udp-active-receive",
+        "udp-active-send"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "tcp-ipv6",
@@ -1716,7 +1732,7 @@
       "scenario_ids": [
         "internet-ipv6"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "udp-ipv6",
@@ -1742,7 +1758,7 @@
       "scenario_ids": [
         "internet-ipv6"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-pathname",
@@ -1772,7 +1788,7 @@
       "scenario_ids": [
         "unix-pathname"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-abstract",
@@ -1802,7 +1818,7 @@
       "scenario_ids": [
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-invalid-abstract",
@@ -1831,7 +1847,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-pathname",
@@ -1856,7 +1872,7 @@
       "scenario_ids": [
         "unix-pathname"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-abstract",
@@ -1881,7 +1897,7 @@
       "scenario_ids": [
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-invalid-abstract",
@@ -1911,7 +1927,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "unix-named-source",
@@ -1934,7 +1950,7 @@
         "unix-pathname",
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "unix-unbound-source",
@@ -1963,7 +1979,7 @@
         "unix-pathname",
         "unix-abstract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "raw-ipv4",
@@ -1992,7 +2008,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "raw-ipv6",
@@ -2021,7 +2037,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "raw-packet",
@@ -2050,7 +2066,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "raw-netlink",
@@ -2079,7 +2095,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "SocketOption-application",
@@ -2098,6 +2114,7 @@
       ],
       "capability_field": null,
       "supported": true,
+      "failure": null,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的 Internet socket，操作结果仍是权威。",
         "M9-002 已实现 typed factory options、运行期 configure 与 getOption；各 option 的 target、family、stage 见 TCP listener/stream 与 UDP typed 选项条目。未通过 qualification 的目标允许空 factory 列表；显式 option application 和查询返回 Option/Unsupported。"
@@ -2109,8 +2126,7 @@
         "capability-contract",
         "socket-options"
       ],
-      "failure": null,
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnsafeSocketOption-application",
@@ -2138,7 +2154,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-lifecycle",
@@ -2165,7 +2181,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-lifecycle",
@@ -2192,7 +2208,7 @@
         "internet-ipv6",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-lifecycle",
@@ -2217,9 +2233,10 @@
       "scenario_ids": [
         "internet-ipv4",
         "internet-ipv6",
-        "capability-contract"
+        "capability-contract",
+        "udp-active-receive"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixStream-lifecycle",
@@ -2246,7 +2263,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixListener-lifecycle",
@@ -2273,7 +2290,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UnixDatagramSocket-lifecycle",
@@ -2300,7 +2317,7 @@
         "unix-abstract",
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "dns-client",
@@ -2326,7 +2343,7 @@
       "scenario_ids": [
         "dns-basic"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "dns-resolver",
@@ -2352,7 +2369,7 @@
       "scenario_ids": [
         "dns-connect"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "dns-parser",
@@ -2375,7 +2392,7 @@
       "scenario_ids": [
         "capability-contract"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpStream-options",
@@ -2399,9 +2416,10 @@
         "wirestack.internal.transport_stdnet.StdNetTransport.queryOption"
       ],
       "scenario_ids": [
-        "socket-options", "invalid-option-admission"
+        "socket-options",
+        "invalid-option-admission"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "TcpListener-options",
@@ -2425,9 +2443,10 @@
         "wirestack.internal.transport_stdnet.StdNetTransportListener.queryOption"
       ],
       "scenario_ids": [
-        "socket-options", "invalid-option-admission"
+        "socket-options",
+        "invalid-option-admission"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-options",
@@ -2451,9 +2470,12 @@
         "wirestack.internal.transport_stdnet.StdNetDatagramSocket.queryOption"
       ],
       "scenario_ids": [
-        "socket-options", "invalid-option-admission", "active-send-control"
+        "socket-options",
+        "invalid-option-admission",
+        "active-send-control",
+        "udp-broadcast"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "UdpSocket-interface-readback",
@@ -2481,7 +2503,7 @@
       "scenario_ids": [
         "socket-options"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     },
     {
       "id": "HttpConnector-options",
@@ -2507,7 +2529,7 @@
       "scenario_ids": [
         "http-option-connector"
       ],
-      "evidence": "docs/evidence/M9-002/native-options.json"
+      "evidence": "docs/evidence/M9-003/native-udp.json"
     }
   ]
 }

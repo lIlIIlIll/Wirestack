@@ -16,8 +16,8 @@ from tools import m7_021_linux_release as release
 from tools import m7_026_linux_api_freeze as api
 
 ROOT = Path(__file__).resolve().parents[1]
-TASK = "M9-002"
-NATIVE_REPORT = f"docs/evidence/{TASK}/native-options.json"
+TASK = "M9-003"
+NATIVE_REPORT = f"docs/evidence/{TASK}/native-udp.json"
 DESCRIPTION = "docs/references/linux-network-capabilities.json"
 DOCS = ("docs/api/README.md", "docs/guides/network-foundation-linux.md")
 BEGIN = "<!-- NETWORK_CAPABILITIES:BEGIN -->"
@@ -179,7 +179,7 @@ def render(description: dict, document: str) -> str:
                 conditions += " `" + "/".join(failure[key] for key in ("category", "phase", "code", "retryability")) + "`。"
         lines.append(f"| {row['label']} | {methods} | {'支持；' if row['supported'] else '不支持；'}{conditions} | {', '.join(row['scenario_ids'])} |")
     lines += ["", *description["environment_failure_policy"].values(),
-              f"[当前原生收据](../evidence/{TASK}/native-options.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。", "", END]
+              f"[当前原生收据](../evidence/{TASK}/native-udp.json)记录实际 source/SDK/target；未运行或交叉编译不能转成支持。", "", END]
     return "\n".join(lines)
 
 
@@ -201,11 +201,13 @@ def native_inputs(root: Path, description: dict) -> set[str]:
     return ({path.relative_to(root).as_posix() for path in release.production_sources(root)}
             | set(release.QUALIFICATION_INPUTS)
             | {DESCRIPTION, description["sdk_reference"], description["native_runner"], *description["consumer_sources"],
-               "tools/check_network_capabilities.py", "tools/development_baseline.py", "tools/m9_001_native_capabilities.py",
-               "tools/evidence_digest.py", "tools/m7_026_linux_api_freeze.py",
-               "tools/m7_027_linux_examples.py", "tools/m8_002_native_sockets.py",
-               "tools/m8_003_native_sockets.py", "tools/m8_004_native_dns.py",
-               "tools/m8_005_native_http.py"})
+               "tools/check_network_capabilities.py", "tools/development_baseline.py",
+               "tools/m9_001_native_capabilities.py", "tools/evidence_digest.py",
+               "tools/m7_026_linux_api_freeze.py", "tools/m7_027_linux_examples.py",
+               "tools/m8_002_native_sockets.py", "tools/m8_003_native_sockets.py",
+               "tools/m8_004_native_dns.py", "tools/m8_005_native_http.py",
+               "src/net/m8_002_udp_test.cj", "src/net/m9_003_udp_test.cj",
+               "src/internal/transport_stdnet/m9_003_udp_lifecycle_test.cj"})
 
 
 def verify_artifacts(root: Path, value: object) -> None:

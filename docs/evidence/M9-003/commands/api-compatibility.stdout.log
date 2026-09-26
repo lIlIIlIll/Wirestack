@@ -1,0 +1,4 @@
+M9-003 API compatibility: PASS
+source_compatibility=ADDITIVE_ONLY
+added_members=3
+report=docs/evidence/M9-003/api-compatibility.json

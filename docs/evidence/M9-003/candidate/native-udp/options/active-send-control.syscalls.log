@@ -1,0 +1,12 @@
+4014867 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+4014867 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+4014867 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+4014872 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(38328), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+4014873 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+4014871 +++ exited with 0 +++
+4014870 +++ exited with 0 +++
+4014869 +++ exited with 0 +++
+4014868 +++ exited with 0 +++
+4014873 +++ exited with 0 +++
+4014872 +++ exited with 0 +++
+4014867 +++ exited with 0 +++

@@ -1,0 +1,8 @@
+4015013 sendto(5, "e", 1, 0, {sa_family=AF_INET, sin_port=htons(45367), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+4015012 +++ exited with 0 +++
+4015011 +++ exited with 0 +++
+4015010 +++ exited with 0 +++
+4015009 +++ exited with 0 +++
+4015013 +++ exited with 0 +++
+4015014 +++ exited with 0 +++
+4015008 +++ exited with 0 +++
