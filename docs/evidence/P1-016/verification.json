@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "source_task": "P1-016",
+  "status": "PASS",
+  "revision": "68485da811c73930105f39c77f67c3b233ed6208",
+  "pull_request": {
+    "number": 194,
+    "url": "https://github.com/lIlIIlIll/Wirestack/pull/194",
+    "title": "P1-016: Keep the retired M7 attestation workflow inert",
+    "draft": true,
+    "base": "m9-002-typed-socket-options",
+    "head": "p1-016-retire-legacy-release-workflow",
+    "head_sha": "68485da811c73930105f39c77f67c3b233ed6208"
+  },
+  "acceptance_commands": [
+    {
+      "id": "task-manifest",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-tasks",
+        "--json"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "P1-016 is registered and dependency P1-015 is COMPLETE."
+    },
+    {
+      "id": "acceptance-plan",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/P1-016/test-plan.md",
+        "--json"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "counts": {
+        "paths": 4,
+        "scenarios": 4,
+        "tests": 4
+      }
+    }
+  ],
+  "workflow_configuration": {
+    "path": ".github/workflows/linux-release-attestation.yml",
+    "github_state": "active",
+    "trigger": "workflow_dispatch",
+    "push_trigger_expected": false,
+    "manual_dispatch_exercised": false,
+    "retained_jobs": [
+      {
+        "id": "stage-frozen-artifact",
+        "condition": "${{ false }}"
+      },
+      {
+        "id": "attest-linux-release",
+        "condition": "${{ false }}"
+      }
+    ],
+    "historical_artifact_sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee",
+    "permissions_pinned_steps_and_artifact_identity_preserved": true,
+    "active_signer": "M8-007",
+    "new_attestation_created": false,
+    "release_qualification_claimed": false,
+    "historical_m7_m8_pass_claimed": false
+  },
+  "hosted_workflow_runs": {
+    "query": "gh run list --repo lIlIIlIll/Wirestack --commit 68485da811c73930105f39c77f67c3b233ed6208 --limit 100",
+    "head_sha": "68485da811c73930105f39c77f67c3b233ed6208",
+    "count": 11,
+    "all_completed": true,
+    "all_success": true,
+    "failed_count": 0,
+    "retired_workflow_push_run_count": 0,
+    "runs": [
+      {"id": 35851286202, "workflow": "CodeQL", "event": "dynamic", "status": "completed", "conclusion": "success"},
+      {"id": 35851267484, "workflow": "NET-03 Absolute Deadline Harness", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267600, "workflow": "Gate Harness", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267379, "workflow": "NET-02 Full Duplex and Race Harness", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267381, "workflow": "NET-01 Close Wakeup Harness", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267393, "workflow": "Threat Model", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267398, "workflow": "DNS Carrier Thread Harness", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267410, "workflow": "Architecture Guard", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267403, "workflow": "P1-014 evidence digest boundary", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267402, "workflow": "Clean Cangjie Build", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 35851267378, "workflow": "M7-033 Developer Documentation", "event": "pull_request", "status": "completed", "conclusion": "success"}
+    ]
+  },
+  "pull_request_checks": {
+    "count": 19,
+    "success_count": 18,
+    "skipped_count": 1,
+    "failed_or_pending_count": 0,
+    "skipped_checks": ["Deploy latest main documentation"]
+  },
+  "manual_signing_safety": "Dispatch was not performed by design. Both retained jobs have an unconditional false guard, so the manual-only workflow cannot execute signing steps or produce an attestation."
+}
