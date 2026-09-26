@@ -1,44 +1,47 @@
-# M9-003 UDP lifecycle test plan
+# M9-003 UDP test plan
 
-Scope: Linux x86_64 glibc StdNet UDP lifecycle, IPv4 broadcast, and qualified IPv4/IPv6 multicast membership. M9-002 is a sealed prerequisite. This plan does not authorize commits, pushes, merges, or release publication. It does not add arbitrary native option pass-through, unbounded membership state, or non-Linux support claims.
+This plan maps the UDP disconnect, broadcast, and multicast contract to focused Cangjie tests and installed Linux consumers. Native acceptance applies only to `linux-x86_64-glibc`.
 
-## Control-flow paths
+## Semantics
 
-| Path ID | Condition | Expected terminal |
+| Path | Action | Required observable result |
 |---|---|---|
-| P001 | Connected UDP disconnect succeeds, repeats, or is cancelled before admission | Peer selection is cleared only on native success; bind remains; repeated disconnect is idempotent; cancelled call leaves peer unchanged |
-| P002 | Connected send after disconnect versus explicit sendTo | Connected send returns NotConnected; sendTo reaches its target from the same bound socket |
-| P003 | Broadcast disabled, enabled, then disabled after traffic | Kernel option readback matches each setting; directed IPv4 broadcast fails while disabled and reaches the receiver while enabled |
-| P004 | IPv4 and link-local IPv6 multicast membership on usable interfaces | Receiver joins exact group/interface, observes a real datagram, and leaves successfully |
-| P005 | Duplicate, unmatched, invalid, native-failing, full, and closed-socket membership operations | Stable structured errors; max-16 bound; failed native join does not publish membership or poison the socket; close releases state |
-| P006 | Disconnect overlaps active receive; cancellation, close, and abort race | Concurrent control is rejected; first terminal owner and exact-once completion are preserved |
-| P007 | Installed package and source/API/capability/documentation evidence | Fresh extracted consumer uses only public APIs; native syscall observations and generated contract remain consistent |
-
-## Semantics and scenario matrix
-
-| Scenario ID | Input and pre-state | Path IDs | Expected behavior | Required assertions | Type |
-|---|---|---|---|---|---|
-| S001 | Bound IPv4 UDP socket connected to a local peer; successful and pre-cancelled disconnect | P001,P002 | Native disconnect clears peer without releasing local bind; pre-cancellation has no side effect | Peer property, local endpoint, repeated call, NotConnected send, explicit sendTo delivery, cancellation result | behavior,boundary |
-| S002 | IPv4 broadcast option toggled around real loopback directed-broadcast sends | P003 | Disabled send fails; enabled send arrives; subsequent disable takes effect | Effective SO_BROADCAST readback and receiver payload | native |
-| S003 | IPv4 multicast group/interface and IPv6 link-local group/interface | P004 | Exact native membership receives one sent datagram and leaves | Real payload delivery in IPv4 and IPv6 native scenarios | native |
-| S004 | Duplicate/unmatched/unsupported-family/bad-interface operations; 16 active entries; close and reopen | P005 | No phantom state, no over-capacity entry, deterministic error, clean next socket | Typed error domain/code, native failure socket remains usable, recovery after leave/close | boundary,native,fault |
-| S005 | Disconnect during blocked receive; pre-cancelled disconnect; repeated close around cancelled receive | P001,P006 | Control does not mutate peer during active receive; cancellation wins once; close remains idempotent | Barrier-controlled concurrency, terminal state, single completion | concurrency |
-| S006 | Fresh archive installation and active send/receive probes | P007 | Public consumer builds outside checkout and real delayed syscalls are observed | Archive and input digests, markers, syscall trace, no checkout dependency | installed,native |
-| S007 | API inventory, capability map, docs, and canonical repository gates | P007 | Declared support, backend preconditions, examples, and evidence agree | Generated documentation, capability correspondence, compatibility classification, full check | integration,compatibility |
+| P001 | Connect a bound UDP socket, send to its peer, disconnect twice, then use `send` and `sendTo`. | Disconnect clears the remote endpoint and retains the local binding. Connected `send` returns `NotConnected`; explicit `sendTo` still delivers from the retained binding. |
+| P002 | Cancel disconnect before it runs, then exercise disconnect against an active receive and close a blocked receive. | A cancelled disconnect leaves the selected peer and open state unchanged. Active-operation exclusion returns `ConcurrentOperation`; cancellation or close completes the owning receive once with its defined terminal result. |
+| P003 | Send IPv4 broadcast through an installed consumer and inspect the capability contract. | Native broadcast succeeds only when the target option is qualified. IPv6 and unqualified targets do not claim broadcast support. |
+| P004 | Join, use, and leave IPv4 multicast membership on the qualified Linux target. | The installed consumer proves the declared IPv4 membership path and cleanup. |
+| P005 | Join, use, and leave IPv6 multicast membership on the qualified Linux target. | The installed consumer proves the declared IPv6 membership path and cleanup. |
+| P006 | Submit invalid, cross-family, duplicate, mismatched-interface, exhausted, and native-failure membership requests. | Inputs and state return the documented error category. A native failure leaves the socket open; leaving a group frees its bounded slot; close remains idempotent. |
+| P007 | Compare the previous and current public `UdpSocket` declarations. | Additive disconnect and membership methods preserve existing declarations; removed, changed, or duplicate declarations fail the compatibility check. |
+| P008 | Generate capability, API-inventory, and documentation reports from the native observations. | Every claimed UDP capability has matching native evidence, and generated API and HTML output agree with the documented contract. |
 
 ## Test-plan matrix
 
-| Test ID | Scenario IDs | Path IDs | Input | Expected result | Assertions | Type |
-|---|---|---|---|---|---|---|
-| T001 | S001,S002,S004 | P001,P002,P003,P005 | Public M9003UdpSocketTest | PASS | Disconnect semantics, retained binding, broadcast behavior, membership errors/bounds/recovery | regression,native |
-| T002 | S005 | P001,P006 | Adapter M9003UdpLifecycleTest | PASS | Active-operation exclusion, cancellation ownership, blocked receive and idempotent close | concurrency |
-| T003 | S001,S002,S003,S004,S005,S006 | P001,P002,P003,P004,P005,P006 | tools/m9_003_native_udp.py --offline | PASS | Fresh package extraction, all mapped prior and M9-003 scenarios, actual IPv4/IPv6 delivery, delayed syscall evidence | installed,native |
-| T004 | S007 | P007 | Capability/API/documentation checks and scripts/check | PASS | API inventory/compatibility, architecture boundary, required native correspondence, generated docs and canonical gate | integration,compatibility |
+| Scenario | Path | Test IDs | Required observation |
+|---|---|---|---|
+| S001 | P001 | T002, T004 | Repeated disconnect clears the peer, retains the local endpoint, rejects connected send, and preserves explicit `sendTo`. |
+| S002 | P002 | T002 | Cancelled disconnect reports `Cancelled` without changing the selected peer or socket state. |
+| S003 | P002 | T002, T004 | Disconnect during receive is rejected; cancellation preserves single terminal ownership. |
+| S004 | P002 | T002 | Close during blocked receive completes with `Closed`; repeated close does not complete the operation twice. |
+| S005 | P002 | T004 | The installed active-send consumer records native send behavior and control-operation exclusion. |
+| S006 | P003 | T004, T005 | The installed IPv4 broadcast consumer passes and the report does not claim IPv6 broadcast. |
+| S007 | P004 | T002, T004, T005 | IPv4 membership succeeds natively and can be removed. |
+| S008 | P005 | T004, T005 | IPv6 membership succeeds natively and can be removed. |
+| S009 | P006 | T002, T004, T005 | Invalid address/index, family mismatch, duplicate membership, wrong interface, table exhaustion, native failure, and close cleanup match the contract. |
+| S010 | P007 | T006 | The API compatibility report accepts additive methods and rejects removed, changed, or duplicate declarations. |
+| S011 | P008 | T005, T007 | Capability rows, public API inventory, generated Markdown, and HTML report the qualified contract. |
+| S012 | P001, P002, P003, P004, P005, P006 | T008, T009 | Existing repository checks and the long gate pass without widening platform claims. |
 
-## Evidence boundaries
+## Test commands
 
-Cross-compilation or a unit test is not native acceptance. IPv4 broadcast and both declared multicast families require real packet delivery; do not replace unavailable native observations with Unsupported. Keep interface identifiers numeric and transient; evidence must not record interface names or machine-specific paths. A task with only working-tree evidence is unsealed and cannot be marked COMPLETE. No compatibility claim extends beyond the documented additive source API and qualified Linux semantic capability change.
-
-## Executed mapping
-
-Exact commands, exit codes, scenario outcomes, normalized logs, input digests, and platform identity belong in verification.json and native-udp.json. A skipped, timed-out, compilation-only, or unavailable scenario is not a pass.
+| Test ID | Command | Purpose |
+|---|---|---|
+| T001 | `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M9-003/test-plan.md --json` | Validate that each semantic path and scenario has a plan entry. |
+| T002 | `cjpm test src/net src/internal/transport_stdnet --filter=M9003*.* --no-progress --no-color` | Run focused public and std.net adapter lifecycle cases. |
+| T003 | `python3 -m unittest tools.tests.test_network_capabilities tools.tests.test_m9_001_native_capabilities tools.tests.test_m9_003_api_compatibility -v` | Check capability evidence and API compatibility rules. |
+| T004 | `python3 tools/m9_003_native_udp.py --offline` | Execute installed native consumers for disconnect, broadcast, both multicast families, membership errors, active receive, and active send. |
+| T005 | `python3 tools/check_network_capabilities.py --check --require-native --native-report docs/evidence/M9-003/native-udp.json --report docs/evidence/M9-003/capabilities.json --api-report docs/evidence/M9-003/api-inventory.json` | Require native observations for every declared capability. |
+| T006 | `python3 tools/m9_003_api_compatibility.py` | Check the public UDP API compatibility contract. |
+| T007 | `scripts/check-docs --html --json --output docs/evidence/M9-003/docs-report.json` | Generate and validate API documentation and HTML. |
+| T008 | `scripts/check` | Run the canonical repository checks. |
+| T009 | `scripts/check-long M9-003 --json --output docs/evidence/M9-003/long-check.json` | Run the task's long-running acceptance gate. |

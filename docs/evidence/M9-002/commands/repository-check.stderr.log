@@ -260,7 +260,7 @@ test_native_dependency_plan_uses_fail_closed_platform_selection (test_m7_029_ind
 test_open_high_and_critical_findings_block_release (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_open_high_and_critical_findings_block_release) ... ok
 test_prepare_cli_returns_structured_invalid_utf8_failure (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_prepare_cli_returns_structured_invalid_utf8_failure) ... ok
 test_process_isolated_agent_requires_conflict_disclosure (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_process_isolated_agent_requires_conflict_disclosure) ... ok
-test_provider_manifest_is_a_repository_input (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_provider_manifest_is_a_repository_input) ... git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_provider_manifest_is_a_repository_input (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_provider_manifest_is_a_repository_input) ... git: $HOME/.cache/agent-tmp/<task-tmp>/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 ok
 test_review_path_outside_package_root_is_a_controlled_failure (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_review_path_outside_package_root_is_a_controlled_failure) ... ok
 test_reviewer_dates_conflicts_and_set_fields_are_strict (test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_reviewer_dates_conflicts_and_set_fields_are_strict) ... ok
@@ -361,7 +361,7 @@ test_strict_modes_reject_the_same_stale_records (test_p1_013_development_release
 test_structural_modes_accept_frozen_records_without_local_release_artifact (test_p1_013_development_release_gate.P1013DevelopmentReleaseGateTests.test_structural_modes_accept_frozen_records_without_local_release_artifact) ... ok
 test_atomic_report_preserves_target_on_injected_failure (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_atomic_report_preserves_target_on_injected_failure) ... ok
 test_crlf_report_is_bounded_and_uses_actual_platform (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_is_bounded_and_uses_actual_platform) ... ok
-test_crlf_report_reads_tracked_checkout_fixture_without_text_override (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_reads_tracked_checkout_fixture_without_text_override) ... git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_crlf_report_reads_tracked_checkout_fixture_without_text_override (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_reads_tracked_checkout_fixture_without_text_override) ... git: $HOME/.cache/agent-tmp/<task-tmp>/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 ok
 test_crlf_report_rejects_claimed_revision_different_from_checkout (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_rejects_claimed_revision_different_from_checkout) ... ok
 test_crlf_report_rejects_wrong_architecture_and_libc (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_crlf_report_rejects_wrong_architecture_and_libc) ... ok
@@ -396,7 +396,7 @@ test_inventory_traces_assigned_digest_field_into_comparison (test_p1_014_evidenc
 test_line_endings_share_text_digest_but_not_byte_digest (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_line_endings_share_text_digest_but_not_byte_digest) ... ok
 test_text_inventory_rejects_nul_framing_ambiguity (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_text_inventory_rejects_nul_framing_ambiguity) ... ok
 test_untyped_unknown_and_malformed_digest_documents_fail_closed (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_untyped_unknown_and_malformed_digest_documents_fail_closed) ... ok
-test_windows_crlf_report_requires_actual_crlf_checkout (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_windows_crlf_report_requires_actual_crlf_checkout) ... git: <sdk>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+test_windows_crlf_report_requires_actual_crlf_checkout (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_windows_crlf_report_requires_actual_crlf_checkout) ... git: $HOME/.cache/agent-tmp/<task-tmp>/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
 ok
 test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks (test_p1_014_evidence_digest_types.EvidenceDigestTypeTests.test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks) ... ok
 test_archive_provider_requires_exact_commit (test_tls_provider_poc.ProviderPocValidationTests.test_archive_provider_requires_exact_commit) ... ok
@@ -497,7 +497,7 @@ test_third_party_comparison_source_rejected (test_validate_tls_provider_matrix.T
 test_unknown_schema_fails_closed (test_validate_tls_provider_matrix.Tests.test_unknown_schema_fails_closed) ... ok
 
 ----------------------------------------------------------------------
-Ran 493 tests in 14.895s
+Ran 493 tests in 17.900s
 
 OK
 test_classification_detects_sustained_starvation (test_dns_carrier_thread.DnsCarrierThreadTests.test_classification_detects_sustained_starvation) ... ok
@@ -680,7 +680,7 @@ test_resource_trend_checks_every_resource_class (test_sse_streaming_profile.Test
 test_short_runs_cannot_be_formal (test_sse_streaming_profile.Tests.test_short_runs_cannot_be_formal) ... ok
 
 ----------------------------------------------------------------------
-Ran 178 tests in 4.153s
+Ran 178 tests in 3.493s
 
 OK
 test_baseline_threshold_is_ninety_percent (test_http1_benchmark.Http1BenchmarkTest.test_baseline_threshold_is_ninety_percent) ... ok

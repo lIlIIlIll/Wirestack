@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-23T16:17:56.177870Z",
+  "generated_at_utc": "2026-09-26T15:37:19.767201Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M9-003/native-udp.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9bea2b626ff3c411ab82ef2a523ca6da906556cc912b5b56c2c92823335cce84"
+        "sha256": "c28846d8ede157a016f8aa8eae1324d7f48e994be6d50ba9f6d46d66a101000d"
       },
       "source_task": "M9-003"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/M9-003/capabilities.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "a3fb6018b8d3b9973b7d09b417eff65029df96c5ae8f67248518975690b785b1"
+        "sha256": "531e97cf95b35a719722ac210576b954f44bc680684ae3803ab1c34a134df316"
       },
       "source_task": "M9-003"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/M9-003/api-compatibility.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0db1a769df9dce110621e73dc8917f6d535941ce9b14752fceecdc184d59b9d2"
+        "sha256": "c37862631cbb2e35849916bb4bed071ff797e1b8670800da3cc519a44e88fdf5"
       },
       "source_task": "M9-003"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M9-003/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7a4d7387aa5541074cf137658ced535592d29b4ff5f7d81e05e8b1dc699a4b77"
+        "sha256": "10f30f6b520abbc0d056470a774f36347db6bd219a46439f7306851d9e648686"
       },
       "source_task": "M9-003"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M9-003/verification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "dc42638b41a55968bd995ccdc0a045a0016b081e38a0c02c2e065f44e98cde65"
+        "sha256": "d15a9670e9b7b8fa20bb19baeeafb0d366f29d8d112d182ea39828416e2baa35"
       },
       "source_task": "M9-003"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M9-003/privacy.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "2dfd1fc04e307950b880798221ee2167e9f55fcb8a43e513c9f35a304d79b9f0"
+        "sha256": "e7cc70ca24c55ee4b9076b5b59f889d68162748af947bb73a6446f47d882a03b"
       },
       "source_task": "M9-003"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M9-003/publication.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "daf46c2ae85fb9ce640172c13809d616c7199d69549f019191c648283d2a19d4"
+        "sha256": "d85d002170edd480a43bcdb2782ff73c1e3bb383e1d545d84dcc7e9d6c4ef039"
       },
       "source_task": "M9-003"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M9-003/candidate/native-udp.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "ba1f30f6f9c3425e6d2f05900d2e977167658e0c5fde13239b55ef945dc75b87"
+        "sha256": "5a9a477577e37a1fa88508e53c4fd5e423662f0dc2cc707eb96602b87c02b47f"
       },
       "source_task": "M9-003"
     },
@@ -94,7 +94,7 @@
       "path": "docs/evidence/M9-003/candidate/capabilities.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "a3fb6018b8d3b9973b7d09b417eff65029df96c5ae8f67248518975690b785b1"
+        "sha256": "531e97cf95b35a719722ac210576b954f44bc680684ae3803ab1c34a134df316"
       },
       "source_task": "M9-003"
     },
@@ -103,7 +103,7 @@
       "path": "docs/evidence/M9-003/candidate/api-compatibility.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0db1a769df9dce110621e73dc8917f6d535941ce9b14752fceecdc184d59b9d2"
+        "sha256": "c37862631cbb2e35849916bb4bed071ff797e1b8670800da3cc519a44e88fdf5"
       },
       "source_task": "M9-003"
     },
@@ -112,17 +112,17 @@
       "path": "docs/evidence/M9-003/candidate/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "c55667b4f68cfdd69f90a5ea9470c5f390d49873c55de9a094b071faa1d511a2"
+        "sha256": "3f42a027cf7c4be92fefe5833627c64326b537c53209571fb4adad7d6f0f2775"
       },
       "source_task": "M9-003"
     }
   ],
-  "revision": "b6cb4bfdf05b242133a980ddf0834848d3ac6578",
+  "revision": "5a0da62f1e2fe1148109998087131f190c8ff67a",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "73d02e7f0b8ee3fce3b28a5f2e4c8ae5c6c540ae33a5ac23dec8e3c39e234b9b"
+      "sha256": "88a5e97c3456f2ca614c45735a4d8b46506e32c90769c19986ca91142b8f6e03"
     },
     "LICENSE": {
       "domain": "text-utf8-lf-v1",
@@ -150,15 +150,15 @@
     },
     "docs/api/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "1560956444f8416d1f9b088ea33a3079681feb9c58e601555a25838ba7a51891"
+      "sha256": "f0cbc120d1e392f09ff34d5e1b693909d94233537f158af691e7cb28e19118d9"
     },
     "docs/evidence/M9-003/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "3f1f0358c31b7279db77c81b6d7d79c77cca1816cf9a0dbf8d8d79ab8907762f"
+      "sha256": "cd7b5e13043eea5444a69dd6d8dbcd9725cf394bfe1a817d6964eb0941cb27c2"
     },
     "docs/evidence/M9-003/api-compatibility.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0db1a769df9dce110621e73dc8917f6d535941ce9b14752fceecdc184d59b9d2"
+      "sha256": "c37862631cbb2e35849916bb4bed071ff797e1b8670800da3cc519a44e88fdf5"
     },
     "docs/evidence/M9-003/api-inventory.json": {
       "domain": "text-utf8-lf-v1",
@@ -166,7 +166,7 @@
     },
     "docs/evidence/M9-003/capabilities.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a3fb6018b8d3b9973b7d09b417eff65029df96c5ae8f67248518975690b785b1"
+      "sha256": "531e97cf95b35a719722ac210576b954f44bc680684ae3803ab1c34a134df316"
     },
     "docs/evidence/M9-003/commands/api-compatibility.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -234,19 +234,19 @@
     },
     "docs/evidence/M9-003/docs-report.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "7a4d7387aa5541074cf137658ced535592d29b4ff5f7d81e05e8b1dc699a4b77"
+      "sha256": "10f30f6b520abbc0d056470a774f36347db6bd219a46439f7306851d9e648686"
     },
     "docs/evidence/M9-003/long-check.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "e89e7cb40b0632bce3e754bef8df47036a74e862a85e82d6c4370634bb9e4bc2"
+      "sha256": "ba7bdd2ddaeffddcbbca98007582a0f350c921871fa67f315d217c2b0feaaecf"
     },
     "docs/evidence/M9-003/native-udp.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9bea2b626ff3c411ab82ef2a523ca6da906556cc912b5b56c2c92823335cce84"
+      "sha256": "c28846d8ede157a016f8aa8eae1324d7f48e994be6d50ba9f6d46d66a101000d"
     },
     "docs/evidence/M9-003/native-udp/capabilities-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9f6a693e987c02a38802adacc7762ab85ad9f8e563520684d652c9d44d8c8031"
+      "sha256": "32994957106afb279f96fdf85d7b03aceee585d07ee6ad3d026f8b5d3710f563"
     },
     "docs/evidence/M9-003/native-udp/capabilities-build.stdout.log": {
       "domain": "text-utf8-lf-v1",
@@ -258,15 +258,15 @@
     },
     "docs/evidence/M9-003/native-udp/contract/capability-contract.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "4c17edd98225e1757e4844249f37515a9d24b3586e87d168894de7fb0d1988b1"
+      "sha256": "1d73c54f76ed6a9678fdef0550de64366b522ceb54dd20239dfdb7f595b34b36"
     },
     "docs/evidence/M9-003/native-udp/contract/capability-contract.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "abd4d6e9a53b097ba161ad12a8eed884d39c0b5b9de1732341e1a6a523609f54"
+      "sha256": "0a4975a65e5f8a5f5990561aafce9f63f056a870b9b2b23da31e193e80032cfe"
     },
     "docs/evidence/M9-003/native-udp/contract/unsupported.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9f000a1d6a5409b80cdcc893d064c8e860e85602dd9036b62647ff4ae5109637"
+      "sha256": "993ab114e60ad415a813e11c2cfa287f0f85c0e5f19faa26c403d4fc10c3a66d"
     },
     "docs/evidence/M9-003/native-udp/dns-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -302,7 +302,7 @@
     },
     "docs/evidence/M9-003/native-udp/internet-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "18741f40ce6a2e5d2fbf9be2eb02515d0005ea46e3baa4d66a161d07866b4b95"
+      "sha256": "47667ac3f3f252b7701374985b0c0510edb538d7694699232f7f3e25b93e90a1"
     },
     "docs/evidence/M9-003/native-udp/internet-build.stdout.log": {
       "domain": "text-utf8-lf-v1",
@@ -314,11 +314,11 @@
     },
     "docs/evidence/M9-003/native-udp/internet/ipv4.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "cf56bd177c813eb43748908a0419016af8b94306362c82a54132152a1037304c"
+      "sha256": "ce3fe887d854362bc3b20a69716e0ffd65c4809cf265e80e5091773a117b8285"
     },
     "docs/evidence/M9-003/native-udp/internet/ipv4.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d8ec0bf04f1223732f97e2af95beed9702b99bc1169ac4b68e089ec5b1e82682"
+      "sha256": "8eb6f532acad3ed9c7e2a150daefaee49e2fde44fac4b97432a6811777df6126"
     },
     "docs/evidence/M9-003/native-udp/internet/ipv6.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -326,11 +326,11 @@
     },
     "docs/evidence/M9-003/native-udp/internet/ipv6.stdout.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "577291a085293ea41937864a719274e6f416e4376b3e7f3e0d7bdde795480bfe"
+      "sha256": "cf2c136d4ee7ae73c26d7899ee7b5c7dd5a7e5fce1c276f714f06f17a17b6da6"
     },
     "docs/evidence/M9-003/native-udp/internet/ipv6.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2d3adbbb09638b472fe7121423aeb536a12a11f42987a6570ce051d301405ffc"
+      "sha256": "ef2d0b9f04c177830290f2eb17fbed22fe0c396ca8c02e11f372b9562edfecf4"
     },
     "docs/evidence/M9-003/native-udp/options-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -350,7 +350,7 @@
     },
     "docs/evidence/M9-003/native-udp/options/active-send-control.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "e99d0593249df0ad8fbe779516e26ed8b2834966c696402613ae9c34d89815af"
+      "sha256": "c13f1e9ae7f1338b797129faa2fb6027e8fc6483cc8c905fa3d13ab065086ff4"
     },
     "docs/evidence/M9-003/native-udp/options/http-option-connector-consumer.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -370,7 +370,7 @@
     },
     "docs/evidence/M9-003/native-udp/options/invalid-option-admission.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9a6d47d1e9a74d26c61f8f52a54f5a626a7facaa73df29da67f840dd7f38505d"
+      "sha256": "cfc0749c2571ebb903a588754b58a5b8053f94bd4dd86e65cdae94ac6652aee8"
     },
     "docs/evidence/M9-003/native-udp/options/socket-options-consumer.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -406,7 +406,7 @@
     },
     "docs/evidence/M9-003/native-udp/udp-build.stderr.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "964f3d8817b9f7d8b232eef4ff123bfc39ec84e0907c091f6cc1e648a0e3edff"
+      "sha256": "c22ea2145b5534f0738f6fbc46b46e35bc890d538e64aab048cc219874a793a1"
     },
     "docs/evidence/M9-003/native-udp/udp-build.stdout.log": {
       "domain": "text-utf8-lf-v1",
@@ -422,7 +422,7 @@
     },
     "docs/evidence/M9-003/native-udp/udp/udp-active-receive.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9d6368dfd2012b71c3b955ce3521a4f154e64f58dc8810595935ea2c3e7cc918"
+      "sha256": "ed7ce88e0174be27f7b4989d7b2fd6d5e0a63a32650ff840e72ee58b7d8bc450"
     },
     "docs/evidence/M9-003/native-udp/udp/udp-active-send-consumer.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -434,7 +434,7 @@
     },
     "docs/evidence/M9-003/native-udp/udp/udp-active-send.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "7aad7860660e82b7bbf07d69daabb869b8b1e0db6157c5ab6603c967eb230282"
+      "sha256": "5ca8a8e8726d94e3912fbf4c2870cccd2dfce45a365481d71198d7e3004c3c4d"
     },
     "docs/evidence/M9-003/native-udp/udp/udp-broadcast-consumer.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -494,7 +494,7 @@
     },
     "docs/evidence/M9-003/native-udp/unix/abstract.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "83abffe1bd2561ab7111595b4e0f724d7b59268c9ca182d9859706b3f077c1ff"
+      "sha256": "514e7f38a4693d44b6e45cecfd559fc494e36f3dfc2ac1bcad0a945dfd7aad2c"
     },
     "docs/evidence/M9-003/native-udp/unix/pathname.stderr.log": {
       "domain": "text-utf8-lf-v1",
@@ -506,35 +506,35 @@
     },
     "docs/evidence/M9-003/native-udp/unix/pathname.syscalls.log": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "29427f835bc31bba23bec432555c751aadbb61b999175708feb62ea193b539af"
+      "sha256": "1b804fb013b499b642e167a114c271df7157c923638da544a98ce8d1f6e49c14"
     },
     "docs/evidence/M9-003/task-check.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "17308a459619edd8a5480d3e2f6ad38b01f37fd2699e4d20e88c04e450601e99"
+      "sha256": "5273656e6dee384332e6d20e2019866c68cc04929e8dca0ede77bd2c4be2525e"
     },
     "docs/evidence/M9-003/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9ad1d87597ca0b672c67a2317b744c2cf2fe4cc6ab87a89c29a92d0453f8cf5a"
+      "sha256": "6307cb66a2bdff7e4ae98b83ed64286e8f33948f8ab3c592f79d59e66c08d279"
     },
     "docs/evidence/M9-003/workspace.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "aae27725654d96faec31fe948d3ec9d31360f4d4123f69005fbfd710b81f2a85"
+      "sha256": "d37c942a98598a22cd6a2a49fc94edc1d9ced98a3dc2cd1f1c8bd9dd27c186c1"
     },
     "docs/guides/network-foundation-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2e7124aafad5276941fd0cf9bbca311cc610ffb1104ff84a45a9bed58490d00a"
+      "sha256": "62d6fb146b6465515947d1d3d40567aee08fafcdba3ebc953323d49099290b4d"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2a673da46632cc42ff2dc86dd9909803b78cbaeac6fd8291e33dbcbf6f02ac9b"
+      "sha256": "3d2dc1df9044535f426f403e844017222ead46741e64fc21e6871f3652f61064"
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "319f7d9dcf2e2217f70a51a2ad3ded2a7e44719d54dadf7e1ba5e9eb83e0bac4"
+      "sha256": "b59a366712d6e8c742fd48a9a08cca0b625f331ae5c5f21217da4a7b0c89dc38"
     },
     "docs/references/linux-network-capabilities.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "07a4d9dd7acbbfdd533521c83b16e260924813ea7f320375a9599871c7ad0106"
+      "sha256": "ce464427b1871c4cdd4f92e0db7c38f702a77b6c166f334a9b642fc2b4b3fb04"
     },
     "docs/references/m7-033-ci-toolchain.json": {
       "domain": "text-utf8-lf-v1",
@@ -563,10 +563,6 @@
     "examples/linux/m9_002/socket_options.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "1db761c6baecebc1f3b5ec80aac608fab4de8158fae8881f54d314d9c4e8006d"
-    },
-    "examples/linux/m9_003/udp_lifecycle.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "9bef771e0048b9dd977c606e3927cd3f543080a7b5443696b78140a230aef019"
     },
     "native/http_files/wirestack_http_files.c": {
       "domain": "text-utf8-lf-v1",
@@ -1046,11 +1042,7 @@
     },
     "src/internal/transport_stdnet/m9_002_option_execution_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "5d8fc8b47e56c7d5b9519c2cbf1ed4e58b6df951f72a3e303afd356adff84c64"
-    },
-    "src/internal/transport_stdnet/m9_003_udp_lifecycle_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "fc0a254e54f467b372e8bc24d763d1b009ef9731e55b7d92fc70476bec5fc054"
+      "sha256": "94da6110878acf9d66f2228ee9dc570e37a46e894069b2c0f08b620f95d21d5a"
     },
     "src/internal/transport_stdnet/net_contract.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1062,7 +1054,7 @@
     },
     "src/internal/transport_stdnet/socket_options.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "bc6c97dfbd7c3950231aaa3ab582958ceb958a2e256f1eab25b0e6173372b139"
+      "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
     },
     "src/internal/transport_stdnet/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1106,11 +1098,7 @@
     },
     "src/net/m9_002_socket_option_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a81e8f6eaa1702704fc9e6af069def7238922fedfdfcc9686c4a6fcb0ce3afb7"
-    },
-    "src/net/m9_003_udp_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "619948d3265d444c5cb29026fe718b36f57e4aef905d89adb26ff2d3d5449b4a"
+      "sha256": "9f88622564742fcbccad09db1b7e4e5cbd1e7a971e4605f4e7d0d47ac665d149"
     },
     "src/net/package.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1126,7 +1114,7 @@
     },
     "src/net/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "8ba007e60142163060d47a5c937521930a492da53acb51e75687477bd1a9c29a"
+      "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
     },
     "src/net/unix_datagram_socket.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1292,10 +1280,6 @@
       "domain": "text-utf8-lf-v1",
       "sha256": "d0dfa424593363f1fb2cbb651f43e3b6689b56aad938165143bc9be4cf80afc5"
     },
-    "tools/m9_003_native_udp.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "2c7eb596260c97d735a8652cb222a5efcac0a0e7041042307f25f4668bfcfbef"
-    },
     "tools/release_smoke/main.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "f2cafa9f57c9ee01fc06f74bed9e53a55888fc6278e0017f2b991d3515a8cdca"
@@ -1314,7 +1298,7 @@
     },
     "tools/tasks/M9-003.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "917f0f39f57a93d8cee18aa067c832a5109882d2b8d80a768d3d049c73aa17b3"
+      "sha256": "dccdc8cfe934512bb1ec4b5d55830e502fb0696afba1236918577d712fda8453"
     },
     "tools/tests/test_m7_linux_task_graph.py": {
       "domain": "text-utf8-lf-v1",
@@ -1347,7 +1331,7 @@
   },
   "source_task": "M9-003",
   "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-    "cjpm": "Cangjie Project Manager: 1.1.3"
+    "cjc": null,
+    "cjpm": null
   }
 }

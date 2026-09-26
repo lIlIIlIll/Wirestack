@@ -2394,6 +2394,7 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::function:encodeSocketOptions#g0(Array<SocketOption>)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::function:requiresCloseCoordination#g0(api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::function:socketFailure#g0(Exception,api.NetworkErrorCategory,api.NetworkPhase,?NetworkEndpoint,?NetworkEndpoint)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::function:udpSocketCapabilities#g0(NetworkEndpoint,Bool)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::interface:DatagramSocket#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::interface:StreamSocket#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::struct:DatagramReceiveResult#g0()",
@@ -223750,14 +223751,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 18,
+          "line": 33,
           "column": 5,
-          "byteOffset": 582
+          "byteOffset": 1307
         },
         "end": {
-          "line": 30,
+          "line": 37,
           "column": 6,
-          "byteOffset": 1267
+          "byteOffset": 1544
         }
       },
       "headerSpelling": "internal init(delegate: stdnet.StdNetDatagramSocket)",
@@ -223882,14 +223883,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 189,
+          "line": 196,
           "column": 5,
-          "byteOffset": 8437
+          "byteOffset": 8714
         },
         "end": {
-          "line": 191,
+          "line": 198,
           "column": 6,
-          "byteOffset": 8546
+          "byteOffset": 8823
         }
       },
       "headerSpelling": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit",
@@ -224083,14 +224084,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 38,
+          "line": 45,
           "column": 5,
-          "byteOffset": 1597
+          "byteOffset": 1874
         },
         "end": {
-          "line": 66,
+          "line": 73,
           "column": 6,
-          "byteOffset": 2617
+          "byteOffset": 2894
         }
       },
       "headerSpelling": "public static func bind(\n        endpoint: api.SocketEndpoint,\n        options!: Array<SocketOption> = [],\n        context!: api.OperationContext = api.OperationContext.background()\n    ): UdpSocket",
@@ -224222,14 +224223,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 184,
+          "line": 191,
           "column": 5,
-          "byteOffset": 8215
+          "byteOffset": 8492
         },
         "end": {
-          "line": 184,
+          "line": 191,
           "column": 80,
-          "byteOffset": 8290
+          "byteOffset": 8567
         }
       },
       "headerSpelling": "public func close(): Unit",
@@ -224388,14 +224389,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 181,
+          "line": 188,
           "column": 5,
-          "byteOffset": 8064
+          "byteOffset": 8341
         },
         "end": {
-          "line": 181,
+          "line": 188,
           "column": 84,
-          "byteOffset": 8143
+          "byteOffset": 8420
         }
       },
       "headerSpelling": "public func close(context!: api.OperationContext): Unit",
@@ -224549,14 +224550,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 72,
+          "line": 79,
           "column": 5,
-          "byteOffset": 2835
+          "byteOffset": 3112
         },
         "end": {
-          "line": 74,
+          "line": 81,
           "column": 6,
-          "byteOffset": 3037
+          "byteOffset": 3314
         }
       },
       "headerSpelling": "public func configure(options: Array<SocketOption>, context!: api.OperationContext = api.OperationContext.background()): Unit",
@@ -224725,14 +224726,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 101,
+          "line": 108,
           "column": 5,
-          "byteOffset": 4366
+          "byteOffset": 4643
         },
         "end": {
-          "line": 107,
+          "line": 114,
           "column": 6,
-          "byteOffset": 4650
+          "byteOffset": 4927
         }
       },
       "headerSpelling": "public func connect(\n        endpoint: NetworkEndpoint,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Unit",
@@ -224873,14 +224874,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 112,
+          "line": 119,
           "column": 5,
-          "byteOffset": 4843
+          "byteOffset": 5120
         },
         "end": {
-          "line": 114,
+          "line": 121,
           "column": 6,
-          "byteOffset": 4980
+          "byteOffset": 5257
         }
       },
       "headerSpelling": "public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit",
@@ -225049,14 +225050,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 81,
+          "line": 88,
           "column": 5,
-          "byteOffset": 3283
+          "byteOffset": 3560
         },
         "end": {
-          "line": 83,
+          "line": 90,
           "column": 6,
-          "byteOffset": 3502
+          "byteOffset": 3779
         }
       },
       "headerSpelling": "public func getOption(name: SocketOptionName, context!: api.OperationContext = api.OperationContext.background()): SocketOption",
@@ -225174,14 +225175,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 194,
+          "line": 201,
           "column": 5,
-          "byteOffset": 8617
+          "byteOffset": 8894
         },
         "end": {
-          "line": 194,
+          "line": 201,
           "column": 53,
-          "byteOffset": 8665
+          "byteOffset": 8942
         }
       },
       "headerSpelling": "public func isClosed(): Bool",
@@ -225354,14 +225355,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 121,
+          "line": 128,
           "column": 5,
-          "byteOffset": 5318
+          "byteOffset": 5595
         },
         "end": {
-          "line": 124,
+          "line": 131,
           "column": 6,
-          "byteOffset": 5553
+          "byteOffset": 5830
         }
       },
       "headerSpelling": "public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,\n        context!: api.OperationContext = api.OperationContext.background()): Unit",
@@ -225561,14 +225562,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 131,
+          "line": 138,
           "column": 5,
-          "byteOffset": 5879
+          "byteOffset": 6156
         },
         "end": {
-          "line": 134,
+          "line": 141,
           "column": 6,
-          "byteOffset": 6116
+          "byteOffset": 6393
         }
       },
       "headerSpelling": "public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,\n        context!: api.OperationContext = api.OperationContext.background()): Unit",
@@ -225750,14 +225751,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 168,
+          "line": 175,
           "column": 5,
-          "byteOffset": 7575
+          "byteOffset": 7852
         },
         "end": {
-          "line": 173,
+          "line": 180,
           "column": 6,
-          "byteOffset": 7772
+          "byteOffset": 8049
         }
       },
       "headerSpelling": "public func receive(\n        capacity: Int64,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): DatagramReceiveResult",
@@ -225930,14 +225931,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 141,
+          "line": 148,
           "column": 5,
-          "byteOffset": 6382
+          "byteOffset": 6659
         },
         "end": {
-          "line": 146,
+          "line": 153,
           "column": 6,
-          "byteOffset": 6560
+          "byteOffset": 6837
         }
       },
       "headerSpelling": "public func send(\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -226137,14 +226138,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 154,
+          "line": 161,
           "column": 5,
-          "byteOffset": 6941
+          "byteOffset": 7218
         },
         "end": {
-          "line": 161,
+          "line": 168,
           "column": 6,
-          "byteOffset": 7262
+          "byteOffset": 7539
         }
       },
       "headerSpelling": "public func sendTo(\n        endpoint: NetworkEndpoint,\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -226268,14 +226269,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 89,
+          "line": 96,
           "column": 5,
-          "byteOffset": 3719
+          "byteOffset": 3996
         },
         "end": {
-          "line": 89,
+          "line": 96,
           "column": 79,
-          "byteOffset": 3793
+          "byteOffset": 4070
         }
       },
       "headerSpelling": "public prop capabilities: SocketCapabilities",
@@ -226373,14 +226374,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 92,
+          "line": 99,
           "column": 5,
-          "byteOffset": 3870
+          "byteOffset": 4147
         },
         "end": {
-          "line": 92,
+          "line": 99,
           "column": 87,
-          "byteOffset": 3952
+          "byteOffset": 4229
         }
       },
       "headerSpelling": "public prop localEndpoint: ?NetworkEndpoint",
@@ -226479,14 +226480,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 95,
+          "line": 102,
           "column": 5,
-          "byteOffset": 4028
+          "byteOffset": 4305
         },
         "end": {
-          "line": 95,
+          "line": 102,
           "column": 83,
-          "byteOffset": 4106
+          "byteOffset": 4383
         }
       },
       "headerSpelling": "public prop remoteEndpoint: ?NetworkEndpoint",
@@ -226585,14 +226586,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 86,
+          "line": 93,
           "column": 5,
-          "byteOffset": 3574
+          "byteOffset": 3851
         },
         "end": {
-          "line": 86,
+          "line": 93,
           "column": 60,
-          "byteOffset": 3629
+          "byteOffset": 3906
         }
       },
       "headerSpelling": "public prop state: SocketState",
@@ -226658,14 +226659,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 16,
+          "line": 31,
           "column": 5,
-          "byteOffset": 529
+          "byteOffset": 1254
         },
         "end": {
-          "line": 16,
+          "line": 31,
           "column": 52,
-          "byteOffset": 576
+          "byteOffset": 1301
         }
       },
       "headerSpelling": "private let capabilityValue: SocketCapabilities",
@@ -226731,14 +226732,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 15,
+          "line": 30,
           "column": 5,
-          "byteOffset": 482
+          "byteOffset": 1207
         },
         "end": {
-          "line": 15,
+          "line": 30,
           "column": 47,
-          "byteOffset": 524
+          "byteOffset": 1249
         }
       },
       "headerSpelling": "private let core: DatagramSocketFacadeCore",
@@ -236919,14 +236920,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 14,
+          "line": 29,
           "column": 1,
-          "byteOffset": 435
+          "byteOffset": 1160
         },
         "end": {
-          "line": 195,
+          "line": 202,
           "column": 2,
-          "byteOffset": 8667
+          "byteOffset": 8944
         }
       },
       "headerSpelling": "public class UdpSocket <: DatagramSocket",
@@ -246708,14 +246709,14 @@
       "source": {
         "path": "src/net/udp_socket.cj",
         "start": {
-          "line": 197,
+          "line": 204,
           "column": 1,
-          "byteOffset": 8669
+          "byteOffset": 8946
         },
         "end": {
-          "line": 213,
+          "line": 220,
           "column": 2,
-          "byteOffset": 9334
+          "byteOffset": 9611
         }
       },
       "headerSpelling": "private func requireUdpInternetEndpoint(\n    endpoint: NetworkEndpoint,\n    localEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>\n): api.SocketEndpoint",
@@ -248733,6 +248734,155 @@
           "IDENTIFIER:3:api",
           "DOT:1:.",
           "IDENTIFIER:16:NetworkException"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::function:udpSocketCapabilities#g0(NetworkEndpoint,Bool)",
+      "kind": "function",
+      "name": "udpSocketCapabilities",
+      "qualifiedName": "wirestack.net.udpSocketCapabilities",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": null,
+      "visibility": "internal",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "localEndpoint",
+          "type": {
+            "kind": "source",
+            "spelling": "NetworkEndpoint",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "optionSupportQualified",
+          "type": {
+            "kind": "source",
+            "spelling": "Bool",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "SocketCapabilities",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": {
+        "rawText": "/** Builds endpoint-specific advisory capabilities for the UDP facade. */",
+        "summary": "Builds endpoint-specific advisory capabilities for the UDP facade.",
+        "description": "",
+        "markdown": {
+          "kind": "document",
+          "literal": "",
+          "source": null,
+          "metadata": null,
+          "children": [
+            {
+              "kind": "paragraph",
+              "literal": "",
+              "source": null,
+              "metadata": null,
+              "children": [
+                {
+                  "kind": "text",
+                  "literal": "Builds endpoint-specific advisory capabilities for the UDP facade.",
+                  "source": null,
+                  "metadata": null,
+                  "children": [
+                    
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "tags": [
+          
+        ]
+      },
+      "source": {
+        "path": "src/net/udp_socket.cj",
+        "start": {
+          "line": 8,
+          "column": 1,
+          "byteOffset": 208
+        },
+        "end": {
+          "line": 20,
+          "column": 2,
+          "byteOffset": 857
+        }
+      },
+      "headerSpelling": "internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint,\n    optionSupportQualified: Bool): SocketCapabilities",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "INTERNAL:8:internal",
+          "FUNC:4:func",
+          "IDENTIFIER:21:udpSocketCapabilities",
+          "LPAREN:1:(",
+          "IDENTIFIER:13:localEndpoint",
+          "COLON:1::",
+          "IDENTIFIER:15:NetworkEndpoint",
+          "COMMA:1:,",
+          "IDENTIFIER:22:optionSupportQualified",
+          "COLON:1::",
+          "BOOLEAN:4:Bool",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "IDENTIFIER:18:SocketCapabilities"
         ]
       },
       "semantic": {

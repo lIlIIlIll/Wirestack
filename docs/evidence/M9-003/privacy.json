@@ -1,11 +1,18 @@
 {
-  "authorization": "Local source and seal commits only; no push, PR, merge or release",
-  "command": "git privacy-check",
-  "exit_code": 0,
   "schema_version": 1,
-  "scope": "Isolated M9-003 publication worktree; original workspace untouched",
   "source_task": "M9-003",
   "status": "PASS",
-  "stderr": "",
-  "stdout": ""
+  "command": "git privacy-check",
+  "exit_code": 0,
+  "scope": "M9-003 source, candidate outputs, and seal-input reports",
+  "authorization": {
+    "local_source_commit": true,
+    "local_seal_commit": true,
+    "pull_request": true,
+    "push": true,
+    "merge": false,
+    "production_release": false
+  },
+  "stdout": "",
+  "stderr": ""
 }

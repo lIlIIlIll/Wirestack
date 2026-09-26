@@ -57,7 +57,7 @@
     },
     "docs/evidence/M9-002/native-options.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6f244cb361288591ef348cc8817111da5f857f90039cf384c63399076ffb7ea0"
+      "sha256": "406abb2b54406e998aa7acd57eb15c0fbd08d86e12db38943c35f8c5d9e2502f"
     },
     "docs/evidence/M9-003/api-inventory.json": {
       "domain": "text-utf8-lf-v1",
@@ -65,7 +65,7 @@
     },
     "docs/evidence/M9-003/native-udp.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9bea2b626ff3c411ab82ef2a523ca6da906556cc912b5b56c2c92823335cce84"
+      "sha256": "c28846d8ede157a016f8aa8eae1324d7f48e994be6d50ba9f6d46d66a101000d"
     }
   },
   "platform": "linux-x86_64-glibc",

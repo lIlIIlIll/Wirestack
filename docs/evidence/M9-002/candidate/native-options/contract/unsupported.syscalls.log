@@ -1,15 +1,16 @@
-3656357 sendto(9, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
-3656357 recvfrom(9, 0x7f7a0a03f5e0, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
-3656357 recvfrom(9, "\2", 1, 0, NULL, NULL) = 1
-3656357 sendto(10, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
-3656357 recvfrom(10, "\2", 1, 0, NULL, NULL) = 1
-3656357 sendto(11, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
-3656357 recvfrom(11, "\2", 1, 0, NULL, NULL) = 1
-3656357 sendto(12, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
-3656357 recvfrom(12, "\2", 1, 0, NULL, NULL) = 1
-3656357 sendto(5, "\2", 1, 0, {sa_family=AF_INET, sin_port=htons(37896), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
-3656357 recvfrom(5, "\2", 2, 0, {sa_family=AF_INET, sin_port=htons(37896), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
-3656357 sendto(6, "\2", 1, 0, {sa_family=AF_INET6, sin6_port=htons(59641), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
-3656357 recvfrom(6, "\2", 2, 0, {sa_family=AF_INET6, sin6_port=htons(59641), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
-3656357 sendto(8, "\2", 1, 0, {sa_family=AF_UNIX, sun_path="<scratch>"}, 110) = 1
-3656357 recvfrom(8, "\2", 2, 0, {sa_family=AF_UNIX, sun_path="<scratch>"}, [120 => 52]) = 1
+2331811 sendto(9, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2331811 recvfrom(9, 0x7f45b5e5edd0, 1, 0, NULL, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+2331811 recvfrom(9, "\2", 1, 0, NULL, NULL) = 1
+2331811 sendto(10, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2331811 recvfrom(10, "\2", 1, 0, NULL, NULL) = 1
+2331811 sendto(11, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2331811 recvfrom(11, "\2", 1, 0, NULL, NULL) = 1
+2331811 sendto(12, "\2", 1, MSG_NOSIGNAL, NULL, 0) = 1
+2331811 recvfrom(12, "\2", 1, 0, NULL, NULL) = 1
+2331811 sendto(5, "\2", 1, 0, {sa_family=AF_INET, sin_port=htons(60444), sin_addr=inet_addr("127.0.0.1")}, 16) = 1
+2331811 recvfrom(5, "\2", 2, 0, {sa_family=AF_INET, sin_port=htons(60444), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 1
+2331811 sendto(6, "\2", 1, 0, {sa_family=AF_INET6, sin6_port=htons(33649), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, 28) = 1
+2331811 recvfrom(6, "\2", 2, 0, {sa_family=AF_INET6, sin6_port=htons(33649), sin6_flowinfo=htonl(0), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_scope_id=0}, [120 => 28]) = 1
+2331811 sendto(8, "\2", 1, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m9-001-peer-42m3qcfp/datagram-peer"}, 110) = 1
+2331811 recvfrom(8, 0x55b8712b7200, 2, 0, 0x7f459c025460, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+2331811 recvfrom(8, "\2", 2, 0, {sa_family=AF_UNIX, sun_path="$HOME/.cache/agent-tmp/w191-b0123/wirestack-m9-001-peer-42m3qcfp/datagram-peer"}, [120 => 88]) = 1
