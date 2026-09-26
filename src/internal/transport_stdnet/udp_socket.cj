@@ -2,9 +2,20 @@ package wirestack.internal.transport_stdnet
 
 import std.net as native
 import std.sync.*
+import std.time.MonoTime
 import wirestack as api
 
 private const MAX_UDP_PAYLOAD: Int64 = 65507
+private const MAX_UDP_MULTICAST_MEMBERSHIPS: Int64 = 16
+
+private struct UdpMulticastMembershipKey {
+    let group: api.IpAddress
+    let interfaceIndex: UInt32
+    init(group: api.IpAddress, interfaceIndex: UInt32) {
+        this.group = group
+        this.interfaceIndex = interfaceIndex
+    }
+}
 
 private enum StdNetDatagramKind {
     | Internet(native.UdpSocket)
@@ -31,6 +42,8 @@ public class StdNetDatagramSocket <: Resource {
     private var receiveActive = false
     private var nativeCloseOwned = false
     private var nativeCloseOwnedByAbort = false
+    private var multicastMembershipSlots: ?Array<?UdpMulticastMembershipKey> = None<Array<?UdpMulticastMembershipKey>>
+    private var multicastMembershipCount: Int64 = 0
     private var sendStaging = Array<Byte>()
     private var receiveScratch = Array<Byte>()
 
@@ -231,6 +244,145 @@ public class StdNetDatagramSocket <: Resource {
         } finally { endConnect() }
     }
 
+    /** Joins one bounded Internet multicast membership through std.net. */
+    public func joinMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32,
+        context: api.OperationContext): Unit {
+        validateMulticastGroup(group, interfaceIndex)
+        beginOptionControl(context)
+        try {
+            let socket = internetSocket()
+            let (table, slot) = prepareMembershipJoin(group, interfaceIndex)
+            try {
+                setNativeMulticastMembership(socket, group, interfaceIndex, true)
+            } catch (error: native.SocketException) {
+                requireOptionOpen()
+                throw mapSocketError(error, context, api.NetworkErrorCategory.Option,
+                    api.NetworkPhase.DatagramSend, remoteEndpoint: remoteEndpoint)
+            }
+            synchronized(lifecycleMutex) {
+                ensureOpenLocked(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpointValue)
+                let key = UdpMulticastMembershipKey(group, interfaceIndex)
+                match (multicastMembershipSlots) {
+                    case Some(slots) => slots[slot] = Some(key)
+                    case None =>
+                        table[slot] = Some(key)
+                        multicastMembershipSlots = Some(table)
+                }
+                multicastMembershipCount += 1
+            }
+        } finally { endConnect() }
+    }
+
+    /** Leaves one membership previously joined on this socket. */
+    public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32,
+        context: api.OperationContext): Unit {
+        validateMulticastGroup(group, interfaceIndex)
+        beginOptionControl(context)
+        try {
+            let socket = internetSocket()
+            let (table, slot) = prepareMembershipLeave(group, interfaceIndex)
+            try {
+                setNativeMulticastMembership(socket, group, interfaceIndex, false)
+            } catch (error: native.SocketException) {
+                requireOptionOpen()
+                throw mapSocketError(error, context, api.NetworkErrorCategory.Option,
+                    api.NetworkPhase.DatagramSend, remoteEndpoint: remoteEndpoint)
+            }
+            synchronized(lifecycleMutex) {
+                ensureOpenLocked(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpointValue)
+                match (multicastMembershipSlots) {
+                    case Some(slots) => slots[slot] = None<UdpMulticastMembershipKey>
+                    case None => table[slot] = None<UdpMulticastMembershipKey>
+                }
+                multicastMembershipCount -= 1
+                if (multicastMembershipCount == 0) {
+                    multicastMembershipSlots = None<Array<?UdpMulticastMembershipKey>>
+                }
+            }
+        } finally { endConnect() }
+    }
+
+    private func internetSocket(): native.UdpSocket {
+        match (nativeKind) {
+            case StdNetDatagramKind.Internet(value) => value
+            case _ => throw optionError(api.NetworkErrorCode.Unsupported, api.NetworkPhase.DatagramSend)
+        }
+    }
+
+    private func validateMulticastGroup(group: api.IpAddress, interfaceIndex: UInt32): Unit {
+        let familyMatches = match ((group.family, optionIpv6())) {
+            case (api.IpAddressFamily.Ipv4, false) | (api.IpAddressFamily.Ipv6, true) => true
+            case _ => false
+        }
+        if (!familyMatches) { throw optionError(api.NetworkErrorCode.Unsupported, api.NetworkPhase.DatagramSend) }
+        if (Int64(interfaceIndex) > 2147483647) {
+            throw IllegalArgumentException("multicast interface index exceeds the native index range")
+        }
+        if (let Some(_) <- group.zone) {
+            throw IllegalArgumentException("multicast group zones must be selected with interfaceIndex")
+        }
+        let octets = group.toOctets()
+        let isMulticast = match (group.family) {
+            case api.IpAddressFamily.Ipv4 => octets[0] >= 224u8 && octets[0] <= 239u8
+            case api.IpAddressFamily.Ipv6 => octets[0] == 255u8
+        }
+        if (!isMulticast) { throw IllegalArgumentException("address is not an IP multicast group") }
+    }
+
+    private func prepareMembershipJoin(group: api.IpAddress, interfaceIndex: UInt32):
+        (Array<?UdpMulticastMembershipKey>, Int64) {
+        synchronized(lifecycleMutex) {
+            ensureOpenLocked(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpointValue)
+            let table = match (multicastMembershipSlots) {
+                case Some(value) => value
+                case None => Array<?UdpMulticastMembershipKey>(MAX_UDP_MULTICAST_MEMBERSHIPS,
+                    repeat: None<UdpMulticastMembershipKey>)
+            }
+            var freeSlot: Int64 = -1
+            for (index in 0..MAX_UDP_MULTICAST_MEMBERSHIPS) {
+                match (table[index]) {
+                    case Some(key) =>
+                        if (key.group == group && key.interfaceIndex == interfaceIndex) {
+                            throw membershipError(api.NetworkErrorCode.InvalidState,
+                                "multicast group is already joined")
+                        }
+                    case None => if (freeSlot < 0) { freeSlot = index }
+                }
+            }
+            if (multicastMembershipCount >= MAX_UDP_MULTICAST_MEMBERSHIPS) {
+                throw membershipError(api.NetworkErrorCode.ResourceExhausted,
+                    "multicast membership limit is reached")
+            }
+            (table, freeSlot)
+        }
+    }
+
+    private func prepareMembershipLeave(group: api.IpAddress, interfaceIndex: UInt32):
+        (Array<?UdpMulticastMembershipKey>, Int64) {
+        synchronized(lifecycleMutex) {
+            ensureOpenLocked(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, remoteEndpointValue)
+            let table = match (multicastMembershipSlots) {
+                case Some(value) => value
+                case None => throw membershipError(api.NetworkErrorCode.InvalidState,
+                    "multicast group is not joined")
+            }
+            for (index in 0..MAX_UDP_MULTICAST_MEMBERSHIPS) {
+                match (table[index]) {
+                    case Some(key) =>
+                        if (key.group == group && key.interfaceIndex == interfaceIndex) { return (table, index) }
+                    case None => ()
+                }
+            }
+            throw membershipError(api.NetworkErrorCode.InvalidState, "multicast group is not joined")
+        }
+    }
+
+    private func membershipError(code: api.NetworkErrorCode, message: String): api.NetworkException {
+        api.NetworkException(api.NetworkErrorCategory.Option, api.NetworkPhase.DatagramSend, code, message,
+            retryability: api.Retryability.Never, localEndpoint: Some(localEndpointValue),
+            remoteEndpoint: remoteEndpointValue)
+    }
+
     private func connectNative(address: native.SocketAddress): Unit {
         match (nativeKind) {
             case StdNetDatagramKind.Internet(value) => value.connect(address)
@@ -291,6 +443,39 @@ public class StdNetDatagramSocket <: Resource {
                     api.NetworkPhase.DatagramSend,
                     remoteEndpoint: Some(endpoint)
                 )
+            }
+        } finally {
+            registration.unregister()
+            endConnect()
+        }
+    }
+
+    /** Removes the connected UDP peer without replacing the bound socket. */
+    public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit {
+        let peer = remoteEndpoint
+        checkNetworkContext(context, api.NetworkErrorCategory.Connect, api.NetworkPhase.DatagramSend,
+            localEndpoint: Some(localEndpoint), remoteEndpoint: peer)
+        beginDisconnect(peer)
+        let gate = OperationGate()
+        let registration = context.cancellation.register {
+            => gate.interrupt { => abort(reason: Some(api.AbortReason.Cancelled)) }
+        }
+        try {
+            try {
+                match (nativeKind) {
+                    case StdNetDatagramKind.Internet(value) => value.disconnect()
+                    case StdNetDatagramKind.Unix(_) =>
+                        throw optionError(api.NetworkErrorCode.Unsupported, api.NetworkPhase.DatagramSend)
+                }
+                if (!gate.complete()) {
+                    throw contextOrTerminalError(context, api.NetworkErrorCategory.Connect,
+                        api.NetworkPhase.DatagramSend, remoteEndpoint: peer)
+                }
+                synchronized(lifecycleMutex) { remoteEndpointValue = None<api.NetworkEndpoint> }
+            } catch (error: native.SocketException) {
+                let _ = gate.complete()
+                throw mapSocketError(error, context, api.NetworkErrorCategory.Connect,
+                    api.NetworkPhase.DatagramSend, remoteEndpoint: peer)
             }
         } finally {
             registration.unregister()
@@ -529,7 +714,15 @@ public class StdNetDatagramSocket <: Resource {
     public func isClosed(): Bool {
         synchronized(lifecycleMutex) { nativeCloseOwned }
     }
-
+    /** Waits until receive admission is active for deterministic lifecycle tests. */
+    func waitUntilReceiveActive(timeout: Duration): Bool {
+        let expiresAt = MonoTime.now() + timeout
+        while (!synchronized(lifecycleMutex) { receiveActive } && !isClosed()) {
+            if (MonoTime.now() >= expiresAt) { return false }
+            sleep(Duration.millisecond)
+        }
+        synchronized(lifecycleMutex) { receiveActive }
+    }
     /** True only when abort won the first native close claim. */
     public func wasClosedByAbort(): Bool {
         synchronized(lifecycleMutex) { nativeCloseOwnedByAbort }
@@ -663,6 +856,17 @@ public class StdNetDatagramSocket <: Resource {
         }
     }
 
+    private func beginDisconnect(remote: ?api.NetworkEndpoint): Unit {
+        synchronized(lifecycleMutex) {
+            ensureOpenLocked(api.NetworkErrorCategory.Connect, api.NetworkPhase.DatagramSend, remote)
+            if (connectActive || sendActive || receiveActive) {
+                throw networkConcurrent(api.NetworkErrorCategory.Connect, api.NetworkPhase.DatagramSend,
+                    localEndpoint: Some(localEndpointValue), remoteEndpoint: remote)
+            }
+            connectActive = true
+        }
+    }
+
     private func beginConnect(endpoint: api.NetworkEndpoint): Unit {
         synchronized(lifecycleMutex) {
             ensureOpenLocked(
@@ -787,6 +991,8 @@ public class StdNetDatagramSocket <: Resource {
             } else {
                 nativeCloseOwned = true
                 nativeCloseOwnedByAbort = abortive
+                multicastMembershipSlots = None<Array<?UdpMulticastMembershipKey>>
+                multicastMembershipCount = 0
                 true
             }
         }

@@ -5,7 +5,8 @@ import wirestack.NetworkEndpoint
 import wirestack.internal.transport_stdnet as stdnet
 
 /** Builds endpoint-specific advisory capabilities for the UDP facade. */
-internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint, optionSupportQualified: Bool): SocketCapabilities {
+internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint,
+    optionSupportQualified: Bool): SocketCapabilities {
     let ipv4 = match (localEndpoint) {
         case NetworkEndpoint.Internet(endpoint) => match (endpoint.address.family) {
             case api.IpAddressFamily.Ipv4 => true
@@ -14,7 +15,7 @@ internal func udpSocketCapabilities(localEndpoint: NetworkEndpoint, optionSuppor
         case _ => false
     }
     SocketCapabilities(nonBlocking: true, closeOnExec: true, halfClose: false,
-        broadcast: ipv4 && optionSupportQualified, multicast: false, raw: false, ancillaryData: false,
+        broadcast: ipv4 && optionSupportQualified, multicast: stdnet.multicastMembershipQualified(), raw: false, ancillaryData: false,
         zeroLengthDatagramSend: false, connectedDatagramSend: true)
 }
 
@@ -31,7 +32,8 @@ public class UdpSocket <: DatagramSocket {
 
     internal init(delegate: stdnet.StdNetDatagramSocket) {
         this.core = DatagramSocketFacadeCore(delegate)
-        this.capabilityValue = udpSocketCapabilities(delegate.localEndpoint, stdnet.socketOptionsQualified())
+        this.capabilityValue = udpSocketCapabilities(delegate.localEndpoint,
+            stdnet.socketOptionsQualified())
     }
 
     /** Binds an Internet datagram socket without DNS.
@@ -109,6 +111,33 @@ public class UdpSocket <: DatagramSocket {
     ): Unit {
         let _ = requireUdpInternetEndpoint(endpoint, localEndpoint: Some(core.localEndpoint))
         core.connect(endpoint, context)
+    }
+
+    /** Disconnects the selected peer while preserving the bound UDP socket. Repeated calls are idempotent.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    public func disconnect(context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.disconnect(context)
+    }
+
+    /** Joins an IPv4 or IPv6 multicast group on this socket family. At most sixteen memberships are tracked.
+     * @param group Multicast IP address without a zone.
+     * @param interfaceIndex Native interface index; zero selects the kernel default.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    public func joinMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,
+        context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.joinMulticastGroup(group, interfaceIndex, context)
+    }
+
+    /** Leaves a previously joined group/interface pair; duplicate joins and unmatched leaves fail InvalidState.
+     * @param group Multicast IP address without a zone.
+     * @param interfaceIndex Native interface index used for the join.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    public func leaveMulticastGroup(group: api.IpAddress, interfaceIndex!: UInt32 = 0,
+        context!: api.OperationContext = api.OperationContext.background()): Unit {
+        core.leaveMulticastGroup(group, interfaceIndex, context)
     }
 
     /** Sends one atomic datagram to the selected peer.

@@ -1,0 +1,12 @@
+3681120 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+3681120 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+3681120 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+3681125 sendto(3, "I", 1, 0, {sa_family=AF_INET, sin_port=htons(56095), sin_addr=inet_addr("127.0.0.1")}, 16) = 1 (DELAYED)
+3681125 getsockopt(3, SOL_SOCKET, SO_BROADCAST, [0], [4]) = 0
+3681124 +++ exited with 0 +++
+3681123 +++ exited with 0 +++
+3681122 +++ exited with 0 +++
+3681121 +++ exited with 0 +++
+3681125 +++ exited with 0 +++
+3681126 +++ exited with 0 +++
+3681120 +++ exited with 0 +++

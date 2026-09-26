@@ -116,6 +116,27 @@ private struct Ipv4MulticastInterface {
     var index: Int32 = 0
 }
 
+@C
+private struct Ipv6MulticastRequest {
+    var group0: UInt8 = 0
+    var group1: UInt8 = 0
+    var group2: UInt8 = 0
+    var group3: UInt8 = 0
+    var group4: UInt8 = 0
+    var group5: UInt8 = 0
+    var group6: UInt8 = 0
+    var group7: UInt8 = 0
+    var group8: UInt8 = 0
+    var group9: UInt8 = 0
+    var group10: UInt8 = 0
+    var group11: UInt8 = 0
+    var group12: UInt8 = 0
+    var group13: UInt8 = 0
+    var group14: UInt8 = 0
+    var group15: UInt8 = 0
+    var interfaceIndex: UInt32 = 0
+}
+
 private func optionCoordinates(name: StdSocketOptionName, ipv6: Bool): (Int32, Int32) {
     match (name) {
         case StdSocketOptionName.ReuseAddress => (1, 2)
@@ -140,6 +161,58 @@ private func setNativeOption(
         case NativeOptionSocket.Tcp(tcp) => tcp.setSocketOption(level, name, value, size)
         case NativeOptionSocket.Listener(listener) => listener.setSocketOption(level, name, value, size)
         case NativeOptionSocket.Udp(udp) => udp.setSocketOption(level, name, value, size)
+    }
+}
+
+/** Applies one qualified Linux IP_ADD/DROP_MEMBERSHIP operation through std.net. */
+internal func setNativeMulticastMembership(
+    socket: native.UdpSocket, group: api.IpAddress, interfaceIndex: UInt32, joining: Bool
+): Unit {
+    if (!socketOptionsQualified()) {
+        throw optionError(api.NetworkErrorCode.Unsupported, api.NetworkPhase.DatagramSend)
+    }
+    let octets = group.toOctets()
+    match (group.family) {
+        case api.IpAddressFamily.Ipv4 =>
+            let pointer = LibC.malloc<Ipv4MulticastInterface>()
+            if (pointer.isNull()) { throw IllegalMemoryException("multicast request allocation failed") }
+            try {
+                var request = Ipv4MulticastInterface()
+                request.group = UInt32(octets[0]) |
+                    (UInt32(octets[1]) << 8u64) |
+                    (UInt32(octets[2]) << 16u64) |
+                    (UInt32(octets[3]) << 24u64)
+                request.index = Int32(interfaceIndex)
+                unsafe { pointer.write(request) }
+                setNativeOption(NativeOptionSocket.Udp(socket), 0, if (joining) { 35 } else { 36 },
+                    CPointer<Unit>(pointer), 12)
+            } finally { unsafe { LibC.free(pointer) } }
+        case api.IpAddressFamily.Ipv6 =>
+            let pointer = LibC.malloc<Ipv6MulticastRequest>()
+            if (pointer.isNull()) { throw IllegalMemoryException("multicast request allocation failed") }
+            try {
+                var request = Ipv6MulticastRequest()
+                request.group0 = octets[0]
+                request.group1 = octets[1]
+                request.group2 = octets[2]
+                request.group3 = octets[3]
+                request.group4 = octets[4]
+                request.group5 = octets[5]
+                request.group6 = octets[6]
+                request.group7 = octets[7]
+                request.group8 = octets[8]
+                request.group9 = octets[9]
+                request.group10 = octets[10]
+                request.group11 = octets[11]
+                request.group12 = octets[12]
+                request.group13 = octets[13]
+                request.group14 = octets[14]
+                request.group15 = octets[15]
+                request.interfaceIndex = interfaceIndex
+                unsafe { pointer.write(request) }
+                setNativeOption(NativeOptionSocket.Udp(socket), 41, if (joining) { 20 } else { 21 },
+                    CPointer<Unit>(pointer), 20)
+            } finally { unsafe { LibC.free(pointer) } }
     }
 }
 
@@ -226,6 +299,8 @@ private func socketOptionsQualifiedImpl(): Bool { false }
 
 /** Provider SPI: whether this build target has native socket-option qualification. */
 public func socketOptionsQualified(): Bool { socketOptionsQualifiedImpl() }
+
+public func multicastMembershipQualified(): Bool { socketOptionsQualified() }
 
 /** Executes defaults not overridden by the caller, followed by caller order. */
 internal func applySocketOptionList(
