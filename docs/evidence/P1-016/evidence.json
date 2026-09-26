@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-23T11:15:18.558240Z",
+  "generated_at_utc": "2026-09-26T21:18:49.551499Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,12 +13,12 @@
       "path": "docs/evidence/P1-016/verification.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "43d0c5fe1cae68bd5d36a74778f9f950c4184749a92f5bf907283962fb3b129c"
+        "sha256": "471a3bd7066e90b3aecb6322505b977537a47e6d2492f785de5bc8ec98d286e9"
       },
       "source_task": "P1-016"
     }
   ],
-  "revision": "68485da811c73930105f39c77f67c3b233ed6208",
+  "revision": "aa9296d620bda5a88f29e491b90d66894af6a8c0",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
@@ -27,7 +27,7 @@
     },
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "26b2f036eb6917224a39776047cd3df1e8b57284fc6c6d0cf9f07c0bbf0c01d3"
+      "sha256": "88a5e97c3456f2ca614c45735a4d8b46506e32c90769c19986ca91142b8f6e03"
     },
     "docs/evidence/P1-016/README.md": {
       "domain": "text-utf8-lf-v1",
@@ -51,7 +51,7 @@
     },
     "tools/tasks/P1-016.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d82fd381418461626304464c832145b3fe9a36bb7dd816060c69abfe0efb0ccd"
+      "sha256": "534d9b77c552f085302ed60dc3511a1cb14f04a47aa0a0adf1a75c62b75baaac"
     },
     "tools/tasks/schema-v1.json": {
       "domain": "text-utf8-lf-v1",
