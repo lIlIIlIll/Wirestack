@@ -2,18 +2,18 @@
   "artifact": {
     "digest": {
       "domain": "artifact-bytes-v1",
-      "sha256": "561b16c50d79b2cd334a1cbf33a8f030a11dcf72598b40fb84f90609d7dd2b3e"
+      "sha256": "81debfa919b08a1c6aa900da9f800bf3ad9915417e6d6c7a08944493df3d0372"
     },
     "path": "dist/m9-003/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
     "payload_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a7f8d282cfa52140f662485e66349ded46cfc28789d7bd547de61a8be4ae5635"
+      "sha256": "578b4d0e31a4e24cff692528909cfc4846ae241aafc605d4f1d43e78c48442b8"
     }
   },
-  "base_revision": "06de1c9f84b6bd85b8f05b4ed1c8641cb63c71a3",
+  "base_revision": "a7133bcb3f68c89920cbb9f3b9ca57766643e506",
   "capability_description_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "07a4d9dd7acbbfdd533521c83b16e260924813ea7f320375a9599871c7ad0106"
+    "sha256": "ce464427b1871c4cdd4f92e0db7c38f702a77b6c166f334a9b642fc2b4b3fb04"
   },
   "capability_observations": {
     "TcpListener": [
@@ -272,7 +272,7 @@
       "stderr": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "47667ac3f3f252b7701374985b0c0510edb538d7694699232f7f3e25b93e90a1"
+          "sha256": "18741f40ce6a2e5d2fbf9be2eb02515d0005ea46e3baa4d66a161d07866b4b95"
         },
         "path": "docs/evidence/M9-003/candidate/native-udp/internet-build.stderr.log"
       },
@@ -322,7 +322,7 @@
       "stderr": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "47667ac3f3f252b7701374985b0c0510edb538d7694699232f7f3e25b93e90a1"
+          "sha256": "18741f40ce6a2e5d2fbf9be2eb02515d0005ea46e3baa4d66a161d07866b4b95"
         },
         "path": "docs/evidence/M9-003/candidate/native-udp/dns-build.stderr.log"
       },
@@ -429,7 +429,7 @@
       "stdout": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "d614c3d7f9ed779770620fae6722ddde0eb0c7630a7e383090e7776aa8868d87"
+          "sha256": "6023cbdf8dc01a621bd8c9da7b8e429a184aef4503c78ec87fd374bfb3f8a8e7"
         },
         "path": "docs/evidence/M9-003/candidate/native-udp/internet/ipv4.stdout.log"
       },
@@ -454,7 +454,7 @@
       "stdout": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "1429d1f619b91c54898e2241ae8e9a724a850ba411f0dca869e8d990cf2d4877"
+          "sha256": "59f26fbba26490c464978d86a3e5072bdb7b8af8e7d27d5187eca91aea8cd78a"
         },
         "path": "docs/evidence/M9-003/candidate/native-udp/internet/ipv6.stdout.log"
       },
@@ -529,7 +529,7 @@
       "stdout": {
         "digest": {
           "domain": "text-utf8-lf-v1",
-          "sha256": "eaed20f6b4bc0b5a060914964e362a3377fc6c93c113c11d24b81e46920d32e7"
+          "sha256": "163c399b0e74b1f4273a28b54758fa5619e22d4d46d8fd4df5535c1c25c2aedb"
         },
         "path": "docs/evidence/M9-003/candidate/native-udp/contract/capability-contract.stdout.log"
       },
@@ -543,7 +543,7 @@
       ],
       "cwd": "<work>/wirestack_m8_004_native_dns/target/release/bin",
       "environment": {
-        "WIRESTACK_DNS_PORT": "45185"
+        "WIRESTACK_DNS_PORT": "43575"
       },
       "exit_code": 0,
       "id": "consumer-basic",
@@ -571,8 +571,8 @@
       ],
       "cwd": "<work>/wirestack_m8_004_native_dns/target/release/bin",
       "environment": {
-        "WIRESTACK_DNS_PORT": "36597",
-        "WIRESTACK_SERVICE_PORT": "42071"
+        "WIRESTACK_DNS_PORT": "40993",
+        "WIRESTACK_SERVICE_PORT": "32997"
       },
       "exit_code": 0,
       "id": "consumer-connect",
@@ -897,27 +897,27 @@
   "consumer_binaries": {
     "capabilities": {
       "domain": "artifact-bytes-v1",
-      "sha256": "38695d18025ed78cf9b872b235ed6eb0cec708bf268ed3d76ad7e895d24eb763"
+      "sha256": "716da6f43bc197f70f178c1d933a47cf71baf94e980d30756cc79c1d3cd973a7"
     },
     "dns": {
       "domain": "artifact-bytes-v1",
-      "sha256": "57b7153fb65846b7eb2bdaf3316eadc93247bc201d46fd3e21a914cb8e0e1752"
+      "sha256": "611d2461ad1cc34089fd217a5cafe5b536f10ae557b137acc3bfc9ccce0c255e"
     },
     "internet": {
       "domain": "artifact-bytes-v1",
-      "sha256": "7bcccb1787fc6463ceb9da04469dd500c4b0037fcb40ad2054fcea978509d457"
+      "sha256": "5620e035e402312b14518bc3c77700b6ac2a2e297b832258b9db5c277a0367f8"
     },
     "options": {
       "domain": "artifact-bytes-v1",
-      "sha256": "9ef005ac48c5fa4a598ce7c4452ef450090daa4ced0493483950542cba45decc"
+      "sha256": "1af8c84fe2c21bdbe86afeecf730a209b228faa22b8558dca8a92770156fa759"
     },
     "udp": {
       "domain": "artifact-bytes-v1",
-      "sha256": "610de3a8cba982b3a7097d12345188b8feb121157c61bf5382df8cb1680f9b4c"
+      "sha256": "cee561e289af60bd8f321ee32a3bda6ec7c2b995e4e87a97c3d1884f1f7e541f"
     },
     "unix": {
       "domain": "artifact-bytes-v1",
-      "sha256": "9dcd8c45c02d56d4fd19c23ebd480d775b2dca009c267cfaac7572892071882e"
+      "sha256": "ace19969479fa160863c9c6cabbf30bee41f43270194dce1643e86c68ce035df"
     }
   },
   "cross_compiled": false,
@@ -948,7 +948,7 @@
     },
     "docs/references/linux-network-capabilities.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "07a4d9dd7acbbfdd533521c83b16e260924813ea7f320375a9599871c7ad0106"
+      "sha256": "ce464427b1871c4cdd4f92e0db7c38f702a77b6c166f334a9b642fc2b4b3fb04"
     },
     "docs/references/m7-033-ci-toolchain.json": {
       "domain": "text-utf8-lf-v1",
@@ -1456,7 +1456,7 @@
     },
     "src/internal/transport_stdnet/socket_options.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "bc6c97dfbd7c3950231aaa3ab582958ceb958a2e256f1eab25b0e6173372b139"
+      "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
     },
     "src/internal/transport_stdnet/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1516,7 +1516,7 @@
     },
     "src/net/udp_socket.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "8ba007e60142163060d47a5c937521930a492da53acb51e75687477bd1a9c29a"
+      "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
     },
     "src/net/unix_datagram_socket.cj": {
       "domain": "text-utf8-lf-v1",
@@ -1692,12 +1692,12 @@
     "method": "fresh release archive extracted outside checkout; sole package dependency is Wirestack",
     "release_manifest_digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0608b43fdcfb9feb97a315789b3e4f6595f7e9752744757f6459d7b635e506b6"
+      "sha256": "25f07c317ba21e93194e09a453bcf3f7f53b66fb9aa4bc658698757d8a69cc5a"
     }
   },
   "installed_source_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "ffcf775d02bad9cafb19797aef14446001eafa7368c0012aab5e4f36e92d8d10"
+    "sha256": "42dd887ccd8f869106f5c09373d6355c15cf23d745d87d3c4c95529dfb7d34c1"
   },
   "invocation": {
     "argv": [
@@ -1712,7 +1712,7 @@
     "cwd": "<repo>",
     "offline": true
   },
-  "merge_base": "91f0514a10ff41b443bb62c70bcc7c142402d7a5",
+  "merge_base": "21bafe6f625140159d757d857dd974b2289552c9",
   "native_execution": true,
   "observed_capabilities": {
     "TcpListener": {
@@ -1822,14 +1822,14 @@
         "stdout": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "d614c3d7f9ed779770620fae6722ddde0eb0c7630a7e383090e7776aa8868d87"
+            "sha256": "6023cbdf8dc01a621bd8c9da7b8e429a184aef4503c78ec87fd374bfb3f8a8e7"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/internet/ipv4.stdout.log"
         },
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "9d43a966332149eb46abeb55ca557539162270c0e7ddc10aa6ab5cfea2373245"
+            "sha256": "fc3e7edaf902cca402a27897e1b03c4ecfdce7f1098b46c231b3d3fd31d349a8"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/internet/ipv4.syscalls.log"
         }
@@ -1869,14 +1869,14 @@
         "stdout": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "1429d1f619b91c54898e2241ae8e9a724a850ba411f0dca869e8d990cf2d4877"
+            "sha256": "59f26fbba26490c464978d86a3e5072bdb7b8af8e7d27d5187eca91aea8cd78a"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/internet/ipv6.stdout.log"
         },
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "96d86c037247c3a66a17af645a19c02fe149cfca0993002c17a5ae793f1bf88e"
+            "sha256": "f67f0157b8616656f91e5c6d519a5c2ee6a7c16e2be0658933756d918c681f41"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/internet/ipv6.syscalls.log"
         }
@@ -1903,32 +1903,32 @@
           {
             "native_eagain_before_action": true,
             "operation": "sendto",
-            "trace_offset": 2859
+            "trace_offset": 2844
           },
           {
             "native_eagain_before_action": true,
             "operation": "accept4",
-            "trace_offset": 8519
+            "trace_offset": 8500
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 46629
+            "trace_offset": 45622
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 47349
+            "trace_offset": 46334
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 48012
+            "trace_offset": 46989
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 48604
+            "trace_offset": 47565
           }
         ],
         "pathname_replacement_guard": "PASS",
@@ -1958,7 +1958,7 @@
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "889b67499b5273a05ba7194e058f3d85db44652ba2acc5c14076269f8b84ee93"
+            "sha256": "dd47af884007cd5e87104a00e7feedb27adf598ec0149cadaacf0119402e1d79"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/unix/pathname.syscalls.log"
         },
@@ -1986,32 +1986,32 @@
           {
             "native_eagain_before_action": true,
             "operation": "sendto",
-            "trace_offset": 2951
+            "trace_offset": 2968
           },
           {
             "native_eagain_before_action": true,
             "operation": "accept4",
-            "trace_offset": 7883
+            "trace_offset": 7988
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 48209
+            "trace_offset": 48358
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 48827
+            "trace_offset": 49093
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 49389
+            "trace_offset": 49655
           },
           {
             "native_eagain_before_action": true,
             "operation": "recvfrom",
-            "trace_offset": 50023
+            "trace_offset": 50289
           }
         ],
         "pathname_replacement_guard": "NOT_APPLICABLE",
@@ -2041,7 +2041,7 @@
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "d663c9ee02a2c17cf1279ab66543ebae00bda8f1e46f7d2292633c3cd0537107"
+            "sha256": "a8d9ca9aee6f50970cb796e50c42f1ea4d588e18f9eee7a14fa5b90572b57156"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/unix/abstract.syscalls.log"
         },
@@ -2210,11 +2210,11 @@
           "fd_inventory_after": [
             {
               "fd": "0",
-              "target": "pipe:[4926330]"
+              "target": "pipe:[65695059]"
             },
             {
               "fd": "1",
-              "target": "pipe:[4926331]"
+              "target": "pipe:[65695060]"
             },
             {
               "fd": "2",
@@ -2222,7 +2222,7 @@
             },
             {
               "fd": "3",
-              "target": "socket:[4933061]"
+              "target": "socket:[65689227]"
             },
             {
               "fd": "4",
@@ -2230,45 +2230,45 @@
             },
             {
               "fd": "5",
-              "target": "socket:[4933062]"
+              "target": "socket:[65689228]"
             },
             {
               "fd": "6",
-              "target": "socket:[4933063]"
+              "target": "socket:[65689229]"
             },
             {
               "fd": "7",
-              "target": "socket:[4933064]"
+              "target": "socket:[65689230]"
             },
             {
               "fd": "8",
-              "target": "socket:[4933065]"
+              "target": "socket:[65689231]"
             },
             {
               "fd": "9",
-              "target": "socket:[4930153]"
+              "target": "socket:[65689233]"
             },
             {
               "fd": "10",
-              "target": "socket:[4932089]"
+              "target": "socket:[65689234]"
             },
             {
               "fd": "11",
-              "target": "socket:[4935744]"
+              "target": "socket:[65689235]"
             },
             {
               "fd": "12",
-              "target": "socket:[4935745]"
+              "target": "socket:[65689236]"
             }
           ],
           "fd_inventory_before": [
             {
               "fd": "0",
-              "target": "pipe:[4926330]"
+              "target": "pipe:[65695059]"
             },
             {
               "fd": "1",
-              "target": "pipe:[4926331]"
+              "target": "pipe:[65695060]"
             },
             {
               "fd": "2",
@@ -2276,7 +2276,7 @@
             },
             {
               "fd": "3",
-              "target": "socket:[4933061]"
+              "target": "socket:[65689227]"
             },
             {
               "fd": "4",
@@ -2284,35 +2284,35 @@
             },
             {
               "fd": "5",
-              "target": "socket:[4933062]"
+              "target": "socket:[65689228]"
             },
             {
               "fd": "6",
-              "target": "socket:[4933063]"
+              "target": "socket:[65689229]"
             },
             {
               "fd": "7",
-              "target": "socket:[4933064]"
+              "target": "socket:[65689230]"
             },
             {
               "fd": "8",
-              "target": "socket:[4933065]"
+              "target": "socket:[65689231]"
             },
             {
               "fd": "9",
-              "target": "socket:[4930153]"
+              "target": "socket:[65689233]"
             },
             {
               "fd": "10",
-              "target": "socket:[4932089]"
+              "target": "socket:[65689234]"
             },
             {
               "fd": "11",
-              "target": "socket:[4935744]"
+              "target": "socket:[65689235]"
             },
             {
               "fd": "12",
-              "target": "socket:[4935745]"
+              "target": "socket:[65689236]"
             }
           ],
           "native_shutdown_calls": 0,
@@ -2321,7 +2321,7 @@
           "syscalls": {
             "digest": {
               "domain": "text-utf8-lf-v1",
-              "sha256": "e84d2408bee1350564d244c274da0ff988271c3818bc04a0fb20970ba4946e9d"
+              "sha256": "19e3aa998a280f27022fe15ea29eba0ff3fa5ad1ccb90ac49d68475175404b27"
             },
             "path": "docs/evidence/M9-003/candidate/native-udp/contract/unsupported.syscalls.log"
           },
@@ -2344,7 +2344,7 @@
               "name": "main"
             },
             {
-              "count": 2,
+              "count": 1,
               "name": "schd-worker"
             },
             {
@@ -2370,7 +2370,7 @@
               "name": "main"
             },
             {
-              "count": 2,
+              "count": 1,
               "name": "schd-worker"
             },
             {
@@ -2391,14 +2391,14 @@
         "stdout": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "eaed20f6b4bc0b5a060914964e362a3377fc6c93c113c11d24b81e46920d32e7"
+            "sha256": "163c399b0e74b1f4273a28b54758fa5619e22d4d46d8fd4df5535c1c25c2aedb"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/contract/capability-contract.stdout.log"
         },
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "5192e40cbf794840426ccb4e475a2ca9ab1fdda85910a062a72c614e8e5fd959"
+            "sha256": "369699c578d510a07681e6c35f9a5c29bb1d4c401efa2f41bd7fcf2e30893c58"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/contract/capability-contract.syscalls.log"
         }
@@ -2417,42 +2417,42 @@
         "mode": "basic",
         "queries": [
           {
-            "at_monotonic_ns_from_case_start": 12388640,
+            "at_monotonic_ns_from_case_start": 8462760,
             "class": 1,
-            "id": 52235,
+            "id": 40726,
             "name": "a.native.test",
             "source_address": "127.0.0.1",
-            "source_port": 35358,
+            "source_port": 53188,
             "transport": "UDP",
             "type": 1
           },
           {
-            "at_monotonic_ns_from_case_start": 14196591,
+            "at_monotonic_ns_from_case_start": 9621675,
             "class": 1,
-            "id": 10455,
+            "id": 34691,
             "name": "a.native.test",
             "source_address": "127.0.0.1",
-            "source_port": 40556,
+            "source_port": 41642,
             "transport": "UDP",
             "type": 1
           },
           {
-            "at_monotonic_ns_from_case_start": 16382273,
+            "at_monotonic_ns_from_case_start": 10766855,
             "class": 1,
-            "id": 1287,
+            "id": 32992,
             "name": "aaaa.native.test",
             "source_address": "127.0.0.1",
-            "source_port": 47246,
+            "source_port": 36722,
             "transport": "UDP",
             "type": 28
           },
           {
-            "at_monotonic_ns_from_case_start": 18421893,
+            "at_monotonic_ns_from_case_start": 11803824,
             "class": 1,
-            "id": 37515,
+            "id": 51977,
             "name": "owner.native.test",
             "source_address": "127.0.0.1",
-            "source_port": 38649,
+            "source_port": 42686,
             "transport": "UDP",
             "type": 1
           }
@@ -2471,26 +2471,26 @@
           "resolver_connect_dns_to_real_tcp_service",
           "single_operation_context"
         ],
-        "dns_response_at_ns_from_start": 111067465,
+        "dns_response_at_ns_from_start": 107492283,
         "mode": "connect",
         "operation_deadline_seconds": 2,
         "queries": [
           {
-            "at_monotonic_ns_from_case_start": 12212744,
+            "at_monotonic_ns_from_case_start": 8341834,
             "class": 1,
-            "id": 21837,
+            "id": 46729,
             "name": "service.native.test",
             "source_address": "127.0.0.1",
-            "source_port": 41401,
+            "source_port": 38448,
             "transport": "UDP",
             "type": 1
           }
         ],
         "query_count": 1,
-        "service_accept_at_ns_from_start": 111928841,
+        "service_accept_at_ns_from_start": 108184181,
         "service_connections": 1,
         "service_remote_address": "127.0.0.1",
-        "service_remote_port": 51074,
+        "service_remote_port": 59984,
         "status": "PASS",
         "tcp_connections": 0,
         "udp_response_datagrams": 1
@@ -2560,7 +2560,7 @@
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "abf4c2a1512fe3385357b83b5e58c52e1364d8a588832e4f9f5230ca3d5e1d18"
+            "sha256": "28ee30e7af0c0c375e73bbf55818c84d86884ee2540a313e0a6e350b95aa22bc"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/options/invalid-option-admission.syscalls.log"
         }
@@ -2588,7 +2588,7 @@
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "5844473054beb1b7af2962d8343b056cd02945111c2bca4566ca364f94371826"
+            "sha256": "cab63b7ec5920904baf05f9496707faf7369a7ab565f911fbb58003b6b555790"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/options/active-send-control.syscalls.log"
         }
@@ -2721,7 +2721,7 @@
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "47d519ff91000a6f8023cbf3b34167332b37713b2eabd7c65b6c75cef9068bad"
+            "sha256": "862bb55c0985e0f7176f7a43c31844211d97da3644b96a33f2ad7fd13af6a39d"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-receive.syscalls.log"
         }
@@ -2749,7 +2749,7 @@
         "syscalls": {
           "digest": {
             "domain": "text-utf8-lf-v1",
-            "sha256": "ec9566201682b71530ef06e91c1c28e500a897745187e809e1a6556131257fe3"
+            "sha256": "145873886ff287b444cf21dfdd4bde034b009ca1216b82b1439822ee0d711364"
           },
           "path": "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-send.syscalls.log"
         }
@@ -2770,7 +2770,7 @@
   },
   "source_digest": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "ffcf775d02bad9cafb19797aef14446001eafa7368c0012aab5e4f36e92d8d10"
+    "sha256": "42dd887ccd8f869106f5c09373d6355c15cf23d745d87d3c4c95529dfb7d34c1"
   },
   "source_state": "WORKING_TREE_UNSEALED",
   "source_task": "M9-003",
