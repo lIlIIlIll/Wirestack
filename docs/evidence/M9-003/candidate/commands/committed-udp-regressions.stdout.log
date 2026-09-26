@@ -1,0 +1,28 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 10840343 ns, RESULT:
+    TCS: M9003UdpLifecycleTest, time elapsed: 1677868 ns, RESULT:
+    [ PASSED ] CASE: disconnectRetainsBindAndRestoresExplicitSendTo (636402 ns)
+    [ PASSED ] CASE: cancelledDisconnectDoesNotChangeTheSelectedPeer (176714 ns)
+    [ PASSED ] CASE: multicastMembershipIsFamilyCheckedKeyedAndBounded (285849 ns)
+Summary: TOTAL: 119
+    PASSED: 3, SKIPPED: 116, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 27679588 ns, RESULT:
+    TCS: M9003UdpLifecycleAdapterTest, time elapsed: 22474108 ns, RESULT:
+    [ PASSED ] CASE: disconnectRejectsActiveReceiveAndCancellationOwnsTheTerminalClose (11708584 ns)
+    [ PASSED ] CASE: closeDuringBlockedReceiveCompletesOnceWithClosedState (10201996 ns)
+Summary: TOTAL: 67
+    PASSED: 2, SKIPPED: 65, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 50394028 ns, RESULT:
+TP: wirestack.*, time elapsed: 50352024 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 27679588 ns
+    TP: wirestack.net, time elapsed: 10840343 ns
+Summary: TOTAL: 186
+    PASSED: 5, SKIPPED: 181, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

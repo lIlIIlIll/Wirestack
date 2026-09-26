@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-003",
+  "status": "PASS",
+  "command": "git privacy-check",
+  "exit_code": 0,
+  "scope": "M9-003 source, candidate outputs, and seal-input reports",
+  "authorization": {
+    "local_source_commit": true,
+    "local_seal_commit": true,
+    "pull_request": true,
+    "push": true,
+    "merge": false,
+    "production_release": false
+  },
+  "stdout": "",
+  "stderr": ""
+}

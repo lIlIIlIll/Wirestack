@@ -1,0 +1,522 @@
+{
+  "schema_version": 1,
+  "source_task": "M9-003",
+  "status": "PASS",
+  "revision": "5a0da62f1e2fe1148109998087131f190c8ff67a",
+  "source_state": "COMMITTED_SOURCE_VERIFIED",
+  "authorization": {
+    "local_source_commit": true,
+    "local_seal_commit": true,
+    "pull_request": true,
+    "push": true,
+    "merge": false,
+    "production_release": false
+  },
+  "release_qualification": "NOT_QUALIFIED",
+  "source_tree_checks": {
+    "before": "PASS",
+    "after": "PASS",
+    "file_count": 302
+  },
+  "native_report": {
+    "path": "docs/evidence/M9-003/candidate/native-udp.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5a9a477577e37a1fa88508e53c4fd5e423662f0dc2cc707eb96602b87c02b47f"
+    }
+  },
+  "candidate_artifacts": {
+    "docs/evidence/M9-003/candidate/api-compatibility.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c37862631cbb2e35849916bb4bed071ff797e1b8670800da3cc519a44e88fdf5"
+    },
+    "docs/evidence/M9-003/candidate/api-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b34e0a60819f6323467849ba18c5ac5282f865a56e5b3dc514d7d97d6658b744"
+    },
+    "docs/evidence/M9-003/candidate/capabilities.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "531e97cf95b35a719722ac210576b954f44bc680684ae3803ab1c34a134df316"
+    },
+    "docs/evidence/M9-003/candidate/command-results.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65de02761c9e41086c7c680ecf7bef5205c1fa8cc2f2117218c4ca553248e7b5"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-api-compatibility.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-api-compatibility.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c0212e8100426dd19c68964b6d9e66d10afebd35e4d5af19f7bc6f3104b48aa"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-capability-correspondence.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-capability-correspondence.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "89e5ff15e97c7af967d8687d22d61578a0ece6716969eb3319152f17b7e6613b"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-capability-negative-regressions.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7f1d78335c52aafca124562fe7af2c29350f9e5ca06d6ddfd76d0098f9f24443"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-capability-negative-regressions.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-installed-native-udp.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-installed-native-udp.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e97d245c2ed450c842ee9a9a764aa859e6126bc2bac11ee2d3bcc54baf3c1df1"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-public-api-html.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-public-api-html.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "347a17b6f9a6a74a68562e0757890870978ab00821c1c2279ed35a2c8b8616ff"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-repository-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4f544f1123248d974f3c569b08c9e25dc834744927b4155d65dd4bb8e6d5adaf"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-repository-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aadafbf068a051db9b72725c56b40760552bacd6b6a1ec50a69f6e99ea2cfd8e"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-udp-plan.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-udp-plan.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fb5af4404d29cf22b9492b03f907fa232007e8ef99c2971afa8043b8675f7a65"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-udp-regressions.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7689d7668cc66a78cdcc1eabd24f07f7c2a0717505b3463febdd9a01200b61b"
+    },
+    "docs/evidence/M9-003/candidate/commands/committed-udp-regressions.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1052951e9d5b7b049a993bd098f0939e7d8996fc47e914b3c0b9d84fe1d79709"
+    },
+    "docs/evidence/M9-003/candidate/docs-report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3f42a027cf7c4be92fefe5833627c64326b537c53209571fb4adad7d6f0f2775"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/capabilities-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32994957106afb279f96fdf85d7b03aceee585d07ee6ad3d026f8b5d3710f563"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/capabilities-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/contract/capability-contract.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/contract/capability-contract.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "163c399b0e74b1f4273a28b54758fa5619e22d4d46d8fd4df5535c1c25c2aedb"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/contract/capability-contract.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "369699c578d510a07681e6c35f9a5c29bb1d4c401efa2f41bd7fcf2e30893c58"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/contract/unsupported.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "19e3aa998a280f27022fe15ea29eba0ff3fa5ad1ccb90ac49d68475175404b27"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/dns/basic.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/dns/basic.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d9f310eb3eb2f93618153742febb39df0f52d597c0343e6a0745f5309cdc526"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/dns/connect.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/dns/connect.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b8f1be386638c5c5f2e92d3e28510ccd1c64334a804e54a3435f236aa1e6add0"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/dns-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "18741f40ce6a2e5d2fbf9be2eb02515d0005ea46e3baa4d66a161d07866b4b95"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/dns-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/http-files-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/http-files-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet/ipv4.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet/ipv4.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6023cbdf8dc01a621bd8c9da7b8e429a184aef4503c78ec87fd374bfb3f8a8e7"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet/ipv4.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fc3e7edaf902cca402a27897e1b03c4ecfdce7f1098b46c231b3d3fd31d349a8"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet/ipv6.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet/ipv6.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "59f26fbba26490c464978d86a3e5072bdb7b8af8e7d27d5187eca91aea8cd78a"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet/ipv6.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f67f0157b8616656f91e5c6d519a5c2ee6a7c16e2be0658933756d918c681f41"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "18741f40ce6a2e5d2fbf9be2eb02515d0005ea46e3baa4d66a161d07866b4b95"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/internet-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/active-send-control-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/active-send-control-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7e8cd0d019df6a79a8b66067c313d36966858c076d7f868b024d63613b9caea"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/active-send-control.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cab63b7ec5920904baf05f9496707faf7369a7ab565f911fbb58003b6b555790"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/http-option-connector-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/http-option-connector-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "46e97c25f25969c07e43b12694d3b2976f91ae7d13a4ca8e9287d82ef557d9ff"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/invalid-option-admission-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/invalid-option-admission-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6ed6b7755624b08725e7469de51ed3b86fe118870ea3dcb108baac2a7d8c8f42"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/invalid-option-admission.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "28ee30e7af0c0c375e73bbf55818c84d86884ee2540a313e0a6e350b95aa22bc"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/socket-options-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options/socket-options-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3bc6fe409429db0a8c90f3dbe30343fba763b9cfcb8b7f2f59ddb8639daf4a2b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47667ac3f3f252b7701374985b0c0510edb538d7694699232f7f3e25b93e90a1"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/options-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/resolver-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/resolver-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/tls-native-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/tls-native-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1ecb91b029d81d00ae9c752bf5761ce2d7293f57e2e60a79cea2b50d936dcb07"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-receive-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-receive-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2b0ac6fe74a3fdf7cd5fa01e54e65498e6632cf012633a947ffa91096e33dc7c"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-receive.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "862bb55c0985e0f7176f7a43c31844211d97da3644b96a33f2ad7fd13af6a39d"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-send-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-send-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2efb938619e57d630150ef00ff292c34670a67fd82c9d878a1e963a93cac827d"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-active-send.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "145873886ff287b444cf21dfdd4bde034b009ca1216b82b1439822ee0d711364"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-broadcast-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-broadcast-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "367271fa280fbb099f74275959faac982128fdb8fc45875e6b77d52673d861e3"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-disconnect-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-disconnect-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8b2827b5306e0292c06d1cc7937dea56308524df71b8792483afe987fe901a13"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-membership-errors-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-membership-errors-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1ad371cb68b95b0624162efda0c336d911539873459728ec56105baa0ea6654d"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-multicast-ipv4-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-multicast-ipv4-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1410fcdc2caaf6882cb67bb7ccaf933018561cb8110b66312b0ef753d910bab3"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-multicast-ipv6-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp/udp-multicast-ipv6-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0c2bb65394c20dc810717ed25f52e7a4de57aba2e4be1bfe940511f3908c0a7c"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "964f3d8817b9f7d8b232eef4ff123bfc39ec84e0907c091f6cc1e648a0e3edff"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/udp-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix/abstract.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix/abstract.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9aa2fb43c62bd0803e592f875f2b0f43c85e91af029db88aa137228c1df76689"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix/abstract.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a8d9ca9aee6f50970cb796e50c42f1ea4d588e18f9eee7a14fa5b90572b57156"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix/pathname.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix/pathname.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47004a17a2ed2c69008175e6e6259004bf3e15b5920d624b6216e50a5d69956e"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix/pathname.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dd47af884007cd5e87104a00e7feedb27adf598ec0149cadaacf0119402e1d79"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47667ac3f3f252b7701374985b0c0510edb538d7694699232f7f3e25b93e90a1"
+    },
+    "docs/evidence/M9-003/candidate/native-udp/unix-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M9-003/candidate/native-udp.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5a9a477577e37a1fa88508e53c4fd5e423662f0dc2cc707eb96602b87c02b47f"
+    }
+  },
+  "commands": [
+    {
+      "id": "committed-udp-plan",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M9-003/test-plan.md",
+        "--json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-udp-plan.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-udp-plan.stderr.log"
+    },
+    {
+      "id": "committed-udp-regressions",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "src/internal/transport_stdnet",
+        "--filter=M9003*.*",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-udp-regressions.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-udp-regressions.stderr.log"
+    },
+    {
+      "id": "committed-capability-negative-regressions",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_network_capabilities",
+        "tools.tests.test_m9_001_native_capabilities",
+        "tools.tests.test_m9_003_api_compatibility",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-capability-negative-regressions.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-capability-negative-regressions.stderr.log"
+    },
+    {
+      "id": "committed-installed-native-udp",
+      "argv": [
+        "python3",
+        "tools/m9_003_native_udp.py",
+        "--offline",
+        "--report",
+        "docs/evidence/M9-003/candidate/native-udp.json",
+        "--output-dir",
+        "docs/evidence/M9-003/candidate/native-udp"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-installed-native-udp.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-installed-native-udp.stderr.log"
+    },
+    {
+      "id": "committed-api-compatibility",
+      "argv": [
+        "python3",
+        "tools/m9_003_api_compatibility.py",
+        "--root",
+        ".",
+        "--report",
+        "docs/evidence/M9-003/candidate/api-compatibility.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-api-compatibility.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-api-compatibility.stderr.log"
+    },
+    {
+      "id": "committed-capability-correspondence",
+      "argv": [
+        "python3",
+        "tools/check_network_capabilities.py",
+        "--check",
+        "--require-native",
+        "--native-report",
+        "docs/evidence/M9-003/candidate/native-udp.json",
+        "--report",
+        "docs/evidence/M9-003/candidate/capabilities.json",
+        "--api-report",
+        "docs/evidence/M9-003/candidate/api-inventory.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-capability-correspondence.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-capability-correspondence.stderr.log"
+    },
+    {
+      "id": "committed-repository-check",
+      "argv": [
+        "scripts/check"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-repository-check.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-repository-check.stderr.log"
+    },
+    {
+      "id": "committed-public-api-html",
+      "argv": [
+        "scripts/check-docs",
+        "--html",
+        "--json",
+        "--output",
+        "docs/evidence/M9-003/candidate/docs-report.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "error_code": null,
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M9-003/candidate/commands/committed-public-api-html.stdout.log",
+      "stderr_path": "docs/evidence/M9-003/candidate/commands/committed-public-api-html.stderr.log"
+    }
+  ]
+}
