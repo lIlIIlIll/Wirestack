@@ -1,0 +1,66 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-26T21:18:49.551499Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-016/verification.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "471a3bd7066e90b3aecb6322505b977537a47e6d2492f785de5bc8ec98d286e9"
+      },
+      "source_task": "P1-016"
+    }
+  ],
+  "revision": "aa9296d620bda5a88f29e491b90d66894af6a8c0",
+  "schema_version": 2,
+  "source_sha256": {
+    ".github/workflows/linux-release-attestation.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7c99c6dd4b7e27457f6b5fc077cd40010e0bee7d0aa9ebd29fd98c8b1924dbe0"
+    },
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "88a5e97c3456f2ca614c45735a4d8b46506e32c90769c19986ca91142b8f6e03"
+    },
+    "docs/evidence/P1-016/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "256fac51074f06869dc024f32bc9b667c6e7c2765ed8a728d4e76d82ee950bda"
+    },
+    "docs/evidence/P1-016/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b43f45f78f7489182c20c5dd433b1da362bb53abdfecb735332ad7ed2687269f"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2a673da46632cc42ff2dc86dd9909803b78cbaeac6fd8291e33dbcbf6f02ac9b"
+    },
+    "docs/product/prd.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1386dd23c83a6244733ec812d19f1b9a0ba871076a2df93978c3d8ac52b4fb45"
+    },
+    "tools/repository/repository_tooling.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "857f88f2cb323b44389768a7adc8d700e15da96e5395059a2bdaf013e4dca73e"
+    },
+    "tools/tasks/P1-016.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "534d9b77c552f085302ed60dc3511a1cb14f04a47aa0a0adf1a75c62b75baaac"
+    },
+    "tools/tasks/schema-v1.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9dfa31e025e7f879bbd1c837c8cc9a7f034cceead8bb4986b902a12e447857eb"
+    }
+  },
+  "source_task": "P1-016",
+  "toolchain": {
+    "cjc": null,
+    "cjpm": null
+  }
+}

@@ -1,7 +1,9 @@
 name: Linux Release Attestation
 
-# Retained as historical M7 evidence only. M8-007 is the active signer.
-on: []
+# Historical M7 workflow retained for reference. M8-007 is the active signer.
+# Manual dispatch is a no-op; this workflow cannot produce a new attestation.
+on:
+  workflow_dispatch:
 
 permissions: {}
 
@@ -11,6 +13,7 @@ env:
 
 jobs:
   stage-frozen-artifact:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -41,6 +44,7 @@ jobs:
 
   attest-linux-release:
     needs: stage-frozen-artifact
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:

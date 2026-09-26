@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "task_id": "P1-016",
+  "dependencies": ["P1-015"],
+  "allowed_paths": [
+    ".gitignore",
+    ".github/workflows/linux-release-attestation.yml",
+    "docs/evidence/P1-016",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "tools/tasks/P1-016.json"
+  ],
+  "platforms": ["github-actions"],
+  "acceptance_commands": [
+    {
+      "id": "task-manifest",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-tasks",
+        "--json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "acceptance-plan",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/P1-016/test-plan.md",
+        "--json"
+      ],
+      "timeout_seconds": 30,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": ["docs/evidence/P1-016/verification.json"],
+  "revision_bound_reports": ["docs/evidence/P1-016/verification.json"],
+  "timeout_seconds": 300,
+  "long_running_gate": false,
+  "source_paths": [
+    ".gitignore",
+    ".github/workflows/linux-release-attestation.yml",
+    "docs/evidence/P1-016/README.md",
+    "docs/evidence/P1-016/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/product/prd.md",
+    "tools/repository/repository_tooling.py",
+    "tools/tasks/P1-016.json",
+    "tools/tasks/schema-v1.json"
+  ]
+}
