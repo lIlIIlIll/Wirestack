@@ -43,6 +43,7 @@
     }
   ],
   "required_evidence": ["docs/evidence/P1-016/verification.json"],
+  "revision_bound_reports": ["docs/evidence/P1-016/verification.json"],
   "timeout_seconds": 300,
   "long_running_gate": false,
   "source_paths": [
