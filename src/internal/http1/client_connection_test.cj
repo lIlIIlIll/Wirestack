@@ -4,6 +4,8 @@ import std.collection.ArrayList
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
+import wirestack.internal.common.*
+import wirestack.{NetworkEndpoint}
 import wirestack.internal.transport.*
 
 @Test
@@ -123,6 +125,74 @@ class Http1ClientConnectionTest {
         @Expect(readConnectionBody(result.response.body), "ok")
         @Expect(connection.isClosed())
         served.get(Duration.second)
+    }
+    @TestCase
+    func executionFailurePreservesNetworkErrorEvidence(): Unit {
+        let local = SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 1u8]), 32100)
+        let remote = SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [198u8, 51u8, 100u8, 2u8]), 443)
+        let underlying = Exception("socket read failed")
+        let cause = NetworkException(
+            NetworkErrorCategory.Read, NetworkPhase.HttpHeaders,
+            NetworkErrorCode.UnexpectedEof, "response read failed",
+            retryability: Retryability.Temporary, nativeCode: Some<Int64>(54),
+            localEndpoint: Some(NetworkEndpoint.Internet(local)),
+            remoteEndpoint: Some(NetworkEndpoint.Internet(remote)),
+            cause: Some<Exception>(underlying)
+        )
+        let wrapped = Http1RequestExecutionException(Http1RequestCommitEvidence(21, 5), cause)
+
+        match (wrapped.category) {
+            case NetworkErrorCategory.Read => ()
+            case _ => @Fail("network error category was not preserved")
+        }
+        match (wrapped.phase) {
+            case NetworkPhase.HttpHeaders => ()
+            case _ => @Fail("network phase was not preserved")
+        }
+        match (wrapped.code) {
+            case NetworkErrorCode.UnexpectedEof => ()
+            case _ => @Fail("network error code was not preserved")
+        }
+        match (wrapped.retryability) {
+            case Retryability.Temporary => ()
+            case _ => @Fail("retryability was not preserved")
+        }
+        @Expect(wrapped.nativeCode, Some<Int64>(54))
+        match (wrapped.localEndpoint) {
+            case Some(NetworkEndpoint.Internet(endpoint)) => @Expect(endpoint.port, 32100)
+            case _ => @Fail("expected preserved local endpoint")
+        }
+        match (wrapped.remoteEndpoint) {
+            case Some(NetworkEndpoint.Internet(endpoint)) => @Expect(endpoint.port, 443)
+            case _ => @Fail("expected preserved remote endpoint")
+        }
+        @Expect(wrapped.evidence.wireBytesWritten, 21)
+        @Expect(wrapped.evidence.bodyBytesWritten, 5)
+        @Expect(wrapped.cause.getOrThrow().toString(), cause.toString())
+        @Expect(cause.cause.getOrThrow().toString(), underlying.toString())
+    }
+
+    @TestCase
+    func responseFailureCarriesCommittedRequestEvidence(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        let served: Future<Bool> = spawn {
+            let head = readConnectionTestRequest(server)
+            server.close()
+            head.target == "/eof"
+        }
+        let connection = Http1ClientConnection(client)
+        var committedFailure = false
+        try {
+            let _ = connection.execute(HttpRequest.get("http://example.com/eof"))
+        } catch (error: Http1RequestExecutionException) {
+            committedFailure = error.evidence.requestCommitted &&
+                error.evidence.wireBytesWritten > 0 && error.evidence.bodyBytesWritten == 0
+        }
+
+        @Expect(committedFailure)
+        @Expect(served.get(Duration.second))
+        @Expect(connection.isClosed())
+        connection.close()
     }
 }
 

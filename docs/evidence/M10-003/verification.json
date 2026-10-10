@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-003",
+  "status": "COMPLETE",
+  "scenario_matrix": "scenario-matrix.json",
+  "workspace": {
+    "task_branch": "m10-003-fair-pooling-safe-retry",
+    "merge_base_revision": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+    "candidate_revision": null,
+    "candidate_committed": false,
+    "source_workspace_preserved": true
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "libc": "glibc",
+    "target": "x86_64-unknown-linux-gnu"
+  },
+  "toolchains": [
+    {
+      "compiler": "1.3.0-alpha.06",
+      "cjpm": "1.3.0-alpha.06"
+    },
+    {
+      "compiler": "1.1.3",
+      "cjpm": "1.1.3"
+    }
+  ],
+  "acceptance": [
+    {
+      "status": "PASS",
+      "criterion": "HTTP/1 and HTTP/2 pool admission is bounded, fair across owners, and retains caller timeout/cancellation semantics.",
+      "evidence": "Both native suites pass admission rotation, waiter-capacity, cancellation cleanup, and absolute-deadline cases: Http1ConnectionPoolTest.admissionRotatesOriginsAndYieldsTheFullPoolSlot; Http2ConnectionPoolTest.admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot; Http1ConnectionPoolTest.activeWaitHonorsCancellationAndReleasesWaiterSlot; Http2ConnectionPoolTest.fullBoundedPoolHonorsOneCallerDeadline."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Expired or unhealthy pool connections are evicted without premature termination of active HTTP/2 streams.",
+      "evidence": "Native tests pass idle and leased HTTP/1 lifetime eviction and active HTTP/2 drain-before-close/replacement: Http1ConnectionPoolTest.expiresConnectionsAtMaximumLifetime; Http1ConnectionPoolTest.evictsLeasedConnectionAtMaximumLifetimeOnRelease; Http2ConnectionPoolTest.expiresConnectionsAtMaximumLifetime; Http2ConnectionPoolTest.drainsExpiredHttp2ConnectionAfterActiveStreamCompletion."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Response-body cleanup is bounded and preserves protocol-specific ownership.",
+      "evidence": "HTTP/1 early close closes instead of reusing its connection; HTTP/2 early close resets only its local stream and remains usable; peer RST and GOAWAY retain their separate stream/connection semantics."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Automatic retries require structured pre-submission or request-commit evidence plus replay and method safety.",
+      "evidence": "HttpRetryPolicyTest.retryRequiresPhaseOrSubmissionEvidence and HttpRetryPolicyTest.goAwayRetriesOnlyDefinitelyUnprocessedSafeReplayableRequests pass. Http1ClientConnectionTest.responseFailureCarriesCommittedRequestEvidence verifies committed request bytes; Http1ClientConnectionTest.executionFailurePreservesNetworkErrorEvidence verifies category, phase, code, retryability, native code, endpoints, cause, and immutable write evidence are retained."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Retry attempts retain the original operation budget and cleanup remains exact-once.",
+      "evidence": "Native tests pass continueWaitTimeoutSendsBodyUnderTheOriginalBudget, timeoutAndCancellationRaceAbandonsBodyExactlyOnce, poolCloseAbortsEverySharedConnectionExactlyOnce, and the H2 stream-close/drain cases."
+    }
+  ],
+  "verification": [
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env cjpm check",
+      "exit_status": 0,
+      "result": "PASS with Cangjie 1.3.0-alpha.06."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env cjpm build",
+      "exit_status": 0,
+      "result": "PASS with Cangjie 1.3.0-alpha.06; compiler emitted 7 warnings."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http1 src/internal/http2 src/http",
+      "exit_status": 0,
+      "result": "PASS; 439 total, 433 passed, 6 skipped, 0 errors, 0 failed."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env --sdk-root $HOME/cangjie_sdk/sts1.1.3 -- cjpm check",
+      "exit_status": 0,
+      "result": "PASS with Cangjie 1.1.3."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env --sdk-root $HOME/cangjie_sdk/sts1.1.3 -- cjpm build",
+      "exit_status": 0,
+      "result": "PASS with Cangjie 1.1.3; compiler emitted 9 warnings."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env --sdk-root $HOME/cangjie_sdk/sts1.1.3 -- cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http1 src/internal/http2 src/http",
+      "exit_status": 0,
+      "result": "PASS; 439 total, 433 passed, 6 skipped, 0 errors, 0 failed."
+    },
+    {
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_status": 0,
+      "result": "PASS."
+    },
+    {
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_status": 0,
+      "result": "PASS; capability contract has 86 rows. Native capability scenarios were not run by this check."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env scripts/check-docs --json",
+      "exit_status": 0,
+      "result": "PASS with cjdoc 0.7.2; 1,584 API symbols and 793 parameters reported at 100% documentation coverage."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env scripts/check",
+      "exit_status": 1,
+      "result": "Initial run overlapped an SDK 1.1.3 build and failed linking because ld could not find -lwirestack.internal.connector and -lwirestack.net; the serial retry is recorded separately."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env scripts/check (serial retry)",
+      "exit_status": 1,
+      "result": "24 Python tests passed; architecture guard and network capability contract passed. The gate failed at combined cjdoc 0.7.2 generation: Out of memory, unable to allocate 9,186,376 bytes from its 268,435,456-byte region."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env scripts/check-task M10-003 --json",
+      "exit_status": 1,
+      "result": "Task gate failed after 204.85 s: cjpm-check, cjpm-build, and http-native-tests passed; documentation-check failed at combined cjdoc 0.7.2 generation with an out-of-memory error."
+    },
+    {
+      "command": "$HOME/.codex/scripts/codex_cangjie_env scripts/check-docs --json (repeat)",
+      "exit_status": 1,
+      "result": "Repeat standalone strict documentation check failed at the combined strict-check stage; cjdoc reported bounded-memory exhaustion. The first standalone run passed."
+    }
+  ],
+  "limitations": [
+    "The exact Compiler 1.1.0-alpha.20260817040003 recorded by M0-002 was not available; qualification used installed Cangjie 1.1.3 and 1.3.0-alpha.06 toolchains.",
+    "No performance comparison or regression claim is made; the task acceptance criteria require native behavior, not a baseline benchmark.",
+    "The candidate remains uncommitted, so no revision-bound evidence seal or candidate source digest is claimed.",
+    "The first standalone docs run passed, but later standalone/task/repository gate runs failed in combined cjdoc generation or strict checking due bounded-memory exhaustion; an unwrapped check-task call timed out at 180 seconds before a structured result.",
+    "LSP references for public HttpRetryPolicy.shouldRetry could not be obtained because no language server is configured; no public signature change was made, and direct policy/regression tests cover the changed behavior."
+  ]
+}
