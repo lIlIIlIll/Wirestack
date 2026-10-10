@@ -5,7 +5,7 @@ import wirestack.internal.common.*
 import wirestack.internal.connector.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 /** DNS-to-HTTP/1 cleartext pipeline. HTTPS is added by the TLS connection factory. */
 public class Http1CleartextClient <: Resource {
     private let pool: Http1ConnectionPool
@@ -17,9 +17,10 @@ public class Http1CleartextClient <: Resource {
         poolConfig!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
         limits!: HttpLimits = HttpLimits(),
         attemptDelay!: Duration = 250 * Duration.millisecond,
-        continueTimeout!: Duration = Duration.second
+        continueTimeout!: Duration = Duration.second,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
-        pool = Http1ConnectionPool(config: poolConfig)
+        pool = Http1ConnectionPool(config: poolConfig, resourceBudget: resourceBudget)
         factory = Http1CleartextConnectionFactory(
             HappyEyeballsConnector(resolver, transportFactory, attemptDelay: attemptDelay),
             limits,
@@ -81,7 +82,8 @@ private class Http1CleartextConnectionFactory <: Http1ConnectionFactory {
         this.continueTimeout = continueTimeout
     }
 
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         if (key.scheme != "http") { throw IllegalArgumentException("cleartext factory requires http pool key") }
         let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
         Http1ClientConnection(connected.transport, limits: limits, continueTimeout: continueTimeout)

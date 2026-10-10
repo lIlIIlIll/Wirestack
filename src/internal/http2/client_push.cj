@@ -4,6 +4,7 @@ import std.collection.ArrayList
 import std.sync.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 /** Connection-scoped admission and routing for bounded peer-promised streams. */
 internal class Http2ClientPushCoordinator {
@@ -16,6 +17,8 @@ internal class Http2ClientPushCoordinator {
     private let terminations: Http2ReaderTerminationRegistry
     private let limits: HttpLimits
     private let http2Limits: Http2Limits
+    private let resourceBudget: ?internal.HttpResourceBudget
+    private let resourceOwner: ?internal.HttpResourceOwnerKey
     private let mutex = Mutex()
     private let exchanges = ArrayList<Http2ClientPushedExchange>()
 
@@ -30,7 +33,9 @@ internal class Http2ClientPushCoordinator {
         reset: Http2StreamResetManager,
         terminations: Http2ReaderTerminationRegistry,
         limits: HttpLimits,
-        http2Limits: Http2Limits
+        http2Limits: Http2Limits,
+        resourceBudget: ?internal.HttpResourceBudget,
+        resourceOwner: ?internal.HttpResourceOwnerKey
     ) {
         this.config = config
         this.machine = machine
@@ -41,6 +46,8 @@ internal class Http2ClientPushCoordinator {
         this.terminations = terminations
         this.limits = limits
         this.http2Limits = http2Limits
+        this.resourceBudget = resourceBudget
+        this.resourceOwner = resourceOwner
     }
 
     func newSource(
@@ -78,11 +85,20 @@ internal class Http2ClientPushCoordinator {
             )
         }
         let stream = machine.reservePeerStream(registry, promisedId)
+        let resourceLease = match ((resourceBudget, resourceOwner)) {
+            case (Some(budget), Some(owner)) => budget.tryAcquireStream(owner)
+            case _ => None<internal.HttpResourceLease>
+        }
+        if (resourceBudget.isSome() && resourceLease.isNone()) {
+            refuseReserved(stream.id, "HTTP/2 aggregate stream limit reached")
+            return
+        }
         var flowOpened = false
         var exchange: ?Http2ClientPushedExchange = None<Http2ClientPushedExchange>
         try {
             flow.openStream(stream.id)
             flowOpened = true
+            if (let Some(lease) <- resourceLease) { lease.activate() }
             let request = decodeHttp2PushedRequest(
                 fields, stream.id, source.parent,
                 limits: limits, http2Limits: http2Limits
@@ -93,7 +109,8 @@ internal class Http2ClientPushCoordinator {
                 } else {
                     let value = Http2ClientPushedExchange(
                         stream.id, request, source.parentContext, source, registry, flow, writer,
-                        reset, limits, http2Limits, { id => remove(id) }
+                        reset, limits, http2Limits, { id => remove(id) },
+                        resourceLease
                     )
                     exchanges.add(value)
                     exchange = Some(value)
@@ -101,6 +118,7 @@ internal class Http2ClientPushCoordinator {
                 }
             }
             if (!admitted) {
+                if (let Some(lease) <- resourceLease) { lease.close() }
                 refuseReserved(stream.id, "HTTP/2 concurrent push limit reached")
                 return
             }
@@ -115,13 +133,13 @@ internal class Http2ClientPushCoordinator {
             }
         } catch (error: Http2ProtocolException) {
             cleanupFailedAdmission(
-                stream.id, flowOpened, exchange, error.code,
+                stream.id, flowOpened, exchange, resourceLease, error.code,
                 "HTTP/2 promised stream admission failed"
             )
             throw error
         } catch (error: Exception) {
             cleanupFailedAdmission(
-                stream.id, flowOpened, exchange, Http2ErrorCode.InternalError,
+                stream.id, flowOpened, exchange, resourceLease, Http2ErrorCode.InternalError,
                 "HTTP/2 promised stream admission failed"
             )
             throw error
@@ -156,12 +174,14 @@ internal class Http2ClientPushCoordinator {
         streamId: Http2StreamId,
         flowOpened: Bool,
         exchange: ?Http2ClientPushedExchange,
+        resourceLease: ?internal.HttpResourceLease,
         code: Http2ErrorCode,
         reason: String
     ): Unit {
         match (exchange) {
             case Some(value) => value.reject(code, reason)
             case None =>
+                if (let Some(lease) <- resourceLease) { lease.close() }
                 try {
                     let _ = reset.cancelLocal(streamId, code: code, reason: reason)
                 } catch (_: Exception) {
@@ -369,6 +389,7 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
     private let reset: Http2StreamResetManager
     private let channel: Http2ClientBodyChannel
     private let onTerminated: (Http2StreamId) -> Unit
+    private let resourceLease: ?internal.HttpResourceLease
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private var response: ?HttpResponse = None<HttpResponse>
@@ -392,7 +413,8 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         reset: Http2StreamResetManager,
         limits: HttpLimits,
         http2Limits: Http2Limits,
-        onTerminated: (Http2StreamId) -> Unit
+        onTerminated: (Http2StreamId) -> Unit,
+        resourceLease: ?internal.HttpResourceLease
     ) {
         this.streamId = streamId
         this.request = request
@@ -402,6 +424,7 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         this.writer = writer
         this.reset = reset
         this.onTerminated = onTerminated
+        this.resourceLease = resourceLease
         sequence = Http2ClientResponseSequence(
             streamId, request.method, limits: limits, http2Limits: http2Limits
         )
@@ -466,8 +489,11 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
 
     func acceptData(frame: Http2Frame): Unit {
         let decoded = decodePushedData(frame, streamId)
-        sequence.acceptData(decoded.data.size, frame.header.flags.isEndStream())
-        channel.offer(decoded.data, Int64(frame.header.length), false)
+        sequence.acceptData(decoded.length, frame.header.flags.isEndStream())
+        channel.offerView(
+            decoded.data, decoded.offset, decoded.length, Int64(frame.header.length), false,
+            frame.takeReceivedBufferReservation()
+        )
         if (frame.header.flags.isEndStream()) {
             registry.peerEnd(streamId)
             channel.finish(None<HttpTrailer>)
@@ -546,6 +572,7 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
             (resetRegistration, readerRegistration, transferred)
         }
         try { channel.close() } catch (_: Exception) {}
+        if (let Some(lease) <- resourceLease) { lease.close() }
         if (let Some(value) <- disposition[0]) { value.unregister() }
         if (let Some(value) <- disposition[1]) { value.unregister() }
         let updates = flow.closeStream(streamId)
@@ -561,27 +588,31 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
 
 private struct Http2DecodedPushedData {
     let data: Array<Byte>
-    init(data: Array<Byte>) { this.data = data }
+    let offset: Int64
+    let length: Int64
+    init(data: Array<Byte>, offset: Int64, length: Int64) {
+        this.data = data
+        this.offset = offset
+        this.length = length
+    }
 }
 
 private func decodePushedData(
-    frame: Http2Frame,
-    streamId: Http2StreamId
+    frame: Http2Frame, streamId: Http2StreamId
 ): Http2DecodedPushedData {
     if (frame.header.streamId.value != streamId.value) {
         throw IllegalArgumentException("HTTP/2 DATA belongs to another promised stream")
     }
-    let payload = frame.payload
-    if (!frame.header.flags.isPadded()) { return Http2DecodedPushedData(payload) }
+    let payload = frame.payloadView()
+    if (!frame.header.flags.isPadded()) {
+        return Http2DecodedPushedData(payload, 0, payload.size)
+    }
     if (payload.isEmpty()) { pushedStreamError(streamId, "HTTP/2 padded DATA has no pad length") }
     let padding = Int64(payload[0])
     if (padding >= payload.size) {
         pushedStreamError(streamId, "HTTP/2 DATA padding consumes its payload")
     }
-    let count = payload.size - padding - 1
-    let data = Array<Byte>(count, repeat: 0u8)
-    for (index in 0..count) { data[index] = payload[index + 1] }
-    Http2DecodedPushedData(data)
+    Http2DecodedPushedData(payload, 1, payload.size - padding - 1)
 }
 
 private func checkPushContext(context: OperationContext): Unit {

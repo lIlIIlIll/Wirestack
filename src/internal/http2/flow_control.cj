@@ -3,7 +3,7 @@ package wirestack.internal.http2
 import std.collection.ArrayList
 import std.sync.Mutex
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 private const HTTP2_DEFAULT_WINDOW: Int64 = 65535
 private const HTTP2_MAX_WINDOW: Int64 = 2147483647
 private const HTTP2_CONNECTION_UPDATE_THRESHOLD: Int64 = HTTP2_DEFAULT_WINDOW / 2
@@ -72,6 +72,8 @@ public class Http2SendPermit {
  */
 public class Http2FlowController {
     private let limits: Http2Limits
+    private let resourceBudget: ?internal.HttpResourceBudget
+    private let resourceOwner: ?internal.HttpResourceOwnerKey
     private let maximumStreamCount: Int64
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
@@ -110,15 +112,36 @@ public class Http2FlowController {
 
     public init(
         limits!: Http2Limits = Http2Limits(),
-        maximumStreams!: UInt32 = limits.maxConcurrentStreams
+        maximumStreams!: UInt32 = limits.maxConcurrentStreams,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ) {
         if (maximumStreams < limits.maxConcurrentStreams) {
             throw IllegalArgumentException("HTTP/2 total flow stream capacity cannot reduce local admission")
         }
+        if (resourceBudget.isSome() != resourceOwner.isSome()) {
+            throw IllegalArgumentException("HTTP/2 buffer budget and owner must be supplied together")
+        }
         this.limits = limits
+        this.resourceBudget = resourceBudget
+        this.resourceOwner = resourceOwner
         maximumStreamCount = Int64(maximumStreams)
     }
+    /** Reserves actual retained payload bytes without blocking the connection reader. */
+    internal func tryReserveReceivedBuffer(bytes: UInt64): Bool {
+        if (bytes == 0u64) { return true }
+        match (resourceBudget) {
+            case Some(budget) => budget.tryReserveReceivedBuffer(resourceOwner.getOrThrow(), bytes)
+            case None => true
+        }
+    }
 
+    internal func releaseReceivedBuffer(bytes: UInt64): Unit {
+        if (bytes == 0u64) { return }
+        if (let Some(budget) <- resourceBudget) {
+            budget.releaseReceivedBuffer(resourceOwner.getOrThrow(), bytes)
+        }
+    }
     public func openStream(streamId: Http2StreamId): Unit {
         if (!streamId.isStream()) { throw IllegalArgumentException("HTTP/2 flow stream id must be non-zero") }
         synchronized(mutex) {

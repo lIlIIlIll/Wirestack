@@ -10,7 +10,7 @@ import wirestack.internal.resolver.*
 import wirestack.internal.tls_engine.*
 import wirestack.internal.transport.*
 import wirestack.internal.trust.*
-
+import wirestack.internal as internal
 /** TLS policy/engine boundary retained in every HTTPS pool partition. */
 public interface Http1TlsHandshaker <: Resource {
     prop tlsContextIdentity: String
@@ -276,10 +276,11 @@ public class Http1HttpsClient <: Resource {
         poolConfig!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
         limits!: HttpLimits = HttpLimits(),
         attemptDelay!: Duration = 250 * Duration.millisecond,
-        continueTimeout!: Duration = Duration.second
+        continueTimeout!: Duration = Duration.second,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
         this.handshaker = handshaker
-        pool = Http1ConnectionPool(config: poolConfig)
+        pool = Http1ConnectionPool(config: poolConfig, resourceBudget: resourceBudget)
         factory = Http1TlsConnectionFactory(
             HappyEyeballsConnector(resolver, transportFactory, attemptDelay: attemptDelay),
             handshaker,
@@ -373,20 +374,36 @@ private class HttpProtocolCache {
 
 private class Http11NegotiatedException <: Exception {
     let connection: ?Http1ClientConnection
-    init(connection!: ?Http1ClientConnection = None<Http1ClientConnection>) {
+    let resourceLease: ?internal.HttpResourceLease
+    init(
+        connection!: ?Http1ClientConnection = None<Http1ClientConnection>,
+        resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+    ) {
         super("HTTPS ALPN selected HTTP/1.1")
         this.connection = connection
+        this.resourceLease = resourceLease
     }
     protected override func getClassName(): String { "Http11NegotiatedException" }
 }
 
 private class Http2NegotiatedException <: Exception {
     let connection: Http2ClientPoolConnection
-    init(connection: Http2ClientPoolConnection) {
+    let resourceLease: ?internal.HttpResourceLease
+    init(connection: Http2ClientPoolConnection, resourceLease: ?internal.HttpResourceLease) {
         super("HTTPS ALPN selected h2")
         this.connection = connection
+        this.resourceLease = resourceLease
     }
     protected override func getClassName(): String { "Http2NegotiatedException" }
+}
+
+private func retainOptionalHttpResourceLease(
+    resourceLease: ?internal.HttpResourceLease
+): ?internal.HttpResourceLease {
+    match (resourceLease) {
+        case Some(value) => Some(value.retain())
+        case None => None<internal.HttpResourceLease>
+    }
 }
 
 private class AutomaticTlsNegotiator {
@@ -397,7 +414,7 @@ private class AutomaticTlsNegotiator {
     private let http2Limits: Http2Limits
     private let continueTimeout: Duration
     private let pushConfig: ?Http2PushConfig
-
+    private let resourceBudget: ?internal.HttpResourceBudget
     init(
         connector: HappyEyeballsConnector,
         handshaker: HttpAlpnTlsHandshaker,
@@ -405,10 +422,12 @@ private class AutomaticTlsNegotiator {
         limits: HttpLimits,
         http2Limits: Http2Limits,
         continueTimeout: Duration,
-        pushConfig: ?Http2PushConfig
+        pushConfig: ?Http2PushConfig,
+        resourceBudget: ?internal.HttpResourceBudget
     ) {
         this.connector = connector
         this.pushConfig = pushConfig
+        this.resourceBudget = resourceBudget
         this.handshaker = handshaker
         this.cache = cache
         this.limits = limits
@@ -416,9 +435,17 @@ private class AutomaticTlsNegotiator {
         this.continueTimeout = continueTimeout
     }
 
-    func createHttp2(key: HttpConnectionPoolKey, context: OperationContext): Http2MultiplexedConnection {
+    func createHttp2(
+        key: HttpConnectionPoolKey,
+        context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease
+    ): Http2MultiplexedConnection {
         if (let Some(CachedHttpProtocol.Http11) <- cache.get(key)) {
             throw Http11NegotiatedException()
+        }
+        let resourceOwner = match (resourceBudget) {
+            case Some(_) => Some(httpResourceOwnerForPoolKey(key))
+            case None => None<internal.HttpResourceOwnerKey>
         }
         let negotiated = connect(key, context)
         match (negotiated.protocol) {
@@ -427,7 +454,9 @@ private class AutomaticTlsNegotiator {
                 try {
                     Http2ClientPoolConnection(Http2ClientConnection.connect(
                         negotiated.transport, context: context, limits: limits,
-                        http2Limits: http2Limits, pushConfig: pushConfig
+                        http2Limits: http2Limits, pushConfig: pushConfig,
+                        resourceBudget: resourceBudget,
+                        resourceOwner: resourceOwner
                     ))
                 } catch (error: Exception) {
                     negotiated.transport.abort(reason: Some(AbortReason.ProtocolFailure))
@@ -435,13 +464,20 @@ private class AutomaticTlsNegotiator {
                 }
             case HttpNegotiatedProtocol.Http11 =>
                 cache.put(key, CachedHttpProtocol.Http11)
-                throw Http11NegotiatedException(connection: Some(Http1ClientConnection(
-                    negotiated.transport, limits: limits, continueTimeout: continueTimeout
-                )))
+                throw Http11NegotiatedException(
+                    connection: Some(Http1ClientConnection(
+                        negotiated.transport, limits: limits, continueTimeout: continueTimeout
+                    )),
+                    resourceLease: retainOptionalHttpResourceLease(resourceLease)
+                )
         }
     }
 
-    func createHttp1(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    func createHttp1(
+        key: HttpConnectionPoolKey,
+        context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease
+    ): Http1ClientConnection {
         let negotiated = connect(key, context)
         match (negotiated.protocol) {
             case HttpNegotiatedProtocol.Http11 =>
@@ -450,15 +486,18 @@ private class AutomaticTlsNegotiator {
             case HttpNegotiatedProtocol.Http2 =>
                 cache.put(key, CachedHttpProtocol.Http2)
                 try {
-                    throw Http2NegotiatedException(Http2ClientPoolConnection(
-                        Http2ClientConnection.connect(
+                    throw Http2NegotiatedException(
+                        Http2ClientPoolConnection(Http2ClientConnection.connect(
                             negotiated.transport,
                             context: context,
                             limits: limits,
                             http2Limits: http2Limits,
-                            pushConfig: pushConfig
-                        )
-                    ))
+                            pushConfig: pushConfig,
+                            resourceBudget: resourceBudget,
+                            resourceOwner: Some(httpResourceOwnerForPoolKey(key))
+                        )),
+                        retainOptionalHttpResourceLease(resourceLease)
+                    )
                 } catch (error: Http2NegotiatedException) {
                     throw error
                 } catch (error: Exception) {
@@ -486,16 +525,18 @@ private class AutomaticTlsNegotiator {
 private class AutomaticHttp2Factory <: Http2MultiplexedConnectionFactory {
     private let negotiator: AutomaticTlsNegotiator
     init(negotiator: AutomaticTlsNegotiator) { this.negotiator = negotiator }
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http2MultiplexedConnection {
-        negotiator.createHttp2(key, context)
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http2MultiplexedConnection {
+        negotiator.createHttp2(key, context, resourceLease)
     }
 }
 
 private class AutomaticHttp1Factory <: Http1ConnectionFactory {
     private let negotiator: AutomaticTlsNegotiator
     init(negotiator: AutomaticTlsNegotiator) { this.negotiator = negotiator }
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
-        negotiator.createHttp1(key, context)
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+        negotiator.createHttp1(key, context, resourceLease)
     }
 }
 
@@ -524,17 +565,18 @@ public class HttpAutomaticHttpsClient <: Resource {
         http2Limits!: Http2Limits = Http2Limits(),
         attemptDelay!: Duration = 250 * Duration.millisecond,
         continueTimeout!: Duration = Duration.second,
-        pushConfig!: ?Http2PushConfig = None<Http2PushConfig>
+        pushConfig!: ?Http2PushConfig = None<Http2PushConfig>,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
         this.handshaker = handshaker
         this.limits = limits
         this.http2Limits = http2Limits
-        h1Pool = Http1ConnectionPool(config: h1PoolConfig)
-        h2Pool = Http2ConnectionPool(config: h2PoolConfig)
+        h1Pool = Http1ConnectionPool(config: h1PoolConfig, resourceBudget: resourceBudget)
+        h2Pool = Http2ConnectionPool(config: h2PoolConfig, resourceBudget: resourceBudget)
         cache = HttpProtocolCache(h1PoolConfig.maximumConnections + h2PoolConfig.maximumConnections)
         let negotiator = AutomaticTlsNegotiator(
             HappyEyeballsConnector(resolver, transportFactory, attemptDelay: attemptDelay),
-            handshaker, cache, limits, http2Limits, continueTimeout, pushConfig
+            handshaker, cache, limits, http2Limits, continueTimeout, pushConfig, resourceBudget
         )
         h1Factory = AutomaticHttp1Factory(negotiator)
         h2Factory = AutomaticHttp2Factory(negotiator)
@@ -556,7 +598,7 @@ public class HttpAutomaticHttpsClient <: Resource {
                     executeHttp1(key, request, context, trailer)
                 } catch (switched: Http2NegotiatedException) {
                     executeAdoptedHttp2(
-                        key, switched.connection, request, context, trailer,
+                        key, switched.connection, switched.resourceLease, request, context, trailer,
                         connectionCancellation
                     )
                 }
@@ -565,7 +607,10 @@ public class HttpAutomaticHttpsClient <: Resource {
                     executeHttp2(key, request, context, trailer, connectionCancellation)
                 } catch (fallback: Http11NegotiatedException) {
                     match (fallback.connection) {
-                        case Some(connection) => executeAdoptedHttp1(key, connection, request, context, trailer)
+                        case Some(connection) =>
+                            executeAdoptedHttp1(
+                                key, connection, fallback.resourceLease, request, context, trailer
+                            )
                         case None => executeHttp1(key, request, context, trailer)
                     }
                 }
@@ -591,7 +636,10 @@ public class HttpAutomaticHttpsClient <: Resource {
                 } catch (switched: Http2NegotiatedException) {
                     let signal = Http2ClientExecutionSignal()
                     let lease = try {
-                        h2Pool.adopt(key, switched.connection, signal, context: context, endStream: false)
+                        h2Pool.adopt(
+                            key, switched.connection, signal, context: context, endStream: false,
+                            resourceLease: switched.resourceLease
+                        )
                     } catch (error: Exception) { switched.connection.close(); throw error }
                     upgradeHttp2Claim(lease, signal, http2Request, protocol, context, connectionCancellation)
                 }
@@ -603,7 +651,10 @@ public class HttpAutomaticHttpsClient <: Resource {
                 } catch (fallback: Http11NegotiatedException) {
                     let lease = match (fallback.connection) {
                         case Some(connection) =>
-                            try { h1Pool.adopt(key, connection, context: context) }
+                            try {
+                                h1Pool.adopt(key, connection, context: context,
+                                    resourceLease: fallback.resourceLease)
+                            }
                             catch (error: Exception) { connection.close(); throw error }
                         case None => h1Pool.acquire(key, h1Factory, context: context)
                     }
@@ -692,6 +743,7 @@ public class HttpAutomaticHttpsClient <: Resource {
     private func executeAdoptedHttp2(
         key: HttpConnectionPoolKey,
         connection: Http2ClientPoolConnection,
+        resourceLease: ?internal.HttpResourceLease,
         request: HttpRequest,
         context: OperationContext,
         trailer: HttpTrailer,
@@ -701,7 +753,8 @@ public class HttpAutomaticHttpsClient <: Resource {
         let signal = Http2ClientExecutionSignal()
         let lease = try {
             h2Pool.adopt(
-                key, connection, signal, context: context, endStream: plan.endStreamOnHeaders
+                key, connection, signal, context: context, endStream: plan.endStreamOnHeaders,
+                resourceLease: resourceLease
             )
         } catch (error: Exception) {
             connection.close()
@@ -721,12 +774,14 @@ public class HttpAutomaticHttpsClient <: Resource {
     private func executeAdoptedHttp1(
         key: HttpConnectionPoolKey,
         connection: Http1ClientConnection,
+        resourceLease: ?internal.HttpResourceLease,
         request: HttpRequest,
         context: OperationContext,
         trailer: HttpTrailer
     ): HttpResponse {
-        let lease = try { h1Pool.adopt(key, connection, context: context) }
-            catch (error: Exception) { connection.close(); throw error }
+        let lease = try {
+            h1Pool.adopt(key, connection, context: context, resourceLease: resourceLease)
+        } catch (error: Exception) { connection.close(); throw error }
         executeHttp1Lease(lease, request, context, trailer)
     }
 
@@ -767,7 +822,8 @@ private class Http1TlsConnectionFactory <: Http1ConnectionFactory {
         this.continueTimeout = continueTimeout
     }
 
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         if (key.scheme != "https") { throw IllegalArgumentException("TLS factory requires https pool key") }
         let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
         try {
