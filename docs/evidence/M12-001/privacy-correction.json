@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "original_native_report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "bbba20eb7693f90e793ad0bcee5b535fc3c72d31672a2f88d973b841439bccd4"
+  },
+  "redacted_native_report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "951c51779c82cdeb80ddd873a529afae65181348f888963231945ba4873977f4"
+  },
+  "change": "One AST replacement: runtime_environment.CJ_SDK_LIBPATH now uses <sdk> placeholders. No operation samples, configuration values, checksums, outcomes, summaries or native command digests changed.",
+  "capture_time_fix": "Campaign.environment applies the existing redactor to runtime environment values.",
+  "live_smoke": "metadata-smoke/report.json"
+}
