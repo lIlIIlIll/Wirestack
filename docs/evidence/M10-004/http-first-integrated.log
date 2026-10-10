@@ -1,0 +1,2035 @@
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:22:9:
+   [36m| [0m
+[36m22[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:34:9:
+   [36m| [0m
+[36m34[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:46:1:
+    [36m| [0m
+[36m46[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m47[0m  [36m| [0m[33m|[0m class Http1ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m295[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < NetworkException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:46:1:
+    [36m| [0m
+[36m46[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m47[0m  [36m| [0m[33m|[0m class Http1ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m295[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < NetworkException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool_test.cj:19:1:
+    [36m| [0m
+[36m19[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m20[0m  [36m| [0m[33m|[0m class Http2ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m364[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < NetworkException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool_test.cj:19:1:
+    [36m| [0m
+[36m19[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m20[0m  [36m| [0m[33m|[0m class Http2ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m364[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < NetworkException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+6 warnings generated, 6 warnings printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'expectResetQueueFull'
+   [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:219:1:
+    [36m| [0m
+[36m219[0m [36m| [0m  private func expectResetQueueFull(action: () -> Unit): Unit {[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m220[0m [36m| [0m[33m|[0m     var matched = false[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m223[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+[33mwarning[0m: unused variable:'context'
+  [36m==>[0m <repo>/src/http/websocket_handshake_test.cj:87:52:
+   [36m| [0m
+[36m87[0m [36m| [0m    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {[0m
+   [36m| [0m                                                   [33m^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < IllegalArgumentException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalArgumentException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < IllegalArgumentException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalArgumentException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                        None < Exception >[0m
+    [36m| [0m                        [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < IllegalStateException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalStateException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < Exception >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalStateException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < IllegalStateException >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < Exception >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < Exception >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < Exception >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < Exception >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m406[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+71 warnings generated, 71 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 2799777897 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 163033166 ns, RESULT:
+    [ PASSED ] CASE: encodedHeaderFailureClosesTheConnection (1036569 ns)
+    [ PASSED ] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (2532600 ns)
+    [ PASSED ] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (1895445 ns)
+    [ PASSED ] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (1979053 ns)
+    [ PASSED ] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (1547472 ns)
+    [ PASSED ] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (1623468 ns)
+    [ PASSED ] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (1527096 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (954068 ns)
+    [ PASSED ] CASE: connectedStreamOutlivesHandshakeCancellationAndUsesOperationContexts (1122785 ns)
+    [ PASSED ] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (1088149 ns)
+    [ PASSED ] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (11458616 ns)
+    [ PASSED ] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (9797101 ns)
+    [ PASSED ] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (109990540 ns)
+    [ PASSED ] CASE: queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (9789962 ns)
+    [ PASSED ] CASE: rejectedConnectReturnsFullResponseAndClosesRequestDirection (743647 ns)
+    [ PASSED ] CASE: enabledPushAttachesBoundedCallerDrivenResponses (1301096 ns)
+    [ FAILED ] CASE: earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof (930843 ns)
+    Expect Failed: `(connection.acceptingNewStreams == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(connection.acceptingNewStreams == true)`
+       left: false
+      right: true
+
+    TCS: Http2ClientMappingTest, time elapsed: 3597240 ns, RESULT:
+    [ PASSED ] CASE: requestMapsOrderedPseudoFieldsAuthorityAndSensitiveHeaders (194000 ns)
+    [ PASSED ] CASE: connectUsesOnlyMethodAndAuthorityPseudoFields (110520 ns)
+    [ PASSED ] CASE: connectStreamMappingKeepsBothDataDirectionsOpen (171247 ns)
+    [ PASSED ] CASE: requestRejectsAuthorityFramingAndConnectionAmbiguity (402371 ns)
+    [ PASSED ] CASE: requestHeaderListHonorsHttp2BoundsBeforeHpackMutation (65866 ns)
+    [ PASSED ] CASE: requestBodyProvesEofBeforeOneTerminalTrailerBlock (97738 ns)
+    [ PASSED ] CASE: requestBodyRejectsPrematureEofAndConfiguredOverflow (92093 ns)
+    [ PASSED ] CASE: responseMapsInformationalFinalDataAndTrailersInOrder (87760 ns)
+    [ PASSED ] CASE: responseRejectsPseudoOrderCaseAndConnectionFieldsAsStreamErrors (55693 ns)
+    [ PASSED ] CASE: responseRejectsInvalidStatusAndTooManyInformationalHeads (160442 ns)
+    [ PASSED ] CASE: responseContentLengthMustMatchExactlyAtEndStream (104429 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (17264 ns)
+    [ PASSED ] CASE: bodylessAndConnectResponseRulesAreExplicit (91449 ns)
+    [ PASSED ] CASE: responseTrailersRequireFinalEndStreamAndRegularAllowedFields (81744 ns)
+    [ PASSED ] CASE: promisedRequestValidationPrecedesApplicationPolicy (130555 ns)
+    TCS: Http2ClientPushOwnershipTest, time elapsed: 746145 ns, RESULT:
+    [ PASSED ] CASE: resetLostOfferIsClosedAndNextOfferRemainsDeliverable (141402 ns)
+    [ PASSED ] CASE: parentCancellationStopsTransferredStalledBodyWithoutCancellingIndependentSibling (180824 ns)
+    [ PASSED ] CASE: expiredParentAbsoluteDeadlineStillGovernsTransferredBodyAfterHeaders (104178 ns)
+    TCS: Http2ConformanceTest, time elapsed: 4490481 ns, RESULT:
+    [ PASSED ] CASE: invalidFrameOrderMatrixFailsAtConnectionScope (202608 ns)
+    [ PASSED ] CASE: continuationSequenceCompletesOnlyOnEndHeaders (104967 ns)
+    [ PASSED ] CASE: rstStreamAndGoAwayRaceCompletesOwnerOnceAndCleansRegistrations (3794081 ns)
+    TCS: Http2ConnectionStateMachineTest, time elapsed: 4728732 ns, RESULT:
+    [ PASSED ] CASE: clientStartEmitsMagicAndSettingsThenPeerSettingsOpens (27348 ns)
+    [ PASSED ] CASE: serverConsumesIncrementalMagicBeforeItsFirstSettings (32032 ns)
+    [ PASSED ] CASE: invalidOrIncompletePrefaceFailsOnceWithProtocolEvidence (46126 ns)
+    [ PASSED ] CASE: firstPeerFrameMustBeNonAcknowledgementSettings (36731 ns)
+    [ PASSED ] CASE: openConnectionAppliesSettingsAndCompletesHeaderBlocks (29904 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsAndMayOnlyNarrowItsBoundary (61170 ns)
+    [ PASSED ] CASE: localDrainUsesProcessedPeerBoundaryAndNeverIncreases (41121 ns)
+    [ PASSED ] CASE: racingFinishTransitionsAndPublishesCompletionExactlyOnce (3605008 ns)
+    TCS: Http2DeterministicFuzzTest, time elapsed: 6609912 ns, RESULT:
+    [ PASSED ] CASE: frameParserDeterministicMutationCorpusStaysBounded (4010785 ns)
+    [ PASSED ] CASE: hpackDecoderDeterministicMutationCorpusFailsClosed (2122187 ns)
+    [ PASSED ] CASE: protocolLimitBoundaryMutationsRejectOversizedInputs (49506 ns)
+    TCS: Http2FlowControllerTest, time elapsed: 2468267267 ns, RESULT:
+    [ PASSED ] CASE: windowUpdateCodecIgnoresReservedBitAndRejectsZeroByScope (27001 ns)
+    [ PASSED ] CASE: reservationsRespectConnectionStreamAndPeerFrameCredit (48926 ns)
+    [ PASSED ] CASE: settingsShrinkPausesReservedDataAndCancellationReleasesIt (50547 ns)
+    [ PASSED ] CASE: streamWindowUpdateWakesAReservedPermitAfterSettingsShrink (44301 ns)
+    [ PASSED ] CASE: concurrentTryReserveNeverOvercommitsOneStream (134509 ns)
+    [ PASSED ] CASE: receiveCreditReturnsOnlyAfterApplicationConsumption (65649 ns)
+    [ PASSED ] CASE: smallReceiveReadsCoalesceWindowUpdates (188782 ns)
+    [ PASSED ] CASE: stalledConnectionCreditFlushesOnceWithoutChangingSmallReadCoalescing (33235 ns)
+    [ PASSED ] CASE: leastRecentlyServedStreamsReceiveCreditBeforeThePreviousOwner (2465843986 ns)
+    [ PASSED ] CASE: connectionSendWindowIsSharedAcrossStreams (52385 ns)
+    [ PASSED ] CASE: connectionAndStreamWindowViolationsHaveCorrectScope (32784 ns)
+    [ PASSED ] CASE: settingsAndWindowOverflowFailAtomically (35480 ns)
+    [ PASSED ] CASE: streamCleanupCancelsPermitsAndRestoresOnlyConnectionReceiveCredit (31458 ns)
+    [ PASSED ] CASE: dataAccountingUsesTheEntireFramePayload (19430 ns)
+    TCS: Http2FrameCodecTest, time elapsed: 1478823 ns, RESULT:
+    [ PASSED ] CASE: everyRequiredFrameEnvelopeRoundTrips (129130 ns)
+    [ PASSED ] CASE: parserAcceptsEverySingleByteBoundaryAndMultipleFrames (73120 ns)
+    [ PASSED ] CASE: incompleteInputStaysBoundedUntilCompletion (22991 ns)
+    [ PASSED ] CASE: oversizedFrameFailsBeforePayloadBufferingAndParserBecomesTerminal (36702 ns)
+    [ PASSED ] CASE: reservedBitIsIgnoredOnReadAndClearedOnWrite (33048 ns)
+    [ PASSED ] CASE: unknownFramesAndFlagsRoundTripWithoutInterpretation (23294 ns)
+    [ PASSED ] CASE: transportWriterHandlesRepeatedPartialWrites (41365 ns)
+    [ PASSED ] CASE: parserRefusesUnbudgetedDataBeforeRetainingItsPayload (100196 ns)
+    TCS: Http2FrameModelTest, time elapsed: 948064 ns, RESULT:
+    [ PASSED ] CASE: frameAndErrorCodesRoundTripIncludingExtensions (24742 ns)
+    [ PASSED ] CASE: streamIdentifierIgnoresReservedBitAndKeepsThirtyOneBits (10103 ns)
+    [ PASSED ] CASE: limitsAreExplicitAndFrameSizeIsBounded (29125 ns)
+    [ PASSED ] CASE: fixedFrameShapesAndStreamScopesAreValidated (44100 ns)
+    [ PASSED ] CASE: settingsRejectInvalidProtocolValuesButRetainExtensions (33776 ns)
+    [ PASSED ] CASE: unknownFlagsAndFramesRemainForwardCompatible (10694 ns)
+    TCS: Http2GoAwayManagerTest, time elapsed: 5353323 ns, RESULT:
+    [ PASSED ] CASE: peerBoundaryRetiresOnlyDefinitelyUnprocessedStreams (185811 ns)
+    [ PASSED ] CASE: narrowingBoundaryWakesEachNewlyExcludedOwnerExactlyOnce (60592 ns)
+    [ PASSED ] CASE: localDrainQueuesGoAwayAndStopsAdmissionBeforeWriterRuns (75681 ns)
+    [ PASSED ] CASE: fabricatedReceiveResultCannotDrainAnOpenCoordinator (57787 ns)
+    [ PASSED ] CASE: racingAdmissionAndGoAwayNeverLeavesAnExcludedStreamActive (4233541 ns)
+    TCS: Http2HeaderBlockAssemblerTest, time elapsed: 927975 ns, RESULT:
+    [ PASSED ] CASE: sameStreamContinuationsAssembleInExactOrder (29142 ns)
+    [ PASSED ] CASE: continuationWithoutStartWrongStreamAndInterleavingFailConnection (48102 ns)
+    [ PASSED ] CASE: paddingAndPriorityOverheadAreExcludedFromHeaderBytes (17953 ns)
+    [ PASSED ] CASE: pushPromiseRetainsPromisedStreamAndFragmentOnly (17899 ns)
+    [ PASSED ] CASE: invalidPaddingPriorityAndSelfDependencyFailClosed (47204 ns)
+    [ PASSED ] CASE: accumulatedCompressedBytesHaveOneHardLimit (24369 ns)
+    TCS: Http2ConnectionHealthTest, time elapsed: 702645 ns, RESULT:
+    [ PASSED ] CASE: pingCodecAndConnectionAckPreserveOpaqueBytes (37685 ns)
+    [ PASSED ] CASE: idleProbeIsSingleOutstandingAndMatchingAckRestoresHealth (157665 ns)
+    [ PASSED ] CASE: ordinaryActivityDefersIdleProbeWithoutAllocatingATimer (27834 ns)
+    TCS: Http2ConnectionCloserTest, time elapsed: 1336218 ns, RESULT:
+    [ PASSED ] CASE: gracefulCloseSendsGoAwayWaitsForStreamAndClosesTransportOnce (154989 ns)
+    [ PASSED ] CASE: expiredCloseAbortsActiveStreamsWithoutStartingGracefulIo (53182 ns)
+    [ PASSED ] CASE: racingShorterDeadlineUpgradesInFlightGracefulCloseToOneAbort (109874 ns)
+    [ PASSED ] CASE: concurrentGracefulCallersShareOneTerminalResultAndTransportClose (150501 ns)
+    [ PASSED ] CASE: failedGracefulTransportCloseFallsBackToOneAbort (93415 ns)
+    TCS: HpackBlockTest, time elapsed: 1535856 ns, RESULT:
+    [ PASSED ] CASE: rfcRequestBlocksDecodeWithSharedDynamicState (47201 ns)
+    [ PASSED ] CASE: encoderMatchesFirstRfcHuffmanRequestExample (64194 ns)
+    [ PASSED ] CASE: literalModesPreserveNeverIndexedAndOnlyIncrementalMutatesTable (130885 ns)
+    [ PASSED ] CASE: tableSizeUpdateMustLeadBlockAndRespectAllowedMaximum (32692 ns)
+    [ PASSED ] CASE: headerCountListAndCompressedLimitsFailClosed (424559 ns)
+    [ PASSED ] CASE: peerCapacityUpdateIsEmittedBeforeHeaders (29973 ns)
+    TCS: HpackCoreTest, time elapsed: 1013472 ns, RESULT:
+    [ PASSED ] CASE: rfcIntegerVectorsEncodeAndDecodeExactly (18437 ns)
+    [ PASSED ] CASE: integerRejectsTruncationOverflowAndInvalidPrefix (31953 ns)
+    [ PASSED ] CASE: rawStringRoundTripsAndOwnsItsBytes (21153 ns)
+    [ PASSED ] CASE: stringLengthLimitAndTruncationFailBeforeCopy (35344 ns)
+    [ PASSED ] CASE: staticTableMatchesRfcBoundariesAndRepresentativeEntries (28153 ns)
+    [ PASSED ] CASE: everyStaticEntryHasBoundedRfcAccounting (86839 ns)
+    TCS: HpackDynamicTableTest, time elapsed: 1163760 ns, RESULT:
+    [ PASSED ] CASE: newestEntryUsesIndexSixtyTwoAndOlderEntriesShift (19012 ns)
+    [ PASSED ] CASE: exactRfcAccountingEvictsOldestEntriesFirst (23894 ns)
+    [ PASSED ] CASE: oversizedEntryClearsTheEntireTableWithoutInsertion (13288 ns)
+    [ PASSED ] CASE: capacityShrinkEvictsImmediatelyAndPeerLimitIsHard (27388 ns)
+    [ PASSED ] CASE: withoutIndexingNeverIndexedAndSensitiveNeverEnterState (19691 ns)
+    [ PASSED ] CASE: staticAndDynamicSearchReturnCanonicalLowestIndexes (141135 ns)
+    [ PASSED ] CASE: zeroCapacityRetainsNoEntries (12825 ns)
+    TCS: HpackHuffmanTest, time elapsed: 1384829 ns, RESULT:
+    [ PASSED ] CASE: rfcRequestExamplesEncodeAndDecodeExactly (71611 ns)
+    [ PASSED ] CASE: everyOctetRoundTripsWithinAnExplicitBound (529796 ns)
+    [ PASSED ] CASE: huffmanStringLiteralUsesFlagAndSharedBounds (38679 ns)
+    [ PASSED ] CASE: eosInvalidPaddingAndTruncatedPrefixFailClosed (36590 ns)
+    [ PASSED ] CASE: decodedAndEncodedOutputLimitsApplyBeforeGrowth (54147 ns)
+    TCS: Http2ConnectionReaderTest, time elapsed: 4923765 ns, RESULT:
+    [ PASSED ] CASE: oneReaderDecodesEveryByteBoundaryAndDispatchesInWireOrder (1075430 ns)
+    [ PASSED ] CASE: serverConsumesMagicAndFirstFrameFromTheSameRead (773611 ns)
+    [ PASSED ] CASE: eofDuringPrefaceOrFrameFailsAndWakesEveryStream (626727 ns)
+    [ PASSED ] CASE: invalidTransportProgressAndHandlerFailureBecomeTerminal (1215653 ns)
+    [ PASSED ] CASE: readerLoopCanOnlyBeClaimedOnce (266739 ns)
+    [ PASSED ] CASE: terminationRegistryIsBoundedRemovableAndExactlyOnce (194738 ns)
+    [ PASSED ] CASE: readerRegistryReservesOneListenerBeyondTheStreamLimit (22843 ns)
+    TCS: Http2ServerMappingTest, time elapsed: 4914548 ns, RESULT:
+    [ PASSED ] CASE: requestHeadMapsPseudoFieldsHostAndContentLength (67928 ns)
+    [ PASSED ] CASE: connectAndOptionsTargetsAreMappedStrictly (81470 ns)
+    [ PASSED ] CASE: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity (113061 ns)
+    [ PASSED ] CASE: paddedDataReturnsAllFlowCreditAndPublishesTrailers (110712 ns)
+    [ PASSED ] CASE: requestQueueIsBoundedBeforeFlowAccountingMutates (83372 ns)
+    [ PASSED ] CASE: receiveBuffersAreSharedAcrossHttp2ConnectionsAndReleaseOnBodyClose (120609 ns)
+    [ PASSED ] CASE: parserBufferLeaseMovesToBodyAndReleasesAfterLastByteIsConsumed (69778 ns)
+    [ PASSED ] CASE: terminalLengthMismatchDoesNotConsumeFlowWindow (63323 ns)
+    [ PASSED ] CASE: responseHeadersBodyFlowAndTrailersMapInOrder (490578 ns)
+    [ PASSED ] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (1176516 ns)
+    [ PASSED ] CASE: responseRulesCloseBodiesOnEveryTerminalOrFailurePath (123091 ns)
+    [ PASSED ] CASE: handlerRunsOnceAndReleasesRequestOwnership (194058 ns)
+    [ PASSED ] CASE: invalidDuplexResponseReleasesPreServeHandoffExactlyOnce (761815 ns)
+    TCS: Http2ServerPushLifecycleTest, time elapsed: 108922797 ns, RESULT:
+    [ PASSED ] CASE: largePushDoesNotDelayParentHeadersUntilPushCreditReturns (65347411 ns)
+    [ PASSED ] CASE: cancelledPushReleasesItsWorkerSlotForTheNextParent (31062400 ns)
+    [ PASSED ] CASE: crossOriginPushIsRejectedAndItsResponseIsClosedBeforeAnyOffer (864394 ns)
+    [ PASSED ] CASE: parentResetWhileWaitingForPushSlotIsRevalidatedBeforeReservation (4740798 ns)
+    [ PASSED ] CASE: resetOfBlockedPushDoesNotBlockReaderOrReleaseWorkerSlotEarly (3177931 ns)
+    [ PASSED ] CASE: blockingHeaderOnlyBodyCloseDoesNotDelayInboundReset (1464567 ns)
+    [ PASSED ] CASE: duplexHandlerReturnAbortsBothStreamDirections (931819 ns)
+    TCS: Http2SettingsTest, time elapsed: 1118439 ns, RESULT:
+    [ PASSED ] CASE: codecPreservesKnownUnknownAndRepeatedSettingsInOrder (17823 ns)
+    [ PASSED ] CASE: peerBatchAppliesAtomicallyAndReturnsAckAndWindowDelta (17889 ns)
+    [ PASSED ] CASE: invalidPeerBatchLeavesEffectiveStateUnchanged (27871 ns)
+    [ PASSED ] CASE: localBatchesAreAcknowledgedInFifoOrder (16980 ns)
+    [ PASSED ] CASE: unexpectedAckAndPendingBatchOverflowFailClosed (21758 ns)
+    [ PASSED ] CASE: advertisedResourceValuesAreCappedByLocalPolicy (20246 ns)
+    [ PASSED ] CASE: settingsFrameLengthAndAckPayloadAreRejectedByFrameLayer (29243 ns)
+    [ PASSED ] CASE: peerDefaultsAreRfcValuesCappedSeparatelyFromLocalAdvertisement (25343 ns)
+    [ PASSED ] CASE: clientPushAdvertisementUsesItsOwnFiniteAdmissionBound (12029 ns)
+    [ PASSED ] CASE: serverEnablePushSettingIsRejectedInBothDirections (23029 ns)
+    TCS: Http2StreamLifecycleTest, time elapsed: 2382327 ns, RESULT:
+    [ PASSED ] CASE: bothEndStreamOrdersReachClosedExactlyOnce (20598 ns)
+    [ PASSED ] CASE: initialEndStreamHalfClosesTheInitiatingSide (13279 ns)
+    [ PASSED ] CASE: clientAndServerAllocateCorrectMonotonicParity (14252 ns)
+    [ PASSED ] CASE: peerParityReuseAndDecreasingIdsFailConnection (34796 ns)
+    [ PASSED ] CASE: localAndPeerConcurrencyLimitsAreIndependentAndCapacityReturns (36473 ns)
+    [ PASSED ] CASE: invalidHalfClosedDirectionsAndUnknownStreamsFailClosed (41945 ns)
+    [ PASSED ] CASE: readerTerminationClosesAndUnregistersEveryActiveStream (50433 ns)
+    [ PASSED ] CASE: racingAdmissionNeverExceedsConfiguredBoundOrDuplicatesIds (562524 ns)
+    [ PASSED ] CASE: racingEndDirectionsCompleteAndCleanupExactlyOnce (733529 ns)
+    TCS: Http2StreamResetManagerTest, time elapsed: 2760018 ns, RESULT:
+    [ PASSED ] CASE: rstCodecPreservesKnownAndExtensionCodes (39585 ns)
+    [ PASSED ] CASE: localCancelQueuesResetAndReleasesOnlyItsStream (74602 ns)
+    [ PASSED ] CASE: peerResetCancelsQueuedDataPermitsAndWakesOwnerOnce (80754 ns)
+    [ PASSED ] CASE: resetWakesBlockedServerBodyWithoutClosingConnection (102814 ns)
+    [ PASSED ] CASE: racingLocalAndPeerResetCompletesEveryStreamExactlyOnce (1633314 ns)
+    [ PASSED ] CASE: cleanupResetUsesReservedQueueSlotAndRetriesDeferredCredit (97709 ns)
+    TCS: Http2WriteSchedulerTest, time elapsed: 5271983 ns, RESULT:
+    [ PASSED ] CASE: controlPrecedesDataAndPartialWritesDrainGracefully (124232 ns)
+    [ PASSED ] CASE: controlBurstIsBoundedAndDataStreamsRotateFairly (501914 ns)
+    [ PASSED ] CASE: queueCountAndBytesAreHardAndCancellationReleasesCapacity (114587 ns)
+    [ PASSED ] CASE: concurrentProducersStillUseExactlyOneWriter (1036249 ns)
+    [ PASSED ] CASE: abortInterruptsActiveWriteAndFailsEveryTicket (101166 ns)
+    [ PASSED ] CASE: transportFailureFansOutAndTicketWaitHonorsCancellation (66485 ns)
+    [ PASSED ] CASE: reservedDataConsumesFlowOnlyWhenTheWriterClaimsIt (38242 ns)
+    [ PASSED ] CASE: serverDataEventTransfersItsPermitBeforeWriterClaim (32057 ns)
+    [ PASSED ] CASE: cancellingQueuedReservedDataReturnsAllFlowCapacity (28838 ns)
+    [ PASSED ] CASE: admittedHeaderBatchSurvivesResetDuringPartialFirstWrite (73478 ns)
+    [ PASSED ] CASE: unstartedEncodedHeaderBatchIsIrrevocableAfterAdmission (41662 ns)
+    [ PASSED ] CASE: largeHeaderBatchRemainsContiguousPastControlBurstLimit (90473 ns)
+    [ PASSED ] CASE: failedHeaderBatchAdmissionTerminatesScheduler (29675 ns)
+    [ PASSED ] CASE: concurrentHeaderBatchesStayContiguousOnTheWire (871708 ns)
+    [ PASSED ] CASE: aggregateManagedBytesIncludeControlReserveAndSlowWrites (259859 ns)
+    [ PASSED ] CASE: cleanupFrameUsesProtectedBytesAfterOrdinaryControlIsFull (86770 ns)
+Summary: TOTAL: 188
+    PASSED: 187, SKIPPED: 0, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: Http2ClientConnectionTest, CASE: earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 16416468027 ns, RESULT:
+    TCS: RequestBodyTest, time elapsed: 1860087 ns, RESULT:
+    [ PASSED ] CASE: byteBodiesOwnInputAndReplayWithIndependentOffsets (313495 ns)
+    [ PASSED ] CASE: emptyAndUtf8StringBodiesHaveExactLengths (32448 ns)
+    [ PASSED ] CASE: oneShotBodyCanOnlyBeClaimedOnce (50088 ns)
+    [ PASSED ] CASE: factoryMustReturnTheDeclaredLengthAndMismatchIsClosed (23052 ns)
+    [ PASSED ] CASE: closedStreamRejectsFurtherReads (20341 ns)
+    [ PASSED ] CASE: fileBodyStreamsAndReopensWithoutEagerReads (153003 ns)
+    [ PASSED ] CASE: fileBodyRejectsOversizeAndChangesBeforeOpen (121469 ns)
+    TCS: HttpClientExtensionsTest, time elapsed: 46691696 ns, RESULT:
+    [ PASSED ] CASE: nativeCookiesAndServiceHooksSurviveThrowingPoolObservers (34607850 ns)
+    [ PASSED ] CASE: mismatchedUpgradePairingsNeverOpenConnections (182220 ns)
+    [ PASSED ] CASE: unavailableServerPushClosesTheOwnedResponse (11362269 ns)
+    TCS: HttpClientRotationTest, time elapsed: 1275409998 ns, RESULT:
+    [ PASSED ] CASE: nativeH1IdleRotationReleasesSingleConnectionBudgetAndPreservesCookiesHooks (145044248 ns)
+    [ PASSED ] CASE: nativeGracefulDnsLateResultFinishesOnlyOldAttempt (3686779 ns)
+    [ PASSED ] CASE: nativeProxyDnsRotationKeepsDirectDnsAndNoProxyPolicy (6061316 ns)
+    [ PASSED ] CASE: nativeH2TlsRotationDrainsOldBodyRollsBackInvalidAndRejectsRemovedTrust (181821732 ns)
+    [ PASSED ] CASE: nativeTlsAttemptRetainsSnapshotAndSecurityReplacementRejectsLateFactory (51065483 ns)
+    [ PASSED ] CASE: nativeRetainedGenerationCeilingRejectsAtomicallyAndReclaimsAfterBodyClose (78968139 ns)
+    [ PASSED ] CASE: nativeSecurityDnsCancelsLateResolverAndEveryPreviouslyDrainingBody (26507849 ns)
+    [ PASSED ] CASE: rapidTlsUpdatesRetainOneContextAndDnsRotationDoesNotReopenClosedMaterial (724088565 ns)
+    [ PASSED ] CASE: nativeTransferredH1SessionRetainsGenerationAcrossRotationAndClientClose (2314000 ns)
+    [ PASSED ] CASE: nativeMtlsIdentityRemovalCancelsOldH2AndRequiresFreshAuthenticatedHandshake (53839827 ns)
+    TCS: HttpCookieJarTest, time elapsed: 272442657 ns, RESULT:
+    [ PASSED ] CASE: cookieSerializesStandardMetadataWithoutInventingBrowserPolicy (31513 ns)
+    [ PASSED ] CASE: hostOnlyAndDomainCookiesDoNotLeakAcrossDnsBoundaries (389273 ns)
+    [ PASSED ] CASE: bundledPublicSuffixRulesProtectRegistrableBoundariesByDefault (597558 ns)
+    [ PASSED ] CASE: defaultPathAndPathMatchUseDirectoryAndSlashBoundaries (175264 ns)
+    [ PASSED ] CASE: maxAgeTakesPrecedenceAndNonPositiveValuesDeleteTheIdentity (132475 ns)
+    [ PASSED ] CASE: secureMetadataControlsTransportAndHttpOnlyDoesNotChangeWireSelection (51358 ns)
+    [ PASSED ] CASE: valuedSecureAttributeCannotLeakCookiesToCleartext (46634 ns)
+    [ PASSED ] CASE: cleartextOriginsCannotCreateOrOverlaySecureCookies (295651 ns)
+    [ PASSED ] CASE: cleartextQuotaFloodCannotEvictSecureIdentityAndInstallReplacement (151949 ns)
+    [ PASSED ] CASE: allSecureQuotaRejectsCleartextInsertionsFromBothStorageEntrypoints (97456 ns)
+    [ PASSED ] CASE: rejectsHeaderInjectionAndInvalidCookieOctetsBeforeStorage (68148 ns)
+    [ PASSED ] CASE: capacityHeaderBoundsAndReplacementRemainDeterministic (77674 ns)
+    [ PASSED ] CASE: removalClearAndSnapshotsExposeOnlyLiveImmutableCookies (65624 ns)
+    [ PASSED ] CASE: concurrentStoresAndReadsRemainRaceFreeAndBounded (1496324 ns)
+    [ PASSED ] CASE: boundedSetCookieMutationsPreserveScopeAndHeaderSafety (267179119 ns)
+    TCS: Http1DeterministicFuzzTest, time elapsed: 7746649 ns, RESULT:
+    [ PASSED ] CASE: acceptedUrlMutationsRoundTripToOneCanonicalIdentity (4210120 ns)
+    [ PASSED ] CASE: acceptedNoProxyMutationsRemainDeterministicAcrossTargets (2684222 ns)
+    [ PASSED ] CASE: proxyAuthorizationMutationCannotInjectBeforeDnsOrConnect (316332 ns)
+    TCS: HttpErrorTest, time elapsed: 456818 ns, RESULT:
+    [ PASSED ] CASE: publicGetMapsInvalidUrlWithoutNetworkSideEffects (168104 ns)
+    [ PASSED ] CASE: classifierProvidesStableHttpFailureCodes (33425 ns)
+    TCS: HttpFacadeTest, time elapsed: 1662501109 ns, RESULT:
+    [ PASSED ] CASE: requestCancellationOutlivesCompletedParentWhileTransferredPushStalls (27279501 ns)
+    [ PASSED ] CASE: publicResourceLimitsReachClientSnapshot (74209 ns)
+    [ PASSED ] CASE: cancellationWrapperPreservesProtocolCompletionPolicy (33055 ns)
+    [ PASSED ] CASE: typedCancellationHandlesAreScopedIdempotentAndStopBeforeNetworkIo (2425297 ns)
+    [ PASSED ] CASE: publicHttp1ConnectionHandleCancelsBodyAndLeavesClientReusable (8444708 ns)
+    [ PASSED ] CASE: publicHttp2StreamAndConnectionHandlesRespectTheirScopes (84652873 ns)
+    [ PASSED ] CASE: publicHttp2SlowStreamCannotStarveOneTenOrHundredSiblings (220499488 ns)
+    [ PASSED ] CASE: publicHttp2BodyIdleDeadlineIgnoresSiblingResponses (949302574 ns)
+    [ PASSED ] CASE: tlsHttp2StreamLimitIsAppliedAcrossConcurrentPublicRequests (26914158 ns)
+    [ PASSED ] CASE: tlsFacadeNegotiatesHttp2AndMapsBodyTrailersAndResponse (39301881 ns)
+    [ PASSED ] CASE: explicitResolverConnectsPublicClientAndServer (2184641 ns)
+    [ PASSED ] CASE: defaultSystemResolverConnectsPublicClientAndServer (262472678 ns)
+    [ PASSED ] CASE: clientFollowsOriginRelativeRedirectEndToEnd (3339234 ns)
+    [ PASSED ] CASE: retryCannotRestartTheOriginalAbsoluteDeadline (296427 ns)
+    [ PASSED ] CASE: redirectCannotRestartTheOriginalAbsoluteDeadline (2330879 ns)
+    [ PASSED ] CASE: clientRetriesOneTemporaryDnsFailureWithinTheSameDeadline (2131188 ns)
+    [ PASSED ] CASE: forwardProxyUsesAbsoluteFormIndependentDnsAndHookCredentials (2308630 ns)
+    [ PASSED ] CASE: serverBuilderRequiresEndpointAndHandler (33307 ns)
+    [ PASSED ] CASE: tlsServerConfigFailsClosedBeforeBinding (154386 ns)
+    [ PASSED ] CASE: followedHttp2RedirectClosesUnclaimedPushBeforeClientTeardown (24850526 ns)
+    TCS: Http2ConcurrentResponseBodyTest, time elapsed: 27332479 ns, RESULT:
+    [ PASSED ] CASE: twoPublicHttp2BodiesCompleteIndependently (27038006 ns)
+    TCS: FileHandlerTest, time elapsed: 12891588 ns, RESULT:
+    [ PASSED ] CASE: confinedDownloadRejectsTraversalAndSymlinkWhileOpenBodyOutlivesHandler (4921598 ns)
+    [ PASSED ] CASE: uploadPublishesOneCompleteBinaryFileAndNeverPublishesRejectedMultipart (7238498 ns)
+    [ PASSED ] CASE: uploadCommitChecksContextAfterDurabilityBeforePublication (173470 ns)
+    TCS: HttpMessageTest, time elapsed: 1156958 ns, RESULT:
+    [ PASSED ] CASE: requestFactoriesProduceImmutableProtocolNeutralModels (54926 ns)
+    [ PASSED ] CASE: responseEofCompletesObserverExactlyOnce (34621 ns)
+    [ PASSED ] CASE: earlyCloseAbandonsObserverExactlyOnce (29746 ns)
+    [ PASSED ] CASE: readFailureClosesAndAbandonsTheBody (26559 ns)
+    [ PASSED ] CASE: emptyDestinationDoesNotMistakeNoProgressForEof (19512 ns)
+    [ PASSED ] CASE: boundedDrainCompletesOnlyWhenEofIsProven (24086 ns)
+    [ PASSED ] CASE: invalidSourceProgressFailsClosed (24530 ns)
+    [ PASSED ] CASE: responseRejectsInvalidStatusAndReason (40022 ns)
+    TCS: MultipartTest, time elapsed: 4518849477 ns, RESULT:
+    [ PASSED ] CASE: writerStreamsExactBinaryFramingAndReplaysIndependently (268605 ns)
+    [ PASSED ] CASE: boundarySeparatorsRoundtripThroughContentTypeAndBody (942454 ns)
+    [ PASSED ] CASE: readerPreservesBinaryWhenEveryDelimiterIsSplitAcrossReads (506289 ns)
+    [ PASSED ] CASE: closingPartDiscardsOnlyThatPartAndReleasesNextPart (516336 ns)
+    [ PASSED ] CASE: malformedAndConfiguredLimitsCloseOwnedSource (127029 ns)
+    [ PASSED ] CASE: partCountLimitRejectsBeforeParsingUnboundedAdditionalMetadata (316354 ns)
+    [ PASSED ] CASE: boundedDeterministicWireMutationsAreChunkIndependent (4511653546 ns)
+    [ PASSED ] CASE: deterministicMutationHarnessEnforcesSmallLimitsAndOwnedClosure (3300002 ns)
+    TCS: HttpModelTest, time elapsed: 1894893 ns, RESULT:
+    [ PASSED ] CASE: methodSupportsStandardAndExtensionTokens (38118 ns)
+    [ PASSED ] CASE: headersPreserveOrderAndMultipleValues (63153 ns)
+    [ PASSED ] CASE: headersOwnTheirInputAndOutputArrays (19289 ns)
+    [ PASSED ] CASE: builderSetAndRemoveUseCaseInsensitiveNames (33366 ns)
+    [ PASSED ] CASE: rejectsInjectionAndInvalidNames (46959 ns)
+    [ PASSED ] CASE: enforcesCountLineAndTotalLimits (26834 ns)
+    [ PASSED ] CASE: urlNormalizesSchemeHostAndDefaultTarget (22877 ns)
+    [ PASSED ] CASE: urlPreservesExplicitPortPathAndQuery (40089 ns)
+    [ PASSED ] CASE: urlRequiresBracketedIpv6AndKeepsQueryOnlyTargetValid (25521 ns)
+    [ PASSED ] CASE: urlRejectsAmbiguousAndUnsafeInputs (129918 ns)
+    [ PASSED ] CASE: trailerRejectsRoutingAndFramingFields (190307 ns)
+    TCS: HttpProxyPolicyTest, time elapsed: 1019508 ns, RESULT:
+    [ PASSED ] CASE: noProxyMatchesDnsBoundariesAndOptionalPorts (104754 ns)
+    [ PASSED ] CASE: noProxyMatchesTypedIpLiteralsExactlyAndWildcardExplicitly (75181 ns)
+    [ PASSED ] CASE: endpointsRetainDnsIpv4AndIpv6RouteIdentity (33461 ns)
+    [ PASSED ] CASE: routeSelectionUsesNoProxyWithoutCallingAuthorizationHook (85815 ns)
+    [ PASSED ] CASE: rejectsAmbiguousNoProxyPatternsAndEndpointPorts (48761 ns)
+    TCS: HttpRedirectPolicyTest, time elapsed: 1677736 ns, RESULT:
+    [ PASSED ] CASE: rewritesPostOn302AndRemovesBodyHeaders (137683 ns)
+    [ PASSED ] CASE: noFollowPreservesRedirectResponse (58754 ns)
+    [ PASSED ] CASE: stripsSensitiveHeadersOnlyAcrossOrigins (186322 ns)
+    [ PASSED ] CASE: rejectsDowngradeLimitAndOneShotReplay (226126 ns)
+    [ PASSED ] CASE: resolvesSchemeRelativeAndQueryOnlyLocations (112597 ns)
+    [ PASSED ] CASE: resolvesRelativePathsAndRemovesDotSegments (151572 ns)
+    TCS: HttpRetryPolicyTest, time elapsed: 1062630 ns, RESULT:
+    [ PASSED ] CASE: retriesOnlyIdempotentReplayableStructuredFailures (93670 ns)
+    [ PASSED ] CASE: explicitSafetyAllowsPostButDisabledAndOneShotFailClosed (78220 ns)
+    [ PASSED ] CASE: cancellationDeadlineUnknownAndNeverAreNotRetried (63900 ns)
+    [ PASSED ] CASE: retryRequiresPhaseOrSubmissionEvidence (60840 ns)
+    [ PASSED ] CASE: goAwayRetriesOnlyDefinitelyUnprocessedSafeReplayableRequests (81208 ns)
+    TCS: HttpServerRotationTest, time elapsed: 2391164645 ns, RESULT:
+    [ PASSED ] CASE: invalidAndClosedUpdatesRollbackWhileUnreferencedUpdatesStayBounded (664520977 ns)
+    [ PASSED ] CASE: gracefulHttp1FinishesAdmittedResponseAndRejectsOldKeepalive (44846955 ns)
+    [ PASSED ] CASE: securityHttp1CancelsActiveExchangeAndGracefulRotationClosesIdleKeepalive (66554299 ns)
+    [ PASSED ] CASE: gracefulHttp2DrainsOldStreamsAndNewHandshakesUseReplacementAuthentication (62381007 ns)
+    [ PASSED ] CASE: securityHttp2CancelsAdmittedStreamWithoutClosingListener (42056312 ns)
+    [ PASSED ] CASE: pendingHandshakeKeepsSnapshotAndSecurityReplacementAbortsPendingSocket (89289980 ns)
+    [ PASSED ] CASE: retainedHandshakeGenerationCapRejectsAtomicallyAndCloseReleasesAll (1211387906 ns)
+    [ PASSED ] CASE: closeAndSecurityRotationRaceLeavesListenerClosedAndNoOwners (208407708 ns)
+    TCS: Http1SseStreamingProfileTest, time elapsed: 3004674966 ns, RESULT:
+    [ PASSED ] CASE: http1StreamsWithoutLifetimeAccumulationAndCancels (3004395989 ns)
+    TCS: Http2SseStreamingProfileTest, time elapsed: 3022195773 ns, RESULT:
+    [ PASSED ] CASE: http2StreamsWithoutLifetimeAccumulationAndPreservesSibling (3021883242 ns)
+    TCS: M2005SystemResolverTest, time elapsed: 9735533 ns, RESULT:
+    [ PASSED ] CASE: resolvesLocalhostThroughThePublicContract (8635091 ns)
+    [ PASSED ] CASE: fixtureReturnsAllCandidatesAndDoesNotInventTtl (17243 ns)
+    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (9290 ns)
+    [ PASSED ] CASE: fixtureMapsStableErrorsAndRetainsNativeEvidence (16366 ns)
+    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (10519 ns)
+    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (112991 ns)
+    TCS: WebSocketHandshakeTest, time elapsed: 28425846 ns, RESULT:
+    [ PASSED ] CASE: nativeHttp1UpgradeTransfersFramesAndClosesSession (3574986 ns)
+    [ PASSED ] CASE: nativeHttp2ExtendedConnectKeepsSiblingRequestsUsable (24481177 ns)
+    TCS: WebSocketConnectionTest, time elapsed: 124459531 ns, RESULT:
+    [ PASSED ] CASE: fragmentedUtf8AndAutomaticPongSurviveOneByteTransportReads (144913 ns)
+    [ PASSED ] CASE: preCancelledSendPerformsNoIoAndLeavesUntouchedSessionHealthy (89655 ns)
+    [ PASSED ] CASE: fragmentedMessageBoundRejectsBeforeWritingAndPreservesProgression (90757 ns)
+    [ PASSED ] CASE: roleMaskingAndNonCanonicalLengthFailClosedWithProtocolStatus (173825 ns)
+    [ PASSED ] CASE: fragmentedTextRejectsInvalidContinuationAtTheMessageBoundary (80273 ns)
+    [ PASSED ] CASE: gracefulCloseEchoesStatusAndCompletesBothOwners (116534 ns)
+    [ PASSED ] CASE: handshakeCryptoMatchesRfcVectorAndReturnsCanonicalFreshKeyShape (36478 ns)
+    [ PASSED ] CASE: framePayloadIsOwnedAndCloseInputIsStrict (25540 ns)
+    [ PASSED ] CASE: boundedDeterministicWireMutationsAreSplitInvariantAndFailClosed (122713323 ns)
+Summary: TOTAL: 137
+    PASSED: 134, SKIPPED: 3, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 2993434146 ns, RESULT:
+    TCS: HttpAutomaticHttpsClientTest, time elapsed: 6399097 ns, RESULT:
+    [ PASSED ] CASE: h2NegotiationMultiplexesTenRequestsOnOneTlsConnection (2957982 ns)
+    [ PASSED ] CASE: http11NegotiationFallsBackAndReusesTheAdoptedConnection (2438829 ns)
+    TCS: Http1ChunkedCodecTest, time elapsed: 2219524 ns, RESULT:
+    [ PASSED ] CASE: decoderStreamsDataExtensionsTrailersAndRemainder (109326 ns)
+    [ PASSED ] CASE: decoderHandlesEveryBoundaryOneByteAtATime (92508 ns)
+    [ PASSED ] CASE: encoderProducesCanonicalChunksAndBoundedTrailers (94247 ns)
+    [ PASSED ] CASE: rejectsInvalidSizeExtensionAndTerminators (89446 ns)
+    [ PASSED ] CASE: enforcesBodyChunkLineAndTrailerBounds (79331 ns)
+    [ PASSED ] CASE: streamingResponseKeepsEachChunkBoundedWithoutALifetimeCeiling (172242 ns)
+    [ PASSED ] CASE: rejectsForbiddenOrFoldedTrailers (93418 ns)
+    [ PASSED ] CASE: eofAndPostCompletionUseFailClosedStates (76890 ns)
+    [ PASSED ] CASE: decodeBatchesOwnDataAndRemainingBytes (61362 ns)
+    TCS: Http1ClientConnectionTest, time elapsed: 24916108 ns, RESULT:
+    [ PASSED ] CASE: expectContinueWaitsForApprovalBeforeOpeningBody (1786402 ns)
+    [ PASSED ] CASE: finalRejectionBeforeContinueNeverOpensRequestBody (1036828 ns)
+    [ PASSED ] CASE: continueWaitTimeoutSendsBodyUnderTheOriginalBudget (18114963 ns)
+    [ PASSED ] CASE: serializesRequestsUntilBodyEofThenReusesConnection (757156 ns)
+    [ PASSED ] CASE: earlyBodyCloseClosesInsteadOfReturningConnectionForReuse (545555 ns)
+    [ PASSED ] CASE: connectionCloseResponseIsNeverReusableAfterEof (1030555 ns)
+    [ PASSED ] CASE: executionFailurePreservesNetworkErrorEvidence (51086 ns)
+    [ PASSED ] CASE: responseFailureCarriesCommittedRequestEvidence (411831 ns)
+    TCS: Http1CleartextClientTest, time elapsed: 1583341 ns, RESULT:
+    [ PASSED ] CASE: resolvesConnectsAndReusesOnlyAfterBodyCompletion (1238578 ns)
+    [ PASSED ] CASE: rejectsHttpsBeforeDnsOrPoolMutation (61107 ns)
+    TCS: Http1ConnectionPoolTest, time elapsed: 6278967 ns, RESULT:
+    [ PASSED ] CASE: retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse (490137 ns)
+    [ PASSED ] CASE: emitsSecretFreeAcquireAndReleaseLifecycle (446051 ns)
+    [ PASSED ] CASE: reusesOnlyTheSameCompleteKey (268589 ns)
+    [ PASSED ] CASE: enforcesTotalPerKeyIdleAndWaiterBounds (491337 ns)
+    [ PASSED ] CASE: activeWaitHonorsCancellationAndReleasesWaiterSlot (278664 ns)
+    [ PASSED ] CASE: evictsExpiredAndClosedConnectionsInsteadOfReusingThem (595753 ns)
+    [ PASSED ] CASE: failedCreationRollsBackItsCapacityReservation (399727 ns)
+    [ PASSED ] CASE: evictsLeasedConnectionAtMaximumLifetimeOnRelease (473866 ns)
+    [ PASSED ] CASE: expiresConnectionsAtMaximumLifetime (469454 ns)
+    [ PASSED ] CASE: admissionRotatesOriginsAndYieldsTheFullPoolSlot (546957 ns)
+    [ PASSED ] CASE: retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResult (543089 ns)
+    TCS: Http1HeadParserTest, time elapsed: 2486929 ns, RESULT:
+    [ PASSED ] CASE: requestParsesIncrementallyAndReturnsBodyRemainder (153851 ns)
+    [ PASSED ] CASE: oneFeedRetainsBytesAfterTheHead (68583 ns)
+    [ PASSED ] CASE: responseParsesStatusReasonHeadersAndFraming (187724 ns)
+    [ PASSED ] CASE: acceptsOriginAbsoluteAuthorityAndAsteriskFormsOnlyWhereValid (475333 ns)
+    [ PASSED ] CASE: rejectsBareLfObsFoldAndInvalidHeaderSyntax (234258 ns)
+    [ PASSED ] CASE: requiresOneValidHostAndMatchingAbsoluteAuthority (182349 ns)
+    [ PASSED ] CASE: rejectsInvalidTargetVersionAndBoundViolations (96949 ns)
+    [ PASSED ] CASE: completedParserCannotBeReused (64522 ns)
+    TCS: Http2Streams1BenchmarkTest, time elapsed: 6413369 ns, RESULT:
+    [ PASSED ] CASE: benchmarkOneConcurrentStream (6202034 ns)
+    TCS: Http2Streams10BenchmarkTest, time elapsed: 37556338 ns, RESULT:
+    [ PASSED ] CASE: benchmarkTenConcurrentStreams (37310752 ns)
+    TCS: Http2Streams100BenchmarkTest, time elapsed: 489160647 ns, RESULT:
+    [ PASSED ] CASE: benchmarkHundredConcurrentStreams (488823808 ns)
+    TCS: Http1HundredConnectionBaselineTest, time elapsed: 30718374 ns, RESULT:
+    [ PASSED ] CASE: benchmarkHundredConcurrentConnections (30360564 ns)
+    TCS: Http2ConnectionPoolTest, time elapsed: 2014155113 ns, RESULT:
+    [ PASSED ] CASE: retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination (173940 ns)
+    [ PASSED ] CASE: retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult (201445 ns)
+    [ PASSED ] CASE: alpnPrefersH2AndFallsBackOnlyToHttp11 (26533 ns)
+    [ PASSED ] CASE: oneConnectionIsSharedUntilPeerStreamCapacityIsFull (232115 ns)
+    [ PASSED ] CASE: concurrentFirstUseDoesNotCreateAConnectionStampede (3169767 ns)
+    [ PASSED ] CASE: newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted (101322 ns)
+    [ PASSED ] CASE: closeRacingUnpublishedAdmissionReleasesConnectionOwners (578008 ns)
+    [ PASSED ] CASE: completeSecurityKeyPreventsCrossContextReuse (79185 ns)
+    [ PASSED ] CASE: drainingConnectionRetainsExistingStreamButReceivesNoNewLease (74452 ns)
+    [ PASSED ] CASE: drainingConnectionWaitsForNonLocalOwnersBeforeDiscard (72851 ns)
+    [ PASSED ] CASE: fullBoundedPoolHonorsOneCallerDeadline (61515 ns)
+    [ PASSED ] CASE: poolCloseAbortsEverySharedConnectionExactlyOnce (66894 ns)
+    [ PASSED ] CASE: drainsExpiredHttp2ConnectionAfterActiveStreamCompletion (119281 ns)
+    [ PASSED ] CASE: expiresConnectionsAtMaximumLifetime (101416 ns)
+    [ PASSED ] CASE: admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot (2007028467 ns)
+    TCS: Http1FramingTest, time elapsed: 2403820 ns, RESULT:
+    [ PASSED ] CASE: requestUsesOneSharedEmptyLengthOrChunkedDecision (198824 ns)
+    [ PASSED ] CASE: identicalContentLengthsAreAcceptedAcrossFieldsAndLists (126617 ns)
+    [ PASSED ] CASE: conflictingOrInvalidContentLengthsAreRejected (266131 ns)
+    [ PASSED ] CASE: contentLengthAndTransferEncodingNeverCoexist (68829 ns)
+    [ PASSED ] CASE: ambiguousTransferEncodingIsRejected (201703 ns)
+    [ PASSED ] CASE: responseHandlesHeadStatusesConnectAndCloseDelimiting (71394 ns)
+    [ PASSED ] CASE: bodylessAndSuccessfulConnectResponsesRejectFramingFields (118374 ns)
+    TCS: HttpConnectionPoolKeyTest, time elapsed: 553970 ns, RESULT:
+    [ PASSED ] CASE: canonicalOriginProducesStableEqualityAndHash (19798 ns)
+    [ PASSED ] CASE: everySecurityAndRouteDimensionPartitionsReuse (44029 ns)
+    [ PASSED ] CASE: refusesIncompletePartitionIdentities (24574 ns)
+    TCS: Http1ProxyClientPipelineTest, time elapsed: 5059318 ns, RESULT:
+    [ PASSED ] CASE: dynamicConnectCredentialsNeverReuseAnAuthenticatedTunnel (3656030 ns)
+    [ PASSED ] CASE: rejectedConnectDrainsClosesAndReturnsStructuredNonRetryableFailure (1044786 ns)
+    TCS: Http1RequestWriterTest, time elapsed: 3300761 ns, RESULT:
+    [ PASSED ] CASE: twoStageWriterDoesNotOpenBodyBeforeExplicitCommit (501788 ns)
+    [ PASSED ] CASE: writesFixedBodyThroughPartialTransportOperations (486640 ns)
+    [ PASSED ] CASE: streamsUnknownLengthBodyAsCanonicalChunks (404304 ns)
+    [ PASSED ] CASE: rejectsDeclaredMismatchBeforeWritingAnything (167112 ns)
+    [ PASSED ] CASE: fixedBodyLimitRejectsBeforeConsumingOrCommittingRequest (190570 ns)
+    [ PASSED ] CASE: prematureBodyEofRetainsPartialCommitEvidence (401815 ns)
+    [ PASSED ] CASE: emptyFramingProbesSourceInsteadOfDroppingUnexpectedBytes (207628 ns)
+    TCS: Http1ResponseReaderTest, time elapsed: 121040632 ns, RESULT:
+    [ PASSED ] CASE: explicitUpgradeTransfersOnlyAMatching101Protocol (506563 ns)
+    [ PASSED ] CASE: mismatchedUpgradeResponseFailsClosed (476433 ns)
+    [ PASSED ] CASE: explicitConnectTransfersBufferedTunnelBytesAndTransportOwnership (496474 ns)
+    [ PASSED ] CASE: failedConnectRemainsAnHttpResponseAndClosesAfterBody (476764 ns)
+    [ PASSED ] CASE: readsInterimAndFixedResponseWithoutBufferingTheBody (355803 ns)
+    [ PASSED ] CASE: bodyReadIdleStartsWhenTheCallerBeginsReading (64764643 ns)
+    [ PASSED ] CASE: timeoutAndCancellationRaceAbandonsBodyExactlyOnce (49921392 ns)
+    [ PASSED ] CASE: received4xxAnd5xxRemainHttpResponses (609558 ns)
+    [ PASSED ] CASE: decodesChunkedResponseAndPublishesTrailerAtEof (393952 ns)
+    [ PASSED ] CASE: closeDelimitedBodyCompletesOnlyAtTransportEof (277790 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (304239 ns)
+    [ PASSED ] CASE: prematureFixedBodyEofAbandonsResponseExactlyOnce (293769 ns)
+    [ PASSED ] CASE: rejectsImplicitUpgradeAndConnectTransportTransfer (527451 ns)
+    TCS: Http1SerializerTest, time elapsed: 1223805 ns, RESULT:
+    [ PASSED ] CASE: clientRequestAddsHostAndUsesOriginForm (73714 ns)
+    [ PASSED ] CASE: forwardProxyRequestUsesAbsoluteFormAndOriginHost (68207 ns)
+    [ PASSED ] CASE: requestPreservesOrderedMultipleFieldsAndLengthFraming (74209 ns)
+    [ PASSED ] CASE: requestRejectsMissingDuplicateOrMismatchedHost (57612 ns)
+    [ PASSED ] CASE: responseSerializesStatusAndUsesSharedFraming (35662 ns)
+    [ PASSED ] CASE: responseRejectsInjectionAndForbiddenBodyFraming (40344 ns)
+    [ PASSED ] CASE: writerHandlesPartialTransportWritesUnderOneContext (91476 ns)
+    [ PASSED ] CASE: serializedBytesAreDefensiveCopies (47683 ns)
+    TCS: Http1ServerConnectionTest, time elapsed: 4191912 ns, RESULT:
+    [ PASSED ] CASE: serializesTwoKeepAliveExchanges (1269638 ns)
+    [ PASSED ] CASE: unreadRequestBodyForcesConnectionCloseAfterResponse (473429 ns)
+    [ PASSED ] CASE: handlerFailureProducesBounded500AndCloses (498841 ns)
+    [ PASSED ] CASE: rejectedHandoffReleasesSessionOwnershipExactlyOnce (793809 ns)
+    [ PASSED ] CASE: selectedUpgradeOfferTransfersBufferedSessionBytes (580869 ns)
+    TCS: Http1ServerRequestReaderTest, time elapsed: 13033631 ns, RESULT:
+    [ PASSED ] CASE: streamsFixedRequestBodyWithoutReadingPastItsLength (399457 ns)
+    [ PASSED ] CASE: rejectsOversizedFixedRequestBeforeReadingItsBody (597050 ns)
+    [ PASSED ] CASE: decodesChunkedRequestAndPublishesTrailer (1004115 ns)
+    [ PASSED ] CASE: sendsContinueOnlyWhenHandlerStartsReadingTheBody (9245262 ns)
+    [ PASSED ] CASE: rejectingWithoutReadingNeverSendsContinue (892152 ns)
+    TCS: Http1ServerTest, time elapsed: 28359344 ns, RESULT:
+    [ PASSED ] CASE: shutdownAbortsConnectionBlockedInsideTlsHandshake (8022761 ns)
+    [ PASSED ] CASE: acceptSideTlsHookOwnsConnectionAndClosesAfterShutdown (1093302 ns)
+    [ PASSED ] CASE: gracefulShutdownStopsAcceptAfterCompletedConnection (871542 ns)
+    [ PASSED ] CASE: expiredShutdownAbortsBlockedConnectionAndReturnsBoundedly (7355524 ns)
+    [ PASSED ] CASE: connectionLimitPreventsSecondAcceptUntilCapacityReturns (9898533 ns)
+    TCS: Http1ServerResponseWriterTest, time elapsed: 3055149 ns, RESULT:
+    [ PASSED ] CASE: writesFixedResponseThroughPartialTransportOperations (325732 ns)
+    [ PASSED ] CASE: streamsChunkedResponseAndTrailer (320322 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (428250 ns)
+    [ PASSED ] CASE: headResponseNeverTransfersRepresentationBytes (120089 ns)
+    [ PASSED ] CASE: closeDelimitedResponseRequiresConnectionClose (900751 ns)
+    [ PASSED ] CASE: rejectsKnownLengthMismatchBeforeCommittingHead (136473 ns)
+    TCS: Http1SmugglingCorpusTest, time elapsed: 76646928 ns, RESULT:
+    [ PASSED ] CASE: clientAndServerFramingRejectTheSameAmbiguousHeaderCorpus (2958277 ns)
+    [ PASSED ] CASE: identicalLengthsAndOneFinalChunkedCodingRemainUnambiguous (1359558 ns)
+    [ PASSED ] CASE: rejectsWhitespaceTargetAndProxyDifferentialCorpus (738408 ns)
+    [ PASSED ] CASE: rejectsMalformedChunkAndTrailerCorpusAtInputOrEof (182260 ns)
+    [ PASSED ] CASE: everyAcceptedSingleByteMutationHasACanonicalReparse (63621932 ns)
+    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (2251277 ns)
+    [ PASSED ] CASE: validHeadParsesAtEveryTransportSplitBoundary (4310479 ns)
+    TCS: Http1HttpsClientTest, time elapsed: 2371959 ns, RESULT:
+    [ PASSED ] CASE: partitionsHandshakesAndReusesHttpsAfterBodyCompletion (1411001 ns)
+    [ PASSED ] CASE: zeroLengthConnectionCloseDoesNotWaitForTlsPeerShutdown (628582 ns)
+    TCS: Http1TlsServerTest, time elapsed: 107336617 ns, RESULT:
+    [ PASSED ] CASE: alpnServerRejectsAClientWithNoSharedHttpProtocol (46531544 ns)
+    [ PASSED ] CASE: automaticClientOffersH2FirstAndFallsBackToServerHttp11 (18461290 ns)
+    [ PASSED ] CASE: requiredMutualTlsCarriesAuthenticatedHttp1Exchange (22734016 ns)
+    [ PASSED ] CASE: realAwsLcHandshakeCarriesOneHttp1Exchange (18776533 ns)
+Summary: TOTAL: 136
+    PASSED: 133, SKIPPED: 3, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 22238590765 ns, RESULT:
+TP: wirestack.*, time elapsed: 22238545543 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http1, time elapsed: 2993434146 ns
+    TP: wirestack.http, time elapsed: 16416468027 ns
+    FAILED:
+    TP: wirestack.internal.http2, time elapsed: 2799777897 ns, RESULT:
+        TCS: Http2ClientConnectionTest, time elapsed: 163033166 ns, RESULT:
+        [ FAILED ] CASE: earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof (930843 ns)
+        TCS: Http2ClientMappingTest, time elapsed: 3597240 ns, RESULT:
+        TCS: Http2ClientPushOwnershipTest, time elapsed: 746145 ns, RESULT:
+        TCS: Http2ConformanceTest, time elapsed: 4490481 ns, RESULT:
+        TCS: Http2ConnectionStateMachineTest, time elapsed: 4728732 ns, RESULT:
+        TCS: Http2DeterministicFuzzTest, time elapsed: 6609912 ns, RESULT:
+        TCS: Http2FlowControllerTest, time elapsed: 2468267267 ns, RESULT:
+        TCS: Http2FrameCodecTest, time elapsed: 1478823 ns, RESULT:
+        TCS: Http2FrameModelTest, time elapsed: 948064 ns, RESULT:
+        TCS: Http2GoAwayManagerTest, time elapsed: 5353323 ns, RESULT:
+        TCS: Http2HeaderBlockAssemblerTest, time elapsed: 927975 ns, RESULT:
+        TCS: Http2ConnectionHealthTest, time elapsed: 702645 ns, RESULT:
+        TCS: Http2ConnectionCloserTest, time elapsed: 1336218 ns, RESULT:
+        TCS: HpackBlockTest, time elapsed: 1535856 ns, RESULT:
+        TCS: HpackCoreTest, time elapsed: 1013472 ns, RESULT:
+        TCS: HpackDynamicTableTest, time elapsed: 1163760 ns, RESULT:
+        TCS: HpackHuffmanTest, time elapsed: 1384829 ns, RESULT:
+        TCS: Http2ConnectionReaderTest, time elapsed: 4923765 ns, RESULT:
+        TCS: Http2ServerMappingTest, time elapsed: 4914548 ns, RESULT:
+        TCS: Http2ServerPushLifecycleTest, time elapsed: 108922797 ns, RESULT:
+        TCS: Http2SettingsTest, time elapsed: 1118439 ns, RESULT:
+        TCS: Http2StreamLifecycleTest, time elapsed: 2382327 ns, RESULT:
+        TCS: Http2StreamResetManagerTest, time elapsed: 2760018 ns, RESULT:
+        TCS: Http2WriteSchedulerTest, time elapsed: 5271983 ns, RESULT:
+Summary: TOTAL: 461
+    PASSED: 454, SKIPPED: 6, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

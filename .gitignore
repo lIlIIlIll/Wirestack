@@ -140,3 +140,4 @@ Thumbs.db
 coverage/
 .local/
 !docs/evidence/M10-003/**
+!docs/evidence/M10-004/**

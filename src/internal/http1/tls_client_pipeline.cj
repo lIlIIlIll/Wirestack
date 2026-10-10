@@ -164,6 +164,12 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
             builder.trust(trust)
             if (let Some(value) <- identity) { builder.identity(value) }
             let context = builder.build()
+            // Validate native trust/key installation before a configuration can
+            // become current. This creates no transport and starts no handshake.
+            let validationHost = HostName("configuration.invalid")
+            let validationEngine = provider.createClientEngine(context,
+                ReferenceIdentity.Dns(validationHost), serverName: Some(validationHost))
+            validationEngine.close()
             DefaultHttp1TlsHandshaker(provider, context, ownedPrivateKey)
         } catch (error: Exception) {
             provider.close()
@@ -321,6 +327,8 @@ public class Http1HttpsClient <: Resource {
     }
 
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
+    public func retire(): Unit { pool.retire() }
+    public func abortConnections(): Unit { pool.close() }
     public func close(): Unit { pool.close(); handshaker.close() }
     public func isClosed(): Bool { pool.isClosed() }
 }
@@ -670,12 +678,17 @@ public class HttpAutomaticHttpsClient <: Resource {
         lease: Http1PoolLease, request: HttpRequest, context: OperationContext
     ): HttpDuplexExchangeResult {
         try {
-            mapHttp1Upgrade(lease.connection.upgradeTracked(
+            let result = lease.connection.upgradeTracked(
                 request, context: context, onTerminated: { reusable =>
                     if (reusable) { h1Pool.release(lease, context: context) }
                     else { h1Pool.discard(lease, context: context) }
                 }
-            ))
+            )
+            match (result) {
+                case Http1UpgradeExchangeResult.Upgraded(_) => h1Pool.transfer(lease)
+                case _ => ()
+            }
+            mapHttp1Upgrade(result)
         } catch (error: Exception) { h1Pool.discard(lease, context: context); throw error }
     }
 
@@ -701,6 +714,8 @@ public class HttpAutomaticHttpsClient <: Resource {
 
     public func h1Snapshot(): Http1ConnectionPoolSnapshot { h1Pool.snapshot() }
     public func h2Snapshot(): Http2ConnectionPoolSnapshot { h2Pool.snapshot() }
+    public func retire(): Unit { h2Pool.retire(); h1Pool.retire() }
+    public func abortConnections(): Unit { h2Pool.close(); h1Pool.close() }
 
     public func close(): Unit { h2Pool.close(); h1Pool.close(); handshaker.close() }
     public func isClosed(): Bool { h1Pool.isClosed() && h2Pool.isClosed() }
