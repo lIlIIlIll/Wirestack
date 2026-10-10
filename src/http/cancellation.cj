@@ -188,10 +188,10 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         }
         if (response.body.isFullyConsumed()) {
             release()
-            if (pushes.isNone()) { return response }
+            if (pushes.isNone() && response.operationContext.isSome()) { return response }
             return HttpResponse(
                 response.status, response.reason, response.body,
-                version: response.version, headers: response.headers, pushes: pushes
+                version: response.version, headers: response.headers, pushes: pushes, operationContext: Some(context)
             )
         }
         let delegate = response.body
@@ -206,7 +206,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             ),
             version: response.version,
             headers: response.headers,
-            pushes: pushes
+            pushes: pushes,
+            operationContext: Some(context)
         )
     }
 
@@ -390,7 +391,8 @@ private class HttpCancellationPushSource <: HttpPushSource {
                         ),
                         version: response.version,
                         headers: response.headers,
-                        pushes: response.pushes
+                        pushes: response.pushes,
+                        operationContext: response.operationContext
                     )
                 ))
             case None =>

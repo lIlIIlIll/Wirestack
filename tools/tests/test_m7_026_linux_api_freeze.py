@@ -106,7 +106,7 @@ class M7026LinuxApiFreezeTest(unittest.TestCase):
         )
         (root / "src/package.cj").write_text("package wirestack\n", encoding="utf-8")
         (root / "src/tls/package.cj").write_text("package wirestack.tls\n", encoding="utf-8")
-        for package in ("observability", "sse"):
+        for package in ("observability", "sse", "gzip"):
             directory = root / "src" / package
             directory.mkdir()
             (directory / "package.cj").write_text(f"package wirestack.{package}\n", encoding="utf-8")
