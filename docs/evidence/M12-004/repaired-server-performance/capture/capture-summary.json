@@ -1,0 +1,61 @@
+{
+  "status": "NOISY",
+  "native_attempts": 528,
+  "native_success": 528,
+  "native_fail": 0,
+  "native_timeouts": 0,
+  "sampled_warmups": 66,
+  "sampled_measured": 462,
+  "sample_failures": 0,
+  "classifier_counts": {
+    "PASS": 9,
+    "NOISY": 24
+  },
+  "tls_ratios": {
+    "tls_bulk_throughput": 1.034900101097179,
+    "tls_full_p50": 0.9961124345287014,
+    "tls_full_p95": 0.99430127207936
+  },
+  "tls_domain": {
+    "name": "candidate-tls-baseline-ratios",
+    "decision": "PASS",
+    "checks": [
+      {
+        "name": "bulk throughput ratio",
+        "operator": "ge",
+        "expected": 0.9,
+        "actual": 1.034900101097179,
+        "decision": "PASS"
+      },
+      {
+        "name": "full handshake p50",
+        "operator": "le",
+        "expected": 1.1,
+        "actual": 0.9961124345287014,
+        "decision": "PASS"
+      },
+      {
+        "name": "full handshake p95",
+        "operator": "le",
+        "expected": 1.2,
+        "actual": 0.99430127207936,
+        "decision": "PASS"
+      }
+    ],
+    "metrics": {}
+  },
+  "sampling_counts": {
+    "processes": 528,
+    "warmups": 66,
+    "measured": 462,
+    "proc_observations": 48220,
+    "commands": 540
+  },
+  "launcher_exit": 0,
+  "controller_elapsed_ns": 1145217596101,
+  "bindings_unchanged": true,
+  "compiled_consumers_unchanged": true,
+  "host_original_unchanged": true,
+  "mask_count": 6,
+  "own_process_cleanup_count": 0
+}

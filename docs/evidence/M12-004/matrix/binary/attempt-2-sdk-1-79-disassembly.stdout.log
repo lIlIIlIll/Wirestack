@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-collection.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000278c0 <_init@@Base>:
+   278c0:	sub    $0x8,%rsp
+   278c4:	mov    0x28247d(%rip),%rax        # 2a9d48 <__gmon_start__>
+   278cb:	test   %rax,%rax
+   278ce:	je     278d2 <_init@@Base+0x12>
+   278d0:	call   *%rax
+   278d2:	add    $0x8,%rsp
+   278d6:	ret
+
+Disassembly of section .plt:
+
+00000000000278e0 <_CNac7HashMapIG_G0_E6<init>Hv@plt-0x10>:
+   278e0:	push   0x282722(%rip)        # 2aa008 <_CNac14MAX_CHILD_SIZEE@@Base+0x209460>
+   278e6:	jmp    *0x282724(%rip)        # 2aa010 <_CNac14MAX_CHILD_SIZEE@@Base+0x209468>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "a7b82c73bf66809bd19a4db250bd80819d138733a36a313c25610be76cafc017"}

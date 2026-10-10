@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-env.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000009348 <_init@@Base>:
+    9348:	sub    $0x8,%rsp
+    934c:	mov    0x20cb85(%rip),%rax        # 215ed8 <__gmon_start__>
+    9353:	test   %rax,%rax
+    9356:	je     935a <_init@@Base+0x12>
+    9358:	call   *%rax
+    935a:	add    $0x8,%rsp
+    935e:	ret
+
+Disassembly of section .plt:
+
+0000000000009360 <_CNay12EnvException6<init>HRNat6StringE@plt-0x10>:
+    9360:	push   0x20cca2(%rip)        # 216008 <_CNay9NULL_BYTEE@@Base+0xa68>
+    9366:	jmp    *0x20cca4(%rip)        # 216010 <_CNay9NULL_BYTEE@@Base+0xa70>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "30787500c337308e8b1f3df8eb71eddca1bf9a6322ce6a3ff1b2b7183268b414"}

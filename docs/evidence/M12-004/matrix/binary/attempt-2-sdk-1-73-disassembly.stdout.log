@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libboundscheck.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000001650 <_init@@Base>:
+    1650:	sub    $0x8,%rsp
+    1654:	mov    0x20f985(%rip),%rax        # 210fe0 <__gmon_start__>
+    165b:	test   %rax,%rax
+    165e:	je     1662 <_init@@Base+0x12>
+    1660:	call   *%rax
+    1662:	add    $0x8,%rsp
+    1666:	ret
+
+Disassembly of section .plt:
+
+0000000000001670 <SecInputSW@plt-0x10>:
+    1670:	push   0x20f7e2(%rip)        # 210e58 <_fini@@Base+0x203798>
+    1676:	jmp    *0x20f7e4(%rip)        # 210e60 <_fini@@Base+0x2037a0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "b5a751cd9d53e48e3594ce0303e85ad9d3c7570dcc60d81a767b77c6b5a4679b"}

@@ -1,0 +1,30 @@
+
+$HOME/.cache/agent-tmp/wirestack-m12-004-latch-fix.u5uzGu/native/candidate-http/target/release/bin/main:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .plt.got:
+
+Disassembly of section .text:
+
+0000000000a980a0 <main>:
+  a980a0:	55                   	push   %rbp
+  a980a1:	48 89 e5             	mov    %rsp,%rbp
+  a980a4:	41 56                	push   %r14
+  a980a6:	53                   	push   %rbx
+  a980a7:	49 89 f6             	mov    %rsi,%r14
+  a980aa:	89 fb                	mov    %edi,%ebx
+  a980ac:	e8 cf c0 7b ff       	call   254180 <CJ_MRT_CjRuntimeInit@plt>
+  a980b1:	89 df                	mov    %ebx,%edi
+  a980b3:	4c 89 f6             	mov    %r14,%rsi
+  a980b6:	e8 05 b9 7b ff       	call   2539c0 <CJ_MRT_SetCommandLineArgs@plt>
+  a980bb:	48 8d 3d 12 00 00 00 	lea    0x12(%rip),%rdi        # a980d4 <cj_entry$>
+  a980c2:	5b                   	pop    %rbx
+  a980c3:	41 5e                	pop    %r14
+  a980c5:	5d                   	pop    %rbp
+  a980c6:	e9 55 b9 7b ff       	jmp    253a20 <CJ_MRT_CjRuntimeStart@plt>
+
+Disassembly of section .fini:

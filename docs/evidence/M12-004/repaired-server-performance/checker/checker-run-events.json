@@ -1,0 +1,37 @@
+{
+  "scope": "INDEPENDENT_NON_NATIVE_EVIDENCE_VERIFICATION_ONLY",
+  "native_executions": 0,
+  "events": [
+    {
+      "kind": "initial_report_verifier",
+      "exit_code": 1,
+      "cause": "Checker compared the entire CJPM version stdout to the qualified oracle. The reviewed checkout-mask wrapper prepends its mask proof before the actual version line.",
+      "preserved_result": "verification-checker-format-failure.json",
+      "preserved_stdout": "verification-checker-format-failure.stdout.log",
+      "disposition": "Parse the actual unique CJPM version line; retain raw capture unchanged. Exact full392 SDK bytes and compiler version continue to match the external oracle. This was not a native or SDK failure."
+    },
+    {
+      "kind": "first_negative_control_invocation",
+      "exit_code": null,
+      "outcome": "Eval worker deadline interrupted the non-native checker before a terminal rejection-probes.json was written. No exit code was observed.",
+      "disposition": "Repeat only private evidence corruption probes with an explicit 300-second tool deadline; no native campaign was repeated."
+    },
+    {
+      "kind": "final_report_verifier_with_main_postflight_receipt",
+      "exit_code": 0,
+      "result": "verification.json",
+      "technical_verification_status": "PASS",
+      "computed_performance_status": "NOISY"
+    },
+    {
+      "kind": "completed_private_real_report_negative_controls",
+      "exit_code": 0,
+      "probe_count": 34,
+      "rejected_count": 34,
+      "result": "rejection-probes.json"
+    }
+  ],
+  "release_qualification": "NOT_QUALIFIED",
+  "formal_m7_024": "NOT_RUN",
+  "formal_soak_86400": "NOT_RUN"
+}

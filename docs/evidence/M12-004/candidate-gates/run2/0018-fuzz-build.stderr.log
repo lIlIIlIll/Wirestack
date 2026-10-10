@@ -1,0 +1,316 @@
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:473:32:
+    [36m| [0m
+[36m473[0m [36m| [0m            if (queueReserved) { releaseQueueCapacity(frames.size, totalBytes, false) }[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http2/flow_control.cj:513:41:
+    [36m| [0m
+[36m513[0m [36m| [0m                    else if (succeeded) { NetworkEventOutcome.Succeeded } else { NetworkEventOutcome.Discarded },[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:518:32:
+    [36m| [0m
+[36m518[0m [36m| [0m            if (queueReserved) { releaseQueueCapacity(1, size, cleanupSlot) }[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http2/write_scheduler.cj:519:31:
+    [36m| [0m
+[36m519[0m [36m| [0m            if (!transferred) { releaseBufferLease(bufferLease) }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http2/server_connection.cj:533:28:
+    [36m| [0m
+[36m533[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+5 warnings generated, 5 warnings printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/client_pipeline.cj:92:9:
+   [36m| [0m
+[36m92[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/server_connection.cj:166:23:
+    [36m| [0m
+[36m166[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/http2_connection_pool.cj:436:42:
+    [36m| [0m
+[36m436[0m [36m| [0m            if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/http2_connection_pool.cj:438:42:
+    [36m| [0m
+[36m438[0m [36m| [0m            if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/http1/tls_client_pipeline.cj:865:9:
+    [36m| [0m
+[36m865[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+7 warnings generated, 7 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/http/client.cj:540:31:
+    [36m| [0m
+[36m540[0m [36m| [0m            if (!transferred) { lifetime.close() }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/http/client.cj:846:29:
+    [36m| [0m
+[36m846[0m [36m| [0m              if (!published) {[0m
+    [36m| [0m [33m_[0m[33m____________________________^[0m
+[36m847[0m [36m| [0m[33m|[0m                 direct.close()[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m849[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/http/client.cj:848:41:
+    [36m| [0m
+[36m848[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/http/client.cj:848:78:
+    [36m| [0m
+[36m848[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                                                             [33m^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/gzip/client.cj:110:31:
+    [36m| [0m
+[36m110[0m [36m| [0m              if (!transferred) {[0m
+    [36m| [0m [33m_[0m[33m______________________________^[0m
+[36m111[0m [36m| [0m[33m|[0m                 try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m113[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/gzip/client.cj:111:31:
+    [36m| [0m
+[36m111[0m [36m| [0m                try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/gzip/client.cj:114:21:
+    [36m| [0m
+[36m114[0m [36m| [0m            if (let Some(value) <- lease) { value.close() }[0m
+    [36m| [0m                    [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+3 warnings generated, 3 warnings printed.
+[31merror[0m: undeclared identifier 'tlsTestCertificateDer'
+  [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/tls_engine/m3_028_fuzz_test.cj:55:63:
+   [36m| [0m
+[36m55[0m [36m| [0m        let certificate = m7023TlsSeed("certificate-adapter", tlsTestCertificateDer())[0m
+   [36m| [0m                                                              [31m^ [0m
+   [36m| [0m
+[34mnote[0m: which is expanded as follows
+   [36m| [0m
+   [36m| [0m/* 13.33 */        let certificate = m7023TlsSeed("certificate-adapter", tlsTestCertificateDer())[0m
+   [36m| [0m                                                                         [34m^^^^^^^^^^^^^^^^^^^^^ [0m
+   [36m| [0m
+[34mnote[0m: the error occurs after the macro is expanded
+  [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/tls_engine/m3_028_fuzz_test.cj:13:1:
+   [36m| [0m
+[36m13[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m14[0m [36m| [0m[34m|[0m class M3028TlsFuzzTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m73[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 13.1 */@Attribute[TEST_GENERATED] class M3028TlsFuzzTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 13.2 */    @Attribute[TestCase_0][0m
+    [36m| [0m[34m|[0m /* 13.3 */    func recordMutationsHaveDeterministicTypedTerminals(): Unit {[0m
+    [36m| [0m[34m|[0m /* 13.4 */        let hello = m7023TlsSeed("tls-record", m3028ClientHello())[0m
+    [36m| [0m[34m|[0m /* 13.5 */        assertEqual("! hello.isEmpty()", "true", ! hello.isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 13.6 */        for(index in 0 .. M3028_MUTATIONS) {[0m
+    [36m| [0m[34m|[0m /* 13.7 */            let input = m3028Mutate(hello, "record", index)[0m
+    [36m| [0m[34m|[0m /* 13.8 */            let first = m3028ClassifyServerInput(input)[0m
+    [36m| [0m[34m|[0m /* 13.9 */            let second = m3028ClassifyServerInput(input)[0m
+    [36m| [0m[34m|[0m /* 13.10 */            assertEqual("first", "second", first, second, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 13.11 */        }[0m
+    [36m| [0m[34m|[0m /* 13.12 */        println("M7023_FUZZ target=tls-record seed=7023 " + "iterations=${M3028_MUTATIONS} decision=PASS")[0m
+    [36m| [0m[34m|[0m /* 13.13 */    }[0m
+    [36m| [0m[34m|[0m /* 13.14 */    [0m
+    [36m| [0m[34m|[0m /* 13.15 */    @Attribute[TestCase_1][0m
+    [36m| [0m[34m|[0m /* 13.16 */    func handshakeMutationsHaveDeterministicTypedTerminals(): Unit {[0m
+    [36m| [0m[34m|[0m /* 13.17 */        let hello = m7023TlsSeed("tls-handshake", m3028ClientHello())[0m
+    [36m| [0m[34m|[0m /* 13.18 */        assertEqual("! hello.isEmpty()", "true", ! hello.isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 13.19 */        for(index in 0 .. M3028_MUTATIONS) {[0m
+    [36m| [0m[34m|[0m /* 13.20 */            let input = m3028Mutate(hello, "handshake", index)[0m
+    [36m| [0m[34m|[0m /* 13.21 */            let first = m3028ClassifyServerInput(input)[0m
+    [36m| [0m[34m|[0m /* 13.22 */            let second = m3028ClassifyServerInput(input)[0m
+    [36m| [0m[34m|[0m /* 13.23 */            assertEqual("first", "second", first, second, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 13.24 */        }[0m
+    [36m| [0m[34m|[0m /* 13.25 */        println("M7023_FUZZ target=tls-handshake seed=7023 " + "iterations=${M3028_MUTATIONS} decision=PASS")[0m
+    [36m| [0m[34m|[0m /* 13.26 */        if(getVariable("WIRESTACK_M7_023_TARGET").isNone()) {[0m
+    [36m| [0m[34m|[0m /* 13.27 */            println("M3028_FUZZ target=tls-record,tls-handshake seed=3028 " + "mutations=${M3028_MUTATIONS * 2} decision=PASS")[0m
+    [36m| [0m[34m|[0m /* 13.28 */        }[0m
+    [36m| [0m[34m|[0m /* 13.29 */    }[0m
+    [36m| [0m[34m|[0m /* 13.30 */    [0m
+    [36m| [0m[34m|[0m /* 13.31 */    @Attribute[TestCase_2][0m
+    [36m| [0m[34m|[0m /* 13.32 */    func certificateAdapterMutationsHaveDeterministicTypedTerminals(): Unit {[0m
+    [36m| [0m[34m|[0m /* 13.33 */        let certificate = m7023TlsSeed("certificate-adapter", tlsTestCertificateDer())[0m
+    [36m| [0m[34m|[0m /* 13.34 */        for(index in 0 .. M3028_MUTATIONS) {[0m
+    [36m| [0m[34m|[0m /* 13.35 */            let input = m3028Mutate(certificate, "certificate", index)[0m
+    [36m| [0m[34m|[0m /* 13.36 */            let first = m3028ClassifyCertificate(input)[0m
+    [36m| [0m[34m|[0m /* 13.37 */            let second = m3028ClassifyCertificate(input)[0m
+    [36m| [0m[34m|[0m /* 13.38 */            assertEqual("first", "second", first, second, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 13.39 */        }[0m
+    [36m| [0m[34m|[0m /* 13.40 */        println("M7023_FUZZ target=certificate-adapter seed=7023 " + "iterations=${M3028_MUTATIONS} decision=PASS")[0m
+    [36m| [0m[34m|[0m /* 13.41 */        if(getVariable("WIRESTACK_M7_023_TARGET").isNone()) {[0m
+    [36m| [0m[34m|[0m /* 13.42 */            println("M3028_FUZZ target=certificate-adapter seed=3028 " + "mutations=${M3028_MUTATIONS} decision=PASS")[0m
+    [36m| [0m[34m|[0m /* 13.43 */        }[0m
+    [36m| [0m[34m|[0m /* 13.44 */    }[0m
+    [36m| [0m[34m|[0m /* 13.45 */    [0m
+    [36m| [0m[34m|[0m /* 13.46 */    init() {[0m
+    [36m| [0m[34m|[0m /* 13.47 */    }[0m
+    [36m| [0m[34m|[0m /* 13.48 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 13.49 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 13.50 */        [0m
+    [36m| [0m[34m|[0m /* 13.51 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 13.52 */    }[0m
+    [36m| [0m[34m|[0m /* 13.53 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 13.54 */        [0m
+    [36m| [0m[34m|[0m /* 13.55 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 13.56 */        let suiteBuilder = TestSuite.builder("M3028TlsFuzzTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 13.57 */        [0m
+    [36m| [0m[34m|[0m /* 13.58 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 13.59 */            [0m
+    [36m| [0m[34m|[0m /* 13.60 */            let recordMutationsHaveDeterministicTypedTerminalsTestFunc = { => recordMutationsHaveDeterministicTypedTerminals();() }[0m
+    [36m| [0m[34m|[0m /* 13.61 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 13.62 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 13.63 */            "recordMutationsHaveDeterministicTypedTerminals",[0m
+    [36m| [0m[34m|[0m /* 13.64 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 13.65 */            body: recordMutationsHaveDeterministicTypedTerminalsTestFunc[0m
+    [36m| [0m[34m|[0m /* 13.66 */            )[0m
+    [36m| [0m[34m|[0m /* 13.67 */            )[0m
+    [36m| [0m[34m|[0m /* 13.68 */            [0m
+    [36m| [0m[34m|[0m /* 13.69 */        }()[0m
+    [36m| [0m[34m|[0m /* 13.70 */        [0m
+    [36m| [0m[34m|[0m /* 13.71 */        [0m
+    [36m| [0m[34m|[0m /* 13.72 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 13.73 */            [0m
+    [36m| [0m[34m|[0m /* 13.74 */            let handshakeMutationsHaveDeterministicTypedTerminalsTestFunc = { => handshakeMutationsHaveDeterministicTypedTerminals();() }[0m
+    [36m| [0m[34m|[0m /* 13.75 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 13.76 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 13.77 */            "handshakeMutationsHaveDeterministicTypedTerminals",[0m
+    [36m| [0m[34m|[0m /* 13.78 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 13.79 */            body: handshakeMutationsHaveDeterministicTypedTerminalsTestFunc[0m
+    [36m| [0m[34m|[0m /* 13.80 */            )[0m
+    [36m| [0m[34m|[0m /* 13.81 */            )[0m
+    [36m| [0m[34m|[0m /* 13.82 */            [0m
+    [36m| [0m[34m|[0m /* 13.83 */        }()[0m
+    [36m| [0m[34m|[0m /* 13.84 */        [0m
+    [36m| [0m[34m|[0m /* 13.85 */        [0m
+    [36m| [0m[34m|[0m /* 13.86 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 13.87 */            [0m
+    [36m| [0m[34m|[0m /* 13.88 */            let certificateAdapterMutationsHaveDeterministicTypedTerminalsTestFunc = { => certificateAdapterMutationsHaveDeterministicTypedTerminals();() }[0m
+    [36m| [0m[34m|[0m /* 13.89 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 13.90 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 13.91 */            "certificateAdapterMutationsHaveDeterministicTypedTerminals",[0m
+    [36m| [0m[34m|[0m /* 13.92 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 13.93 */            body: certificateAdapterMutationsHaveDeterministicTypedTerminalsTestFunc[0m
+    [36m| [0m[34m|[0m /* 13.94 */            )[0m
+    [36m| [0m[34m|[0m /* 13.95 */            )[0m
+    [36m| [0m[34m|[0m /* 13.96 */            [0m
+    [36m| [0m[34m|[0m /* 13.97 */        }()[0m
+    [36m| [0m[34m|[0m /* 13.98 */        [0m
+    [36m| [0m[34m|[0m /* 13.99 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 13.100 */    }[0m
+    [36m| [0m[34m|[0m /* 13.101 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 13.102 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 13.103 */    }[0m
+    [36m| [0m[34m|[0m /* 13.104 */}[0m
+    [36m| [0m[34m|[0m /* 13.105 */[0m
+    [36m| [0m[34m|[0m /* 13.106 */[0m
+    [36m| [0m[34m|[0m /* 13.107 */interface TestPackageExtension_M3028TlsFuzzTest {[0m
+    [36m| [0m[34m|[0m /* 13.108 */    func registerM3028TlsFuzzTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 13.109 */}[0m
+    [36m| [0m[34m|[0m /* 13.110 */extend TestPackage <: TestPackageExtension_M3028TlsFuzzTest {[0m
+    [36m| [0m[34m|[0m /* 13.111 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 13.112 */    public func registerM3028TlsFuzzTest() {[0m
+    [36m| [0m[34m|[0m /* 13.113 */        registerSuite({ => M3028TlsFuzzTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 13.114 */    }[0m
+    [36m| [0m[34m|[0m /* 13.115 */}[0m
+    [36m| [0m[34m|[0m /* 13.116 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+
+[31merror[0m: undeclared identifier 'tlsTestLocalIdentity'
+   [36m==>[0m <scratch>/candidate-install/wirestack-0.1.0/src/internal/tls_engine/m3_028_fuzz_test.cj:161:20:
+    [36m| [0m
+[36m161[0m [36m| [0m    let identity = tlsTestLocalIdentity()[0m
+    [36m| [0m                   [31m^ [0m
+    [36m| [0m
+
+2 errors generated, 2 errors printed.
+Error: cjpm test failed

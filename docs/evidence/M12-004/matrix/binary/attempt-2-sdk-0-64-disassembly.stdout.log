@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.mockmacro.a:
+
+unittest.mock.mockmacro.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNcc13parseStubCallHCNax6TokensECNax4ExprEEL0_E$g-0x84>:
+       0:	mov    0x0(%rip),%rax        # 7 <_CCNcc13parseStubCallHCNax6TokensECNax4ExprEEL0_E$g-0x7d>
+       7:	ret
+       8:	nopl   0x0(%rax,%rax,1)
+      10:	mov    (%rsi),%rax
+      13:	ret
+      14:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+      20:	push   %rbp
+      21:	mov    %rsp,%rbp
+      24:	mov    %rsi,%rdx
+      27:	mov    %edi,%esi
+      29:	lea    0x0(%rip),%rdi        # 30 <_CCNcc13parseStubCallHCNax6TokensECNax4ExprEEL0_E$g-0x54>
+      30:	call   35 <_CCNcc13parseStubCallHCNax6TokensECNax4ExprEEL0_E$g-0x4f>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "a2b9ff150344502d0ee159d8bc6e3bbdc9a5d77d016f8c9c291fd91d914ca724"}

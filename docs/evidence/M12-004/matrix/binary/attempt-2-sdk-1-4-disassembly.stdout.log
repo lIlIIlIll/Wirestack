@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-aio.a:
+
+schdfd.cpp.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_ZL17GetSystemPageSizev>:
+       0:	push   %rbp
+       1:	mov    %rsp,%rbp
+       4:	mov    $0x1e,%edi
+       9:	call   e <_ZL17GetSystemPageSizev+0xe>
+       e:	mov    0x0(%rip),%rcx        # 15 <_ZL17GetSystemPageSizev+0x15>
+      15:	mov    %rax,(%rcx)
+      18:	cmp    $0xffffffffffffffff,%rax
+      1c:	je     20 <_ZL17GetSystemPageSizev+0x20>
+      1e:	pop    %rbp
+      1f:	ret
+      20:	call   25 <_ZL17GetSystemPageSizev+0x25>
+      25:	mov    (%rax),%esi
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "f70440338becc761236d769e0aea644c8a0e2b4b70a16553c41221429ffc1473"}

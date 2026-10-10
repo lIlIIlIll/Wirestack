@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000001e18 <_init@@Base>:
+    1e18:	sub    $0x8,%rsp
+    1e1c:	mov    0x2661ad(%rip),%rax        # 267fd0 <__gmon_start__>
+    1e23:	test   %rax,%rax
+    1e26:	je     1e2a <_init@@Base+0x12>
+    1e28:	call   *%rax
+    1e2a:	add    $0x8,%rsp
+    1e2e:	ret
+
+Disassembly of section .plt:
+
+0000000000001e30 <__ctype_toupper_loc@plt-0x10>:
+    1e30:	push   0x2660f2(%rip)        # 267f28 <_fini@@Base+0x22a270>
+    1e36:	jmp    *0x2660f4(%rip)        # 267f30 <_fini@@Base+0x22a278>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "44dc368f06ad120058cbb56fb8b688bf32e8a53e30309d35a74e9d69a25ee624"}

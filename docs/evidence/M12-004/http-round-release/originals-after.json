@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "scope": "REPAIR_INPUT_AND_OWNED_PROCESS_INTEGRITY_ONLY",
+  "sdk392_unchanged": true,
+  "host_original_glibc14_unchanged": true,
+  "host_glibc": "2.35",
+  "both_original_http_binaries_unchanged": {
+    "baseline": "d132fe407098689cab5115c10d520486906fbf651b25dd3306f0d8910b29add1",
+    "candidate": "538e4c728db27d17db8d171a790fd8357fed0c62e3f668e87b1c835eb0992557"
+  },
+  "original_source_inputs_unchanged": 10,
+  "original_archives_unchanged": {
+    "baseline.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+    },
+    "candidate.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+    }
+  },
+  "fixed_consumer_inputs_unchanged": {
+    "http.cj": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7",
+    "common.cj": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
+  },
+  "owned_live_processes": [],
+  "fixture_private_keys_remaining": []
+}

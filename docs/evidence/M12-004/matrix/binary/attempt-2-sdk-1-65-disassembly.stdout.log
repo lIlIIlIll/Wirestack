@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-unittest.prop_test.a:
+
+unittest.prop_test.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CC$Cw$CiF0DhCNav6RandomEDhDhE$g-0x104>:
+       0:	mov    0x0(%rip),%rax        # 7 <_CC$Cw$CiF0DhCNav6RandomEDhDhE$g-0xfd>
+       7:	ret
+       8:	nopl   0x0(%rax,%rax,1)
+      10:	push   %rbp
+      11:	mov    %rsp,%rbp
+      14:	sub    $0x20,%rsp
+      18:	mov    (%rsi),%rax
+      1b:	mov    %rax,-0x8(%rbp)
+      1f:	mov    0x0(%rip),%rdi        # 26 <_CC$Cw$CiF0DhCNav6RandomEDhDhE$g-0xde>
+      26:	lea    -0x8(%rbp),%rdx
+      2a:	mov    $0x1,%esi
+      2f:	call   34 <_CC$Cw$CiF0DhCNav6RandomEDhDhE$g-0xd0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "4dd4971b8e9c17a4ee834e9e0ecf46d38b314159ec804e3b9847825ced3b4f26"}

@@ -237,4 +237,47 @@ prerequisites.
 | M12-001 | COMPLETE | [#182](https://github.com/lIlIIlIll/Wirestack/issues/182); [acceptance evidence](../evidence/M12-001/README.md); [source-bound verification](../evidence/M12-001/verification.json); [native corpus](../evidence/M12-001/native-final/report.json); [candidate and CI decisions](../evidence/M12-001/comparison.json) | SDK 1.1.3 native Linux x86_64: exact M11-004 development archive and 164 production inputs; 33 full-layer/feature/observer scenarios, 462 measured executions, 82,236 operation latencies, zero unexpected failures and zero terminal ownership ledgers. Real E2E attribution and bounded H2 slow-reader/overload evidence; larger read buffer rejected in all 14 paired rounds. CI repeatability is NOISY, not a performance pass; unavailable allocation/copy/lock costs keep P1-001 deferred. Task contracts, retained-corpus verification, architecture and public API pass; dependency-closure cjdoc heap exhaustion remains explicitly unpassed. No production API change or formal release qualification. |
 | M12-002 | COMPLETE | [#183](https://github.com/lIlIIlIll/Wirestack/issues/183); [acceptance evidence](../evidence/M12-002/README.md); [source-bound verification](../evidence/M12-002/verification.json); [deployment cells](../evidence/M12-002/deployment-matrix.json); [task gate](../evidence/M12-002/task-gate.json) | Exact stable 1.1.3 and selected candidate 1.3.0-alpha.06 installed-source profiles pass 47 checks and six CA cases each. Native KVM Westmere/no-AVX, kernel 5.15.0-198-generic and explicitly selected glibc 2.44 pass 47 unchanged-binary plus 47 rebuilt checks; stock glibc 2.35 CLI startup is UNSUPPORTED. 333 ELF/archive scans, four actual SDK/runtime coexistence combinations and 17 behavioral regressions pass. Test-only deep binding preserves distinct TLS owners and shared base libc/pthread; unsafe dlmopen exit139 and unisolated OpenSSL remain unqualified. Default SDK-change recompilation, exact input drift rejection and excluded platforms are documented. Development archive remains NOT_QUALIFIED for formal release; no committed seal or signing requested. |
 | M12-003 | COMPLETE | [#184](https://github.com/lIlIIlIll/Wirestack/issues/184); [native acceptance report](../evidence/M12-003/report.md); [source-bound verification](../evidence/M12-003/verification.json); [task gate](../gates/M12-003-task.json) | STS 1.1.3 only: all 25 required fault coverage keys pass against the unchanged 164-input installed archive. Eight supported resource scenarios pass; typed 96-MiB runtime OOM remains a failed native diagnostic, not library refusal. Native KVM packet/DNS/transport: 36/36 across three seeds; current protocol/lifecycle stress: 260/260. Host contracts: 36 passed/one explicitly skipped; guest packet suite: four passed/zero skipped. Owned VM and supervisors finish with zero live owned processes. Host qdisc blocker and combined-pressure timeout remain retained failures; unavailable counters remain UNAVAILABLE. Formal 86,400-second release soak and non-Linux qualification are not claimed. |
-| M12-004 | READY | [#185](https://github.com/lIlIIlIll/Wirestack/issues/185) | M9-001 is COMPLETE with source-bound evidence. Inventory, upgrade and non-production rollback come first; selected-candidate completion requires consumer, performance, matrix, fuzz, independent review and 86,400-second soak evidence. Production signing remains separately authorized. |
+| M12-004 | BLOCKED | [#185](https://github.com/lIlIIlIll/Wirestack/issues/185); [rehearsal evidence](../evidence/M12-004/README.md); [candidate gates](../evidence/M12-004/candidate-gates/summary.json); [exact rollback refusal](../evidence/M12-004/rollback/final-candidate-refusal.json) | STS 1.1.3 only: isolated AWS-LC 5.11.0 upgrade, hidden-checkout HTTPS/HTTP2, inventory and 13 rejection controls pass; native version/source identity and rollback advisory/gap omissions fixed. Final candidate TLS 13/13 and full fuzz 10/10 pass. Host47+CA6, Westmere/noAVX/kernel5.15/glibc2.44 same-binary47+rebuilt47, and four same-STS independent TLS cells/20 checks pass; stock glibc2.35 UNSUPPORTED. 80 behavioral regressions pass. Paired33-case performance FAILS handshakeP95ratio1.205157275>1.20;31NOISY. Original signed release authenticates/runs underSTS but restore refuses missing current security disposition and preserves upgraded bytes/pointer. WebSocket eager frame allocation remains OPEN; committed source, complete independent approval, formal performance and86400-second soak/signing acceptance absent. Productionpin5.5.0 unchanged; no production authorization. |
+
+M12-004 Server follow-up: [source-bound report](../evidence/M12-004/server-performance/summary.json)
+and [independent raw-evidence verification](../evidence/M12-004/server-performance/checker/verification.json).
+The same two archives and STS392 closure execute once on real Xeon/kernel5.15
+with private read-only glibc2.44 and nonexclusive NUMA0 CPU0-7 affinity.
+Full33 performance remains FAIL:528 native attempts,464 healthy samples and64
+baseline HTTP failures. No original campaign rerun or discarded failure.
+TLS-only diagnostic ratios satisfy existing limits; bulk/resumption remain NOISY.
+All source/archive/SDK/six-binary/host bindings remain unchanged, and owned process
+cleanup passes. M12-004 remains BLOCKED. Neither this supplement nor passing TLS
+diagnostics grants full performance or release qualification.
+
+M12-004 HTTP round-release repair: [source-bound supplement](../evidence/M12-004/http-round-release/summary.json),
+[native capture](../evidence/M12-004/http-round-release/native/report.json) and
+[independent checker](../evidence/M12-004/http-round-release/checker/verification.json).
+The coordinator releases every round after any required concurrent admission check.
+Two fresh STS1.1.3-only optimized consumers execute all14 HTTP cases each:
+28/28 native exits0, zero controller timeouts and terminal owners;29 existing
+contracts pass and11/11 tampering controls are rejected. Original SDK392, host
+glibc14, archives and old binaries remain unchanged. The bad-build origin is
+unproven. Correctness repair only; both historical performance FAIL reports and
+all other release blockers remain unchanged. M12-004 remains BLOCKED.
+
+M12-004 repaired-source full33 Server follow-up:
+[source-bound supplement](../evidence/M12-004/repaired-server-performance/summary.json),
+[full capture](../evidence/M12-004/repaired-server-performance/capture/report.json),
+[independent checker](../evidence/M12-004/repaired-server-performance/checker/verification.json)
+and [preservation proof](../evidence/M12-004/repaired-server-performance/postflight.json).
+Qualified STS1.1.3 only; six fresh optimized consumers execute33 cases on both
+unchanged archive legs with one warmup and seven measured rounds each.
+528/528 native exits0,66 warmups,462 measured samples and93984 latency records;
+zero native failures, timeouts, discarded samples and terminal-owner failures.
+TLS bulk/P50/P95 ratios1.034900/0.996112/0.994301 meet unchanged limits, but the
+full classifier is9 PASS/24 NOISY: overallNOISY, not performance acceptance.
+Technical verificationPASS and34/34 tampering controls rejected. First bootstrap
+exit1 occurred before any SDK/native execution because bundle metadata removed
+loader execution permission; that failure is retained, original modes restored
+without changing bytes, and only one actual native campaign ran. Original SDK392,
+hostglibc14, six original binaries and historical reports remain unchanged;
+owned processes and fixture keys are cleared. Private glibc2.44/nonexclusive
+CPU affinity does not grant stock-host qualification. Formal M7-024,86400-second
+soak, security approval, source publication and signing remain unmet.
+M12-004 remains BLOCKED; no automatic next-task execution.

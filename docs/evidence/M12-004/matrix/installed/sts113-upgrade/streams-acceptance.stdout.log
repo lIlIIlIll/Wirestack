@@ -1,0 +1,22 @@
+SUMMARY events=1 bytes=5 recoveries=0 cursor_bytes=8
+SUMMARY frames=1 bytes=5 recoveries=0
+SUMMARY events=1 bytes=5 recoveries=0 cursor_bytes=8
+SUMMARY frames=1 bytes=5 recoveries=0
+CHECK streams_success PASS
+CHECK streams_cursor_duplicate_explicit_recover PASS
+POST submissions=1 recoveries=0 peer_failure=1
+SUMMARY events=1 bytes=5 recoveries=0 cursor_bytes=8
+SUMMARY frames=1 bytes=5 recoveries=1
+CHECK streams_peer_disconnect PASS
+CHECK streams_post_exactly_once_after_peer_failure PASS
+CHECK streams_active_cancel PASS
+CHECK streams_deadline PASS
+CHECK streams_pre_cancel PASS
+CAPACITY retained=122780 high_water=122780 capacity=262144
+CHECK streams_bounded_slow_consumer_h2_sibling PASS
+CHECK streams_explicit_close PASS
+CHECK streams_capacity PASS
+CHECK streams_untrusted_chain PASS
+CLEANUP active_h1=0 active_h2=0 producers=0
+CHECK streams_cleanup PASS
+APP_ACCEPTANCE_PASS
