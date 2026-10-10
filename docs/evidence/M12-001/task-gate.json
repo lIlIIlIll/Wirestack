@@ -1,0 +1,53 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.benchmarks.tests.test_m12_001_end_to_end"
+      ],
+      "duration_ms": 263.976,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T10:44:32.613648Z",
+      "id": "performance-decision-contracts",
+      "started_at_utc": "2026-10-09T10:44:32.349675Z",
+      "status": "PASS",
+      "stderr_excerpt": ".......................\n----------------------------------------------------------------------\nRan 23 tests in 0.185s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M12-001/performance-decision-contracts.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M12-001/performance-decision-contracts.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/benchmarks/m12_001_end_to_end.py",
+        "verify"
+      ],
+      "duration_ms": 263.876,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T10:44:32.877623Z",
+      "id": "retained-native-performance-evidence",
+      "started_at_utc": "2026-10-09T10:44:32.613754Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M12-001/retained-native-performance-evidence.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M12_001_EVIDENCE_PASS\n",
+      "stdout_path": "build/repository-tooling/M12-001/retained-native-performance-evidence.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M12-001"
+}

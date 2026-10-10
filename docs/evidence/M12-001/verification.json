@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-001",
+  "status": "COMPLETE",
+  "candidate_committed": false,
+  "committed_source_seal": "NOT_REQUESTED",
+  "release_qualification": "NOT_QUALIFIED",
+  "production_source_count": 164,
+  "production_sources_equal_accepted_artifact": true,
+  "native_probe_sources_current": true,
+  "source_digests": {
+    "examples/linux/m12_001/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
+    },
+    "examples/linux/m12_001/transport_tls.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49f45578676208727f773128bd907320079500d11f099eb138218a20de8891e6"
+    },
+    "examples/linux/m12_001/http.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9b1ad91a850538af9a07c46571a561e2570873c8102a7d059947813f103ffb68"
+    },
+    "examples/linux/m12_001/streams.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3701649e791d4551e7cc35f4fe38107c744521c19b736f81e5ce05ff61e99102"
+    },
+    "tools/benchmarks/m12_001_end_to_end.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "876a584cc146eafbce63c5c836f805aa05d1f456691c3a11c720452e401c26f6"
+    },
+    "tools/benchmarks/tests/test_m12_001_end_to_end.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dae3087de6f5e7b555d3b33db56ea5dd9d11e4895e37fb371e38aeab8e7fbfa7"
+    },
+    "tools/tasks/M12-001.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e96fc01943f7163b03ce2bb8634d746ebf5a163b72158de2e16f3348fc43479b"
+    },
+    "docs/performance/end-to-end-baselines.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9271cf985efa24a92922403e46a56169ae592d6579680e85ade630011a34c0a3"
+    },
+    "docs/performance/http1-benchmark.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c8033240a45c90f0dfa49074bd7f02ea74f6965e489590c96e99e1f21be5dfec"
+    },
+    "docs/performance/http2-benchmark.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ac2fefd5e8f90ec84142b7efca4c4713608b93d9932b99fea1405e238a072bb7"
+    }
+  },
+  "status_file_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "ffe729bab64d3d78be54ce3e572daef0dc0c122664ec6bb08a7891e8c54870be"
+  },
+  "native": {
+    "status": "PASS",
+    "measured_processes": 462,
+    "operation_latency_samples": 82236,
+    "successes": 81494,
+    "expected_rejections": 742,
+    "unexpected_failures": 0,
+    "terminal_ownership_ledgers": "zero in every validated sample"
+  },
+  "ci": {
+    "status": "NOISY",
+    "case_verdicts": {
+      "PASS": 3,
+      "NOISY": 30
+    },
+    "full_reference_states": {
+      "NOISY": 30,
+      "STABLE": 3
+    }
+  },
+  "candidate": {
+    "decision": "REJECTED",
+    "reason": "No reliable equivalent-work improvement with preserved tails; no production optimization or API added",
+    "paired_rounds": 14,
+    "positive_rounds": 0,
+    "paired_speedup_ratios": [
+      0.6171226862998537,
+      0.5965669601641195,
+      0.5813227376429031,
+      0.4873202870197714,
+      0.6640100116552745,
+      0.6505013321237264,
+      0.5877390151300439,
+      0.5601373398105203,
+      0.5903954868161729,
+      0.6549946595809971,
+      0.5311165820966919,
+      0.5813886789436225,
+      0.6553804311553326,
+      0.7329011298313879
+    ],
+    "median_speedup_fraction": -0.4065187765098538,
+    "two_sided_sign_test_p": 0.0001220703125,
+    "tail_within_10_percent": false,
+    "noisy": false,
+    "body_read_calls_before": [
+      2050,
+      2050,
+      2050,
+      2050,
+      2050,
+      2049,
+      2050,
+      2058,
+      2050,
+      2049,
+      2050,
+      2050,
+      2050,
+      2059
+    ],
+    "body_read_calls_after": [
+      514,
+      513,
+      514,
+      514,
+      514,
+      514,
+      513,
+      514,
+      514,
+      514,
+      514,
+      514,
+      514,
+      517
+    ],
+    "allocations_reduced": null,
+    "copied_bytes_reduced": null,
+    "unavailable_reason": "Fewer public read invocations does not prove fewer managed allocations or internal copies.",
+    "P1-001_vectored_io": "DEFERRED: no measured copy bottleneck or supported native vectored SPI demonstrated."
+  },
+  "acceptance": {
+    "full_layer_and_feature_baselines": "PASS",
+    "raw_environment_and_reconstructable_installed_artifact": "PASS",
+    "equivalent_work_correctness_cleanup_and_candidate_decision": "PASS; candidate REJECTED",
+    "real_end_to_end_attribution": "PASS; unsupported costs explicitly unavailable",
+    "p1_001_decision": "DEFERRED; no allocation/copy evidence or supported vectored/borrowed SPI",
+    "frozen_noise_aware_ci_classifier": "PASS; repeatability result NOISY",
+    "durable_evidence": "PASS"
+  },
+  "commands": [
+    {
+      "id": "architecture",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "exit_code": 0,
+      "wall_ns": 6370549245,
+      "log": "docs/evidence/M12-001/architecture-final.log"
+    },
+    {
+      "id": "public-api",
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "exit_code": 0,
+      "wall_ns": 2334863399,
+      "log": "docs/evidence/M12-001/public-api-final.log"
+    },
+    {
+      "id": "task",
+      "argv": [
+        "python3",
+        "-m",
+        "tools.repository.repository_tooling",
+        "check",
+        "task",
+        "M12-001",
+        "--output",
+        "docs/evidence/M12-001/task-gate.json"
+      ],
+      "exit_code": 0,
+      "wall_ns": 1143341198,
+      "log": "docs/evidence/M12-001/task-final.log"
+    },
+    {
+      "id": "disjoint-comparison",
+      "argv": [
+        "python3",
+        "tools/benchmarks/m12_001_end_to_end.py",
+        "compare",
+        "--baseline",
+        "docs/evidence/M12-001/native-final/report.json",
+        "--candidate",
+        "docs/evidence/M12-001/native-final/report.json",
+        "--baseline-rounds",
+        "0:7",
+        "--candidate-rounds",
+        "7:14",
+        "--output",
+        "docs/evidence/M12-001/comparison.json"
+      ],
+      "exit_code": 2,
+      "wall_ns": 495292138,
+      "log": "docs/evidence/M12-001/disjoint-comparison-final.log"
+    },
+    {
+      "id": "self-comparison",
+      "argv": [
+        "python3",
+        "tools/benchmarks/m12_001_end_to_end.py",
+        "compare",
+        "--baseline",
+        "docs/evidence/M12-001/native-final/report.json",
+        "--candidate",
+        "docs/evidence/M12-001/native-final/report.json",
+        "--output",
+        "docs/evidence/M12-001/self-comparison-rejected.json"
+      ],
+      "exit_code": 3,
+      "wall_ns": 460024353,
+      "log": "docs/evidence/M12-001/self-comparison-final.log"
+    },
+    {
+      "id": "live-sdk-metadata-privacy",
+      "argv": [
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<sdk>",
+        "--cwd",
+        "<repo>",
+        "python3",
+        "<scratch>/environment-smoke.py",
+        "<scratch>"
+      ],
+      "environment": {
+        "PYTHONPATH": "<repo>",
+        "TMPDIR": "<scratch>",
+        "TMP": "<scratch>",
+        "TEMP": "<scratch>"
+      },
+      "exit_code": 0,
+      "wall_ns": 1311207004,
+      "evidence": "docs/evidence/M12-001/metadata-smoke/report.json"
+    }
+  ],
+  "limits": [
+    "Dependency-closure fast gate and direct cjdoc check fail with generator heap exhaustion; neither is reported passed.",
+    "No full regression or other native platforms executed by this task.",
+    "No production optimization, allocation/copy/lock improvement or formal release qualification claimed.",
+    "Earlier P1-015 exact archive unavailable; no measured historical before-version."
+  ],
+  "cleanup": {
+    "retained_private_path": "$HOME/.cache/agent-tmp/wirestack-m12-001.M4AS5h/profile-evidence",
+    "retained_private_bytes": 318862,
+    "retained_files": [
+      "perf-cpu.data",
+      "native-http-cpu.data"
+    ],
+    "private_keys_and_extracted_packages_removed": true
+  },
+  "evidence": [
+    {
+      "path": "docs/evidence/M12-001/README.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a53859ffd2b062b2e9efd01021462fb48370b43efbfe749d9f73c7619ec9c81c"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/workspace.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "51891b8d63b30cae7aedaa3a96f0bcd98bfee7fb0158a3c78508e473fe4d2a45"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/dependencies.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "474eb7f97631a34272849470263648a6e3b495ec474c9289b95cc4f362cf70cc"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/artifact.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "222a2bb9099e8872d82ba4566880fa34ddc2674d485bf624ae28c55a6f023d8e"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/attribution.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "07f037917deb6d9c58f401d2d976651ceba0bb8a1c2668217032ba30809b6e2b"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/baselines.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0a41389ce8be680c935b853ed6967d2fadb6b6f566e014502b360d2b44924545"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/comparison.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "493ce5f48fa36156a7984d222db32676e14b79d185fdbf965d6e65e121076653"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/self-comparison-rejected.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a3fb9184d667fc1f1b6047fc1003187a750aa1f846a8f8592cbe2c8696f6a2e8"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/task-gate.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5cb088215880053d5b556cfef2c44a2716ba423da168adee90c2720132bc0a33"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/fast-gate.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d458394054bcb8251a2322847ec53b7dd2c530dfe41d37d0a90a8fdecc7ee4ba"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/documentation-tool-limit.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6f4a07588571b10dfae81e9de42b9c835dfcab1d3a88fa78b38df88d7b01a9ab"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/native-perf.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "defd87d79021c90f35052036fb67ea369ac17ba3ef84d01bc28258cdf28186d1"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-001/native-final/report.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "951c51779c82cdeb80ddd873a529afae65181348f888963231945ba4873977f4"
+      }
+    }
+  ],
+  "privacy": {
+    "status": "PASS",
+    "exit_code": 0,
+    "argv": [
+      "git",
+      "privacy-check",
+      "--message",
+      "<scratch>/publication-text.txt"
+    ],
+    "scope": "Task source paths, planning status and all published M12 text evidence; accepted binary archive excluded",
+    "text_files": 1135,
+    "log": {
+      "path": "docs/evidence/M12-001/privacy.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  }
+}

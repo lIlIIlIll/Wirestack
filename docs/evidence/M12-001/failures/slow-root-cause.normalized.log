@@ -1,0 +1,9 @@
+ 256│DEBUG receive flush window=49024 pending=16511
+*257│DEBUG receive flush window=0 pending=0
+*258│DEBUG receive flush window=0 pending=4096
+*259│DEBUG local reset stream=25 reason=HTTP/2 aggregate receive-buffer budget is exhausted
+*260│DEBUG local reset stream=23 reason=HTTP/2 stream cancelled locally
+*261│FAIL h2_slow_consumerAn exception has occurred:
+ 262│HttpException: HTTP stream reset
+ 263│	 at wirestack.http::wrapHttpError(std.core::Exception)(<task-scratch>/http/wirestack/src/http/error.cj:145)
+ 264│	 at wirestack.http::wrapHttpBodyError(std.core::Exception)(<task-scratch>/http/wirestack/src/http/error.cj:0)

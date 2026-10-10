@@ -1,0 +1,56 @@
+{
+  "status": "UNAVAILABLE",
+  "source_commit": "26c81160eacc91d7c1726e20d46c9d3aa086addc",
+  "source_inventory_matching": true,
+  "production_inputs": 167,
+  "qualified_archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "2c4d4db3d68a1fb0293fda3b7381818215a5f732ffd6887774f17fc3f55e7643"
+  },
+  "attempts": [
+    {
+      "provider_cache_key": "08df58f75caefedf09cafd021abad011fba371a320e594867f153b0835adb707",
+      "resolver_cache_key": "18dc5b2df892096617cad17809b39913809f8929fae61af4f9e2f5885de9ce38",
+      "http_files_cache_key": "7ce2bd28847b36f854288066e56bd75bf6c8079a8d3074bda8fec5a8432d1309",
+      "archive_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "c645e37d6071208dd72edf803d086f3792e9f90c0aafb9b9a216c4da850e0c76"
+      },
+      "payload_sha256": "3821e2a769d64603acc9b31091aa70abb1f4e8360c4c6cb123ad0c1bdf0cc39f",
+      "exact_qualified_artifact": false
+    },
+    {
+      "provider_cache_key": "08df58f75caefedf09cafd021abad011fba371a320e594867f153b0835adb707",
+      "resolver_cache_key": "18dc5b2df892096617cad17809b39913809f8929fae61af4f9e2f5885de9ce38",
+      "http_files_cache_key": "86aff326db75ffe95cfbfb6a8f6d837cfd36d10b35d6cb4d0f0008db01cd7bb2",
+      "archive_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "670bbf1493ed621ee0ee73b694e7cd011b9bb8d8bd861f03685d6894229cd35e"
+      },
+      "payload_sha256": "c48effc685abb1329c58553517b303d1148735117f997cd43b7f76734ae23694",
+      "exact_qualified_artifact": false
+    },
+    {
+      "provider_cache_key": "9aea8d425627de82b9f225632d31af15262435636b1243955e6079611372aaef",
+      "resolver_cache_key": "18dc5b2df892096617cad17809b39913809f8929fae61af4f9e2f5885de9ce38",
+      "http_files_cache_key": "7ce2bd28847b36f854288066e56bd75bf6c8079a8d3074bda8fec5a8432d1309",
+      "archive_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "7b1c381b90a1a2f02f74854701711c46ccf6f14091dca939c2645177a4a56277"
+      },
+      "payload_sha256": "fd08e929d05622d90abf5c613073d199ce3b1a3e546c37482ef3216f49a056f1",
+      "exact_qualified_artifact": false
+    },
+    {
+      "provider_cache_key": "9aea8d425627de82b9f225632d31af15262435636b1243955e6079611372aaef",
+      "resolver_cache_key": "18dc5b2df892096617cad17809b39913809f8929fae61af4f9e2f5885de9ce38",
+      "http_files_cache_key": "86aff326db75ffe95cfbfb6a8f6d837cfd36d10b35d6cb4d0f0008db01cd7bb2",
+      "archive_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b07d5d091d922de69e2c184baa90d3b644e65041d8b5fbcf4cc57feedb430ed3"
+      },
+      "payload_sha256": "f9d168dc30086f5a580bb869eb4595681639b7f87fcb5d647cdec69b6586ca24",
+      "exact_qualified_artifact": false
+    }
+  ]
+}

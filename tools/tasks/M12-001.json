@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-001",
+  "dependencies": ["M9-001", "M9-002", "M9-003", "M10-001", "M10-002", "M10-003", "M10-004", "M10-005", "M11-001", "M11-002", "M11-003", "M11-004"],
+  "allowed_paths": ["examples/linux/m12_001", "tools/benchmarks/m12_001_end_to_end.py", "tools/benchmarks/tests/test_m12_001_end_to_end.py", "tools/tasks/M12-001.json", "docs/performance", "docs/planning/status.md", "docs/evidence/M12-001"],
+  "platforms": ["linux-x86_64-glibc"],
+  "acceptance_commands": [
+    {"id": "architecture-guard", "argv": ["python3", "tools/architecture_guard.py", "--root", ".", "--format", "text"], "timeout_seconds": 60, "long_running": false, "gate": "fast"},
+    {"id": "current-public-api", "argv": ["scripts/check-m7-032-public-api", "--json"], "timeout_seconds": 60, "long_running": false, "gate": "fast"},
+    {"id": "performance-decision-contracts", "argv": ["python3", "-m", "unittest", "tools.benchmarks.tests.test_m12_001_end_to_end"], "timeout_seconds": 60, "long_running": false, "gate": "task"},
+    {"id": "retained-native-performance-evidence", "argv": ["python3", "tools/benchmarks/m12_001_end_to_end.py", "verify"], "timeout_seconds": 120, "long_running": false, "gate": "task"}
+  ],
+  "required_evidence": ["docs/evidence/M12-001/workspace.json", "docs/evidence/M12-001/dependencies.json", "docs/evidence/M12-001/artifact.json", "docs/evidence/M12-001/native-final/report.json", "docs/evidence/M12-001/attribution.json", "docs/evidence/M12-001/comparison.json", "docs/evidence/M12-001/verification.json"],
+  "timeout_seconds": 240,
+  "long_running_gate": false,
+  "source_paths": ["examples/linux/m12_001/common.cj", "examples/linux/m12_001/transport_tls.cj", "examples/linux/m12_001/http.cj", "examples/linux/m12_001/streams.cj", "tools/benchmarks/m12_001_end_to_end.py", "tools/benchmarks/tests/test_m12_001_end_to_end.py", "tools/tasks/M12-001.json", "docs/performance/end-to-end-baselines.md", "docs/performance/http1-benchmark.md", "docs/performance/http2-benchmark.md"]
+}

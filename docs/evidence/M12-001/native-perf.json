@@ -1,0 +1,35 @@
+{
+  "status": "CAPTURED",
+  "sample_count": 34,
+  "raw_data_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "5aac9b32af853496820146c6aec4fd30eb539e406eca93367b49c8a3986a8eab"
+  },
+  "decode_command": {
+    "argv": [
+      "perf",
+      "report",
+      "--stdio",
+      "--no-children",
+      "--no-demangle",
+      "-g",
+      "none",
+      "--sort",
+      "symbol",
+      "-i",
+      "<scratch>/perf-cpu.data"
+    ],
+    "DEBUGINFOD_URLS": "",
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_ns": 34281381,
+    "log": "docs/evidence/M12-001/native-perf-report.log",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b8ba2277050d9ba03ae5ac88c7977f95e0a4ce465de77411e87ef7e8a0ec33a"
+    }
+  },
+  "initial_decode": "Tool cell interrupted after30s; original decode did not produce a report. No successful original decode claimed.",
+  "cjprof": "UNAVAILABLE: No sampling data is available.",
+  "boundary": "34 CPU-clock user-space samples from whole native process including runtime, both peers, initialization, native warmup, one measured8MiB transfer and cleanup. Low sample count supports inspection only, not quantitative bottleneck or allocation/copy claims."
+}
