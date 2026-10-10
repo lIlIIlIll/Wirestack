@@ -98,6 +98,7 @@ PUBLIC_PACKAGE_FILES = {
     ),
     "wirestack.observability": ("bounded_network_event_sink.cj",),
     "wirestack.sse": ("model.cj", "decoder.cj", "encoder.cj", "writer.cj", "session_policy.cj", "session.cj"),
+    "wirestack.gzip": ("model.cj", "body.cj", "client.cj", "decoder.cj"),
 }
 
 

@@ -4,6 +4,9 @@ Wirestack 对应用开发者公开 `wirestack.net`、`wirestack.http` 和 `wires
 是实现细节，consumer 不应导入。Linux 入门路径见
 [getting-started-linux.md](../guides/getting-started-linux.md)。
 
+显式可选的 gzip 内容解压由 `wirestack.gzip` 提供；默认 HTTP client 保持原始 body，
+不自动协商或解压。用法和边界见 [有界 gzip 指南](../guides/gzip.md)。
+
 最新生成的 HTML 会发布到
 [`lIlIIlIll.github.io/Wirestack`](https://lIlIIlIll.github.io/Wirestack/)。Pages workflow
 从 `main` 重新生成站点；HTML 不提交到仓库。
@@ -63,6 +66,16 @@ HTTP/2 push 默认关闭；启用后通过父响应的 `pushes` 接收独立拥�
 `MultipartWriter` 和 `MultipartReader` 提供有界流式 multipart 编解码。
 `FileHandler` 的无符号链接路径解析和原子无覆盖上传只在 Linux x86_64 GNU 目标提供。
 接口用法、资源所有权和明确排除项见 [Linux HTTP 扩展指南](../guides/http-parity-linux.md)。
+
+## `wirestack.gzip`
+
+导入可选包后，用 `GzipClient` 包装共享 client，或让 `GzipBodyStream` 拥有已有输入流。
+`GzipLimits` 限制累计编码/解码 bytes、header、member、block 和每次 read；默认只接受一个 member。
+实现是原始 Cangjie RFC 1951/1952 codec，不增加 native 压缩依赖。
+`GzipResponse.wireHeaders` 保留 wire metadata，decoded view 不把 wire Content-Length、
+Content-Encoding 或表示校验器当作 decoded metadata。必须读到经过完整校验的 EOF；prefix output
+仍可能因 CRC/ISIZE、截断或绝对限额失败。关闭 response 不关闭共享 client。
+详细所有权、CPU checkpoint、取消与安装后示例见 [gzip 指南](../guides/gzip.md)。
 
 ## `wirestack.net`
 

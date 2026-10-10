@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-002",
+  "status": "PASS",
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "scope": "Actual exercised archive, installed source component and native consumer dependencies; not formal M7 qualification",
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "be9b7470679f7b9229e0e0b825856194d65f50d891414e709bdd4e1a03bfaf8c"
+  },
+  "payload_sha256": "189d0a4eb69bf7e630e8fafa5d33dd6c1aac63c0628e33d5d0457d443ecccebc",
+  "optional_modules": [
+    {
+      "implementation": "wirestack-cangjie-rfc1951-rfc1952",
+      "license": "Apache-2.0",
+      "nativeDependencies": [],
+      "package": "wirestack.gzip",
+      "selection": "explicit-package-import",
+      "sources": [
+        {
+          "path": "src/gzip/body.cj",
+          "sha256": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "1b18e40d4bc1cd038dfb8e739a0381eeef2ec6effa0c80e488fb12c508e7a9f0"
+          }
+        },
+        {
+          "path": "src/gzip/client.cj",
+          "sha256": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "7dd5b31b36bb6ea36723573dfea6aabef6c73644ce6e3a74aee35e3cc1e04024"
+          }
+        },
+        {
+          "path": "src/gzip/decoder.cj",
+          "sha256": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "ecbf181d97f852ba9eb914d1de38ceab498a7c52380ad609b91fa61eef3d4082"
+          }
+        },
+        {
+          "path": "src/gzip/model.cj",
+          "sha256": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "bdbe6f4703a77aacd004a80f7bb709afbd0c122bab597896b717dd651d151f26"
+          }
+        }
+      ]
+    }
+  ],
+  "raw_native_needed": [
+    "libboundscheck.so",
+    "libc.so.6",
+    "libcangjie-runtime.so",
+    "libm.so.6"
+  ],
+  "gzip_native_needed": [
+    "libboundscheck.so",
+    "libc.so.6",
+    "libcangjie-runtime.so",
+    "libm.so.6"
+  ],
+  "additional_native_compression_dependencies": [],
+  "license": "Apache-2.0",
+  "source_digests_match": true,
+  "non_claims": [
+    "Working-tree source/binary acceptance, not an M7 qualified release or committed candidate.",
+    "No new compression dependency; existing SDK and native-provider provenance remains separately recorded.",
+    "Unsigned artifact; no non-Linux platform qualification."
+  ],
+  "generator_source": {
+    "path": "tools/m7_025_linux_supply_chain.py",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b7a15290f28b7cf14e8a1fdc5bacafaab6c53e14e35ec268c4fb1afd46cf273a"
+    }
+  },
+  "consumer_runner_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "78861c9c861097aa09dc64410aacf4d154f1a4d622c4b5d739e6634daf3222be"
+  },
+  "documents": {
+    "provider-manifest.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cfe1e2eb99acd07a65cfcd646488e75eeced50e3af6bcdddca90b980b76d9e9a"
+    },
+    "build-fingerprint.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f76bfbbac3b6e28829f03c225b91b4419ebd59cf090d2493494e5e28541e6f71"
+    },
+    "sbom.spdx.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a28fbe711233b74dad6b571b8e63c27606d0c49955c72819f68b6e9ef6db1043"
+    }
+  }
+}
