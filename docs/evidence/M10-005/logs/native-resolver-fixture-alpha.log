@@ -1,0 +1,28 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 574266132 ns, RESULT:
+    TCS: DnsResourceObservationTest, time elapsed: 544276238 ns, RESULT:
+    [ PASSED ] CASE: snapshotsFollowActualUdpAdmissionQueueRejectionCacheAndClose (21451203 ns)
+    [ PASSED ] CASE: nativeFallbackSnapshotsRetainAbandonedWorkAndHistoricalCloseSample (521768163 ns)
+Summary: TOTAL: 124
+    PASSED: 2, SKIPPED: 122, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 1670334038 ns, RESULT:
+    TCS: SystemResolverResourceObservationTest, time elapsed: 1665506578 ns, RESULT:
+    [ PASSED ] CASE: realLocalhostCompletionPreservesOwnerAndFinalSample (530361233 ns)
+    [ PASSED ] CASE: abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical (512234431 ns)
+    [ PASSED ] CASE: closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample (621288668 ns)
+Summary: TOTAL: 34
+    PASSED: 3, SKIPPED: 31, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2251256739 ns, RESULT:
+TP: wirestack.*, time elapsed: 2251181943 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.resolver, time elapsed: 1670334038 ns
+    TP: wirestack.net, time elapsed: 574266132 ns
+Summary: TOTAL: 158
+    PASSED: 5, SKIPPED: 153, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

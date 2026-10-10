@@ -372,8 +372,8 @@ public class HttpServerBuilder {
     public func tls(value: HttpServerTlsConfig): HttpServerBuilder { tlsConfig = Some(value); this }
 
     /**
-     * Installs request and pre-commit response interception outside server locks.
-     * @param value Service interceptor shared by HTTP/1.1 and HTTP/2 requests.
+     * Installs request and pre-commit response observations outside server locks. Hook exceptions are isolated.
+     * @param value Non-blocking observer shared by HTTP/1.1 and HTTP/2 requests.
      */
     public func serviceHook(value: HttpServiceHook): HttpServerBuilder {
         configuredServiceHook = Some(value)
@@ -524,11 +524,15 @@ public class HttpServer <: Resource {
      * The listener remains bound. In-progress handshakes retain their snapshot.
      * @param value New certificate, key, authentication and TLS policy material.
      * @param policy Explicit disposition of obsolete handshakes and connections.
+     * @param context Optional publication observation sink; rotation does not acquire a timeout budget.
      * @return The monotonically increasing listener-local TLS generation.
      */
     public func rotateTls(value: HttpServerTlsConfig,
-        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful): UInt64 {
-        dispatcher.rotateTls(value, policy)
+        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful,
+        context!: OperationContext = OperationContext.background()): UInt64 {
+        let generation = dispatcher.rotateTls(value, policy)
+        emitHttpObservation(context, NetworkEventKind.ConfigurationRotated, NetworkEventOutcome.Succeeded)
+        generation
     }
 
     /** Last published TLS generation, starting at one, or zero for cleartext. */
@@ -559,6 +563,13 @@ public class HttpServer <: Resource {
     public func resourceSnapshot(): HttpResourceSnapshot {
         resourceSnapshotFromLedger(resourceBudget.snapshot())
     }
+    /** Samples ledger, TLS retention and optional adapter independently outside owner locks.
+     * @param observations Optional caller-owned bounded observation statistics.
+     */
+    public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpServerObservationSnapshot {
+        let (generation, retained, draining) = dispatcher.observationCounters()
+        HttpServerObservationSnapshot(resourceSnapshot(), generation, retained, draining, sampleHttpObservations(observations))
+    }
 }
 
 private class PublicHttp1Handler <: http1.Http1ServerHandler {
@@ -583,9 +594,14 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
  */
     public func handle(request: http1.Http1ServerRequest,
         context: transport.OperationContext): http1.Http1ServerResponse {
+        let operation = observedRequestContext(context, delegate is ServiceHookHandler)
+        emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
         let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
             case Some(value) => value
             case None =>
+                emitHttpFailure(operation, NetworkEventKind.RequestCompleted, NetworkException(
+                    NetworkErrorCategory.ResourceExhausted, NetworkPhase.PoolAcquire, NetworkErrorCode.ResourceExhausted,
+                    "HTTP server request admission exhausted"))
                 let headers = HttpHeaders.builder()
                 headers.add("Connection", "close")
                 return http1.Http1ServerResponse(HttpResponse(
@@ -594,8 +610,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
         }
         let requestCancellation = HttpRequestCancellationHandle()
         let cancellation = HttpRequestCancellationOperation(
-            context, Some(requestCancellation), Some(connectionCancellation),
-            None<HttpStreamCancellationHandle>
+            operation, Some(requestCancellation), Some(connectionCancellation),
+            None<HttpStreamCancellationHandle>, metrics: Some(resourceBudget)
         )
         cancellation.retainResource(requestLease)
         cancellation.retain(requestCancellation.cancellationToken.register { =>
@@ -609,6 +625,7 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
                 ),
                 cancellation.context
             )
+            emitHttpObservation(operation, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
             http1.Http1ServerResponse(
                 if (response.duplexHandler.isSome()) { response.response }
                 else { cancellation.wrap(response.response) }, trailer: response.trailer,
@@ -616,6 +633,7 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
             )
         } catch (error: Exception) {
             cancellation.fail()
+            emitHttpFailure(operation, NetworkEventKind.RequestCompleted, error)
             throw error
         }
     }
@@ -636,10 +654,12 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
  */
     public func handle(request: http2.Http2ServerRequest,
         context: transport.OperationContext): http2.Http2ServerResponse {
+        let operation = observedRequestContext(context, delegate is ServiceHookHandler)
+        emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
         let requestCancellation = HttpRequestCancellationHandle()
         let streamCancellation = HttpStreamCancellationHandle()
         let cancellation = HttpRequestCancellationOperation(
-            context, Some(requestCancellation), Some(connectionCancellation),
+            operation, Some(requestCancellation), Some(connectionCancellation),
             Some(streamCancellation)
         )
         cancellation.retain(requestCancellation.cancellationToken.register { => request.cancelStream() })
@@ -652,6 +672,7 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
                 ),
                 cancellation.context
             )
+            emitHttpObservation(operation, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
             http2.Http2ServerResponse(
                 if (response.duplexHandler.isSome()) { response.response }
                 else { cancellation.wrap(response.response) }, trailer: response.trailer,
@@ -659,6 +680,7 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
             )
         } catch (error: Exception) {
             cancellation.fail()
+            emitHttpFailure(operation, NetworkEventKind.RequestCompleted, error)
             throw error
         }
     }
@@ -699,6 +721,14 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
     func tlsGeneration(): UInt64 {
         synchronized(mutex) { generationId }
     }
+    func observationCounters(): (UInt64, Int64, Int64) {
+        let (id, count, entries) = synchronized(mutex) {
+            (generationId, retained.size + if (generation.isSome()) { 1 } else { 0 }, connections.toArray())
+        }
+        var draining: Int64 = 0
+        for (entry in entries) { if (entry.isDraining()) { draining++ } }
+        (id, count, draining)
+    }
 
     func rotateTls(value: HttpServerTlsConfig, policy: HttpConfigurationRotation): UInt64 {
         let obsolete = ArrayList<PublicServerConnectionEntry>()
@@ -728,11 +758,15 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
      * @param context Original accept operation budget and cancellation.
      */
     public func serve(value: transport.DuplexTransport, context: transport.OperationContext): Unit {
+        let observed = if (context.eventSink.isSome() || publicHandler is ServiceHookHandler) {
+            context.withEventCorrelation(requestId: context.requestId, attemptId: context.attemptId,
+                connectionId: Some(api.nextNetworkCorrelationId()), streamId: context.streamId)
+        } else { context }
         let entry = synchronized(mutex) {
             if (stopping || closed) { None<PublicServerConnectionEntry> } else {
                 let selected = generation
                 if (let Some(current) <- selected) { current.references++ }
-                let admitted = PublicServerConnectionEntry(nextConnectionId, value, selected)
+                let admitted = PublicServerConnectionEntry(nextConnectionId, value, selected, observed)
                 nextConnectionId++
                 connections.add(admitted)
                 Some(admitted)
@@ -740,7 +774,7 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
         }
         if (entry.isNone()) { value.close(); return }
         let admitted = entry.getOrThrow()
-        let operation = context.withCancellation(admitted.cancellation.token)
+        let operation = observed.withCancellation(admitted.cancellation.token)
         let parentRegistration = context.cancellation.register { => admitted.cancellation.cancel() }
         var lease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         try {
@@ -835,6 +869,7 @@ private class PublicServerTlsGeneration {
 private class PublicServerConnectionEntry {
     let id: Int64
     let generation: ?PublicServerTlsGeneration
+    private let observationContext: OperationContext
     let cancellation = transport.CancellationSource()
     let connectionCancellation = HttpConnectionCancellationHandle()
     private let mutex = Mutex()
@@ -843,9 +878,10 @@ private class PublicServerConnectionEntry {
     private var forced = false
     private var h1: ?http1.Http1ServerDrainControl = None<http1.Http1ServerDrainControl>
     private var h2: ?http2.Http2ServerConnection = None<http2.Http2ServerConnection>
-    init(id: Int64, value: transport.DuplexTransport, generation: ?PublicServerTlsGeneration) {
-        this.id = id; current = value; this.generation = generation
+    init(id: Int64, value: transport.DuplexTransport, generation: ?PublicServerTlsGeneration, context: OperationContext) {
+        this.id = id; current = value; this.generation = generation; observationContext = context
     }
+    func isDraining(): Bool { synchronized(mutex) { retired } }
     func promote(value: transport.DuplexTransport): Bool {
         let accepted = synchronized(mutex) { current = value; !forced }
         if (!accepted) { value.abort(reason: Some(transport.AbortReason.Cancelled)) }
@@ -860,13 +896,14 @@ private class PublicServerConnectionEntry {
         if (drain) { value.beginDrain() }
     }
     func retire(policy: HttpConfigurationRotation): Unit {
-        let (value, first, second, abort) = synchronized(mutex) {
+        let (value, first, second, abort, changed) = synchronized(mutex) {
+            let changed = !retired
             retired = true
             match (policy) {
                 case HttpConfigurationRotation.SecurityReplacement => forced = true
                 case HttpConfigurationRotation.Graceful => ()
             }
-            (current, h1, h2, forced)
+            (current, h1, h2, forced, changed)
         }
         if (abort) {
             cancellation.cancel()
@@ -877,5 +914,6 @@ private class PublicServerConnectionEntry {
             if (let Some(control) <- first) { control.beginDrain() }
             if (let Some(connection) <- second) { connection.beginDrain() }
         }
+        if (changed) { emitHttpObservation(observationContext, NetworkEventKind.ConnectionDraining, NetworkEventOutcome.Started) }
     }
 }

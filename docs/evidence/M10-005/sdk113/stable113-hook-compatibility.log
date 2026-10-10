@@ -1,0 +1,19 @@
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.http[0m, time elapsed: 67150064 ns, RESULT:
+    TCS: [33mHttpClientExtensionsTest[0m, time elapsed: 47831397 ns, RESULT:
+    [[32m PASSED [0m] CASE: nativeCookiesAndServiceHooksSurviveThrowingPoolObservers (35310971 ns)
+    [[32m PASSED [0m] CASE: mismatchedUpgradePairingsNeverOpenConnections (196705 ns)
+    [[32m PASSED [0m] CASE: unavailableServerPushClosesTheOwnedResponse (11133563 ns)
+Summary: TOTAL: 141
+    [32mPASSED[0m: 3, [32mSKIPPED[0m: 138, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 73300321 ns, RESULT:
+TP: [33mwirestack[0m.*, time elapsed: 73186925 ns, RESULT:
+    PASSED:
+    TP: [33mwirestack.http[0m, time elapsed: 67150064 ns
+Summary: TOTAL: 141
+    [32mPASSED[0m: 3, [32mSKIPPED[0m: 138, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

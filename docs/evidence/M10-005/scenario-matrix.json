@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "task": "M10-005",
+  "platform": "linux-x86_64-glibc",
+  "status": "PASS",
+  "release_qualification": "NOT_QUALIFIED",
+  "criteria": [
+    {
+      "criterion": "Existing public hooks and structured sinks correlate logical request, distinct retry/redirect attempts, physical reused connection and actual H2 stream IDs.",
+      "evidence": [
+        "src/http/observability_test.cj",
+        "src/internal/http2/observability_test.cj",
+        "installed/report.json",
+        "sdk113/installed.json"
+      ],
+      "installed_checks": [
+        "logical_retry_redirect",
+        "h1_reuse_resources",
+        "h2_reuse_resources"
+      ],
+      "note": "Pool-hook-only native redirect also passes without a caller event sink; the existing hook adapter installs the sink before attempt creation."
+    },
+    {
+      "criterion": "Actual stage boundaries and effective deadline owners integrate M10-001 without inventing reasons for unexpired native TimedOut.",
+      "evidence": [
+        "src/internal/transport/network_observation_test.cj",
+        "src/internal/http1/client_pipeline_test.cj",
+        "src/internal/http1/response_reader_test.cj",
+        "src/internal/http2/observability_test.cj",
+        "installed/report.json"
+      ],
+      "installed_checks": [
+        "pool_wait",
+        "dns_cap",
+        "tls_cap",
+        "headers_cap",
+        "h2_backpressure"
+      ]
+    },
+    {
+      "criterion": "M10-002 snapshots use real resource leases, admission rejection and reclamation completion, rather than request-facade counters.",
+      "evidence": [
+        "src/internal/http_resource_observation_test.cj",
+        "src/http/observability_test.cj",
+        "src/internal/http2/server_cancellation_test.cj",
+        "logs/http2-all.log",
+        "sdk113/stable113-ledger.log"
+      ],
+      "note": "H2 cancellation completion follows channel/request/stream/exchange cleanup; pending cancellation is not reported complete."
+    },
+    {
+      "criterion": "M10-003 actual H1/H2 pools, held bodies and transferred sessions expose bounded current owners and clean up at shutdown.",
+      "evidence": [
+        "src/internal/http1/connection_pool_test.cj",
+        "src/internal/http1/http2_connection_pool_test.cj",
+        "src/internal/http1/server_connection_test.cj",
+        "installed/report.json"
+      ],
+      "installed_checks": [
+        "h1_reuse_resources",
+        "h2_reuse_resources",
+        "native_shutdown",
+        "native_fd_task_stability"
+      ]
+    },
+    {
+      "criterion": "M10-004 direct/proxy resolver and TLS generations remain observable during live leases, graceful drain and security replacement.",
+      "evidence": [
+        "src/http/observability_test.cj",
+        "src/http/server_rotation_test.cj",
+        "sdk113/stable113-delta-rotation.log",
+        "../M10-004/verification.json"
+      ],
+      "note": "Snapshots retain the current plus bounded retained owners. Snapshot sampling neither rotates nor collects generations."
+    },
+    {
+      "criterion": "Native resolver workers, queued queries and cache entries come from actual owners; unavailable custom owners remain unknown and post-close samples remain historical.",
+      "evidence": [
+        "native-resolver-fixture.json",
+        "src/internal/resolver/resolver_observation_test.cj",
+        "src/net/dns_observation_test.cj",
+        "installed/report.json"
+      ],
+      "installed_checks": [
+        "custom_resolver_unknown"
+      ],
+      "note": "Three delayed getaddrinfo cases explicitly skip without the 500 ms fixture; both SDK fixture runs actually execute all five selected cases."
+    },
+    {
+      "criterion": "Callbacks are outside owner locks; throwing and reentrant hook/sink/exporter callbacks do not change IO results or create unbounded workers.",
+      "evidence": [
+        "src/http/observability_test.cj",
+        "src/http/client_extensions_test.cj",
+        "src/internal/http2/observability_test.cj",
+        "src/observability/bounded_network_event_sink_test.cj",
+        "logs/adapter-behavior-final-alpha.log",
+        "logs/adapter-behavior-final-stable113.log"
+      ]
+    },
+    {
+      "criterion": "Optional adapter has fixed queue bounds, deterministic sampling, honest drops, batching and finite flush/close without high-cardinality aggregation or global services.",
+      "evidence": [
+        "src/network_event_buffer.cj",
+        "src/observability/bounded_network_event_sink.cj",
+        "src/observability/bounded_network_event_sink_test.cj",
+        "performance.json"
+      ],
+      "note": "One export worker plus at most one lazily created cancellation dispatcher. A noncooperative callback can outlive close; close returns false rather than reporting termination."
+    },
+    {
+      "criterion": "Structured payload and default diagnostic output do not expose credentials, cookies, query/body data, certificate secrets or arbitrary exception messages.",
+      "evidence": [
+        "src/network_event.cj",
+        "tools/m10_005_native_observation.py",
+        "installed/report.json",
+        "sdk113/installed.json"
+      ],
+      "installed_checks": [
+        "secret_safe_proxy_tls"
+      ],
+      "note": "Installed runner checks original stdout/stderr for secret markers before redaction; loopback native fixtures and bounded snapshots are exercised, not source-only assertions."
+    },
+    {
+      "criterion": "Real disabled/enabled workload, raw samples, installed consumer and native FD/task rollback are recorded without release, SLA or unsupported-platform claims.",
+      "evidence": [
+        "performance.json",
+        "installed/report.json",
+        "sdk113/installed.json"
+      ],
+      "installed_checks": [
+        "bounded_exporter_measurement",
+        "native_fd_task_stability"
+      ],
+      "note": "Fresh archive extraction and manifest verification outside checkout for each installed run. RSS recorded, not used as an exact-zero allocator assertion."
+    }
+  ]
+}

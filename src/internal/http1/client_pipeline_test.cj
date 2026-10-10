@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.sync.AtomicInt64
+import wirestack as api
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
@@ -10,6 +11,66 @@ import wirestack.internal.transport.*
 
 @Test
 class Http1CleartextClientTest {
+    @TestCase
+    func observedAttemptsReusePhysicalIdentityAndCompleteEachBodyOnce(): Unit {
+        let resolver = StaticResolver(ResolveResult(
+            [IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 1u8])],
+            HostName("example.test"), ResolverSource.Static))
+        let transports = PipelineTestTransportFactory()
+        let client = Http1CleartextClient(resolver, transports, attemptDelay: Duration.Zero)
+        let sink = api.NetworkEventBuffer(capacity: 256)
+        let firstContext = OperationContext(eventSink: Some(sink), requestId: Some(101), attemptId: Some(201))
+        let first = client.execute(HttpRequest.get("http://example.test/one"), context: firstContext)
+        @Expect(client.observationSnapshot().leasedConnections, 1)
+        let initial = sink.drain()
+        var physical = None<Int64>
+        var starts: Int64 = 0
+        for (event in initial) {
+            @Expect(event.requestId, Some(101))
+            @Expect(event.attemptId, Some(201))
+            @Expect(event.occurredAt.isSome())
+            match (event.kind) {
+                case NetworkEventKind.DnsStarted | NetworkEventKind.ConnectAttemptStarted |
+                    NetworkEventKind.TcpConnected | NetworkEventKind.HttpConnectionAcquired | NetworkEventKind.BodyStarted =>
+                    @Expect(event.connectionId.isSome())
+                    if (physical.isNone()) { physical = event.connectionId }
+                    @Expect(event.connectionId, physical)
+                case NetworkEventKind.BodyCompleted => @Fail("body completed before consumption")
+                case _ => ()
+            }
+            match (event.kind) { case NetworkEventKind.BodyStarted => starts++; case _ => () }
+        }
+        @Expect(starts, 1)
+        @Expect(readPipelineBody(first.body), "one")
+        var completions: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) { case NetworkEventKind.BodyCompleted => completions++; case _ => () }
+        }
+        @Expect(completions, 1)
+        @Expect(client.observationSnapshot().idleConnections, 1)
+        let second = client.execute(HttpRequest.get("http://example.test/two"),
+            context: OperationContext(eventSink: Some(sink), requestId: Some(101), attemptId: Some(202)))
+        let reused = sink.drain()
+        var skipped: Int64 = 0
+        for (event in reused) {
+            @Expect(event.attemptId, Some(202))
+            match (event.kind) {
+                case NetworkEventKind.DnsCompleted =>
+                    match (event.outcome) { case NetworkEventOutcome.NotExecuted => skipped++; case _ => @Fail("reused DNS ran") }
+                    @Expect(event.connectionId, physical)
+                case NetworkEventKind.DnsStarted | NetworkEventKind.ConnectAttemptStarted => @Fail("reused connection was dialed")
+                case NetworkEventKind.BodyStarted | NetworkEventKind.HttpConnectionAcquired => @Expect(event.connectionId, physical)
+                case _ => ()
+            }
+        }
+        @Expect(skipped, 1)
+        @Expect(readPipelineBody(second.body), "two")
+        @Expect(transports.connectCount, 1)
+        client.close()
+        @Expect(client.observationSnapshot().leasedConnections, 0)
+        @Expect(client.observationSnapshot().idleConnections, 0)
+    }
+
     @TestCase
     func resolvesConnectsAndReusesOnlyAfterBodyCompletion(): Unit {
         let host = HostName("example.com")

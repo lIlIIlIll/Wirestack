@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "repository": "<repo>",
+  "physical_branch": "gitbutler/workspace",
+  "task_branch": "m10-005-correlated-observability",
+  "stack_above": "m10-004-config-generation-rotation",
+  "head": "cd6a5f7cef1b057683913eb29dc0aa181c774ad0",
+  "target_branch": "main",
+  "merge_base": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+  "initial_status": {
+    "staged_paths": 0,
+    "unstaged_paths": 55,
+    "untracked_paths": 17
+  },
+  "initial_dirty_paths_excerpt": [
+    {
+      "status": "M",
+      "path": ".gitignore"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/api-surface.json"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/coverage.json"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/docs.json"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e68747470.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1107274642-1457213055.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1459411304-1648339336.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1931680831-674701885.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--217762376-902530301.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--562758312-1467020050.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--887133373-317905094.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--96869997-1171829526.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48747470436c69656e742367302829.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a487474705365727665722367302829.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--1540261509-896816530.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--1951019228-728824373.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--543205424-511961423.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--628025280-1560256325.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a696e7465726661--2016838845-284931218.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--1153227448-118100904.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--1643010048-1708066319.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--837915989-2033017775.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a656e756d3a4f7065726174696f6e54696d656f757453746167652367302829.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4f70657261--2035435707-1084868009.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4f7065726174696f6e436f6e746578742367302829.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/evidence/M10-001/README.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/evidence/M7-033/docs-report.json"
+    },
+    {
+      "status": "M",
+      "path": "docs/guides/http1-linux.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/planning/implementation-backlog.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/planning/status.md"
+    },
+    {
+      "status": "A",
+      "path": "examples/linux/m10_004/configuration_rotation.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/http/client.cj"
+    },
+    {
+      "status": "A",
+      "path": "src/http/client_rotation.cj"
+    },
+    {
+      "status": "A",
+      "path": "src/http/client_rotation_test.cj"
+    },
+    {
+      "status": "A",
+      "path": "src/http/configuration_rotation.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/http/facade_test.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/http/retry.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/http/retry_test.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/http/server.cj"
+    },
+    {
+      "status": "A",
+      "path": "src/http/server_rotation_test.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/http/websocket.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/connector/happy_eyeballs.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/client_connection.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/client_connection_test.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/client_pipeline.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/connection_pool.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/connection_pool_test.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/http2_connection_pool.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/http2_connection_pool_test.cj"
+    },
+    {
+      "status": "A",
+      "path": "src/internal/http1/pool_admission.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/proxy_client_pipeline.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/request_writer.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/response_reader.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/response_reader_test.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/server_connection.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/tls_client_pipeline.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http1/tls_server.cj"
+    },
+    {
+      "status": "M",
+      "path": "src/internal/http2/client_connection.cj"
+    }
+  ],
+  "initial_receipt_note": "Counts and paths observed before editing; the retained transcript excerpt elides the tail of the GitButler path display. The excerpt is not asserted to be the complete 72-path list.",
+  "preserved": [
+    "Uncommitted M10-001 through M10-004 implementation and unrelated repository repairs",
+    "Prior incomplete M10-005 checkout <prior-partial>, read-only",
+    "Historical M7/M9/M10 evidence and sibling repositories"
+  ],
+  "authorization": "Local implementation and verification; no commit, push, PR or GitHub issue mutation.",
+  "toolchains": [
+    {
+      "sdk": "1.3.0-alpha.06",
+      "selection": "$HOME/cangjie_sdk/daily/cangjie",
+      "compiler": "cjnative",
+      "target": "x86_64-unknown-linux-gnu"
+    },
+    {
+      "sdk": "1.1.3",
+      "selection": "$HOME/cangjie_sdk/sts1.1.3",
+      "compiler": "cjnative",
+      "target": "x86_64-unknown-linux-gnu"
+    }
+  ],
+  "temporary_storage": {
+    "path": "$HOME/.cache/agent-tmp/wirestack-m10-005-integration.NOPljl6D",
+    "filesystem": "disk-backed btrfs",
+    "mode": "0700",
+    "initial_available_gib": 364,
+    "environment": [
+      "TMPDIR",
+      "TMP",
+      "TEMP"
+    ]
+  }
+}

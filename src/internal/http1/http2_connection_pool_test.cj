@@ -8,6 +8,7 @@ import std.unittest.testmacro.*
 import wirestack.internal.http2.*
 import wirestack.internal.transport.*
 import wirestack.internal as internal
+import wirestack as api
 
 private class Http2PoolTestClock <: MonotonicClock {
     private var current: MonoTime
@@ -18,6 +19,73 @@ private class Http2PoolTestClock <: MonotonicClock {
 
 @Test
 class Http2ConnectionPoolTest {
+    @TestCase
+    func throwingReentrantH2ObserverSeesAdmittedNotReservedStreams(): Unit {
+        let pool = Http2ConnectionPool()
+        let factory = PoolFakeFactory(8u32)
+        let sink = ReentrantH2PoolObservationSink(pool)
+        let context = OperationContext(eventSink: Some(sink))
+        let key = poolKey("example.test", "h2")
+        let first = pool.acquire(key, PoolNoopGoAwayListener(), factory, context: context)
+        let second = pool.acquire(key, PoolNoopGoAwayListener(), factory, context: context)
+        @Expect(sink.acquired.load(), 2)
+        @Expect(sink.pendingAtAcquire.load(), 0)
+        factory.connection(0).finish(first.admission.stream.id)
+        pool.release(first, context: context)
+        factory.connection(0).finish(second.admission.stream.id)
+        pool.release(second, context: context)
+        pool.retire(); pool.close()
+        @Expect(pool.observationSnapshot().activeStreams, 0)
+        @Expect(pool.observationSnapshot().idleConnections, 0)
+    }
+
+    @TestCase
+    func observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreams(): Unit {
+        let one = Http2ConnectionPool()
+        let two = Http2ConnectionPool()
+        let factory = PoolFakeFactory(8u32)
+        let sink = api.NetworkEventBuffer(capacity: 64)
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(71), attemptId: Some(72))
+        let key = poolKey("example.test", "h2")
+        let first = one.acquire(key, PoolNoopGoAwayListener(), factory, context: context)
+        let other = two.acquire(key, PoolNoopGoAwayListener(), factory, context: context)
+        @Expect(first.connectionId != other.connectionId)
+        @Expect(first.admission.stream.id.value, other.admission.stream.id.value)
+        let shared = one.acquire(key, PoolNoopGoAwayListener(), factory, context: context)
+        @Expect(shared.connectionId, first.connectionId)
+        @Expect(shared.admission.stream.id.value != first.admission.stream.id.value)
+        @Expect(one.observationSnapshot().leasedConnections, 1)
+        @Expect(one.observationSnapshot().activeStreams, 2)
+        @Expect(one.observationSnapshot().reservedStreams, 0)
+        one.retire()
+        @Expect(one.observationSnapshot().drainingConnections, 1)
+        factory.connection(0).finish(first.admission.stream.id)
+        one.release(first, context: context)
+        @Expect(one.observationSnapshot().activeStreams, 1)
+        factory.connection(0).finish(shared.admission.stream.id)
+        one.release(shared, context: context)
+        @Expect(one.observationSnapshot().leasedConnections, 0)
+        @Expect(one.observationSnapshot().drainingConnections, 0)
+        @Expect(one.observationSnapshot().activeStreams, 0)
+        factory.connection(1).finish(other.admission.stream.id)
+        two.release(other, context: context); two.close(); one.close()
+        var acquired: Int64 = 0
+        var released: Int64 = 0
+        var closed: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.HttpConnectionAcquired => acquired++
+                case NetworkEventKind.HttpConnectionReleased => released++
+                case NetworkEventKind.ConnectionClosed => closed++
+                case NetworkEventKind.Http2StreamOpened | NetworkEventKind.Http2StreamClosed => @Fail("pool duplicated protocol stream events")
+                case _ => ()
+            }
+        }
+        @Expect(acquired, 3)
+        @Expect(released, 3)
+        @Expect(closed, 2)
+    }
+
     @TestCase
     func retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination(): Unit {
         let pool = Http2ConnectionPool()
@@ -48,6 +116,8 @@ class Http2ConnectionPoolTest {
                 catch (_: NetworkException) { None<Http2PoolLease> }
             }
             gate.waitUntilEntered()
+            @Expect(pool.observationSnapshot().connectingConnections, 1)
+            @Expect(pool.observationSnapshot().reservedStreams, 1)
             if (strict) { pool.close() } else { pool.retire() }
             gate.release()
             let result = pending.get(Duration.second)
@@ -360,6 +430,22 @@ class Http2ConnectionPoolTest {
         factory.finish(third)
         pool.release(third)
         pool.close()
+    }
+}
+
+private class ReentrantH2PoolObservationSink <: NetworkEventSink {
+    private let pool: Http2ConnectionPool
+    let acquired = AtomicInt64(0)
+    let pendingAtAcquire = AtomicInt64(0)
+    init(pool: Http2ConnectionPool) { this.pool = pool }
+    public func emit(event: NetworkEvent): Unit {
+        let snapshot = pool.observationSnapshot()
+        match (event.kind) {
+            case NetworkEventKind.HttpConnectionAcquired =>
+                acquired.fetchAdd(1); pendingAtAcquire.fetchAdd(snapshot.reservedStreams)
+            case _ => ()
+        }
+        throw Exception("fixture H2 observer failure")
     }
 }
 

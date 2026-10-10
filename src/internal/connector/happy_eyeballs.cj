@@ -211,6 +211,8 @@ public class HappyEyeballsConnector {
         try {
             if (!coordinator.awaitStart(scheduledAt, cancellation)) {
                 coordinator.recordSkipped(candidate, MonoTime.now())
+                emitNetworkEvent(parent, NetworkEvent(NetworkEventKind.ConnectAttemptCompleted,
+                    NetworkEventOutcome.NotExecuted, connectionAttemptIndex: Some(candidate.ordinal + 1)))
                 return
             }
             let startedAt = MonoTime.now()
@@ -219,13 +221,17 @@ public class HappyEyeballsConnector {
                 cancellation: cancellation,
                 trace: parent.trace,
                 eventSink: parent.eventSink,
-                timeoutPolicy: parent.timeoutPolicy
+                timeoutPolicy: parent.timeoutPolicy,
+                requestId: parent.requestId, attemptId: parent.attemptId,
+                connectionId: parent.connectionId, streamId: parent.streamId,
+                stage: parent.stage, deadlineStage: parent.deadlineStage
             )
             emitNetworkEvent(parent, NetworkEvent(
                 NetworkEventKind.ConnectAttemptStarted,
                 NetworkEventOutcome.Started,
                 trace: parent.trace,
-                phase: Some(NetworkPhase.TcpConnect)
+                phase: Some(NetworkPhase.TcpConnect),
+                connectionAttemptIndex: Some(candidate.ordinal + 1)
             ))
             try {
                 let connected = attemptFactory.connect(candidate.endpoint, child)
@@ -233,7 +239,8 @@ public class HappyEyeballsConnector {
                     NetworkEventKind.ConnectAttemptCompleted,
                     NetworkEventOutcome.Succeeded,
                     trace: parent.trace,
-                    phase: Some(NetworkPhase.TcpConnect)
+                    phase: Some(NetworkPhase.TcpConnect),
+                    connectionAttemptIndex: Some(candidate.ordinal + 1)
                 ))
                 let won = coordinator.tryWin(candidate, connected, startedAt, MonoTime.now())
                 if (!won) {
@@ -241,11 +248,11 @@ public class HappyEyeballsConnector {
                 }
             } catch (error: NetworkException) {
                 emitFailedEvent(parent, NetworkEventKind.ConnectAttemptCompleted,
-                    NetworkPhase.TcpConnect, error)
+                    NetworkPhase.TcpConnect, error, candidateIndex: Some(candidate.ordinal + 1))
                 coordinator.recordFailure(candidate, startedAt, MonoTime.now(), error)
             } catch (error: Exception) {
                 emitFailedEvent(parent, NetworkEventKind.ConnectAttemptCompleted,
-                    NetworkPhase.TcpConnect, error)
+                    NetworkPhase.TcpConnect, error, candidateIndex: Some(candidate.ordinal + 1))
                 coordinator.recordFailure(
                     candidate,
                     startedAt,
@@ -266,7 +273,7 @@ public class HappyEyeballsConnector {
 }
 
 private func emitFailedEvent(context: OperationContext, kind: NetworkEventKind,
-    phase: NetworkPhase, error: Exception): Unit {
+    phase: NetworkPhase, error: Exception, candidateIndex!: ?Int64 = None<Int64>): Unit {
     let code = match (error) {
         case value: NetworkException => Some(value.code)
         case _ => Some(NetworkErrorCode.SystemFailure)
@@ -276,7 +283,7 @@ private func emitFailedEvent(context: OperationContext, kind: NetworkEventKind,
         NetworkEventOutcome.Failed,
         trace: context.trace,
         phase: Some(phase),
-        errorCode: code
+        errorCode: code, connectionAttemptIndex: candidateIndex
     ))
 }
 
