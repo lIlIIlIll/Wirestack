@@ -774,7 +774,7 @@ class TlsEnginePumpTest {
 
     @TestCase
     func wantWriteWithoutCiphertextFailsInsteadOfSpinning(): Unit {
-        let engine = StalledEngine(TlsEngineStep.WantWrite)
+        let engine = StalledEngine(TlsEngineStep.WantWrite, None)
         let transport = ScriptedTransport([])
         var observed = false
 
@@ -792,7 +792,7 @@ class TlsEnginePumpTest {
 
     @TestCase
     func eofDuringWantReadRetainsTlsHandshakeEvidence(): Unit {
-        let engine = StalledEngine(TlsEngineStep.WantRead)
+        let engine = StalledEngine(TlsEngineStep.WantRead, None)
         let transport = ScriptedTransport([])
         var observed = false
 
@@ -815,7 +815,7 @@ class TlsEnginePumpTest {
     func preCancellationStopsBeforeCallingProviderOrTransport(): Unit {
         let source = CancellationSource()
         source.cancel()
-        let engine = StalledEngine(TlsEngineStep.WantRead)
+        let engine = StalledEngine(TlsEngineStep.WantRead, None)
         let transport = ScriptedTransport([1])
         var cancelled = false
 
@@ -840,8 +840,36 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func cancellationAtTlsHandshakeCompletionBoundaryWinsDeterministically(): Unit {
+        let cancellation = CancellationSource()
+        let engine = StalledEngine(TlsEngineStep.Complete, Some(cancellation))
+        let transport = ScriptedTransport([1])
+        var cancelled = false
+
+        try {
+            TlsEnginePump().driveHandshake(
+                engine,
+                transport,
+                context: OperationContext(cancellation: cancellation.token)
+            )
+            @Fail("TLS handshake success was published after cancellation")
+        } catch (error: TlsEngineException) {
+            match (error.tlsCode) {
+                case TlsEngineErrorCode.HandshakeCancelled =>
+                    cancelled = isTlsHandshakePhase(error.phase) &&
+                        isNeverRetryable(error.retryability)
+                case _ => ()
+            }
+        }
+        @Expect(cancelled)
+        @Expect(engine.steps, 1)
+        @Expect(transport.readCalls, 0)
+        @Expect(transport.writeCalls, 0)
+    }
+
+    @TestCase
     func expiredDeadlineStopsBeforeCallingProviderOrTransport(): Unit {
-        let engine = StalledEngine(TlsEngineStep.WantRead)
+        let engine = StalledEngine(TlsEngineStep.WantRead, None)
         let transport = ScriptedTransport([1])
         var timedOut = false
 
@@ -1176,11 +1204,19 @@ private class ScriptedEngine <: TlsEngine {
 
 private class StalledEngine <: TlsEngine {
     private let result: TlsEngineStep
+    private let cancelOnStep: Option<CancellationSource>
     var steps: Int64 = 0
 
-    init(result: TlsEngineStep) { this.result = result }
+    init(result: TlsEngineStep, cancelOnStep: Option<CancellationSource>) {
+        this.result = result
+        this.cancelOnStep = cancelOnStep
+    }
 
-    public func handshakeStep(): TlsEngineStep { steps++; result }
+    public func handshakeStep(): TlsEngineStep {
+        steps++
+        if (let Some(source) <- cancelOnStep) { source.cancel() }
+        result
+    }
     public func pendingCiphertext(): Int64 { 0 }
     public func drainCiphertext(_: MutableByteSpan): Int64 { 0 }
     public func feedCiphertext(_: ByteSpan): Int64 { 0 }

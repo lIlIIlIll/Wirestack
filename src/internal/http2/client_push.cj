@@ -428,7 +428,10 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         sequence = Http2ClientResponseSequence(
             streamId, request.method, limits: limits, http2Limits: http2Limits
         )
-        channel = Http2ClientBodyChannel(streamId, flow, writer, parentContext, http2Limits)
+        channel = Http2ClientBodyChannel(
+            streamId, flow, writer, parentContext, http2Limits,
+            readTimeoutStage: OperationTimeoutStage.BodyReadIdle
+        )
     }
 
     func bindReset(value: Http2StreamResetRegistration): Unit {
