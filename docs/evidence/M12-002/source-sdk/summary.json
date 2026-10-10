@@ -1,0 +1,627 @@
+{
+  "task_id": "M12-002",
+  "status": "PASS",
+  "release_qualification": "NOT_QUALIFIED",
+  "binary_cross_sdk": "NOT_CLAIMED",
+  "artifact_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "identical_artifact": true,
+  "identical_production_sources": true,
+  "production_source_count": 164,
+  "profiles": {
+    "stable-native": {
+      "report": "docs/evidence/M12-002/source-sdk/stable-native/report.json",
+      "report_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0ebe58faced22d69bc1c0138ef8d4a2a7a77bab1482b7647f55992facccc1ec1"
+      },
+      "toolchain": {
+        "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+        "cjpm": "Cangjie Project Manager: 1.1.3",
+        "native_cc": "cc (GCC) 16.2.1 20260810",
+        "openssl_fixture_only": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)"
+      },
+      "status": "PASS",
+      "native_checks": 47,
+      "semantic_outcome": "same complete M11-004 checks and public operational outputs; no observed semantic difference",
+      "build_options": {
+        "command": [
+          "cjpm",
+          "build"
+        ],
+        "consumer_compile_option": "",
+        "consumer_link_option": "",
+        "cpu_override": "none",
+        "environment": {
+          "CFLAGS": "",
+          "CXXFLAGS": "",
+          "LDFLAGS": "",
+          "CJC_FLAGS": ""
+        }
+      },
+      "compiler_cjpm_runtime": {
+        "bin/cjc": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+        },
+        "tools/bin/cjpm": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "32ab13ead318414ab1b9ef9bf6dee06f210f9d12c1cd31bdd5ce15b42c929cba"
+        },
+        "runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "6ac1c91488100ef87c273bd9ab5015f712bc91f566f3bac74150a4485d2adc36"
+        }
+      },
+      "binary_bindings": {
+        "cli": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "1b9bce5f37fd7cad9df632864168db2b3fdf8908a8ff11c99976d313d9e269b5"
+          },
+          "pass_checks": {
+            "cli_success": 1,
+            "cli_pre_cancel": 1,
+            "cli_active_cancel": 1,
+            "cli_deadline": 1,
+            "cli_capacity": 1,
+            "cli_output_failure": 1,
+            "cli_explicit_close": 1,
+            "cli_raw_gzip": 1,
+            "cli_proxy_connect": 1,
+            "cli_peer_disconnect": 1,
+            "cli_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        },
+        "decoded": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "c3ac0e64719630cbd33e2e2f626125c5a26aedfc8fe9c3f6c1e01748ef29af26"
+          },
+          "pass_checks": {
+            "decoded_success": 1,
+            "decoded_pre_cancel": 1,
+            "decoded_active_cancel": 1,
+            "decoded_deadline": 1,
+            "decoded_capacity": 1,
+            "decoded_output_failure": 1,
+            "decoded_explicit_close": 1,
+            "decoded_decoded_gzip": 1,
+            "decoded_peer_disconnect": 1,
+            "decoded_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        },
+        "streams": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "d336ef4908f6f17e913dc25111b49d149d731ce48b26d49fb272435efad0660e"
+          },
+          "pass_checks": {
+            "streams_success": 1,
+            "streams_cursor_duplicate_explicit_recover": 1,
+            "streams_peer_disconnect": 1,
+            "streams_post_exactly_once_after_peer_failure": 1,
+            "streams_active_cancel": 1,
+            "streams_deadline": 1,
+            "streams_pre_cancel": 1,
+            "streams_bounded_slow_consumer_h2_sibling": 1,
+            "streams_explicit_close": 1,
+            "streams_capacity": 1,
+            "streams_untrusted_chain": 1,
+            "streams_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        },
+        "service": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "4c9d0c790dcf5c082d930ae7546fba26e1087ee8b2c065d8e7808adf1c2d6483"
+          },
+          "pass_checks": {
+            "service_untrusted_rejected": 1,
+            "service_server_capacity": 1,
+            "service_success": 1,
+            "service_pre_cancel": 1,
+            "service_active_cancel": 1,
+            "service_deadline": 1,
+            "service_capacity": 1,
+            "service_explicit_close": 1,
+            "service_peer_disconnect": 1,
+            "service_ordinary_rotation": 1,
+            "service_security_cancel": 1,
+            "service_security_rotation": 1,
+            "service_graceful_stop": 1,
+            "service_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        }
+      },
+      "ca_checks": {
+        "explicit-ca": {
+          "status": "PASS",
+          "expected_exit": 0,
+          "diagnostic": "TRUST_DOWNLOAD_PASS bytes=8"
+        },
+        "missing-explicit-ca": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR ca_file_missing"
+        },
+        "incorrect-explicit-ca": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR certificate_untrusted phase=tls_handshake"
+        },
+        "system-ca-installed": {
+          "status": "PASS",
+          "expected_exit": 0,
+          "diagnostic": "TRUST_DOWNLOAD_PASS bytes=8"
+        },
+        "system-ca-missing": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR trust_unavailable"
+        },
+        "system-ca-incorrect": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR certificate_untrusted phase=tls_handshake"
+        }
+      }
+    },
+    "candidate-native": {
+      "report": "docs/evidence/M12-002/source-sdk/candidate-native/report.json",
+      "report_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "614350ee1d3ef9c2065ef8d788342c94dca4e4575435319ff3f51cd1cbc870d6"
+      },
+      "toolchain": {
+        "cjc": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+        "cjpm": "Cangjie Project Manager: 1.3.0-alpha.06",
+        "native_cc": "cc (GCC) 16.2.1 20260810",
+        "openssl_fixture_only": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)"
+      },
+      "status": "PASS",
+      "native_checks": 47,
+      "semantic_outcome": "same complete M11-004 checks and public operational outputs; no observed semantic difference",
+      "build_options": {
+        "command": [
+          "cjpm",
+          "build"
+        ],
+        "consumer_compile_option": "",
+        "consumer_link_option": "",
+        "cpu_override": "none",
+        "environment": {
+          "CFLAGS": "",
+          "CXXFLAGS": "",
+          "LDFLAGS": "",
+          "CJC_FLAGS": ""
+        }
+      },
+      "compiler_cjpm_runtime": {
+        "bin/cjc": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "724b2a273d79195bdddda68f71b23346cdbecf2e4c4208ba200a29f16ffa036f"
+        },
+        "tools/bin/cjpm": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "092e42385cf67e7471918f413f19e1313de0c06b0bce980ed78ef0f86d9994fa"
+        },
+        "runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "f3de5cd3b5e1f24b3436e66909c67a4f29bfd9ba8ca9dd5054de8b65cf9ed528"
+        }
+      },
+      "binary_bindings": {
+        "cli": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "90ac7abb94b6ac2e404437c1dfb27e9dc05593b070ae83d13e5f57576304ba32"
+          },
+          "pass_checks": {
+            "cli_success": 1,
+            "cli_pre_cancel": 1,
+            "cli_active_cancel": 1,
+            "cli_deadline": 1,
+            "cli_capacity": 1,
+            "cli_output_failure": 1,
+            "cli_explicit_close": 1,
+            "cli_raw_gzip": 1,
+            "cli_proxy_connect": 1,
+            "cli_peer_disconnect": 1,
+            "cli_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        },
+        "decoded": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "29c870b3a5ed6945762a09e43008eac21a849b95c48813c79883ee6b4f32095e"
+          },
+          "pass_checks": {
+            "decoded_success": 1,
+            "decoded_pre_cancel": 1,
+            "decoded_active_cancel": 1,
+            "decoded_deadline": 1,
+            "decoded_capacity": 1,
+            "decoded_output_failure": 1,
+            "decoded_explicit_close": 1,
+            "decoded_decoded_gzip": 1,
+            "decoded_peer_disconnect": 1,
+            "decoded_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        },
+        "streams": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "cde04258bd3c28cfc5d7034ef73d177aa4d962d23690b9656b615518c6e0ced2"
+          },
+          "pass_checks": {
+            "streams_success": 1,
+            "streams_cursor_duplicate_explicit_recover": 1,
+            "streams_peer_disconnect": 1,
+            "streams_post_exactly_once_after_peer_failure": 1,
+            "streams_active_cancel": 1,
+            "streams_deadline": 1,
+            "streams_pre_cancel": 1,
+            "streams_bounded_slow_consumer_h2_sibling": 1,
+            "streams_explicit_close": 1,
+            "streams_capacity": 1,
+            "streams_untrusted_chain": 1,
+            "streams_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        },
+        "service": {
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "d8810a268a994850f3cd1b7e91502246974cf4d2ff58d70f6eed9d2142b78b38"
+          },
+          "pass_checks": {
+            "service_untrusted_rejected": 1,
+            "service_server_capacity": 1,
+            "service_success": 1,
+            "service_pre_cancel": 1,
+            "service_active_cancel": 1,
+            "service_deadline": 1,
+            "service_capacity": 1,
+            "service_explicit_close": 1,
+            "service_peer_disconnect": 1,
+            "service_ordinary_rotation": 1,
+            "service_security_cancel": 1,
+            "service_security_rotation": 1,
+            "service_graceful_stop": 1,
+            "service_cleanup": 1
+          },
+          "needed": [
+            "libboundscheck.so",
+            "libc.so.6",
+            "libcangjie-runtime.so",
+            "libm.so.6"
+          ]
+        }
+      },
+      "ca_checks": {
+        "explicit-ca": {
+          "status": "PASS",
+          "expected_exit": 0,
+          "diagnostic": "TRUST_DOWNLOAD_PASS bytes=8"
+        },
+        "missing-explicit-ca": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR ca_file_missing"
+        },
+        "incorrect-explicit-ca": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR certificate_untrusted phase=tls_handshake"
+        },
+        "system-ca-installed": {
+          "status": "PASS",
+          "expected_exit": 0,
+          "diagnostic": "TRUST_DOWNLOAD_PASS bytes=8"
+        },
+        "system-ca-missing": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR trust_unavailable"
+        },
+        "system-ca-incorrect": {
+          "status": "PASS",
+          "expected_exit": 1,
+          "diagnostic": "ERROR certificate_untrusted phase=tls_handshake"
+        }
+      }
+    }
+  },
+  "native_build_manifests": {
+    "target/native/current/provider-manifest.json": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9b9d0d13b137a3c300f3fc0fd3ea5eaa84380c48885ccfbcbaf62c7335a2e381"
+      },
+      "contents": {
+        "abiVersion": 1,
+        "archive": {
+          "bytes": 8082822,
+          "name": "libwirestack_tls_provider.a",
+          "sha256": "a3ae2da76b1e432adde3cce3c1db581d8b3bf9ae4f83917d4fa185f2906e737d"
+        },
+        "backend": "aws-lc-static",
+        "build_fingerprint": "9aea8d425627de82b9f225632d31af15262435636b1243955e6079611372aaef",
+        "build_inputs": {
+          "abi_contract_sha256": "09b0d582ac3345bbb120a593220bda1046bad5b26350f3d6e864f76bfece9d30",
+          "builder_sha256": "98f15142646222112c37aeb4fbe5408848f1141388e3a1635f2d2eec0926934a",
+          "provider": {
+            "abi": {
+              "backend": "aws-lc-static",
+              "header": "native/tls/aws_lc/wirestack_tls_provider.h",
+              "name": "wirestack_tls_provider",
+              "version": 1
+            },
+            "capabilities": [
+              "customRoots",
+              "clientCert",
+              "server",
+              "tls12",
+              "tls13",
+              "http2",
+              "externalSigner",
+              "external-decryptor",
+              "sessionResumption",
+              "secureRandom"
+            ],
+            "cmake_options": [
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DBUILD_SHARED_LIBS=OFF",
+              "-DBUILD_TESTING=OFF",
+              "-DBUILD_TOOL=OFF",
+              "-DDISABLE_GO=ON",
+              "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+            ],
+            "license_expression": "Apache-2.0 OR ISC",
+            "patches": [],
+            "provider_id": "aws-lc",
+            "provider_version": "5.5.0",
+            "schema_version": 1,
+            "source": {
+              "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+              "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+              "kind": "git",
+              "tag": "v5.5.0",
+              "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+              "url": "https://github.com/aws/aws-lc.git"
+            }
+          },
+          "shim": {
+            "header_sha256": "89bfa537e931d670712aeaeef65a484c9060f25dff9468164cd0c21d04310c68",
+            "source_sha256": "9e62e56accb050a77b553e72e07c23f9180cbf7e5a1aadb8541a6c7cfe2f5358"
+          },
+          "target": {
+            "architecture": "x86_64",
+            "libc": "glibc",
+            "libc_version": "2.44",
+            "os": "linux"
+          },
+          "test_only_key_log": false,
+          "tools": {
+            "ar": "/usr/lib/llvm15/bin/llvm-ar",
+            "ar_version": "LLVM (http://llvm.org/):",
+            "cc": "/usr/lib/llvm15/bin/clang",
+            "cc_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+            "cmake": "/usr/bin/cmake",
+            "cmake_version": "cmake version 4.4.4",
+            "cxx": "/usr/lib/llvm15/bin/clang++",
+            "cxx_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+            "ranlib": "/usr/lib/llvm15/bin/llvm-ranlib",
+            "ranlib_version": "LLVM (http://llvm.org/):"
+          }
+        },
+        "capabilities": [
+          "customRoots",
+          "clientCert",
+          "server",
+          "tls12",
+          "tls13",
+          "http2",
+          "externalSigner",
+          "external-decryptor",
+          "sessionResumption",
+          "secureRandom"
+        ],
+        "externalOpenSslDependency": false,
+        "patchLevel": "abi-1;patches=none",
+        "providerFingerprint": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+        "providerId": "aws-lc",
+        "providerVersion": "5.5.0",
+        "runtimeLoaderLibraryStrings": [],
+        "schema_version": 1,
+        "source": {
+          "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+          "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+          "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+        },
+        "target": {
+          "architecture": "x86_64",
+          "libc": "glibc",
+          "libc_version": "2.44",
+          "os": "linux"
+        },
+        "test_only_key_log": false
+      }
+    },
+    "target/native/resolver/current/resolver-manifest.json": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5adfa39283663e36ce8fc9a43dbe26051462fbfeb1c37da9f8308f9b89d8e91f"
+      },
+      "contents": {
+        "archive": {
+          "path": "lib/libwirestack_resolver.a",
+          "sha256": "dcef4fbe2f69e05fc7a52a427aa0ae91e6ce2e8fba94fd68e1f642e3e81e8faa"
+        },
+        "build_fingerprint": "18dc5b2df892096617cad17809b39913809f8929fae61af4f9e2f5885de9ce38",
+        "close_model": "bounded admission stop with a process-wide cap of eight live pools and 64 workers; blocking libc/NSS calls remain quarantined until completion",
+        "inputs": {
+          "compiler": "/usr/lib/llvm15/bin/clang",
+          "compiler_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+          "flags": [
+            "-std=c11",
+            "-O2",
+            "-fPIC",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-pthread"
+          ],
+          "header_sha256": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe",
+          "schema": 1,
+          "source_sha256": "f8bdb11af530e4e84cbdbf374afe93e5493dc74886500c6b26acbc3adaf9abae",
+          "target": "x86_64-pc-linux-gnu"
+        },
+        "private_runtime_abi": false,
+        "schema_version": 1,
+        "worker_model": "fixed pthread pool with bounded FIFO admission"
+      }
+    },
+    "target/native/http_files/current/http-files-manifest.json": {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "dde6c2e1e5fb16a7df4c87d4a403b22062ec7999d74b9227a0357fcb3bddfb0a"
+      },
+      "contents": {
+        "abi_version": 1,
+        "archive": {
+          "bytes": 20156,
+          "path": "lib/libwirestack_http_files.a",
+          "sha256": "8524cf328f0b088b6f429dbed5827cc9429ba4ce32fd4e3e2ac82051aaba155a"
+        },
+        "build_fingerprint": "86aff326db75ffe95cfbfb6a8f6d837cfd36d10b35d6cb4d0f0008db01cd7bb2",
+        "build_smoke": "PASS",
+        "component": "wirestack-http-files",
+        "filesystem_model": "descriptor-relative Linux POSIX operations with bounded paths",
+        "inputs": {
+          "archive_flags": [
+            "rcsD"
+          ],
+          "builder_sha256": "0562017adad454142837e3b44a12b89c711e5ed348d98deb1dd1db01922aea2d",
+          "compile_flags": [
+            "-std=c11",
+            "-O2",
+            "-fPIC",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-D_POSIX_C_SOURCE=200809L"
+          ],
+          "compiler_target": "x86_64-pc-linux-gnu",
+          "schema_version": 1,
+          "sources": {
+            "native/http_files/wirestack_http_files.c": "2f3f936cdf63dc8157b962f18d250e45cfe89f1dab520a1c06bba528baf801d0",
+            "native/http_files/wirestack_http_files.h": "2b2580c2d124cf4a1ffdbc178262745d94e7d99f6b03042220b8cee6e6035b6e"
+          },
+          "target": {
+            "architecture": "x86_64",
+            "libc": "glibc",
+            "libc_version": "2.44",
+            "os": "linux"
+          },
+          "tools": {
+            "ar": {
+              "path": "/usr/lib/llvm15/bin/llvm-ar",
+              "version": "LLVM (http://llvm.org/):"
+            },
+            "cc": {
+              "path": "/usr/lib/llvm15/bin/clang",
+              "version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)"
+            },
+            "ranlib": {
+              "path": "/usr/lib/llvm15/bin/llvm-ranlib",
+              "version": "LLVM (http://llvm.org/):"
+            }
+          }
+        },
+        "platform": {
+          "architecture": "x86_64",
+          "libc": "glibc",
+          "libc_version": "2.44",
+          "os": "linux"
+        },
+        "private_runtime_abi": false,
+        "runtime_dependencies": [
+          "libc"
+        ],
+        "schema_version": 1
+      }
+    }
+  },
+  "acceptance_mapping": {
+    "source_stable_candidate": "PASS on exact recorded compiler/runtime/CJPM bits; consumers recompile",
+    "checkout_independence_relocation": "PASS with checkout and old install hidden",
+    "system_explicit_ca": "PASS six isolated real public probes per SDK; no host CA changes",
+    "semantic_compatibility": "PASS identical47 consumer checks and operational outputs; no observed difference",
+    "binary_cross_sdk": "NOT_CLAIMED; separate worker owns actual binary matrix",
+    "minimum_cpu_glibc_kernel": "Main owns native VM evidence; this host is not minimum-boundary proof"
+  },
+  "scope_exclusions": [
+    "musl",
+    "aarch64",
+    "arbitrary nightlies",
+    "formal release qualification",
+    "hashed CA directory native execution"
+  ],
+  "verification": {
+    "stable": "docs/evidence/M12-002/source-sdk/stable-verifier.json",
+    "candidate_command_exit": 0,
+    "candidate_stdout_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ba2eda2262548161f5f72263b8c6fc9ff788b52687e08569c15ccbaba5444288"
+    },
+    "candidate_stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/opt/wirestack-matrix/support/tools/m12_002_glibc_namespace.py", line 73, in <module>
+    raise SystemExit(main())
+  File "/opt/wirestack-matrix/support/tools/m12_002_glibc_namespace.py", line 68, in main
+    os.execvp(command[0], command)
+  File "/usr/lib/python3.10/os.py", line 575, in execvp
+    _execvpe(file, args)
+  File "/usr/lib/python3.10/os.py", line 616, in _execvpe
+    raise saved_exc
+  File "/usr/lib/python3.10/os.py", line 608, in _execvpe
+    exec_func(fullname, *argrest)
+PermissionError: [Errno 13] Permission denied

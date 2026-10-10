@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000003000 <.init>:
+    3000:	endbr64
+    3004:	sub    $0x8,%rsp
+    3008:	mov    0xaef31(%rip),%rax        # b1f40 <__gmon_start__>
+    300f:	test   %rax,%rax
+    3012:	je     3016 <PCRE2_10.47@@PCRE2_10.47+0x3016>
+    3014:	call   *%rax
+    3016:	add    $0x8,%rsp
+    301a:	ret
+
+Disassembly of section .text:
+
+0000000000003040 <pcre2_code_copy_8@@PCRE2_10.47-0xa770>:
+    3040:	xor    %eax,%eax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "977d24fcd3704e31f6a4709e7ce031894d0ede1dc7f9919ad9efc70ed545291a"}

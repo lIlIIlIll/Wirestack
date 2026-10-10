@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.diff.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000000e128 <_init@@Base>:
+    e128:	sub    $0x8,%rsp
+    e12c:	mov    0x21ec15(%rip),%rax        # 22cd48 <__gmon_start__>
+    e133:	test   %rax,%rax
+    e136:	je     e13a <_init@@Base+0x12>
+    e138:	call   *%rax
+    e13a:	add    $0x8,%rsp
+    e13e:	ret
+
+Disassembly of section .plt:
+
+000000000000e140 <CJ_MCC_NewArray64@plt-0x10>:
+    e140:	push   0x21eec2(%rip)        # 22d008 <_CNcb20MultilineDiffBuilder23SIMILARITY_MAX_DISTANCEE@@Base+0x203560>
+    e146:	jmp    *0x21eec4(%rip)        # 22d010 <_CNcb20MultilineDiffBuilder23SIMILARITY_MAX_DISTANCEE@@Base+0x203568>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "4c5b2e41b20736805c31220eabf8ba40c5b0367ca01c647aa291cf700302e20b"}

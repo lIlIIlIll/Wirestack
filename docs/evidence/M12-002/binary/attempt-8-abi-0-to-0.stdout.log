@@ -1,0 +1,8 @@
+IDENTITY wirestack aws-lc 5.5.0 9aea8d425627de82b9f225632d31af15262435636b1243955e6079611372aaef
+CHECK independent_cangjie_native PASS
+CHECK wirestack_verified_tls PASS
+BOUNDARY symbols SSL_connect global=0x55c97f5ba750 isolated=0x7fb9dde2d560 owners_distinct=1 global_owner=<scratch>/coexist-0/target/release/bin/main independent_owner=/usr/lib/libssl.so.3
+BOUNDARY unisolated_openssl UNSUPPORTED resolved_identity=AWS-LC 5.5.0
+IDENTITY independent_tls OpenSSL 3.6.5 29 Sep 2026 namespace=new verified_peer=example.test bytes=38
+CHECK independent_verified_tls PASS
+CHECK same_process_identity_preserved PASS

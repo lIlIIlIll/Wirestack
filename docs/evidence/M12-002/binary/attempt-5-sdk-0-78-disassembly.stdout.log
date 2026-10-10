@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-collection.concurrent.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000000c520 <_init@@Base>:
+    c520:	sub    $0x8,%rsp
+    c524:	mov    0x21c8ed(%rip),%rax        # 228e18 <__gmon_start__>
+    c52b:	test   %rax,%rax
+    c52e:	je     c532 <_init@@Base+0x12>
+    c530:	call   *%rax
+    c532:	add    $0x8,%rsp
+    c536:	ret
+
+Disassembly of section .plt:
+
+000000000000c540 <_CNab15AtomicReferenceIG_E6<init>HG_@plt-0x10>:
+    c540:	push   0x21cac2(%rip)        # 229008 <_CNbh8BUF_SIZEE@@Base+0x202f60>
+    c546:	jmp    *0x21cac4(%rip)        # 229010 <_CNbh8BUF_SIZEE@@Base+0x202f68>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "4894aede36da7e2616c0b958f007656fc03ed658babb1e168cc02e5cfbf8368d"}

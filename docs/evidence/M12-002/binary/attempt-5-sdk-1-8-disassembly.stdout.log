@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-ast.a:
+
+ast.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNax12parsePatternHCNax6TokensEEL_E$g-0x4>:
+       0:	add    %al,(%rax)
+	...
+
+0000000000000004 <_CCNax12parsePatternHCNax6TokensEEL_E$g>:
+       4:	push   %rbp
+       5:	mov    %rsp,%rbp
+       8:	call   d <_CCNax12parsePatternHCNax6TokensEEL_E$g+0x9>
+       d:	push   %r14
+       f:	push   %r12
+      11:	push   %rbx
+      12:	sub    $0x20,%rsp
+      16:	mov    0x28(%r15),%rax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "a9cd49c0b65327acc8c2c6564efcee8e77d0beda134977d0fc35797da3f9a02c"}

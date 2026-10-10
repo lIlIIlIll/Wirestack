@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-unittestFFI.a:
+
+coverage_impl.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_MICROFUZZ_ENABLE_TRACE>:
+       0:	push   %rbp
+       1:	mov    %rsp,%rbp
+       4:	sub    $0x10,%rsp
+       8:	mov    %fs:0x28,%rax
+      11:	mov    %rax,-0x8(%rbp)
+      15:	movb   $0x1,0x0(%rip)        # 1c <CJ_MICROFUZZ_ENABLE_TRACE+0x1c>
+      1c:	mov    %fs:0x28,%rax
+      25:	cmp    -0x8(%rbp),%rax
+      29:	jne    31 <CJ_MICROFUZZ_ENABLE_TRACE+0x31>
+      2b:	add    $0x10,%rsp
+      2f:	pop    %rbp
+      30:	ret
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "912001d0d4b511f3f716721f468a93ffda778ebbdeb1dbdedf3abc462b5ea9fe"}

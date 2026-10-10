@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "profile": "stable",
+  "status": "FAIL",
+  "release_qualification": "NOT_QUALIFIED",
+  "binary_cross_sdk": "NOT_CLAIMED",
+  "consumer_recompile_required": true,
+  "runner_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e8743f411181fbaf6e97d79eb24233d10e5b124ba627d027acf6f6642683d97d"
+  },
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "commands": [],
+  "platform": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "kernel": "7.2.7-arch1-1",
+  "consumers": {},
+  "consumer_sources": {
+    "examples/linux/m11_004/cli/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2990c7e28f508a42c9d3dd4e82ce8c0f182e33e8ec6afbd781e7be158fe54486"
+    },
+    "examples/linux/m11_004/cli/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "66817afa6779aa5fe1b82aeb21f418b2caf208bbcffa5c1e04d43b0041ca9912"
+    },
+    "examples/linux/m11_004/cli/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b1458c6f1717c0e843f3121592853553a9ed94c767a4c9778692a9645f80d876"
+    },
+    "examples/linux/m11_004/decoded/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "250447c22abc80d62cbbc337e8c324738c71fa681274e293aa75b9db1a6aadfd"
+    },
+    "examples/linux/m11_004/decoded/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1e4f9e5a8ac60f05030bf1ee4e876f47e97721981f623de31959ed28ea9af46e"
+    },
+    "examples/linux/m11_004/decoded/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9237ba16adcd47a089a700f9c9370fdf8e1a6ff59af4ee36b1ce71000c0fab1b"
+    },
+    "examples/linux/m11_004/streams/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "62ea29be65a7ec375ce56c6e4bc6d6baf6bebfee852813defcd91f258ed7ad0f"
+    },
+    "examples/linux/m11_004/streams/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bda1f56253aecbd41b4c9f26df927b457f3a0c3c81a69054638503f994e734a6"
+    },
+    "examples/linux/m11_004/streams/src/fixture.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "11d49b86bc0ae249cd95e1fba7a4b4d4ce29bedd6637c3ee9ccbc5e4ccd23b68"
+    },
+    "examples/linux/m11_004/streams/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "751177c08d2aa594f3e09b203db3052c8852a5925c690943c5f5c95a58b4f16e"
+    },
+    "examples/linux/m11_004/service/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8e5260e1e8638edc922620a293e4e9e340689f8bfe78b5ec6448e2e7d2bb8b4f"
+    },
+    "examples/linux/m11_004/service/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+    },
+    "examples/linux/m12_002/sdk/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9247985ecdcba616248b1b746de7db28bfdb10678e20a479b49e93cf18e772fa"
+    },
+    "examples/linux/m12_002/sdk/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d91377ebc092c953b7b463930ee54392055b41876038e51eacec66835571d58f"
+    }
+  },
+  "error": "SDK is missing compiler or CJPM"
+}

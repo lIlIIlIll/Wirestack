@@ -1,0 +1,1159 @@
+In archive <scratch>/wirestack/target/native/http_files/current/lib/libwirestack_http_files.a:
+
+wirestack_http_files.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <wirestack_http_files_abi_version>:
+       0:	mov    $0x1,%eax
+       5:	ret
+       6:	cs nopw 0x0(%rax,%rax,1)
+
+0000000000000010 <wirestack_http_files_root_open>:
+      10:	push   %rbp
+      11:	push   %r15
+      13:	push   %r14
+      15:	push   %r13
+      17:	push   %r12
+      19:	push   %rbx
+      1a:	sub    $0x98,%rsp
+      21:	mov    %fs:0x28,%rax
+      2a:	mov    %rax,0x90(%rsp)
+      32:	mov    $0x1,%r15d
+      38:	test   %rdx,%rdx
+      3b:	je     165 <wirestack_http_files_root_open+0x155>
+      41:	mov    %rcx,%r14
+      44:	test   %rcx,%rcx
+      47:	je     165 <wirestack_http_files_root_open+0x155>
+      4d:	mov    %rdx,%r12
+      50:	mov    %rdi,%rbp
+      53:	movq   $0x0,(%rdx)
+      5a:	movq   $0x0,(%r14)
+      61:	mov    $0x16,%r13d
+      67:	mov    $0x1,%r15d
+      6d:	test   %rdi,%rdi
+      70:	je     15d <wirestack_http_files_root_open+0x14d>
+      76:	mov    %rsi,%rbx
+      79:	lea    -0x1001(%rsi),%rax
+      80:	cmp    $0xfffffffffffff000,%rax
+      86:	jb     15d <wirestack_http_files_root_open+0x14d>
+      8c:	lea    0x1(%rbx),%rdi
+      90:	call   95 <wirestack_http_files_root_open+0x85>
+      95:	test   %rax,%rax
+      98:	je     151 <wirestack_http_files_root_open+0x141>
+      9e:	mov    %rax,%r13
+      a1:	mov    %rax,%rdi
+      a4:	mov    %rbp,%rsi
+      a7:	mov    %rbx,%rdx
+      aa:	call   af <wirestack_http_files_root_open+0x9f>
+      af:	movb   $0x0,0x0(%r13,%rbx,1)
+      b5:	mov    %r13,%rdi
+      b8:	xor    %esi,%esi
+      ba:	mov    %rbx,%rdx
+      bd:	call   c2 <wirestack_http_files_root_open+0xb2>
+      c2:	test   %rax,%rax
+      c5:	je     ee <wirestack_http_files_root_open+0xde>
+      c7:	mov    %r13,%rdi
+      ca:	call   cf <wirestack_http_files_root_open+0xbf>
+      cf:	mov    $0x16,%r13d
+      d5:	jmp    15d <wirestack_http_files_root_open+0x14d>
+      da:	nopw   0x0(%rax,%rax,1)
+      e0:	call   e5 <wirestack_http_files_root_open+0xd5>
+      e5:	cmpl   $0x4,(%rax)
+      e8:	jne    191 <wirestack_http_files_root_open+0x181>
+      ee:	mov    %r13,%rdi
+      f1:	mov    $0xb0000,%esi
+      f6:	xor    %eax,%eax
+      f8:	call   fd <wirestack_http_files_root_open+0xed>
+      fd:	test   %eax,%eax
+      ff:	js     e0 <wirestack_http_files_root_open+0xd0>
+     101:	mov    %eax,%ebx
+     103:	mov    %r13,%rdi
+     106:	call   10b <wirestack_http_files_root_open+0xfb>
+     10b:	mov    %rsp,%rsi
+     10e:	mov    %ebx,%edi
+     110:	call   115 <wirestack_http_files_root_open+0x105>
+     115:	test   %eax,%eax
+     117:	je     1c5 <wirestack_http_files_root_open+0x1b5>
+     11d:	call   122 <wirestack_http_files_root_open+0x112>
+     122:	movslq (%rax),%rbp
+     125:	mov    %ebx,%edi
+     127:	call   12c <wirestack_http_files_root_open+0x11c>
+     12c:	mov    %rbp,(%r14)
+     12f:	lea    -0x1(%rbp),%eax
+     132:	cmp    $0x27,%eax
+     135:	ja     205 <wirestack_http_files_root_open+0x1f5>
+     13b:	mov    $0x3,%r15d
+     141:	lea    0x0(%rip),%rcx        # 148 <wirestack_http_files_root_open+0x138>
+     148:	movslq (%rcx,%rax,4),%rax
+     14c:	add    %rcx,%rax
+     14f:	jmp    *%rax
+     151:	mov    $0xc,%r13d
+     157:	mov    $0x2,%r15d
+     15d:	call   162 <wirestack_http_files_root_open+0x152>
+     162:	mov    %r13d,(%rax)
+     165:	mov    %fs:0x28,%rax
+     16e:	cmp    0x90(%rsp),%rax
+     176:	jne    24a <wirestack_http_files_root_open+0x23a>
+     17c:	mov    %r15d,%eax
+     17f:	add    $0x98,%rsp
+     186:	pop    %rbx
+     187:	pop    %r12
+     189:	pop    %r13
+     18b:	pop    %r14
+     18d:	pop    %r15
+     18f:	pop    %rbp
+     190:	ret
+     191:	movslq (%rax),%rbx
+     194:	mov    %r13,%rdi
+     197:	call   19c <wirestack_http_files_root_open+0x18c>
+     19c:	mov    %rbx,(%r14)
+     19f:	lea    -0x1(%rbx),%eax
+     1a2:	cmp    $0x27,%eax
+     1a5:	ja     205 <wirestack_http_files_root_open+0x1f5>
+     1a7:	mov    $0x3,%r15d
+     1ad:	lea    0x0(%rip),%rcx        # 1b4 <wirestack_http_files_root_open+0x1a4>
+     1b4:	movslq (%rcx,%rax,4),%rax
+     1b8:	add    %rcx,%rax
+     1bb:	jmp    *%rax
+     1bd:	mov    $0x4,%r15d
+     1c3:	jmp    165 <wirestack_http_files_root_open+0x155>
+     1c5:	mov    $0xf000,%eax
+     1ca:	and    0x18(%rsp),%eax
+     1ce:	cmp    $0x4000,%eax
+     1d3:	jne    226 <wirestack_http_files_root_open+0x216>
+     1d5:	mov    $0x1,%edi
+     1da:	mov    $0x10,%esi
+     1df:	call   1e4 <wirestack_http_files_root_open+0x1d4>
+     1e4:	test   %rax,%rax
+     1e7:	je     238 <wirestack_http_files_root_open+0x228>
+     1e9:	movabs $0x5753484652303031,%rcx
+     1f3:	mov    %rcx,(%rax)
+     1f6:	mov    %ebx,0x8(%rax)
+     1f9:	mov    %rax,(%r12)
+     1fd:	xor    %r15d,%r15d
+     200:	jmp    165 <wirestack_http_files_root_open+0x155>
+     205:	mov    $0xb,%r15d
+     20b:	jmp    165 <wirestack_http_files_root_open+0x155>
+     210:	mov    $0x8,%r15d
+     216:	jmp    165 <wirestack_http_files_root_open+0x155>
+     21b:	mov    $0x5,%r15d
+     221:	jmp    165 <wirestack_http_files_root_open+0x155>
+     226:	mov    %ebx,%edi
+     228:	call   22d <wirestack_http_files_root_open+0x21d>
+     22d:	mov    $0x6,%r15d
+     233:	jmp    165 <wirestack_http_files_root_open+0x155>
+     238:	mov    %ebx,%edi
+     23a:	call   23f <wirestack_http_files_root_open+0x22f>
+     23f:	mov    $0x2,%r15d
+     245:	jmp    165 <wirestack_http_files_root_open+0x155>
+     24a:	call   24f <wirestack_http_files_root_open+0x23f>
+     24f:	nop
+
+0000000000000250 <fail_errno>:
+     250:	movslq %edi,%rcx
+     253:	mov    %rcx,(%rsi)
+     256:	dec    %ecx
+     258:	cmp    $0x27,%ecx
+     25b:	ja     278 <fail_errno+0x28>
+     25d:	mov    $0x3,%eax
+     262:	lea    0x0(%rip),%rdx        # 269 <fail_errno+0x19>
+     269:	movslq (%rdx,%rcx,4),%rcx
+     26d:	add    %rdx,%rcx
+     270:	jmp    *%rcx
+     272:	mov    $0x4,%eax
+     277:	ret
+     278:	mov    $0xb,%eax
+     27d:	ret
+     27e:	mov    $0x8,%eax
+     283:	ret
+     284:	mov    $0x5,%eax
+     289:	ret
+     28a:	nopw   0x0(%rax,%rax,1)
+
+0000000000000290 <wirestack_http_files_root_close>:
+     290:	push   %rbx
+     291:	test   %rdi,%rdi
+     294:	je     2c0 <wirestack_http_files_root_close+0x30>
+     296:	mov    %rdi,%rbx
+     299:	movabs $0x5753484652303031,%rax
+     2a3:	cmp    %rax,(%rdi)
+     2a6:	jne    2c0 <wirestack_http_files_root_close+0x30>
+     2a8:	movq   $0x0,(%rbx)
+     2af:	mov    0x8(%rbx),%edi
+     2b2:	call   2b7 <wirestack_http_files_root_close+0x27>
+     2b7:	mov    %rbx,%rdi
+     2ba:	pop    %rbx
+     2bb:	jmp    2c0 <wirestack_http_files_root_close+0x30>
+     2c0:	pop    %rbx
+     2c1:	ret
+     2c2:	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+00000000000002d0 <wirestack_http_files_download_open>:
+     2d0:	push   %rbp
+     2d1:	push   %r15
+     2d3:	push   %r14
+     2d5:	push   %r13
+     2d7:	push   %r12
+     2d9:	push   %rbx
+     2da:	sub    $0xb8,%rsp
+     2e1:	mov    %fs:0x28,%rax
+     2ea:	mov    %rax,0xb0(%rsp)
+     2f2:	mov    $0x1,%ebp
+     2f7:	test   %r8,%r8
+     2fa:	je     3d6 <wirestack_http_files_download_open+0x106>
+     300:	mov    %r9,%r14
+     303:	test   %r9,%r9
+     306:	je     3d6 <wirestack_http_files_download_open+0x106>
+     30c:	mov    0xf0(%rsp),%rax
+     314:	test   %rax,%rax
+     317:	je     3d6 <wirestack_http_files_download_open+0x106>
+     31d:	mov    %r8,%r13
+     320:	mov    %rdi,%rbx
+     323:	movq   $0x0,(%r8)
+     32a:	movq   $0x0,(%r14)
+     331:	movq   $0x0,(%rax)
+     338:	mov    $0x9,%ebp
+     33d:	test   %rdi,%rdi
+     340:	je     3d6 <wirestack_http_files_download_open+0x106>
+     346:	movabs $0x5753484646303031,%rax
+     350:	add    $0xc000000,%rax
+     356:	cmp    %rax,(%rbx)
+     359:	jne    3d6 <wirestack_http_files_download_open+0x106>
+     35b:	mov    %rsi,%r15
+     35e:	mov    $0x1,%ebp
+     363:	test   %rsi,%rsi
+     366:	je     3be <wirestack_http_files_download_open+0xee>
+     368:	mov    %rdx,%r12
+     36b:	lea    -0x1001(%rdx),%rax
+     372:	cmp    $0xfffffffffffff000,%rax
+     378:	jb     3be <wirestack_http_files_download_open+0xee>
+     37a:	mov    %rcx,0x18(%rsp)
+     37f:	lea    0x1(%r12),%rdi
+     384:	call   389 <wirestack_http_files_download_open+0xb9>
+     389:	test   %rax,%rax
+     38c:	je     3c5 <wirestack_http_files_download_open+0xf5>
+     38e:	mov    %rax,%rdi
+     391:	mov    %r15,%rsi
+     394:	mov    %r12,%rdx
+     397:	mov    %rax,%r15
+     39a:	call   39f <wirestack_http_files_download_open+0xcf>
+     39f:	movb   $0x0,(%r15,%r12,1)
+     3a4:	mov    %r15,%rdi
+     3a7:	xor    %esi,%esi
+     3a9:	mov    %r12,%rdx
+     3ac:	call   3b1 <wirestack_http_files_download_open+0xe1>
+     3b1:	test   %rax,%rax
+     3b4:	je     401 <wirestack_http_files_download_open+0x131>
+     3b6:	mov    %r15,%rdi
+     3b9:	call   3be <wirestack_http_files_download_open+0xee>
+     3be:	mov    $0x16,%ebx
+     3c3:	jmp    3cf <wirestack_http_files_download_open+0xff>
+     3c5:	mov    $0xc,%ebx
+     3ca:	mov    $0x2,%ebp
+     3cf:	call   3d4 <wirestack_http_files_download_open+0x104>
+     3d4:	mov    %ebx,(%rax)
+     3d6:	mov    %fs:0x28,%rax
+     3df:	cmp    0xb0(%rsp),%rax
+     3e7:	jne    749 <wirestack_http_files_download_open+0x479>
+     3ed:	mov    %ebp,%eax
+     3ef:	add    $0xb8,%rsp
+     3f6:	pop    %rbx
+     3f7:	pop    %r12
+     3f9:	pop    %r13
+     3fb:	pop    %r14
+     3fd:	pop    %r15
+     3ff:	pop    %rbp
+     400:	ret
+     401:	movzbl (%r15),%r9d
+     405:	test   %r9d,%r9d
+     408:	je     410 <wirestack_http_files_download_open+0x140>
+     40a:	cmp    $0x2f,%r9d
+     40e:	jne    41f <wirestack_http_files_download_open+0x14f>
+     410:	mov    %r15,%rdi
+     413:	call   418 <wirestack_http_files_download_open+0x148>
+     418:	mov    $0x1,%ebp
+     41d:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     41f:	mov    %r15,%r8
+     422:	mov    %r15,%r11
+     425:	mov    %r15,%r10
+     428:	jmp    439 <wirestack_http_files_download_open+0x169>
+     42a:	lea    0x1(%r10),%r11
+     42e:	movzbl 0x1(%r10),%r9d
+     433:	inc    %r10
+     436:	inc    %r8
+     439:	cmp    $0x2f,%r9b
+     43d:	je     447 <wirestack_http_files_download_open+0x177>
+     43f:	movzbl %r9b,%eax
+     443:	test   %eax,%eax
+     445:	jne    42e <wirestack_http_files_download_open+0x15e>
+     447:	mov    %r10,%rsi
+     44a:	sub    %r11,%rsi
+     44d:	cmp    $0x1,%rsi
+     451:	je     464 <wirestack_http_files_download_open+0x194>
+     453:	cmp    $0x2,%rsi
+     457:	je     46f <wirestack_http_files_download_open+0x19f>
+     459:	test   %rsi,%rsi
+     45c:	je     410 <wirestack_http_files_download_open+0x140>
+     45e:	movzbl (%r11),%ecx
+     462:	jmp    483 <wirestack_http_files_download_open+0x1b3>
+     464:	movzbl (%r11),%ecx
+     468:	cmp    $0x2e,%cl
+     46b:	jne    483 <wirestack_http_files_download_open+0x1b3>
+     46d:	jmp    410 <wirestack_http_files_download_open+0x140>
+     46f:	movzbl (%r11),%ecx
+     473:	cmp    $0x2e,%cl
+     476:	jne    483 <wirestack_http_files_download_open+0x1b3>
+     478:	mov    $0x2e,%cl
+     47a:	cmpb   $0x2e,0x1(%r11)
+     47f:	jne    488 <wirestack_http_files_download_open+0x1b8>
+     481:	jmp    410 <wirestack_http_files_download_open+0x140>
+     483:	cmp    $0x20,%cl
+     486:	jb     410 <wirestack_http_files_download_open+0x140>
+     488:	mov    %r8,%rbp
+     48b:	sub    %r11,%rbp
+     48e:	mov    $0x1,%al
+     490:	mov    $0x1,%edx
+     495:	data16 cs nopw 0x0(%rax,%rax,1)
+     4a0:	cmp    $0x5c,%cl
+     4a3:	je     4c5 <wirestack_http_files_download_open+0x1f5>
+     4a5:	movzbl %cl,%ecx
+     4a8:	cmp    $0x7f,%ecx
+     4ab:	je     4c5 <wirestack_http_files_download_open+0x1f5>
+     4ad:	cmp    %rsi,%rdx
+     4b0:	setb   %al
+     4b3:	cmp    %rdx,%rbp
+     4b6:	je     4c5 <wirestack_http_files_download_open+0x1f5>
+     4b8:	movzbl (%r11,%rdx,1),%ecx
+     4bd:	inc    %rdx
+     4c0:	cmp    $0x20,%cl
+     4c3:	jae    4a0 <wirestack_http_files_download_open+0x1d0>
+     4c5:	test   $0x1,%al
+     4c7:	jne    410 <wirestack_http_files_download_open+0x140>
+     4cd:	test   %r9b,%r9b
+     4d0:	jne    42a <wirestack_http_files_download_open+0x15a>
+     4d6:	mov    %r15,0x8(%rsp)
+     4db:	mov    0x8(%rbx),%edi
+     4de:	mov    $0x406,%esi
+     4e3:	xor    %edx,%edx
+     4e5:	xor    %eax,%eax
+     4e7:	call   4ec <wirestack_http_files_download_open+0x21c>
+     4ec:	test   %eax,%eax
+     4ee:	js     5b2 <wirestack_http_files_download_open+0x2e2>
+     4f4:	mov    %eax,%r15d
+     4f7:	mov    0x8(%rsp),%r12
+     4fc:	mov    %r12,%rdi
+     4ff:	mov    $0x2f,%esi
+     504:	call   509 <wirestack_http_files_download_open+0x239>
+     509:	test   %rax,%rax
+     50c:	je     5be <wirestack_http_files_download_open+0x2ee>
+     512:	mov    %rax,%rbp
+     515:	mov    %rbp,%rbx
+     518:	sub    %r12,%rbx
+     51b:	lea    0x1(%rbx),%rdi
+     51f:	call   524 <wirestack_http_files_download_open+0x254>
+     524:	test   %rax,%rax
+     527:	je     64a <wirestack_http_files_download_open+0x37a>
+     52d:	mov    %r12,%rsi
+     530:	mov    %rax,%r12
+     533:	mov    %rbp,0x10(%rsp)
+     538:	mov    %rax,%rdi
+     53b:	mov    %rbx,%rdx
+     53e:	call   543 <wirestack_http_files_download_open+0x273>
+     543:	movb   $0x0,(%r12,%rbx,1)
+     548:	nopl   0x0(%rax,%rax,1)
+     550:	mov    %r15d,%edi
+     553:	mov    %r12,%rsi
+     556:	mov    $0xb0000,%edx
+     55b:	xor    %eax,%eax
+     55d:	call   562 <wirestack_http_files_download_open+0x292>
+     562:	mov    %eax,%ebx
+     564:	call   569 <wirestack_http_files_download_open+0x299>
+     569:	mov    (%rax),%ebp
+     56b:	test   %ebx,%ebx
+     56d:	jns    574 <wirestack_http_files_download_open+0x2a4>
+     56f:	cmp    $0x4,%ebp
+     572:	je     550 <wirestack_http_files_download_open+0x280>
+     574:	mov    %r12,%rdi
+     577:	call   57c <wirestack_http_files_download_open+0x2ac>
+     57c:	mov    %r15d,%edi
+     57f:	call   584 <wirestack_http_files_download_open+0x2b4>
+     584:	test   %ebx,%ebx
+     586:	js     657 <wirestack_http_files_download_open+0x387>
+     58c:	mov    0x10(%rsp),%r12
+     591:	inc    %r12
+     594:	mov    %r12,%rdi
+     597:	mov    $0x2f,%esi
+     59c:	call   5a1 <wirestack_http_files_download_open+0x2d1>
+     5a1:	mov    %rax,%rbp
+     5a4:	mov    %ebx,%r15d
+     5a7:	test   %rax,%rax
+     5aa:	jne    515 <wirestack_http_files_download_open+0x245>
+     5b0:	jmp    5c1 <wirestack_http_files_download_open+0x2f1>
+     5b2:	call   5b7 <wirestack_http_files_download_open+0x2e7>
+     5b7:	mov    (%rax),%ebp
+     5b9:	jmp    657 <wirestack_http_files_download_open+0x387>
+     5be:	mov    %r15d,%ebx
+     5c1:	xor    %ebp,%ebp
+     5c3:	mov    %ebx,%edi
+     5c5:	mov    %r12,%rsi
+     5c8:	mov    $0xa0800,%edx
+     5cd:	xor    %eax,%eax
+     5cf:	call   5d4 <wirestack_http_files_download_open+0x304>
+     5d4:	mov    %eax,%r15d
+     5d7:	test   %eax,%eax
+     5d9:	jns    5e7 <wirestack_http_files_download_open+0x317>
+     5db:	call   5e0 <wirestack_http_files_download_open+0x310>
+     5e0:	mov    (%rax),%ebp
+     5e2:	cmp    $0x4,%ebp
+     5e5:	je     5c1 <wirestack_http_files_download_open+0x2f1>
+     5e7:	mov    %ebx,%edi
+     5e9:	call   5ee <wirestack_http_files_download_open+0x31e>
+     5ee:	mov    0x8(%rsp),%rdi
+     5f3:	call   5f8 <wirestack_http_files_download_open+0x328>
+     5f8:	test   %r15d,%r15d
+     5fb:	js     661 <wirestack_http_files_download_open+0x391>
+     5fd:	lea    0x20(%rsp),%rsi
+     602:	mov    %r15d,%edi
+     605:	call   60a <wirestack_http_files_download_open+0x33a>
+     60a:	test   %eax,%eax
+     60c:	je     6b3 <wirestack_http_files_download_open+0x3e3>
+     612:	call   617 <wirestack_http_files_download_open+0x347>
+     617:	movslq (%rax),%rbx
+     61a:	mov    %r15d,%edi
+     61d:	call   622 <wirestack_http_files_download_open+0x352>
+     622:	mov    0xf0(%rsp),%rax
+     62a:	mov    %rbx,(%rax)
+     62d:	lea    -0x1(%rbx),%eax
+     630:	cmp    $0x27,%eax
+     633:	ja     695 <wirestack_http_files_download_open+0x3c5>
+     635:	mov    $0x3,%ebp
+     63a:	lea    0x0(%rip),%rcx        # 641 <wirestack_http_files_download_open+0x371>
+     641:	movslq (%rcx,%rax,4),%rax
+     645:	add    %rcx,%rax
+     648:	jmp    *%rax
+     64a:	mov    %r15d,%edi
+     64d:	call   652 <wirestack_http_files_download_open+0x382>
+     652:	mov    $0xc,%ebp
+     657:	mov    0x8(%rsp),%rdi
+     65c:	call   661 <wirestack_http_files_download_open+0x391>
+     661:	movslq %ebp,%rax
+     664:	mov    0xf0(%rsp),%rcx
+     66c:	mov    %rax,(%rcx)
+     66f:	dec    %eax
+     671:	cmp    $0x27,%eax
+     674:	ja     695 <wirestack_http_files_download_open+0x3c5>
+     676:	mov    $0x3,%ebp
+     67b:	lea    0x0(%rip),%rcx        # 682 <wirestack_http_files_download_open+0x3b2>
+     682:	movslq (%rcx,%rax,4),%rax
+     686:	add    %rcx,%rax
+     689:	jmp    *%rax
+     68b:	mov    $0x4,%ebp
+     690:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     695:	mov    $0xb,%ebp
+     69a:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     69f:	mov    $0x8,%ebp
+     6a4:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     6a9:	mov    $0x5,%ebp
+     6ae:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     6b3:	mov    $0xf000,%eax
+     6b8:	and    0x38(%rsp),%eax
+     6bc:	cmp    $0x8000,%eax
+     6c1:	jne    713 <wirestack_http_files_download_open+0x443>
+     6c3:	mov    0x50(%rsp),%rbx
+     6c8:	test   %rbx,%rbx
+     6cb:	js     725 <wirestack_http_files_download_open+0x455>
+     6cd:	cmp    0x18(%rsp),%rbx
+     6d2:	ja     725 <wirestack_http_files_download_open+0x455>
+     6d4:	mov    $0x1,%edi
+     6d9:	mov    $0x20,%esi
+     6de:	call   6e3 <wirestack_http_files_download_open+0x413>
+     6e3:	test   %rax,%rax
+     6e6:	je     737 <wirestack_http_files_download_open+0x467>
+     6e8:	movabs $0x5753484646303031,%rcx
+     6f2:	mov    %rcx,(%rax)
+     6f5:	mov    %r15d,0x8(%rax)
+     6f9:	mov    %rbx,0x10(%rax)
+     6fd:	movq   $0x0,0x18(%rax)
+     705:	mov    %rax,0x0(%r13)
+     709:	mov    %rbx,(%r14)
+     70c:	xor    %ebp,%ebp
+     70e:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     713:	mov    %r15d,%edi
+     716:	call   71b <wirestack_http_files_download_open+0x44b>
+     71b:	mov    $0x6,%ebp
+     720:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     725:	mov    %r15d,%edi
+     728:	call   72d <wirestack_http_files_download_open+0x45d>
+     72d:	mov    $0x7,%ebp
+     732:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     737:	mov    %r15d,%edi
+     73a:	call   73f <wirestack_http_files_download_open+0x46f>
+     73f:	mov    $0x2,%ebp
+     744:	jmp    3d6 <wirestack_http_files_download_open+0x106>
+     749:	call   74e <wirestack_http_files_download_open+0x47e>
+     74e:	xchg   %ax,%ax
+
+0000000000000750 <wirestack_http_files_file_read>:
+     750:	push   %rbp
+     751:	push   %r15
+     753:	push   %r14
+     755:	push   %r13
+     757:	push   %r12
+     759:	push   %rbx
+     75a:	push   %rax
+     75b:	mov    $0x1,%r14d
+     761:	test   %rcx,%rcx
+     764:	je     827 <wirestack_http_files_file_read+0xd7>
+     76a:	mov    %r8,%r12
+     76d:	test   %r8,%r8
+     770:	je     827 <wirestack_http_files_file_read+0xd7>
+     776:	mov    %rcx,%rbx
+     779:	mov    %rdx,%rbp
+     77c:	mov    %rsi,%r13
+     77f:	test   %rsi,%rsi
+     782:	sete   %al
+     785:	test   %rdx,%rdx
+     788:	setne  %cl
+     78b:	js     827 <wirestack_http_files_file_read+0xd7>
+     791:	and    %cl,%al
+     793:	jne    827 <wirestack_http_files_file_read+0xd7>
+     799:	mov    %rdi,%r15
+     79c:	movq   $0x0,(%rbx)
+     7a3:	movq   $0x0,(%r12)
+     7ab:	mov    $0x9,%r14d
+     7b1:	test   %rdi,%rdi
+     7b4:	je     827 <wirestack_http_files_file_read+0xd7>
+     7b6:	movabs $0x5753484646303031,%rax
+     7c0:	cmp    %rax,(%r15)
+     7c3:	jne    827 <wirestack_http_files_file_read+0xd7>
+     7c5:	xor    %r14d,%r14d
+     7c8:	test   %rbp,%rbp
+     7cb:	je     827 <wirestack_http_files_file_read+0xd7>
+     7cd:	mov    0x10(%r15),%rax
+     7d1:	sub    0x18(%r15),%rax
+     7d5:	je     827 <wirestack_http_files_file_read+0xd7>
+     7d7:	cmp    %rbp,%rax
+     7da:	cmovb  %rax,%rbp
+     7de:	xchg   %ax,%ax
+     7e0:	mov    0x8(%r15),%edi
+     7e4:	mov    %r13,%rsi
+     7e7:	mov    %rbp,%rdx
+     7ea:	call   7ef <wirestack_http_files_file_read+0x9f>
+     7ef:	test   %rax,%rax
+     7f2:	jns    816 <wirestack_http_files_file_read+0xc6>
+     7f4:	call   7f9 <wirestack_http_files_file_read+0xa9>
+     7f9:	mov    (%rax),%edi
+     7fb:	cmp    $0x4,%edi
+     7fe:	je     7e0 <wirestack_http_files_file_read+0x90>
+     800:	mov    %r12,%rsi
+     803:	add    $0x8,%rsp
+     807:	pop    %rbx
+     808:	pop    %r12
+     80a:	pop    %r13
+     80c:	pop    %r14
+     80e:	pop    %r15
+     810:	pop    %rbp
+     811:	jmp    250 <fail_errno>
+     816:	je     821 <wirestack_http_files_file_read+0xd1>
+     818:	add    %rax,0x18(%r15)
+     81c:	mov    %rax,(%rbx)
+     81f:	jmp    827 <wirestack_http_files_file_read+0xd7>
+     821:	mov    $0xa,%r14d
+     827:	mov    %r14d,%eax
+     82a:	add    $0x8,%rsp
+     82e:	pop    %rbx
+     82f:	pop    %r12
+     831:	pop    %r13
+     833:	pop    %r14
+     835:	pop    %r15
+     837:	pop    %rbp
+     838:	ret
+     839:	nopl   0x0(%rax)
+
+0000000000000840 <wirestack_http_files_file_close>:
+     840:	push   %rbx
+     841:	test   %rdi,%rdi
+     844:	je     870 <wirestack_http_files_file_close+0x30>
+     846:	mov    %rdi,%rbx
+     849:	movabs $0x5753484646303031,%rax
+     853:	cmp    %rax,(%rdi)
+     856:	jne    870 <wirestack_http_files_file_close+0x30>
+     858:	movq   $0x0,(%rbx)
+     85f:	mov    0x8(%rbx),%edi
+     862:	call   867 <wirestack_http_files_file_close+0x27>
+     867:	mov    %rbx,%rdi
+     86a:	pop    %rbx
+     86b:	jmp    870 <wirestack_http_files_file_close+0x30>
+     870:	pop    %rbx
+     871:	ret
+     872:	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000880 <wirestack_http_files_upload_begin>:
+     880:	push   %rbp
+     881:	push   %r15
+     883:	push   %r14
+     885:	push   %r13
+     887:	push   %r12
+     889:	push   %rbx
+     88a:	sub    $0x118,%rsp
+     891:	mov    %fs:0x28,%rax
+     89a:	mov    %rax,0x110(%rsp)
+     8a2:	mov    $0x1,%ebp
+     8a7:	test   %r8,%r8
+     8aa:	je     967 <wirestack_http_files_upload_begin+0xe7>
+     8b0:	mov    %r9,%r14
+     8b3:	test   %r9,%r9
+     8b6:	je     967 <wirestack_http_files_upload_begin+0xe7>
+     8bc:	mov    %r8,%r13
+     8bf:	mov    %rdi,%rbx
+     8c2:	movq   $0x0,(%r8)
+     8c9:	movq   $0x0,(%r14)
+     8d0:	mov    $0x9,%ebp
+     8d5:	test   %rdi,%rdi
+     8d8:	je     967 <wirestack_http_files_upload_begin+0xe7>
+     8de:	movabs $0x5753484652303031,%rax
+     8e8:	cmp    %rax,(%rbx)
+     8eb:	jne    967 <wirestack_http_files_upload_begin+0xe7>
+     8ed:	mov    %rsi,%r12
+     8f0:	mov    $0x1,%ebp
+     8f5:	test   %rsi,%rsi
+     8f8:	je     94f <wirestack_http_files_upload_begin+0xcf>
+     8fa:	mov    %rdx,%r15
+     8fd:	lea    -0x401(%rdx),%rax
+     904:	cmp    $0xfffffffffffffc00,%rax
+     90a:	jb     94f <wirestack_http_files_upload_begin+0xcf>
+     90c:	mov    %rcx,0x18(%rsp)
+     911:	lea    0x1(%r15),%rdi
+     915:	call   91a <wirestack_http_files_upload_begin+0x9a>
+     91a:	test   %rax,%rax
+     91d:	je     956 <wirestack_http_files_upload_begin+0xd6>
+     91f:	mov    %rax,%rdi
+     922:	mov    %r12,%rsi
+     925:	mov    %r15,%rdx
+     928:	mov    %rax,%r12
+     92b:	call   930 <wirestack_http_files_upload_begin+0xb0>
+     930:	movb   $0x0,(%r12,%r15,1)
+     935:	mov    %r12,%rdi
+     938:	xor    %esi,%esi
+     93a:	mov    %r15,%rdx
+     93d:	call   942 <wirestack_http_files_upload_begin+0xc2>
+     942:	test   %rax,%rax
+     945:	je     992 <wirestack_http_files_upload_begin+0x112>
+     947:	mov    %r12,%rdi
+     94a:	call   94f <wirestack_http_files_upload_begin+0xcf>
+     94f:	mov    $0x16,%ebx
+     954:	jmp    960 <wirestack_http_files_upload_begin+0xe0>
+     956:	mov    $0xc,%ebx
+     95b:	mov    $0x2,%ebp
+     960:	call   965 <wirestack_http_files_upload_begin+0xe5>
+     965:	mov    %ebx,(%rax)
+     967:	mov    %fs:0x28,%rax
+     970:	cmp    0x110(%rsp),%rax
+     978:	jne    c69 <wirestack_http_files_upload_begin+0x3e9>
+     97e:	mov    %ebp,%eax
+     980:	add    $0x118,%rsp
+     987:	pop    %rbx
+     988:	pop    %r12
+     98a:	pop    %r13
+     98c:	pop    %r14
+     98e:	pop    %r15
+     990:	pop    %rbp
+     991:	ret
+     992:	movzbl (%r12),%edx
+     997:	test   %edx,%edx
+     999:	je     b60 <wirestack_http_files_upload_begin+0x2e0>
+     99f:	cmp    $0x2f,%edx
+     9a2:	je     b60 <wirestack_http_files_upload_begin+0x2e0>
+     9a8:	xor    %ecx,%ecx
+     9aa:	mov    %edx,%eax
+     9ac:	cmp    $0x2f,%al
+     9ae:	je     9c4 <wirestack_http_files_upload_begin+0x144>
+     9b0:	movzbl %al,%esi
+     9b3:	test   %esi,%esi
+     9b5:	je     9c4 <wirestack_http_files_upload_begin+0x144>
+     9b7:	movzbl 0x1(%r12,%rcx,1),%eax
+     9bd:	inc    %rcx
+     9c0:	cmp    $0x2f,%al
+     9c2:	jne    9b0 <wirestack_http_files_upload_begin+0x130>
+     9c4:	test   %rcx,%rcx
+     9c7:	je     b60 <wirestack_http_files_upload_begin+0x2e0>
+     9cd:	cmp    $0x2,%rcx
+     9d1:	je     9e3 <wirestack_http_files_upload_begin+0x163>
+     9d3:	cmp    $0x1,%rcx
+     9d7:	jne    9f5 <wirestack_http_files_upload_begin+0x175>
+     9d9:	cmp    $0x2e,%dl
+     9dc:	jne    9f5 <wirestack_http_files_upload_begin+0x175>
+     9de:	jmp    b60 <wirestack_http_files_upload_begin+0x2e0>
+     9e3:	cmp    $0x2e,%dl
+     9e6:	jne    9f5 <wirestack_http_files_upload_begin+0x175>
+     9e8:	cmpb   $0x2e,0x1(%r12)
+     9ee:	jne    9fe <wirestack_http_files_upload_begin+0x17e>
+     9f0:	jmp    b60 <wirestack_http_files_upload_begin+0x2e0>
+     9f5:	cmp    $0x20,%dl
+     9f8:	jb     b60 <wirestack_http_files_upload_begin+0x2e0>
+     9fe:	lea    -0x1(%rcx),%rdi
+     a02:	mov    $0x1,%sil
+     a05:	mov    $0x1,%ebp
+     a0a:	cmp    $0x5c,%dl
+     a0d:	je     a31 <wirestack_http_files_upload_begin+0x1b1>
+     a0f:	movzbl %dl,%edx
+     a12:	cmp    $0x7f,%edx
+     a15:	je     a31 <wirestack_http_files_upload_begin+0x1b1>
+     a17:	cmp    %rcx,%rbp
+     a1a:	setb   %sil
+     a1e:	sub    $0x1,%rdi
+     a22:	jb     a31 <wirestack_http_files_upload_begin+0x1b1>
+     a24:	movzbl (%r12,%rbp,1),%edx
+     a29:	inc    %rbp
+     a2c:	cmp    $0x20,%dl
+     a2f:	jae    a0a <wirestack_http_files_upload_begin+0x18a>
+     a31:	test   $0x1,%sil
+     a35:	jne    b60 <wirestack_http_files_upload_begin+0x2e0>
+     a3b:	test   %al,%al
+     a3d:	jne    b60 <wirestack_http_files_upload_begin+0x2e0>
+     a43:	mov    0x8(%rbx),%edi
+     a46:	lea    0x80(%rsp),%rdx
+     a4e:	mov    %r12,%rsi
+     a51:	mov    $0x100,%ecx
+     a56:	call   a5b <wirestack_http_files_upload_begin+0x1db>
+     a5b:	test   %eax,%eax
+     a5d:	je     b72 <wirestack_http_files_upload_begin+0x2f2>
+     a63:	mov    %r12,0x10(%rsp)
+     a68:	call   a6d <wirestack_http_files_upload_begin+0x1ed>
+     a6d:	mov    (%rax),%ebp
+     a6f:	cmp    $0x2,%ebp
+     a72:	jne    b84 <wirestack_http_files_upload_begin+0x304>
+     a78:	mov    %rax,%r12
+     a7b:	mov    $0x1,%edi
+     a80:	mov    $0x38,%esi
+     a85:	call   a8a <wirestack_http_files_upload_begin+0x20a>
+     a8a:	test   %rax,%rax
+     a8d:	je     b9f <wirestack_http_files_upload_begin+0x31f>
+     a93:	mov    %rax,%rbp
+     a96:	mov    0x8(%rbx),%edi
+     a99:	mov    $0x406,%esi
+     a9e:	xor    %edx,%edx
+     aa0:	xor    %eax,%eax
+     aa2:	call   aa7 <wirestack_http_files_upload_begin+0x227>
+     aa7:	mov    %eax,%r15d
+     aaa:	mov    %eax,0x8(%rbp)
+     aad:	movl   $0xffffffff,0xc(%rbp)
+     ab4:	mov    0x10(%rsp),%rax
+     ab9:	mov    %rax,0x18(%rbp)
+     abd:	mov    0x18(%rsp),%rax
+     ac2:	mov    %rax,0x20(%rbp)
+     ac6:	test   %r15d,%r15d
+     ac9:	js     bef <wirestack_http_files_upload_begin+0x36f>
+     acf:	mov    %rbp,0x8(%rsp)
+     ad4:	lea    0x20(%rsp),%rbp
+     ad9:	movl   $0x0,0x18(%rsp)
+     ae1:	mov    $0x1,%ebx
+     ae6:	lock xadd %rbx,0x0(%rip)        # aef <wirestack_http_files_upload_begin+0x26f>
+     aef:	call   af4 <wirestack_http_files_upload_begin+0x274>
+     af4:	movslq %eax,%rcx
+     af7:	mov    $0x60,%esi
+     afc:	mov    %rbp,%rdi
+     aff:	lea    0x0(%rip),%rdx        # b06 <wirestack_http_files_upload_begin+0x286>
+     b06:	mov    %rbx,%r8
+     b09:	xor    %eax,%eax
+     b0b:	call   b10 <wirestack_http_files_upload_begin+0x290>
+     b10:	add    $0xffffffa0,%eax
+     b13:	cmp    $0xffffffa1,%eax
+     b16:	jb     c32 <wirestack_http_files_upload_begin+0x3b2>
+     b1c:	mov    %r15d,%edi
+     b1f:	mov    %rbp,%rsi
+     b22:	mov    $0xa00c1,%edx
+     b27:	mov    $0x180,%ecx
+     b2c:	xor    %eax,%eax
+     b2e:	call   b33 <wirestack_http_files_upload_begin+0x2b3>
+     b33:	test   %eax,%eax
+     b35:	jns    bb3 <wirestack_http_files_upload_begin+0x333>
+     b37:	mov    (%r12),%ebx
+     b3b:	cmp    $0x4,%ebx
+     b3e:	je     b1c <wirestack_http_files_upload_begin+0x29c>
+     b40:	cmp    $0x11,%ebx
+     b43:	jne    b56 <wirestack_http_files_upload_begin+0x2d6>
+     b45:	mov    0x18(%rsp),%eax
+     b49:	inc    %eax
+     b4b:	mov    %eax,0x18(%rsp)
+     b4f:	cmp    $0x80,%eax
+     b54:	jne    ae1 <wirestack_http_files_upload_begin+0x261>
+     b56:	mov    0x8(%rsp),%rdi
+     b5b:	jmp    bf6 <wirestack_http_files_upload_begin+0x376>
+     b60:	mov    %r12,%rdi
+     b63:	call   b68 <wirestack_http_files_upload_begin+0x2e8>
+     b68:	mov    $0x1,%ebp
+     b6d:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     b72:	mov    %r12,%rdi
+     b75:	call   b7a <wirestack_http_files_upload_begin+0x2fa>
+     b7a:	mov    $0x8,%ebp
+     b7f:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     b84:	mov    0x10(%rsp),%rdi
+     b89:	call   b8e <wirestack_http_files_upload_begin+0x30e>
+     b8e:	mov    %ebp,%edi
+     b90:	mov    %r14,%rsi
+     b93:	call   250 <fail_errno>
+     b98:	mov    %eax,%ebp
+     b9a:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     b9f:	mov    0x10(%rsp),%rdi
+     ba4:	call   ba9 <wirestack_http_files_upload_begin+0x329>
+     ba9:	mov    $0x2,%ebp
+     bae:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     bb3:	mov    %eax,%ebx
+     bb5:	lea    0x20(%rsp),%rdi
+     bba:	call   bbf <wirestack_http_files_upload_begin+0x33f>
+     bbf:	mov    0x8(%rsp),%rbp
+     bc4:	mov    %rax,0x10(%rbp)
+     bc8:	test   %rax,%rax
+     bcb:	je     c01 <wirestack_http_files_upload_begin+0x381>
+     bcd:	mov    %ebx,0xc(%rbp)
+     bd0:	movabs $0x5753484652303031,%rax
+     bda:	add    $0x3000000,%rax
+     be0:	mov    %rax,0x0(%rbp)
+     be4:	mov    %rbp,0x0(%r13)
+     be8:	xor    %ebp,%ebp
+     bea:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     bef:	mov    (%r12),%ebx
+     bf3:	mov    %rbp,%rdi
+     bf6:	xor    %esi,%esi
+     bf8:	call   c70 <destroy_upload>
+     bfd:	mov    %ebx,%edi
+     bff:	jmp    b90 <wirestack_http_files_upload_begin+0x310>
+     c01:	mov    %ebx,%edi
+     c03:	call   c08 <wirestack_http_files_upload_begin+0x388>
+     c08:	movl   $0xffffffff,0xc(%rbp)
+     c0f:	lea    0x20(%rsp),%rsi
+     c14:	mov    %r15d,%edi
+     c17:	xor    %edx,%edx
+     c19:	call   c1e <wirestack_http_files_upload_begin+0x39e>
+     c1e:	mov    %rbp,%rdi
+     c21:	xor    %esi,%esi
+     c23:	call   c70 <destroy_upload>
+     c28:	mov    $0x2,%ebp
+     c2d:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     c32:	test   %r15d,%r15d
+     c35:	js     c4b <wirestack_http_files_upload_begin+0x3cb>
+     c37:	mov    %r15d,%edi
+     c3a:	call   c3f <wirestack_http_files_upload_begin+0x3bf>
+     c3f:	mov    0x8(%rsp),%rax
+     c44:	movl   $0xffffffff,0x8(%rax)
+     c4b:	mov    0x10(%rsp),%rdi
+     c50:	call   c55 <wirestack_http_files_upload_begin+0x3d5>
+     c55:	mov    0x8(%rsp),%rdi
+     c5a:	call   c5f <wirestack_http_files_upload_begin+0x3df>
+     c5f:	mov    $0xb,%ebp
+     c64:	jmp    967 <wirestack_http_files_upload_begin+0xe7>
+     c69:	call   c6e <wirestack_http_files_upload_begin+0x3ee>
+     c6e:	xchg   %ax,%ax
+
+0000000000000c70 <destroy_upload>:
+     c70:	push   %rbp
+     c71:	push   %rbx
+     c72:	push   %rax
+     c73:	mov    %esi,%ebp
+     c75:	mov    %rdi,%rbx
+     c78:	mov    0xc(%rdi),%edi
+     c7b:	test   %edi,%edi
+     c7d:	js     c8b <destroy_upload+0x1b>
+     c7f:	call   c84 <destroy_upload+0x14>
+     c84:	movl   $0xffffffff,0xc(%rbx)
+     c8b:	test   %ebp,%ebp
+     c8d:	je     ca6 <destroy_upload+0x36>
+     c8f:	mov    0x8(%rbx),%edi
+     c92:	test   %edi,%edi
+     c94:	js     ca6 <destroy_upload+0x36>
+     c96:	mov    0x10(%rbx),%rsi
+     c9a:	test   %rsi,%rsi
+     c9d:	je     ca6 <destroy_upload+0x36>
+     c9f:	xor    %edx,%edx
+     ca1:	call   ca6 <destroy_upload+0x36>
+     ca6:	mov    0x8(%rbx),%edi
+     ca9:	test   %edi,%edi
+     cab:	js     cb9 <destroy_upload+0x49>
+     cad:	call   cb2 <destroy_upload+0x42>
+     cb2:	movl   $0xffffffff,0x8(%rbx)
+     cb9:	movq   $0x0,(%rbx)
+     cc0:	mov    0x10(%rbx),%rdi
+     cc4:	call   cc9 <destroy_upload+0x59>
+     cc9:	mov    0x18(%rbx),%rdi
+     ccd:	call   cd2 <destroy_upload+0x62>
+     cd2:	mov    %rbx,%rdi
+     cd5:	add    $0x8,%rsp
+     cd9:	pop    %rbx
+     cda:	pop    %rbp
+     cdb:	jmp    ce0 <wirestack_http_files_upload_write>
+
+0000000000000ce0 <wirestack_http_files_upload_write>:
+     ce0:	push   %rbp
+     ce1:	push   %r15
+     ce3:	push   %r14
+     ce5:	push   %r13
+     ce7:	push   %r12
+     ce9:	push   %rbx
+     cea:	push   %rax
+     ceb:	mov    $0x1,%eax
+     cf0:	test   %rcx,%rcx
+     cf3:	je     dfe <wirestack_http_files_upload_write+0x11e>
+     cf9:	mov    %rcx,%rbx
+     cfc:	mov    %rdx,%r14
+     cff:	mov    %rsi,%r12
+     d02:	test   %rsi,%rsi
+     d05:	sete   %cl
+     d08:	test   %rdx,%rdx
+     d0b:	setne  %dl
+     d0e:	js     dfe <wirestack_http_files_upload_write+0x11e>
+     d14:	and    %dl,%cl
+     d16:	jne    dfe <wirestack_http_files_upload_write+0x11e>
+     d1c:	mov    %rdi,%r15
+     d1f:	movq   $0x0,(%rbx)
+     d26:	mov    $0x9,%eax
+     d2b:	test   %rdi,%rdi
+     d2e:	je     dfe <wirestack_http_files_upload_write+0x11e>
+     d34:	movabs $0x5753484655303031,%rcx
+     d3e:	cmp    %rcx,(%r15)
+     d41:	jne    dfe <wirestack_http_files_upload_write+0x11e>
+     d47:	cmpl   $0x0,0xc(%r15)
+     d4c:	js     dfe <wirestack_http_files_upload_write+0x11e>
+     d52:	mov    0x20(%r15),%rdx
+     d56:	mov    0x28(%r15),%rcx
+     d5a:	sub    %rcx,%rdx
+     d5d:	mov    $0x7,%eax
+     d62:	cmp    %r14,%rdx
+     d65:	jb     dfe <wirestack_http_files_upload_write+0x11e>
+     d6b:	test   %r14,%r14
+     d6e:	je     db9 <wirestack_http_files_upload_write+0xd9>
+     d70:	xor    %eax,%eax
+     d72:	lea    (%r12,%rax,1),%r13
+     d76:	mov    %r14,%rbp
+     d79:	mov    %rax,(%rsp)
+     d7d:	sub    %rax,%rbp
+     d80:	mov    0xc(%r15),%edi
+     d84:	mov    %r13,%rsi
+     d87:	mov    %rbp,%rdx
+     d8a:	call   d8f <wirestack_http_files_upload_write+0xaf>
+     d8f:	test   %rax,%rax
+     d92:	jns    da4 <wirestack_http_files_upload_write+0xc4>
+     d94:	call   d99 <wirestack_http_files_upload_write+0xb9>
+     d99:	movslq (%rax),%rax
+     d9c:	cmp    $0x4,%rax
+     da0:	je     d80 <wirestack_http_files_upload_write+0xa0>
+     da2:	jmp    dc4 <wirestack_http_files_upload_write+0xe4>
+     da4:	je     e0d <wirestack_http_files_upload_write+0x12d>
+     da6:	mov    (%rsp),%rcx
+     daa:	add    %rax,%rcx
+     dad:	mov    %rcx,%rax
+     db0:	cmp    %r14,%rcx
+     db3:	jb     d72 <wirestack_http_files_upload_write+0x92>
+     db5:	mov    0x28(%r15),%rcx
+     db9:	add    %r14,%rcx
+     dbc:	mov    %rcx,0x28(%r15)
+     dc0:	xor    %eax,%eax
+     dc2:	jmp    dfe <wirestack_http_files_upload_write+0x11e>
+     dc4:	mov    %rax,(%rbx)
+     dc7:	lea    -0x1(%rax),%ecx
+     dca:	cmp    $0x27,%ecx
+     dcd:	ja     deb <wirestack_http_files_upload_write+0x10b>
+     dcf:	mov    $0x4,%eax
+     dd4:	lea    0x0(%rip),%rdx        # ddb <wirestack_http_files_upload_write+0xfb>
+     ddb:	movslq (%rdx,%rcx,4),%rcx
+     ddf:	add    %rdx,%rcx
+     de2:	jmp    *%rcx
+     de4:	mov    $0x3,%eax
+     de9:	jmp    dfe <wirestack_http_files_upload_write+0x11e>
+     deb:	mov    $0xb,%eax
+     df0:	jmp    dfe <wirestack_http_files_upload_write+0x11e>
+     df2:	mov    $0x8,%eax
+     df7:	jmp    dfe <wirestack_http_files_upload_write+0x11e>
+     df9:	mov    $0x5,%eax
+     dfe:	add    $0x8,%rsp
+     e02:	pop    %rbx
+     e03:	pop    %r12
+     e05:	pop    %r13
+     e07:	pop    %r14
+     e09:	pop    %r15
+     e0b:	pop    %rbp
+     e0c:	ret
+     e0d:	movq   $0x5,(%rbx)
+     e14:	mov    $0xb,%eax
+     e19:	jmp    dfe <wirestack_http_files_upload_write+0x11e>
+     e1b:	nopl   0x0(%rax,%rax,1)
+
+0000000000000e20 <wirestack_http_files_upload_prepare>:
+     e20:	push   %r14
+     e22:	push   %rbx
+     e23:	push   %rax
+     e24:	test   %rsi,%rsi
+     e27:	je     e94 <wirestack_http_files_upload_prepare+0x74>
+     e29:	mov    %rsi,%r14
+     e2c:	mov    %rdi,%rbx
+     e2f:	movq   $0x0,(%rsi)
+     e36:	mov    $0x9,%eax
+     e3b:	test   %rdi,%rdi
+     e3e:	je     e99 <wirestack_http_files_upload_prepare+0x79>
+     e40:	movabs $0x5753484655303031,%rcx
+     e4a:	cmp    %rcx,(%rbx)
+     e4d:	jne    e99 <wirestack_http_files_upload_prepare+0x79>
+     e4f:	mov    0xc(%rbx),%edi
+     e52:	test   %edi,%edi
+     e54:	js     e99 <wirestack_http_files_upload_prepare+0x79>
+     e56:	cmpl   $0x0,0x30(%rbx)
+     e5a:	jne    e99 <wirestack_http_files_upload_prepare+0x79>
+     e5c:	call   e61 <wirestack_http_files_upload_prepare+0x41>
+     e61:	test   %eax,%eax
+     e63:	je     ea1 <wirestack_http_files_upload_prepare+0x81>
+     e65:	call   e6a <wirestack_http_files_upload_prepare+0x4a>
+     e6a:	movslq (%rax),%rax
+     e6d:	mov    %rax,(%r14)
+     e70:	lea    -0x1(%rax),%ecx
+     e73:	cmp    $0x27,%ecx
+     e76:	ja     ed5 <wirestack_http_files_upload_prepare+0xb5>
+     e78:	mov    $0x3,%eax
+     e7d:	lea    0x0(%rip),%rdx        # e84 <wirestack_http_files_upload_prepare+0x64>
+     e84:	movslq (%rdx,%rcx,4),%rcx
+     e88:	add    %rdx,%rcx
+     e8b:	jmp    *%rcx
+     e8d:	mov    $0x4,%eax
+     e92:	jmp    e99 <wirestack_http_files_upload_prepare+0x79>
+     e94:	mov    $0x1,%eax
+     e99:	add    $0x8,%rsp
+     e9d:	pop    %rbx
+     e9e:	pop    %r14
+     ea0:	ret
+     ea1:	mov    0xc(%rbx),%edi
+     ea4:	call   ea9 <wirestack_http_files_upload_prepare+0x89>
+     ea9:	movl   $0xffffffff,0xc(%rbx)
+     eb0:	test   %eax,%eax
+     eb2:	je     eca <wirestack_http_files_upload_prepare+0xaa>
+     eb4:	call   eb9 <wirestack_http_files_upload_prepare+0x99>
+     eb9:	mov    (%rax),%edi
+     ebb:	mov    %r14,%rsi
+     ebe:	add    $0x8,%rsp
+     ec2:	pop    %rbx
+     ec3:	pop    %r14
+     ec5:	jmp    250 <fail_errno>
+     eca:	movl   $0x1,0x30(%rbx)
+     ed1:	xor    %eax,%eax
+     ed3:	jmp    e99 <wirestack_http_files_upload_prepare+0x79>
+     ed5:	mov    $0xb,%eax
+     eda:	jmp    e99 <wirestack_http_files_upload_prepare+0x79>
+     edc:	mov    $0x5,%eax
+     ee1:	jmp    e99 <wirestack_http_files_upload_prepare+0x79>
+     ee3:	mov    $0x8,%eax
+     ee8:	jmp    e99 <wirestack_http_files_upload_prepare+0x79>
+     eea:	nopw   0x0(%rax,%rax,1)
+
+0000000000000ef0 <wirestack_http_files_upload_publish>:
+     ef0:	push   %rbp
+     ef1:	push   %r15
+     ef3:	push   %r14
+     ef5:	push   %r13
+     ef7:	push   %r12
+     ef9:	push   %rbx
+     efa:	sub    $0x18,%rsp
+     efe:	test   %rsi,%rsi
+     f01:	je     fc6 <wirestack_http_files_upload_publish+0xd6>
+     f07:	mov    %rsi,%rbx
+     f0a:	mov    %rdi,%rbp
+     f0d:	movq   $0x0,(%rsi)
+     f14:	mov    $0x9,%r14d
+     f1a:	test   %rdi,%rdi
+     f1d:	je     fcc <wirestack_http_files_upload_publish+0xdc>
+     f23:	movabs $0x5753484655303031,%rax
+     f2d:	cmp    %rax,0x0(%rbp)
+     f31:	jne    fcc <wirestack_http_files_upload_publish+0xdc>
+     f37:	cmpl   $0x0,0xc(%rbp)
+     f3b:	jns    fcc <wirestack_http_files_upload_publish+0xdc>
+     f41:	cmpl   $0x0,0x30(%rbp)
+     f45:	je     fcc <wirestack_http_files_upload_publish+0xdc>
+     f4b:	mov    0x8(%rbp),%r15d
+     f4f:	mov    0x10(%rbp),%r13
+     f53:	mov    0x18(%rbp),%r12
+     f57:	xor    %r14d,%r14d
+     f5a:	mov    $0x13c,%edi
+     f5f:	mov    %r15d,%esi
+     f62:	mov    %r13,%rdx
+     f65:	mov    %r15d,%ecx
+     f68:	mov    %r12,%r8
+     f6b:	mov    $0x1,%r9d
+     f71:	xor    %eax,%eax
+     f73:	call   f78 <wirestack_http_files_upload_publish+0x88>
+     f78:	test   %rax,%rax
+     f7b:	je     1034 <wirestack_http_files_upload_publish+0x144>
+     f81:	mov    %r12,0x10(%rsp)
+     f86:	call   f8b <wirestack_http_files_upload_publish+0x9b>
+     f8b:	mov    (%rax),%r12d
+     f8e:	cmp    $0x26,%r12d
+     f92:	je     f9a <wirestack_http_files_upload_publish+0xaa>
+     f94:	cmp    $0x16,%r12d
+     f98:	jne    1009 <wirestack_http_files_upload_publish+0x119>
+     f9a:	mov    %rax,0x8(%rsp)
+     f9f:	mov    %r15d,%edi
+     fa2:	mov    %r13,%rsi
+     fa5:	mov    %r15d,%edx
+     fa8:	mov    0x10(%rsp),%r12
+     fad:	mov    %r12,%rcx
+     fb0:	xor    %r8d,%r8d
+     fb3:	call   fb8 <wirestack_http_files_upload_publish+0xc8>
+     fb8:	test   %eax,%eax
+     fba:	je     fde <wirestack_http_files_upload_publish+0xee>
+     fbc:	mov    0x8(%rsp),%rax
+     fc1:	mov    (%rax),%r12d
+     fc4:	jmp    1009 <wirestack_http_files_upload_publish+0x119>
+     fc6:	mov    $0x1,%r14d
+     fcc:	mov    %r14d,%eax
+     fcf:	add    $0x18,%rsp
+     fd3:	pop    %rbx
+     fd4:	pop    %r12
+     fd6:	pop    %r13
+     fd8:	pop    %r14
+     fda:	pop    %r15
+     fdc:	pop    %rbp
+     fdd:	ret
+     fde:	mov    %r15d,%edi
+     fe1:	mov    %r13,%rsi
+     fe4:	xor    %edx,%edx
+     fe6:	call   feb <wirestack_http_files_upload_publish+0xfb>
+     feb:	test   %eax,%eax
+     fed:	je     1034 <wirestack_http_files_upload_publish+0x144>
+     fef:	mov    %r12,%rsi
+     ff2:	mov    0x8(%rsp),%rbp
+     ff7:	mov    0x0(%rbp),%r12d
+     ffb:	mov    %r15d,%edi
+     ffe:	xor    %edx,%edx
+    1000:	call   1005 <wirestack_http_files_upload_publish+0x115>
+    1005:	mov    %r12d,0x0(%rbp)
+    1009:	movslq %r12d,%rax
+    100c:	mov    %rax,(%rbx)
+    100f:	dec    %eax
+    1011:	cmp    $0x27,%eax
+    1014:	ja     1040 <wirestack_http_files_upload_publish+0x150>
+    1016:	mov    $0x3,%r14d
+    101c:	lea    0x0(%rip),%rcx        # 1023 <wirestack_http_files_upload_publish+0x133>
+    1023:	movslq (%rcx,%rax,4),%rax
+    1027:	add    %rcx,%rax
+    102a:	jmp    *%rax
+    102c:	mov    $0x4,%r14d
+    1032:	jmp    fcc <wirestack_http_files_upload_publish+0xdc>
+    1034:	mov    %rbp,%rdi
+    1037:	xor    %esi,%esi
+    1039:	call   c70 <destroy_upload>
+    103e:	jmp    fcc <wirestack_http_files_upload_publish+0xdc>
+    1040:	mov    $0xb,%r14d
+    1046:	jmp    fcc <wirestack_http_files_upload_publish+0xdc>
+    1048:	mov    $0x8,%r14d
+    104e:	jmp    fcc <wirestack_http_files_upload_publish+0xdc>
+    1053:	mov    $0x5,%r14d
+    1059:	jmp    fcc <wirestack_http_files_upload_publish+0xdc>
+    105e:	xchg   %ax,%ax
+
+0000000000001060 <wirestack_http_files_upload_abort>:
+    1060:	test   %rdi,%rdi
+    1063:	je     107e <wirestack_http_files_upload_abort+0x1e>
+    1065:	movabs $0x5753484655303031,%rax
+    106f:	cmp    %rax,(%rdi)
+    1072:	jne    107e <wirestack_http_files_upload_abort+0x1e>
+    1074:	mov    $0x1,%esi
+    1079:	jmp    c70 <destroy_upload>
+    107e:	ret

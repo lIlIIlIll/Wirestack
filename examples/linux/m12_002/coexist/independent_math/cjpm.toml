@@ -1,0 +1,5 @@
+[package]
+name = "independent_math"
+version = "1.0.0"
+cjc-version = "1.1.0"
+output-type = "static"

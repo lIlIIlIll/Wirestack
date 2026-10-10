@@ -1,0 +1,369 @@
+<pid>:	find library=libcap.so.2 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libcap.so.2
+<pid>:	
+<pid>:	find library=libgcc_s.so.1 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libgcc_s.so.1
+<pid>:	
+<pid>:	find library=libc.so.6 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /lib64/ld-linux-x86-64.so.2
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libgcc_s.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libcap.so.2
+<pid>:	
+<pid>:	
+<pid>:	initialize program: bwrap
+<pid>:	
+<pid>:	
+<pid>:	transferring control: bwrap
+<pid>:	
+<pid>:	find library=libc.so.6 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /lib64/ld-linux-x86-64.so.2
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	initialize program: /usr/bin/env
+<pid>:	
+<pid>:	
+<pid>:	transferring control: /usr/bin/env
+<pid>:	
+<pid>:	find library=libcap.so.2 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libcap.so.2
+<pid>:	
+<pid>:	find library=libncursesw.so.6 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libncursesw.so.6
+<pid>:	
+<pid>:	find library=libm.so.6 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libm.so.6
+<pid>:	
+<pid>:	find library=libc.so.6 [0]; searching
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /lib64/ld-linux-x86-64.so.2
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libm.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libncursesw.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libcap.so.2
+<pid>:	
+<pid>:	
+<pid>:	initialize program: zsh
+<pid>:	
+<pid>:	
+<pid>:	transferring control: zsh
+<pid>:	
+<pid>:	find library=libcangjie-runtime.so [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/glibc-hwcaps/x86-64-v3:$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/glibc-hwcaps/x86-64-v2:$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative/glibc-hwcaps/x86-64-v3:<sdk-1>/runtime/lib/linux_x86_64_cjnative/glibc-hwcaps/x86-64-v2:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v3:<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v2:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/glibc-hwcaps/x86-64-v3/libcangjie-runtime.so
+<pid>:	    (no such file)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/glibc-hwcaps/x86-64-v2/libcangjie-runtime.so
+<pid>:	    (no such file)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libcangjie-runtime.so
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/glibc-hwcaps/x86-64-v3/libcangjie-runtime.so
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/glibc-hwcaps/x86-64-v2/libcangjie-runtime.so
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so
+<pid>:	
+<pid>:	find library=libboundscheck.so [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v3:<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v2:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libboundscheck.so
+<pid>:	
+<pid>:	find library=libm.so.6 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v3:<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v2:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libm.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libm.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v3/libm.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/glibc-hwcaps/x86-64-v2/libm.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libm.so.6
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libm.so.6
+<pid>:	
+<pid>:	find library=libc.so.6 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libc.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libc.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libc.so.6
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libc.so.6
+<pid>:	
+<pid>:	find library=libstdc++.so.6 [0]; searching
+<pid>:	 search path=<sdk-1>/runtime/lib/linux_x86_64_cjnative		(LD_LIBRARY_PATH)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libstdc++.so.6
+<pid>:	    (no such file)
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libstdc++.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libstdc++.so.6
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libstdc++.so.6
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libstdc++.so.6
+<pid>:	
+<pid>:	find library=libgcc_s.so.1 [0]; searching
+<pid>:	 search path=<sdk-1>/runtime/lib/linux_x86_64_cjnative		(LD_LIBRARY_PATH)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libgcc_s.so.1
+<pid>:	    (no such file)
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libgcc_s.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libgcc_s.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libgcc_s.so.1
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libgcc_s.so.1
+<pid>:	
+<pid>:	find library=libpthread.so.0 [0]; searching
+<pid>:	 search path=<sdk-1>/runtime/lib/linux_x86_64_cjnative		(LD_LIBRARY_PATH)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libpthread.so.0
+<pid>:	    (no such file)
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libpthread.so.0
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libpthread.so.0
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libpthread.so.0
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libpthread.so.0
+<pid>:	
+<pid>:	find library=libdl.so.2 [0]; searching
+<pid>:	 search path=<sdk-1>/runtime/lib/linux_x86_64_cjnative		(LD_LIBRARY_PATH)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libdl.so.2
+<pid>:	    (no such file)
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libdl.so.2
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libdl.so.2
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libdl.so.2
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libdl.so.2
+<pid>:	
+<pid>:	
+<pid>:	calling init: /lib64/ld-linux-x86-64.so.2
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libc.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libdl.so.2
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libpthread.so.0
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libgcc_s.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libm.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libstdc++.so.6
+<pid>:	
+<pid>:	
+<pid>:	calling init: $HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libboundscheck.so
+<pid>:	
+<pid>:	
+<pid>:	calling init: <sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so
+<pid>:	
+<pid>:	
+<pid>:	initialize program: <scratch>/coexist-1/target/release/bin/main
+<pid>:	
+<pid>:	
+<pid>:	transferring control: <scratch>/coexist-1/target/release/bin/main
+<pid>:	
+<pid>:	find library=libcrypto.so.3 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libcrypto.so.3
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcrypto.so.3
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libcrypto.so.3
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libcrypto.so.3
+<pid>:	
+<pid>:	find library=libz.so.1 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libz.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libz.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libz.so.1
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libz.so.1
+<pid>:	
+<pid>:	find library=libbrotlienc.so.1 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libbrotlienc.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libbrotlienc.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libbrotlienc.so.1
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libbrotlienc.so.1
+<pid>:	
+<pid>:	find library=libbrotlidec.so.1 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libbrotlidec.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libbrotlidec.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libbrotlidec.so.1
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libbrotlidec.so.1
+<pid>:	
+<pid>:	find library=libzstd.so.1 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libzstd.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libzstd.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libzstd.so.1
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libzstd.so.1
+<pid>:	
+<pid>:	find library=libbrotlicommon.so.1 [0]; searching
+<pid>:	 search path=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx:<sdk-1>/runtime/lib/linux_x86_64_cjnative:<sdk-1>/tools/lib		(LD_LIBRARY_PATH)
+<pid>:	  trying file=$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libbrotlicommon.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/runtime/lib/linux_x86_64_cjnative/libbrotlicommon.so.1
+<pid>:	    (no such file)
+<pid>:	  trying file=<sdk-1>/tools/lib/libbrotlicommon.so.1
+<pid>:	    (no such file)
+<pid>:	 search cache=/etc/ld.so.cache
+<pid>:	  trying file=/usr/lib/libbrotlicommon.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libbrotlicommon.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libzstd.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libbrotlidec.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libbrotlienc.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libz.so.1
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libcrypto.so.3
+<pid>:	
+<pid>:	
+<pid>:	calling init: /usr/lib/libssl.so.3
+<pid>:	
+<pid>:	
+<pid>:	calling fini:  [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: <sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: $HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/linux_x86_64_cjnative/dynamic/stdx/libboundscheck.so [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libstdc++.so.6 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libgcc_s.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libpthread.so.0 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libdl.so.2 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libssl.so.3 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libcrypto.so.3 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libz.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libbrotlienc.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libm.so.6 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libbrotlidec.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libzstd.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libbrotlicommon.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libc.so.6 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /lib64/ld-linux-x86-64.so.2 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini:  [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libcap.so.2 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libgcc_s.so.1 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /usr/lib/libc.so.6 [0]
+<pid>:	
+<pid>:	
+<pid>:	calling fini: /lib64/ld-linux-x86-64.so.2 [0]
+<pid>:	

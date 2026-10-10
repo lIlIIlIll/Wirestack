@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-overflow.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000229b8 <_init@@Base>:
+   229b8:	sub    $0x8,%rsp
+   229bc:	mov    0x2235dd(%rip),%rax        # 245fa0 <__gmon_start__>
+   229c3:	test   %rax,%rax
+   229c6:	je     229ca <_init@@Base+0x12>
+   229c8:	call   *%rax
+   229ca:	add    $0x8,%rsp
+   229ce:	ret
+
+Disassembly of section .plt:
+
+00000000000229d0 <_CNat9Exception6<init>HRNat6StringE@plt-0x10>:
+   229d0:	push   0x223632(%rip)        # 246008 <_CNap20NATIVE_32_SHIFT_MASKE@@Base+0x20d358>
+   229d6:	jmp    *0x223634(%rip)        # 246010 <_CNap20NATIVE_32_SHIFT_MASKE@@Base+0x20d360>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "124a42e9c342fce0b3e9cfbed9a6fc867f5fc915366f59b217db323abb219b59"}

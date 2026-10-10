@@ -1,0 +1,4 @@
+An exception has occurred:
+IllegalStateException: coexistence assertion
+	 at wirestack_m12_002_coexist::require(Bool)(<scratch>/coexist-0/src/main.cj:11)
+	 at wirestack_m12_002_coexist::main(std.core::Array<...>)(<scratch>/coexist-0/src/main.cj:55)
