@@ -1769,6 +1769,8 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/redirect.cj::function:stringPrefix#g0(Array<Byte>,Int64)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/redirect.cj::function:stringRange#g0(Array<Byte>,Int64,Int64)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:isIdempotentMethod#g0(HttpMethod)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:retryBeforeRequestSubmission#g0(transport.NetworkException)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:retryHttp1Execution#g0(http1.Http1RequestExecutionException)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:retryWriteFailure#g0(http1.Http1RequestWriteException)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:retryable#g0(transport.Retryability)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/server.cj::PublicHttp1Handler::constructor:init#g0(HttpServerHandler,internal.HttpResourceBudget,HttpConnectionCancellationHandle)",
@@ -126856,9 +126858,9 @@
           "byteOffset": 1185
         },
         "end": {
-          "line": 51,
+          "line": 52,
           "column": 6,
-          "byteOffset": 2197
+          "byteOffset": 2294
         }
       },
       "headerSpelling": "public func shouldRetry(request: HttpRequest, error: Exception,\n        attemptsStarted: Int64, context: OperationContext,\n        responseCommitted!: Bool = false): Bool",
@@ -156132,9 +156134,9 @@
           "byteOffset": 246
         },
         "end": {
-          "line": 52,
+          "line": 53,
           "column": 2,
-          "byteOffset": 2199
+          "byteOffset": 2296
         }
       },
       "headerSpelling": "public class HttpRetryPolicy",
@@ -181557,14 +181559,14 @@
       "source": {
         "path": "src/http/retry.cj",
         "start": {
-          "line": 54,
+          "line": 55,
           "column": 1,
-          "byteOffset": 2201
+          "byteOffset": 2298
         },
         "end": {
-          "line": 59,
+          "line": 60,
           "column": 2,
-          "byteOffset": 2396
+          "byteOffset": 2493
         }
       },
       "headerSpelling": "private func isIdempotentMethod(method: HttpMethod): Bool",
@@ -181578,6 +181580,200 @@
           "IDENTIFIER:6:method",
           "COLON:1::",
           "IDENTIFIER:10:HttpMethod",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "BOOLEAN:4:Bool"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:retryBeforeRequestSubmission#g0(transport.NetworkException)",
+      "kind": "function",
+      "name": "retryBeforeRequestSubmission",
+      "qualifiedName": "wirestack.http.retryBeforeRequestSubmission",
+      "packageName": "wirestack.http",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": null,
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "error",
+          "type": {
+            "kind": "source",
+            "spelling": "transport.NetworkException",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Bool",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/http/retry.cj",
+        "start": {
+          "line": 82,
+          "column": 1,
+          "byteOffset": 3444
+        },
+        "end": {
+          "line": 90,
+          "column": 2,
+          "byteOffset": 3926
+        }
+      },
+      "headerSpelling": "private func retryBeforeRequestSubmission(error: transport.NetworkException): Bool",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:28:retryBeforeRequestSubmission",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:error",
+          "COLON:1::",
+          "IDENTIFIER:9:transport",
+          "DOT:1:.",
+          "IDENTIFIER:16:NetworkException",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "BOOLEAN:4:Bool"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.http::file:src/http/retry.cj::function:retryHttp1Execution#g0(http1.Http1RequestExecutionException)",
+      "kind": "function",
+      "name": "retryHttp1Execution",
+      "qualifiedName": "wirestack.http.retryHttp1Execution",
+      "packageName": "wirestack.http",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": null,
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "error",
+          "type": {
+            "kind": "source",
+            "spelling": "http1.Http1RequestExecutionException",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Bool",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/http/retry.cj",
+        "start": {
+          "line": 62,
+          "column": 1,
+          "byteOffset": 2495
+        },
+        "end": {
+          "line": 69,
+          "column": 2,
+          "byteOffset": 2928
+        }
+      },
+      "headerSpelling": "private func retryHttp1Execution(error: http1.Http1RequestExecutionException): Bool",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:19:retryHttp1Execution",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:error",
+          "COLON:1::",
+          "IDENTIFIER:5:http1",
+          "DOT:1:.",
+          "IDENTIFIER:30:Http1RequestExecutionException",
           "RPAREN:1:)",
           "COLON:1::",
           "BOOLEAN:4:Bool"
@@ -181652,14 +181848,14 @@
       "source": {
         "path": "src/http/retry.cj",
         "start": {
-          "line": 61,
+          "line": 71,
           "column": 1,
-          "byteOffset": 2398
+          "byteOffset": 2930
         },
         "end": {
-          "line": 70,
+          "line": 80,
           "column": 2,
-          "byteOffset": 2910
+          "byteOffset": 3442
         }
       },
       "headerSpelling": "private func retryWriteFailure(error: http1.Http1RequestWriteException): Bool",
@@ -181749,14 +181945,14 @@
       "source": {
         "path": "src/http/retry.cj",
         "start": {
-          "line": 72,
+          "line": 92,
           "column": 1,
-          "byteOffset": 2912
+          "byteOffset": 3928
         },
         "end": {
-          "line": 79,
+          "line": 99,
           "column": 2,
-          "byteOffset": 3246
+          "byteOffset": 4262
         }
       },
       "headerSpelling": "private func retryable(value: transport.Retryability): Bool",
