@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-003",
+  "family": "lifecycle",
+  "observation_kind": "executed_native_profile_aggregation",
+  "status": "PASS",
+  "seed": 184003,
+  "native_stress_profiles": 260,
+  "reports": [
+    {
+      "path": "docs/evidence/M12-003/lifecycle/sts-final-stress/report.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d06df5725695ed8a80d24f6ef2d096eb517f8c50a65b95a0a685ca2ffa897d5d"
+      },
+      "original_status": "FAIL",
+      "selected_native_pass_profiles": 220
+    },
+    {
+      "path": "docs/evidence/M12-003/lifecycle/sts-final-race/report.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "96681ef1a0b6d81d5b0a79d08cf714fe99381656f5b2e2a84357b14cde0ae8cb"
+      },
+      "original_status": "PASS",
+      "selected_native_pass_profiles": 40
+    }
+  ],
+  "source_bound_layers_verified": [
+    "gzip",
+    "protocol",
+    "race",
+    "streams"
+  ],
+  "earlier_build_failure_retained": "sts-final-stress/report.json remains FAIL; race classifier syntax fixed and independently executed twenty times for both race profiles",
+  "formal_86400": "NOT_RUN",
+  "release_qualification": "NOT_QUALIFIED",
+  "fixture_environment_observed_after_execution": {
+    "python": "3.14.7",
+    "ssl": "OpenSSL 3.6.5 29 Sep 2026",
+    "h2": "4.4.1"
+  },
+  "wire_slow_consumer": [
+    {
+      "round": 0,
+      "bytes": 1048576,
+      "elapsed_ns": 332537306,
+      "throughput_bytes_per_second": 3153258.2392424867,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 1,
+      "bytes": 1048576,
+      "elapsed_ns": 354631319,
+      "throughput_bytes_per_second": 2956805.9667059467,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 2,
+      "bytes": 1048576,
+      "elapsed_ns": 384785172,
+      "throughput_bytes_per_second": 2725094.614612644,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 3,
+      "bytes": 1048576,
+      "elapsed_ns": 349399220,
+      "throughput_bytes_per_second": 3001082.8301219447,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 4,
+      "bytes": 1048576,
+      "elapsed_ns": 339233137,
+      "throughput_bytes_per_second": 3091018.78806138,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 5,
+      "bytes": 1048576,
+      "elapsed_ns": 334300203,
+      "throughput_bytes_per_second": 3136629.8631891645,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 6,
+      "bytes": 1048576,
+      "elapsed_ns": 328027414,
+      "throughput_bytes_per_second": 3196610.8783822563,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 7,
+      "bytes": 1048576,
+      "elapsed_ns": 333246884,
+      "throughput_bytes_per_second": 3146544.049906255,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 8,
+      "bytes": 1048576,
+      "elapsed_ns": 321864713,
+      "throughput_bytes_per_second": 3257815.9631932066,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 9,
+      "bytes": 1048576,
+      "elapsed_ns": 329499526,
+      "throughput_bytes_per_second": 3182329.3123644735,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 10,
+      "bytes": 1048576,
+      "elapsed_ns": 346235417,
+      "throughput_bytes_per_second": 3028505.8908343855,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 11,
+      "bytes": 1048576,
+      "elapsed_ns": 342092810,
+      "throughput_bytes_per_second": 3065179.8849557815,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 12,
+      "bytes": 1048576,
+      "elapsed_ns": 323268227,
+      "throughput_bytes_per_second": 3243671.7017661002,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 13,
+      "bytes": 1048576,
+      "elapsed_ns": 333503212,
+      "throughput_bytes_per_second": 3144125.6403851365,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 14,
+      "bytes": 1048576,
+      "elapsed_ns": 332882740,
+      "throughput_bytes_per_second": 3149986.0881942995,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 15,
+      "bytes": 1048576,
+      "elapsed_ns": 391127914,
+      "throughput_bytes_per_second": 2680903.0050460678,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 16,
+      "bytes": 1048576,
+      "elapsed_ns": 327883263,
+      "throughput_bytes_per_second": 3198016.2403105036,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 17,
+      "bytes": 1048576,
+      "elapsed_ns": 333130736,
+      "throughput_bytes_per_second": 3147641.1110861893,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 18,
+      "bytes": 1048576,
+      "elapsed_ns": 342561874,
+      "throughput_bytes_per_second": 3060982.787594162,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    },
+    {
+      "round": 19,
+      "bytes": 1048576,
+      "elapsed_ns": 369521472,
+      "throughput_bytes_per_second": 2837659.1875018296,
+      "acknowledged_window_updates": 64,
+      "window_exhaustions": 63,
+      "managed_buffer_bytes_at_fault": 65535
+    }
+  ],
+  "sampled_native_process_highwater": {
+    "fd": 9,
+    "tasks": 16,
+    "rss_kib": 145548
+  },
+  "coverage": {
+    "cancel_storm": [
+      "cancel_storm"
+    ],
+    "goaway": [
+      "h2_goaway"
+    ],
+    "h2_single_stream_fault_scope": [
+      "h2_streamscope"
+    ],
+    "h2_slow_consumer": [
+      "h2_slowconsumer"
+    ],
+    "rotation_shutdown_race": [
+      "rotation_shutdown"
+    ],
+    "sse_interrupt": [
+      "sse_cancel",
+      "sse_cancel_h1"
+    ],
+    "websocket_interrupt": [
+      "websocket_disconnect",
+      "websocket_disconnect_h1"
+    ]
+  },
+  "operation_overshoot_ns_max": 0,
+  "cleanup": {
+    "native_commands_reaped": 260,
+    "remaining_live_owned_processes": 0,
+    "live_samplers": 0
+  },
+  "unavailable": {
+    "cancellation_registration_count": "UNAVAILABLE: no public counter",
+    "local_h2_window_counters": "UNAVAILABLE: measured peer DATA window instead"
+  }
+}

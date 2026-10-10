@@ -1,0 +1,9 @@
+test_answer_preserves_transaction_and_question (tools.gates.tests.test_m12_003_network.DnsAnswerTests) ... ok
+test_invalid_label_and_question_tail_fail_closed (tools.gates.tests.test_m12_003_network.DnsAnswerTests) ... ok
+test_native_peer_modes (tools.gates.tests.test_m12_003_network.IsolatedFixtureTests) ... ok
+test_original_response_recovers_after_real_packet_loss (tools.gates.tests.test_m12_003_network.IsolatedFixtureTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.856s
+
+OK

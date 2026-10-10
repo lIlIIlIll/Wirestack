@@ -1,0 +1,1 @@
+{"profile_id":"rotation_shutdown","completion_count":2,"operation_ns":29451937,"old_terminal":"Cancelled","new_terminal":"Cancelled","cancel_operation_ns":[29451359,29451769],"old_generation":1,"new_generation":2,"terminal_owners":0,"terminal_buffers":0,"terminal_generations":0,"recovery":true}

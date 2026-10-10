@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-003",
+  "platform": "linux-x86_64-glibc",
+  "sdk_policy": "STS_ONLY",
+  "selected_archive": "docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",
+  "default_seed": 120003,
+  "families": {
+    "resources": {
+      "runner": "tools/gates/m12_003_resources.py",
+      "required_coverage": ["low_cpu", "low_memory", "low_fd", "resolver_quota", "pool_quota", "stream_quota", "buffer_quota"],
+      "feature_tasks": ["M9-001", "M10-001", "M10-002", "M10-003", "M10-005"]
+    },
+    "network": {
+      "runner": "tools/gates/m12_003_network.py",
+      "required_coverage": ["dns_no_response", "dns_late", "ipv6_blackhole_ipv4_reachable", "multi_candidate_cancel", "delay", "packet_loss", "rst", "silent_disconnect", "peer_not_reading", "peer_not_writing", "transient_recovery"],
+      "feature_tasks": ["M9-001", "M10-001", "M10-003", "M10-005"]
+    },
+    "lifecycle": {
+      "runner": "tools/gates/m12_003_lifecycle.py",
+      "required_coverage": ["h2_slow_consumer", "goaway", "h2_single_stream_fault_scope", "sse_interrupt", "websocket_interrupt", "cancel_storm", "rotation_shutdown_race"],
+      "feature_tasks": ["M10-001", "M10-002", "M10-003", "M10-004", "M10-005", "M11-001", "M11-002", "M11-003", "M11-004"]
+    }
+  },
+  "tiers": {
+    "smoke": {"formal_release_qualification": false, "purpose": "Each required fault with real application, semantic assertions, recovery and cleanup"},
+    "stress": {"formal_release_qualification": false, "purpose": "Seeded repeated fault transitions with bounded workload and raw native measurements"},
+    "formal_candidate_soak": {"minimum_duration_seconds": 86400, "formal_release_qualification": true, "owner_task": "M12-004", "current_claim": "NOT_EXECUTED_BY_M12-003", "runner": "tools/m7_022_linux_release_soak.py"}
+  },
+  "requirements": {
+    "isolated_faults_only": true,
+    "auto_retry_to_hide_failures": false,
+    "missing_privilege_result": "BLOCKED",
+    "oom_kill_is_library_rejection_pass": false,
+    "unavailable_public_counters": "UNAVAILABLE, never fabricated zero",
+    "rss_is_logical_resource_liveness": false,
+    "normal_exit_timeout_exception_cancellation_cleanup": true
+  }
+}
