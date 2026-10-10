@@ -1,0 +1,895 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-004",
+  "status": "PASS",
+  "platform": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "consumer_source": "examples/linux/m10_004/configuration_rotation.cj",
+  "consumer_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "b2dc1bc076e65cb3068c065e42ca64cc580a5a64b7da6ea41015451f16448290"
+  },
+  "commands": [
+    {
+      "id": "trusted-certificate",
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=example.test",
+        "-addext",
+        "subjectAltName=DNS:example.test",
+        "-keyout",
+        "<scratch>/trusted.pem",
+        "-out",
+        "<scratch>/trusted.crt"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/trusted-certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/trusted-certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8a4fbd624f9d40a8cfb556f1ef90b63a0641ddb4318b78a0945f6d746017a665"
+        }
+      }
+    },
+    {
+      "id": "trusted-der",
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/trusted.crt",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/trusted.der"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/trusted-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/trusted-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "untrusted-certificate",
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=example.test",
+        "-addext",
+        "subjectAltName=DNS:example.test",
+        "-keyout",
+        "<scratch>/untrusted.pem",
+        "-out",
+        "<scratch>/untrusted.crt"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/untrusted-certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/untrusted-certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e56a812eb94685222ddcb6c803a13fbf4eeb9f952d59c3410e0be5c7a6528011"
+        }
+      }
+    },
+    {
+      "id": "untrusted-der",
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/untrusted.crt",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/untrusted-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/untrusted-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "key-der",
+      "argv": [
+        "openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "<scratch>/trusted.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/key.pk8"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/key-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/key-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "compiler",
+      "argv": [
+        "cjc",
+        "--version"
+      ],
+      "cwd": "<scratch>/consumer",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/compiler.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6a21c72a644dd53b5051245b1cf10a54f6f4ad3f08d97d4627cf527f5ad07c92"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/compiler.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cjpm",
+      "argv": [
+        "cjpm",
+        "--version"
+      ],
+      "cwd": "<scratch>/consumer",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/cjpm.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7f3c8e40124497dcae7763539ca5bf57d7f50a0760b359128b23056427dfb650"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/cjpm.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "consumer-build",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumer",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/consumer-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/consumer-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f5fdf5ac0b5faef6462f83aee9c2e865f173e72c7c58216f7bf0c9367774a2f9"
+        }
+      }
+    },
+    {
+      "id": "consumer-run",
+      "argv": [
+        "<scratch>/consumer/target/release/bin/main",
+        "<scratch>/trusted.der",
+        "<scratch>/key.pk8",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/consumer",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/consumer-run.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "95b0bdc198ec2001b3eeb51c5db8cd4b54fa51ac4a8314e48035d5d54727edfa"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M10-004/stress/attempt-7/consumer-run.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "a69f5882c4994019eb40bd4c04f16a499c169b9dba87e047aea45451f486a559"
+  },
+  "payload_sha256": "d55c3336bd531b56dd75dcd8a2e7527717690e3603c8c344a952c578414a5e38",
+  "production_sources": {
+    "src/byte_span.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+    },
+    "src/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d"
+    },
+    "src/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3"
+    },
+    "src/deadline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+    },
+    "src/hostname_verifier.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+    },
+    "src/http/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "501c5a14ca1b6c904afe95b2c984e906ccef035618156bdabf2f95b0b2458dc0"
+    },
+    "src/http/client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9831e9c67ea6f1035df4a1b9564b6f33c8663a2c227c48f20c170b42e3dca2c6"
+    },
+    "src/http/client_rotation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dc5814124cd510b8992d9c4aec3ba9fcc31aadd5976ea42b423d9038cdc114e5"
+    },
+    "src/http/configuration_rotation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "81338be084b2ab6eb14d49e70d2769984c28e0c3e201e40eb216022a06679816"
+    },
+    "src/http/cookie.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+    },
+    "src/http/duplex.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e81f52f4efbc0b728a1891d67bc0f3a6292af471d16d992b65e2055e44ffac24"
+    },
+    "src/http/error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d88c54a157e02063ab4048c197631daba3642a9618672841e4b98d3a25d275ad"
+    },
+    "src/http/file_handler.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+    },
+    "src/http/hooks.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0b6016a645fd69bbb8743e5abfed22b4c325286a450587b4ff87b722ef04f2ed"
+    },
+    "src/http/multipart.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+    },
+    "src/http/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+    },
+    "src/http/proxy.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+    },
+    "src/http/redirect.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+    },
+    "src/http/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8c44e5ff6961122d6483c22546a26dab02e8414b88d5e18b954ddcf0b3ff29e4"
+    },
+    "src/http/resource_budget.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bc58eb5bfb50d8df65d34138d22471112bcaebdcbcca5cfd29fbb2177d9228b1"
+    },
+    "src/http/retry.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957"
+    },
+    "src/http/server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b46d88316212a2aec864b56f7ffb9ea8640d6705fe96a5dae26ef9c6fca46efa"
+    },
+    "src/http/tls.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+    },
+    "src/http/upgrade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+    },
+    "src/http/websocket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c38204ff2672725aa854a4528e7cbd7a7d12779c1b3eb01126c1af325b0469c8"
+    },
+    "src/http/websocket_handshake.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "db5d899be8d22022db1e7aed502ad36c3cc5e52d6dbae8dce53112f797276d59"
+    },
+    "src/http_body.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+    },
+    "src/http_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+    },
+    "src/http_message.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4033d25f42135e43f498f11d2b459512dcb7c45bce6e91efaa85b18a053e8ef1"
+    },
+    "src/http_model.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+    },
+    "src/http_push.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+    },
+    "src/http_url.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955"
+    },
+    "src/internal/common/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+    },
+    "src/internal/connector/happy_eyeballs.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f2ef35eb73c573f37de73655cf3f31969704d1caa0ff142001cfd8c19904ced1"
+    },
+    "src/internal/connector/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+    },
+    "src/internal/connector/route.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+    },
+    "src/internal/http1/chunked.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+    },
+    "src/internal/http1/client_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d4eb4cdc7585faea715b15424988d5f8160cba4c8425b4d24daa6cd2d852e0a1"
+    },
+    "src/internal/http1/client_pipeline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "920ba818c0343b3ed597e2553d20f9af221c85bea56ea42565067faa85f434f8"
+    },
+    "src/internal/http1/connection_pool.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d612feca28292d4693291e4a0060c167e6cec9a406937419f9c05379ec39a61c"
+    },
+    "src/internal/http1/head_parser.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+    },
+    "src/internal/http1/http2_connection_pool.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a440aefef99d40937c22aa455e3c16389533a88a73f71720c60a014f2ec6f2e7"
+    },
+    "src/internal/http1/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+    },
+    "src/internal/http1/pool_admission.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "60faf41eebd2e5e549f1aaf5e35e0cbfd408660d7abdd5bcba412c6653743058"
+    },
+    "src/internal/http1/pool_key.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5e72b0cccb4c59e8f07828b8d9903be4053736fd16cd8de8463c3248a0507dac"
+    },
+    "src/internal/http1/protocol_upgrade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "11dd5d4bcec8b1517a7f6b49f59475a8b19829cbc5abfa07220434be060f4b16"
+    },
+    "src/internal/http1/proxy_client_pipeline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dd9cdf07c4e55c0a1cb3dd53ed4bc7b81c7ec767999d24f764241fb4710ad53b"
+    },
+    "src/internal/http1/request_writer.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c27a20147584252abd76d8645e097348e10e7b5fccbff804e6326ca2f26e4936"
+    },
+    "src/internal/http1/response_reader.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40d64a82c10b839458b0d67c60627366943e3241dff37b2e887ff43ae675f15a"
+    },
+    "src/internal/http1/serializer.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+    },
+    "src/internal/http1/server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+    },
+    "src/internal/http1/server_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3c08c18e63f46a359faa9a258c84d55af6b04586a6589a43d3ff23da6e92e21d"
+    },
+    "src/internal/http1/server_reader.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+    },
+    "src/internal/http1/server_writer.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+    },
+    "src/internal/http1/tls_client_pipeline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3c8e8acba198f25396742d5267c90e80e95584b79b069cb64e812b6b73f9be5f"
+    },
+    "src/internal/http1/tls_server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5e120d0906f2d770d1de78fad9db460b87964d080b1ee749cdeb745815679c02"
+    },
+    "src/internal/http2/client_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f6754d4deabadd0d5013b22100426a6a7af951a137e6519d49d3461f6360400e"
+    },
+    "src/internal/http2/client_mapping.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+    },
+    "src/internal/http2/client_push.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "96b45e9483324487dc5eb41f5ec603cd03ad7d74c3d4645cfefa3da7dca197f1"
+    },
+    "src/internal/http2/connection_state.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+    },
+    "src/internal/http2/duplex_stream.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+    },
+    "src/internal/http2/flow_control.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6370e5fd5700649ccef52b7461eb22ff7a8a55e8267f6272181f6b21c1837f86"
+    },
+    "src/internal/http2/frame_codec.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ff25f15a331f00c21850e9ece84e392cd10ea1f77b76c1fc05964fa5841402d5"
+    },
+    "src/internal/http2/frame_model.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+    },
+    "src/internal/http2/goaway.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+    },
+    "src/internal/http2/header_block.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+    },
+    "src/internal/http2/health_close.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+    },
+    "src/internal/http2/hpack_block.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+    },
+    "src/internal/http2/hpack_core.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    "src/internal/http2/hpack_dynamic_table.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+    },
+    "src/internal/http2/hpack_huffman.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+    },
+    "src/internal/http2/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+    },
+    "src/internal/http2/reader_loop.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3e680b8bd8c005c7c3a067ab3955e33a8359c96220d76ebbee638a5c1da79015"
+    },
+    "src/internal/http2/server_connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "406f1023290dbf86972edcbfa71979cb7d8f0ab708c6213ac46d0cf16adcb49c"
+    },
+    "src/internal/http2/server_mapping.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9994ac2a79bd7565a9e1182be780f9362c2c1a4a30dd81addc691c172af9591b"
+    },
+    "src/internal/http2/settings.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+    },
+    "src/internal/http2/stream_lifecycle.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+    },
+    "src/internal/http2/stream_reset.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "056345fed53e9fecff452bc6366b7a9bfe9d0b715aabb940f8c0ceeece4ebf34"
+    },
+    "src/internal/http2/write_scheduler.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "50ed0bb79d8ac3c4cc9fe93d1f3b43a657d0ccec002e4345414ea8c869c3d2ed"
+    },
+    "src/internal/http_files/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+    },
+    "src/internal/http_model/body.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+    },
+    "src/internal/http_model/message.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+    },
+    "src/internal/http_model/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+    },
+    "src/internal/http_model/public_suffix.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+    },
+    "src/internal/http_model/public_suffix_data.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+    },
+    "src/internal/http_model/url.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+    },
+    "src/internal/http_resource_budget.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b53624aeb00d9f28da696bb99d5e52e75dd9f73a4a138a67daa0afb8071e5d28"
+    },
+    "src/internal/http_resource_budget_types.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "af46dc471fc20467402dd1c1163a879a312ebf020d636a053cf04df65acda7fe"
+    },
+    "src/internal/identity/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+    },
+    "src/internal/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+    },
+    "src/internal/platform/linux/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+    },
+    "src/internal/platform/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+    },
+    "src/internal/resolver/bounded_backend.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ad49a33fdce5823d5afbae43fc5b366d429d56f0ed207ec9145bbe9d0b5f2eab"
+    },
+    "src/internal/resolver/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+    },
+    "src/internal/resolver/system_resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cc35345eef32af804135ae5bfa7f99a09b90a30afdb336dfc1615e26937ba3f4"
+    },
+    "src/internal/tls_engine/connection.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+    },
+    "src/internal/tls_engine/context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+    },
+    "src/internal/tls_engine/engine.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+    },
+    "src/internal/tls_engine/identity.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+    },
+    "src/internal/tls_engine/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+    },
+    "src/internal/tls_engine/server_name.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+    },
+    "src/internal/tls_engine/session.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+    },
+    "src/internal/tls_engine/websocket_crypto.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+    },
+    "src/internal/transport/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+    },
+    "src/internal/transport/completion.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+    },
+    "src/internal/transport/deadline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+    },
+    "src/internal/transport/lifecycle.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+    },
+    "src/internal/transport/memory_transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+    },
+    "src/internal/transport/memory_transport_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+    },
+    "src/internal/transport/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+    },
+    "src/internal/transport/network_event.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+    },
+    "src/internal/transport/operation_context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+    },
+    "src/internal/transport/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+    },
+    "src/internal/transport/scripted_transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+    },
+    "src/internal/transport/transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    "src/internal/transport_stdnet/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+    },
+    "src/internal/transport_stdnet/socket_options.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
+    },
+    "src/internal/transport_stdnet/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32f78914fb335bf68dfd2a99ae3d06e823fe855bc7b583bb126b7622f6f364b2"
+    },
+    "src/internal/transport_stdnet/unix_address.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    "src/internal/transport_stdnet/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    "src/internal/trust/hostname.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+    },
+    "src/internal/trust/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+    },
+    "src/net/datagram_socket_core.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "007a873cf52ccc3587db5c1c58d8b69cbb991585b09085c0abc861ca647709ce"
+    },
+    "src/net/dns_client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a63095f98489b93b83f76cebc878678391d338f9080e15cf2ea7277ff6562622"
+    },
+    "src/net/dns_resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65b410bda4ed26d315848f68bdd70b432101153b12e3c5d6dcccd8bea14ec183"
+    },
+    "src/net/dns_wire.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+    },
+    "src/net/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+    },
+    "src/net/socket_options.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+    },
+    "src/net/tcp_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+    },
+    "src/net/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
+    },
+    "src/net/unix_datagram_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    "src/net/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    "src/net/unix_stream.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    "src/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+    },
+    "src/network_event.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084"
+    },
+    "src/operation_context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "274f42a140e7de448f3fe1363add4d80170f585f239c1e2752920818935acc5f"
+    },
+    "src/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+    },
+    "src/private_key_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+    },
+    "src/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+    },
+    "src/tls/facade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+    },
+    "src/tls/identity.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+    },
+    "src/tls/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+    },
+    "src/tls_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+    },
+    "src/transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+    },
+    "src/trust.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+    }
+  },
+  "toolchain": {
+    "compiler": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.3.0-alpha.06"
+  },
+  "consumer_binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "d17595d52e7ad263ca9c6537c07f4310d0792bab3a37a22b55132e9cadf5cf1d"
+  },
+  "checkout_path_dependency": false,
+  "acceptance": [
+    "graceful-active-exchange",
+    "server-security-cancellation",
+    "h2-obsolete-authentication-rejected",
+    "client-identity-replacement",
+    "removed-trust-rejected",
+    "dns-new-admission",
+    "zero-terminal-owners"
+  ]
+}

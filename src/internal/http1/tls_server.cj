@@ -106,7 +106,10 @@ public class DefaultHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpS
                     for (encoded in clientTrustRootsDer) { roots.add(DerCertificate(encoded)) }
                     builder.clientTrust(TrustPolicy.customRoots(CertificateChain(roots.toArray())))
             }
-            DefaultHttp1ServerTlsHandshaker(created, builder.build(), key)
+            let context = builder.build()
+            let validation = created.createServerEngine(context)
+            validation.close()
+            DefaultHttp1ServerTlsHandshaker(created, context, key)
         } catch (error: Exception) {
             key.close()
             match (provider) { case Some(value) => value.close(); case None => () }

@@ -933,6 +933,16 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
     }
 
     func connectionTerminated(error: Exception): Unit {
+        // END_STREAM completes the wire message, not the caller-owned body.
+        // A later reader shutdown must not replace that validated response.
+        let complete = synchronized(mutex) {
+            !connectMode && response.isSome() && sequence.isTerminal && failure.isNone()
+        }
+        if (complete) {
+            readerRegistration.unregister()
+            channel.detachFromConnection()
+            return
+        }
         signalFailure(error)
         match (synchronized(mutex) { duplexTransport }) {
             case Some(value) => value.peerTerminated(resetStream: true)
@@ -1025,6 +1035,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     private var eof = false
     private var closed = false
 
+    private var detached = false
     public prop contentLength: ?Int64 { get() { synchronized(mutex) { expectedLength } } }
     prop trailer: ?HttpTrailer { get() { synchronized(mutex) { retainedTrailer } } }
 
@@ -1107,6 +1118,9 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         } else { Array<Http2Frame>() })
     }
 
+    // Buffered, validated DATA stays owned and budgeted until consumer cleanup.
+    func detachFromConnection(): Unit { synchronized(mutex) { detached = true } }
+
     func finish(trailer: ?HttpTrailer): Unit {
         synchronized(mutex) {
             retainedTrailer = trailer
@@ -1167,7 +1181,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                     segment.remainingFlowBytes
                 } else { count }
                 segment.remainingFlowBytes -= credit
-                if (credit > 0) { updates = flow.consumeReceived(streamId, credit) }
+                if (credit > 0 && !detached) { updates = flow.consumeReceived(streamId, credit) }
                 if (segment.remainingData == 0) {
                     let _ = segments.remove(at: 0)
                     segment.release(flow)
@@ -1214,7 +1228,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 segment.release(flow)
             }
             segments.clear()
-            if (credit > 0) { updates = flow.consumeReceivedNow(streamId, credit) }
+            if (credit > 0 && !detached) { updates = flow.consumeReceivedNow(streamId, credit) }
             changed.notifyAll()
         }
         enqueueClientUpdates(writer, updates)
@@ -1453,7 +1467,6 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         if (let Some(frame) <- terminalGoAway) {
             try { let _ = writer.enqueue(frame) } catch (_: Exception) {}
         }
-        flow.close()
         if (let Some(value) <- health) { value.close() }
         let current = synchronized(mutex) {
             changed.notifyAll()
@@ -1465,6 +1478,7 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
             completion.code, Http2ErrorScope.Connection, completion.reason
         )
         for (exchange in current) { exchange.connectionTerminated(error) }
+        flow.close()
         if (let Some(value) <- synchronized(mutex) { pushCoordinator }) {
             value.connectionTerminated(completion)
         }

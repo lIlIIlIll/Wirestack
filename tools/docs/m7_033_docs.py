@@ -66,6 +66,8 @@ PUBLIC_PACKAGE_FILES = {
     "wirestack.http": (
         "cancellation.cj",
         "client.cj",
+        "client_rotation.cj",
+        "configuration_rotation.cj",
         "cookie.cj",
         "duplex.cj",
         "error.cj",
