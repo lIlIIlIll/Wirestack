@@ -404,14 +404,14 @@ public class HttpClient <: Resource {
     /**
      * Establishes an uncompressed WebSocket over HTTP/1.1 or negotiated HTTP/2.
      * Rejected handshakes return an owned response. No redirects or retries replay the handshake.
-     * @param url Absolute HTTP or HTTPS URL of the WebSocket resource.
+     * @param url Absolute ws or wss URL; ws uses plaintext and wss uses validated TLS.
      * @param protocols Ordered acceptable subprotocols.
      * @param headers Additional headers excluding protocol-managed fields.
      * @param webSocketLimits Session frame, message and close bounds.
-     * @param context Shared handshake deadline and cancellation.
+     * @param context Canonical handshake and session lifetime deadline and cancellation.
      */
     public func connectWebSocket(
-        url: HttpUrl,
+        url: WebSocketUrl,
         protocols!: Array<String> = [],
         headers!: HttpHeaders = HttpHeaders(),
         webSocketLimits!: WebSocketLimits = WebSocketLimits(),
@@ -420,11 +420,11 @@ public class HttpClient <: Resource {
         if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
         let bounded = contextForRequest(context: context)
         let operation = withHttpPoolHook(bounded, poolHook)
-        let handshake = WebSocketHandshake(url, protocols, headers, limits)
+        let handshake = WebSocketHandshake(url.httpUrl, protocols, headers, limits)
         let h1Request = requestWithCookies(handshake.http1Request, operation)
         let h2Request = requestWithCookies(handshake.http2Request, operation)
         let result = executeDuplex(h1Request, h2Request, Some("websocket"), operation)
-        handshake.accept(result, webSocketLimits)
+        handshake.accept(result, webSocketLimits, operation)
     }
 
     /**
@@ -472,11 +472,28 @@ public class HttpClient <: Resource {
     private func executeDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
         protocol: ?String, parent: OperationContext): http1.HttpDuplexExchangeResult {
         let (slot, invocation, lifetime) = selectGeneration(h1Request.url)
-        let cancellation = HttpRequestCancellationOperation(parent, Some(slot.cancellation),
-            None<HttpConnectionCancellationHandle>, None<HttpStreamCancellationHandle>)
-        let context = cancellation.context
+        let observed = observedRequestContext(parent, poolHook.isSome())
+        let cancellation = HttpRequestCancellationOperation(observed, Some(slot.cancellation),
+            None<HttpConnectionCancellationHandle>, None<HttpStreamCancellationHandle>, metrics: Some(resourceBudget))
+        let context = observedAttemptContext(cancellation.context)
+        emitHttpObservation(context, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
         var transferred = false
+        var attemptStarted = false
+        var attemptFinished = false
         try {
+            let admission = context.forStage(transport.OperationTimeoutStage.RequestAdmission)
+            emitHttpObservation(admission, NetworkEventKind.StageStarted, NetworkEventOutcome.Started)
+            let requestLease = try {
+                let value = resourceBudget.acquireRequest(resourceOwner(h1Request.url), admission)
+                emitHttpObservation(admission, NetworkEventKind.StageCompleted, NetworkEventOutcome.Succeeded)
+                value
+            } catch (error: Exception) {
+                emitHttpFailure(admission, NetworkEventKind.StageCompleted, error)
+                throw error
+            }
+            cancellation.retainResource(requestLease)
+            emitHttpObservation(context, NetworkEventKind.AttemptStarted, NetworkEventOutcome.Started)
+            attemptStarted = true
             let result = match (slot.client) {
                 case value: http1.Http1CleartextClient =>
                     http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>), context: context))
@@ -492,23 +509,33 @@ public class HttpClient <: Resource {
                         proxyAuthorization: authorization, context: context))
                 case _ => throw IllegalStateException("invalid HTTP duplex route generation")
             }
+            emitHttpObservation(context, NetworkEventKind.AttemptCompleted, NetworkEventOutcome.Succeeded)
+            attemptFinished = true
             match (result) {
                 case http1.HttpDuplexExchangeResult.Response(response) =>
                     try { captureCookies(response.headers, h1Request.url, context) }
                     catch (error: Exception) { response.close(); throw error }
+                    emitHttpObservation(context, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
                     cancellation.retainResource(lifetime)
                     transferred = true
                     http1.HttpDuplexExchangeResult.Response(cancellation.wrap(response))
                 case http1.HttpDuplexExchangeResult.Connected(connection) =>
                     try { captureCookies(connection.headers, h1Request.url, context) }
                     catch (error: Exception) { connection.transport.close(); throw error }
-                    cancellation.fail()
+                    emitHttpObservation(context, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
+                    cancellation.detachCancellation()
                     transferred = true
                     http1.HttpDuplexExchangeResult.Connected(http1.HttpDuplexConnection(
                         connection.status, connection.headers, connection.version,
-                        ClientRotationTransport(connection.transport, lifetime)))
+                        ClientRotationTransport(connection.transport, lifetime, cancellation),
+                        context: connection.operationContext.withCancellation(parent.cancellation)))
             }
-        } catch (error: Exception) { cancellation.fail(); throw error }
+        } catch (error: Exception) {
+            cancellation.fail()
+            emitHttpFailure(context, NetworkEventKind.RequestCompleted, error)
+            if (attemptStarted && !attemptFinished) { emitHttpFailure(context, NetworkEventKind.AttemptCompleted, error) }
+            throw error
+        }
         finally {
             if (!transferred) { lifetime.close() }
             invocation.close()

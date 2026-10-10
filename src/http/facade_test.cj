@@ -685,7 +685,7 @@ class HttpFacadeTest {
                 server.localEndpoint, h1Context
             )
             let h1Connection = http1test.Http1ClientConnection(
-                h1Handshaker.handshake(HostName("example.com"), h1Transport, h1Context)
+                h1Handshaker.handshake(api.ReferenceIdentity.Dns(HostName("example.com")), h1Transport, h1Context)
             )
             try {
                 let h1Response = h1Connection.execute(

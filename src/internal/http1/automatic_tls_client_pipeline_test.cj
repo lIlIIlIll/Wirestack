@@ -11,6 +11,7 @@ import wirestack.internal.http2.*
 import wirestack.internal.http_model.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.ReferenceIdentity
 
 @Test
 class HttpAutomaticHttpsClientTest {
@@ -187,11 +188,11 @@ private class PassthroughAlpnHandshaker <: HttpAlpnTlsHandshaker {
     public prop alpnPolicy: String { get() { "h2,http/1.1" } }
 
     public func handshakeNegotiated(
-        host: HostName,
+        reference: ReferenceIdentity,
         transport: DuplexTransport,
         context: OperationContext
     ): HttpNegotiatedTlsTransport {
-        let _ = host
+        let _ = reference
         let _ = context
         let handshakeIndex = handshakes.fetchAdd(1)
         let negotiatedProtocol = if (handshakeIndex == 0) {

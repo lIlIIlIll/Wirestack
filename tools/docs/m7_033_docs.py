@@ -89,6 +89,7 @@ PUBLIC_PACKAGE_FILES = {
         "upgrade.cj",
         "websocket.cj",
         "websocket_handshake.cj",
+        "websocket_url.cj",
     ),
     "wirestack.tls": ("facade.cj", "identity.cj", "package.cj"),
     "wirestack.net": (
