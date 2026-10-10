@@ -22,8 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M7-032"
 SCHEMA_VERSION = 1
 PROFILE = "linux-x86_64-glibc"
-DEFAULT_INVENTORY = ROOT / "docs/api/baselines/wirestack-linux-pre1-m7-032.json"
-DEFAULT_REPORT = ROOT / "docs/evidence/M7-032/linux_x86_64/public-api.json"
+DEFAULT_INVENTORY = ROOT / "docs/api/baselines/wirestack-linux-pre1-m11-001.json"
+DEFAULT_REPORT = ROOT / "docs/evidence/M11-001/public-api.json"
 PUBLIC_PACKAGES = frozenset(api_scan.PUBLIC_PACKAGES)
 
 

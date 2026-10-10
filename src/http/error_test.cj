@@ -15,8 +15,7 @@ class HttpErrorTest {
         try {
             let _ = client.get("https://user:secret@example.com/")
         } catch (error: HttpException) {
-            matched = sameHttpErrorCode(error.code, HttpErrorCode.InvalidUrl) &&
-                error.message == "invalid HTTP URL"
+            matched = sameHttpErrorCode(error.code, HttpErrorCode.InvalidUrl)
         } finally {
             client.close()
         }

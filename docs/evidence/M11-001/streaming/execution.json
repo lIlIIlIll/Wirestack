@@ -1,0 +1,34 @@
+{
+  "task_id": "M11-001",
+  "status": "RUNNING",
+  "platform_scope": "linux-x86_64",
+  "command": [
+    "python3",
+    "tools/gates/m11_001_sse_streaming_profile.py",
+    "--env-runner",
+    "$HOME/.codex/scripts/codex_cangjie_env",
+    "--target-dir",
+    "<scratch>/final-target",
+    "--preflight-timeout-seconds",
+    "240",
+    "--output",
+    "<scratch>/final.json"
+  ],
+  "environment": {
+    "DISABLE_ZOXIDE": "1",
+    "TMPDIR": "<scratch>",
+    "TMP": "<scratch>",
+    "TEMP": "<scratch>"
+  },
+  "formal_parameters": {
+    "duration_seconds": 3600,
+    "minimum_events": 1000000,
+    "parallel_protocols": true,
+    "session_maximum_duration_seconds": 7200,
+    "client_read_buffer_bytes": 256,
+    "http_body_limit_bytes": 65536
+  },
+  "runtime_handle": "bg_51",
+  "superseded_runtime_handle": "bg_48",
+  "formal_outcome": "pending"
+}

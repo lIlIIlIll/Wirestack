@@ -22,7 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M7-026"
 SCHEMA_VERSION = 1
 PROFILE = "linux-x86_64-glibc"
-PUBLIC_PACKAGES = ("wirestack", "wirestack.http", "wirestack.net", "wirestack.tls")
+PUBLIC_PACKAGES = ("wirestack", "wirestack.http", "wirestack.net", "wirestack.tls",
+                   "wirestack.observability", "wirestack.sse")
 EXPECTED_PACKAGE_NAME = "wirestack"
 EXPECTED_MAJOR = 0
 DEFAULT_BASELINE = ROOT / "docs/api/baselines/wirestack-linux-v0.json"

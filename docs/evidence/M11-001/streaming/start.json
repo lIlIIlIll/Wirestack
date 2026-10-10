@@ -1,0 +1,684 @@
+{
+  "compiled_binaries": [
+    {
+      "path": "release/unittest_bin/std.testrunner",
+      "sha256": "2cde1f44863d93da3275cb982096f59f3553193893275d4603a9dde0c57ba446"
+    },
+    {
+      "path": "release/unittest_bin/std.testrunner.cjo",
+      "sha256": "2ad617ae7f40f077eb327b318949381ed5e855a0af0b47151ad9a7c069b82609"
+    },
+    {
+      "path": "release/unittest_bin/wirestack.sse",
+      "sha256": "7a4bdf41102a8bd59dcfce7497411cedc2c7b16015786aded3577c2bca27e86f"
+    },
+    {
+      "path": "release/unittest_bin/wirestack.sse$test.cjo",
+      "sha256": "81874ca6ed6089e4c0fa63010a9a69a4cfd15f29aaeb6c8da3d0f9f1f4ad7c27"
+    }
+  ],
+  "preflight": {
+    "command": [
+      "$HOME/.codex/scripts/codex_cangjie_env",
+      "--cwd",
+      "<repo>",
+      "cjpm",
+      "test",
+      "src/sse",
+      "--target-dir",
+      "$HOME/.cache/agent-tmp/wirestack-m11-001.Iwqulu/profile/final-target",
+      "-j",
+      "1",
+      "--parallel",
+      "1",
+      "--filter",
+      "M11Http*",
+      "--show-all-output",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 0,
+    "stderr": "\u001b[33mwarning\u001b[0m: unused import 'std.sync.*'\n \u001b[36m==>\u001b[0m <repo>/src/sse/native_framing_test.cj:3:1:\n  \u001b[36m| \u001b[0m\n\u001b[36m3\u001b[0m \u001b[36m| \u001b[0mimport std.sync.*\u001b[0m\n  \u001b[36m| \u001b[0m\u001b[33m^^^^^^^^^^^^^^^^^ unused import\u001b[0m\n  \u001b[36m| \u001b[0m\n  \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused expression\n   \u001b[36m==>\u001b[0m <repo>/src/sse/streaming_profile_test.cj:122:216:\n    \u001b[36m| \u001b[0m\n\u001b[36m122\u001b[0m \u001b[36m| \u001b[0m        @ExpectThrows[SseException](session.receive())\u001b[0m\n    \u001b[36m| \u001b[0m                                                       \u001b[33m^ unused expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused expression\n   \u001b[36m==>\u001b[0m <repo>/src/sse/streaming_profile_test.cj:122:678:\n    \u001b[36m| \u001b[0m\n\u001b[36m122\u001b[0m \u001b[36m| \u001b[0m        @ExpectThrows[SseException](session.receive())\u001b[0m\n    \u001b[36m| \u001b[0m                                                       \u001b[33m^ unused expression\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m_____________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)\n   \u001b[36m==>\u001b[0m <repo>/src/sse/decoder_test.cj:6:1:\n    \u001b[36m| \u001b[0m\n\u001b[36m6\u001b[0m   \u001b[36m| \u001b[0m  @Test\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m7\u001b[0m   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m class SseDecoderTests {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m188\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: unreachable block in 'if' expression\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m                  if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m__________________________________________________^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                     throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m                 }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m________________^ unreachable block in 'if' expression\u001b[0m\n    \u001b[36m| \u001b[0m\n\n30 warnings generated, 30 warnings printed.\n",
+    "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.sse, time elapsed: 60081653472 ns, RESULT:\n    TCS: M11Http1SseStreamingProfileTest, time elapsed: 30022088489 ns, RESULT:\n    [ PASSED ] CASE: http1StreamsWithoutLifetimeAccumulationAndCancels (30021568345 ns)\n    STDOUT:\n    SSE_SAMPLE protocol=h1 elapsedMs=30015 events=1125 produced=81664 leadEvents=80539 usedHeapBytes=3383296 managedBufferBytes=0 sessionReservedBytes=3465728\n    SSE_RESULT protocol=h1 requestedSeconds=30 elapsedMs=30016 minimumEvents=1000 events=1125 sequenceErrors=0 produced=81664 maxLeadEvents=81513 slowLeadEvents=81513 slowReadGapNs=18016918 serverReadCalls=319 cancelLatencyNs=235148 siblingBefore=false siblingAfter=false bodyLimitBytes=65536 applicationPendingBytes=0 sessionReservedBytes=3465728 managedAfterSessionBytes=0\n    SSE_CLEANUP protocol=h1 managedBufferBytes=0\n    TCS: M11Http2SseStreamingProfileTest, time elapsed: 30052696137 ns, RESULT:\n    [ PASSED ] CASE: http2StreamsWithoutLifetimeAccumulationAndPreservesSibling (30052446603 ns)\n    STDOUT:\n    SSE_SAMPLE protocol=h2 elapsedMs=30001 events=1104 produced=3072 leadEvents=1968 usedHeapBytes=8904704 managedBufferBytes=13 sessionReservedBytes=3465728\n    SSE_RESULT protocol=h2 requestedSeconds=30 elapsedMs=30003 minimumEvents=1000 events=1104 sequenceErrors=0 produced=3072 maxLeadEvents=2044 slowLeadEvents=2044 slowReadGapNs=27745385049 serverReadCalls=12 cancelLatencyNs=181282 siblingBefore=true siblingAfter=true bodyLimitBytes=65536 applicationPendingBytes=0 sessionReservedBytes=3465728 managedAfterSessionBytes=0\n    SSE_CLEANUP protocol=h2 managedBufferBytes=0\nSummary: TOTAL: 44\n    PASSED: 2, SKIPPED: 42, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 60083343555 ns, RESULT:\nTP: wirestack.*, time elapsed: 60083261503 ns, RESULT:\n    PASSED:\n    TP: wirestack.sse, time elapsed: 60081653472 ns\nSummary: TOTAL: 44\n    PASSED: 2, SKIPPED: 42, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n"
+  },
+  "production_sources": [
+    {
+      "path": "src/byte_span.cj",
+      "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+    },
+    {
+      "path": "src/cancellation.cj",
+      "sha256": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d"
+    },
+    {
+      "path": "src/common.cj",
+      "sha256": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3"
+    },
+    {
+      "path": "src/deadline.cj",
+      "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+    },
+    {
+      "path": "src/hostname_verifier.cj",
+      "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+    },
+    {
+      "path": "src/http/cancellation.cj",
+      "sha256": "6ba57c314bd55b557e128ded972c5d3d13e4a39047af6e3f4b6988b8a3a4f8c0"
+    },
+    {
+      "path": "src/http/client.cj",
+      "sha256": "58d5cfd5d717f885ac61736d820a80346e24f269d7249163286cd374776f7b23"
+    },
+    {
+      "path": "src/http/client_rotation.cj",
+      "sha256": "dc5814124cd510b8992d9c4aec3ba9fcc31aadd5976ea42b423d9038cdc114e5"
+    },
+    {
+      "path": "src/http/configuration_rotation.cj",
+      "sha256": "81338be084b2ab6eb14d49e70d2769984c28e0c3e201e40eb216022a06679816"
+    },
+    {
+      "path": "src/http/cookie.cj",
+      "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+    },
+    {
+      "path": "src/http/duplex.cj",
+      "sha256": "e81f52f4efbc0b728a1891d67bc0f3a6292af471d16d992b65e2055e44ffac24"
+    },
+    {
+      "path": "src/http/error.cj",
+      "sha256": "bdbc8b908567971439758c1c9b6bd344f7a6f381d082d45adaa20b3d5cb93cb7"
+    },
+    {
+      "path": "src/http/file_handler.cj",
+      "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+    },
+    {
+      "path": "src/http/hooks.cj",
+      "sha256": "f3605fab36dc2b91c3a19576372ff11fdd4e39b59efa32fd5bfac158d30f9f6a"
+    },
+    {
+      "path": "src/http/multipart.cj",
+      "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+    },
+    {
+      "path": "src/http/observability.cj",
+      "sha256": "a36cac65dd05e2edf16c310b6d12d67d32768279ad3e80ae3cb8558924f6ea35"
+    },
+    {
+      "path": "src/http/package.cj",
+      "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+    },
+    {
+      "path": "src/http/proxy.cj",
+      "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+    },
+    {
+      "path": "src/http/redirect.cj",
+      "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+    },
+    {
+      "path": "src/http/resolver.cj",
+      "sha256": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177"
+    },
+    {
+      "path": "src/http/resource_budget.cj",
+      "sha256": "0126e7e2cdcdef300bd0a8fa4bd219477177383af399f055d52c5345104917d8"
+    },
+    {
+      "path": "src/http/retry.cj",
+      "sha256": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957"
+    },
+    {
+      "path": "src/http/server.cj",
+      "sha256": "9b44d95acef40a700fafdd77d9156cdeacb0fcb9156bbc90405205d8658f7b18"
+    },
+    {
+      "path": "src/http/tls.cj",
+      "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+    },
+    {
+      "path": "src/http/upgrade.cj",
+      "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+    },
+    {
+      "path": "src/http/websocket.cj",
+      "sha256": "c38204ff2672725aa854a4528e7cbd7a7d12779c1b3eb01126c1af325b0469c8"
+    },
+    {
+      "path": "src/http/websocket_handshake.cj",
+      "sha256": "db5d899be8d22022db1e7aed502ad36c3cc5e52d6dbae8dce53112f797276d59"
+    },
+    {
+      "path": "src/http_body.cj",
+      "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+    },
+    {
+      "path": "src/http_contract.cj",
+      "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+    },
+    {
+      "path": "src/http_message.cj",
+      "sha256": "4033d25f42135e43f498f11d2b459512dcb7c45bce6e91efaa85b18a053e8ef1"
+    },
+    {
+      "path": "src/http_model.cj",
+      "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+    },
+    {
+      "path": "src/http_push.cj",
+      "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+    },
+    {
+      "path": "src/http_url.cj",
+      "sha256": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955"
+    },
+    {
+      "path": "src/internal/common/package.cj",
+      "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+    },
+    {
+      "path": "src/internal/connector/happy_eyeballs.cj",
+      "sha256": "cd2a91dcb818a3b8712d02649cc0731ec36446557834b4244356ed65f298ee5b"
+    },
+    {
+      "path": "src/internal/connector/package.cj",
+      "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+    },
+    {
+      "path": "src/internal/connector/route.cj",
+      "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+    },
+    {
+      "path": "src/internal/http1/chunked.cj",
+      "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+    },
+    {
+      "path": "src/internal/http1/client_connection.cj",
+      "sha256": "1b742d3afbebbe204f8a6d2ae79729f504f8cf9c16f3eeb07396137cf4b84da8"
+    },
+    {
+      "path": "src/internal/http1/client_pipeline.cj",
+      "sha256": "c1dcfaf856cef4aaf191363bb593d813c6e0bef977300ce92d16a08763cd9311"
+    },
+    {
+      "path": "src/internal/http1/connection_pool.cj",
+      "sha256": "5830e140cd22d48385bdd3d20b24a07792997d087229da58f8793bfb86d90c24"
+    },
+    {
+      "path": "src/internal/http1/head_parser.cj",
+      "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+    },
+    {
+      "path": "src/internal/http1/http2_connection_pool.cj",
+      "sha256": "f9fcd87da1ad6f8740801b2fac39ae29af7454d7e3f6559609504a556e921563"
+    },
+    {
+      "path": "src/internal/http1/package.cj",
+      "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+    },
+    {
+      "path": "src/internal/http1/pool_admission.cj",
+      "sha256": "60faf41eebd2e5e549f1aaf5e35e0cbfd408660d7abdd5bcba412c6653743058"
+    },
+    {
+      "path": "src/internal/http1/pool_key.cj",
+      "sha256": "5e72b0cccb4c59e8f07828b8d9903be4053736fd16cd8de8463c3248a0507dac"
+    },
+    {
+      "path": "src/internal/http1/protocol_upgrade.cj",
+      "sha256": "11dd5d4bcec8b1517a7f6b49f59475a8b19829cbc5abfa07220434be060f4b16"
+    },
+    {
+      "path": "src/internal/http1/proxy_client_pipeline.cj",
+      "sha256": "bd231a5fde3f6ea6f9627b7cb0001faef799bc5e810a32e5197ef9099354d6d2"
+    },
+    {
+      "path": "src/internal/http1/request_writer.cj",
+      "sha256": "f136cf6ef23d024c473576f1c7a071c6dfdfe07c6fe8c3a045d8fe4bc8961650"
+    },
+    {
+      "path": "src/internal/http1/response_reader.cj",
+      "sha256": "72a73f6314d9c0e76bab7d84e9d36784da20b104ca67d55b6ac1168e82916212"
+    },
+    {
+      "path": "src/internal/http1/serializer.cj",
+      "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+    },
+    {
+      "path": "src/internal/http1/server.cj",
+      "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+    },
+    {
+      "path": "src/internal/http1/server_connection.cj",
+      "sha256": "9b69b2bd71fb5b19a214c083b75ed4a5c367dc59a9c57ab9c916129ad8942a20"
+    },
+    {
+      "path": "src/internal/http1/server_reader.cj",
+      "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+    },
+    {
+      "path": "src/internal/http1/server_writer.cj",
+      "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+    },
+    {
+      "path": "src/internal/http1/tls_client_pipeline.cj",
+      "sha256": "bf0d6e9d7e83915fbd5304304abb07c7c6a4731a6abae0ef43c1ec715ec1dee5"
+    },
+    {
+      "path": "src/internal/http1/tls_server.cj",
+      "sha256": "23407a4258f4c4639df7baf28c40f84b9f0366e9498a5e0c9c68448670cba796"
+    },
+    {
+      "path": "src/internal/http2/client_connection.cj",
+      "sha256": "39446077c122fd6115ebdeb30d4d4b47e32ed11749a40755e23ef44fd606ec8a"
+    },
+    {
+      "path": "src/internal/http2/client_mapping.cj",
+      "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+    },
+    {
+      "path": "src/internal/http2/client_push.cj",
+      "sha256": "96b45e9483324487dc5eb41f5ec603cd03ad7d74c3d4645cfefa3da7dca197f1"
+    },
+    {
+      "path": "src/internal/http2/connection_state.cj",
+      "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+    },
+    {
+      "path": "src/internal/http2/duplex_stream.cj",
+      "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+    },
+    {
+      "path": "src/internal/http2/flow_control.cj",
+      "sha256": "b296e490719597dab558988c621accc17301e235f35a44cc8813233f90591137"
+    },
+    {
+      "path": "src/internal/http2/frame_codec.cj",
+      "sha256": "ff25f15a331f00c21850e9ece84e392cd10ea1f77b76c1fc05964fa5841402d5"
+    },
+    {
+      "path": "src/internal/http2/frame_model.cj",
+      "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+    },
+    {
+      "path": "src/internal/http2/goaway.cj",
+      "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+    },
+    {
+      "path": "src/internal/http2/header_block.cj",
+      "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+    },
+    {
+      "path": "src/internal/http2/health_close.cj",
+      "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+    },
+    {
+      "path": "src/internal/http2/hpack_block.cj",
+      "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+    },
+    {
+      "path": "src/internal/http2/hpack_core.cj",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    {
+      "path": "src/internal/http2/hpack_dynamic_table.cj",
+      "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+    },
+    {
+      "path": "src/internal/http2/hpack_huffman.cj",
+      "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+    },
+    {
+      "path": "src/internal/http2/observability.cj",
+      "sha256": "fc4d28b389b73c00f33db648ec2c1d76d57452ed755d8f2007cb61b19d752dce"
+    },
+    {
+      "path": "src/internal/http2/package.cj",
+      "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+    },
+    {
+      "path": "src/internal/http2/reader_loop.cj",
+      "sha256": "3e680b8bd8c005c7c3a067ab3955e33a8359c96220d76ebbee638a5c1da79015"
+    },
+    {
+      "path": "src/internal/http2/server_cancellation.cj",
+      "sha256": "8b718950bbe3e7de56e40b63e5d2262f7e6301ea61cb1b56c3530b4308cbe9c9"
+    },
+    {
+      "path": "src/internal/http2/server_connection.cj",
+      "sha256": "5dd9ae32547c1c8adb779290044c60bdce31546b3b01b86330cfca028c66866e"
+    },
+    {
+      "path": "src/internal/http2/server_mapping.cj",
+      "sha256": "be1efea8eae10d0bdec1976b69b5c42b2eb8a2b86f8962ad9863765a25304a4b"
+    },
+    {
+      "path": "src/internal/http2/settings.cj",
+      "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+    },
+    {
+      "path": "src/internal/http2/stream_lifecycle.cj",
+      "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+    },
+    {
+      "path": "src/internal/http2/stream_reset.cj",
+      "sha256": "c1a838f98f6fa9a8d7873e8986ef5b93b31433d9840e763c04fc59a457b77760"
+    },
+    {
+      "path": "src/internal/http2/write_scheduler.cj",
+      "sha256": "50ed0bb79d8ac3c4cc9fe93d1f3b43a657d0ccec002e4345414ea8c869c3d2ed"
+    },
+    {
+      "path": "src/internal/http_files/package.cj",
+      "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+    },
+    {
+      "path": "src/internal/http_model/body.cj",
+      "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+    },
+    {
+      "path": "src/internal/http_model/message.cj",
+      "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+    },
+    {
+      "path": "src/internal/http_model/package.cj",
+      "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+    },
+    {
+      "path": "src/internal/http_model/public_suffix.cj",
+      "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+    },
+    {
+      "path": "src/internal/http_model/public_suffix_data.cj",
+      "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+    },
+    {
+      "path": "src/internal/http_model/url.cj",
+      "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+    },
+    {
+      "path": "src/internal/http_resource_budget.cj",
+      "sha256": "2f533291ce0a0b2e25c8560db9fc5f8494caef69d71775be45a5d10225ecf9d3"
+    },
+    {
+      "path": "src/internal/http_resource_budget_types.cj",
+      "sha256": "2d555765cb6ff9ac22f343666831b1e0492118ba5fcb82cb35aebd6c5839623c"
+    },
+    {
+      "path": "src/internal/identity/package.cj",
+      "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+    },
+    {
+      "path": "src/internal/package.cj",
+      "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+    },
+    {
+      "path": "src/internal/platform/linux/package.cj",
+      "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+    },
+    {
+      "path": "src/internal/platform/package.cj",
+      "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+    },
+    {
+      "path": "src/internal/resolver/bounded_backend.cj",
+      "sha256": "d536557035988f377c8c8269bfc8854d648f4f2e65d1792b0c8126f4621c56cd"
+    },
+    {
+      "path": "src/internal/resolver/package.cj",
+      "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+    },
+    {
+      "path": "src/internal/resolver/system_resolver.cj",
+      "sha256": "29fe44c8e6568d269452f3d54d0c48929415082fdf36e1afbddd66224f727923"
+    },
+    {
+      "path": "src/internal/tls_engine/connection.cj",
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+    },
+    {
+      "path": "src/internal/tls_engine/context.cj",
+      "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+    },
+    {
+      "path": "src/internal/tls_engine/engine.cj",
+      "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+    },
+    {
+      "path": "src/internal/tls_engine/identity.cj",
+      "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+    },
+    {
+      "path": "src/internal/tls_engine/package.cj",
+      "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+    },
+    {
+      "path": "src/internal/tls_engine/server_name.cj",
+      "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+    },
+    {
+      "path": "src/internal/tls_engine/session.cj",
+      "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+    },
+    {
+      "path": "src/internal/tls_engine/websocket_crypto.cj",
+      "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+    },
+    {
+      "path": "src/internal/transport/cancellation.cj",
+      "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+    },
+    {
+      "path": "src/internal/transport/completion.cj",
+      "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+    },
+    {
+      "path": "src/internal/transport/deadline.cj",
+      "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+    },
+    {
+      "path": "src/internal/transport/lifecycle.cj",
+      "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+    },
+    {
+      "path": "src/internal/transport/memory_transport.cj",
+      "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+    },
+    {
+      "path": "src/internal/transport/memory_transport_listener.cj",
+      "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+    },
+    {
+      "path": "src/internal/transport/network_error.cj",
+      "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+    },
+    {
+      "path": "src/internal/transport/network_event.cj",
+      "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+    },
+    {
+      "path": "src/internal/transport/operation_context.cj",
+      "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+    },
+    {
+      "path": "src/internal/transport/package.cj",
+      "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+    },
+    {
+      "path": "src/internal/transport/scripted_transport.cj",
+      "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+    },
+    {
+      "path": "src/internal/transport/transport.cj",
+      "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+    },
+    {
+      "path": "src/internal/transport_stdnet/net_contract.cj",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    {
+      "path": "src/internal/transport_stdnet/package.cj",
+      "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+    },
+    {
+      "path": "src/internal/transport_stdnet/socket_options.cj",
+      "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
+    },
+    {
+      "path": "src/internal/transport_stdnet/udp_socket.cj",
+      "sha256": "32f78914fb335bf68dfd2a99ae3d06e823fe855bc7b583bb126b7622f6f364b2"
+    },
+    {
+      "path": "src/internal/transport_stdnet/unix_address.cj",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    {
+      "path": "src/internal/transport_stdnet/unix_listener.cj",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    {
+      "path": "src/internal/trust/hostname.cj",
+      "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+    },
+    {
+      "path": "src/internal/trust/package.cj",
+      "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+    },
+    {
+      "path": "src/net/datagram_socket_core.cj",
+      "sha256": "007a873cf52ccc3587db5c1c58d8b69cbb991585b09085c0abc861ca647709ce"
+    },
+    {
+      "path": "src/net/dns_client.cj",
+      "sha256": "60496e50a26db7af557c3497e0299b0c9afc47f013a5dc7c814c317b5f185550"
+    },
+    {
+      "path": "src/net/dns_resolver.cj",
+      "sha256": "a8643f30d07032512cfbb6f21682e0d581c4542169b7c76312c061f6316e80ab"
+    },
+    {
+      "path": "src/net/dns_wire.cj",
+      "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+    },
+    {
+      "path": "src/net/package.cj",
+      "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+    },
+    {
+      "path": "src/net/socket_options.cj",
+      "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+    },
+    {
+      "path": "src/net/tcp_listener.cj",
+      "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+    },
+    {
+      "path": "src/net/udp_socket.cj",
+      "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
+    },
+    {
+      "path": "src/net/unix_datagram_socket.cj",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    {
+      "path": "src/net/unix_listener.cj",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    {
+      "path": "src/net/unix_stream.cj",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    {
+      "path": "src/network_error.cj",
+      "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+    },
+    {
+      "path": "src/network_event.cj",
+      "sha256": "8b356f7f4ea634313f745a244cf1288dd9d4d960fb573870a8e0558b78e77956"
+    },
+    {
+      "path": "src/network_event_buffer.cj",
+      "sha256": "b445222f06db9333f9c7660e9bafbd4c5e6e4b125238b4120b8dc95379a3eb33"
+    },
+    {
+      "path": "src/network_pool_snapshot.cj",
+      "sha256": "f19d0fc1cfdb8e952b3550153540afc342a9627bb3a862be4e559caa8aa7859c"
+    },
+    {
+      "path": "src/observability/bounded_network_event_sink.cj",
+      "sha256": "d11390cfc372f11c6d5d567ea58c88f633e0e147a213be34b0d072ad58cd7aa4"
+    },
+    {
+      "path": "src/operation_context.cj",
+      "sha256": "98c98f6d7e325e61cdd239bf8c2e7abfa586ae662e11c892df2aa8428245eb43"
+    },
+    {
+      "path": "src/package.cj",
+      "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+    },
+    {
+      "path": "src/private_key_contract.cj",
+      "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+    },
+    {
+      "path": "src/resolver.cj",
+      "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+    },
+    {
+      "path": "src/resolver_snapshot.cj",
+      "sha256": "b1f82e6f120e77391595abda5289c0376c9013ce8a3d692721ac05669cfb0094"
+    },
+    {
+      "path": "src/sse/decoder.cj",
+      "sha256": "0b89572bab2a9674d4b786ff3352ff0d1456664e83ba9ca9dbdf3bdf2cc5a99c"
+    },
+    {
+      "path": "src/sse/encoder.cj",
+      "sha256": "099f94ce9d9363aff48611789fa31a84e048a386ceabf6d84806bc52c844ea7d"
+    },
+    {
+      "path": "src/sse/model.cj",
+      "sha256": "6c018731253fb95b3ae59a29ae54d80cb7780302ed7151c8ace792c46c91bdee"
+    },
+    {
+      "path": "src/sse/session.cj",
+      "sha256": "662381ad817543c851af746edaae780a00b4e7e0fb14aeccbfd3d88a70dc0f74"
+    },
+    {
+      "path": "src/sse/session_policy.cj",
+      "sha256": "ca2b6ec5d9d7a006b05ea3c72cb49d4461974cc572bfb34598a74dcbaa903bf4"
+    },
+    {
+      "path": "src/sse/writer.cj",
+      "sha256": "77520d6b36a837f2230cb3d5363f703a40c4b4710018f1553d20c3eafec722a4"
+    },
+    {
+      "path": "src/tls/facade.cj",
+      "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+    },
+    {
+      "path": "src/tls/identity.cj",
+      "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+    },
+    {
+      "path": "src/tls/package.cj",
+      "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+    },
+    {
+      "path": "src/tls_contract.cj",
+      "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+    },
+    {
+      "path": "src/transport.cj",
+      "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+    },
+    {
+      "path": "src/trust.cj",
+      "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+    }
+  ],
+  "started_at_utc": "2026-10-08T13:04:01.096942+00:00",
+  "task_id": "M11-001"
+}
