@@ -321,12 +321,15 @@ public class HttpResponse <: Resource {
     public let body: ResponseBody
     /** Bounded HTTP/2 pushes associated with this parent response, when enabled. */
     public let pushes: ?HttpPushSource
+    /** Canonical request deadline/cancellation retained by a client response; absent for manually constructed responses. */
+    public let operationContext: ?OperationContext
 
 /**
  * Wirestack 公开 API：构造并校验该公开值。
  * @param body 调用方提供的输入值。
  * @param headers 调用方提供的输入值。
  * @param pushes Owned push source; response closure rejects its unclaimed offers.
+ * @param operationContext Original client operation, including its capped absolute deadline and linked cancellation.
  * @param reason 描述终止原因的稳定值。
  * @param status 待记录的协议状态码。
  * @param version 调用方提供的输入值。
@@ -337,7 +340,8 @@ public class HttpResponse <: Resource {
         body: ResponseBody,
         version!: HttpVersion = HttpVersion.Http11,
         headers!: HttpHeaders = HttpHeaders(),
-        pushes!: ?HttpPushSource = None<HttpPushSource>
+        pushes!: ?HttpPushSource = None<HttpPushSource>,
+        operationContext!: ?OperationContext = None<OperationContext>
     ) {
         if (status < 100 || status > 999) {
             throw IllegalArgumentException("HTTP status must be exactly three decimal digits")
@@ -349,6 +353,7 @@ public class HttpResponse <: Resource {
         this.headers = headers
         this.body = body
         this.pushes = pushes
+        this.operationContext = operationContext
     }
 
 /**

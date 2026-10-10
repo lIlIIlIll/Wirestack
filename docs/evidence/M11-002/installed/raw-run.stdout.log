@@ -1,0 +1,3 @@
+RAW encoded_bytes=30 implicit_negotiation=false
+CHECK default_raw_no_negotiation PASS
+M11_002_INSTALLED_RAW_PASS

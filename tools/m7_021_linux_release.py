@@ -288,6 +288,24 @@ def validate_http_files_manifest(
         raise ReleaseError("HTTP files native archive provenance is invalid")
 
 
+def optional_modules(payload: Mapping[str, bytes]) -> list[dict[str, Any]]:
+    sources = sorted(path for path in payload if path.startswith("src/gzip/"))
+    if not sources:
+        return []
+    expected = [f"src/gzip/{name}.cj" for name in ("body", "client", "decoder", "model")]
+    if sources != expected:
+        raise ReleaseError("gzip production source inventory is invalid")
+    return [{
+        "package": "wirestack.gzip", "selection": "explicit-package-import",
+        "implementation": "wirestack-cangjie-rfc1951-rfc1952",
+        "license": PROJECT_LICENSE_EXPRESSION, "nativeDependencies": [],
+        "sources": [
+            {"path": path, "sha256": evidence_digest.text_evidence_digest_bytes(payload[path]).to_json()}
+            for path in sources
+        ],
+    }]
+
+
 def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     payload: dict[str, bytes] = {}
     for relative in (
@@ -414,6 +432,9 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         },
         "externalOpenSslDependency": False,
     }
+    modules = optional_modules(payload)
+    if modules:
+        release_manifest["optionalModules"] = modules
     payload["release-manifest.json"] = canonical_json(release_manifest)
     reject_loader_strings(payload)
     return payload, release_manifest
@@ -597,6 +618,8 @@ def read_verified_payload(path: Path) -> tuple[dict[str, bytes], dict[str, Any]]
         or not evidence_digest.schema_text_sha256_equal(manifest.get("artifactBuildFingerprint"), fingerprint)
     ):
         raise ReleaseError("release payload fingerprint differs from the inventory")
+    if manifest.get("optionalModules", []) != optional_modules(payload):
+        raise ReleaseError("optional module source inventory differs from payload")
     return payload, manifest
 
 
