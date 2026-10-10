@@ -721,3 +721,31 @@ class DnsResolverPolicyTest {
         }
     }
 }
+
+@Test
+class DnsHostsGenerationSnapshotTest {
+    @TestCase
+    func hostsUpdatesRequireFreshSnapshotsAndValidationDoesNotMutateOldPolicy(): Unit {
+        let path = dnsResolverTestTempPath()
+        var old = None<Resolver>
+        var next = None<Resolver>
+        try {
+            File.writeTo(path, "192.0.2.1 service\n".toArray())
+            let first = Resolver(config: DnsResolverConfig(hostsPath: path))
+            old = Some(first)
+            File.writeTo(path, "198.51.100.2 service\n".toArray())
+            let second = Resolver(config: DnsResolverConfig(hostsPath: path))
+            next = Some(second)
+            @Expect(first.resolve("service").addresses[0].toOctets(), [192u8, 0u8, 2u8, 1u8])
+            @Expect(second.resolve("service").addresses[0].toOctets(), [198u8, 51u8, 100u8, 2u8])
+            @AssertThrows[IllegalArgumentException](DnsResolverConfig(hostsPath: path, ndots: -1))
+            @Expect(first.resolve("service").addresses[0].toOctets(), [192u8, 0u8, 2u8, 1u8])
+            @Expect(second.resolve("service").addresses[0].toOctets(), [198u8, 51u8, 100u8, 2u8])
+        } finally {
+            if (let Some(value) <- old) { value.close() }
+            if (let Some(value) <- next) { value.close() }
+            let _ = removeIfExists(path)
+        }
+    }
+}
+

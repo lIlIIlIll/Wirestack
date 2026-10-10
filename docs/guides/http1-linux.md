@@ -361,3 +361,56 @@ Public HTTP protocol/policy failures use `HttpException.code`, including
 `InvalidUrl`, `InvalidRequest`, `InvalidResponse`, `HeaderLimitExceeded`,
 `BodyLimitExceeded`, `InvalidFraming`, `ProxyFailure`, `PoolExhausted`,
 `RedirectLimit` and `BodyNotReplayable`. HTTP 4xx/5xx remain normal responses.
+
+
+## Rotate TLS and resolver configuration online
+
+Use `HttpConfigurationRotation.Graceful` for ordinary certificate or resolver replacement. It stops new admissions to the affected old pools, closes idle connections and drains admitted exchanges under their original operation budgets. A started handshake keeps its captured TLS snapshot. HTTP/2 streams already admitted may finish, but later client requests use the replacement pool. The server sends GOAWAY to obsolete H2 connections and closes idle H1 keepalive reads without interrupting an admitted H1 exchange.
+
+A validated H2 response that has received END_STREAM remains readable, including buffered DATA, after its graceful peer closes the connection. Those bytes remain budgeted until caller consumption or close. Matching Content-Length without END_STREAM is not completion: premature EOF still fails, and explicit security cancellation still aborts the old response.
+
+Choose `HttpConfigurationRotation.SecurityReplacement` explicitly when an old trust policy or client identity must stop being used. Wirestack cannot infer which arbitrary policy is stricter. This mode cancels affected old-generation request tokens and aborts their connections, including generations draining from earlier graceful updates. New H2 requests cannot reuse the old authenticated connection. The server also cancels pending handshakes and active handler contexts; the listener stays bound. Cancellation cannot undo work the peer already executed.
+
+TLS material is fully validated before publication, including native engine installation of certificates, trust roots and keys. Validation, capacity or closed-state failure leaves the previous generation active. Generation publication and client route selection share one mutex. Server handshake dispatch captures the current generation under its dispatcher mutex. The update returns after applying the selected retirement action to its captured obsolete connections; operations concurrent with the update may already have been admitted to their old snapshot.
+
+`HttpClient.rotateTls` changes direct HTTPS and HTTPS-through-proxy TLS. `rotateResolver` changes only direct DNS and direct pools. `rotateProxyResolver` changes only proxy-endpoint DNS and proxy pools, retaining NO_PROXY and authorization policy; a client without a configured proxy rejects that update. Each method returns the new independent `UInt64` generation. Client counters start at one. A TLS server starts at one and reports its last published value through `tlsGeneration()`; a cleartext server reports zero and rejects TLS rotation.
+
+```cj
+let replacement = HttpClientTlsConfig(
+    [File.readFrom("/etc/wirestack/replacement-ca.der")]
+)
+try {
+    let generation = client.rotateTls(
+        replacement, policy: HttpConfigurationRotation.SecurityReplacement
+    )
+    let snapshot = client.configurationSnapshot()
+    // snapshot.tlsGeneration equals generation unless another caller updates TLS.
+    // No certificates, key bytes or arbitrary hostnames enter this snapshot.
+} finally { replacement.close() }
+
+let serverReplacement = HttpServerTlsConfig(
+    [File.readFrom("/etc/wirestack/replacement-leaf.der")],
+    File.readFrom("/etc/wirestack/replacement-key.pk8")
+)
+try { let _ = server.rotateTls(serverReplacement) }
+finally { serverReplacement.close() }
+```
+
+The built client/server retains provider and key ownership independently of the caller's TLS config. DNS rotation shares the retained immutable TLS context instead of reopening a config the caller may have closed. Existing TLS session/contextVersion partitioning remains unchanged. A replacement never borrows a session from its obsolete trust context.
+
+For hosts, nameserver, search, ndots or DNS cache-policy changes, construct a fresh `wirestack.net.Resolver` with the replacement `DnsResolverConfig`, then publish it with `rotateResolver` or `rotateProxyResolver`. Each resolver snapshots hosts at construction and owns separate positive and negative caches. Exact hosts lookup precedes DNS search expansion. An old in-flight DNS result can complete the old admitted operation and populate only its old resolver's cache. Security replacement cancels the old operation instead. No result/cache entries transfer between snapshots.
+
+A resolver supplied by the caller remains caller-owned. Keep its old instance alive until the old admitted work completes, then close it. Wirestack does not poll configuration files. `DnsResolverConfig.fromSystem` retains its documented tolerant parsing behavior; callers requiring strict file validation must validate before constructing and publishing their replacement. An ordinary cache TTL expiration only affects that cache entry. It does not rotate generations or disconnect established connections.
+
+`configurationSnapshot()` reports `tlsGeneration`, `directDnsGeneration`, `proxyDnsGeneration`, `retainedGenerations` and `retainedTlsContexts`. At most 64 client route owners and 64 distinct TLS context owners are retained. A server retains at most 64 referenced TLS generations. Old contexts release only after their real request/body/connection lifetimes finish; updates reject capacity exhaustion rather than growing an unbounded queue or spawning watchers.
+
+A successfully transferred HTTP/1 Upgrade or CONNECT session is caller-owned, not a pooled request. Graceful/security rotation and client close do not revoke it. It retains its old generation until the caller closes or aborts the session. Close such sessions explicitly when your application's security policy requires revocation. HTTP/2 CONNECT remains a stream on a shared pooled connection and is aborted by security replacement of that connection.
+
+The Linux example `examples/linux/m10_004/configuration_rotation.cj` demonstrates graceful admitted-request completion, server security cancellation, new mTLS authentication, removed-trust rejection, direct DNS admission and zero terminal connection/generation owners. The installed acceptance runner extracts a fresh current package outside the checkout and builds the example against only that installation:
+
+```sh
+python3 tools/m10_004_native_rotation.py
+```
+
+Expected final marker: `M10_004_INSTALLED_ROTATION_PASS` in `docs/evidence/M10-004/installed/consumer-run.stdout.log`. This is Linux development acceptance, not release qualification.
+

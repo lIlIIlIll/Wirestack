@@ -31,6 +31,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     private var pendingPushes: Int64 = 0
     private var draining = false
     private var closed = false
+    private var started = false
     private var operationContext = OperationContext.background()
     internal prop pushesPerRequestLimit: UInt32 {
         get() { http2Limits.maxPushesPerRequest }
@@ -86,12 +87,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
 
     public func serve(context!: OperationContext = OperationContext.background()): Unit {
         operationContext = context
+        if (synchronized(mutex) { closed }) { return }
         try {
             let settings = machine.start(settings: initialHttp2Settings(
                 Http2ConnectionRole.Server, http2Limits
             ))
             writeAll(transport, ByteSpan(settings), context: context)
             let _ = spawn { writer.run() }
+            if (synchronized(mutex) { started = true; draining }) { startDrain() }
             let _ = reader.getOrThrow().run(context: context)
         } finally {
             abort()
@@ -104,10 +107,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             if (draining || closed) { false } else {
                 draining = true
                 pushChanged.notifyAll()
-                true
+                started
             }
         }
         if (!shouldStart) { return }
+        startDrain()
+    }
+
+    private func startDrain(): Unit {
         try { let _ = writer.enqueue(machine.beginDrain()) }
         catch (_: Exception) { abort(); return }
         let _ = spawn {
