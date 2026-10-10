@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-net.a:
+
+socket_buffer.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_SOCKET_MallocWithInit>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	lea    -0x80000000(%rdi),%rax
+  1c:	cmp    $0xffffffff80000001,%rax
+  22:	jae    37 <CJ_SOCKET_MallocWithInit+0x37>
+  24:	mov    %fs:0x28,%rax
+  2d:	cmp    -0x8(%rbp),%rax
+  31:	jne    59 <CJ_SOCKET_MallocWithInit+0x59>
+  33:	xor    %eax,%eax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0b61b7468b429d7ad34e6c8e14993f280aa93dcd2071d7afd679fc5af9515588"}

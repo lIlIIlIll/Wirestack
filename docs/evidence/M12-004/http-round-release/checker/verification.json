@@ -1,0 +1,121 @@
+{
+  "task_id": "M12-004",
+  "parent_status": "BLOCKED",
+  "existing_full_33_campaign": "FAIL",
+  "report_sha256": "27c85ed2085b15ec4f3b989d643fb94f47c074db30e354ec1b00616ade126341",
+  "checker_sha256": "1db014c378eb3253c1dde330d1e3365bbddd175f4a199850d5868445a709737e",
+  "bindings": {
+    "logical_cases": 28,
+    "labels": [
+      "baseline",
+      "candidate"
+    ],
+    "source_hashes": {
+      "http.cj": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7",
+      "common.cj": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
+    },
+    "archives": {
+      "baseline": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f",
+      "candidate": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+    },
+    "new_binaries": {
+      "baseline": "69daf2ca970ce28e5ef7d10edc024249c6f24fc217402ff6b8fd73086e716891",
+      "candidate": "3a9976c5ea476b799f8341575115887bc13302a1c2f4372cb6db89463797161c"
+    },
+    "raw_stdout_sha256": {
+      "baseline": {
+        "h1_short_reuse": "e5d41c6e25b390f11bcffe9d9cb6a5d06b88b87a8338628b625744cd661ea7f7",
+        "h1_new_connection": "8ceb9e9d28a508debb39628ee92e6e6d288fd81cd396b2f73485027091cbe7e3",
+        "h1_bulk_4096": "a98d4406d9ef3e9e3a19b03f633f6c81bfd938fbc38ed7ef221ee20298391337",
+        "h1_bulk_32768": "7580eefc36f235edeef0d7775015a089ff706a49c2876be7db1bace933d2d67a",
+        "h1_concurrent": "4f695423e4aae39ecfcb4f15c528356a72a66403846fdc52d6f6a014bd26fcf1",
+        "h1_early_close": "81ec0449f1a5ed4fbcacbeaaad0c0045716e43738f23e94f60c319fde0c55ed2",
+        "h2_streams_1": "0fb97f0eabc113c394a8b2fd3b83ac024b985e4c8682add6a61d2f7804ccbf35",
+        "h2_streams_10": "8ccfd6ee26c2a9bcc41479ed6f8f18fabca6a0838b8c4b122512caae492f31f1",
+        "h2_streams_100": "608a6deb805f9eb95289456c0575302dd1761149b5800c80f9bc2b70567193b2",
+        "h2_slow_consumer": "9456a9f4343039ed075e7017259b156a4c41153c210cd6be615030a474ece186",
+        "h2_stream_cancel": "18cc087a79360809b34d9f6e8c889b7239f8d8193ed3b1812bf5f2ff907bb831",
+        "http_overload": "1897101b7b524d324be3cbecc5f6a623d4559cd2846ec62b40524bb43bc50379",
+        "http_observed": "370c255c32174458861b7560152a9db92be019fcdd5a37b32bbcd5abc57e3ae3",
+        "http_unobserved": "32452886fc069ecfda5292c5786b33b2715eecfb4e8562000279be983cb51266"
+      },
+      "candidate": {
+        "h1_short_reuse": "413e4f83b46299edfee7d8e179c9aa7567240b03fb6e10c881d25b67b573a1e8",
+        "h1_new_connection": "a4dd5bad7ed6c132ea2f3c51907beabf3685a79f96b2dc0a32ba041f9fda0ea0",
+        "h1_bulk_4096": "81a8b5fd767b510edc32d2d3b9cc542e432923275a8200b24650924104fcd042",
+        "h1_bulk_32768": "abcd74849a72a4c300a028aa3d526426402cb4d138a808825e169d9fd3102402",
+        "h1_concurrent": "9c0273cf58546a0f8518b6971822398b8ded1fd6340cef0e55533735ea1cbd0b",
+        "h1_early_close": "91e312f7d951318019ca4fab943f08bc0a0ed231445c67112972410c0bb1a52f",
+        "h2_streams_1": "ab4a213b6b165788bbe430bfbc68b638835b7c049ec2c5a9a895fe686275f8d3",
+        "h2_streams_10": "c82b7d6a152fb56f3ca104fee22edccfe6f3c9f59ce7554c5aae4ae63a446980",
+        "h2_streams_100": "6df81c6b22fffb124c518e3e31f864541fd6be0ffda4d8cbcecba72c09ec8ef0",
+        "h2_slow_consumer": "af84767d1f6f434d78942831af0fcb3f09a03d3e50d1fada805ec8c299d77af3",
+        "h2_stream_cancel": "106298bb8e9d29bc6abfb841d0b5b3bb1228dbac1245c0f87ef65011f25934a1",
+        "http_overload": "bf5e830ea4401f61b1a762dbbba919aa49b841d4201dae358700094916ee677a",
+        "http_observed": "d935282c65ae82d1855ec5897f8916277befdca0b3e214c3760977d45e46ddc0",
+        "http_unobserved": "1eeef268c6b9de27937667b4b46c4c6a6dbc6a63fd360ef3e105e992d3b746f4"
+      }
+    }
+  },
+  "negative_controls": [
+    {
+      "name": "nonzero_exit",
+      "status": "REJECTED",
+      "reason": "nonzero native/build exit"
+    },
+    {
+      "name": "missing_case",
+      "status": "REJECTED",
+      "reason": "missing or extra logical case"
+    },
+    {
+      "name": "wrong_operations",
+      "status": "REJECTED",
+      "reason": "wrong fixed work: operations"
+    },
+    {
+      "name": "wrong_bytes",
+      "status": "REJECTED",
+      "reason": "wrong fixed work: bytes"
+    },
+    {
+      "name": "wrong_checksum",
+      "status": "REJECTED",
+      "reason": "wrong fixed work: checksum"
+    },
+    {
+      "name": "hidden_failure",
+      "status": "REJECTED",
+      "reason": "hidden failure or duplicate sample in raw stdout"
+    },
+    {
+      "name": "missing_latency",
+      "status": "REJECTED",
+      "reason": "missing latency"
+    },
+    {
+      "name": "leaked_owner",
+      "status": "REJECTED",
+      "reason": "leaked terminal owner"
+    },
+    {
+      "name": "wrong_observer_argv",
+      "status": "REJECTED",
+      "reason": "wrong observer argv"
+    },
+    {
+      "name": "stale_source",
+      "status": "REJECTED",
+      "reason": "stale source in build"
+    },
+    {
+      "name": "modified_raw_stdout",
+      "status": "REJECTED",
+      "reason": "modified raw artifact"
+    }
+  ],
+  "negative_rejected": 11,
+  "negative_total": 11,
+  "status": "PASS",
+  "exit_code": 0
+}

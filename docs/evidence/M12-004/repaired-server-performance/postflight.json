@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "scope": "ORIGINAL_AND_NEW_CAMPAIGN_INPUT_PRESERVATION_ONLY",
+  "sdk392_unchanged": true,
+  "host_original_glibc14_unchanged": true,
+  "host_glibc": "2.35",
+  "all_six_original_binaries_unchanged": {
+    "baseline": {
+      "transport_tls": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "60c01f3222c23a0a679309206a3add96f84c5315dbdb50f8cf2351f687b7faa7"
+      },
+      "http": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "d132fe407098689cab5115c10d520486906fbf651b25dd3306f0d8910b29add1"
+      },
+      "streams": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b09a58d292b97e3f04f9f8306313ca32c7c78fd3403bfe095d290a510fcc5cca"
+      }
+    },
+    "candidate": {
+      "transport_tls": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b5aa26f17300d76b72242e36ca34cffa13fcd8b2ec2239a8f6c590bb2b519625"
+      },
+      "http": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "538e4c728db27d17db8d171a790fd8357fed0c62e3f668e87b1c835eb0992557"
+      },
+      "streams": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "3c04cd62d61aa19305fd352b2d7a4cec69ea818b76ecc24704801765f60981fc"
+      }
+    }
+  },
+  "old_and_new_archives_unchanged": true,
+  "old_and_new10_source_inputs_unchanged": true,
+  "owned_live_processes": [],
+  "fixture_private_keys_remaining": []
+}

@@ -386,6 +386,7 @@ def build_provider(
                 f"-I{prefix / 'include'}",
                 f"-I{shim_dir}",
                 f'-DWIRESTACK_TLS_BUILD_FINGERPRINT="{fingerprint}"',
+                f'-DWIRESTACK_TLS_PROVIDER_SOURCE_FINGERPRINT="{manifest["source"]["content_sha256"]}"',
                 *shim_defines,
                 "-c",
                 str(shim_source),
@@ -419,14 +420,19 @@ def build_provider(
         smoke_source.write_text(
             """#include "wirestack_tls_provider.h"
 #include <stdint.h>
+#include <string.h>
 int main(void) {
   uint64_t handle = 0; unsigned char data[32] = {0};
   uint64_t engine = 0, invalid_engine = 0, pending = 0, drained = 0;
   uint64_t capabilities = 0;
   int32_t step = -1;
+  const char *expected_version = WIRESTACK_TLS_EXPECTED_VERSION;
+  const char *expected_source = WIRESTACK_TLS_EXPECTED_SOURCE;
   if (wirestack_tls_provider_abi_version() != 1) return 13;
   if (wirestack_tls_provider_create(&handle) != 0) return 1;
   if (wirestack_tls_provider_random(handle, data, sizeof(data)) != 0) return 2;
+  if (strcmp(wirestack_tls_provider_version(handle), expected_version) != 0) return 15;
+  if (strcmp(wirestack_tls_provider_fingerprint(handle), expected_source) != 0) return 16;
   capabilities = wirestack_tls_provider_capabilities(handle);
   if ((capabilities & WIRESTACK_TLS_CAP_EXTERNAL_DECRYPTOR) == 0) return 3;
 #if defined(WIRESTACK_TLS_ENABLE_TEST_KEYLOG)
@@ -460,6 +466,8 @@ int main(void) {
                 "-Wextra",
                 "-Werror",
                 f"-I{include_dir}",
+                f'-DWIRESTACK_TLS_EXPECTED_VERSION="{manifest["provider_version"]}"',
+                f'-DWIRESTACK_TLS_EXPECTED_SOURCE="{manifest["source"]["content_sha256"]}"',
                 *shim_defines,
                 "-c",
                 str(smoke_source),

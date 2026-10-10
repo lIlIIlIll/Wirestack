@@ -1,0 +1,35 @@
+Breakpoint 1 at 0xa8b95d
+Breakpoint 2 at 0xa8b962
+Breakpoint 3 at 0x255945
+To enable execution of this file add
+	add-auto-load-safe-path /usr/lib/x86_64-linux-gnu/libthread_db.so.1
+line to your configuration file "$HOME/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "$HOME/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+[New LWP 1500095]
+[New LWP 1500096]
+[New LWP 1500097]
+[New LWP 1500098]
+[New LWP 1500099]
+[New LWP 1500100]
+[New LWP 1500101]
+[Switching to LWP 1500099]
+CTOR_ARGUMENT esi=0
+CTOR_RESULT payload=0
+[Switching to LWP 1500092]
+TASK_LATCH payload=0
+[LWP 1500098 exited]
+[LWP 1500097 exited]
+[LWP 1500096 exited]
+[LWP 1500095 exited]
+FAIL h1_short_reuse phase=measured produced=0 requests=11 active=1 waiters=0 TimeoutException
+[LWP 1500101 exited]
+[LWP 1500099 exited]
+[LWP 1500092 exited]
+[LWP 1500100 exited]
+[New process 1500092]
+[Inferior 1 (process 1500092) exited with code 01]

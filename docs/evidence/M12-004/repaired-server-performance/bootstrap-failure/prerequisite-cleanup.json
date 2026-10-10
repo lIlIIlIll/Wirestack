@@ -1,0 +1,6 @@
+{
+  "stopped_own_observer_pids": [
+    1698412
+  ],
+  "reason": "Launcher exited before fresh SDK shell; no report will be created; observer otherwise waits forever"
+}

@@ -1,0 +1,21 @@
+In archive <scratch>/wirestack/target/native/http_files/current/lib/libwirestack_http_files.a:
+
+wirestack_http_files.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <wirestack_http_files_abi_version>:
+       0:	mov    $0x1,%eax
+       5:	ret
+       6:	cs nopw 0x0(%rax,%rax,1)
+
+0000000000000010 <wirestack_http_files_root_open>:
+      10:	push   %rbp
+      11:	push   %r15
+      13:	push   %r14
+      15:	push   %r13
+      17:	push   %r12
+      19:	push   %rbx
+      1a:	sub    $0x98,%rsp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0fe9c5468029c8e8300155c780703c2f9db688be3e5c758122669eb394b0244c"}

@@ -1,0 +1,21 @@
+
+/usr/lib/libm.so.6:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000010000 <.init>:
+   10000:	endbr64
+   10004:	sub    $0x8,%rsp
+   10008:	mov    0x125ec9(%rip),%rax        # 135ed8 <__gmon_start__>
+   1000f:	test   %rax,%rax
+   10012:	je     10016 <GLIBC_2.15@@GLIBC_2.15+0x10016>
+   10014:	call   *%rax
+   10016:	add    $0x8,%rsp
+   1001a:	ret
+
+Disassembly of section .plt:
+
+0000000000010020 <.plt>:
+   10020:	push   0x125da2(%rip)        # 135dc8 <f32subf64x@@GLIBC_2.28+0xab958>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "428a80991b8a2db30501bf19ba3d1f9b2bce73d6aee1f8ff86ce7f475e687805"}

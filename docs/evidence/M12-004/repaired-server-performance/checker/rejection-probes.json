@@ -1,0 +1,322 @@
+{
+  "evidence": "PRIVATE_CLONES_OF_REAL_NEW_REPORT_AND_RAW_LOGS",
+  "exit_code": 0,
+  "native_executions": 0,
+  "probe_count": 34,
+  "probes": [
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "source binding drift",
+      "probe": "wrong-http-source",
+      "reason": "{} source binding drift: examples/linux/m12_001/http.cj",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "archive binding drift",
+      "probe": "wrong-archive-bytes",
+      "reason": "{} archive binding drift: candidate.tar.gz",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "external SDK oracle drift",
+      "probe": "wrong-external-sdk392-oracle",
+      "reason": "{} external SDK oracle drift",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "source binding drift",
+      "probe": "changed-threshold-input",
+      "reason": "{} source binding drift: tools/gates/campaigns/m7-024-linux-performance.json",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "source binding differs",
+      "probe": "wrong-source-report-binding",
+      "reason": "{\"binding_integrity\": \"source binding differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "archive binding differs",
+      "probe": "wrong-archive-report-binding",
+      "reason": "{\"binding_integrity\": \"archive binding differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "SDK full392 binding differs",
+      "probe": "wrong-sdk392-report-binding",
+      "reason": "{\"binding_integrity\": \"SDK full392 binding differs from external qualified oracle\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "missing native attempted command",
+      "probe": "missing-native-round",
+      "reason": "{\"extended_integrity\": \"\", \"raw_log_integrity\": \"missing native attempted command\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "missing native attempted command",
+      "probe": "missing-native-case",
+      "reason": "{\"extended_integrity\": \"\", \"raw_log_integrity\": \"missing native attempted command\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "successful command missing native sample",
+      "probe": "missing-healthy-sample",
+      "reason": "{\"extended_integrity\": \"reported sampling counts differ from raw inventory\", \"raw_log_integrity\": \"successful command missing native sample\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "text log digest mismatch",
+      "probe": "modified-real-raw-stdout",
+      "reason": "{\"raw_log_integrity\": \"text log digest mismatch: 0013-websocket_disconnect-warmup-0.stdout.log\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "native attempted leg order differs",
+      "probe": "reordered-native-command",
+      "reason": "{\"raw_log_integrity\": \"native attempted leg order differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "failed native command reported successful sample",
+      "probe": "hidden-native-failure",
+      "reason": "{\"extended_integrity\": \"native exit inventory differs\", \"raw_log_integrity\": \"failed native command reported successful sample\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "native attempted workload differs",
+      "probe": "modified-native-workload",
+      "reason": "{\"raw_log_integrity\": \"native attempted workload differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "host system/SDK modified",
+      "probe": "changed-host-binding",
+      "reason": "{\"binding_integrity\": \"host system/SDK modified\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "glibc digest differs",
+      "probe": "wrong-readonly-glibc-binding",
+      "reason": "{\"binding_integrity\": \"glibc digest differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "live native readonly glibc binding differs",
+      "probe": "writable-native-glibc",
+      "reason": "{\"binding_integrity\": \"live native readonly glibc binding differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "native selected SDK root differs",
+      "probe": "wrong-selected-sdk-root",
+      "reason": "{\"binding_integrity\": \"native selected SDK root differs\", \"extended_integrity\": \"native SDK root/path selection differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "formal gates strengthened",
+      "probe": "strengthened-formal-status",
+      "reason": "{\"binding_integrity\": \"formal gates strengthened\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "qualification or scope strengthened",
+      "probe": "strengthened-qualification",
+      "reason": "{\"binding_integrity\": \"qualification or scope strengthened\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "formal gates strengthened",
+      "probe": "strengthened-soak-status",
+      "reason": "{\"binding_integrity\": \"formal gates strengthened\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "reviewed capture adapter identity differs",
+      "probe": "unreviewed-adapter",
+      "reason": "{\"binding_integrity\": \"reviewed capture adapter identity differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "compiled consumer binary binding drift",
+      "probe": "modified-binary-binding",
+      "reason": "{\"binding_integrity\": \"compiled consumer binary binding drift\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "recomputed TLS ratios or thresholds differ",
+      "probe": "modified-tls-ratio",
+      "reason": "{} recomputed TLS ratios or thresholds differ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "recomputed classifier differs",
+      "probe": "modified-classifier",
+      "reason": "{} recomputed classifier differs",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "recomputed campaign decision differs",
+      "probe": "strengthened-performance-status",
+      "reason": "{} recomputed campaign decision differs",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "SDK full392 binding differs",
+      "probe": "missing-sdk392-file",
+      "reason": "{\"binding_integrity\": \"SDK full392 binding differs from external qualified oracle\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "nested formal status strengthened",
+      "probe": "strengthened-nested-formal-status",
+      "reason": "{\"extended_integrity\": \"nested formal status strengthened\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "controller record differs",
+      "probe": "controller-monotonic-tampering",
+      "reason": "{\"extended_integrity\": \"controller record differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "bootstrap_prerequisite_failure",
+      "probe": "hidden-bootstrap-failure",
+      "reason": "{\"bootstrap_prerequisite_verification\": \"'bootstrap_prerequisite_failure'\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "bootstrap prerequisite report altered or omitted",
+      "probe": "bootstrap-exit-strengthened",
+      "reason": "{\"bootstrap_prerequisite_verification\": \"bootstrap prerequisite report altered or omitted\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "bootstrap prerequisite raw artifact binding differs",
+      "probe": "bootstrap-raw-hash-tampered",
+      "reason": "{\"bootstrap_prerequisite_verification\": \"bootstrap prerequisite raw artifact binding differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "recovered private loader mode differs",
+      "probe": "recovered-loader-xbit-removed",
+      "reason": "{\"bootstrap_prerequisite_verification\": \"recovered private loader mode differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    },
+    {
+      "decision": "REJECTED",
+      "exit_code": 1,
+      "expected_rejection": "glibc mode receipt differs",
+      "probe": "private-mode-receipt-tampered",
+      "reason": "{\"bootstrap_prerequisite_verification\": \"glibc mode receipt differs\"} ",
+      "stderr": "",
+      "technical_verification_status": "FAIL"
+    }
+  ],
+  "rejected_count": 34,
+  "report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "7a4f30a238bc925ce07cb1067c5d15b11b58cfc747574f77fe1c1d92aa112d8e"
+  },
+  "schema_version": 1,
+  "scope": "SERVER_REPAIRED_SOURCE_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "unexpected": []
+}

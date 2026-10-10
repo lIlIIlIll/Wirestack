@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "dependencies": [
+    "M9-001"
+  ],
+  "allowed_paths": [
+    "tools/m12_004_upgrade.py",
+    "tools/m12_004_inventory.py",
+    "tools/m12_004_verifier_controls.py",
+    "tools/m12_004_rollback.py",
+    "tools/m12_004_candidate_gates.py",
+    "tools/tests/test_m12_004_upgrade.py",
+    "tools/tests/test_m12_004_inventory.py",
+    "tools/tests/test_m12_004_verifier_controls.py",
+    "tools/tests/test_m12_004_rollback.py",
+    "tools/tests/test_m12_004_candidate_gates.py",
+    "native/tls/aws_lc/wirestack_tls_provider.c",
+    "tools/build_linux_tls_provider.py",
+    "tools/release_smoke/main.cj",
+    "tools/m7_021_linux_release.py",
+    "tools/m8_006_native_tls.py",
+    "tools/m8_007_final_release.py",
+    "tools/tests/test_m7_021_linux_release.py",
+    "src/tls/package_test.cj",
+    "examples/linux/m12_001/http.cj",
+    "docs/performance/end-to-end-baselines.md",
+    "docs/references/m12-004-aws-lc-upgrade.json",
+    "tools/tasks/M12-004.json",
+    "docs/guides/dependency-upgrade-runbook.md",
+    "docs/guides/native-dependency-inventory.md",
+    "docs/guides/release-verifier-rejection-controls.md",
+    "docs/guides/nonproduction-rollback.md",
+    "docs/guides/candidate-dependency-gates.md",
+    "docs/evidence/M12-004",
+    "docs/gates/M12-004-task.json",
+    "docs/planning/status.md"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": [
+        "scripts/architecture-guard"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "current-public-api",
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "dependency-upgrade-contracts",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v",
+        "tools.tests.test_m12_004_upgrade",
+        "tools.tests.test_m12_004_inventory",
+        "tools.tests.test_m12_004_verifier_controls",
+        "tools.tests.test_m12_004_rollback",
+        "tools.tests.test_m12_004_candidate_gates",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "source-bound-formal-acceptance",
+      "argv": [
+        "scripts/verify-evidence",
+        "M12-004",
+        "--json"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M12-004/workspace.json",
+    "docs/evidence/M12-004/acceptance.json",
+    "docs/evidence/M12-004/upgrade/report.json",
+    "docs/evidence/M12-004/inventory/candidate/inventory.json",
+    "docs/evidence/M12-004/verifier-controls/candidate-verification.json",
+    "docs/evidence/M12-004/rollback/final-candidate-refusal.json",
+    "docs/evidence/M12-004/review/independent-review.json",
+    "docs/evidence/M12-004/review/independent-review-followup.json",
+    "docs/evidence/M12-004/candidate-gates/final2/report.json",
+    "docs/evidence/M12-004/matrix/installed/sts113-upgrade/report.json",
+    "docs/evidence/M12-004/matrix/installed/index.json",
+    "docs/evidence/M12-004/matrix/native-floor/index.json",
+    "docs/evidence/M12-004/matrix/native-floor/native-glibc244/report.json",
+    "docs/evidence/M12-004/matrix/native-floor/owned-cleanup.json",
+    "docs/evidence/M12-004/matrix/binary/report.json",
+    "docs/evidence/M12-004/matrix/binary/index.json",
+    "docs/evidence/M12-004/matrix/binary/summary.json",
+    "docs/evidence/M12-004/integration/tests.json"
+  ],
+  "timeout_seconds": 300,
+  "long_running_gate": false,
+  "source_paths": [
+    "tools/m12_004_upgrade.py",
+    "tools/m12_004_inventory.py",
+    "tools/m12_004_verifier_controls.py",
+    "tools/m12_004_rollback.py",
+    "tools/m12_004_candidate_gates.py",
+    "tools/tests/test_m12_004_upgrade.py",
+    "tools/tests/test_m12_004_inventory.py",
+    "tools/tests/test_m12_004_verifier_controls.py",
+    "tools/tests/test_m12_004_rollback.py",
+    "tools/tests/test_m12_004_candidate_gates.py",
+    "native/tls/aws_lc/wirestack_tls_provider.c",
+    "tools/build_linux_tls_provider.py",
+    "tools/release_smoke/main.cj",
+    "tools/m7_021_linux_release.py",
+    "tools/m8_006_native_tls.py",
+    "tools/m8_007_final_release.py",
+    "tools/tests/test_m7_021_linux_release.py",
+    "src/tls/package_test.cj",
+    "docs/references/m12-004-aws-lc-upgrade.json"
+  ]
+}

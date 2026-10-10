@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "scope": "Post-campaign task-owned capture/supervisor/native processes only",
+  "status": "PASS",
+  "live_owned_process_count": 0,
+  "owned_processes": [],
+  "ephemeral_fixture_private_keys_present": {
+    "key.pem": false,
+    "key.pk8": false
+  },
+  "host_glibc_unchanged_proof": "output/host-before.json and output/host-after.json exact equality; full14 originals plus SDK392",
+  "retained_inputs": "Useful raw failure/binary/source inputs retained; no unrelated cleanup"
+}

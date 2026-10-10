@@ -1,0 +1,19 @@
+{
+  "task_id": "M12-004",
+  "supervisor_exit_code": 0,
+  "remaining_live_owned_processes": 0,
+  "supervision_evidence": "cleanup.json",
+  "owned_test_ssh_keys_removed": true,
+  "owned_known_hosts_removed": true,
+  "owned_cloud_init_seed_removed": true,
+  "owned_overlay_removed": true,
+  "historical_image_keys_overlays_modified": false,
+  "host_system_changes": false,
+  "retained_private_work": {
+    "installed_source": "$HOME/.cache/agent-tmp/wirestack-m12-004.Kt3Yol/installed-source",
+    "installed_source_size": "276 MiB",
+    "native_floor": "$HOME/.cache/agent-tmp/wirestack-m12-004.Kt3Yol/native-floor",
+    "native_floor_size": "463 MiB",
+    "reason": "Fresh transferred source, SDK archives, capture wrappers and interrupted-capture evidence retained for reproduction. VM disks and keys were removed."
+  }
+}

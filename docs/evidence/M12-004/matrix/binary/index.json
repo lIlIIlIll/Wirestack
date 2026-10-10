@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "status": "PASS",
+  "qualified": false,
+  "original_instrumentation_task_id": "M12-002",
+  "sdk_scope": "Only qualified STS 1.1.3 executes. Two independently located byte-identical roots. Same-version same-byte relocation/isolation, NOT other-version compatibility. No future STS proof.",
+  "original_and_adapted_bindings": {
+    "tools/m12_002_binary.py": {
+      "original_byte_sha256": "b44548399f8941926c5ed098f674e7996635dc8bf04ed72aa641affc76b54f8d",
+      "adapted_byte_sha256": "67c18021051c12ba4be45b60b0d6c8f20039987de48d0ea4998acc66bde259ae",
+      "original_text_sha256": "b44548399f8941926c5ed098f674e7996635dc8bf04ed72aa641affc76b54f8d",
+      "adapted_text_sha256": "67c18021051c12ba4be45b60b0d6c8f20039987de48d0ea4998acc66bde259ae",
+      "exact_diff": "--- original/tools/m12_002_binary.py\n+++ private-adapted/tools/m12_002_binary.py\n@@ -48,7 +48,7 @@\n     found = re.findall(r'^CHECK (\\w+) PASS$', text, re.M)\n     if set(found) != CHECKS or len(found) != len(CHECKS):\n         raise ValueError('same-process behavior checks missing or duplicated')\n-    if not re.search(r'^IDENTITY wirestack aws-lc 5\\.5\\.0 [0-9a-f]+$', text, re.M):\n+    if not re.search(r'^IDENTITY wirestack aws-lc 5\\.11\\.0 853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c$', text, re.M):\n         raise ValueError('Wirestack provider identity missing')\n     if not re.search(r'^IDENTITY independent_tls OpenSSL 3\\..* isolation=deepbind libc=shared verified_peer=example.test bytes=[1-9][0-9]*$', text, re.M):\n         raise ValueError('independent verified TLS identity missing')\n@@ -92,7 +92,7 @@\n                   'cwd': self.normalize(str(cwd)), 'checkout_hidden': hidden}\n         record['environment'] = {key: self.normalize(value) for key, value in (env or {}).items()}\n         for key in ('stdout', 'stderr'):\n-            record[key] = {'path': f'docs/evidence/M12-002/binary/{label}.{key}.log'}\n+            record[key] = {'path': f'docs/evidence/M12-004/matrix/binary/{label}.{key}.log'}\n         raw = {key: self.work / f'{label}.{key}.raw' for key in ('stdout', 'stderr')}\n         with raw['stdout'].open('wb') as out, raw['stderr'].open('wb') as err:\n             try:\n@@ -212,7 +212,7 @@\n     parser.add_argument('--consumer', action='append', type=Path, default=[])\n     parser.add_argument('--verify', action='store_true')\n     args = parser.parse_args()\n-    output = ROOT / 'docs/evidence/M12-002/binary'\n+    output = ROOT / 'docs/evidence/M12-004/matrix/binary'\n     fixture = ROOT / 'examples/linux/m12_002/coexist'\n     sdks = [sdk.resolve() for sdk in args.sdk]\n     work = args.scratch.resolve()\n@@ -255,7 +255,7 @@\n             known = {record['id'] for record in capture.prior['commands']}\n             capture.prior['commands'].extend(record for record in snapshot['commands'] if record['id'] not in known)\n             break\n-    report = {'schema_version': 1, 'task_id': 'M12-002', 'status': 'INCOMPLETE',\n+    report = {'schema_version': 1, 'task_id': 'M12-004', 'status': 'INCOMPLETE',\n         'release_qualification': 'NOT_QUALIFIED', 'archive_digest': artifact_byte_digest(args.archive).to_json(),\n         'environment': {'os': platform.system(), 'architecture': platform.machine(),\n                         'kernel': platform.release(), 'libc': platform.libc_ver()},\n"
+    },
+    "examples/linux/m12_002/coexist/src/main.cj": {
+      "original_byte_sha256": "a48e5b94f6bae41228c3e40478caafeff267b039a884fd421b4a066acb01ffb4",
+      "adapted_byte_sha256": "ebab29aef1b9387ecabacb16722890684dd6956a8b5cb994c32997683867c541",
+      "original_text_sha256": "a48e5b94f6bae41228c3e40478caafeff267b039a884fd421b4a066acb01ffb4",
+      "adapted_text_sha256": "ebab29aef1b9387ecabacb16722890684dd6956a8b5cb994c32997683867c541",
+      "exact_diff": "--- original/examples/linux/m12_002/coexist/src/main.cj\n+++ private-adapted/examples/linux/m12_002/coexist/src/main.cj\n@@ -28,7 +28,7 @@\n main(args: Array<String>): Int64 {\n     require(args.size == 2)\n     let info = TlsRuntime.info()\n-    require(info.tlsProvider == \"aws-lc\" && info.tlsProviderVersion == \"5.5.0\" && !info.externalOpenSslDependency)\n+    require(info.tlsProvider == \"aws-lc\" && info.tlsProviderVersion == \"5.11.0\" && info.buildFingerprint == \"853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c\" && !info.externalOpenSslDependency)\n     println(\"IDENTITY wirestack ${info.tlsProvider} ${info.tlsProviderVersion} ${info.buildFingerprint}\")\n     require(checkedNativeWork() == 985)\n     println(\"CHECK independent_cangjie_native PASS\")\n"
+    }
+  },
+  "candidate_archive_before_after": {
+    "path": "docs/evidence/M12-004/upgrade/candidate.tar.gz",
+    "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+  },
+  "sdk_closure_files_per_root": 392,
+  "sdk_closure_before_after_equal": true,
+  "current_inventory_exact_oracle_after": true,
+  "native_fingerprint": "853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c",
+  "cjc_sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae",
+  "freshness_verifier": {
+    "command": "sh <binary-private>/run.sh --verify",
+    "exit_code": 0,
+    "stdout": "M12_002_BINARY_BINDING_PASS",
+    "scope": "Verifies actual report against archive, both SDK roots, fixture/tool/production inputs, all scanned bytes and diagnostic digests under the same read-only overlays."
+  },
+  "actual_harness_cli": {
+    "argv": [
+      "python3",
+      "<repo>/tools/m12_002_binary.py",
+      "--archive",
+      "<repo>/docs/evidence/M12-004/upgrade/candidate.tar.gz",
+      "--sdk",
+      "$HOME/cangjie_sdk/sts1.1.3",
+      "--sdk",
+      "<binary-private>/sts1.1.3-relocated",
+      "--scratch",
+      "<binary-private>/run3",
+      "--wrapper",
+      "$HOME/.codex/scripts/codex_cangjie_env",
+      "--openssl-library",
+      "/usr/lib/libssl.so.3",
+      "--openssl-crypto-library",
+      "/usr/lib/libcrypto.so.3"
+    ],
+    "context": "sh <binary-private>/run.sh applies disclosed read-only overlays and mounts writable private scratch/evidence plus fresh /proc for nested bwrap. Actual <repo> cwd/import ROOT, no production comparator changes.",
+    "exit_code": 0
+  },
+  "counters": {
+    "commands": 1758,
+    "commands_nonzero": 0,
+    "scans": 287,
+    "sdk_elf_archive_inputs_per_root": 130,
+    "matrix_cells": 4,
+    "behavior_checks_per_cell": 5,
+    "behavior_checks_total": 20,
+    "boundary_tests": 6,
+    "boundary_tests_skipped": 0
+  },
+  "cell_checks": {
+    "attempt-2-abi-0-to-0": [
+      "IDENTITY wirestack aws-lc 5.11.0 853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c",
+      "CHECK independent_cangjie_native PASS",
+      "CHECK wirestack_verified_tls PASS",
+      "IDENTITY independent_tls OpenSSL 3.6.5 29 Sep 2026 isolation=deepbind libc=shared verified_peer=example.test bytes=38",
+      "CHECK independent_verified_tls PASS",
+      "CHECK wirestack_after_independent_cleanup PASS",
+      "CHECK same_process_identity_preserved PASS"
+    ],
+    "attempt-2-abi-0-to-1": [
+      "IDENTITY wirestack aws-lc 5.11.0 853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c",
+      "CHECK independent_cangjie_native PASS",
+      "CHECK wirestack_verified_tls PASS",
+      "IDENTITY independent_tls OpenSSL 3.6.5 29 Sep 2026 isolation=deepbind libc=shared verified_peer=example.test bytes=38",
+      "CHECK independent_verified_tls PASS",
+      "CHECK wirestack_after_independent_cleanup PASS",
+      "CHECK same_process_identity_preserved PASS"
+    ],
+    "attempt-2-abi-1-to-0": [
+      "IDENTITY wirestack aws-lc 5.11.0 853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c",
+      "CHECK independent_cangjie_native PASS",
+      "CHECK wirestack_verified_tls PASS",
+      "IDENTITY independent_tls OpenSSL 3.6.5 29 Sep 2026 isolation=deepbind libc=shared verified_peer=example.test bytes=38",
+      "CHECK independent_verified_tls PASS",
+      "CHECK wirestack_after_independent_cleanup PASS",
+      "CHECK same_process_identity_preserved PASS"
+    ],
+    "attempt-2-abi-1-to-1": [
+      "IDENTITY wirestack aws-lc 5.11.0 853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c",
+      "CHECK independent_cangjie_native PASS",
+      "CHECK wirestack_verified_tls PASS",
+      "IDENTITY independent_tls OpenSSL 3.6.5 29 Sep 2026 isolation=deepbind libc=shared verified_peer=example.test bytes=38",
+      "CHECK independent_verified_tls PASS",
+      "CHECK wirestack_after_independent_cleanup PASS",
+      "CHECK same_process_identity_preserved PASS"
+    ]
+  },
+  "test_fixture_only": {
+    "library_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6409e9f083faae79a622c9534be6ed2456d0102cd8ea2b52eb18c9d72f1f41e"
+    },
+    "library": "/usr/lib/libssl.so.3",
+    "scope": "TEST_FIXTURE_ONLY",
+    "crypto_library": "/usr/lib/libcrypto.so.3",
+    "crypto_library_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a75a864dcda6ef9e4dc29fad4b7988ca832b904c3915a63c920062c40763dae1"
+    },
+    "isolation": "test-only explicit dlopen RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND; one shared libc/pthread key allocator; ordinary unisolated OpenSSL unsupported",
+    "dynamic_dependencies": [
+      "external-tls-dependency-0",
+      "external-tls-dependency-1",
+      "external-tls-dependency-2",
+      "external-tls-dependency-3",
+      "external-tls-dependency-4",
+      "external-tls-dependency-5",
+      "external-tls-dependency-6",
+      "external-tls-dependency-7"
+    ]
+  },
+  "default_wirestack_implicit_system_tls_dependencies": false,
+  "attempts": "Initial tool worker timeout left no report. First overlaid capture failed before STS execution because nested bwrap could not set uid map on read-only /proc. Final overlaid capture with --proc /proc passed. Only ELF scans freshly captured within this task may be reused from that failed attempt; no historical M12-002 scans or runtime verdicts reused.",
+  "private_keys_removed": [
+    "<binary-private>/run/key.pem",
+    "<binary-private>/run/key.pk8",
+    "<binary-private>/run2/key.pem",
+    "<binary-private>/run2/key.pk8",
+    "<binary-private>/run3/key.pem",
+    "<binary-private>/run3/key.pk8"
+  ],
+  "limitations": [
+    "Ordinary unisolated OpenSSL unsupported; explicit TEST_FIXTURE_ONLY dlopen RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND required.",
+    "Native CPU/kernel floor owned by separate agent. ELF symbol requirements do not prove native minimum.",
+    "SDK upstream build flags UNKNOWN. Historical native compiler executable digest is not retroactively qualified.",
+    "Formal M12-004 remains BLOCKED. This leg cannot approve candidate qualification."
+  ],
+  "private_command_script_sha256": "166912e4415483a80c28a1206cc2852038de5b80e3856d66f36b6238909fc99b",
+  "files": {
+    "report.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a074144e588b3a6a8696cc77f5824d7527aa9998fd4aebb5a0830626ee80d3f3"
+    },
+    "summary.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "db83b0bf753c3cd163dbf8cc2af7d9a42a3d59c3f133d668542d29e71d6b8840"
+    },
+    "qualification-before.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ec236c05a4e91a1b222c880a93a56c09468948fea5ade941c191d95dd9e2cf3b"
+    },
+    "qualification-after.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2000d6cc0ac517f0f587a98f00b6e22cd72f647ab70f1fbfa754c20cdb30a534"
+    },
+    "verification.stdout.log": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bc07ff4101a6dc26b9c77c182270168bfe290f5457265344ef3680d9129bb78b"
+    },
+    "verification.stderr.log": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "harness.stdout.log": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431"
+    },
+    "harness.stderr.log": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "attempt-1.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5b9ef0a99df56f39f6595e26cc5a29ea53139c6d7b8689740c33a04a8f5355fd"
+    }
+  }
+}

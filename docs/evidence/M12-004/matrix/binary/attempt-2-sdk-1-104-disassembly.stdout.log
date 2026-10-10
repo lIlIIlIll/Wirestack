@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-random.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000003bb8 <_init@@Base>:
+    3bb8:	sub    $0x8,%rsp
+    3bbc:	mov    0x2053ad(%rip),%rax        # 208f70 <__gmon_start__>
+    3bc3:	test   %rax,%rax
+    3bc6:	je     3bca <_init@@Base+0x12>
+    3bc8:	call   *%rax
+    3bca:	add    $0x8,%rsp
+    3bce:	ret
+
+Disassembly of section .plt:
+
+0000000000003bd0 <CJ_MCC_NewArray64@plt-0x10>:
+    3bd0:	push   0x205432(%rip)        # 209008 <_CNav6Random16TEMPERING_MASK_CE@@Base+0x201cf0>
+    3bd6:	jmp    *0x205434(%rip)        # 209010 <_CNav6Random16TEMPERING_MASK_CE@@Base+0x201cf8>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "dcaf89e0b74783a47db663ae55bcc53d2a67f3b16ea56efbece16b7d2cadf3a5"}

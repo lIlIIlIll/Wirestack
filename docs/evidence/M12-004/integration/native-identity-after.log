@@ -1,0 +1,16 @@
+CMake Warning (deprecated) at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
+
+UPGRADE_NATIVE_ARCHIVE_BUILT <scratch>/native-before/cache/853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c
+version=5.11.0
+fingerprint=ece6d5e872aaf5210aaabc32b16788f6e31d6afe5ecc74b7d514827bf5c906bb
+
+manifestVersion=5.11.0
+manifestFingerprint=ece6d5e872aaf5210aaabc32b16788f6e31d6afe5ecc74b7d514827bf5c906bb

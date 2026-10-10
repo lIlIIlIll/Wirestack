@@ -1,0 +1,14 @@
+{
+  "attempt": 1,
+  "retry": false,
+  "started_monotonic_ns": 180504557724331,
+  "ended_monotonic_ns": 180965397370651,
+  "elapsed_ns": 460839646320,
+  "observer_start_monotonic_ns": 180506612043840,
+  "launcher_exit_code": 1,
+  "native_observer_exit_code": -15,
+  "live_observer_exit_code": 0,
+  "remaining_own_native_sdk_processes": [],
+  "own_process_cleanup_count": 0,
+  "fixture_keys_removed": true
+}
