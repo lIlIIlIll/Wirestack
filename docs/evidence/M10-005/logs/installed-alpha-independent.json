@@ -1,0 +1,1426 @@
+{
+  "candidate": {
+    "archive_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "de44a91c04e0a579990e335dff6d3c3feb45c22c26c7f5dfa4e95e93d316b881"
+    },
+    "installation_outside_checkout": true,
+    "manifest_verified": true,
+    "payload_sha256": "0e4a1bc213d5f53d2cf3c87da3da78a08d3be479aee3a54e30f231b99d3f0a9d",
+    "production_sources": [
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+        },
+        "file": "src/byte_span.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c023b65acab9740096dc1ec9a770cf59d7361b2fec3dcdeebb3cc6033d78034d"
+        },
+        "file": "src/cancellation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7a6d9bf1bd56bb9c5209152b2482dee044027f8d348233dcd6cc7b87d1c866e3"
+        },
+        "file": "src/common.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+        },
+        "file": "src/deadline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+        },
+        "file": "src/hostname_verifier.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e6db19f6a5cfbe691aa13d410a67fd9e324d08d2356e70ca1786d7532fa0d23c"
+        },
+        "file": "src/http/cancellation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d65d56a4aa2d9f0708fe53adfc14c21fd375baed778a1e3b9ee979eaaec33164"
+        },
+        "file": "src/http/client.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "dc5814124cd510b8992d9c4aec3ba9fcc31aadd5976ea42b423d9038cdc114e5"
+        },
+        "file": "src/http/client_rotation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "81338be084b2ab6eb14d49e70d2769984c28e0c3e201e40eb216022a06679816"
+        },
+        "file": "src/http/configuration_rotation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+        },
+        "file": "src/http/cookie.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e81f52f4efbc0b728a1891d67bc0f3a6292af471d16d992b65e2055e44ffac24"
+        },
+        "file": "src/http/duplex.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d88c54a157e02063ab4048c197631daba3642a9618672841e4b98d3a25d275ad"
+        },
+        "file": "src/http/error.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+        },
+        "file": "src/http/file_handler.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f3605fab36dc2b91c3a19576372ff11fdd4e39b59efa32fd5bfac158d30f9f6a"
+        },
+        "file": "src/http/hooks.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+        },
+        "file": "src/http/multipart.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a36cac65dd05e2edf16c310b6d12d67d32768279ad3e80ae3cb8558924f6ea35"
+        },
+        "file": "src/http/observability.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+        },
+        "file": "src/http/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+        },
+        "file": "src/http/proxy.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+        },
+        "file": "src/http/redirect.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177"
+        },
+        "file": "src/http/resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ad3461e5a9792857c755e75bbe2af07ef92540616128d16432b709b520c6443c"
+        },
+        "file": "src/http/resource_budget.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957"
+        },
+        "file": "src/http/retry.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9b44d95acef40a700fafdd77d9156cdeacb0fcb9156bbc90405205d8658f7b18"
+        },
+        "file": "src/http/server.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+        },
+        "file": "src/http/tls.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+        },
+        "file": "src/http/upgrade.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c38204ff2672725aa854a4528e7cbd7a7d12779c1b3eb01126c1af325b0469c8"
+        },
+        "file": "src/http/websocket.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "db5d899be8d22022db1e7aed502ad36c3cc5e52d6dbae8dce53112f797276d59"
+        },
+        "file": "src/http/websocket_handshake.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+        },
+        "file": "src/http_body.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+        },
+        "file": "src/http_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4033d25f42135e43f498f11d2b459512dcb7c45bce6e91efaa85b18a053e8ef1"
+        },
+        "file": "src/http_message.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+        },
+        "file": "src/http_model.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+        },
+        "file": "src/http_push.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955"
+        },
+        "file": "src/http_url.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+        },
+        "file": "src/internal/common/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cd2a91dcb818a3b8712d02649cc0731ec36446557834b4244356ed65f298ee5b"
+        },
+        "file": "src/internal/connector/happy_eyeballs.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+        },
+        "file": "src/internal/connector/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+        },
+        "file": "src/internal/connector/route.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+        },
+        "file": "src/internal/http1/chunked.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1b742d3afbebbe204f8a6d2ae79729f504f8cf9c16f3eeb07396137cf4b84da8"
+        },
+        "file": "src/internal/http1/client_connection.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c1dcfaf856cef4aaf191363bb593d813c6e0bef977300ce92d16a08763cd9311"
+        },
+        "file": "src/internal/http1/client_pipeline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5830e140cd22d48385bdd3d20b24a07792997d087229da58f8793bfb86d90c24"
+        },
+        "file": "src/internal/http1/connection_pool.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+        },
+        "file": "src/internal/http1/head_parser.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f9fcd87da1ad6f8740801b2fac39ae29af7454d7e3f6559609504a556e921563"
+        },
+        "file": "src/internal/http1/http2_connection_pool.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+        },
+        "file": "src/internal/http1/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "60faf41eebd2e5e549f1aaf5e35e0cbfd408660d7abdd5bcba412c6653743058"
+        },
+        "file": "src/internal/http1/pool_admission.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5e72b0cccb4c59e8f07828b8d9903be4053736fd16cd8de8463c3248a0507dac"
+        },
+        "file": "src/internal/http1/pool_key.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "11dd5d4bcec8b1517a7f6b49f59475a8b19829cbc5abfa07220434be060f4b16"
+        },
+        "file": "src/internal/http1/protocol_upgrade.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bd231a5fde3f6ea6f9627b7cb0001faef799bc5e810a32e5197ef9099354d6d2"
+        },
+        "file": "src/internal/http1/proxy_client_pipeline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f136cf6ef23d024c473576f1c7a071c6dfdfe07c6fe8c3a045d8fe4bc8961650"
+        },
+        "file": "src/internal/http1/request_writer.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "72a73f6314d9c0e76bab7d84e9d36784da20b104ca67d55b6ac1168e82916212"
+        },
+        "file": "src/internal/http1/response_reader.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+        },
+        "file": "src/internal/http1/serializer.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+        },
+        "file": "src/internal/http1/server.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9b69b2bd71fb5b19a214c083b75ed4a5c367dc59a9c57ab9c916129ad8942a20"
+        },
+        "file": "src/internal/http1/server_connection.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+        },
+        "file": "src/internal/http1/server_reader.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+        },
+        "file": "src/internal/http1/server_writer.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bf0d6e9d7e83915fbd5304304abb07c7c6a4731a6abae0ef43c1ec715ec1dee5"
+        },
+        "file": "src/internal/http1/tls_client_pipeline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "23407a4258f4c4639df7baf28c40f84b9f0366e9498a5e0c9c68448670cba796"
+        },
+        "file": "src/internal/http1/tls_server.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "39446077c122fd6115ebdeb30d4d4b47e32ed11749a40755e23ef44fd606ec8a"
+        },
+        "file": "src/internal/http2/client_connection.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+        },
+        "file": "src/internal/http2/client_mapping.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "96b45e9483324487dc5eb41f5ec603cd03ad7d74c3d4645cfefa3da7dca197f1"
+        },
+        "file": "src/internal/http2/client_push.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+        },
+        "file": "src/internal/http2/connection_state.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+        },
+        "file": "src/internal/http2/duplex_stream.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b296e490719597dab558988c621accc17301e235f35a44cc8813233f90591137"
+        },
+        "file": "src/internal/http2/flow_control.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ff25f15a331f00c21850e9ece84e392cd10ea1f77b76c1fc05964fa5841402d5"
+        },
+        "file": "src/internal/http2/frame_codec.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+        },
+        "file": "src/internal/http2/frame_model.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+        },
+        "file": "src/internal/http2/goaway.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+        },
+        "file": "src/internal/http2/header_block.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+        },
+        "file": "src/internal/http2/health_close.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+        },
+        "file": "src/internal/http2/hpack_block.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+        },
+        "file": "src/internal/http2/hpack_core.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+        },
+        "file": "src/internal/http2/hpack_dynamic_table.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+        },
+        "file": "src/internal/http2/hpack_huffman.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fc4d28b389b73c00f33db648ec2c1d76d57452ed755d8f2007cb61b19d752dce"
+        },
+        "file": "src/internal/http2/observability.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+        },
+        "file": "src/internal/http2/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3e680b8bd8c005c7c3a067ab3955e33a8359c96220d76ebbee638a5c1da79015"
+        },
+        "file": "src/internal/http2/reader_loop.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8b718950bbe3e7de56e40b63e5d2262f7e6301ea61cb1b56c3530b4308cbe9c9"
+        },
+        "file": "src/internal/http2/server_cancellation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5dd9ae32547c1c8adb779290044c60bdce31546b3b01b86330cfca028c66866e"
+        },
+        "file": "src/internal/http2/server_connection.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "be1efea8eae10d0bdec1976b69b5c42b2eb8a2b86f8962ad9863765a25304a4b"
+        },
+        "file": "src/internal/http2/server_mapping.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+        },
+        "file": "src/internal/http2/settings.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+        },
+        "file": "src/internal/http2/stream_lifecycle.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c1a838f98f6fa9a8d7873e8986ef5b93b31433d9840e763c04fc59a457b77760"
+        },
+        "file": "src/internal/http2/stream_reset.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "50ed0bb79d8ac3c4cc9fe93d1f3b43a657d0ccec002e4345414ea8c869c3d2ed"
+        },
+        "file": "src/internal/http2/write_scheduler.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+        },
+        "file": "src/internal/http_files/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+        },
+        "file": "src/internal/http_model/body.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+        },
+        "file": "src/internal/http_model/message.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+        },
+        "file": "src/internal/http_model/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+        },
+        "file": "src/internal/http_model/public_suffix.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+        },
+        "file": "src/internal/http_model/public_suffix_data.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+        },
+        "file": "src/internal/http_model/url.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2f533291ce0a0b2e25c8560db9fc5f8494caef69d71775be45a5d10225ecf9d3"
+        },
+        "file": "src/internal/http_resource_budget.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2d555765cb6ff9ac22f343666831b1e0492118ba5fcb82cb35aebd6c5839623c"
+        },
+        "file": "src/internal/http_resource_budget_types.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+        },
+        "file": "src/internal/identity/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+        },
+        "file": "src/internal/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+        },
+        "file": "src/internal/platform/linux/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+        },
+        "file": "src/internal/platform/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d536557035988f377c8c8269bfc8854d648f4f2e65d1792b0c8126f4621c56cd"
+        },
+        "file": "src/internal/resolver/bounded_backend.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+        },
+        "file": "src/internal/resolver/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "29fe44c8e6568d269452f3d54d0c48929415082fdf36e1afbddd66224f727923"
+        },
+        "file": "src/internal/resolver/system_resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+        },
+        "file": "src/internal/tls_engine/connection.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+        },
+        "file": "src/internal/tls_engine/context.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+        },
+        "file": "src/internal/tls_engine/engine.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+        },
+        "file": "src/internal/tls_engine/identity.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+        },
+        "file": "src/internal/tls_engine/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+        },
+        "file": "src/internal/tls_engine/server_name.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+        },
+        "file": "src/internal/tls_engine/session.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+        },
+        "file": "src/internal/tls_engine/websocket_crypto.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+        },
+        "file": "src/internal/transport/cancellation.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+        },
+        "file": "src/internal/transport/completion.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+        },
+        "file": "src/internal/transport/deadline.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+        },
+        "file": "src/internal/transport/lifecycle.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+        },
+        "file": "src/internal/transport/memory_transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+        },
+        "file": "src/internal/transport/memory_transport_listener.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+        },
+        "file": "src/internal/transport/network_error.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+        },
+        "file": "src/internal/transport/network_event.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+        },
+        "file": "src/internal/transport/operation_context.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+        },
+        "file": "src/internal/transport/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+        },
+        "file": "src/internal/transport/scripted_transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+        },
+        "file": "src/internal/transport/transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+        },
+        "file": "src/internal/transport_stdnet/net_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+        },
+        "file": "src/internal/transport_stdnet/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
+        },
+        "file": "src/internal/transport_stdnet/socket_options.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "32f78914fb335bf68dfd2a99ae3d06e823fe855bc7b583bb126b7622f6f364b2"
+        },
+        "file": "src/internal/transport_stdnet/udp_socket.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+        },
+        "file": "src/internal/transport_stdnet/unix_address.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+        },
+        "file": "src/internal/transport_stdnet/unix_listener.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+        },
+        "file": "src/internal/trust/hostname.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+        },
+        "file": "src/internal/trust/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "007a873cf52ccc3587db5c1c58d8b69cbb991585b09085c0abc861ca647709ce"
+        },
+        "file": "src/net/datagram_socket_core.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "60496e50a26db7af557c3497e0299b0c9afc47f013a5dc7c814c317b5f185550"
+        },
+        "file": "src/net/dns_client.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a8643f30d07032512cfbb6f21682e0d581c4542169b7c76312c061f6316e80ab"
+        },
+        "file": "src/net/dns_resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+        },
+        "file": "src/net/dns_wire.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+        },
+        "file": "src/net/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+        },
+        "file": "src/net/socket_options.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+        },
+        "file": "src/net/tcp_listener.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
+        },
+        "file": "src/net/udp_socket.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+        },
+        "file": "src/net/unix_datagram_socket.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+        },
+        "file": "src/net/unix_listener.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+        },
+        "file": "src/net/unix_stream.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+        },
+        "file": "src/network_error.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8b356f7f4ea634313f745a244cf1288dd9d4d960fb573870a8e0558b78e77956"
+        },
+        "file": "src/network_event.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b445222f06db9333f9c7660e9bafbd4c5e6e4b125238b4120b8dc95379a3eb33"
+        },
+        "file": "src/network_event_buffer.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f19d0fc1cfdb8e952b3550153540afc342a9627bb3a862be4e559caa8aa7859c"
+        },
+        "file": "src/network_pool_snapshot.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d11390cfc372f11c6d5d567ea58c88f633e0e147a213be34b0d072ad58cd7aa4"
+        },
+        "file": "src/observability/bounded_network_event_sink.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "98c98f6d7e325e61cdd239bf8c2e7abfa586ae662e11c892df2aa8428245eb43"
+        },
+        "file": "src/operation_context.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+        },
+        "file": "src/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+        },
+        "file": "src/private_key_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+        },
+        "file": "src/resolver.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b1f82e6f120e77391595abda5289c0376c9013ce8a3d692721ac05669cfb0094"
+        },
+        "file": "src/resolver_snapshot.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+        },
+        "file": "src/tls/facade.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+        },
+        "file": "src/tls/identity.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+        },
+        "file": "src/tls/package.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+        },
+        "file": "src/tls_contract.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+        },
+        "file": "src/transport.cj"
+      },
+      {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+        },
+        "file": "src/trust.cj"
+      }
+    ]
+  },
+  "candidate_committed": false,
+  "checks": {
+    "bounded_exporter_measurement": "PASS",
+    "custom_resolver_unknown": "PASS",
+    "dns_cap": "PASS",
+    "h1_reuse_resources": "PASS",
+    "h2_backpressure": "PASS",
+    "h2_reuse_resources": "PASS",
+    "headers_cap": "PASS",
+    "logical_retry_redirect": "PASS",
+    "native_fd_task_stability": "PASS",
+    "native_shutdown": "PASS",
+    "pool_wait": "PASS",
+    "secret_safe_proxy_tls": "PASS",
+    "tls_cap": "PASS"
+  },
+  "commands": [
+    {
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=example.test/OU=<fixture-secret>",
+        "-addext",
+        "subjectAltName=DNS:example.test",
+        "-keyout",
+        "<scratch>/key.pem",
+        "-out",
+        "<scratch>/certificate.pem"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "name": "certificate",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "999a20674d1d063837c387682d9ac3f93eb72161790130d6df27855850668d35"
+        },
+        "file": "installed-observation-alpha.certificate.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.certificate.stdout.log"
+      },
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/certificate.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/certificate.der"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "name": "certificate_der",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.certificate_der.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.certificate_der.stdout.log"
+      },
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "<scratch>/key.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/key.pk8"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "name": "key_der",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.key_der.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.key_der.stdout.log"
+      },
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "cjc",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "name": "compiler",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.compiler.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6a21c72a644dd53b5051245b1cf10a54f6f4ad3f08d97d4627cf527f5ad07c92"
+        },
+        "file": "installed-observation-alpha.compiler.stdout.log"
+      },
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "cjpm",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "name": "package_manager",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "file": "installed-observation-alpha.package_manager.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7f3c8e40124497dcae7763539ca5bf57d7f50a0760b359128b23056427dfb650"
+        },
+        "file": "installed-observation-alpha.package_manager.stdout.log"
+      },
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumer",
+      "exit_code": 0,
+      "name": "consumer_build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b75c3faa3d8307d0e35567c9284091beb45b545e7916a875fdd2797a68b2a26e"
+        },
+        "file": "installed-observation-alpha.consumer_build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "file": "installed-observation-alpha.consumer_build.stdout.log"
+      },
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "<scratch>/consumer/target/release/bin/main",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8",
+        "<silent-port>",
+        "<proxy-port>",
+        "<refused-port>"
+      ],
+      "cwd": "<scratch>/consumer",
+      "exit_code": 0,
+      "name": "consumer_run",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "d263787978365f584a3735b79aff3713e431cafc8b4026fc9553249bdc8b6b06"
+        },
+        "file": "installed-observation-alpha.consumer_run.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ae86af82549ff1de8edc71ecb9eae963694f3f2546d0dc87f8d5c103b71889b2"
+        },
+        "file": "installed-observation-alpha.consumer_run.stdout.log"
+      },
+      "timed_out": false
+    }
+  ],
+  "consumer": {
+    "binary_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cd57139bd5c0ccdc7709af3a1f4b8ebef583e77ab5a1a969f0a76a510c5f113f"
+    },
+    "dependency_kind": "extracted_installation_path_only",
+    "source": "examples/linux/m10_005/observability.cj",
+    "source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "36210d14fae1bd22672251e99269cfd711eb71171d45ba70319e538135dd03b9"
+    }
+  },
+  "fixtures": {
+    "authenticated_connect_407": true,
+    "secret_output_absent": true,
+    "silent_tcp_accepted": 1
+  },
+  "measurement": {
+    "drop_counter_scope": "cumulative_per_mode_sink_and_collector",
+    "identical_workload_warmed_before_baseline": true,
+    "measured_mean_overhead_ratio": {
+      "async_exporter": 0.331588400215413,
+      "root_buffer": 0.19755075000249311
+    },
+    "request_count_per_sample": 30,
+    "samples": [
+      {
+        "drops": 0,
+        "duration_ns": 16879985,
+        "events": 0,
+        "index": 0,
+        "mode": "disabled",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 14843011,
+        "events": 0,
+        "index": 1,
+        "mode": "disabled",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 15106115,
+        "events": 0,
+        "index": 2,
+        "mode": "disabled",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 18852120,
+        "events": 690,
+        "index": 0,
+        "mode": "root_buffer",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 18631790,
+        "events": 690,
+        "index": 1,
+        "mode": "root_buffer",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 18596327,
+        "events": 690,
+        "index": 2,
+        "mode": "root_buffer",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 20884955,
+        "events": 690,
+        "index": 0,
+        "mode": "async_exporter",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 20621168,
+        "events": 690,
+        "index": 1,
+        "mode": "async_exporter",
+        "requests": 30
+      },
+      {
+        "drops": 0,
+        "duration_ns": 20850978,
+        "events": 690,
+        "index": 2,
+        "mode": "async_exporter",
+        "requests": 30
+      }
+    ],
+    "sla_claim": false,
+    "warmup_requests_per_mode": 12
+  },
+  "native_resources": {
+    "after_load": {
+      "fds": 10,
+      "rss_kib": 78144,
+      "tasks": 15
+    },
+    "baseline": {
+      "fds": 10,
+      "rss_kib": 79704,
+      "tasks": 15
+    }
+  },
+  "platform": {
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "os": "linux"
+  },
+  "qualification": "NOT_QUALIFIED",
+  "schema_version": 1,
+  "status": "PASS",
+  "task": "M10-005"
+}

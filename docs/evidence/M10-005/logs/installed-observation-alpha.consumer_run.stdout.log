@@ -1,0 +1,40 @@
+CHECK logical_retry_redirect PASS
+SNAPSHOT h1 phase=retained requests=1 streams=0 buffers=0 queued=17
+SNAPSHOT h1 phase=reclaimed requests=0 streams=0 buffers=0
+SNAPSHOT h1 phase=retained requests=1 streams=0 buffers=0 queued=23
+SNAPSHOT h1 phase=reclaimed requests=0 streams=0 buffers=0
+CHECK h1_reuse_resources PASS
+IDENTITY h1 connection=5 streams=0
+SNAPSHOT h2 phase=retained requests=1 streams=1 buffers=0 queued=28
+SNAPSHOT h2 phase=reclaimed requests=0 streams=0 buffers=0
+SNAPSHOT h2 phase=retained requests=1 streams=1 buffers=0 queued=24
+SNAPSHOT h2 phase=reclaimed requests=0 streams=0 buffers=0
+STREAM h2 first=1 second=3
+CHECK h2_reuse_resources PASS
+IDENTITY h2 connection=16 streams=2
+CHECK pool_wait PASS
+TIMEOUT pool_wait stage=connection_pool reason=stage_limit matched=4
+CHECK dns_cap PASS
+TIMEOUT dns_cap stage=dns reason=stage_limit matched=2
+CHECK custom_resolver_unknown PASS
+CHECK tls_cap PASS
+TIMEOUT tls_cap stage=tls_handshake reason=stage_limit matched=1
+CHECK headers_cap PASS
+TIMEOUT headers_cap stage=response_headers reason=stage_limit matched=2
+CHECK h2_backpressure PASS
+TIMEOUT h2_backpressure stage=request_write reason=stage_limit matched=2
+CHECK secret_safe_proxy_tls PASS
+MARK baseline
+SAMPLE mode=disabled index=0 duration_ns=16879985 requests=30 events=0 drops=0
+SAMPLE mode=disabled index=1 duration_ns=14843011 requests=30 events=0 drops=0
+SAMPLE mode=disabled index=2 duration_ns=15106115 requests=30 events=0 drops=0
+SAMPLE mode=root_buffer index=0 duration_ns=18852120 requests=30 events=690 drops=0
+SAMPLE mode=root_buffer index=1 duration_ns=18631790 requests=30 events=690 drops=0
+SAMPLE mode=root_buffer index=2 duration_ns=18596327 requests=30 events=690 drops=0
+SAMPLE mode=async_exporter index=0 duration_ns=20884955 requests=30 events=690 drops=0
+SAMPLE mode=async_exporter index=1 duration_ns=20621168 requests=30 events=690 drops=0
+SAMPLE mode=async_exporter index=2 duration_ns=20850978 requests=30 events=690 drops=0
+CHECK bounded_exporter_measurement PASS
+MARK after_load
+CHECK native_shutdown PASS
+M10_005_INSTALLED_OBSERVATION_PASS

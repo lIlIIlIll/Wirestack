@@ -1,0 +1,4 @@
+rotation index=0 actual=2 expected=2
+rotation index=1 actual=3 expected=3
+rotation index=2 actual=4 expected=4
+ROTATION_80_PASS generation=81

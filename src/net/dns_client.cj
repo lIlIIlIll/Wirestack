@@ -60,7 +60,7 @@ private enum DnsAddressAnswer {
  * configured nameserver. Closing the client stops admission, cancels queued and
  * active operations, waits for admitted cleanup, and is idempotent.
  */
-public class DnsClient <: Resource {
+public class DnsClient <: Resource & api.ResolverResourceOwner {
     private let delegate: ?system_resolver.SystemResolver
     private let workerCount: Int64
     private let queueCapacity: Int64
@@ -72,6 +72,8 @@ public class DnsClient <: Resource {
     private var nextOperationId: Int64 = 1
     private var queued: Int64 = 0
     private var closed = false
+    private let ownerId = api.nextNetworkCorrelationId()
+    private var rejectedQueries: Int64 = 0
 
     /** Resolver configuration captured for the lifetime of this client. */
     public let config: DnsResolverConfig
@@ -224,6 +226,36 @@ public class DnsClient <: Resource {
 
     /** Returns whether this client has permanently stopped admission. */
     public func isClosed(): Bool { synchronized(lifecycleMutex) { closed } }
+
+    /** Samples bounded owner-local admission, retained cache, and actual work.
+     * Native fallback work remains counted after a caller abandons it or closes this owner.
+     * Admission/cache and fallback metrics are sampled under their respective owner locks.
+     */
+    public func resolverResourceSnapshot(): api.ResolverResourceSnapshot {
+        synchronized(lifecycleMutex) {
+            let native = match (delegate) {
+                case Some(value) => Some(value.resolverResourceSnapshot())
+                case None => None<api.ResolverResourceSnapshot>
+            }
+            var outstanding = active.size
+            var waiting = queued
+            var running = active.size
+            var rejections = rejectedQueries
+            var sampledAt = MonoTime.now()
+            var isLive = true
+            if (let Some(value) <- native) {
+                if (!value.isLive) { sampledAt = value.sampledAt; isLive = false }
+                outstanding = max(outstanding, value.activeQueries)
+                waiting += value.queuedQueries
+                running = value.runningWork
+                rejections = if (Int64.Max - rejections < value.rejectedQueries) {
+                    Int64.Max
+                } else { rejections + value.rejectedQueries }
+            }
+            api.ResolverResourceSnapshot(ownerId, outstanding + queued, waiting,
+                running, cache.size, rejections, sampledAt: sampledAt, isLive: isLive)
+        }
+    }
 
     private func lookupWire(
         host: api.HostName,
@@ -705,6 +737,7 @@ public class DnsClient <: Resource {
                     } else {
                         if (!isQueued) {
                             if (queued >= queueCapacity) {
+                                if (rejectedQueries < Int64.Max) { rejectedQueries++ }
                                 throw api.ResolveException(
                                     api.ResolveErrorCode.TemporaryFailure,
                                     "DNS client admission queue is full"

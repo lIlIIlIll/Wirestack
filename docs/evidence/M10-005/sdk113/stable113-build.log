@@ -1,0 +1,228 @@
+warning: unused function:'waitUntilWriteActive'
+   ==> <repo>/src/internal/transport_stdnet/package.cj:696:5:
+    | 
+696 |       internal func waitUntilWriteActive(timeout: Duration): Bool {
+    |  _____^
+697 | |         let expiresAt = MonoTime.now() + timeout
+    | | ...
+706 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'waitUntilReceiveActive'
+   ==> <repo>/src/internal/transport_stdnet/udp_socket.cj:718:5:
+    | 
+718 |       func waitUntilReceiveActive(timeout: Duration): Bool {
+    |  _____^
+719 | |         let expiresAt = MonoTime.now() + timeout
+    | | ...
+725 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'waitUntilAcceptActive'
+    ==> <repo>/src/internal/transport_stdnet/package.cj:1054:5:
+     | 
+1054 |       func waitUntilAcceptActive(timeout: Duration): Bool {
+     |  _____^
+1055 | |         let expiresAt = MonoTime.now() + timeout
+     | | ...
+1063 | |     }
+     | |_____^ unused function
+     | 
+     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+3 warnings generated, 3 warnings printed.
+warning: unused function:'offer'
+   ==> <repo>/src/internal/http2/server_mapping.cj:401:5:
+    | 
+401 |       func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
+    |  _____^
+402 | |         offerView(
+    | | ...
+405 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http2/write_scheduler.cj:473:32:
+    | 
+473 |             if (queueReserved) { releaseQueueCapacity(frames.size, totalBytes, false) }
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http2/flow_control.cj:513:41:
+    | 
+513 |                     else if (succeeded) { NetworkEventOutcome.Succeeded } else { NetworkEventOutcome.Discarded },
+    |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http2/write_scheduler.cj:518:32:
+    | 
+518 |             if (queueReserved) { releaseQueueCapacity(1, size, cleanupSlot) }
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http2/write_scheduler.cj:519:31:
+    | 
+519 |             if (!transferred) { releaseBufferLease(bufferLease) }
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http2/server_connection.cj:533:28:
+    | 
+533 |             if (slotOwned) { releasePushSlot() }
+    |                            ^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'offer'
+    ==> <repo>/src/internal/http2/client_connection.cj:1119:5:
+     | 
+1119 |       func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
+     |  _____^
+1120 | |         offerView(data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>)
+1121 | |     }
+     | |_____^ unused function
+     | 
+     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+7 warnings generated, 7 warnings printed.
+warning: unused variable:'resourceLease'
+  ==> <repo>/src/internal/http1/client_pipeline.cj:91:9:
+   | 
+91 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+   |         ^^^^^^^^^^^^^ unused variable
+   | 
+   # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'size'
+   ==> <repo>/src/internal/http1/pool_admission.cj:101:5:
+    | 
+101 |     func size(): Int64 { waiterCount }
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http1/server_connection.cj:166:23:
+    | 
+166 |         try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }
+    |                       ^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused variable:'resourceLease'
+   ==> <repo>/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    | 
+238 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+    |         ^^^^^^^^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused variable:'resourceLease'
+   ==> <repo>/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    | 
+279 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+    |         ^^^^^^^^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http1/http2_connection_pool.cj:436:42:
+    | 
+436 |             if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/internal/http1/http2_connection_pool.cj:438:42:
+    | 
+438 |             if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'waitUntilWaiters'
+   ==> <repo>/src/internal/http1/connection_pool.cj:551:5:
+    | 
+551 |       internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {
+    |  _____^
+552 | |         let expiresAt = MonoTime.now() + timeout
+    | | ...
+561 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused function:'waitUntilWaiters'
+   ==> <repo>/src/internal/http1/http2_connection_pool.cj:636:5:
+    | 
+636 |       internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {
+    |  _____^
+637 | |         let expiresAt = MonoTime.now() + timeout
+    | | ...
+646 | |     }
+    | |_____^ unused function
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unused variable:'resourceLease'
+   ==> <repo>/src/internal/http1/tls_client_pipeline.cj:861:9:
+    | 
+861 |         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
+    |         ^^^^^^^^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+10 warnings generated, 10 warnings printed.
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/http/client.cj:489:31:
+    | 
+489 |             if (!transferred) { lifetime.close() }
+    |                               ^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable block in 'if' expression
+   ==> <repo>/src/http/client.cj:776:29:
+    | 
+776 |               if (!published) {
+    |  _____________________________^
+777 | |                 direct.close()
+    | | ...
+779 | |             }
+    | |_____________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable pattern
+   ==> <repo>/src/http/client.cj:778:41:
+    | 
+778 |                 match (tunneled) { case Some(native) => native.close(); case None => () }
+    |                                         ^^^^^^^^^^^^ 
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning: unreachable pattern
+   ==> <repo>/src/http/client.cj:778:78:
+    | 
+778 |                 match (tunneled) { case Some(native) => native.close(); case None => () }
+    |                                                                              ^^^^ 
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+cjpm build success

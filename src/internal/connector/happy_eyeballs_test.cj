@@ -119,6 +119,15 @@ private func hostAndResolver(addresses: Array<IpAddress>): (HostName, StaticReso
     (host, StaticResolver(ResolveResult(addresses, host, ResolverSource.Static)))
 }
 
+private class CorrelatedAttemptFactory <: TransportFactory {
+    let calls = AtomicInt64(0)
+    var childContext = None<OperationContext>
+    public func connect(_: SocketEndpoint, context: OperationContext): DuplexTransport {
+        calls.fetchAdd(1); childContext = Some(context)
+        let (transport, peer) = MemoryTransport.pair(); peer.close(); transport
+    }
+}
+
 private class ConnectorEventSink <: NetworkEventSink {
     private let mutex = Mutex()
     private let recorded = ArrayList<NetworkEvent>()
@@ -174,6 +183,37 @@ private class ConnectorRaceSink <: NetworkEventSink {
 
 @Test
 class HappyEyeballsConnectorTest {
+    @TestCase
+    func candidateIndicesAndSkippedCandidatesPreservePhysicalCorrelation(): Unit {
+        let (host, resolver) = hostAndResolver([ipv4Address(2), ipv4Address(3)])
+        let factory = CorrelatedAttemptFactory()
+        let sink = ConnectorEventSink()
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(21), attemptId: Some(22), connectionId: Some(23))
+        let result = HappyEyeballsConnector(resolver, factory, attemptDelay: Duration.second).connect(host, 443, context: context)
+        @Expect(factory.calls.load(), 1)
+        @Expect(factory.childContext.getOrThrow().requestId, Some(21))
+        @Expect(factory.childContext.getOrThrow().attemptId, Some(22))
+        @Expect(factory.childContext.getOrThrow().connectionId, Some(23))
+        var started: Int64 = 0
+        var skipped: Int64 = 0
+        for (event in sink.events()) {
+            @Expect(event.requestId, Some(21)); @Expect(event.attemptId, Some(22)); @Expect(event.connectionId, Some(23))
+            match (event.kind) {
+                case NetworkEventKind.ConnectAttemptStarted =>
+                    started++; @Expect(event.connectionAttemptIndex, Some(1))
+                case NetworkEventKind.ConnectAttemptCompleted =>
+                    match (event.outcome) {
+                        case NetworkEventOutcome.NotExecuted => skipped++; @Expect(event.connectionAttemptIndex, Some(2))
+                        case NetworkEventOutcome.Succeeded => @Expect(event.connectionAttemptIndex, Some(1))
+                        case _ => @Fail("unexpected candidate failure")
+                    }
+                case _ => ()
+            }
+        }
+        @Expect(started, 1); @Expect(skipped, 1)
+        result.transport.close()
+    }
+
     @TestCase
     func emitsCompleteDnsAttemptAndConnectedLifecycle(): Unit {
         let (host, resolver) = hostAndResolver([ipv4Address(2)])

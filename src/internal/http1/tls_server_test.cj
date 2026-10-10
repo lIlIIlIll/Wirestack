@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.collection.ArrayList
+import wirestack as api
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
@@ -126,11 +127,16 @@ private func runTlsHttp1Exchange(
     client: DefaultHttp1TlsHandshaker
 ): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
-        let context = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))
+        let clientSink = api.NetworkEventBuffer(capacity: 256)
+        let serverSink = api.NetworkEventBuffer(capacity: 256)
+        let context = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)),
+            eventSink: Some(clientSink), requestId: Some(901), attemptId: Some(902), connectionId: Some(api.nextNetworkCorrelationId()))
+        let serverContext = OperationContext(deadline: context.deadline, eventSink: Some(serverSink),
+            connectionId: Some(api.nextNetworkCorrelationId()))
         let serving = spawn {
-            let secured = server.handshake(serverTransport, context)
+            let secured = server.handshake(serverTransport, serverContext)
             serveHttp1Connection(
-                secured, TlsServerStaticHandler(), context: context, maximumRequests: 1
+                secured, TlsServerStaticHandler(), context: serverContext, maximumRequests: 1
             )
         }
         let secured = client.handshake(HostName("example.com"), clientTransport, context)
@@ -143,6 +149,20 @@ private func runTlsHttp1Exchange(
         response.close()
         connection.close()
         @Expect(serving.get(3 * Duration.second).requestsServed, 1)
+        for ((sink, owner) in [(clientSink, context), (serverSink, serverContext)]) {
+            var starts: Int64 = 0
+            var completions: Int64 = 0
+            for (event in sink.drain()) {
+                match (event.kind) {
+                    case NetworkEventKind.TlsHandshakeStarted => starts++
+                    case NetworkEventKind.TlsHandshakeCompleted => completions++
+                    case _ => continue
+                }
+                @Expect(event.connectionId, owner.connectionId)
+                match (event.stage) { case Some(OperationTimeoutStage.TlsHandshake) => (); case _ => @Fail("TLS event lost its effective stage") }
+            }
+            @Expect(starts, 1); @Expect(completions, 1)
+        }
 }
 
 private func http1TlsServerPin(): SpkiSha256Pin {

@@ -1,6 +1,8 @@
 package wirestack.internal.http1
 
 import std.collection.ArrayList
+import wirestack.NetworkConnectionPoolSnapshot
+import wirestack.nextNetworkCorrelationId
 import std.sync.Mutex
 import std.time.*
 import wirestack.internal as internal
@@ -44,11 +46,13 @@ public interface Http1ConnectionFactory {
 /** A unique claim on one connection. It cannot be duplicated or returned twice. */
 public class Http1PoolLease {
     public let connection: Http1ClientConnection
+    public let connectionId: Int64
     internal let id: Int64
     internal let key: HttpConnectionPoolKey
 
-    internal init(id: Int64, key: HttpConnectionPoolKey, connection: Http1ClientConnection) {
+    internal init(id: Int64, key: HttpConnectionPoolKey, connection: Http1ClientConnection, connectionId!: Int64 = id) {
         this.id = id
+        this.connectionId = connectionId
         this.key = key
         this.connection = connection
     }
@@ -72,6 +76,8 @@ public struct Http1ConnectionPoolSnapshot {
 
 private class Http1PoolEntry {
     var id: Int64
+    let connectionId: Int64
+    var observationContext: ?OperationContext
     let key: HttpConnectionPoolKey
     let connection: Http1ClientConnection
     let resourceLease: ?internal.HttpResourceLease
@@ -81,8 +87,11 @@ private class Http1PoolEntry {
     let createdAt: MonoTime
 
     init(id: Int64, key: HttpConnectionPoolKey, connection: Http1ClientConnection,
-        resourceLease: ?internal.HttpResourceLease, leased: Bool, idleSince: MonoTime) {
+        resourceLease: ?internal.HttpResourceLease, leased: Bool, idleSince: MonoTime,
+        context!: OperationContext = OperationContext.background()) {
         this.id = id
+        this.connectionId = id
+        this.observationContext = if (context.eventSink.isSome()) { Some(context) } else { None<OperationContext> }
         this.key = key
         this.connection = connection
         this.resourceLease = resourceLease
@@ -95,7 +104,7 @@ private class Http1PoolEntry {
 private enum Http1PoolDecision {
     | Reuse(Http1PoolLease)
     | Reserve(Int64)
-    | Discard(Http1ClientConnection, ?internal.HttpResourceLease)
+    | Discard(Http1PoolEntry)
 }
 
 /** Bounded, cancellation-aware HTTP/1 connection pool with complete-key isolation. */
@@ -108,7 +117,6 @@ public class Http1ConnectionPool <: Resource {
     private let changed = synchronized(mutex) { mutex.condition() }
     private var entries = ArrayList<Http1PoolEntry>()
     private var reservations = ArrayList<HttpConnectionPoolKey>()
-    private var nextId: Int64 = 1
     private var waiters: Int64 = 0
     private var closed = false
     private var retiring = false
@@ -130,16 +138,22 @@ public class Http1ConnectionPool <: Resource {
         context!: OperationContext = OperationContext.background()
     ): Http1PoolLease {
         let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
+        emitHttpStage(poolContext, true)
+        var poolStageOpen = true
         let registration = poolContext.cancellation.register { => wake() }
         try {
             while (true) {
                 match (decide(key, poolContext)) {
                     case Http1PoolDecision.Reuse(lease) =>
-                        emitPoolAcquired(poolContext, lease.id, NetworkEventOutcome.Reused)
+                        emitHttpStage(poolContext, false)
+                        poolStageOpen = false
+                        emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Reused)
+                        emitReusedConnectionStages(context, lease.connectionId, key.scheme == "https")
                         return lease
-                    case Http1PoolDecision.Discard(connection, resourceLease) =>
-                        closeQuietly(connection)
-                        closeOptionalResourceLease(resourceLease)
+                    case Http1PoolDecision.Discard(entry) =>
+                        closeQuietly(entry.connection)
+                        closeOptionalResourceLease(entry.resourceLease)
+                        emitOwnedPoolEvent(entry.observationContext, entry.connectionId, NetworkEventKind.ConnectionClosed)
                     case Http1PoolDecision.Reserve(id) =>
                         var reservationOutstanding = true
                         var resourceLease = None<internal.HttpResourceLease>
@@ -150,7 +164,8 @@ public class Http1ConnectionPool <: Resource {
                                 ))
                                 case None => None<internal.HttpResourceLease>
                             }
-                            let connection = factory.create(key, context, resourceLease)
+                            if (poolStageOpen) { emitHttpStage(poolContext, false); poolStageOpen = false }
+                            let connection = factory.create(key, connectionEventContext(context, id), resourceLease)
                             if (let Some(value) <- resourceLease) { value.activate() }
                             let accepted = synchronized(mutex) {
                                 removeReservation(key)
@@ -160,7 +175,7 @@ public class Http1ConnectionPool <: Resource {
                                     false
                                 } else {
                                     entries.add(Http1PoolEntry(
-                                        id, key, connection, resourceLease, true, clock.now()
+                                        id, key, connection, resourceLease, true, clock.now(), context: context
                                     ))
                                     resourceLease = None<internal.HttpResourceLease>
                                     changed.notifyAll()
@@ -174,7 +189,7 @@ public class Http1ConnectionPool <: Resource {
                                 throw poolClosed()
                             }
                             let lease = Http1PoolLease(id, key, connection)
-                            emitPoolAcquired(poolContext, lease.id, NetworkEventOutcome.Succeeded)
+                            emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Succeeded)
                             return lease
                         } catch (error: Exception) {
                             closeOptionalResourceLease(resourceLease)
@@ -186,12 +201,17 @@ public class Http1ConnectionPool <: Resource {
                                     changed.notifyAll()
                                 }
                             }
-                            emitPoolAcquireFailed(poolContext, error)
                             throw error
                         }
                 }
             }
             throw poolClosed()
+        } catch (error: Exception) {
+            if (poolStageOpen) {
+                emitHttpStage(poolContext, false, code: Some(httpObservationError(error)))
+                emitPoolAcquireFailed(poolContext, error)
+            }
+            throw error
         } finally {
             registration.unregister()
         }
@@ -213,9 +233,8 @@ public class Http1ConnectionPool <: Resource {
                     countForKey(key) >= config.maximumConnectionsPerKey) {
                     throw poolExhausted()
                 }
-                let id = nextId
-                nextId++
-                entries.add(Http1PoolEntry(id, key, connection, resourceLease, true, clock.now()))
+                let id = context.connectionId ?? nextNetworkCorrelationId()
+                entries.add(Http1PoolEntry(id, key, connection, resourceLease, true, clock.now(), context: context))
                 changed.notifyAll()
                 Http1PoolLease(id, key, connection)
             }
@@ -228,16 +247,22 @@ public class Http1ConnectionPool <: Resource {
     }
     /** Transfers close ownership while retaining the aggregate lease until session cleanup. */
     public func transfer(lease: Http1PoolLease): Unit {
+        var observationContext = None<OperationContext>
         synchronized(mutex) {
             let index = findEntry(lease.id)
             if (index < 0 || closed) { throw poolClosed() }
             let entry = entries[index]
             if (!entry.leased || entry.key != lease.key) { throw poolClosed() }
             match (entry.connection.currentState()) {
-                case Http1ClientConnectionState.Upgraded => entry.transferred = true
+                case Http1ClientConnectionState.Upgraded =>
+                    if (!entry.transferred) {
+                        entry.transferred = true
+                        if (!retiring) { observationContext = entry.observationContext }
+                    }
                 case _ => throw IllegalStateException("only upgraded HTTP/1 ownership can transfer")
             }
         }
+        emitOwnedPoolEvent(observationContext, lease.connectionId, NetworkEventKind.ConnectionDraining)
     }
 
 
@@ -285,10 +310,10 @@ public class Http1ConnectionPool <: Resource {
         if (let Some(connection) <- closeConnection) {
             closeQuietly(connection)
             closeOptionalResourceLease(closeResourceLease)
-            emitPoolConnectionClosed(context, lease.id)
+            emitPoolConnectionClosed(context, lease.connectionId)
         }
         if (let Some(value) <- outcome) {
-            emitPoolReleased(context, lease.id, value)
+            emitPoolReleased(context, lease.connectionId, value)
         }
     }
 
@@ -309,8 +334,22 @@ public class Http1ConnectionPool <: Resource {
         if (let Some(value) <- connection) {
             closeQuietly(value)
             closeOptionalResourceLease(resourceLease)
-            emitPoolReleased(context, lease.id, NetworkEventOutcome.Discarded)
-            emitPoolConnectionClosed(context, lease.id)
+            emitPoolReleased(context, lease.connectionId, NetworkEventOutcome.Discarded)
+            emitPoolConnectionClosed(context, lease.connectionId)
+        }
+    }
+
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot {
+        synchronized(mutex) {
+            var leased: Int64 = 0
+            var draining: Int64 = 0
+            for (entry in entries) {
+                if (entry.leased) { leased++ }
+                if (retiring || closed || entry.transferred) { draining++ }
+            }
+            NetworkConnectionPoolSnapshot(leasedConnections: leased, idleConnections: idleCount(),
+                connectingConnections: reservations.size, queuedRequests: waiters,
+                drainingConnections: draining, sampledAt: clock.now())
         }
     }
 
@@ -322,7 +361,11 @@ public class Http1ConnectionPool <: Resource {
 
     /** Stops new claims, evicts idle entries, and lets reserved/leased exchanges finish. */
     public func retire(): Unit {
-        let claimed = synchronized(mutex) {
+        let (claimed, draining) = synchronized(mutex) {
+            let newlyDraining = ArrayList<Http1PoolEntry>()
+            if (!retiring) {
+                for (entry in entries) { if (!entry.transferred) { newlyDraining.add(entry) } }
+            }
             retiring = true
             let result = ArrayList<Http1PoolEntry>()
             var index: Int64 = entries.size
@@ -331,11 +374,15 @@ public class Http1ConnectionPool <: Resource {
                 if (!entries[index].leased) { result.add(entries.remove(at: index)) }
             }
             changed.notifyAll()
-            result.toArray()
+            (result.toArray(), newlyDraining.toArray())
+        }
+        for (entry in draining) {
+            emitOwnedPoolEvent(entry.observationContext, entry.connectionId, NetworkEventKind.ConnectionDraining)
         }
         for (entry in claimed) {
             closeQuietly(entry.connection)
             closeOptionalResourceLease(entry.resourceLease)
+            emitOwnedPoolEvent(entry.observationContext, entry.connectionId, NetworkEventKind.ConnectionClosed)
         }
     }
 
@@ -358,6 +405,7 @@ public class Http1ConnectionPool <: Resource {
         for (entry in claimed) {
             closeQuietly(entry.connection)
             closeOptionalResourceLease(entry.resourceLease)
+            emitOwnedPoolEvent(entry.observationContext, entry.connectionId, NetworkEventKind.ConnectionClosed)
         }
     }
 
@@ -375,7 +423,7 @@ public class Http1ConnectionPool <: Resource {
                     if (stale >= 0) {
                         let removed = entries.remove(at: stale)
                         changed.notifyAll()
-                        return Http1PoolDecision.Discard(removed.connection, removed.resourceLease)
+                        return Http1PoolDecision.Discard(removed)
                     }
 
                     let idle = findIdle(key)
@@ -395,14 +443,13 @@ public class Http1ConnectionPool <: Resource {
                         if (canReuse) {
                             let entry = entries[idle]
                             entry.leased = true
-                            entry.id = nextId
-                            nextId++
+                            entry.observationContext = if (context.eventSink.isSome()) { Some(context) } else { None<OperationContext> }
+                            entry.id = nextNetworkCorrelationId()
                             return Http1PoolDecision.Reuse(
-                                Http1PoolLease(entry.id, entry.key, entry.connection)
+                                Http1PoolLease(entry.id, entry.key, entry.connection, connectionId: entry.connectionId)
                             )
                         }
-                        let id = nextId
-                        nextId++
+                        let id = nextNetworkCorrelationId()
                         reservations.add(key)
                         return Http1PoolDecision.Reserve(id)
                     }
@@ -524,7 +571,50 @@ private func closeOptionalResourceLease(lease: ?internal.HttpResourceLease): Uni
         case None => ()
     }
 }
-private func emitPoolAcquired(context: OperationContext, id: Int64,
+internal func negotiatedEventContext(context: OperationContext, id: ?Int64): OperationContext {
+    match (id) {
+        case Some(value) => connectionEventContext(context, value)
+        case None => context
+    }
+}
+
+internal func connectionEventContext(context: OperationContext, id: Int64): OperationContext {
+    if (context.eventSink.isNone()) { return context }
+    context.withEventCorrelation(requestId: context.requestId, attemptId: context.attemptId,
+        connectionId: Some(id), streamId: context.streamId)
+}
+
+internal func emitReusedConnectionStages(context: OperationContext, id: Int64, tls: Bool): Unit {
+    if (context.eventSink.isNone()) { return }
+    let correlated = connectionEventContext(context, id)
+    emitNetworkEvent(correlated, NetworkEvent(NetworkEventKind.DnsCompleted, NetworkEventOutcome.NotExecuted,
+        stage: Some(OperationTimeoutStage.Dns)))
+    if (tls) {
+        emitNetworkEvent(correlated, NetworkEvent(NetworkEventKind.TlsHandshakeCompleted, NetworkEventOutcome.NotExecuted,
+            stage: Some(OperationTimeoutStage.TlsHandshake)))
+    }
+}
+
+internal func emitHttpStage(context: OperationContext, started: Bool, code!: ?NetworkErrorCode = None<NetworkErrorCode>): Unit {
+    if (context.eventSink.isNone()) { return }
+    emitNetworkEvent(context, NetworkEvent(
+        if (started) { NetworkEventKind.StageStarted } else { NetworkEventKind.StageCompleted },
+        if (started) { NetworkEventOutcome.Started } else if (code.isSome()) { NetworkEventOutcome.Failed }
+        else { NetworkEventOutcome.Succeeded }, errorCode: code))
+}
+
+internal func httpObservationError(error: Exception): NetworkErrorCode {
+    match (error) {
+        case value: NetworkException => value.code
+        case value: Http1RequestWriteException => match (value.cause) {
+            case Some(cause) => httpObservationError(cause)
+            case None => NetworkErrorCode.InvalidState
+        }
+        case _ => NetworkErrorCode.SystemFailure
+    }
+}
+
+internal func emitPoolAcquired(context: OperationContext, id: Int64,
     outcome: NetworkEventOutcome): Unit {
     emitNetworkEvent(context, NetworkEvent(
         NetworkEventKind.HttpConnectionAcquired,
@@ -549,7 +639,7 @@ private func emitPoolAcquireFailed(context: OperationContext, error: Exception):
     ))
 }
 
-private func emitPoolReleased(context: OperationContext, id: Int64,
+internal func emitPoolReleased(context: OperationContext, id: Int64,
     outcome: NetworkEventOutcome): Unit {
     emitNetworkEvent(context, NetworkEvent(
         NetworkEventKind.HttpConnectionReleased,
@@ -560,7 +650,13 @@ private func emitPoolReleased(context: OperationContext, id: Int64,
     ))
 }
 
-private func emitPoolConnectionClosed(context: OperationContext, id: Int64): Unit {
+internal func emitOwnedPoolEvent(context: ?OperationContext, id: Int64, kind: NetworkEventKind): Unit {
+    if (let Some(value) <- context) {
+        emitNetworkEvent(connectionEventContext(value, id), NetworkEvent(kind, NetworkEventOutcome.Succeeded))
+    }
+}
+
+internal func emitPoolConnectionClosed(context: OperationContext, id: Int64): Unit {
     emitNetworkEvent(context, NetworkEvent(
         NetworkEventKind.ConnectionClosed,
         NetworkEventOutcome.Succeeded,

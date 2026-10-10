@@ -6,7 +6,9 @@ import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
+import wirestack.internal.http_model.*
 import wirestack.internal as internal
+import wirestack as api
 private class PoolTestClock <: MonotonicClock {
     private var current: MonoTime
     init() { current = MonoTime.now() }
@@ -46,6 +48,106 @@ private class PoolEventSink <: NetworkEventSink {
 @Test
 class Http1ConnectionPoolTest {
     @TestCase
+    func transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilClose(): Unit {
+        let (transport, peer) = MemoryTransport.pair(capacity: 2048)
+        writeAll(peer, ByteSpan("HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\nx".toArray()))
+        let pool = Http1ConnectionPool()
+        let sink = api.NetworkEventBuffer(capacity: 64)
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(71), attemptId: Some(72),
+            connectionId: Some(api.nextNetworkCorrelationId()))
+        let lease = pool.adopt(poolTestKey(), Http1ClientConnection(transport), context: context)
+        let request = HttpRequest.get("http://example.test/chat").withHeaders(
+            HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "websocket").build())
+        let result = lease.connection.upgradeTracked(request, context: context,
+            onTerminated: { _ => pool.discard(lease, context: context) })
+        let upgraded = match (result) { case Http1UpgradeExchangeResult.Upgraded(value) => value; case _ => throw Exception("upgrade rejected") }
+        let _ = sink.drain()
+        pool.transfer(lease); pool.transfer(lease); pool.retire(); pool.retire(); pool.close(); pool.close()
+        @Expect(pool.observationSnapshot().leasedConnections, 1)
+        @Expect(pool.observationSnapshot().drainingConnections, 1)
+        @Expect(!upgraded.transport.isClosed())
+        var drains: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.ConnectionDraining => drains++; @Expect(event.connectionId, context.connectionId)
+                case NetworkEventKind.ConnectionClosed => @Fail("pool closed a transferred session")
+                case _ => ()
+            }
+        }
+        @Expect(drains, 1)
+        upgraded.transport.close(); upgraded.transport.close()
+        @Expect(pool.observationSnapshot().leasedConnections, 0)
+        @Expect(pool.observationSnapshot().drainingConnections, 0)
+        var closes: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) { case NetworkEventKind.ConnectionClosed => closes++; case _ => () }
+        }
+        @Expect(closes, 1)
+        peer.close()
+    }
+
+    @TestCase
+    func globalPhysicalIdsRemainStableAcrossClaimsAndPools(): Unit {
+        let one = Http1ConnectionPool()
+        let two = Http1ConnectionPool()
+        let factory = PoolTestFactory()
+        let first = one.acquire(poolTestKey(), factory)
+        let other = two.acquire(poolTestKey(), factory)
+        @Expect(first.connectionId != other.connectionId)
+        one.release(first)
+        let reused = one.acquire(poolTestKey(), factory)
+        @Expect(reused.connectionId, first.connectionId)
+        one.discard(first)
+        @Expect(one.observationSnapshot().leasedConnections, 1)
+        one.release(reused); two.release(other)
+        @Expect(one.observationSnapshot().idleConnections, 1)
+        one.close(); two.close()
+        @Expect(one.observationSnapshot().idleConnections, 0)
+    }
+
+    @TestCase
+    func throwingReentrantSinkCannotChangePoolOwnership(): Unit {
+        let pool = Http1ConnectionPool()
+        let sink = ReentrantPoolObservationSink(pool)
+        let context = OperationContext(eventSink: Some(sink))
+        let lease = pool.acquire(poolTestKey(), PoolTestFactory(), context: context)
+        pool.release(lease, context: context)
+        @Expect(pool.observationSnapshot().idleConnections, 1)
+        pool.retire()
+        @Expect(pool.observationSnapshot().idleConnections, 0)
+        @Expect(sink.calls.load() > 0)
+        @Expect(sink.closedSamples.load(), 1)
+        pool.close()
+    }
+
+    @TestCase
+    func boundedFullSinkDoesNotPreventWaiterCancellationOrReclamation(): Unit {
+        let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
+            maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1))
+        let factory = PoolTestFactory()
+        let sink = api.NetworkEventBuffer(capacity: 1)
+        let source = CancellationSource()
+        let active = pool.acquire(poolTestKey(), factory, context: OperationContext(eventSink: Some(sink)))
+        let pending = spawn {
+            try { let _ = pool.acquire(poolTestKey(), factory,
+                context: OperationContext(cancellation: source.token, eventSink: Some(sink))); false }
+            catch (error: NetworkException) {
+                match (error.code) { case NetworkErrorCode.Cancelled => true; case _ => false }
+            }
+        }
+        @Expect(pool.waitUntilWaiters(1, Duration.second))
+        @Expect(pool.observationSnapshot().queuedRequests, 1)
+        source.cancel()
+        @Expect(pending.get(Duration.second))
+        @Expect(pool.observationSnapshot().queuedRequests, 0)
+        @Expect(sink.snapshot().queuedEvents, 1)
+        @Expect(sink.snapshot().droppedEvents > 0)
+        pool.release(active); pool.close()
+        @Expect(pool.observationSnapshot().leasedConnections, 0)
+        @Expect(pool.observationSnapshot().connectingConnections, 0)
+    }
+
+    @TestCase
     func retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse(): Unit {
         let pool = Http1ConnectionPool()
         let factory = PoolTestFactory()
@@ -78,17 +180,25 @@ class Http1ConnectionPoolTest {
         let second = pool.acquire(poolTestKey(), factory, context: context)
         pool.discard(second, context: context)
 
-        @Expect(sink.events.size, 5)
-        expectPoolEvent(sink.events[0], NetworkEventKind.HttpConnectionAcquired,
-            NetworkEventOutcome.Succeeded, first.id)
-        expectPoolEvent(sink.events[1], NetworkEventKind.HttpConnectionReleased,
-            NetworkEventOutcome.Released, first.id)
-        expectPoolEvent(sink.events[2], NetworkEventKind.HttpConnectionAcquired,
-            NetworkEventOutcome.Reused, second.id)
-        expectPoolEvent(sink.events[3], NetworkEventKind.HttpConnectionReleased,
-            NetworkEventOutcome.Discarded, second.id)
-        expectPoolEvent(sink.events[4], NetworkEventKind.ConnectionClosed,
-            NetworkEventOutcome.Succeeded, second.id)
+        let lifecycle = ArrayList<NetworkEvent>()
+        for (event in sink.events) {
+            match (event.kind) {
+                case NetworkEventKind.HttpConnectionAcquired | NetworkEventKind.HttpConnectionReleased |
+                    NetworkEventKind.ConnectionClosed => lifecycle.add(event)
+                case _ => ()
+            }
+        }
+        @Expect(lifecycle.size, 5)
+        expectPoolEvent(lifecycle[0], NetworkEventKind.HttpConnectionAcquired,
+            NetworkEventOutcome.Succeeded, first.connectionId)
+        expectPoolEvent(lifecycle[1], NetworkEventKind.HttpConnectionReleased,
+            NetworkEventOutcome.Released, first.connectionId)
+        expectPoolEvent(lifecycle[2], NetworkEventKind.HttpConnectionAcquired,
+            NetworkEventOutcome.Reused, second.connectionId)
+        expectPoolEvent(lifecycle[3], NetworkEventKind.HttpConnectionReleased,
+            NetworkEventOutcome.Discarded, second.connectionId)
+        expectPoolEvent(lifecycle[4], NetworkEventKind.ConnectionClosed,
+            NetworkEventOutcome.Succeeded, second.connectionId)
         pool.close()
     }
 
@@ -275,6 +385,8 @@ class Http1ConnectionPoolTest {
                 catch (_: NetworkException) { None<Http1PoolLease> }
             }
             factory.waitUntilEntered()
+            @Expect(pool.observationSnapshot().connectingConnections, 1)
+            @Expect(pool.observationSnapshot().leasedConnections, 0)
             if (strict) { pool.close() } else { pool.retire() }
             factory.release()
             let result = pending.get(Duration.second)
@@ -292,6 +404,23 @@ class Http1ConnectionPoolTest {
         }
     }
 
+}
+
+private class ReentrantPoolObservationSink <: NetworkEventSink {
+    private let pool: Http1ConnectionPool
+    let calls = AtomicInt64(0)
+    let closedSamples = AtomicInt64(0)
+    init(pool: Http1ConnectionPool) { this.pool = pool }
+    public func emit(event: NetworkEvent): Unit {
+        let snapshot = pool.observationSnapshot()
+        calls.fetchAdd(1)
+        match (event.kind) {
+            case NetworkEventKind.ConnectionClosed =>
+                if (snapshot.leasedConnections == 0 && snapshot.idleConnections == 0) { closedSamples.fetchAdd(1) }
+            case _ => ()
+        }
+        throw Exception("fixture observer failure")
+    }
 }
 
 private func expectPoolEvent(event: NetworkEvent, kind: NetworkEventKind,

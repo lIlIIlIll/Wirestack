@@ -54,10 +54,13 @@ PUBLIC_ROOT_FILES = (
     "http_url.cj",
     "network_error.cj",
     "network_event.cj",
+    "network_event_buffer.cj",
+    "network_pool_snapshot.cj",
     "operation_context.cj",
     "package.cj",
     "private_key_contract.cj",
     "resolver.cj",
+    "resolver_snapshot.cj",
     "tls_contract.cj",
     "transport.cj",
     "trust.cj",
@@ -74,6 +77,7 @@ PUBLIC_PACKAGE_FILES = {
         "file_handler.cj",
         "hooks.cj",
         "multipart.cj",
+        "observability.cj",
         "package.cj",
         "proxy.cj",
         "redirect.cj",
@@ -92,6 +96,7 @@ PUBLIC_PACKAGE_FILES = {
         "unix_stream.cj", "unix_listener.cj", "unix_datagram_socket.cj",
         "dns_wire.cj", "dns_client.cj", "dns_resolver.cj",
     ),
+    "wirestack.observability": ("bounded_network_event_sink.cj",),
 }
 
 

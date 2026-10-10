@@ -1,0 +1,1394 @@
+[33mwarning[0m: unused variable:'context'
+  [36m==>[0m <repo>/src/http/websocket_handshake_test.cj:87:52:
+   [36m| [0m
+[36m87[0m [36m| [0m    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {[0m
+   [36m| [0m                                                   [33m^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/observability_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpFacadeObservabilityTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m166[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/observability_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpFacadeObservabilityTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m166[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/multipart_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class MultipartTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m279[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/websocket_test.cj:9:1:
+    [36m| [0m
+[36m9[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m10[0m  [36m| [0m[33m|[0m class WebSocketConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m262[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < IllegalArgumentException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalArgumentException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < IllegalArgumentException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/cookie_test.cj:8:1:
+    [36m| [0m
+[36m8[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m9[0m   [36m| [0m[33m|[0m class HttpCookieJarTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m484[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalArgumentException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                        None < Exception >[0m
+    [36m| [0m                        [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                    None < Exception >[0m
+    [36m| [0m                    [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < IllegalStateException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalStateException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < Exception >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < Exception >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < IllegalStateException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < IllegalStateException >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________^[0m
+    [36m| [0m[34m|[0m                     throw e[0m
+    [36m| [0m[34m|[0m                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < Exception >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < Exception >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < Exception >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/client_rotation_test.cj:10:1:
+    [36m| [0m
+[36m10[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m11[0m  [36m| [0m[33m|[0m class HttpClientRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m383[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < Exception >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/http/server_rotation_test.cj:148:1:
+    [36m| [0m
+[36m148[0m [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m149[0m [36m| [0m[33m|[0m class HttpServerRotationTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m410[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                      if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________^[0m
+    [36m| [0m[34m|[0m                         throw e[0m
+    [36m| [0m[34m|[0m                     }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+73 warnings generated, 73 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 756698339 ns, RESULT:
+    TCS: HttpServerRotationTest, time elapsed: 744614051 ns, RESULT:
+    [ PASSED ] CASE: invalidAndClosedUpdatesRollbackWhileUnreferencedUpdatesStayBounded (743344534 ns)
+Summary: TOTAL: 141
+    PASSED: 1, SKIPPED: 140, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 761650815 ns, RESULT:
+TP: wirestack.*, time elapsed: 761603395 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 756698339 ns
+Summary: TOTAL: 141
+    PASSED: 1, SKIPPED: 140, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
