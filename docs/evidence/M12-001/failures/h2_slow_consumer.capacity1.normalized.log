@@ -1,0 +1,11 @@
+An exception has occurred:
+HttpException: HTTP stream reset
+	 at wirestack.http::wrapHttpError(std.core::Exception)(<task-scratch>/http/wirestack/src/http/error.cj:145)
+	 at wirestack.http::wrapHttpBodyError(std.core::Exception)(<task-scratch>/http/wirestack/src/http/error.cj:0)
+	 at wirestack.http::HttpCancellationBodyStream::read(std.core::Array<...>)(<task-scratch>/http/wirestack/src/http/cancellation.cj:507)
+	 at wirestack::ResponseBody::read(std.core::Array<...>)(<task-scratch>/http/wirestack/src/http_message.cj:182)
+	 at wirestack.http::HttpCancellationBodyStream::read(std.core::Array<...>)(<task-scratch>/http/wirestack/src/http/cancellation.cj:506)
+	 at wirestack::ResponseBody::read(std.core::Array<...>)(<task-scratch>/http/wirestack/src/http_message.cj:182)
+	 at wirestack_m12_001::readPerf(wirestack::HttpResponse, std.core::Array<...>, Int64, Bool)(<task-scratch>/http/src/main.cj:168)
+	 at wirestack_m12_001::main(std.core::Array<...>)(<task-scratch>/http/src/main.cj:336)
+FAIL h2_slow_consumer phase=held flow stall produced=65536 requests=13 active=0 waiters=0 HttpException: HTTP stream reset

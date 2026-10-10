@@ -1,0 +1,14 @@
+An exception has occurred:
+NetworkException: operation deadline exceeded
+	 at wirestack.internal.transport_stdnet::deadlineExceeded(wirestack::NetworkErrorCategory, wirestack::NetworkPhase, std.core::Option<...>, wirestack::Retryability, std.core::Option<...>, std.core::Option<...>)(<task-scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:1222)
+	 at wirestack.internal.transport_stdnet::StdNetTransportListener::acceptConfigured(wirestack::OperationContext, (wirestack.internal.transport_stdnet::NativeOptionSocket, wirestack.internal.transport_stdnet::StdSocketOption, Bool) -> Unit)(<task-scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:0)
+	 at wirestack.internal.transport_stdnet::StdNetTransportListener::accept(wirestack::OperationContext)(<task-scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:934)
+	 at wirestack.internal.http1::Http1Server::serve(wirestack::OperationContext)(<task-scratch>/install/wirestack/src/internal/http1/server.cj:103)
+	 at wirestack.http::HttpServer::serve(wirestack::OperationContext)(<task-scratch>/install/wirestack/src/http/server.cj:545)
+An exception has occurred:
+NetworkException: operation deadline exceeded
+	 at wirestack.internal.transport_stdnet::deadlineExceeded(wirestack::NetworkErrorCategory, wirestack::NetworkPhase, std.core::Option<...>, wirestack::Retryability, std.core::Option<...>, std.core::Option<...>)(<task-scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:1222)
+	 at wirestack.internal.transport_stdnet::StdNetTransportListener::acceptConfigured(wirestack::OperationContext, (wirestack.internal.transport_stdnet::NativeOptionSocket, wirestack.internal.transport_stdnet::StdSocketOption, Bool) -> Unit)(<task-scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:0)
+	 at wirestack.internal.transport_stdnet::StdNetTransportListener::accept(wirestack::OperationContext)(<task-scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:934)
+	 at wirestack.internal.http1::Http1Server::serve(wirestack::OperationContext)(<task-scratch>/install/wirestack/src/internal/http1/server.cj:103)
+	 at wirestack.http::HttpServer::serve(wirestack::OperationContext)(<task-scratch>/install/wirestack/src/http/server.cj:545)

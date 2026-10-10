@@ -1,0 +1,19 @@
+{
+  "status": "RETAINED_ORIGINAL_FAILURES",
+  "production_changed": false,
+  "original_connection_capacity": 1,
+  "original_receive_reserve_bytes": 65535,
+  "corrected_connection_capacity": 2,
+  "corrected_receive_reserve_bytes": 131070,
+  "route_and_origin_connection_capacity": 1,
+  "required_actual_connections": 1,
+  "configured_managed_bytes": 16777216,
+  "configured_control_bytes": 65536,
+  "root_cause": "4096 consumed bytes restored protocol credit but retained a whole frame reservation; the full cap1 receive allocation refused sibling DATA. Private diagnostic instrumentation was removed before final build.",
+  "claims_excluded": [
+    "unchanged-boundary performance improvement",
+    "credit-race/library fix",
+    "passing fully-unread connection-window isolation",
+    "passing original cap1 partial-read isolation"
+  ]
+}
