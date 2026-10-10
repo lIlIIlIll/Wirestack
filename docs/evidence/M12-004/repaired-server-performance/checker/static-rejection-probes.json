@@ -1,0 +1,37 @@
+{
+  "scope": "REAL_FROZEN_INPUT_NEGATIVE_CONTROLS_ONLY_NOT_CAMPAIGN_ACCEPTANCE",
+  "probe_count": 4,
+  "rejected_count": 4,
+  "exit_code": 0,
+  "native_executions": 0,
+  "probes": [
+    {
+      "probe": "wrong-http-source",
+      "exit_code": 1,
+      "decision": "REJECTED",
+      "reason": "source binding drift: examples/linux/m12_001/http.cj",
+      "stderr": ""
+    },
+    {
+      "probe": "wrong-archive",
+      "exit_code": 1,
+      "decision": "REJECTED",
+      "reason": "archive binding drift: candidate.tar.gz",
+      "stderr": ""
+    },
+    {
+      "probe": "wrong-sdk392-oracle",
+      "exit_code": 1,
+      "decision": "REJECTED",
+      "reason": "external SDK oracle drift",
+      "stderr": ""
+    },
+    {
+      "probe": "wrong-thresholds",
+      "exit_code": 1,
+      "decision": "REJECTED",
+      "reason": "source binding drift: tools/gates/campaigns/m7-024-linux-performance.json",
+      "stderr": ""
+    }
+  ]
+}

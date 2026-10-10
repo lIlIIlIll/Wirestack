@@ -153,9 +153,9 @@ INPUTS = (
 )
 
 
-def require(condition: bool, message: str) -> None:
+def require(condition: bool, message: str, *, code: str = "RELEASE_INVALID") -> None:
     if not condition:
-        raise release.ReleaseError(message)
+        raise release.ReleaseError(message, code=code)
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -332,7 +332,7 @@ def run_fuzz() -> dict:
 def verify_fuzz() -> dict:
     result = release.load_json(FUZZ_REPORT)
     require(result.get("source_task") == TASK_ID and result.get("decision") == "PASS", "current fuzz evidence is absent")
-    require(result.get("final_release_inputs") == fuzz_inputs(), "fuzz qualification inputs changed")
+    require(result.get("final_release_inputs") == fuzz_inputs(), "fuzz qualification inputs changed", code="STALE_FUZZ_INPUTS")
     manifest, targets = fuzz.load_manifest(ROOT, ROOT / "tools/gates/campaigns/m7-023-linux-fuzz.json")
     require(result["manifest"] == "tools/gates/campaigns/m7-023-linux-fuzz.json" and
             digest.schema_text_sha256_equal(result["manifest_sha256"], digest.text_evidence_sha256(ROOT / result["manifest"])), "fuzz manifest changed")

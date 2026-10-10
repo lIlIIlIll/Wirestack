@@ -1,0 +1,30 @@
+
+$HOME/.cache/agent-tmp/wirestack-m12-004-latch-fix.u5uzGu/native/baseline-http/target/release/bin/main:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .plt.got:
+
+Disassembly of section .text:
+
+0000000000a91760 <main>:
+  a91760:	55                   	push   %rbp
+  a91761:	48 89 e5             	mov    %rsp,%rbp
+  a91764:	41 56                	push   %r14
+  a91766:	53                   	push   %rbx
+  a91767:	49 89 f6             	mov    %rsi,%r14
+  a9176a:	89 fb                	mov    %edi,%ebx
+  a9176c:	e8 5f 26 7c ff       	call   253dd0 <CJ_MRT_CjRuntimeInit@plt>
+  a91771:	89 df                	mov    %ebx,%edi
+  a91773:	4c 89 f6             	mov    %r14,%rsi
+  a91776:	e8 95 1e 7c ff       	call   253610 <CJ_MRT_SetCommandLineArgs@plt>
+  a9177b:	48 8d 3d 12 00 00 00 	lea    0x12(%rip),%rdi        # a91794 <cj_entry$>
+  a91782:	5b                   	pop    %rbx
+  a91783:	41 5e                	pop    %r14
+  a91785:	5d                   	pop    %rbp
+  a91786:	e9 e5 1e 7c ff       	jmp    253670 <CJ_MRT_CjRuntimeStart@plt>
+
+Disassembly of section .fini:

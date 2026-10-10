@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-ast.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000001b49f8 <_init@@Base>:
+  1b49f8:	sub    $0x8,%rsp
+  1b49fc:	mov    0x1aaa395(%rip),%rax        # 1c5ed98 <__gmon_start__>
+  1b4a03:	test   %rax,%rax
+  1b4a06:	je     1b4a0a <_init@@Base+0x12>
+  1b4a08:	call   *%rax
+  1b4a0a:	add    $0x8,%rsp
+  1b4a0e:	ret
+
+Disassembly of section .plt:
+
+00000000001b4a10 <_ZNSt6vectorIN7Cangjie12SubstitutionESaIS1_EE17_M_realloc_insertIJRNS0_5RangeERNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEEEvN9__gnu_cxx17__normal_iteratorIPS1_S3_EEDpOT_@plt-0x10>:
+  1b4a10:	push   0x1aaa5f2(%rip)        # 1c5f008 <_ZTIPFbRN7Cangjie13GlobalOptionsERKNS_17OptionArgInstanceEE@@Base+0x3130>
+  1b4a16:	jmp    *0x1aaa5f4(%rip)        # 1c5f010 <_ZTIPFbRN7Cangjie13GlobalOptionsERKNS_17OptionArgInstanceEE@@Base+0x3138>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "89a765bf75de1d723a528a07257b525fa3aaf466cc86ac34cc8ec73bcadb131d"}

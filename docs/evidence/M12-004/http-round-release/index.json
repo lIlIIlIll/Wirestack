@@ -1,0 +1,1028 @@
+{
+  "schema_version": 1,
+  "scope": "SERVER_STS_ONLY_HTTP_ROUND_RELEASE_CORRECTNESS_NOT_PERFORMANCE_ACCEPTANCE",
+  "files": {
+    "native/report.json": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "27c85ed2085b15ec4f3b989d643fb94f47c074db30e354ec1b00616ade126341"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "27c85ed2085b15ec4f3b989d643fb94f47c074db30e354ec1b00616ade126341"
+      },
+      "size_bytes": 263207,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-build.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "size_bytes": 19,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-build.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "9f259d709754f2e5b9a654cea445add140ec5a1e57d9cbbb3e7c0ce23a46c8ec"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4ded8ed8860d5016d05d2465624a77dd8beec8c0112c652a00164b01de96e7ec"
+      },
+      "size_bytes": 16838,
+      "normalization_changed_bytes": true
+    },
+    "native/baseline-main-disassembly-0.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e29a58dd82277ea216e62339c8ffe98b7c81fe4837f94d4d3332b167f6ab67a4"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7cfc6eed2beadd4330aec7909175fb689b5d6a7d8a56e831e8c9a50adf71b1aa"
+      },
+      "size_bytes": 1135,
+      "normalization_changed_bytes": true
+    },
+    "native/baseline-main-disassembly-0.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-build.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "size_bytes": 19,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-build.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8a1c79facddccbecb51af01b29d0b32fdce9c2c7bdbd4bb0554e19a96be6002e"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "34e3554c1263eb513d8122e0f5484e6392776b4ea90601ffa2b0e888c8f685e3"
+      },
+      "size_bytes": 16865,
+      "normalization_changed_bytes": true
+    },
+    "native/candidate-main-disassembly-0.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "7d5831e7debb6edaab4fcfdea8294ae0dfe3d96b52d498431f3e3e5dd7d4e2d2"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0ef57d7954612c3b91801026503a1b15f85aced09063234eb008589db42e7f5f"
+      },
+      "size_bytes": 1136,
+      "normalization_changed_bytes": true
+    },
+    "native/candidate-main-disassembly-0.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/certificate.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/certificate.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ebc544df9d83cc408345b5c408876ef4f983df0c19c54a75bd29310ebd5e5489"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ebc544df9d83cc408345b5c408876ef4f983df0c19c54a75bd29310ebd5e5489"
+      },
+      "size_bytes": 1724,
+      "normalization_changed_bytes": false
+    },
+    "native/certificate-der.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/certificate-der.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/key-der.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/key-der.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_short_reuse.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e5d41c6e25b390f11bcffe9d9cb6a5d06b88b87a8338628b625744cd661ea7f7"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e5d41c6e25b390f11bcffe9d9cb6a5d06b88b87a8338628b625744cd661ea7f7"
+      },
+      "size_bytes": 2440,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_short_reuse.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_new_connection.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8ceb9e9d28a508debb39628ee92e6e6d288fd81cd396b2f73485027091cbe7e3"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8ceb9e9d28a508debb39628ee92e6e6d288fd81cd396b2f73485027091cbe7e3"
+      },
+      "size_bytes": 2444,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_new_connection.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_bulk_4096.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "a98d4406d9ef3e9e3a19b03f633f6c81bfd938fbc38ed7ef221ee20298391337"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a98d4406d9ef3e9e3a19b03f633f6c81bfd938fbc38ed7ef221ee20298391337"
+      },
+      "size_bytes": 849,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_bulk_4096.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_bulk_32768.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "7580eefc36f235edeef0d7775015a089ff706a49c2876be7db1bace933d2d67a"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7580eefc36f235edeef0d7775015a089ff706a49c2876be7db1bace933d2d67a"
+      },
+      "size_bytes": 852,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_bulk_32768.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_concurrent.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "4f695423e4aae39ecfcb4f15c528356a72a66403846fdc52d6f6a014bd26fcf1"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4f695423e4aae39ecfcb4f15c528356a72a66403846fdc52d6f6a014bd26fcf1"
+      },
+      "size_bytes": 1724,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_concurrent.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_early_close.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "81ec0449f1a5ed4fbcacbeaaad0c0045716e43738f23e94f60c319fde0c55ed2"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "81ec0449f1a5ed4fbcacbeaaad0c0045716e43738f23e94f60c319fde0c55ed2"
+      },
+      "size_bytes": 2438,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h1_early_close.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_streams_1.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "0fb97f0eabc113c394a8b2fd3b83ac024b985e4c8682add6a61d2f7804ccbf35"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0fb97f0eabc113c394a8b2fd3b83ac024b985e4c8682add6a61d2f7804ccbf35"
+      },
+      "size_bytes": 2544,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_streams_1.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_streams_10.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8ccfd6ee26c2a9bcc41479ed6f8f18fabca6a0838b8c4b122512caae492f31f1"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8ccfd6ee26c2a9bcc41479ed6f8f18fabca6a0838b8c4b122512caae492f31f1"
+      },
+      "size_bytes": 1769,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_streams_10.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_streams_100.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "608a6deb805f9eb95289456c0575302dd1761149b5800c80f9bc2b70567193b2"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "608a6deb805f9eb95289456c0575302dd1761149b5800c80f9bc2b70567193b2"
+      },
+      "size_bytes": 10051,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_streams_100.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_slow_consumer.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "9456a9f4343039ed075e7017259b156a4c41153c210cd6be615030a474ece186"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9456a9f4343039ed075e7017259b156a4c41153c210cd6be615030a474ece186"
+      },
+      "size_bytes": 1166,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_slow_consumer.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_stream_cancel.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "18cc087a79360809b34d9f6e8c889b7239f8d8193ed3b1812bf5f2ff907bb831"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "18cc087a79360809b34d9f6e8c889b7239f8d8193ed3b1812bf5f2ff907bb831"
+      },
+      "size_bytes": 992,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-h2_stream_cancel.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-http_overload.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "1897101b7b524d324be3cbecc5f6a623d4559cd2846ec62b40524bb43bc50379"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1897101b7b524d324be3cbecc5f6a623d4559cd2846ec62b40524bb43bc50379"
+      },
+      "size_bytes": 1325,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-http_overload.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-http_observed.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "370c255c32174458861b7560152a9db92be019fcdd5a37b32bbcd5abc57e3ae3"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "370c255c32174458861b7560152a9db92be019fcdd5a37b32bbcd5abc57e3ae3"
+      },
+      "size_bytes": 2820,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-http_observed.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-http_unobserved.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "32452886fc069ecfda5292c5786b33b2715eecfb4e8562000279be983cb51266"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "32452886fc069ecfda5292c5786b33b2715eecfb4e8562000279be983cb51266"
+      },
+      "size_bytes": 2439,
+      "normalization_changed_bytes": false
+    },
+    "native/baseline-http_unobserved.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_short_reuse.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "413e4f83b46299edfee7d8e179c9aa7567240b03fb6e10c881d25b67b573a1e8"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "413e4f83b46299edfee7d8e179c9aa7567240b03fb6e10c881d25b67b573a1e8"
+      },
+      "size_bytes": 2440,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_short_reuse.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_new_connection.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "a4dd5bad7ed6c132ea2f3c51907beabf3685a79f96b2dc0a32ba041f9fda0ea0"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a4dd5bad7ed6c132ea2f3c51907beabf3685a79f96b2dc0a32ba041f9fda0ea0"
+      },
+      "size_bytes": 2444,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_new_connection.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_bulk_4096.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "81a8b5fd767b510edc32d2d3b9cc542e432923275a8200b24650924104fcd042"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "81a8b5fd767b510edc32d2d3b9cc542e432923275a8200b24650924104fcd042"
+      },
+      "size_bytes": 849,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_bulk_4096.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_bulk_32768.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "abcd74849a72a4c300a028aa3d526426402cb4d138a808825e169d9fd3102402"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "abcd74849a72a4c300a028aa3d526426402cb4d138a808825e169d9fd3102402"
+      },
+      "size_bytes": 852,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_bulk_32768.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_concurrent.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "9c0273cf58546a0f8518b6971822398b8ded1fd6340cef0e55533735ea1cbd0b"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9c0273cf58546a0f8518b6971822398b8ded1fd6340cef0e55533735ea1cbd0b"
+      },
+      "size_bytes": 1720,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_concurrent.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_early_close.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "91e312f7d951318019ca4fab943f08bc0a0ed231445c67112972410c0bb1a52f"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "91e312f7d951318019ca4fab943f08bc0a0ed231445c67112972410c0bb1a52f"
+      },
+      "size_bytes": 2438,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h1_early_close.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_streams_1.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ab4a213b6b165788bbe430bfbc68b638835b7c049ec2c5a9a895fe686275f8d3"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ab4a213b6b165788bbe430bfbc68b638835b7c049ec2c5a9a895fe686275f8d3"
+      },
+      "size_bytes": 2544,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_streams_1.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_streams_10.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "c82b7d6a152fb56f3ca104fee22edccfe6f3c9f59ce7554c5aae4ae63a446980"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c82b7d6a152fb56f3ca104fee22edccfe6f3c9f59ce7554c5aae4ae63a446980"
+      },
+      "size_bytes": 1760,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_streams_10.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_streams_100.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "6df81c6b22fffb124c518e3e31f864541fd6be0ffda4d8cbcecba72c09ec8ef0"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6df81c6b22fffb124c518e3e31f864541fd6be0ffda4d8cbcecba72c09ec8ef0"
+      },
+      "size_bytes": 9962,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_streams_100.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_slow_consumer.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "af84767d1f6f434d78942831af0fcb3f09a03d3e50d1fada805ec8c299d77af3"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "af84767d1f6f434d78942831af0fcb3f09a03d3e50d1fada805ec8c299d77af3"
+      },
+      "size_bytes": 1166,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_slow_consumer.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_stream_cancel.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "106298bb8e9d29bc6abfb841d0b5b3bb1228dbac1245c0f87ef65011f25934a1"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "106298bb8e9d29bc6abfb841d0b5b3bb1228dbac1245c0f87ef65011f25934a1"
+      },
+      "size_bytes": 992,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-h2_stream_cancel.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-http_overload.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bf5e830ea4401f61b1a762dbbba919aa49b841d4201dae358700094916ee677a"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bf5e830ea4401f61b1a762dbbba919aa49b841d4201dae358700094916ee677a"
+      },
+      "size_bytes": 1325,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-http_overload.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-http_observed.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "d935282c65ae82d1855ec5897f8916277befdca0b3e214c3760977d45e46ddc0"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d935282c65ae82d1855ec5897f8916277befdca0b3e214c3760977d45e46ddc0"
+      },
+      "size_bytes": 2855,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-http_observed.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-http_unobserved.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "1eeef268c6b9de27937667b4b46c4c6a6dbc6a63fd360ef3e105e992d3b746f4"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1eeef268c6b9de27937667b4b46c4c6a6dbc6a63fd360ef3e105e992d3b746f4"
+      },
+      "size_bytes": 2439,
+      "normalization_changed_bytes": false
+    },
+    "native/candidate-http_unobserved.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "environment/178889704591269-namespace.json": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "30f04f140e71ee6a35a2e1e52007e5b9c9892dbc4b9073f427e8fbb7f9626d1e"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "30f04f140e71ee6a35a2e1e52007e5b9c9892dbc4b9073f427e8fbb7f9626d1e"
+      },
+      "size_bytes": 78480,
+      "normalization_changed_bytes": false
+    },
+    "checker/check.py": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "1db014c378eb3253c1dde330d1e3365bbddd175f4a199850d5868445a709737e"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1db014c378eb3253c1dde330d1e3365bbddd175f4a199850d5868445a709737e"
+      },
+      "size_bytes": 14853,
+      "normalization_changed_bytes": false
+    },
+    "checker/verification.json": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e19de831f8b6eacdd36dbdfcbb7720662ecc87c4615d55cd945a2cc68386174a"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e19de831f8b6eacdd36dbdfcbb7720662ecc87c4615d55cd945a2cc68386174a"
+      },
+      "size_bytes": 5102,
+      "normalization_changed_bytes": false
+    },
+    "checker/contract-adjustment.json": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b18ff67924c41b02f9ecd30c8ecc9e28be646cbeea1c8a17282b16552c9aeb02"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b18ff67924c41b02f9ecd30c8ecc9e28be646cbeea1c8a17282b16552c9aeb02"
+      },
+      "size_bytes": 1106,
+      "normalization_changed_bytes": false
+    },
+    "host-tests.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "size_bytes": 0,
+      "normalization_changed_bytes": false
+    },
+    "host-tests.stderr": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "4e935cbc9e74494fdae07b999dc36bb8b99e6bd836e051c803d47e776da7a943"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4e935cbc9e74494fdae07b999dc36bb8b99e6bd836e051c803d47e776da7a943"
+      },
+      "size_bytes": 128,
+      "normalization_changed_bytes": false
+    },
+    "originals-after.json": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8107caef003491f1c2463992676b991e06b6a9f8dc206c74fd93573eb63c49e3"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8107caef003491f1c2463992676b991e06b6a9f8dc206c74fd93573eb63c49e3"
+      },
+      "size_bytes": 1063,
+      "normalization_changed_bytes": false
+    },
+    "bootstrap.py": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "6be95ea811a9bc4774333aa722f24ca52e516e0c301207a9f61ebbaacdef69f1"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6be95ea811a9bc4774333aa722f24ca52e516e0c301207a9f61ebbaacdef69f1"
+      },
+      "size_bytes": 2536,
+      "normalization_changed_bytes": false
+    },
+    "check-originals.py": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e117179840746f5377eea51e0816543afbc2685de31d338b8907fc9e703565b2"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e117179840746f5377eea51e0816543afbc2685de31d338b8907fc9e703565b2"
+      },
+      "size_bytes": 2860,
+      "normalization_changed_bytes": false
+    },
+    "native/native_driver.py": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e8c51d79f6ce2da9b4218c9fc73fd49eb658d974301af4bf87db957746f8e585"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e8c51d79f6ce2da9b4218c9fc73fd49eb658d974301af4bf87db957746f8e585"
+      },
+      "size_bytes": 10074,
+      "normalization_changed_bytes": false
+    },
+    "before/diagnosis.json": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "475417cdf11e8eb90ca39580a31706034d30318a85a2901775295b46a8dc4224"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "475417cdf11e8eb90ca39580a31706034d30318a85a2901775295b46a8dc4224"
+      },
+      "size_bytes": 92818,
+      "normalization_changed_bytes": false
+    },
+    "before/constructor-observed.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f52e2758435e5aab44cdb1bf11ecdc253398895c874f7fd3659ec365dc7d9099"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "52f55b5f648f98d1b5188638ec5c344bce76b851b397d998195a6494832b4cc0"
+      },
+      "size_bytes": 1134,
+      "normalization_changed_bytes": true
+    },
+    "before/constructor-corrected.stdout": {
+      "captured_artifact_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "0c8dc8d3b9fc17e669c81ab87734a32501a9382e2958b34ca4ed135cf601fe7b"
+      },
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "aa9d6919e92af6226ee6686bc27ce73ba8cdb49ab2c2d37cab4e855facde66ef"
+      },
+      "size_bytes": 21478,
+      "normalization_changed_bytes": true
+    },
+    "workspace.json": {
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "68acb561d3da807c4df66703d3d3c7acdbe68b0fed6f5ed7b0f4adaabe72ab84"
+      },
+      "size_bytes": 25624
+    },
+    "summary.json": {
+      "published_text_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9789fd60c8baf0627b79a00199aa681932ea4baf070c5c92f6eb0e967f2d4058"
+      },
+      "size_bytes": 4006
+    }
+  }
+}

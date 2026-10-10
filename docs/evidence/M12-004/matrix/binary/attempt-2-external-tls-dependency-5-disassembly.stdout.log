@@ -1,0 +1,21 @@
+
+/usr/lib/libzstd.so.1.5.7:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000000c000 <.init>:
+    c000:	endbr64
+    c004:	sub    $0x8,%rsp
+    c008:	mov    0xd8a89(%rip),%rax        # e4a98 <__gmon_start__>
+    c00f:	test   %rax,%rax
+    c012:	je     c016 <FSE_versionNumber@@Base-0x1daa>
+    c014:	call   *%rax
+    c016:	add    $0x8,%rsp
+    c01a:	ret
+
+Disassembly of section .text:
+
+000000000000c040 <FSE_versionNumber@@Base-0x1d80>:
+    c040:	mov    %r13,0x20
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "f9071beb33e61180d0d7c3c4713b0e8b2db056c515a7ee7d5893b8c5fa50f87d"}

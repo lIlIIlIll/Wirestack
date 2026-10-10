@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-interop.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000002158 <_init@@Base>:
+    2158:	sub    $0x8,%rsp
+    215c:	mov    0x200e75(%rip),%rax        # 202fd8 <__gmon_start__>
+    2163:	test   %rax,%rax
+    2166:	je     216a <_init@@Base+0x12>
+    2168:	call   *%rax
+    216a:	add    $0x8,%rsp
+    216e:	ret
+
+Disassembly of section .plt:
+
+0000000000002170 <_CGP11std.interopifHv@plt-0x10>:
+    2170:	push   0x200e92(%rip)        # 203008 <_fini@@Base+0x200774>
+    2176:	jmp    *0x200e94(%rip)        # 203010 <_fini@@Base+0x20077c>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "3df8208fce5b145adb2bbaeecd6fa0730e49a7db4e7447bd5fe378e6d6b7c788"}

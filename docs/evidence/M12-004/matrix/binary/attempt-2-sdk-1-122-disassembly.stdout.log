@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-trace.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000011e8 <_init@@Base>:
+    11e8:	sub    $0x8,%rsp
+    11ec:	mov    0x203dc5(%rip),%rax        # 204fb8 <__gmon_start__>
+    11f3:	test   %rax,%rax
+    11f6:	je     11fa <_init@@Base+0x12>
+    11f8:	call   *%rax
+    11fa:	add    $0x8,%rsp
+    11fe:	ret
+
+Disassembly of section .plt:
+
+0000000000001200 <TraceDumpFooter@plt-0x10>:
+    1200:	push   0x203c8a(%rip)        # 204e90 <_fini@@Base+0x20177c>
+    1206:	jmp    *0x203c8c(%rip)        # 204e98 <_fini@@Base+0x201784>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "be01bc53c192f336feddc4cc62244e597db55baad640b7748ec3b781cbaad8b8"}

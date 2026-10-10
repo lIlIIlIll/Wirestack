@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "family": "candidate-gates",
+  "status": "INTERRUPTED",
+  "qualification": "NOT_QUALIFIED",
+  "report": "docs/evidence/M12-004/candidate-gates/report.json",
+  "archive": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "82d0047047e4341ba284e4b6e60d44179e75ea311bab4e3f4b8e16fa3e1bae5b"
+  },
+  "reason": "Tool worker deadline interrupted the initial campaign. The recorded TLS build failure was a consumer package-name mismatch, corrected in the driver. Fuzz build diagnostics remained in private scratch. Later complete attempts retain their own evidence directories."
+}

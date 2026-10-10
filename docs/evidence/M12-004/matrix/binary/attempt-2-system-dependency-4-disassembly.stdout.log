@@ -1,0 +1,21 @@
+
+/usr/lib/libgcc_s.so.1:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000004000 <.init>:
+    4000:	endbr64
+    4004:	sub    $0x8,%rsp
+    4008:	mov    0x27f01(%rip),%rax        # 2bf10 <__gmon_start__>
+    400f:	test   %rax,%rax
+    4012:	je     4016 <GCC_12.0.0@@GCC_12.0.0+0x4016>
+    4014:	call   *%rax
+    4016:	add    $0x8,%rsp
+    401a:	ret
+
+Disassembly of section .text:
+
+0000000000004040 <__cpu_indicator_init@GCC_4.8.0-0x290>:
+    4040:	push   %rbp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "44fab8fcb7e1bf17e8af1102c4176d429b59ad0cd35b5ef452f6281ca4ad2690"}

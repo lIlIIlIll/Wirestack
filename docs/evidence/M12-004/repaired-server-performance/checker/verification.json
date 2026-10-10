@@ -1,0 +1,3951 @@
+{
+  "binding_integrity": {
+    "adapter_review": "cjpm only child mount checkout masking; frozen measurement function; fresh exec after readonly14 libc files; no production modification",
+    "archive_manifest_payloads": "PASS",
+    "bindings": "PASS",
+    "consumer_binaries_before_after": "PASS",
+    "namespace_limits": "PRIVATE_GLIBC244_UNPRIVILEGED_HOST_UID_NONEXCLUSIVE_8CORE_NUMA0",
+    "performance_gate_source_ast": "UNCHANGED",
+    "sdk_files_checked": 392
+  },
+  "bootstrap_prerequisite_verification": {
+    "bundle_declared_modes": {
+      "ld-linux-x86-64.so.2": 493,
+      "libBrokenLocale.so.1": 420,
+      "libanl.so.1": 420,
+      "libc.so.6": 420,
+      "libdl.so.2": 420,
+      "libm.so.6": 420,
+      "libmvec.so.1": 420,
+      "libnss_compat.so.2": 420,
+      "libnss_dns.so.2": 420,
+      "libnss_files.so.2": 420,
+      "libpthread.so.0": 420,
+      "libresolv.so.2": 420,
+      "librt.so.1": 420,
+      "libutil.so.1": 420
+    },
+    "failure_phase": "PREEXEC_ISOLATION",
+    "first_exec_viability": "FAIL",
+    "launch_stderr_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "94c69aa342df65e921ab51cf8541a4628ecbced6ed4c73864cf16c7bc896cee8"
+    },
+    "launcher_exit_code": 1,
+    "native_campaigns_authorized": 1,
+    "native_observer_exit_code": -15,
+    "private_effective_modes": {
+      "ld-linux-x86-64.so.2": 448,
+      "libBrokenLocale.so.1": 384,
+      "libanl.so.1": 384,
+      "libc.so.6": 384,
+      "libdl.so.2": 384,
+      "libm.so.6": 384,
+      "libmvec.so.1": 384,
+      "libnss_compat.so.2": 384,
+      "libnss_dns.so.2": 384,
+      "libnss_files.so.2": 384,
+      "libpthread.so.0": 384,
+      "libresolv.so.2": 384,
+      "librt.so.1": 384,
+      "libutil.so.1": 384
+    },
+    "private_extraction_umask": "077",
+    "recovered_loader_owner_execute": true,
+    "recovery_authorization": "MAIN_AUTHORIZED_METADATA_ONLY_RECOVERY",
+    "report_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2f608e9c1f61bea80bd07a09b24b7a63dc78e8050582a35f27084aa14562215e"
+    },
+    "sdk_byte_binding": "PASS_FULL392",
+    "sdk_native_executions_in_prerequisite": 0,
+    "technical_verification": "PASS"
+  },
+  "errors": {},
+  "exit_code": 0,
+  "extended_integrity": {
+    "compiled_consumers_unchanged": true,
+    "controller_fresh_loaded_libc_loader": "PASS",
+    "host_glibc_unchanged_from_prior": true,
+    "no_retry_no_discard": "PASS",
+    "status": "PASS"
+  },
+  "formal_m7_024": "NOT_RUN",
+  "formal_soak_86400": "NOT_RUN",
+  "full_campaign_reconstruction": {
+    "cases": 33,
+    "classifiers": {
+      "h1_bulk_32768": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "h1_bulk_4096": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "h1_concurrent": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h1_early_close": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h1_new_connection": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h1_short_reuse": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h2_slow_consumer": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h2_stream_cancel": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h2_streams_1": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h2_streams_10": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "h2_streams_100": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "http_observed": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "http_overload": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "http_unobserved": {
+        "relative_changes": {
+          "p95": -0.013371515669384104,
+          "p99": -0.018734326078477026,
+          "throughput_loss": -0.01260445078058714
+        },
+        "relative_regression_limit": 0.05248638630153851,
+        "status": "PASS"
+      },
+      "sse_cancel": {
+        "relative_changes": {
+          "p95": 0.0015865304325382024,
+          "p99": -0.003412645517119728,
+          "throughput_loss": -0.000703445711757178
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "sse_h1": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "sse_h2": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "sse_slow": {
+        "relative_changes": {
+          "p95": -0.00027492636409887083,
+          "p99": -0.0006609092108675885,
+          "throughput_loss": 0.005725517336533481
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "tcp_bulk": {
+        "relative_changes": {
+          "p95": -0.017068410582749882,
+          "p99": -0.010106227338723128,
+          "throughput_loss": -0.014721967214482268
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "tcp_cancel": {
+        "relative_changes": {
+          "p95": -0.0008821410460567725,
+          "p99": -0.001519493580623088
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "tcp_partial": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "tls_bulk": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "tls_close": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "tls_failure": {
+        "relative_changes": {
+          "p95": -0.00034733447659551775,
+          "p99": 8.433599725155005e-05
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "tls_full": {
+        "relative_changes": {
+          "p95": -0.005698727920639968,
+          "p99": -0.0058243393198470494,
+          "throughput_loss": -0.010283382841361766
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "tls_resumed": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "tls_small": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "udp_packets": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "websocket_disconnect": {
+        "relative_changes": {
+          "p95": -0.0016034538386519026,
+          "p99": 0.004259635676019835,
+          "throughput_loss": 0.0009056560380539258
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      },
+      "websocket_fragmented": {
+        "reason": "baseline cannot support a stable performance gate",
+        "status": "NOISY"
+      },
+      "websocket_h1": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "websocket_h2": {
+        "reason": "candidate dispersion exceeds the frozen noise ceiling",
+        "status": "NOISY"
+      },
+      "websocket_slow": {
+        "relative_changes": {
+          "p95": -0.00014603371202970283,
+          "p99": -0.0006790362574660147,
+          "throughput_loss": -0.0002518104259223719
+        },
+        "relative_regression_limit": 0.05,
+        "status": "PASS"
+      }
+    },
+    "measured_rounds_per_leg": 7,
+    "native_commands": 528,
+    "performance_status": "NOISY",
+    "summaries": {
+      "baseline": {
+        "h1_bulk_32768": {
+          "contract": {
+            "bytes": 8388608,
+            "checksum": 813694976,
+            "expected_rejections": 0,
+            "operations": 1,
+            "successes": 1
+          },
+          "duration_ns_samples": [
+            492377741.0,
+            493573344.0,
+            493781290.0,
+            492696000.0,
+            494315082.0,
+            497937952.0,
+            492343476.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7,
+          "operations": 7,
+          "p50_ns": 493532390.0,
+          "p95_ns": 497881053.0,
+          "p99_ns": 497881053.0,
+          "p99_ns_samples": [
+            492321404.0,
+            493532390.0,
+            493726207.0,
+            492636167.0,
+            494274267.0,
+            497881053.0,
+            492302011.0
+          ],
+          "rate_samples": [
+            2.0309610218549663,
+            2.0260413414870313,
+            2.0251881151673445,
+            2.0296491142611264,
+            2.023001191778324,
+            2.0082823492032196,
+            2.031102368054939
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0026353737093225194,
+            "p99": 0.002692306010148594,
+            "successful_operations_per_second": 0.002640066520531855
+          },
+          "rounds": 7,
+          "successes": 7,
+          "successful_bytes_per_second": 16995666.605528843,
+          "successful_operations_per_second": 2.0260413414870313,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_bulk_4096": {
+          "contract": {
+            "bytes": 8388608,
+            "checksum": 813694976,
+            "expected_rejections": 0,
+            "operations": 1,
+            "successes": 1
+          },
+          "duration_ns_samples": [
+            40656113.0,
+            39996476.0,
+            40235411.0,
+            26824747.0,
+            39957647.0,
+            40366558.0,
+            40256844.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7,
+          "operations": 7,
+          "p50_ns": 40178636.0,
+          "p95_ns": 40609010.0,
+          "p99_ns": 40609010.0,
+          "p99_ns_samples": [
+            40609010.0,
+            39959980.0,
+            40178636.0,
+            26781470.0,
+            39917510.0,
+            40323281.0,
+            40210052.0
+          ],
+          "rate_samples": [
+            24.596547141631568,
+            25.002202694057345,
+            24.8537289702347,
+            37.27900956530923,
+            25.026498682467462,
+            24.772981634946433,
+            24.840496686724872
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.00880430998952639,
+            "p99": 0.008068451741368223,
+            "successful_operations_per_second": 0.00885690606842458
+          },
+          "rounds": 7,
+          "successes": 7,
+          "successful_bytes_per_second": 208488189.66954258,
+          "successful_operations_per_second": 24.8537289702347,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_concurrent": {
+          "contract": {
+            "bytes": 700,
+            "checksum": 74600,
+            "expected_rejections": 0,
+            "operations": 100,
+            "successes": 100
+          },
+          "duration_ns_samples": [
+            217427850.0,
+            199411591.0,
+            187637216.0,
+            198990164.0,
+            207018086.0,
+            208782263.0,
+            198942175.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 700,
+          "operations": 700,
+          "p50_ns": 14658859.0,
+          "p95_ns": 25278827.0,
+          "p99_ns": 26745224.0,
+          "p99_ns_samples": [
+            26038382.0,
+            25135624.0,
+            24978641.0,
+            24777481.0,
+            25907841.0,
+            27345568.0,
+            25888954.0
+          ],
+          "rate_samples": [
+            459.9226823978621,
+            501.4753630845862,
+            532.9433154667995,
+            502.53740179841253,
+            483.0495824408308,
+            478.96789010281014,
+            502.6586242962308
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0565533298763962,
+            "p99": 0.04314145167858076,
+            "successful_operations_per_second": 0.05447538282717963
+          },
+          "rounds": 7,
+          "successes": 700,
+          "successful_bytes_per_second": 3510.3275415921034,
+          "successful_operations_per_second": 501.4753630845862,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_early_close": {
+          "contract": {
+            "bytes": 200,
+            "checksum": 19400,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            507561659.0,
+            442263757.0,
+            509803699.0,
+            505621438.0,
+            507167932.0,
+            512015142.0,
+            507662740.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 2465075.0,
+          "p95_ns": 2648288.0,
+          "p99_ns": 3043727.0,
+          "p99_ns_samples": [
+            3224404.0,
+            2689323.0,
+            2930709.0,
+            2963286.0,
+            2894438.0,
+            3043727.0,
+            2964944.0
+          ],
+          "rate_samples": [
+            394.04079574103525,
+            452.2188328445824,
+            392.3078635802523,
+            395.55284837428115,
+            394.34669934927985,
+            390.61344791244477,
+            393.96233806719795
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.005667432918923452,
+            "p99": 0.03444623461927063,
+            "successful_operations_per_second": 0.005689180557648832
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 394.04079574103525,
+          "successful_operations_per_second": 394.04079574103525,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_new_connection": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            511878949.0,
+            512072952.0,
+            512137454.0,
+            511895146.0,
+            514429799.0,
+            513056564.0,
+            511746508.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 2520686.0,
+          "p95_ns": 2681043.0,
+          "p99_ns": 2983468.0,
+          "p99_ns_samples": [
+            2870715.0,
+            2957474.0,
+            3069599.0,
+            3085077.0,
+            2960408.0,
+            2844868.0,
+            2883004.0
+          ],
+          "rate_samples": [
+            390.7173764240889,
+            390.5693499702753,
+            390.52015906651496,
+            390.70501363964877,
+            388.7799664575807,
+            389.8205656715855,
+            390.8184948474529
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0005616950605897262,
+            "p99": 0.043492823064547645,
+            "successful_operations_per_second": 0.0005619079439816401
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 2733.9854497919273,
+          "successful_operations_per_second": 390.5693499702753,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_short_reuse": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            313001660.0,
+            312763220.0,
+            310053796.0,
+            309960184.0,
+            314917166.0,
+            307711934.0,
+            307427989.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1549506.0,
+          "p95_ns": 1642651.0,
+          "p99_ns": 1754756.0,
+          "p99_ns_samples": [
+            1713144.0,
+            1805561.0,
+            1689451.0,
+            1692218.0,
+            1754756.0,
+            1659893.0,
+            1657176.0
+          ],
+          "rate_samples": [
+            638.9742469736423,
+            639.4613791225196,
+            645.0493513712697,
+            645.2441646505152,
+            635.0876407924997,
+            649.9585420694149,
+            650.5588533124744
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.012555954832431724,
+            "p99": 0.02832084577755348,
+            "successful_operations_per_second": 0.012663197878837353
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 4515.345459598889,
+          "successful_operations_per_second": 645.0493513712697,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_slow_consumer": {
+          "contract": {
+            "bytes": 8388685,
+            "checksum": 813703182,
+            "expected_rejections": 0,
+            "operations": 13,
+            "successes": 13
+          },
+          "duration_ns_samples": [
+            5889139149.0,
+            5540842480.0,
+            5324108213.0,
+            5644684416.0,
+            4416139323.0,
+            6029575712.0,
+            5064764236.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 91,
+          "operations": 91,
+          "p50_ns": 2866221.0,
+          "p95_ns": 5317728718.0,
+          "p99_ns": 6022776061.0,
+          "p99_ns_samples": [
+            5883013123.0,
+            5534121913.0,
+            5317728718.0,
+            5639769053.0,
+            4412580759.0,
+            6022776061.0,
+            5057793661.0
+          ],
+          "rate_samples": [
+            2.207453359665895,
+            2.3462136032425165,
+            2.441723473662236,
+            2.303051692872532,
+            2.9437477056699284,
+            2.156038935563498,
+            2.566753237514371
+          ],
+          "regime": "slow",
+          "robust_relative_noise": {
+            "duration": 0.09319605156135029,
+            "p99": 0.09346850612938422,
+            "successful_operations_per_second": 0.0876842316668787
+          },
+          "rounds": 7,
+          "successes": 91,
+          "successful_bytes_per_second": 1513972.8354089574,
+          "successful_operations_per_second": 2.3462136032425165,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_stream_cancel": {
+          "contract": {
+            "bytes": 14,
+            "checksum": 1492,
+            "expected_rejections": 1,
+            "operations": 3,
+            "successes": 2
+          },
+          "duration_ns_samples": [
+            62018097.0,
+            62779057.0,
+            65849871.0,
+            65044478.0,
+            65974295.0,
+            63718829.0,
+            64378804.0
+          ],
+          "expected_rejections": 7,
+          "latency_samples": 21,
+          "operations": 21,
+          "p50_ns": 3072904.0,
+          "p95_ns": 62679698.0,
+          "p99_ns": 62981980.0,
+          "p99_ns_samples": [
+            58983643.0,
+            59913125.0,
+            62679698.0,
+            62165533.0,
+            62981980.0,
+            60785663.0,
+            61319168.0
+          ],
+          "rate_samples": [
+            32.24865155085297,
+            31.857757914394924,
+            30.372117205818064,
+            30.748190492050686,
+            30.314837013415605,
+            31.387896346933807,
+            31.0661254284873
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.03387767088994073,
+            "p99": 0.03289545249537632,
+            "successful_operations_per_second": 0.033120853557936314
+          },
+          "rounds": 7,
+          "successes": 14,
+          "successful_bytes_per_second": 217.46287799941112,
+          "successful_operations_per_second": 31.0661254284873,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_streams_1": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            541599948.0,
+            557247615.0,
+            556786535.0,
+            554788529.0,
+            546474683.0,
+            557830396.0,
+            563150347.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 2788145.0,
+          "p95_ns": 3049634.0,
+          "p99_ns": 3351409.0,
+          "p99_ns_samples": [
+            3067328.0,
+            3351409.0,
+            3455714.0,
+            3104920.0,
+            3068869.0,
+            3597849.0,
+            3157670.0
+          ],
+          "rate_samples": [
+            369.2762540664055,
+            358.9068748190156,
+            359.2040888704322,
+            360.49772038455393,
+            365.9821876871833,
+            358.5319147793445,
+            355.1449467543345
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.005320250238450899,
+            "p99": 0.04241768430519972,
+            "successful_operations_per_second": 0.005339410497436429
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 2514.4286220930253,
+          "successful_operations_per_second": 359.2040888704322,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_streams_10": {
+          "contract": {
+            "bytes": 700,
+            "checksum": 74600,
+            "expected_rejections": 0,
+            "operations": 100,
+            "successes": 100
+          },
+          "duration_ns_samples": [
+            110578246.0,
+            121073125.0,
+            137006835.0,
+            113692044.0,
+            101991761.0,
+            106257446.0,
+            123903454.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 700,
+          "operations": 700,
+          "p50_ns": 7383401.0,
+          "p95_ns": 17771625.0,
+          "p99_ns": 26838624.0,
+          "p99_ns_samples": [
+            18941004.0,
+            26838624.0,
+            27997268.0,
+            18361407.0,
+            17603419.0,
+            18180529.0,
+            19175849.0
+          ],
+          "rate_samples": [
+            904.3370067562837,
+            825.947129059401,
+            729.8905926846643,
+            879.5690224374891,
+            980.4713539557376,
+            941.1105175631644,
+            807.0800027899141
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0969508033015925,
+            "p99": 0.05952589604014655,
+            "successful_operations_per_second": 0.10373423613814309
+          },
+          "rounds": 7,
+          "successes": 700,
+          "successful_bytes_per_second": 6156.983157062424,
+          "successful_operations_per_second": 879.5690224374891,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_streams_100": {
+          "contract": {
+            "bytes": 7000,
+            "checksum": 746000,
+            "expected_rejections": 0,
+            "operations": 1000,
+            "successes": 1000
+          },
+          "duration_ns_samples": [
+            490616728.0,
+            461781529.0,
+            493914625.0,
+            562527617.0,
+            515688746.0,
+            457777359.0,
+            374918416.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7000,
+          "operations": 7000,
+          "p50_ns": 41007129.0,
+          "p95_ns": 58820961.0,
+          "p99_ns": 95689999.0,
+          "p99_ns_samples": [
+            69067503.0,
+            53686616.0,
+            63398185.0,
+            101716418.0,
+            61138668.0,
+            60055828.0,
+            43187754.0
+          ],
+          "rate_samples": [
+            2038.250925679811,
+            2165.5262005943073,
+            2024.6414043722637,
+            1777.690498704884,
+            1939.1542044627051,
+            2184.4680177815435,
+            2667.246945799536
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.08713739992452928,
+            "p99": 0.1807107131480195,
+            "successful_operations_per_second": 0.09257855360732699
+          },
+          "rounds": 7,
+          "successes": 7000,
+          "successful_bytes_per_second": 14267.756479758677,
+          "successful_operations_per_second": 2038.250925679811,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "http_observed": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            280575850.0,
+            295588985.0,
+            306050383.0,
+            252452502.0,
+            172410256.0,
+            235236312.0,
+            293115247.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1283665.0,
+          "p95_ns": 1628121.0,
+          "p99_ns": 1694520.0,
+          "p99_ns_samples": [
+            1669912.0,
+            1737063.0,
+            1710006.0,
+            1657464.0,
+            1172961.0,
+            1622023.0,
+            1694520.0
+          ],
+          "rate_samples": [
+            712.819724149459,
+            676.6151993113004,
+            653.487174365013,
+            792.2282346799636,
+            1160.023798120223,
+            850.2088742149639,
+            682.3254745257246
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.13461081068024922,
+            "p99": 0.03559670473653701,
+            "successful_operations_per_second": 0.12340629100209294
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 4989.738069046213,
+          "successful_operations_per_second": 712.819724149459,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "http_overload": {
+          "contract": {
+            "bytes": 28,
+            "checksum": 2984,
+            "expected_rejections": 2,
+            "operations": 6,
+            "successes": 4
+          },
+          "duration_ns_samples": [
+            30596441.0,
+            30396792.0,
+            30201276.0,
+            30197236.0,
+            30249346.0,
+            30480748.0,
+            30635724.0
+          ],
+          "expected_rejections": 14,
+          "latency_samples": 42,
+          "operations": 42,
+          "p50_ns": 2387593.0,
+          "p95_ns": 15059846.0,
+          "p99_ns": 15164198.0,
+          "p99_ns_samples": [
+            15164198.0,
+            14863473.0,
+            15059846.0,
+            15049358.0,
+            14827413.0,
+            14859852.0,
+            15108023.0
+          ],
+          "rate_samples": [
+            130.7341595710429,
+            131.59283387536422,
+            132.44473511648977,
+            132.46245451073733,
+            132.23426384160504,
+            131.2303753175611,
+            130.5665242316454
+          ],
+          "regime": "overload",
+          "robust_relative_noise": {
+            "duration": 0.009536270195881196,
+            "p99": 0.011313557960412663,
+            "successful_operations_per_second": 0.009598005779623147
+          },
+          "rounds": 7,
+          "successes": 28,
+          "successful_bytes_per_second": 921.1498371275495,
+          "successful_operations_per_second": 131.59283387536422,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "http_unobserved": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            311724000.0,
+            312562760.0,
+            309950295.0,
+            308129460.0,
+            313836319.0,
+            313276457.0,
+            307962313.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1549052.0,
+          "p95_ns": 1645438.0,
+          "p99_ns": 1707454.0,
+          "p99_ns_samples": [
+            1689416.0,
+            1671861.0,
+            1679448.0,
+            1694961.0,
+            1735617.0,
+            1694082.0,
+            1660888.0
+          ],
+          "rate_samples": [
+            641.5932042447806,
+            639.8714933282519,
+            645.2647512401949,
+            649.0778259242073,
+            637.2748719373044,
+            638.4137573414909,
+            649.4301138724074
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.00843597231204527,
+            "p99": 0.008747731050256419,
+            "successful_operations_per_second": 0.008484247556531758
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 4491.152429713465,
+          "successful_operations_per_second": 641.5932042447806,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_cancel": {
+          "contract": {
+            "bytes": 262,
+            "checksum": 25574,
+            "expected_rejections": 1,
+            "operations": 9,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            83331669.0,
+            83873943.0,
+            83627016.0,
+            83830852.0,
+            83813387.0,
+            83915291.0,
+            93237443.0
+          ],
+          "expected_rejections": 7,
+          "latency_samples": 63,
+          "operations": 63,
+          "p50_ns": 575125.0,
+          "p95_ns": 10143518.0,
+          "p99_ns": 10246303.0,
+          "p99_ns_samples": [
+            10091338.0,
+            10143518.0,
+            10192072.0,
+            10246303.0,
+            10127308.0,
+            10208722.0,
+            10135088.0
+          ],
+          "rate_samples": [
+            96.00191735029333,
+            95.38123180878715,
+            95.66286569402405,
+            95.43025997159137,
+            95.45014569092643,
+            95.33423413856718,
+            85.80243883350597
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.0014933554701316884,
+            "p99": 0.007096764692486373,
+            "successful_operations_per_second": 0.0014918527947428745
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 3125.3410140696174,
+          "successful_operations_per_second": 95.43025997159137,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_h1": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2717985942.0,
+            2637143857.0,
+            2739861415.0,
+            2716091685.0,
+            2685919632.0,
+            2668088243.0,
+            2718862850.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 275157.0,
+          "p95_ns": 308572.0,
+          "p99_ns": 340069.0,
+          "p99_ns_samples": [
+            322529.0,
+            340307.0,
+            355041.0,
+            342512.0,
+            342455.0,
+            340069.0,
+            331402.0
+          ],
+          "rate_samples": [
+            94.18738928856462,
+            97.07471942437913,
+            93.43538275274409,
+            94.25307746929022,
+            95.31186151291365,
+            95.94885051933419,
+            94.15701126667717
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.012974893996628836,
+            "p99": 0.009606423023916639,
+            "successful_operations_per_second": 0.01286233000876061
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3169.9960820726124,
+          "successful_operations_per_second": 94.25307746929022,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_h2": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2661175014.0,
+            2659384423.0,
+            2660123148.0,
+            2661365776.0,
+            2659947917.0,
+            2658980691.0,
+            2661271072.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 571874.0,
+          "p95_ns": 617037.0,
+          "p99_ns": 651809.0,
+          "p99_ns_samples": [
+            689431.0,
+            634960.0,
+            644017.0,
+            698282.0,
+            643477.0,
+            644812.0,
+            641406.0
+          ],
+          "rate_samples": [
+            96.1981074725362,
+            96.26287865189921,
+            96.23614613198352,
+            96.1912121620369,
+            96.24248593887036,
+            96.2774949312334,
+            96.19463522278876
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0005862497504194493,
+            "p99": 0.006010817416310438,
+            "successful_operations_per_second": 0.0005860180271481084
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3236.6922585796015,
+          "successful_operations_per_second": 96.23614613198352,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_slow": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            5426070666.0,
+            5225734462.0,
+            5456273736.0,
+            5256440510.0,
+            5265749239.0,
+            5286422033.0,
+            5265699449.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 10486390.0,
+          "p95_ns": 10526455.0,
+          "p99_ns": 10549104.0,
+          "p99_ns_samples": [
+            10560776.0,
+            10552288.0,
+            10549940.0,
+            10542376.0,
+            10548793.0,
+            10554273.0,
+            10529114.0
+          ],
+          "rate_samples": [
+            47.17962882498147,
+            48.988329173928854,
+            46.91846714194986,
+            48.70215871614611,
+            48.61606361806474,
+            48.425948288264486,
+            48.61652330890563
+          ],
+          "regime": "slow",
+          "robust_relative_noise": {
+            "duration": 0.005820536260519032,
+            "p99": 0.000608923444114374,
+            "successful_operations_per_second": 0.005797774788519191
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 1635.094952154443,
+          "successful_operations_per_second": 48.61606361806474,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tcp_bulk": {
+          "contract": {
+            "bytes": 134217728,
+            "checksum": 16777121248,
+            "expected_rejections": 0,
+            "operations": 8,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            8121343956.0,
+            8228221031.0,
+            8142674278.0,
+            8146111171.0,
+            8153702316.0,
+            8204410636.0,
+            8219438949.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 56,
+          "operations": 56,
+          "p50_ns": 1019411275.0,
+          "p95_ns": 1052465015.0,
+          "p99_ns": 1053655597.0,
+          "p99_ns_samples": [
+            1036584376.0,
+            1053655597.0,
+            1039242156.0,
+            1037086872.0,
+            1052465015.0,
+            1052997688.0,
+            1051839305.0
+          ],
+          "rate_samples": [
+            0.9850586360265715,
+            0.972263624161265,
+            0.9824782039500856,
+            0.9820636905226443,
+            0.9811493834281404,
+            0.975085274851667,
+            0.9733024418866573
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.005883769443220865,
+            "p99": 0.002560119693568591,
+            "successful_operations_per_second": 0.005907212500285342
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 16460955.134040732,
+          "successful_operations_per_second": 0.9811493834281404,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tcp_cancel": {
+          "contract": {
+            "bytes": 0,
+            "checksum": 0,
+            "expected_rejections": 32,
+            "operations": 32,
+            "successes": 0
+          },
+          "duration_ns_samples": [
+            690668397.0,
+            690751656.0,
+            690748716.0,
+            690808249.0,
+            691014959.0,
+            690858507.0,
+            690701384.0
+          ],
+          "expected_rejections": 224,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 1145587.0,
+          "p95_ns": 1181217.0,
+          "p99_ns": 1189212.0,
+          "p99_ns_samples": [
+            1189015.0,
+            1187342.0,
+            1187431.0,
+            1189212.0,
+            1194017.0,
+            1190479.0,
+            1184328.0
+          ],
+          "rate_samples": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.00012146881020289585,
+            "p99": 0.0019751125090936615
+          },
+          "rounds": 7,
+          "successes": 0,
+          "successful_bytes_per_second": 0.0,
+          "successful_operations_per_second": 0.0,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tcp_partial": {
+          "contract": {
+            "bytes": 65536,
+            "checksum": 4161536,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            83287789.0,
+            84691338.0,
+            81568526.0,
+            85714517.0,
+            82773307.0,
+            82905560.0,
+            80494958.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 272199.0,
+          "p95_ns": 570344.0,
+          "p99_ns": 981093.0,
+          "p99_ns_samples": [
+            966245.0,
+            969349.0,
+            981093.0,
+            977619.0,
+            974005.0,
+            994972.0,
+            991518.0
+          ],
+          "rate_samples": [
+            3073.679864403652,
+            3022.7412394877974,
+            3138.465441927932,
+            2986.65860766619,
+            3092.7844890865604,
+            3087.850802768837,
+            3180.323418517716
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.023910176933850995,
+            "p99": 0.012541800026390649,
+            "successful_operations_per_second": 0.024302101626796576
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 790489.8055088223,
+          "successful_operations_per_second": 3087.850802768837,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_bulk": {
+          "contract": {
+            "bytes": 134217728,
+            "checksum": 16777121248,
+            "expected_rejections": 0,
+            "operations": 8,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            410038657.0,
+            398587937.0,
+            385968842.0,
+            390537641.0,
+            442517732.0,
+            444895558.0,
+            425377464.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 56,
+          "operations": 56,
+          "p50_ns": 47359419.0,
+          "p95_ns": 62838300.0,
+          "p99_ns": 64095626.0,
+          "p99_ns_samples": [
+            62838300.0,
+            56967071.0,
+            48958171.0,
+            55753239.0,
+            64095626.0,
+            60550735.0,
+            64017821.0
+          ],
+          "rate_samples": [
+            19.510355580937336,
+            20.070853273213835,
+            20.727061693751953,
+            20.48458115206365,
+            18.078371602971156,
+            17.98174842644754,
+            18.80682611808509
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.07051092824548003,
+            "p99": 0.08679754913957691,
+            "successful_operations_per_second": 0.07403180458500293
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 327329449.8181912,
+          "successful_operations_per_second": 19.510355580937336,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_close": {
+          "contract": {
+            "bytes": 8192,
+            "checksum": 520192,
+            "expected_rejections": 0,
+            "operations": 32,
+            "successes": 32
+          },
+          "duration_ns_samples": [
+            129157528.0,
+            133860338.0,
+            130327817.0,
+            131739355.0,
+            124254328.0,
+            131364320.0,
+            127805382.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 364819.0,
+          "p95_ns": 411140.0,
+          "p99_ns": 434630.0,
+          "p99_ns_samples": [
+            447926.0,
+            412800.0,
+            422814.0,
+            410234.0,
+            395082.0,
+            434630.0,
+            426256.0
+          ],
+          "rate_samples": [
+            247.75946470576613,
+            239.05512624658098,
+            245.53468888380138,
+            242.90387637012492,
+            257.5363008683287,
+            243.59734819926751,
+            250.38069210575185
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.016057556145515735,
+            "p99": 0.04143287970597,
+            "successful_operations_per_second": 0.01588550542698508
+          },
+          "rounds": 7,
+          "successes": 224,
+          "successful_bytes_per_second": 62856.88035425315,
+          "successful_operations_per_second": 245.53468888380138,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_failure": {
+          "contract": {
+            "bytes": 0,
+            "checksum": 0,
+            "expected_rejections": 16,
+            "operations": 16,
+            "successes": 0
+          },
+          "duration_ns_samples": [
+            174021613.0,
+            173931741.0,
+            174129769.0,
+            173924147.0,
+            173881768.0,
+            173995992.0,
+            173775534.0
+          ],
+          "expected_rejections": 112,
+          "latency_samples": 112,
+          "operations": 112,
+          "p50_ns": 10577254.0,
+          "p95_ns": 10606491.0,
+          "p99_ns": 10612313.0,
+          "p99_ns_samples": [
+            10624671.0,
+            10607776.0,
+            10612313.0,
+            10598526.0,
+            10591845.0,
+            10606566.0,
+            10589075.0
+          ],
+          "rate_samples": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "regime": "failure",
+          "robust_relative_noise": {
+            "duration": 0.0005476776812117346,
+            "p99": 0.0011238419673247685
+          },
+          "rounds": 7,
+          "successes": 0,
+          "successful_bytes_per_second": 0.0,
+          "successful_operations_per_second": 0.0,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_full": {
+          "contract": {
+            "bytes": 8192,
+            "checksum": 520192,
+            "expected_rejections": 0,
+            "operations": 32,
+            "successes": 32
+          },
+          "duration_ns_samples": [
+            317667747.0,
+            323703033.0,
+            320788815.0,
+            322630824.0,
+            324439703.0,
+            323082446.0,
+            317245497.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 5280940.0,
+          "p95_ns": 5372778.0,
+          "p99_ns": 5452979.0,
+          "p99_ns_samples": [
+            5468220.0,
+            5452979.0,
+            5374518.0,
+            5439980.0,
+            5451052.0,
+            5382107.0,
+            5459305.0
+          ],
+          "rate_samples": [
+            100.7341799795621,
+            98.8560400668226,
+            99.75410146391793,
+            99.18457140350607,
+            98.63157839224135,
+            99.04592588109847,
+            100.8682559803205
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.008312423382708156,
+            "p99": 0.0030114090271015576,
+            "successful_operations_per_second": 0.008266078351699055
+          },
+          "rounds": 7,
+          "successes": 224,
+          "successful_bytes_per_second": 25391.250279297554,
+          "successful_operations_per_second": 99.18457140350607,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_resumed": {
+          "contract": {
+            "bytes": 8192,
+            "checksum": 520192,
+            "expected_rejections": 0,
+            "operations": 32,
+            "successes": 32
+          },
+          "duration_ns_samples": [
+            129926666.0,
+            118800491.0,
+            122736109.0,
+            127264764.0,
+            112631706.0,
+            134807224.0,
+            127479585.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 1270612.0,
+          "p95_ns": 1537933.0,
+          "p99_ns": 1580423.0,
+          "p99_ns_samples": [
+            1586286.0,
+            1569837.0,
+            1596019.0,
+            1568879.0,
+            1397543.0,
+            1562040.0,
+            1537144.0
+          ],
+          "rate_samples": [
+            246.29278180662314,
+            269.3591560997841,
+            260.72196895210357,
+            251.44430393946277,
+            284.1118290439461,
+            237.3760029358664,
+            251.02058498229343
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.05275760306285564,
+            "p99": 0.01644971868448746,
+            "successful_operations_per_second": 0.0547042264717712
+          },
+          "rounds": 7,
+          "successes": 224,
+          "successful_bytes_per_second": 64369.74180850247,
+          "successful_operations_per_second": 251.44430393946277,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_small": {
+          "contract": {
+            "bytes": 65536,
+            "checksum": 4161536,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            1022012192.0,
+            1008485357.0,
+            975801651.0,
+            974861100.0,
+            1024606598.0,
+            1021542618.0,
+            994387509.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 2413678.0,
+          "p95_ns": 2577707.0,
+          "p99_ns": 2634340.0,
+          "p99_ns_samples": [
+            2629449.0,
+            2672676.0,
+            2662295.0,
+            2627687.0,
+            2614414.0,
+            2632174.0,
+            2689851.0
+          ],
+          "rate_samples": [
+            250.48624860240415,
+            253.84602584765145,
+            262.34839809673576,
+            262.60151317967245,
+            249.8519924619888,
+            250.60138998527813,
+            257.444907224795
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.020725605284916397,
+            "p99": 0.010003508886570568,
+            "successful_operations_per_second": 0.021019440867493727
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 64984.58261699877,
+          "successful_operations_per_second": 253.84602584765145,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "udp_packets": {
+          "contract": {
+            "bytes": 2457600,
+            "checksum": 296161280,
+            "expected_rejections": 0,
+            "operations": 1024,
+            "successes": 1024
+          },
+          "duration_ns_samples": [
+            171776885.0,
+            201013137.0,
+            170921975.0,
+            169407761.0,
+            171834471.0,
+            169336922.0,
+            172927485.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7168,
+          "operations": 7168,
+          "p50_ns": 169004.0,
+          "p95_ns": 210256.0,
+          "p99_ns": 259422.0,
+          "p99_ns_samples": [
+            221959.0,
+            265576.0,
+            232397.0,
+            223844.0,
+            236305.0,
+            233280.0,
+            314764.0
+          ],
+          "rate_samples": [
+            5961.22115033114,
+            5094.194415760996,
+            5991.037723499275,
+            6044.587296092061,
+            5959.223397033067,
+            6047.11593848387,
+            5921.557235392627
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.009930786438466385,
+            "p99": 0.059970051440329214,
+            "successful_operations_per_second": 0.009864710401588182
+          },
+          "rounds": 7,
+          "successes": 7168,
+          "successful_bytes_per_second": 14306930.760794736,
+          "successful_operations_per_second": 5961.22115033114,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_disconnect": {
+          "contract": {
+            "bytes": 262,
+            "checksum": 25574,
+            "expected_rejections": 1,
+            "operations": 9,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            107834966.0,
+            107644865.0,
+            107719330.0,
+            107701575.0,
+            107811924.0,
+            98210308.0,
+            97751460.0
+          ],
+          "expected_rejections": 7,
+          "latency_samples": 63,
+          "operations": 63,
+          "p50_ns": 489905.0,
+          "p95_ns": 30547808.0,
+          "p99_ns": 30648161.0,
+          "p99_ns_samples": [
+            30572836.0,
+            30473810.0,
+            30547808.0,
+            30648161.0,
+            30562642.0,
+            20485191.0,
+            20507707.0
+          ],
+          "rate_samples": [
+            74.18743935060915,
+            74.3184544845683,
+            74.26707908413466,
+            74.27932228474839,
+            74.20329498989369,
+            81.45784452686982,
+            81.84020985466611
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.0015190439638417543,
+            "p99": 0.0035914012160872554,
+            "successful_operations_per_second": 0.0015174891730900706
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 2432.64780482551,
+          "successful_operations_per_second": 74.27932228474839,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_fragmented": {
+          "contract": {
+            "bytes": 6706,
+            "checksum": 647804,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            2378448994.0,
+            2379793065.0,
+            2380027505.0,
+            2388120847.0,
+            2378112065.0,
+            2383965158.0,
+            2380286020.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1555875.0,
+          "p95_ns": 1719345.0,
+          "p99_ns": 2100345.0,
+          "p99_ns_samples": [
+            1821198.0,
+            2166865.0,
+            2030468.0,
+            2050701.0,
+            2154916.0,
+            2099610.0,
+            2032922.0
+          ],
+          "rate_samples": [
+            84.08841245052153,
+            84.04092059155572,
+            84.03264230343422,
+            83.74785566285038,
+            84.10032602900066,
+            83.89384355255748,
+            84.02351579580339
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0009833081355923236,
+            "p99": 0.03535985177751413,
+            "successful_operations_per_second": 0.000983960730082563
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 2817.6144964341493,
+          "successful_operations_per_second": 84.03264230343422,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_h1": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2678062552.0,
+            2678948148.0,
+            2675194189.0,
+            2679884512.0,
+            2677981471.0,
+            2680468091.0,
+            2672256592.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 207655.0,
+          "p95_ns": 296207.0,
+          "p99_ns": 314846.0,
+          "p99_ns_samples": [
+            310617.0,
+            317063.0,
+            313998.0,
+            307265.0,
+            312338.0,
+            320483.0,
+            308886.0
+          ],
+          "rate_samples": [
+            95.59149386141746,
+            95.55989360642153,
+            95.69398776830253,
+            95.52650453916277,
+            95.59438807633184,
+            95.50570695452461,
+            95.79918364366411
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0010086537724754384,
+            "p99": 0.016385887083864275,
+            "successful_operations_per_second": 0.0010079680239592152
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3215.0107896359546,
+          "successful_operations_per_second": 95.59149386141746,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_h2": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2775935568.0,
+            2790237030.0,
+            2778405604.0,
+            2776448323.0,
+            2778828588.0,
+            2776696566.0,
+            2787653013.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 491264.0,
+          "p95_ns": 560966.0,
+          "p99_ns": 620112.0,
+          "p99_ns_samples": [
+            641387.0,
+            615169.0,
+            629530.0,
+            609883.0,
+            614549.0,
+            616081.0,
+            615085.0
+          ],
+          "rate_samples": [
+            92.22116066059931,
+            91.74847772699798,
+            92.13917493955645,
+            92.20412923925326,
+            92.12514982230347,
+            92.19588598000233,
+            91.83352404555524
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.001044435271229751,
+            "p99": 0.0021979833184051865,
+            "successful_operations_per_second": 0.0010451715548100077
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3098.899594646801,
+          "successful_operations_per_second": 92.13917493955645,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_slow": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            5333707956.0,
+            5336186498.0,
+            5334905572.0,
+            5343390195.0,
+            5334345544.0,
+            5335176392.0,
+            5335045986.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 10487674.0,
+          "p95_ns": 10524967.0,
+          "p99_ns": 10553192.0,
+          "p99_ns_samples": [
+            10551403.0,
+            10556966.0,
+            10548536.0,
+            10560435.0,
+            10559959.0,
+            10538699.0,
+            10541570.0
+          ],
+          "rate_samples": [
+            47.99662863281073,
+            47.974335247830766,
+            47.98585402216,
+            47.909658598308674,
+            47.99089183263453,
+            47.98341820222989,
+            47.98459107415086
+          ],
+          "regime": "slow",
+          "robust_relative_noise": {
+            "duration": 0.0001946516134865796,
+            "p99": 0.001202221695067471,
+            "successful_operations_per_second": 0.0001946771727918057
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 1613.8567544860896,
+          "successful_operations_per_second": 47.98459107415086,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        }
+      },
+      "candidate": {
+        "h1_bulk_32768": {
+          "contract": {
+            "bytes": 8388608,
+            "checksum": 813694976,
+            "expected_rejections": 0,
+            "operations": 1,
+            "successes": 1
+          },
+          "duration_ns_samples": [
+            478448976.0,
+            490502646.0,
+            477586693.0,
+            477100610.0,
+            488919484.0,
+            490951261.0,
+            517294721.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7,
+          "operations": 7,
+          "p50_ns": 488856076.0,
+          "p95_ns": 517220286.0,
+          "p99_ns": 517220286.0,
+          "p99_ns_samples": [
+            478365562.0,
+            490455718.0,
+            477529736.0,
+            477031171.0,
+            488856076.0,
+            490881435.0,
+            517220286.0
+          ],
+          "rate_samples": [
+            2.090087031558408,
+            2.0387249857975283,
+            2.0938606846820162,
+            2.0959939665556075,
+            2.0453265470598425,
+            2.036862066436367,
+            1.9331339745104417
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.031750780381663006,
+            "p99": 0.031815572762564984,
+            "successful_operations_per_second": 0.03244562312701035
+          },
+          "rounds": 7,
+          "successes": 7,
+          "successful_bytes_per_second": 17157442.63527857,
+          "successful_operations_per_second": 2.0453265470598425,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_bulk_4096": {
+          "contract": {
+            "bytes": 8388608,
+            "checksum": 813694976,
+            "expected_rejections": 0,
+            "operations": 1,
+            "successes": 1
+          },
+          "duration_ns_samples": [
+            39644089.0,
+            39004747.0,
+            26606573.0,
+            39957785.0,
+            25883133.0,
+            25264109.0,
+            26054623.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7,
+          "operations": 7,
+          "p50_ns": 26563917.0,
+          "p95_ns": 39925238.0,
+          "p99_ns": 39925238.0,
+          "p99_ns_samples": [
+            39605135.0,
+            38969480.0,
+            26563917.0,
+            39925238.0,
+            25844061.0,
+            25224501.0,
+            26025532.0
+          ],
+          "rate_samples": [
+            25.224441404114494,
+            25.637905047813796,
+            37.58469758581836,
+            25.026412249828162,
+            38.635199224143385,
+            39.581843159400556,
+            38.380904609519774
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.07480621898957074,
+            "p99": 0.07475622520579325,
+            "successful_operations_per_second": 0.07878121197149685
+          },
+          "rounds": 7,
+          "successes": 7,
+          "successful_bytes_per_second": 315283294.8459766,
+          "successful_operations_per_second": 37.58469758581836,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_concurrent": {
+          "contract": {
+            "bytes": 700,
+            "checksum": 74600,
+            "expected_rejections": 0,
+            "operations": 100,
+            "successes": 100
+          },
+          "duration_ns_samples": [
+            167462331.0,
+            213471151.0,
+            167857268.0,
+            237568094.0,
+            189084859.0,
+            178349438.0,
+            210891500.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 700,
+          "operations": 700,
+          "p50_ns": 14463901.0,
+          "p95_ns": 25317211.0,
+          "p99_ns": 27648798.0,
+          "p99_ns_samples": [
+            27449426.0,
+            25599483.0,
+            26522962.0,
+            25317211.0,
+            24692113.0,
+            24621305.0,
+            28235074.0
+          ],
+          "rate_samples": [
+            597.1492179933886,
+            468.44737348139375,
+            595.7442367047222,
+            420.931945516219,
+            528.8630751762097,
+            560.6970289415771,
+            474.17747988894763
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.16954059771015298,
+            "p99": 0.053483500639446506,
+            "successful_operations_per_second": 0.16936769371333
+          },
+          "rounds": 7,
+          "successes": 700,
+          "successful_bytes_per_second": 3702.0415262334673,
+          "successful_operations_per_second": 528.8630751762097,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_early_close": {
+          "contract": {
+            "bytes": 200,
+            "checksum": 19400,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            500161457.0,
+            498798838.0,
+            503533161.0,
+            501962104.0,
+            503881837.0,
+            501827000.0,
+            502528402.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 2433709.0,
+          "p95_ns": 2614507.0,
+          "p99_ns": 3091408.0,
+          "p99_ns_samples": [
+            3261610.0,
+            2844405.0,
+            2967206.0,
+            3105315.0,
+            2959932.0,
+            2898743.0,
+            2867027.0
+          ],
+          "rate_samples": [
+            399.87087609591634,
+            400.963243623274,
+            397.1933042161646,
+            398.4364524856641,
+            396.9184545145651,
+            398.54372124257964,
+            397.9874554433642
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.004640288758133024,
+            "p99": 0.046535174794556086,
+            "successful_operations_per_second": 0.004625810748142512
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 398.4364524856641,
+          "successful_operations_per_second": 398.4364524856641,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_new_connection": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            503804171.0,
+            502296166.0,
+            501212940.0,
+            501198090.0,
+            502640221.0,
+            498950504.0,
+            503102208.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 2446656.0,
+          "p95_ns": 2627565.0,
+          "p99_ns": 2906534.0,
+          "p99_ns_samples": [
+            2906534.0,
+            2851915.0,
+            2846408.0,
+            2834171.0,
+            2988913.0,
+            2859233.0,
+            2837143.0
+          ],
+          "rate_samples": [
+            396.9796431081949,
+            398.17146444235453,
+            399.0319962609106,
+            399.043819181354,
+            397.8989178424701,
+            400.8413628138153,
+            397.5335365651983
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.003197298678166697,
+            "p99": 0.0076793898836395895,
+            "successful_operations_per_second": 0.0032042087093760983
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 2787.2002510964817,
+          "successful_operations_per_second": 398.17146444235453,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h1_short_reuse": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            306745504.0,
+            307892278.0,
+            308299386.0,
+            307578407.0,
+            307695340.0,
+            309197777.0,
+            307365156.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1525808.0,
+          "p95_ns": 1622732.0,
+          "p99_ns": 1709329.0,
+          "p99_ns_samples": [
+            1654322.0,
+            1643250.0,
+            1715018.0,
+            1668590.0,
+            1740681.0,
+            1709329.0,
+            1648035.0
+          ],
+          "rate_samples": [
+            652.0062963987241,
+            649.5778370901527,
+            648.720072377958,
+            650.2407043157617,
+            649.993594313128,
+            646.8351808363745,
+            650.6918435478093
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0015909594158949564,
+            "p99": 0.022515467550446783,
+            "successful_operations_per_second": 0.0015926684884216605
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 4549.9551601918965,
+          "successful_operations_per_second": 649.993594313128,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_slow_consumer": {
+          "contract": {
+            "bytes": 8388685,
+            "checksum": 813703182,
+            "expected_rejections": 0,
+            "operations": 13,
+            "successes": 13
+          },
+          "duration_ns_samples": [
+            5332472863.0,
+            5480507240.0,
+            4571141296.0,
+            5048303893.0,
+            6116665567.0,
+            5825173246.0,
+            5748427199.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 91,
+          "operations": 91,
+          "p50_ns": 2867452.0,
+          "p95_ns": 5327327872.0,
+          "p99_ns": 6109343231.0,
+          "p99_ns_samples": [
+            5327327872.0,
+            5470999938.0,
+            4567105443.0,
+            5038151490.0,
+            6109343231.0,
+            5817907948.0,
+            5741656231.0
+          ],
+          "rate_samples": [
+            2.4378933252904207,
+            2.3720432125549022,
+            2.8439287167464533,
+            2.5751223134617263,
+            2.125340981553128,
+            2.231693282071357,
+            2.261488151448015
+          ],
+          "regime": "slow",
+          "robust_relative_noise": {
+            "duration": 0.09323987691613742,
+            "p99": 0.09400947202606237,
+            "successful_operations_per_second": 0.08772302537894351
+          },
+          "rounds": 7,
+          "successes": 91,
+          "successful_bytes_per_second": 1530640.25511624,
+          "successful_operations_per_second": 2.3720432125549022,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_stream_cancel": {
+          "contract": {
+            "bytes": 14,
+            "checksum": 1492,
+            "expected_rejections": 1,
+            "operations": 3,
+            "successes": 2
+          },
+          "duration_ns_samples": [
+            56681338.0,
+            62228952.0,
+            63754698.0,
+            64951399.0,
+            61609340.0,
+            67455513.0,
+            61280595.0
+          ],
+          "expected_rejections": 7,
+          "latency_samples": 21,
+          "operations": 21,
+          "p50_ns": 3077315.0,
+          "p95_ns": 62062482.0,
+          "p99_ns": 64526067.0,
+          "p99_ns_samples": [
+            53757827.0,
+            59317462.0,
+            60595525.0,
+            62062482.0,
+            58698229.0,
+            64526067.0,
+            58437600.0
+          ],
+          "rate_samples": [
+            35.284982157619496,
+            32.13938103923074,
+            31.37023721765571,
+            30.79225437469022,
+            32.46261037693311,
+            29.64917040954088,
+            32.63675883042585
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.03635078121836279,
+            "p99": 0.031944323642842304,
+            "successful_operations_per_second": 0.03548085224401807
+          },
+          "rounds": 7,
+          "successes": 14,
+          "successful_bytes_per_second": 224.9756672746152,
+          "successful_operations_per_second": 32.13938103923074,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_streams_1": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            547754477.0,
+            546599362.0,
+            539368908.0,
+            546586515.0,
+            552572361.0,
+            542128494.0,
+            540917746.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 2754680.0,
+          "p95_ns": 2989451.0,
+          "p99_ns": 3378710.0,
+          "p99_ns_samples": [
+            3232356.0,
+            3378710.0,
+            3038307.0,
+            3381397.0,
+            3625907.0,
+            3176693.0,
+            3215420.0
+          ],
+          "rate_samples": [
+            365.12709324692565,
+            365.8987073607305,
+            370.803724563226,
+            365.9073074644002,
+            361.9435464308357,
+            368.9162296641799,
+            369.74198291508816
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.012092252101389657,
+            "p99": 0.0671288807297216,
+            "successful_operations_per_second": 0.012191688885107632
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 2561.3511522508015,
+          "successful_operations_per_second": 365.9073074644002,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_streams_10": {
+          "contract": {
+            "bytes": 700,
+            "checksum": 74600,
+            "expected_rejections": 0,
+            "operations": 100,
+            "successes": 100
+          },
+          "duration_ns_samples": [
+            122409506.0,
+            108218711.0,
+            109673093.0,
+            112415756.0,
+            133270416.0,
+            129876134.0,
+            111102588.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 700,
+          "operations": 700,
+          "p50_ns": 7188806.0,
+          "p95_ns": 19180149.0,
+          "p99_ns": 27033783.0,
+          "p99_ns_samples": [
+            20667142.0,
+            25756960.0,
+            27111505.0,
+            19787086.0,
+            29091754.0,
+            26849376.0,
+            17823799.0
+          ],
+          "rate_samples": [
+            816.9300184905575,
+            924.0546212013189,
+            911.8006729326034,
+            889.5550193159756,
+            750.3540770818934,
+            769.964403159706,
+            900.0690424961118
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.05535290726506344,
+            "p99": 0.19195454682540175,
+            "successful_operations_per_second": 0.05749965841858901
+          },
+          "rounds": 7,
+          "successes": 700,
+          "successful_bytes_per_second": 6226.885135211829,
+          "successful_operations_per_second": 889.5550193159756,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "h2_streams_100": {
+          "contract": {
+            "bytes": 7000,
+            "checksum": 746000,
+            "expected_rejections": 0,
+            "operations": 1000,
+            "successes": 1000
+          },
+          "duration_ns_samples": [
+            484141914.0,
+            423431233.0,
+            385217968.0,
+            423495582.0,
+            377221141.0,
+            458245347.0,
+            367509155.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7000,
+          "operations": 7000,
+          "p50_ns": 34589758.0,
+          "p95_ns": 54821173.0,
+          "p99_ns": 61597712.0,
+          "p99_ns_samples": [
+            66336941.0,
+            59277564.0,
+            58036967.0,
+            53894174.0,
+            55960742.0,
+            60159566.0,
+            46567668.0
+          ],
+          "rate_samples": [
+            2065.5100727345825,
+            2361.6585694801593,
+            2595.932908300892,
+            2361.2997218941473,
+            2650.964888524103,
+            2182.237106272243,
+            2721.0206504923667
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.1337997348178612,
+            "p99": 0.054223462046181704,
+            "successful_operations_per_second": 0.147072544365324
+          },
+          "rounds": 7,
+          "successes": 7000,
+          "successful_bytes_per_second": 16531.609986361116,
+          "successful_operations_per_second": 2361.6585694801593,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "http_observed": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            262413226.0,
+            254560612.0,
+            260542691.0,
+            303973409.0,
+            258470808.0,
+            274697137.0,
+            271707477.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1295308.0,
+          "p95_ns": 1599119.0,
+          "p99_ns": 1666309.0,
+          "p99_ns_samples": [
+            1715544.0,
+            1637564.0,
+            1640308.0,
+            1787498.0,
+            1617202.0,
+            1617577.0,
+            1658578.0
+          ],
+          "rate_samples": [
+            762.1567062324824,
+            785.6675014593382,
+            767.6285188902114,
+            657.9522881884711,
+            773.781772678948,
+            728.0745703585545,
+            736.0857426827455
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.04436622991098779,
+            "p99": 0.020545519865781302,
+            "successful_operations_per_second": 0.04573482686473113
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 5335.096943627376,
+          "successful_operations_per_second": 762.1567062324824,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "http_overload": {
+          "contract": {
+            "bytes": 28,
+            "checksum": 2984,
+            "expected_rejections": 2,
+            "operations": 6,
+            "successes": 4
+          },
+          "duration_ns_samples": [
+            40479043.0,
+            30251184.0,
+            40412812.0,
+            40120676.0,
+            30159016.0,
+            30627707.0,
+            30036192.0
+          ],
+          "expected_rejections": 14,
+          "latency_samples": 42,
+          "operations": 42,
+          "p50_ns": 2403080.0,
+          "p95_ns": 24859083.0,
+          "p99_ns": 24938974.0,
+          "p99_ns_samples": [
+            24938974.0,
+            15014690.0,
+            24859083.0,
+            24918343.0,
+            14812177.0,
+            14977518.0,
+            14910397.0
+          ],
+          "rate_samples": [
+            98.81656540150912,
+            132.22622955848604,
+            98.97851206196688,
+            99.69921743093262,
+            132.63032189113864,
+            130.60070086213113,
+            133.1726738196373
+          ],
+          "regime": "overload",
+          "robust_relative_noise": {
+            "duration": 0.028633555198892297,
+            "p99": 0.019996801385842797,
+            "successful_operations_per_second": 0.029197447499336743
+          },
+          "rounds": 7,
+          "successes": 28,
+          "successful_bytes_per_second": 914.2049060349179,
+          "successful_operations_per_second": 130.60070086213113,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "http_unobserved": {
+          "contract": {
+            "bytes": 1400,
+            "checksum": 149200,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            307843798.0,
+            309767737.0,
+            306373340.0,
+            311046445.0,
+            304978945.0,
+            303502451.0,
+            309916079.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1526337.0,
+          "p95_ns": 1623436.0,
+          "p99_ns": 1675466.0,
+          "p99_ns_samples": [
+            1649659.0,
+            1677156.0,
+            1675466.0,
+            1685653.0,
+            1669995.0,
+            1617359.0,
+            1653768.0
+          ],
+          "rate_samples": [
+            649.6801342088431,
+            645.6450304894082,
+            652.7983146314232,
+            642.9907919378406,
+            655.7829754444197,
+            658.9732614712888,
+            645.3359911022881
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.009980268664045003,
+            "p99": 0.013900970242425873,
+            "successful_operations_per_second": 0.00991353472370169
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 4547.760939461902,
+          "successful_operations_per_second": 649.6801342088431,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_cancel": {
+          "contract": {
+            "bytes": 262,
+            "checksum": 25574,
+            "expected_rejections": 1,
+            "operations": 9,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            83771923.0,
+            83613742.0,
+            83461771.0,
+            83590571.0,
+            83826270.0,
+            83795767.0,
+            83788323.0
+          ],
+          "expected_rejections": 7,
+          "latency_samples": 63,
+          "operations": 63,
+          "p50_ns": 569766.0,
+          "p95_ns": 10159611.0,
+          "p99_ns": 10211336.0,
+          "p99_ns_samples": [
+            10211336.0,
+            10159611.0,
+            10124602.0,
+            10187898.0,
+            10161994.0,
+            10141419.0,
+            10155806.0
+          ],
+          "rate_samples": [
+            95.49738997874026,
+            95.67805253830166,
+            95.85226750100954,
+            95.70457414389477,
+            95.43547625344657,
+            95.47021629386124,
+            95.47869814747337
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.0009618361297495819,
+            "p99": 0.00265477282545562,
+            "successful_operations_per_second": 0.0009612125435141565
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 3127.5395218037434,
+          "successful_operations_per_second": 95.49738997874026,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_h1": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2686673115.0,
+            2726906785.0,
+            2637656081.0,
+            2687868027.0,
+            2687583771.0,
+            2737486139.0,
+            2728908677.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 276673.0,
+          "p95_ns": 312586.0,
+          "p99_ns": 337032.0,
+          "p99_ns_samples": [
+            364162.0,
+            344995.0,
+            339178.0,
+            340057.0,
+            323996.0,
+            326083.0,
+            323924.0
+          ],
+          "rate_samples": [
+            95.2851311053522,
+            93.87926327668733,
+            97.05586783813914,
+            95.24277138179598,
+            95.2528448647192,
+            93.51645524441503,
+            93.81039466715727
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.021533372185464073,
+            "p99": 0.05724028975935939,
+            "successful_operations_per_second": 0.021225097582791116
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3203.2822718643097,
+          "successful_operations_per_second": 95.24277138179598,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_h2": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2659708908.0,
+            2660284651.0,
+            2660025979.0,
+            2659788851.0,
+            2661764880.0,
+            2660533499.0,
+            2661004550.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 569630.0,
+          "p95_ns": 613880.0,
+          "p99_ns": 653840.0,
+          "p99_ns_samples": [
+            652514.0,
+            650329.0,
+            637472.0,
+            655662.0,
+            683804.0,
+            630640.0,
+            685318.0
+          ],
+          "rate_samples": [
+            96.25113456212856,
+            96.23030373977826,
+            96.23966157512479,
+            96.24824162404913,
+            96.17678928876693,
+            96.2213030191957,
+            96.20426992505519
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0002763136943723997,
+            "p99": 0.034177457035404604,
+            "successful_operations_per_second": 0.0002763652008404732
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3236.495762498011,
+          "successful_operations_per_second": 96.23030373977826,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "sse_slow": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            5305642193.0,
+            5245238909.0,
+            5285366329.0,
+            5275756028.0,
+            5296071991.0,
+            5316736881.0,
+            5305551308.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 10487933.0,
+          "p95_ns": 10523561.0,
+          "p99_ns": 10542132.0,
+          "p99_ns_samples": [
+            10521229.0,
+            10539351.0,
+            10539311.0,
+            10537480.0,
+            10550040.0,
+            10550133.0,
+            10542132.0
+          ],
+          "rate_samples": [
+            48.250520990230676,
+            48.80616582797487,
+            48.435620932340484,
+            48.52385111088007,
+            48.3377115029855,
+            48.14983433068634,
+            48.25134752989557
+          ],
+          "regime": "slow",
+          "robust_relative_noise": {
+            "duration": 0.002996978611350602,
+            "p99": 0.0003912110527488837,
+            "successful_operations_per_second": 0.003003049078000622
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 1625.7331876590044,
+          "successful_operations_per_second": 48.3377115029855,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tcp_bulk": {
+          "contract": {
+            "bytes": 134217728,
+            "checksum": 16777121248,
+            "expected_rejections": 0,
+            "operations": 8,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            8035405342.0,
+            7983080447.0,
+            7985629358.0,
+            8084335783.0,
+            8015781203.0,
+            8063678678.0,
+            8066006701.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 56,
+          "operations": 56,
+          "p50_ns": 999354275.0,
+          "p95_ns": 1034501110.0,
+          "p99_ns": 1043007114.0,
+          "p99_ns_samples": [
+            1033136377.0,
+            1043007114.0,
+            1030249229.0,
+            1040123135.0,
+            1017564571.0,
+            1033402050.0,
+            1033704870.0
+          ],
+          "rate_samples": [
+            0.995593832483479,
+            1.002119426593823,
+            1.0017995628592007,
+            0.9895680009757457,
+            0.9980312333133428,
+            0.9921030238749798,
+            0.9918166816063001
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.005646208613305322,
+            "p99": 0.004523285409197707,
+            "successful_operations_per_second": 0.005624787647123509
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 16703292.775843143,
+          "successful_operations_per_second": 0.995593832483479,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tcp_cancel": {
+          "contract": {
+            "bytes": 0,
+            "checksum": 0,
+            "expected_rejections": 32,
+            "operations": 32,
+            "successes": 0
+          },
+          "duration_ns_samples": [
+            690761036.0,
+            690595338.0,
+            690655226.0,
+            690738915.0,
+            690748122.0,
+            690890326.0,
+            691248858.0
+          ],
+          "expected_rejections": 224,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 1151478.0,
+          "p95_ns": 1180175.0,
+          "p99_ns": 1187405.0,
+          "p99_ns_samples": [
+            1180175.0,
+            1201047.0,
+            1191612.0,
+            1180827.0,
+            1181661.0,
+            1187405.0,
+            1183787.0
+          ],
+          "rate_samples": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.00019938904676457448,
+            "p99": 0.004523745572472074
+          },
+          "rounds": 7,
+          "successes": 0,
+          "successful_bytes_per_second": 0.0,
+          "successful_operations_per_second": 0.0,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tcp_partial": {
+          "contract": {
+            "bytes": 65536,
+            "checksum": 4161536,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            87125455.0,
+            89886123.0,
+            82220635.0,
+            88285618.0,
+            84091357.0,
+            86033459.0,
+            82982512.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 285630.0,
+          "p95_ns": 568807.0,
+          "p99_ns": 976517.0,
+          "p99_ns_samples": [
+            968419.0,
+            984194.0,
+            965221.0,
+            976517.0,
+            982269.0,
+            985203.0,
+            973502.0
+          ],
+          "rate_samples": [
+            2938.291685248588,
+            2848.0480796796633,
+            3113.5736181069387,
+            2899.6795378382017,
+            3044.3081088583217,
+            2975.5865098949466,
+            3084.9873525159132
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.038811073879988944,
+            "p99": 0.011655629343882389,
+            "successful_operations_per_second": 0.03782100651320109
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 761750.1465331063,
+          "successful_operations_per_second": 2975.5865098949466,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_bulk": {
+          "contract": {
+            "bytes": 134217728,
+            "checksum": 16777121248,
+            "expected_rejections": 0,
+            "operations": 8,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            396515594.0,
+            396210858.0,
+            416278669.0,
+            386145418.0,
+            385245661.0,
+            407558575.0,
+            394827253.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 56,
+          "operations": 56,
+          "p50_ns": 47412897.0,
+          "p95_ns": 59118809.0,
+          "p99_ns": 60662095.0,
+          "p99_ns_samples": [
+            60350221.0,
+            55654510.0,
+            60662095.0,
+            48149038.0,
+            47782484.0,
+            59118809.0,
+            58441259.0
+          ],
+          "rate_samples": [
+            20.17575127196637,
+            20.19126896315396,
+            19.217895596759487,
+            20.717583653938373,
+            20.765970418028925,
+            19.629080310725886,
+            20.26202583335857
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0376643422124489,
+            "p99": 0.056340529104617676,
+            "successful_operations_per_second": 0.03864611788297845
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 338753280.70893,
+          "successful_operations_per_second": 20.19126896315396,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_close": {
+          "contract": {
+            "bytes": 8192,
+            "checksum": 520192,
+            "expected_rejections": 0,
+            "operations": 32,
+            "successes": 32
+          },
+          "duration_ns_samples": [
+            126571323.0,
+            137270424.0,
+            128179557.0,
+            119579920.0,
+            131113539.0,
+            134075762.0,
+            124902519.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 362229.0,
+          "p95_ns": 409854.0,
+          "p99_ns": 451746.0,
+          "p99_ns_samples": [
+            409854.0,
+            521353.0,
+            407217.0,
+            403137.0,
+            454898.0,
+            417151.0,
+            435342.0
+          ],
+          "rate_samples": [
+            252.82188130402966,
+            233.1164941983424,
+            249.6497939995221,
+            267.6034571690632,
+            244.0632770960442,
+            238.67102839959992,
+            256.19979689921223
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.03790414518908034,
+            "p99": 0.04980727937845049,
+            "successful_operations_per_second": 0.038898627327123576
+          },
+          "rounds": 7,
+          "successes": 224,
+          "successful_bytes_per_second": 63910.34726387766,
+          "successful_operations_per_second": 249.6497939995221,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_failure": {
+          "contract": {
+            "bytes": 0,
+            "checksum": 0,
+            "expected_rejections": 16,
+            "operations": 16,
+            "successes": 0
+          },
+          "duration_ns_samples": [
+            173981532.0,
+            173971088.0,
+            174019992.0,
+            173988290.0,
+            174043605.0,
+            173888483.0,
+            173920676.0
+          ],
+          "expected_rejections": 112,
+          "latency_samples": 112,
+          "operations": 112,
+          "p50_ns": 10579780.0,
+          "p95_ns": 10602807.0,
+          "p99_ns": 10613208.0,
+          "p99_ns_samples": [
+            10618905.0,
+            10606708.0,
+            10603609.0,
+            10602363.0,
+            10613208.0,
+            10601434.0,
+            10601413.0
+          ],
+          "rate_samples": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "regime": "failure",
+          "robust_relative_noise": {
+            "duration": 0.00032774050983756136,
+            "p99": 0.0003070454219879288
+          },
+          "rounds": 7,
+          "successes": 0,
+          "successful_bytes_per_second": 0.0,
+          "successful_operations_per_second": 0.0,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_full": {
+          "contract": {
+            "bytes": 8192,
+            "checksum": 520192,
+            "expected_rejections": 0,
+            "operations": 32,
+            "successes": 32
+          },
+          "duration_ns_samples": [
+            317989381.0,
+            323124833.0,
+            318605903.0,
+            319346858.0,
+            322251329.0,
+            322077889.0,
+            318249629.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 5260410.0,
+          "p95_ns": 5342160.0,
+          "p99_ns": 5421219.0,
+          "p99_ns_samples": [
+            5347578.0,
+            5405869.0,
+            5437773.0,
+            5328452.0,
+            5562921.0,
+            5340182.0,
+            5421219.0
+          ],
+          "rate_samples": [
+            100.63229123993924,
+            99.03293319458365,
+            100.43756157273708,
+            100.20452432320471,
+            99.30137479743334,
+            99.35484891358065,
+            100.54999938428837
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.006302223897878463,
+            "p99": 0.015986742668015076,
+            "successful_operations_per_second": 0.006329127701909
+          },
+          "rounds": 7,
+          "successes": 224,
+          "successful_bytes_per_second": 25652.358226740405,
+          "successful_operations_per_second": 100.20452432320471,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_resumed": {
+          "contract": {
+            "bytes": 8192,
+            "checksum": 520192,
+            "expected_rejections": 0,
+            "operations": 32,
+            "successes": 32
+          },
+          "duration_ns_samples": [
+            137977845.0,
+            117786100.0,
+            118414652.0,
+            127912098.0,
+            115744026.0,
+            129616675.0,
+            137116895.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 224,
+          "operations": 224,
+          "p50_ns": 1305303.0,
+          "p95_ns": 1523935.0,
+          "p99_ns": 1583530.0,
+          "p99_ns_samples": [
+            1569093.0,
+            1442355.0,
+            1584738.0,
+            1643139.0,
+            1551003.0,
+            1477758.0,
+            1575818.0
+          ],
+          "rate_samples": [
+            231.9212914218221,
+            271.678916272803,
+            270.236828462748,
+            250.1718015757978,
+            276.47215243748303,
+            246.8818151676858,
+            233.37751339833068
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.11008273384429984,
+            "p99": 0.017092826237832936,
+            "successful_operations_per_second": 0.10815849821542005
+          },
+          "rounds": 7,
+          "successes": 224,
+          "successful_bytes_per_second": 64043.98120340423,
+          "successful_operations_per_second": 250.1718015757978,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "tls_small": {
+          "contract": {
+            "bytes": 65536,
+            "checksum": 4161536,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            1033251823.0,
+            998331727.0,
+            971001554.0,
+            954443469.0,
+            938933788.0,
+            953197244.0,
+            935418775.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 2314879.0,
+          "p95_ns": 2553746.0,
+          "p99_ns": 2630284.0,
+          "p99_ns_samples": [
+            2771974.0,
+            2640292.0,
+            2610095.0,
+            2653697.0,
+            2591836.0,
+            2637224.0,
+            2612843.0
+          ],
+          "rate_samples": [
+            247.76147914911542,
+            256.427791561111,
+            263.64530411451847,
+            268.21913325911186,
+            272.64968336617153,
+            268.5698071531562,
+            273.67421612849284
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.025720765680046786,
+            "p99": 0.013706560610702767,
+            "successful_operations_per_second": 0.02528216017767551
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 68664.09811433264,
+          "successful_operations_per_second": 268.21913325911186,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "udp_packets": {
+          "contract": {
+            "bytes": 2457600,
+            "checksum": 296161280,
+            "expected_rejections": 0,
+            "operations": 1024,
+            "successes": 1024
+          },
+          "duration_ns_samples": [
+            168882497.0,
+            168671661.0,
+            168331940.0,
+            168747961.0,
+            167900902.0,
+            168581543.0,
+            168785801.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 7168,
+          "operations": 7168,
+          "p50_ns": 166400.0,
+          "p95_ns": 203014.0,
+          "p99_ns": 224185.0,
+          "p99_ns_samples": [
+            238651.0,
+            222499.0,
+            239007.0,
+            225848.0,
+            221457.0,
+            215607.0,
+            285739.0
+          ],
+          "rate_samples": [
+            6063.387374003595,
+            6070.96647966252,
+            6083.218669017894,
+            6068.221470243424,
+            6098.835609590709,
+            6074.211813330004,
+            6066.861038861913
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0010032744267574384,
+            "p99": 0.06722798785023555,
+            "successful_operations_per_second": 0.0010025959707356336
+          },
+          "rounds": 7,
+          "successes": 7168,
+          "successful_bytes_per_second": 14570319.551190048,
+          "successful_operations_per_second": 6070.96647966252,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_disconnect": {
+          "contract": {
+            "bytes": 262,
+            "checksum": 25574,
+            "expected_rejections": 1,
+            "operations": 9,
+            "successes": 8
+          },
+          "duration_ns_samples": [
+            107715859.0,
+            107822091.0,
+            117926972.0,
+            97610371.0,
+            107891835.0,
+            107799204.0,
+            97464698.0
+          ],
+          "expected_rejections": 7,
+          "latency_samples": 63,
+          "operations": 63,
+          "p50_ns": 485322.0,
+          "p95_ns": 30498826.0,
+          "p99_ns": 30778711.0,
+          "p99_ns_samples": [
+            30484438.0,
+            30564246.0,
+            30778711.0,
+            20419699.0,
+            30498826.0,
+            30553153.0,
+            20522788.0
+          ],
+          "rate_samples": [
+            74.26947224178011,
+            74.19629804805028,
+            67.83859421066116,
+            81.95850418394578,
+            74.14833569194555,
+            74.21205076801866,
+            82.08100126673557
+          ],
+          "regime": "cleanup",
+          "robust_relative_noise": {
+            "duration": 0.0012739864071723572,
+            "p99": 0.0031801778861914225,
+            "successful_operations_per_second": 0.0012728926206510393
+          },
+          "rounds": 7,
+          "successes": 56,
+          "successful_bytes_per_second": 2430.444662652611,
+          "successful_operations_per_second": 74.21205076801866,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_fragmented": {
+          "contract": {
+            "bytes": 6706,
+            "checksum": 647804,
+            "expected_rejections": 0,
+            "operations": 200,
+            "successes": 200
+          },
+          "duration_ns_samples": [
+            2390457490.0,
+            2381964950.0,
+            2379923013.0,
+            2385883152.0,
+            2378391279.0,
+            2382512579.0,
+            2382849277.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1400,
+          "operations": 1400,
+          "p50_ns": 1556295.0,
+          "p95_ns": 1721100.0,
+          "p99_ns": 2121377.0,
+          "p99_ns_samples": [
+            2103715.0,
+            2030129.0,
+            1923649.0,
+            1944065.0,
+            1887064.0,
+            2138899.0,
+            2230450.0
+          ],
+          "rate_samples": [
+            83.66599315681619,
+            83.96429174996887,
+            84.03633180885586,
+            83.8264019058717,
+            84.09045297378086,
+            83.94499225852776,
+            83.93313078190131
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0016114460781615038,
+            "p99": 0.0777621757041055,
+            "successful_operations_per_second": 0.0016131994735241095
+          },
+          "rounds": 7,
+          "successes": 1400,
+          "successful_bytes_per_second": 2814.6755904284355,
+          "successful_operations_per_second": 83.94499225852776,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_h1": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2678357335.0,
+            2676105625.0,
+            2675517059.0,
+            2674896512.0,
+            2679466855.0,
+            2673354017.0,
+            2678628389.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 206179.0,
+          "p95_ns": 295855.0,
+          "p99_ns": 313280.0,
+          "p99_ns_samples": [
+            306650.0,
+            300821.0,
+            313280.0,
+            318759.0,
+            320921.0,
+            328332.0,
+            312472.0
+          ],
+          "rate_samples": [
+            95.58097295482793,
+            95.66139602580148,
+            95.68243982554999,
+            95.7046371145741,
+            95.54139455850817,
+            95.75985760661791,
+            95.571300987955
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0012474788793136668,
+            "p99": 0.0313765257916241,
+            "successful_operations_per_second": 0.0012464301168386518
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3217.3617960240267,
+          "successful_operations_per_second": 95.66139602580148,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_h2": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            2774870748.0,
+            2786085296.0,
+            2785970730.0,
+            2776992479.0,
+            2777036703.0,
+            2787582863.0,
+            2777318195.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 487406.0,
+          "p95_ns": 560832.0,
+          "p99_ns": 607034.0,
+          "p99_ns_samples": [
+            626028.0,
+            610842.0,
+            603309.0,
+            587648.0,
+            588487.0,
+            632794.0,
+            590542.0
+          ],
+          "rate_samples": [
+            92.25654931297723,
+            91.88519833457389,
+            91.88897688095955,
+            92.18606169656825,
+            92.18459364380968,
+            91.83583505191035,
+            92.17525037673978
+          ],
+          "regime": "normal",
+          "robust_relative_noise": {
+            "duration": 0.0013065067332697182,
+            "p99": 0.03642428208430506,
+            "successful_operations_per_second": 0.001307659077387792
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 3100.1129130614436,
+          "successful_operations_per_second": 92.17525037673978,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        },
+        "websocket_slow": {
+          "contract": {
+            "bytes": 8610,
+            "checksum": 830450,
+            "expected_rejections": 0,
+            "operations": 256,
+            "successes": 256
+          },
+          "duration_ns_samples": [
+            5333356426.0,
+            5335355239.0,
+            5335263293.0,
+            5333702904.0,
+            5332520009.0,
+            5334605141.0,
+            5332398566.0
+          ],
+          "expected_rejections": 0,
+          "latency_samples": 1792,
+          "operations": 1792,
+          "p50_ns": 10486085.0,
+          "p95_ns": 10523430.0,
+          "p99_ns": 10546026.0,
+          "p99_ns_samples": [
+            10541644.0,
+            10549596.0,
+            10565460.0,
+            10539990.0,
+            10534413.0,
+            10553056.0,
+            10536662.0
+          ],
+          "rate_samples": [
+            47.999792166899894,
+            47.98180974505866,
+            47.982636646232336,
+            47.99667409446696,
+            48.00732103544555,
+            47.98855645987164,
+            48.00841438077905
+          ],
+          "regime": "slow",
+          "robust_relative_noise": {
+            "duration": 0.00032880723927925773,
+            "p99": 0.0010169837456093186,
+            "successful_operations_per_second": 0.00032888017748453535
+          },
+          "rounds": 7,
+          "successes": 1792,
+          "successful_bytes_per_second": 1614.2631404428146,
+          "successful_operations_per_second": 47.99667409446696,
+          "unexpected_failure_rate": 0.0,
+          "unexpected_failures": 0
+        }
+      }
+    },
+    "tls": {
+      "checks": [
+        {
+          "actual": 1.034900101097179,
+          "decision": "PASS",
+          "expected": 0.9,
+          "name": "bulk throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 0.9961124345287014,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "full handshake p50",
+          "operator": "le"
+        },
+        {
+          "actual": 0.99430127207936,
+          "decision": "PASS",
+          "expected": 1.2,
+          "name": "full handshake p95",
+          "operator": "le"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {},
+      "name": "candidate-tls-baseline-ratios"
+    },
+    "warmups_per_case_per_leg": 1
+  },
+  "main_postflight_receipt": {
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ef325d310fed0a1711e470a20363db416e75d9200157fcc8c29e22a9d661fa7a"
+    },
+    "provenance": "MAIN_EXECUTED_POSTFLIGHT_RECEIPT_NOT_CHECKER_NATIVE_RUN",
+    "receipt": {
+      "all_six_original_binaries_unchanged": {
+        "baseline": {
+          "http": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "d132fe407098689cab5115c10d520486906fbf651b25dd3306f0d8910b29add1"
+          },
+          "streams": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "b09a58d292b97e3f04f9f8306313ca32c7c78fd3403bfe095d290a510fcc5cca"
+          },
+          "transport_tls": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "60c01f3222c23a0a679309206a3add96f84c5315dbdb50f8cf2351f687b7faa7"
+          }
+        },
+        "candidate": {
+          "http": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "538e4c728db27d17db8d171a790fd8357fed0c62e3f668e87b1c835eb0992557"
+          },
+          "streams": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "3c04cd62d61aa19305fd352b2d7a4cec69ea818b76ecc24704801765f60981fc"
+          },
+          "transport_tls": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "b5aa26f17300d76b72242e36ca34cffa13fcd8b2ec2239a8f6c590bb2b519625"
+          }
+        }
+      },
+      "fixture_private_keys_remaining": [],
+      "host_glibc": "2.35",
+      "host_original_glibc14_unchanged": true,
+      "old_and_new10_source_inputs_unchanged": true,
+      "old_and_new_archives_unchanged": true,
+      "owned_live_processes": [],
+      "scope": "ORIGINAL_AND_NEW_CAMPAIGN_INPUT_PRESERVATION_ONLY",
+      "sdk392_unchanged": true,
+      "status": "PASS"
+    },
+    "status": "PASS"
+  },
+  "performance_status": "NOISY",
+  "raw_log_integrity": {
+    "balanced_order": "PASS",
+    "commands": 540,
+    "failed_commands": [],
+    "log_files": 1080,
+    "native_attempts": 528,
+    "status": "PASS",
+    "successful_native_samples": 528
+  },
+  "release_qualification": "NOT_QUALIFIED",
+  "report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "7a4f30a238bc925ce07cb1067c5d15b11b58cfc747574f77fe1c1d92aa112d8e"
+  },
+  "schema_version": 1,
+  "scope": "SERVER_REPAIRED_SOURCE_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "static_input_validation": {
+    "archive_payloads": "PASS",
+    "glibc_input_files": 14,
+    "glibc_modes": {
+      "ld-linux-x86-64.so.2": 493,
+      "libBrokenLocale.so.1": 420,
+      "libanl.so.1": 420,
+      "libc.so.6": 420,
+      "libdl.so.2": 420,
+      "libm.so.6": 420,
+      "libmvec.so.1": 420,
+      "libnss_compat.so.2": 420,
+      "libnss_dns.so.2": 420,
+      "libnss_files.so.2": 420,
+      "libpthread.so.0": 420,
+      "libresolv.so.2": 420,
+      "librt.so.1": 420,
+      "libutil.so.1": 420
+    },
+    "http_native_abi_manifest": "IDENTICAL",
+    "loader_executable_metadata": "PASS",
+    "production_cangjie_identical_bytes": 164,
+    "same_source_files": 10,
+    "sdk_oracle_files": 392,
+    "source_changes": [
+      "examples/linux/m12_001/http.cj"
+    ],
+    "status": "PASS",
+    "thresholds_and_measurement": "UNCHANGED"
+  },
+  "technical_verification_status": "PASS",
+  "verification_status": "PASS"
+}

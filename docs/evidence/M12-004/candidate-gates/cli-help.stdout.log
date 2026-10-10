@@ -1,0 +1,14 @@
+usage: m12_004_candidate_gates.py [-h] [--candidate CANDIDATE_ARCHIVE]
+                                  --baseline BASELINE --sdk-root SDK_ROOT
+                                  --work-root WORK_ROOT [--output OUTPUT]
+
+Run immutable installed candidate development gates with the qualified STS
+SDK.
+
+options:
+  -h, --help            show this help message and exit
+  --candidate CANDIDATE_ARCHIVE
+  --baseline BASELINE
+  --sdk-root SDK_ROOT
+  --work-root WORK_ROOT
+  --output OUTPUT

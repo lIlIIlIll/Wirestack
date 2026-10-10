@@ -1,0 +1,28 @@
+
+Version symbols section '.gnu.version' contains 40 entries:
+ Addr: 0x0000000000000b76  Offset: 0x00000b76  Link: 3 (.dynsym)
+  000:   0 (*local*)       7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   2 (GLIBC_2.2.5)
+  004:   2 (GLIBC_2.2.5)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)
+  008:   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)
+  00c:   2 (GLIBC_2.2.5)   6 (GLIBC_2.35)    7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)
+  010:   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   3 (GLIBC_2.3)  
+  014:   4 (GLIBC_2.4)     5 (GLIBC_2.34)    7 (GLIBC_PRIVATE)   6 (GLIBC_2.35) 
+  018:   5h(GLIBC_2.34)    7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   3 (GLIBC_2.3)  
+  01c:   6 (GLIBC_2.35)    7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)
+  020:   2 (GLIBC_2.2.5)   6 (GLIBC_2.35)    7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)
+  024:   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)   7 (GLIBC_PRIVATE)
+
+Version definition section '.gnu.version_d' contains 7 entries:
+ Addr: 0x0000000000000bc8  Offset: 0x00000bc8  Link: 4 (.dynstr)
+  000000: Rev: 1  Flags: BASE  Index: 1  Cnt: 1  Name: ld-linux-x86-64.so.2
+  0x001c: Rev: 1  Flags: none  Index: 2  Cnt: 1  Name: GLIBC_2.2.5
+  0x0038: Rev: 1  Flags: none  Index: 3  Cnt: 2  Name: GLIBC_2.3
+  0x0054: Parent 1: GLIBC_2.2.5
+  0x005c: Rev: 1  Flags: none  Index: 4  Cnt: 2  Name: GLIBC_2.4
+  0x0078: Parent 1: GLIBC_2.3
+  0x0080: Rev: 1  Flags: none  Index: 5  Cnt: 2  Name: GLIBC_2.34
+  0x009c: Parent 1: GLIBC_2.4
+  0x00a4: Rev: 1  Flags: none  Index: 6  Cnt: 2  Name: GLIBC_2.35
+  0x00c0: Parent 1: GLIBC_2.34
+  0x00c8: Rev: 1  Flags: none  Index: 7  Cnt: 2  Name: GLIBC_PRIVATE
+  0x00e4: Parent 1: GLIBC_2.35

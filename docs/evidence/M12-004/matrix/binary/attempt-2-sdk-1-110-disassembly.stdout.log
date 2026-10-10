@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-sync.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000019598 <_init@@Base>:
+   19598:	sub    $0x8,%rsp
+   1959c:	mov    0x219865(%rip),%rax        # 232e08 <__gmon_start__>
+   195a3:	test   %rax,%rax
+   195a6:	je     195aa <_init@@Base+0x12>
+   195a8:	call   *%rax
+   195aa:	add    $0x8,%rsp
+   195ae:	ret
+
+Disassembly of section .plt:
+
+00000000000195b0 <_CNab17ReadWriteLockImpl9writeLockHl@plt-0x10>:
+   195b0:	push   0x219a52(%rip)        # 233008 <_CNab9TimerHeap9NODE_SIZEE@@Base+0x2063c8>
+   195b6:	jmp    *0x219a54(%rip)        # 233010 <_CNab9TimerHeap9NODE_SIZEE@@Base+0x2063d0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "9d2cbcfb57c6718a79511793f38b4e21599b76838c13b894058af44e4daff119"}

@@ -1,0 +1,21 @@
+
+<sdk-1>/tools/lib/libcangjie-lsp.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000004cdfc8 <_init@@Base>:
+  4cdfc8:	sub    $0x8,%rsp
+  4cdfcc:	mov    0xd1a2385(%rip),%rax        # d670358 <__gmon_start__>
+  4cdfd3:	test   %rax,%rax
+  4cdfd6:	je     4cdfda <_init@@Base+0x12>
+  4cdfd8:	call   *%rax
+  4cdfda:	add    $0x8,%rsp
+  4cdfde:	ret
+
+Disassembly of section .plt:
+
+00000000004cdfe0 <_ZN7Cangjie4CHIR10Translator18GetExactParentTypeERNS0_4TypeERKNS_3AST8FuncDeclERNS0_8FuncTypeERSt6vectorIPS2_SaISB_EEb@plt-0x10>:
+  4cdfe0:	push   0xd17e032(%rip)        # d64c018 <_ZTIPFvPN7Cangjie4CHIR10AnnotationEE@@Base+0x258>
+  4cdfe6:	jmp    *0xd17e034(%rip)        # d64c020 <_ZTIPFvPN7Cangjie4CHIR10AnnotationEE@@Base+0x260>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "690a389dd95273f379ab6382d01bc0de98059b8328d2670a882f1d22a8e2d36f"}
