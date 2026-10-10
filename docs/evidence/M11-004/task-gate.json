@@ -1,0 +1,76 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "duration_ms": 1366.108,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T07:42:25.216769Z",
+      "id": "cjpm-check",
+      "started_at_utc": "2026-10-09T07:42:23.850669Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M11-004/cjpm-check.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "The valid serial compilation order is:\n    wirestack -> wirestack.internal.identity -> wirestack.internal.platform -> wirestack.internal.platform.android -> wirestack.internal.platform.apple -> wirestack.internal.platform.harmony -> wirestack.internal.platform.linux -> wirestack.internal.platform.windows -> wirestack.internal.common -> wirestack.internal.http_files -> wirestack.internal.http_model -> wirestack.observability -> wirestack.internal.transport -> wirestack.internal.trust -> wirestack.internal -> wirestack.internal.resolver -> wirestack.internal.tls_engine -> wirestack.internal.connector -> wirestack.internal.http2 -> wirestack.tls -> wirestack.internal.http1 -> wirestack.internal.transport_stdnet -> wirestack.net -> wirestack.http -> wirestack.gzip -> wirestack.sse\ncjpm check success\n",
+      "stdout_path": "build/repository-tooling/M11-004/cjpm-check.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m11_004_installed_consumers",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_032_public_api_contract"
+      ],
+      "duration_ms": 11183.766,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T07:42:36.400680Z",
+      "id": "installed-application-release-api-tooling",
+      "started_at_utc": "2026-10-09T07:42:25.216958Z",
+      "status": "PASS",
+      "stderr_excerpt": ".........................................................\n----------------------------------------------------------------------\nRan 57 tests in 10.804s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M11-004/installed-application-release-api-tooling.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M11-004/installed-application-release-api-tooling.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m11_004_installed_consumers.py"
+      ],
+      "duration_ms": 123943.608,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T07:44:40.344632Z",
+      "id": "installed-applications",
+      "started_at_utc": "2026-10-09T07:42:36.401030Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M11-004/installed-applications.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"status\": \"PASS\", \"report\": \"docs/evidence/M11-004/installed/report.json\"}\n",
+      "stdout_path": "build/repository-tooling/M11-004/installed-applications.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M11-004"
+}
