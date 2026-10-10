@@ -38,9 +38,9 @@ class HttpClientExtensionsTest {
             @Expect(fixture.acquisitions.load(), 3)
             @Expect(fixture.releases.load(), 3)
             let denied = client.get("${base}/denied")
-            try { @Expect(denied.status, 500) } finally { denied.close() }
+            try { @Expect(denied.status, 200) } finally { denied.close() }
             let afterFailure = client.get("${base}/after-fail")
-            try { @Expect(afterFailure.status, 500) } finally { afterFailure.close() }
+            try { @Expect(afterFailure.status, 202) } finally { afterFailure.close() }
             let recovered = client.get("${base}/echo")
             try { @Expect(readExtensionBody(recovered.body), "session=stored") }
             finally { recovered.close() }

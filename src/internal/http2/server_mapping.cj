@@ -123,6 +123,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     private var duplexTransport: ?Http2StreamTransport = None<Http2StreamTransport>
     private var ownerComplete = false
     private let onOwnerTerminated: () -> Unit
+    private let onCancellationRequested: () -> Unit
 
     private init(
         streamId: Http2StreamId,
@@ -134,7 +135,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         limits: HttpLimits,
         http2Limits: Http2Limits,
         peerEnded: Bool,
-        onOwnerTerminated: () -> Unit
+        onOwnerTerminated: () -> Unit,
+        onCancellationRequested: () -> Unit
     ) {
         this.streamId = streamId
         this.request = request
@@ -146,6 +148,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         this.http2Limits = http2Limits
         this.peerEnded = peerEnded
         this.onOwnerTerminated = onOwnerTerminated
+        this.onCancellationRequested = onCancellationRequested
     }
 
     public static func open(
@@ -163,7 +166,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
             _ => None<Http2ServerPushSender>
         },
         localCancellation!: () -> Unit = { => },
-        onOwnerTerminated!: () -> Unit = { => }
+        onOwnerTerminated!: () -> Unit = { => },
+        onCancellationRequested!: () -> Unit = { => }
     ): Http2ServerExchange {
         if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
         var flowOpened = false
@@ -183,7 +187,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
                     streamId, head, body, pushSender: pushSender,
                     localCancellation: localCancellation
                 ), registry, flow, sink,
-                channel, limits, http2Limits, endStream, onOwnerTerminated
+                channel, limits, http2Limits, endStream, onOwnerTerminated, onCancellationRequested
             )
         } catch (error: Exception) {
             if (flowOpened) { let updates = flow.closeStream(streamId); if (!updates.isEmpty()) { sink.submit(updates) } }
@@ -316,6 +320,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     /** Wakes a blocked handler body read after reset cleanup has claimed this stream. */
     public func streamReset(event: Http2StreamResetEvent): Unit {
         if (event.streamId.value != streamId.value) { return }
+        if (http2ErrorCodeToWire(event.code) == http2ErrorCodeToWire(Http2ErrorCode.Cancel)) {
+            onCancellationRequested()
+        }
         bodyChannel.reset(event)
         if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
             transport.peerTerminated(resetStream: true)

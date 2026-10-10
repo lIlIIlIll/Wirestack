@@ -1,0 +1,257 @@
+{
+  "scope": "M10-005 source-bound candidate acceptance; not release qualification",
+  "platform": "native Linux x86_64",
+  "sdk": {
+    "version": "1.1.3",
+    "compiler": "cjnative",
+    "target": "x86_64-unknown-linux-gnu",
+    "selection": "$HOME/cangjie_sdk/sts1.1.3",
+    "log": "stable113-sdk.log"
+  },
+  "source_binding": {
+    "manifest": "final-current-source-sha256.txt",
+    "cangjie_source_files": 289,
+    "additional": [
+      "cjpm.toml"
+    ],
+    "note": "Historical commands bind stable113-prior-source-sha256.txt. Three fixture/rotation deltas bind stable113-last-delta-source-sha256.txt. Final 9 adapter and 5 facade cases bind final-current-source-sha256.txt. Only these two test files changed since the previous delta; production bytes match the installed consumer source map. No release qualification.",
+    "prior_run_manifest": "stable113-prior-source-sha256.txt",
+    "manifest_sha256": "0623b044db4fdf6d0da417c82a35589c0a9f0302573ee7576478657b4784d2d7",
+    "intermediate_manifest": "stable113-last-delta-source-sha256.txt"
+  },
+  "commands": [
+    {
+      "name": "complete-source-build",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm build --target-dir <scratch>/stable113-integration",
+      "exit_code": 0,
+      "status": "passed",
+      "log": "stable113-build.log"
+    },
+    {
+      "name": "observation-contracts",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --target-dir <scratch>/stable113-integration --filter 'NetworkObservationTest.*,HttpFacadeObservabilityTest.*,HttpResourceObservationTest.*'",
+      "exit_code": 0,
+      "passed": 12,
+      "skipped": 933,
+      "errors": 0,
+      "failed": 0,
+      "classes": {
+        "NetworkObservationTest": 6,
+        "HttpFacadeObservabilityTest": 4,
+        "HttpResourceObservationTest": 2
+      },
+      "log": "stable113-observation.log",
+      "log_note": "Runtime output retained; verbose compile warnings omitted. Complete source compile is independently recorded."
+    },
+    {
+      "name": "resolver-native-fixture-build",
+      "command": "cc -shared -fPIC -O2 tools/gates/native/gai_delay.c -ldl -pthread -o <scratch>/stable113-gai-delay.so",
+      "exit_code": 0
+    },
+    {
+      "name": "real-resolver-dns",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> LD_PRELOAD=<scratch>/stable113-gai-delay.so WIRESTACK_GAI_DELAY_MS=500 $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --filter 'SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*'",
+      "exit_code": 0,
+      "passed": 5,
+      "skipped": 940,
+      "errors": 0,
+      "failed": 0,
+      "fixture_skipped_cases": 0,
+      "classes": {
+        "SystemResolverResourceObservationTest": 3,
+        "DnsResourceObservationTest": 2
+      },
+      "log": "stable113-resolver.log"
+    },
+    {
+      "name": "c1-adapter-with-defective-sdk-progress",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --filter 'BoundedNetworkEventSinkTests.*,Http1ConnectionPoolTest.*,Http2ConnectionPoolTest.*,Http1CleartextClientTest.*,Http1HttpsClientTest.*,HttpAutomaticHttpsClientTest.*,Http1ProxyClientPipelineTest.*,Http1ClientConnectionTest.*,Http1ResponseReaderTest.*,Http1TlsServerTest.*,HappyEyeballsConnectorTest.*'",
+      "exit_code": 1,
+      "status": "harness-failed",
+      "passed_case_assertions": 89,
+      "skipped": 856,
+      "errors": 0,
+      "failed_case_assertions": 0,
+      "failure": "SDK std.unittest TestProgressCollector.updateBody NoneValueException; not a Wirestack case failure.",
+      "log": "stable113-c1.log"
+    },
+    {
+      "name": "c1-adapter-no-progress",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --no-progress --filter 'BoundedNetworkEventSinkTests.*,Http1ConnectionPoolTest.*,Http2ConnectionPoolTest.*,Http1CleartextClientTest.*,Http1HttpsClientTest.*,HttpAutomaticHttpsClientTest.*,Http1ProxyClientPipelineTest.*,Http1ClientConnectionTest.*,Http1ResponseReaderTest.*,Http1TlsServerTest.*,HappyEyeballsConnectorTest.*'",
+      "exit_code": 0,
+      "passed": 89,
+      "skipped": 856,
+      "errors": 0,
+      "failed": 0,
+      "classes": {
+        "BoundedNetworkEventSinkTests": 10,
+        "HappyEyeballsConnectorTest": 9,
+        "HttpAutomaticHttpsClientTest": 2,
+        "Http1ClientConnectionTest": 9,
+        "Http1CleartextClientTest": 3,
+        "Http1ConnectionPoolTest": 15,
+        "Http2ConnectionPoolTest": 17,
+        "Http1ProxyClientPipelineTest": 3,
+        "Http1ResponseReaderTest": 15,
+        "Http1HttpsClientTest": 2,
+        "Http1TlsServerTest": 4
+      },
+      "actual_aws_lc_case": "Http1TlsServerTest.realAwsLcHandshakeCarriesOneHttp1Exchange",
+      "log": "stable113-c1-no-progress.log"
+    },
+    {
+      "name": "complete-http2-protocol",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration src/internal/http2",
+      "exit_code": 0,
+      "passed": 196,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0,
+      "log": "stable113-http2.log"
+    },
+    {
+      "name": "complete-ledger",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --no-progress src/internal",
+      "exit_code": 0,
+      "passed": 11,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0,
+      "log": "stable113-ledger.log"
+    },
+    {
+      "name": "public-hook-compatibility",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --no-progress --filter 'HttpClientExtensionsTest.*' src/http",
+      "exit_code": 0,
+      "passed": 3,
+      "skipped": 138,
+      "errors": 0,
+      "failed": 0,
+      "log": "stable113-hook-compatibility.log"
+    }
+  ],
+  "command_shape_failure": {
+    "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm build --target-dir <scratch>/stable113-integration --no-progress",
+    "exit_code": 1,
+    "reason": "SDK1.1.3 build does not support test-only --no-progress; corrected complete build succeeded."
+  },
+  "installed_acceptance": {
+    "status": "PASS",
+    "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> DISABLE_ZOXIDE=1 $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" python3 tools/m10_005_native_observation.py --output <scratch>/stable113-installed-observation.json",
+    "exit_code": 0,
+    "report": "stable113-installed-observation.json",
+    "checks": {
+      "bounded_exporter_measurement": "PASS",
+      "custom_resolver_unknown": "PASS",
+      "dns_cap": "PASS",
+      "h1_reuse_resources": "PASS",
+      "h2_backpressure": "PASS",
+      "h2_reuse_resources": "PASS",
+      "headers_cap": "PASS",
+      "logical_retry_redirect": "PASS",
+      "native_fd_task_stability": "PASS",
+      "native_shutdown": "PASS",
+      "pool_wait": "PASS",
+      "secret_safe_proxy_tls": "PASS",
+      "tls_cap": "PASS"
+    },
+    "dependency_kind": "extracted_installation_path_only",
+    "installation_outside_checkout": true,
+    "qualification": "NOT_QUALIFIED",
+    "native_resources": {
+      "after_load": {
+        "fds": 10,
+        "rss_kib": 36388,
+        "tasks": 15
+      },
+      "baseline": {
+        "fds": 10,
+        "rss_kib": 55264,
+        "tasks": 15
+      }
+    },
+    "sample_count": 9,
+    "sla_claim": false
+  },
+  "accepted_distinct_cases": 314,
+  "distinct_case_note": "12 observation + 5 resolver/DNS + 89 C1/adapter + 196 H2 + 11 ledger, minus 2 ledger observation cases already included in the first group. Plus 3 existing public hook compatibility cases. Historical aggregate includes the later-removed payload-copy case; it is not a current full-suite count.",
+  "evidence_manifest": "Historical file retained in temporary evidence; final durable files indexed by M10-005 verification.json.",
+  "retained_build_target_size": "331 MiB",
+  "delta_commands": [
+    {
+      "name": "recompile-test-metadata-no-fixture",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> env -u WIRESTACK_GAI_DELAY_MS -u LD_PRELOAD $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --target-dir <scratch>/stable113-integration --no-progress --filter 'SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*'",
+      "exit_code": 0,
+      "status": "passed",
+      "total": 945,
+      "passed": 2,
+      "skipped": 943,
+      "fixture_skipped_cases": 3,
+      "filter_skipped_cases": 940,
+      "selected_cases": 5,
+      "errors": 0,
+      "failed": 0,
+      "log": "stable113-delta-no-env.log",
+      "compilation": "changed test metadata compiled by cjpm test without --skip-build"
+    },
+    {
+      "name": "prepared-native-fixture",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> WIRESTACK_GAI_DELAY_MS=500 LD_PRELOAD=<scratch>/gai-delay.so $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --no-progress --filter 'SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*'",
+      "exit_code": 0,
+      "status": "passed",
+      "total": 945,
+      "passed": 5,
+      "skipped": 940,
+      "fixture_skipped_cases": 0,
+      "filter_skipped_cases": 940,
+      "selected_cases": 5,
+      "errors": 0,
+      "failed": 0,
+      "log": "stable113-delta-native-fixture.log",
+      "fixture_sha256": "5cac6efb9940072e631ff7e3e16af5920087b8d55dd3be3a29870c89df287b29",
+      "classes": {
+        "SystemResolverResourceObservationTest": 3,
+        "DnsResourceObservationTest": 2
+      }
+    },
+    {
+      "name": "all-server-rotation-cases",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> env -u WIRESTACK_GAI_DELAY_MS -u LD_PRELOAD $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --no-progress --filter 'HttpServerRotationTest.*' src/http",
+      "exit_code": 0,
+      "status": "passed",
+      "total": 141,
+      "passed": 8,
+      "skipped": 133,
+      "filter_skipped_cases": 133,
+      "errors": 0,
+      "failed": 0,
+      "log": "stable113-delta-rotation.log",
+      "includes": "invalidAndClosedUpdatesRollbackWhileUnreferencedUpdatesStayBounded, including the 80 generation rotations"
+    },
+    {
+      "name": "current-bounded-adapter-behavior",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test src/observability --target-dir <scratch>/stable113-integration --no-progress --no-color",
+      "exit_code": 0,
+      "passed": 9,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0,
+      "log": "../logs/adapter-behavior-final-stable113.log",
+      "compilation": "Current source compiled without --skip-build after removing the non-behavioral copy assertion."
+    },
+    {
+      "name": "current-five-facade-behaviors",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test src/http --target-dir <scratch>/stable113-integration --filter \"HttpFacadeObservabilityTest.*\" --no-progress --no-color",
+      "exit_code": 0,
+      "total": 142,
+      "passed": 5,
+      "skipped": 137,
+      "errors": 0,
+      "failed": 0,
+      "log": "../logs/stable113-facade-final.log",
+      "compilation": "Current source compiled, including native pool-hook-only redirect correlation."
+    }
+  ],
+  "delta_note": "Native Linux x86_64 only. Real delayed resolver fixture:5 cases; server rotation:8; final adapter:9; final facade:5. Historical installed acceptance unchanged; compare its production digest map with final source. Prior SDK progress failure and corrected result are retained.",
+  "current_delta_distinct_cases_passed": 27
+}

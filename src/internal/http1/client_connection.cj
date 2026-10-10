@@ -34,6 +34,7 @@ public class Http1ClientConnection <: Resource {
     private let mutex = Mutex()
     private var state = Http1ClientConnectionState.Ready
     private var upgradedObserver: ?ResponseBodyObserver = None<ResponseBodyObserver>
+    private var observedBodyOwner: ?Http1ConnectionBodyObserver = None<Http1ConnectionBodyObserver>
 
     public init(
         transport: DuplexTransport,
@@ -120,6 +121,7 @@ public class Http1ClientConnection <: Resource {
                 match (state) {
                     case Http1ClientConnectionState.Exchanging =>
                         state = Http1ClientConnectionState.AwaitingBody
+                        if (context.eventSink.isSome()) { observedBodyOwner = Some(observer) }
                         true
                     case _ => false
                 }
@@ -203,6 +205,7 @@ public class Http1ClientConnection <: Resource {
                         match (state) {
                             case Http1ClientConnectionState.Exchanging =>
                                 state = Http1ClientConnectionState.AwaitingBody
+                                if (context.eventSink.isSome()) { observedBodyOwner = Some(observer) }
                                 true
                             case _ => false
                         }
@@ -226,38 +229,53 @@ public class Http1ClientConnection <: Resource {
     public func currentState(): Http1ClientConnectionState { synchronized(mutex) { state } }
 
     public func close(): Unit {
-        let (shouldClose, observer) = synchronized(mutex) {
+        let (shouldClose, observer, bodyOwner) = synchronized(mutex) {
             match (state) {
-                case Http1ClientConnectionState.Closed => (false, None<ResponseBodyObserver>)
+                case Http1ClientConnectionState.Closed => (false, None<ResponseBodyObserver>, None<Http1ConnectionBodyObserver>)
                 case _ =>
                     state = Http1ClientConnectionState.Closed
                     let current = upgradedObserver
                     upgradedObserver = None<ResponseBodyObserver>
-                    (true, current)
+                    let body = observedBodyOwner
+                    observedBodyOwner = None<Http1ConnectionBodyObserver>
+                    (true, current, body)
             }
         }
         if (shouldClose) {
             try { transport.close(OperationContext.background()) }
-            finally { if (let Some(value) <- observer) { value.completed() } }
+            finally {
+                if (let Some(value) <- bodyOwner) { value.connectionFailed(NetworkErrorCode.Closed) }
+                if (let Some(value) <- observer) { value.completed() }
+            }
         }
     }
 
     /** Immediately wakes the active exchange and prevents this connection from re-entering the pool. */
     public func abort(reason!: AbortReason = AbortReason.ApplicationAbort): Unit {
-        let (shouldAbort, observer) = synchronized(mutex) {
+        let (shouldAbort, observer, bodyOwner) = synchronized(mutex) {
             match (state) {
                 case Http1ClientConnectionState.Closed | Http1ClientConnectionState.Failed =>
-                    (false, None<ResponseBodyObserver>)
+                    (false, None<ResponseBodyObserver>, None<Http1ConnectionBodyObserver>)
                 case _ =>
                     state = Http1ClientConnectionState.Failed
                     let current = upgradedObserver
                     upgradedObserver = None<ResponseBodyObserver>
-                    (true, current)
+                    let body = observedBodyOwner
+                    observedBodyOwner = None<Http1ConnectionBodyObserver>
+                    (true, current, body)
             }
         }
         if (shouldAbort) {
             try { transport.abort(reason: Some(reason)) }
-            finally { if (let Some(value) <- observer) { value.abandoned() } }
+            finally {
+                if (let Some(value) <- bodyOwner) {
+                    value.connectionFailed(match (reason) {
+                        case AbortReason.Cancelled => NetworkErrorCode.Cancelled
+                        case _ => NetworkErrorCode.Closed
+                    })
+                }
+                if (let Some(value) <- observer) { value.abandoned() }
+            }
         }
     }
 
@@ -274,6 +292,7 @@ public class Http1ClientConnection <: Resource {
         let (closeTransport, abortTransport) = synchronized(mutex) {
             match (state) {
                 case Http1ClientConnectionState.AwaitingBody =>
+                    observedBodyOwner = None<Http1ConnectionBodyObserver>
                     if (reusable) {
                         state = Http1ClientConnectionState.Ready
                         (false, false)
@@ -303,7 +322,11 @@ public class Http1ClientConnection <: Resource {
     }
 }
 
-private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
+internal interface Http1BodyObservationOwner {
+    func bindBodyObservation(onClosed: (NetworkErrorCode) -> Unit): Unit
+}
+
+private class Http1ConnectionBodyObserver <: ResponseBodyObserver & Http1BodyObservationOwner {
     private let connection: Http1ClientConnection
     private let onTerminated: (Bool) -> Unit
     private let mutex = Mutex()
@@ -312,6 +335,17 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
     private var terminal = false
     private var cancellation: ?CancellationRegistration = None<CancellationRegistration>
     private var cancellationAttached = true
+    private var bodyObservation = None<(NetworkErrorCode) -> Unit>
+
+    public func bindBodyObservation(onClosed: (NetworkErrorCode) -> Unit): Unit {
+        synchronized(mutex) { bodyObservation = Some(onClosed) }
+    }
+
+    func connectionFailed(code: NetworkErrorCode): Unit {
+        let callback = synchronized(mutex) { bodyObservation }
+        if (let Some(value) <- callback) { value(code) }
+        finish(false, true)
+    }
 
     init(connection: Http1ClientConnection, onTerminated: (Bool) -> Unit) {
         this.connection = connection

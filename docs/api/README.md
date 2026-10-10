@@ -126,7 +126,7 @@ changes; the false-to-true multicast capability is an observable semantic
 change, while the new UdpSocket methods are additive.
 
 <!-- NETWORK_CAPABILITIES:BEGIN -->
-<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "756a2de14180cd58be797964654e7537c4385a356e585909cb9a223572d10a8e"} -->
+<!-- capability-description: {"domain": "text-utf8-lf-v1", "sha256": "10491609d94304f6f5eb91368c012a0c083dae3377eaed31ee1b55397320bfce"} -->
 
 ## 当前 Linux 公开网络能力
 
@@ -217,8 +217,8 @@ change, while the new UdpSocket methods are additive.
 | 幂等 close/abort 与终态 | `UnixStream.close`, `UnixStream.abort`, `UnixStream.isClosed`, `UnixStream.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | unix-pathname, unix-abstract, capability-contract |
 | 幂等 close/abort 与终态 | `UnixListener.close`, `UnixListener.abort`, `UnixListener.isClosed`, `UnixListener.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | unix-pathname, unix-abstract, capability-contract |
 | 幂等 close/abort 与终态 | `UnixDatagramSocket.close`, `UnixDatagramSocket.abort`, `UnixDatagramSocket.isClosed`, `UnixDatagramSocket.state` | 支持；首个终态 owner 保留；不把 EOF、本地 close、abort、cancel、deadline 合并；listener accept 的取消是 operation-local。 | unix-pathname, unix-abstract, capability-contract |
-| 显式 DNS query/lookup | `DnsClient.init`, `DnsClient.query`, `DnsClient.lookup`, `DnsClient.close`, `DnsClient.isClosed` | 支持；本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。 | dns-basic |
-| 显式配置的 resolve/connect | `Resolver.init`, `Resolver.resolve`, `Resolver.connect`, `Resolver.close`, `Resolver.isClosed` | 支持；hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。 | dns-connect |
+| 显式 DNS query/lookup | `DnsClient.init`, `DnsClient.query`, `DnsClient.lookup`, `DnsClient.close`, `DnsClient.isClosed`, `DnsClient.resolverResourceSnapshot` | 支持；本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。 只读资源统计的独立验收见 docs/evidence/M10-005/README.md；M9-003 历史原生收据不证明新增统计接口，闭合 owner 的最后样本不是当前零值。 | dns-basic |
+| 显式配置的 resolve/connect | `Resolver.init`, `Resolver.resolve`, `Resolver.connect`, `Resolver.close`, `Resolver.isClosed`, `Resolver.resolverResourceSnapshot` | 支持；hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。 资源统计委托同一 DnsClient owner，跨模块采样不原子；新增统计接口由 M10-005 独立执行验收，不使用 M9-003 历史收据充当新证据。 | dns-connect |
 | 有界 DNS message parser | `DnsMessageParser.init`, `DnsMessageParser.parse` | 支持；受 DnsParserLimits 限制；完整报文成功，截断报文保留结构化 ResolveException；此条只声明 parser，不代表 DNS 网络可达。 | capability-contract |
 | TCP typed 选项 | `TcpStream.connect`, `TcpStream.configure`, `TcpStream.getOption` | 支持；NoDelay、KeepAlive、ReceiveBuffer、SendBuffer 支持创建前及打开后配置；默认 NoDelay(true)、KeepAlive(false)，KeepAlive(true) 使用 45s/5s/5。 | socket-options, invalid-option-admission |
 | listener 与 accepted-stream 选项 | `TcpListener.bind`, `TcpListener.accept`, `TcpListener.getOption` | 支持；listener 绑定前支持 reuse、缓冲与 IPv6-only；默认 ReuseAddress(true)。acceptedOptions 在暴露连接前应用 TCP 默认值和调用者覆盖，失败只关闭该连接。 | socket-options, invalid-option-admission |

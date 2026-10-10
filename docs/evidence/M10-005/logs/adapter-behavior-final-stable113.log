@@ -1,0 +1,58 @@
+[33mwarning[0m: unused variable:'context'
+  [36m==>[0m <repo>/src/observability/bounded_network_event_sink_test.cj:25:57:
+   [36m| [0m
+[36m25[0m [36m| [0m    public func export(events: Array<api.NetworkEvent>, context: api.OperationContext): Unit {[0m
+   [36m| [0m                                                        [33m^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'events'
+  [36m==>[0m <repo>/src/observability/bounded_network_event_sink_test.cj:59:24:
+   [36m| [0m
+[36m59[0m [36m| [0m    public func export(events: Array<api.NetworkEvent>, context: api.OperationContext): Unit {[0m
+   [36m| [0m                       [33m^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'context'
+  [36m==>[0m <repo>/src/observability/bounded_network_event_sink_test.cj:59:57:
+   [36m| [0m
+[36m59[0m [36m| [0m    public func export(events: Array<api.NetworkEvent>, context: api.OperationContext): Unit {[0m
+   [36m| [0m                                                        [33m^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'events'
+  [36m==>[0m <repo>/src/observability/bounded_network_event_sink_test.cj:79:24:
+   [36m| [0m
+[36m79[0m [36m| [0m    public func export(events: Array<api.NetworkEvent>, context: api.OperationContext): Unit {[0m
+   [36m| [0m                       [33m^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.observability, time elapsed: 391780714 ns, RESULT:
+    TCS: BoundedNetworkEventSinkTests, time elapsed: 391780714 ns, RESULT:
+    [ PASSED ] CASE: samplingFallsBackToAttemptThenConnectionAndKeepsUncorrelatedEvents (476052 ns)
+    [ PASSED ] CASE: blockingCancellationCallbackRetainsDispatcherUntilReleased (209920755 ns)
+    [ PASSED ] CASE: fullQueueDropsNewestAndPreservesFifoBatches (262987 ns)
+    [ PASSED ] CASE: blockingCallbackCloseExpiresWithoutFakingWorkerReclamation (108898285 ns)
+    [ PASSED ] CASE: exporterExceptionsAreCountedWithoutRetryOrRetainedText (118935 ns)
+    [ PASSED ] CASE: reentrantExporterDoesNotJoinItselfOrHoldOwnerLock (122630 ns)
+    [ PASSED ] CASE: samplingIsStableAcrossSpansWithoutRetainingUniqueIds (4598273 ns)
+    [ PASSED ] CASE: cancellationDeadlineAndConcurrentFlushCloseRemainBounded (64762820 ns)
+    [ PASSED ] CASE: configurationBoundsRejectUnboundedWork (69758 ns)
+Summary: TOTAL: 9
+    PASSED: 9, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 399912881 ns, RESULT:
+TP: wirestack.*, time elapsed: 399757090 ns, RESULT:
+    PASSED:
+    TP: wirestack.observability, time elapsed: 391780714 ns
+Summary: TOTAL: 9
+    PASSED: 9, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

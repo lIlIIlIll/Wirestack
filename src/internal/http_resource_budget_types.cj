@@ -88,6 +88,12 @@ public struct HttpResourceBudgetSnapshot {
     public let highWaterManagedBufferBytes: UInt64
     public let highWaterAdmissionWaiters: Int64
     public let owners: Array<HttpResourceBudgetOwnerSnapshot>
+    /** Saturating lifetime rejection count sampled with all ledger counters. */
+    public let rejectedOperations: Int64
+    /** Saturating number of measured cancellations after owned cleanup. */
+    public let completedCancellations: Int64
+    /** Last measured cleanup duration; absent before the first completion. */
+    public let lastCancellationCompletionLatency: ?Duration
  
     public init(limits: HttpResourceBudgetPolicy, activeConnections: Int64,
         activeRequests: Int64, activeStreams: Int64, managedBufferBytes: UInt64,
@@ -95,7 +101,9 @@ public struct HttpResourceBudgetSnapshot {
         highWaterStreams: Int64, highWaterManagedBufferBytes: UInt64,
         highWaterAdmissionWaiters: Int64, owners: Array<HttpResourceBudgetOwnerSnapshot>,
         sampledAt!: MonoTime = MonoTime.now(), reservedConnections!: Int64 = 0,
-        reservedStreams!: Int64 = 0) {
+        reservedStreams!: Int64 = 0, rejectedOperations!: Int64 = 0,
+        completedCancellations!: Int64 = 0,
+        lastCancellationCompletionLatency!: ?Duration = None<Duration>) {
         this.limits = limits
         this.activeConnections = activeConnections
         this.reservedConnections = reservedConnections
@@ -111,5 +119,8 @@ public struct HttpResourceBudgetSnapshot {
         this.highWaterManagedBufferBytes = highWaterManagedBufferBytes
         this.highWaterAdmissionWaiters = highWaterAdmissionWaiters
         this.owners = owners
+        this.rejectedOperations = rejectedOperations
+        this.completedCancellations = completedCancellations
+        this.lastCancellationCompletionLatency = lastCancellationCompletionLatency
     }
 }
