@@ -372,6 +372,23 @@ public class HttpClient <: Resource {
     }
 
     /**
+     * Sends a request without retry or redirect replay, including replayable POST bodies.
+     * Pool selection, cancellation, resource admission and event correlation are unchanged.
+     * @param request The request submitted at most once.
+     * @param context Shared absolute deadline and cancellation for the response lifetime.
+     * @param trailer Request trailers.
+     * @return An owned response; redirects are returned to the caller unchanged.
+     */
+    public func sendOnce(request: HttpRequest,
+        context!: OperationContext = OperationContext.background(),
+        trailer!: HttpTrailer = HttpTrailer()
+    ): HttpResponse {
+        sendInternal(request.withRetrySafety(HttpRetrySafety.Disabled), context, trailer,
+            None<HttpRequestCancellationHandle>, None<HttpConnectionCancellationHandle>,
+            None<HttpStreamCancellationHandle>, followRedirects: false)
+    }
+
+    /**
      * Establishes an uncompressed WebSocket over HTTP/1.1 or negotiated HTTP/2.
      * Rejected handshakes return an owned response. No redirects or retries replay the handshake.
      * @param url Absolute HTTP or HTTPS URL of the WebSocket resource.
@@ -510,13 +527,34 @@ public class HttpClient <: Resource {
         )
     }
 
+    /**
+     * Reserves bounded response-consumer storage in this client's real managed-buffer ledger.
+     * This DATA-class reservation cannot consume control-frame or HTTP/2 receive-window reserves.
+     * @param url Origin and configured route owning the storage.
+     * @param bytes Maximum retained bytes; must be positive and fit the configured ledger.
+     * @param context Original deadline and cancellation bounding admission.
+     * @return An idempotent lease; the consumer closes it when its storage is released.
+     */
+    public func reserveResponseBuffer(url: HttpUrl, bytes: UInt64,
+        context!: OperationContext = OperationContext.background()): Resource {
+        if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
+        let dataCapacity = resourceLimits.maximumManagedBufferBytes -
+            resourceLimits.reservedControlBufferBytes - UInt64(resourceLimits.maximumConnections) * 65535u64
+        if (bytes == 0u64 || bytes > min(dataCapacity,
+            min(resourceLimits.maximumManagedBufferBytesPerRoute, resourceLimits.maximumManagedBufferBytesPerOrigin))) {
+            throw IllegalArgumentException("response buffer reservation cannot fit the configured DATA capacity")
+        }
+        resourceBudget.acquireManagedBuffer(resourceOwner(url), bytes, false, context)
+    }
+
     private func sendInternal(
         request: HttpRequest,
         context: OperationContext,
         trailer: HttpTrailer,
         requestCancellation: ?HttpRequestCancellationHandle,
         connectionCancellation: ?HttpConnectionCancellationHandle,
-        streamCancellation: ?HttpStreamCancellationHandle
+        streamCancellation: ?HttpStreamCancellationHandle,
+        followRedirects!: Bool = true
     ): HttpResponse {
         let bounded = match (requestTimeout) {
             case Some(value) => context.shortenDeadline(value)
@@ -550,9 +588,10 @@ public class HttpClient <: Resource {
                     current, operation, trailer, cancellation.connectionCancellation
                 )
                 let next = try {
-                    redirectPolicy.nextRequest(
-                        current, response, redirectsFollowed: redirectCount, limits: limits
-                    )
+                    if (followRedirects) {
+                        redirectPolicy.nextRequest(
+                            current, response, redirectsFollowed: redirectCount, limits: limits)
+                    } else { None<HttpRequest> }
                 } catch (error: Exception) {
                     response.close()
                     throw error

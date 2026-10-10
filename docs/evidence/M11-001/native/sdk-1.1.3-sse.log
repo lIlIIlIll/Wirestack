@@ -1,0 +1,1460 @@
+[33mwarning[0m: unused import 'std.sync.*'
+ [36m==>[0m <repo>/src/sse/native_framing_test.cj:3:1:
+  [36m| [0m
+[36m3[0m [36m| [0mimport std.sync.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.72 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.73 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.74 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 6.1 */@Attribute[TEST_GENERATED] class SseDecoderTests <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 6.2 */    @Attribute[TestCase_0][0m
+    [36m| [0m[34m|[0m /* 6.3 */    func bomAndLineEndingsHaveIndependentExpectedEvents(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.4 */        let decoder = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.5 */        let bytes = "\u{feff}data: €😀\r\nid: first\r\n\r\ndata: second\r\rdata: third\n\n".toArray()[0m
+    [36m| [0m[34m|[0m /* 6.6 */        let first = decoder.decode(bytes)[0m
+    [36m| [0m[34m|[0m /* 6.7 */        expectEqual("first.event.getOrThrow().data", "\"€😀\"", first.event.getOrThrow().data, "€😀", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.8 */        expectEqual("first.event.getOrThrow().lastEventId", "\"first\"", first.event.getOrThrow().lastEventId, "first", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.9 */        let second = decoder.decode(bytes, offset: first.consumed)[0m
+    [36m| [0m[34m|[0m /* 6.10 */        expectEqual("second.event.getOrThrow().data", "\"second\"", second.event.getOrThrow().data, "second", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.11 */        let third = decoder.decode(bytes, offset: first.consumed + second.consumed)[0m
+    [36m| [0m[34m|[0m /* 6.12 */        expectEqual("third.event.getOrThrow().data", "\"third\"", third.event.getOrThrow().data, "third", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.13 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.14 */        let doubled = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.15 */        expectEqual("doubled.decode(\"\\u{feff}\\u{feff}data: ignored\\n\\n\".toArray()).event.isNone()", "true", doubled.decode("\u{feff}\u{feff}data: ignored\n\n".toArray()).event.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.16 */        expectEqual("doubled.decode(\"data: kept\\n\\n\".toArray()).event.getOrThrow().data", "\"kept\"", doubled.decode("data: kept\n\n".toArray()).event.getOrThrow().data, "kept", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.17 */        doubled.close()[0m
+    [36m| [0m[34m|[0m /* 6.18 */    }[0m
+    [36m| [0m[34m|[0m /* 6.19 */    [0m
+    [36m| [0m[34m|[0m /* 6.20 */    @Attribute[TestCase_1][0m
+    [36m| [0m[34m|[0m /* 6.21 */    func incompleteUtf8PrefixReplacesOnceAtLineEndAndEofNeverDispatches(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.22 */        for(prefix in[[226u8],[226u8, 130u8],[240u8, 144u8, 128u8]]) {[0m
+    [36m| [0m[34m|[0m /* 6.23 */            let decoder = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.24 */            let _ = decoder.decode("data:".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.25 */            let _ = decoder.decode(prefix)[0m
+    [36m| [0m[34m|[0m /* 6.26 */            expectEqual("decoder.decode([10u8, 10u8]).event.getOrThrow().data", "\"\\u{fffd}\"", decoder.decode([10u8, 10u8]).event.getOrThrow().data, "\u{fffd}", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.27 */            decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.28 */        }[0m
+    [36m| [0m[34m|[0m /* 6.29 */        let incomplete = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.30 */        expectEqual("incomplete.decode(\"data: x\\n\".toArray()).event.isNone()", "true", incomplete.decode("data: x\n".toArray()).event.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.31 */        incomplete.finish()[0m
+    [36m| [0m[34m|[0m /* 6.32 */        expectEqual("incomplete.lastEventId", "\"\"", incomplete.lastEventId, "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.33 */        incomplete.close()[0m
+    [36m| [0m[34m|[0m /* 6.34 */        expectEqual("incomplete.retainedBytes", "0u64", incomplete.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.35 */    }[0m
+    [36m| [0m[34m|[0m /* 6.36 */    [0m
+    [36m| [0m[34m|[0m /* 6.37 */    @Attribute[TestCase_2][0m
+    [36m| [0m[34m|[0m /* 6.38 */    func multilineEmptyDataAndOpaquePayload(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.39 */        let decoder = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.40 */        let input = "data: first\ndata:  second\nevent: custom\nid: cursor\n\ndata:\n\ndata: [DONE]\n\n".toArray()[0m
+    [36m| [0m[34m|[0m /* 6.41 */        let first = decoder.decode(input)[0m
+    [36m| [0m[34m|[0m /* 6.42 */        let event = first.event.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 6.43 */        expectEqual("event.data", "\"first\\n second\"", event.data, "first\n second", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.44 */        expectEqual("event.eventType", "\"custom\"", event.eventType, "custom", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.45 */        expectEqual("event.lastEventId", "\"cursor\"", event.lastEventId, "cursor", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.46 */        expectEqual("first.consumed < input.size", "true", first.consumed < input.size, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.47 */        let second = decoder.decode(input, offset: first.consumed)[0m
+    [36m| [0m[34m|[0m /* 6.48 */        expectEqual("second.event.getOrThrow().data", "\"\"", second.event.getOrThrow().data, "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.49 */        expectEqual("second.event.getOrThrow().eventType", "\"message\"", second.event.getOrThrow().eventType, "message", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.50 */        expectEqual("second.event.getOrThrow().lastEventId", "\"cursor\"", second.event.getOrThrow().lastEventId, "cursor", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.51 */        let third = decoder.decode(input, offset: first.consumed + second.consumed)[0m
+    [36m| [0m[34m|[0m /* 6.52 */        expectEqual("third.event.getOrThrow().data", "\"[DONE]\"", third.event.getOrThrow().data, "[DONE]", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.53 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.54 */    }[0m
+    [36m| [0m[34m|[0m /* 6.55 */    [0m
+    [36m| [0m[34m|[0m /* 6.56 */    @Attribute[TestCase_3][0m
+    [36m| [0m[34m|[0m /* 6.57 */    func cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommit(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.58 */        let decoder = SseDecoder(lastEventId: "old")[0m
+    [36m| [0m[34m|[0m /* 6.59 */        let _ = decoder.decode("id: next\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.60 */        expectEqual("decoder.lastEventId", "\"old\"", decoder.lastEventId, "old", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.61 */        expectEqual("decoder.decode(\"\\n\".toArray()).event.isNone()", "true", decoder.decode("\n".toArray()).event.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.62 */        expectEqual("decoder.lastEventId", "\"next\"", decoder.lastEventId, "next", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.63 */        let _ = decoder.decode("id: unfinished\ndata: pending\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.64 */        decoder.finish()[0m
+    [36m| [0m[34m|[0m /* 6.65 */        expectEqual("decoder.lastEventId", "\"next\"", decoder.lastEventId, "next", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.66 */        expectEqual("try {\n    try {\n        assertEqual(\"true\", \"true\", true, true)\n        decoder.decode(Array < Byte >())\n        fail(\"@AssertThrows: Expected \'SseException\' was not caught.\")\n    } catch(e: SseException) {\n        if(e is AssertException) {\n            throw e\n        }\n        if(e is AssertIntermediateException) {\n            throw e\n        }\n        if(e is UnittestTimeoutException) {\n            throw e\n        }\n        e\n    }\n} catch(e: Exception) {\n    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {\n        throw e\n    }\n    assertCaughtUnexpectedE(\"@AssertThrows(SseException)\", \"SseException\", e.toString())\n}\n.code == SseErrorCode.Closed", "true", try {[0m
+    [36m| [0m[34m|[0m /* 6.67 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.68 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.69 */                decoder.decode(Array < Byte >())[0m
+    [36m| [0m[34m|[0m /* 6.70 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.71 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.72 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.73 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.74 */                }[0m
+    [36m| [0m[34m|[0m /* 6.75 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.76 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.77 */                }[0m
+    [36m| [0m[34m|[0m /* 6.78 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.79 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.80 */                }[0m
+    [36m| [0m[34m|[0m /* 6.81 */                e[0m
+    [36m| [0m[34m|[0m /* 6.82 */            }[0m
+    [36m| [0m[34m|[0m /* 6.83 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.84 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.85 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.86 */            }[0m
+    [36m| [0m[34m|[0m /* 6.87 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.88 */        }[0m
+    [36m| [0m[34m|[0m /* 6.89 */        .code == SseErrorCode.Closed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.90 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.91 */    }[0m
+    [36m| [0m[34m|[0m /* 6.92 */    [0m
+    [36m| [0m[34m|[0m /* 6.93 */    @Attribute[TestCase_4][0m
+    [36m| [0m[34m|[0m /* 6.94 */    func retryIsImmediateDigitOnlyClampedWithoutOverflow(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.95 */        let decoder = SseDecoder(limits: SseLimits(maximumRetryMilliseconds: 123u64))[0m
+    [36m| [0m[34m|[0m /* 6.96 */        let _ = decoder.decode("retry: 42\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.97 */        expectEqual("decoder.retryMilliseconds.getOrThrow()", "42u64", decoder.retryMilliseconds.getOrThrow(), 42u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.98 */        for(value in["", "-1", "+2", " 3", "4 ", "١", "999999999999999999999x"]) {[0m
+    [36m| [0m[34m|[0m /* 6.99 */            let _ = decoder.decode(("retry: " + value + "\n").toArray())[0m
+    [36m| [0m[34m|[0m /* 6.100 */            expectEqual("decoder.retryMilliseconds.getOrThrow()", "42u64", decoder.retryMilliseconds.getOrThrow(), 42u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.101 */        }[0m
+    [36m| [0m[34m|[0m /* 6.102 */        let _ = decoder.decode("retry: 999999999999999999999999999999999999999999\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.103 */        expectEqual("decoder.retryMilliseconds.getOrThrow()", "123u64", decoder.retryMilliseconds.getOrThrow(), 123u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.104 */        let _ = decoder.decode("retry: 00000\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.105 */        expectEqual("decoder.retryMilliseconds.getOrThrow()", "0u64", decoder.retryMilliseconds.getOrThrow(), 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.106 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.107 */    }[0m
+    [36m| [0m[34m|[0m /* 6.108 */    [0m
+    [36m| [0m[34m|[0m /* 6.109 */    @Attribute[TestCase_5][0m
+    [36m| [0m[34m|[0m /* 6.110 */    func nullIdIsIgnoredAndEmptyIdClearsCursor(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.111 */        let decoder = SseDecoder(lastEventId: "previous")[0m
+    [36m| [0m[34m|[0m /* 6.112 */        let first = decoder.decode("id: bad\u{0000}value\ndata: x\n\n".toArray()).event.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 6.113 */        expectEqual("first.lastEventId", "\"previous\"", first.lastEventId, "previous", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.114 */        let second = decoder.decode("id\ndata: y\n\n".toArray()).event.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 6.115 */        expectEqual("second.lastEventId", "\"\"", second.lastEventId, "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.116 */        expectEqual("decoder.lastEventId", "\"\"", decoder.lastEventId, "", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.117 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.118 */    }[0m
+    [36m| [0m[34m|[0m /* 6.119 */    [0m
+    [36m| [0m[34m|[0m /* 6.120 */    @Attribute[TestCase_6][0m
+    [36m| [0m[34m|[0m /* 6.121 */    func blankBlocksResetEventTypeAndFieldsNotNoProgress(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.122 */        let decoder = SseDecoder(limits: SseLimits(maximumFieldsPerEvent: 2))[0m
+    [36m| [0m[34m|[0m /* 6.123 */        let _ = decoder.decode("event: discarded\n\n: comment\nunknown: ignored\n\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.124 */        let event = decoder.decode("Event: case-sensitive\ndata: kept\n\n".toArray()).event.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 6.125 */        expectEqual("event.eventType", "\"message\"", event.eventType, "message", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.126 */        expectEqual("event.data", "\"kept\"", event.data, "kept", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.127 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.128 */    }[0m
+    [36m| [0m[34m|[0m /* 6.129 */    [0m
+    [36m| [0m[34m|[0m /* 6.130 */    @Attribute[TestCase_7][0m
+    [36m| [0m[34m|[0m /* 6.131 */    func malformedUtf8UsesEncodingStandardReplacement(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.132 */        let prefix = "data: ".toArray()[0m
+    [36m| [0m[34m|[0m /* 6.133 */        let malformed =[194u8, 65u8, 224u8, 128u8, 128u8, 237u8, 160u8, 128u8, 240u8, 144u8, 128u8, 244u8, 144u8, 128u8, 128u8, 255u8][0m
+    [36m| [0m[34m|[0m /* 6.134 */        let bytes = Array < Byte >(prefix.size + malformed.size + 2, repeat: 10u8)[0m
+    [36m| [0m[34m|[0m /* 6.135 */        prefix.copyTo(bytes)[0m
+    [36m| [0m[34m|[0m /* 6.136 */        malformed.copyTo(bytes, 0, prefix.size, malformed.size)[0m
+    [36m| [0m[34m|[0m /* 6.137 */        let decoder = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.138 */        let event = decoder.decode(bytes).event.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 6.139 */        expectEqual("event.data", "\"\\u{fffd}A\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\\u{fffd}\"", event.data, "\u{fffd}A\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}\u{fffd}", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.140 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.141 */    }[0m
+    [36m| [0m[34m|[0m /* 6.142 */    [0m
+    [36m| [0m[34m|[0m /* 6.143 */    @Attribute[TestCase_8][0m
+    [36m| [0m[34m|[0m /* 6.144 */    func lineBoundChecksBeforeGrowthAndFailureReleasesStorage(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.145 */        let limits = SseLimits(maximumLineBytes: 7)[0m
+    [36m| [0m[34m|[0m /* 6.146 */        let decoder = SseDecoder(limits: limits)[0m
+    [36m| [0m[34m|[0m /* 6.147 */        expectEqual("decoder.decode(\"data: x\\n\\n\".toArray()).event.getOrThrow().data", "\"x\"", decoder.decode("data: x\n\n".toArray()).event.getOrThrow().data, "x", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.148 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 6.149 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.150 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.151 */                decoder.decode("data: xx".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.152 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.153 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.154 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.155 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.156 */                }[0m
+    [36m| [0m[34m|[0m /* 6.157 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.158 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.159 */                }[0m
+    [36m| [0m[34m|[0m /* 6.160 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.161 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.162 */                }[0m
+    [36m| [0m[34m|[0m /* 6.163 */                e[0m
+    [36m| [0m[34m|[0m /* 6.164 */            }[0m
+    [36m| [0m[34m|[0m /* 6.165 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.166 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.167 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.168 */            }[0m
+    [36m| [0m[34m|[0m /* 6.169 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.170 */        }[0m
+    [36m| [0m[34m|[0m /* 6.171 */        [0m
+    [36m| [0m[34m|[0m /* 6.172 */        expectEqual("error.code == SseErrorCode.LineLimit", "true", error.code == SseErrorCode.LineLimit, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.173 */        expectEqual("decoder.retainedBytes", "0u64", decoder.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.174 */        expectEqual("try {\n    try {\n        assertEqual(\"true\", \"true\", true, true)\n        decoder.decode(Array < Byte >())\n        fail(\"@AssertThrows: Expected \'SseException\' was not caught.\")\n    } catch(e: SseException) {\n        if(e is AssertException) {\n            throw e\n        }\n        if(e is AssertIntermediateException) {\n            throw e\n        }\n        if(e is UnittestTimeoutException) {\n            throw e\n        }\n        e\n    }\n} catch(e: Exception) {\n    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {\n        throw e\n    }\n    assertCaughtUnexpectedE(\"@AssertThrows(SseException)\", \"SseException\", e.toString())\n}\n.code == SseErrorCode.Closed", "true", try {[0m
+    [36m| [0m[34m|[0m /* 6.175 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.176 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.177 */                decoder.decode(Array < Byte >())[0m
+    [36m| [0m[34m|[0m /* 6.178 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.179 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.180 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.181 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.182 */                }[0m
+    [36m| [0m[34m|[0m /* 6.183 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.184 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.185 */                }[0m
+    [36m| [0m[34m|[0m /* 6.186 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.187 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.188 */                }[0m
+    [36m| [0m[34m|[0m /* 6.189 */                e[0m
+    [36m| [0m[34m|[0m /* 6.190 */            }[0m
+    [36m| [0m[34m|[0m /* 6.191 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.192 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.193 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.194 */            }[0m
+    [36m| [0m[34m|[0m /* 6.195 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.196 */        }[0m
+    [36m| [0m[34m|[0m /* 6.197 */        .code == SseErrorCode.Closed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.198 */    }[0m
+    [36m| [0m[34m|[0m /* 6.199 */    [0m
+    [36m| [0m[34m|[0m /* 6.200 */    @Attribute[TestCase_9][0m
+    [36m| [0m[34m|[0m /* 6.201 */    func eventByteBoundIncludesIgnoredFieldsAndBlankDelimiter(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.202 */        let decoder = SseDecoder(limits: SseLimits(maximumEventBytes: 8))[0m
+    [36m| [0m[34m|[0m /* 6.203 */        expectEqual("decoder.decode(\"data:x\\n\\n\".toArray()).event.getOrThrow().data", "\"x\"", decoder.decode("data:x\n\n".toArray()).event.getOrThrow().data, "x", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.204 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 6.205 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.206 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.207 */                decoder.decode("x:1234567".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.208 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.209 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.210 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.211 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.212 */                }[0m
+    [36m| [0m[34m|[0m /* 6.213 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.214 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.215 */                }[0m
+    [36m| [0m[34m|[0m /* 6.216 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.217 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.218 */                }[0m
+    [36m| [0m[34m|[0m /* 6.219 */                e[0m
+    [36m| [0m[34m|[0m /* 6.220 */            }[0m
+    [36m| [0m[34m|[0m /* 6.221 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.222 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.223 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.224 */            }[0m
+    [36m| [0m[34m|[0m /* 6.225 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.226 */        }[0m
+    [36m| [0m[34m|[0m /* 6.227 */        [0m
+    [36m| [0m[34m|[0m /* 6.228 */        expectEqual("error.code == SseErrorCode.EventLimit", "true", error.code == SseErrorCode.EventLimit, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.229 */        expectEqual("decoder.retainedBytes", "0u64", decoder.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.230 */    }[0m
+    [36m| [0m[34m|[0m /* 6.231 */    [0m
+    [36m| [0m[34m|[0m /* 6.232 */    @Attribute[TestCase_10][0m
+    [36m| [0m[34m|[0m /* 6.233 */    func fieldsIncludeCommentsAndUnknownNames(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.234 */        let decoder = SseDecoder(limits: SseLimits(maximumFieldsPerEvent: 2))[0m
+    [36m| [0m[34m|[0m /* 6.235 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 6.236 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.237 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.238 */                decoder.decode(":a\nunknown\n:b\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.239 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.240 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.241 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.242 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.243 */                }[0m
+    [36m| [0m[34m|[0m /* 6.244 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.245 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.246 */                }[0m
+    [36m| [0m[34m|[0m /* 6.247 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.248 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.249 */                }[0m
+    [36m| [0m[34m|[0m /* 6.250 */                e[0m
+    [36m| [0m[34m|[0m /* 6.251 */            }[0m
+    [36m| [0m[34m|[0m /* 6.252 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.253 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.254 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.255 */            }[0m
+    [36m| [0m[34m|[0m /* 6.256 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.257 */        }[0m
+    [36m| [0m[34m|[0m /* 6.258 */        [0m
+    [36m| [0m[34m|[0m /* 6.259 */        expectEqual("error.code == SseErrorCode.FieldLimit", "true", error.code == SseErrorCode.FieldLimit, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.260 */        expectEqual("decoder.retainedBytes", "0u64", decoder.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.261 */    }[0m
+    [36m| [0m[34m|[0m /* 6.262 */    [0m
+    [36m| [0m[34m|[0m /* 6.263 */    @Attribute[TestCase_11][0m
+    [36m| [0m[34m|[0m /* 6.264 */    func noProgressIsNotResetByHeartbeatOrCursorOnlyBlocks(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.265 */        let decoder = SseDecoder(limits: SseLimits(maximumBytesWithoutEvent: 8))[0m
+    [36m| [0m[34m|[0m /* 6.266 */        let _ = decoder.decode(":\n\nid\n\n\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.267 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 6.268 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.269 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.270 */                decoder.decode("\n".toArray())[0m
+    [36m| [0m[34m|[0m /* 6.271 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.272 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.273 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.274 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.275 */                }[0m
+    [36m| [0m[34m|[0m /* 6.276 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.277 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.278 */                }[0m
+    [36m| [0m[34m|[0m /* 6.279 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.280 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.281 */                }[0m
+    [36m| [0m[34m|[0m /* 6.282 */                e[0m
+    [36m| [0m[34m|[0m /* 6.283 */            }[0m
+    [36m| [0m[34m|[0m /* 6.284 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.285 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.286 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.287 */            }[0m
+    [36m| [0m[34m|[0m /* 6.288 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.289 */        }[0m
+    [36m| [0m[34m|[0m /* 6.290 */        [0m
+    [36m| [0m[34m|[0m /* 6.291 */        expectEqual("error.code == SseErrorCode.NoProgress", "true", error.code == SseErrorCode.NoProgress, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.292 */        expectEqual("decoder.retainedBytes", "0u64", decoder.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.293 */        let progressing = SseDecoder(limits: SseLimits(maximumBytesWithoutEvent: 8))[0m
+    [36m| [0m[34m|[0m /* 6.294 */        for(_ in 0 .. 10) {[0m
+    [36m| [0m[34m|[0m /* 6.295 */            expectEqual("progressing.decode(\"data:x\\n\\n\".toArray()).event.getOrThrow().data", "\"x\"", progressing.decode("data:x\n\n".toArray()).event.getOrThrow().data, "x", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.296 */        }[0m
+    [36m| [0m[34m|[0m /* 6.297 */        progressing.close()[0m
+    [36m| [0m[34m|[0m /* 6.298 */    }[0m
+    [36m| [0m[34m|[0m /* 6.299 */    [0m
+    [36m| [0m[34m|[0m /* 6.300 */    @Attribute[TestCase_12][0m
+    [36m| [0m[34m|[0m /* 6.301 */    func decodedIdBoundIncludesReplacementExpansion(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.302 */        let decoder = SseDecoder(limits: SseLimits(maximumIdBytes: 3))[0m
+    [36m| [0m[34m|[0m /* 6.303 */        let first = decoder.decode([105u8, 100u8, 58u8, 255u8, 10u8, 10u8])[0m
+    [36m| [0m[34m|[0m /* 6.304 */        expectEqual("first.event.isNone()", "true", first.event.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.305 */        expectEqual("decoder.lastEventId", "\"\\u{fffd}\"", decoder.lastEventId, "\u{fffd}", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.306 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 6.307 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.308 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.309 */                decoder.decode([105u8, 100u8, 58u8, 255u8, 255u8, 10u8])[0m
+    [36m| [0m[34m|[0m /* 6.310 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.311 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.312 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.313 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.314 */                }[0m
+    [36m| [0m[34m|[0m /* 6.315 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.316 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.317 */                }[0m
+    [36m| [0m[34m|[0m /* 6.318 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.319 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.320 */                }[0m
+    [36m| [0m[34m|[0m /* 6.321 */                e[0m
+    [36m| [0m[34m|[0m /* 6.322 */            }[0m
+    [36m| [0m[34m|[0m /* 6.323 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.324 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.325 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.326 */            }[0m
+    [36m| [0m[34m|[0m /* 6.327 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.328 */        }[0m
+    [36m| [0m[34m|[0m /* 6.329 */        [0m
+    [36m| [0m[34m|[0m /* 6.330 */        expectEqual("error.code == SseErrorCode.IdLimit", "true", error.code == SseErrorCode.IdLimit, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.331 */        expectEqual("decoder.retainedBytes", "0u64", decoder.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.332 */    }[0m
+    [36m| [0m[34m|[0m /* 6.333 */    [0m
+    [36m| [0m[34m|[0m /* 6.334 */    @Attribute[TestCase_13][0m
+    [36m| [0m[34m|[0m /* 6.335 */    func windowsLifecycleAndHardCeilings(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.336 */        let decoder = SseDecoder()[0m
+    [36m| [0m[34m|[0m /* 6.337 */        expectEqual("decoder.decode(Array < Byte >()).consumed", "0", decoder.decode(Array < Byte >()).consumed, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.338 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.339 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.340 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.341 */                decoder.decode([0u8], offset: - 1)[0m
+    [36m| [0m[34m|[0m /* 6.342 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.343 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.344 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.345 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.346 */                }[0m
+    [36m| [0m[34m|[0m /* 6.347 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.348 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.349 */                }[0m
+    [36m| [0m[34m|[0m /* 6.350 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.351 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.352 */                }[0m
+    [36m| [0m[34m|[0m /* 6.353 */                e[0m
+    [36m| [0m[34m|[0m /* 6.354 */            }[0m
+    [36m| [0m[34m|[0m /* 6.355 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.356 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.357 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.358 */            }[0m
+    [36m| [0m[34m|[0m /* 6.359 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.360 */        }[0m
+    [36m| [0m[34m|[0m /* 6.361 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.362 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.363 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.364 */                decoder.decode([0u8], length: Int64.Max)[0m
+    [36m| [0m[34m|[0m /* 6.365 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.366 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.367 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.368 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.369 */                }[0m
+    [36m| [0m[34m|[0m /* 6.370 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.371 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.372 */                }[0m
+    [36m| [0m[34m|[0m /* 6.373 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.374 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.375 */                }[0m
+    [36m| [0m[34m|[0m /* 6.376 */                e[0m
+    [36m| [0m[34m|[0m /* 6.377 */            }[0m
+    [36m| [0m[34m|[0m /* 6.378 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.379 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.380 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.381 */            }[0m
+    [36m| [0m[34m|[0m /* 6.382 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.383 */        }[0m
+    [36m| [0m[34m|[0m /* 6.384 */        expectEqual("decoder.decode(\"xxdata:x\\n\\nyy\".toArray(), offset: 2, length: 8).event.getOrThrow().data", "\"x\"", decoder.decode("xxdata:x\n\nyy".toArray(), offset: 2, length: 8).event.getOrThrow().data, "x", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.385 */        expectEqual("decoder.retainedBytes <= SseLimits().maximumRetainedBytes", "true", decoder.retainedBytes <= SseLimits().maximumRetainedBytes, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.386 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.387 */        decoder.close()[0m
+    [36m| [0m[34m|[0m /* 6.388 */        decoder.finish()[0m
+    [36m| [0m[34m|[0m /* 6.389 */        expectEqual("decoder.retainedBytes", "0u64", decoder.retainedBytes, 0u64, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.390 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.391 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.392 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.393 */                SseLimits(maximumLineBytes: 0)[0m
+    [36m| [0m[34m|[0m /* 6.394 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.395 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.396 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.397 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.398 */                }[0m
+    [36m| [0m[34m|[0m /* 6.399 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.400 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.401 */                }[0m
+    [36m| [0m[34m|[0m /* 6.402 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.403 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.404 */                }[0m
+    [36m| [0m[34m|[0m /* 6.405 */                e[0m
+    [36m| [0m[34m|[0m /* 6.406 */            }[0m
+    [36m| [0m[34m|[0m /* 6.407 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.408 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.409 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.410 */            }[0m
+    [36m| [0m[34m|[0m /* 6.411 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.412 */        }[0m
+    [36m| [0m[34m|[0m /* 6.413 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.414 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.415 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.416 */                SseLimits(maximumEventBytes: 16 * 1024 * 1024 + 1)[0m
+    [36m| [0m[34m|[0m /* 6.417 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.418 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.419 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.420 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.421 */                }[0m
+    [36m| [0m[34m|[0m /* 6.422 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.423 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.424 */                }[0m
+    [36m| [0m[34m|[0m /* 6.425 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.426 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.427 */                }[0m
+    [36m| [0m[34m|[0m /* 6.428 */                e[0m
+    [36m| [0m[34m|[0m /* 6.429 */            }[0m
+    [36m| [0m[34m|[0m /* 6.430 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.431 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.432 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.433 */            }[0m
+    [36m| [0m[34m|[0m /* 6.434 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.435 */        }[0m
+    [36m| [0m[34m|[0m /* 6.436 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.437 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.438 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.439 */                SseLimits(maximumFieldsPerEvent: 65537)[0m
+    [36m| [0m[34m|[0m /* 6.440 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.441 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.442 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.443 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.444 */                }[0m
+    [36m| [0m[34m|[0m /* 6.445 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.446 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.447 */                }[0m
+    [36m| [0m[34m|[0m /* 6.448 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.449 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.450 */                }[0m
+    [36m| [0m[34m|[0m /* 6.451 */                e[0m
+    [36m| [0m[34m|[0m /* 6.452 */            }[0m
+    [36m| [0m[34m|[0m /* 6.453 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.454 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.455 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.456 */            }[0m
+    [36m| [0m[34m|[0m /* 6.457 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.458 */        }[0m
+    [36m| [0m[34m|[0m /* 6.459 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.460 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.461 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.462 */                SseLimits(maximumBytesWithoutEvent: 64 * 1024 * 1024 + 1)[0m
+    [36m| [0m[34m|[0m /* 6.463 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.464 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.465 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.466 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.467 */                }[0m
+    [36m| [0m[34m|[0m /* 6.468 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.469 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.470 */                }[0m
+    [36m| [0m[34m|[0m /* 6.471 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.472 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.473 */                }[0m
+    [36m| [0m[34m|[0m /* 6.474 */                e[0m
+    [36m| [0m[34m|[0m /* 6.475 */            }[0m
+    [36m| [0m[34m|[0m /* 6.476 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.477 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.478 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.479 */            }[0m
+    [36m| [0m[34m|[0m /* 6.480 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.481 */        }[0m
+    [36m| [0m[34m|[0m /* 6.482 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.483 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.484 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.485 */                SseLimits(maximumIdBytes: 65537)[0m
+    [36m| [0m[34m|[0m /* 6.486 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.487 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.488 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.489 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.490 */                }[0m
+    [36m| [0m[34m|[0m /* 6.491 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.492 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.493 */                }[0m
+    [36m| [0m[34m|[0m /* 6.494 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.495 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.496 */                }[0m
+    [36m| [0m[34m|[0m /* 6.497 */                e[0m
+    [36m| [0m[34m|[0m /* 6.498 */            }[0m
+    [36m| [0m[34m|[0m /* 6.499 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.500 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.501 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.502 */            }[0m
+    [36m| [0m[34m|[0m /* 6.503 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.504 */        }[0m
+    [36m| [0m[34m|[0m /* 6.505 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.506 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.507 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.508 */                SseLimits(maximumRetryMilliseconds: 86400001u64)[0m
+    [36m| [0m[34m|[0m /* 6.509 */                fail("@AssertThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.510 */            } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 6.511 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.512 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.513 */                }[0m
+    [36m| [0m[34m|[0m /* 6.514 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.515 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.516 */                }[0m
+    [36m| [0m[34m|[0m /* 6.517 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.518 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.519 */                }[0m
+    [36m| [0m[34m|[0m /* 6.520 */                e[0m
+    [36m| [0m[34m|[0m /* 6.521 */            }[0m
+    [36m| [0m[34m|[0m /* 6.522 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.523 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.524 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.525 */            }[0m
+    [36m| [0m[34m|[0m /* 6.526 */            assertCaughtUnexpectedE("@AssertThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.527 */        }[0m
+    [36m| [0m[34m|[0m /* 6.528 */        expectEqual("try {\n    try {\n        assertEqual(\"true\", \"true\", true, true)\n        SseDecoder(lastEventId: \"bad\\n\")\n        fail(\"@AssertThrows: Expected \'SseException\' was not caught.\")\n    } catch(e: SseException) {\n        if(e is AssertException) {\n            throw e\n        }\n        if(e is AssertIntermediateException) {\n            throw e\n        }\n        if(e is UnittestTimeoutException) {\n            throw e\n        }\n        e\n    }\n} catch(e: Exception) {\n    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {\n        throw e\n    }\n    assertCaughtUnexpectedE(\"@AssertThrows(SseException)\", \"SseException\", e.toString())\n}\n.code == SseErrorCode.InvalidMetadata", "true", try {[0m
+    [36m| [0m[34m|[0m /* 6.529 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.530 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.531 */                SseDecoder(lastEventId: "bad\n")[0m
+    [36m| [0m[34m|[0m /* 6.532 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.533 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.534 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.535 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.536 */                }[0m
+    [36m| [0m[34m|[0m /* 6.537 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.538 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.539 */                }[0m
+    [36m| [0m[34m|[0m /* 6.540 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.541 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.542 */                }[0m
+    [36m| [0m[34m|[0m /* 6.543 */                e[0m
+    [36m| [0m[34m|[0m /* 6.544 */            }[0m
+    [36m| [0m[34m|[0m /* 6.545 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.546 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.547 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.548 */            }[0m
+    [36m| [0m[34m|[0m /* 6.549 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.550 */        }[0m
+    [36m| [0m[34m|[0m /* 6.551 */        .code == SseErrorCode.InvalidMetadata, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.552 */        expectEqual("try {\n    try {\n        assertEqual(\"true\", \"true\", true, true)\n        SseDecoder(limits: SseLimits(maximumIdBytes: 1), lastEventId: \"xx\")\n        fail(\"@AssertThrows: Expected \'SseException\' was not caught.\")\n    } catch(e: SseException) {\n        if(e is AssertException) {\n            throw e\n        }\n        if(e is AssertIntermediateException) {\n            throw e\n        }\n        if(e is UnittestTimeoutException) {\n            throw e\n        }\n        e\n    }\n} catch(e: Exception) {\n    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {\n        throw e\n    }\n    assertCaughtUnexpectedE(\"@AssertThrows(SseException)\", \"SseException\", e.toString())\n}\n.code == SseErrorCode.IdLimit", "true", try {[0m
+    [36m| [0m[34m|[0m /* 6.553 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.554 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.555 */                SseDecoder(limits: SseLimits(maximumIdBytes: 1), lastEventId: "xx")[0m
+    [36m| [0m[34m|[0m /* 6.556 */                fail("@AssertThrows: Expected 'SseException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.557 */            } catch(e: SseException) {[0m
+    [36m| [0m[34m|[0m /* 6.558 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.559 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.560 */                }[0m
+    [36m| [0m[34m|[0m /* 6.561 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.562 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.563 */                }[0m
+    [36m| [0m[34m|[0m /* 6.564 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.565 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.566 */                }[0m
+    [36m| [0m[34m|[0m /* 6.567 */                e[0m
+    [36m| [0m[34m|[0m /* 6.568 */            }[0m
+    [36m| [0m[34m|[0m /* 6.569 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.570 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.571 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.572 */            }[0m
+    [36m| [0m[34m|[0m /* 6.573 */            assertCaughtUnexpectedE("@AssertThrows(SseException)", "SseException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.574 */        }[0m
+    [36m| [0m[34m|[0m /* 6.575 */        .code == SseErrorCode.IdLimit, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.576 */    }[0m
+    [36m| [0m[34m|[0m /* 6.577 */    [0m
+    [36m| [0m[34m|[0m /* 6.578 */    init() {[0m
+    [36m| [0m[34m|[0m /* 6.579 */    }[0m
+    [36m| [0m[34m|[0m /* 6.580 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 6.581 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.582 */        [0m
+    [36m| [0m[34m|[0m /* 6.583 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 6.584 */    }[0m
+    [36m| [0m[34m|[0m /* 6.585 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 6.586 */        [0m
+    [36m| [0m[34m|[0m /* 6.587 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 6.588 */        let suiteBuilder = TestSuite.builder("SseDecoderTests").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 6.589 */        [0m
+    [36m| [0m[34m|[0m /* 6.590 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.591 */            [0m
+    [36m| [0m[34m|[0m /* 6.592 */            let bomAndLineEndingsHaveIndependentExpectedEventsTestFunc = { => bomAndLineEndingsHaveIndependentExpectedEvents();() }[0m
+    [36m| [0m[34m|[0m /* 6.593 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.594 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.595 */            "bomAndLineEndingsHaveIndependentExpectedEvents",[0m
+    [36m| [0m[34m|[0m /* 6.596 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.597 */            body: bomAndLineEndingsHaveIndependentExpectedEventsTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.598 */            )[0m
+    [36m| [0m[34m|[0m /* 6.599 */            )[0m
+    [36m| [0m[34m|[0m /* 6.600 */            [0m
+    [36m| [0m[34m|[0m /* 6.601 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.602 */        [0m
+    [36m| [0m[34m|[0m /* 6.603 */        [0m
+    [36m| [0m[34m|[0m /* 6.604 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.605 */            [0m
+    [36m| [0m[34m|[0m /* 6.606 */            let incompleteUtf8PrefixReplacesOnceAtLineEndAndEofNeverDispatchesTestFunc = { => incompleteUtf8PrefixReplacesOnceAtLineEndAndEofNeverDispatches();() }[0m
+    [36m| [0m[34m|[0m /* 6.607 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.608 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.609 */            "incompleteUtf8PrefixReplacesOnceAtLineEndAndEofNeverDispatches",[0m
+    [36m| [0m[34m|[0m /* 6.610 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.611 */            body: incompleteUtf8PrefixReplacesOnceAtLineEndAndEofNeverDispatchesTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.612 */            )[0m
+    [36m| [0m[34m|[0m /* 6.613 */            )[0m
+    [36m| [0m[34m|[0m /* 6.614 */            [0m
+    [36m| [0m[34m|[0m /* 6.615 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.616 */        [0m
+    [36m| [0m[34m|[0m /* 6.617 */        [0m
+    [36m| [0m[34m|[0m /* 6.618 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.619 */            [0m
+    [36m| [0m[34m|[0m /* 6.620 */            let multilineEmptyDataAndOpaquePayloadTestFunc = { => multilineEmptyDataAndOpaquePayload();() }[0m
+    [36m| [0m[34m|[0m /* 6.621 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.622 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.623 */            "multilineEmptyDataAndOpaquePayload",[0m
+    [36m| [0m[34m|[0m /* 6.624 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.625 */            body: multilineEmptyDataAndOpaquePayloadTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.626 */            )[0m
+    [36m| [0m[34m|[0m /* 6.627 */            )[0m
+    [36m| [0m[34m|[0m /* 6.628 */            [0m
+    [36m| [0m[34m|[0m /* 6.629 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.630 */        [0m
+    [36m| [0m[34m|[0m /* 6.631 */        [0m
+    [36m| [0m[34m|[0m /* 6.632 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.633 */            [0m
+    [36m| [0m[34m|[0m /* 6.634 */            let cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommitTestFunc = { => cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommit();() }[0m
+    [36m| [0m[34m|[0m /* 6.635 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.636 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.637 */            "cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommit",[0m
+    [36m| [0m[34m|[0m /* 6.638 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.639 */            body: cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommitTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.640 */            )[0m
+    [36m| [0m[34m|[0m /* 6.641 */            )[0m
+    [36m| [0m[34m|[0m /* 6.642 */            [0m
+    [36m| [0m[34m|[0m /* 6.643 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.644 */        [0m
+    [36m| [0m[34m|[0m /* 6.645 */        [0m
+    [36m| [0m[34m|[0m /* 6.646 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.647 */            [0m
+    [36m| [0m[34m|[0m /* 6.648 */            let retryIsImmediateDigitOnlyClampedWithoutOverflowTestFunc = { => retryIsImmediateDigitOnlyClampedWithoutOverflow();() }[0m
+    [36m| [0m[34m|[0m /* 6.649 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.650 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.651 */            "retryIsImmediateDigitOnlyClampedWithoutOverflow",[0m
+    [36m| [0m[34m|[0m /* 6.652 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.653 */            body: retryIsImmediateDigitOnlyClampedWithoutOverflowTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.654 */            )[0m
+    [36m| [0m[34m|[0m /* 6.655 */            )[0m
+    [36m| [0m[34m|[0m /* 6.656 */            [0m
+    [36m| [0m[34m|[0m /* 6.657 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.658 */        [0m
+    [36m| [0m[34m|[0m /* 6.659 */        [0m
+    [36m| [0m[34m|[0m /* 6.660 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.661 */            [0m
+    [36m| [0m[34m|[0m /* 6.662 */            let nullIdIsIgnoredAndEmptyIdClearsCursorTestFunc = { => nullIdIsIgnoredAndEmptyIdClearsCursor();() }[0m
+    [36m| [0m[34m|[0m /* 6.663 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.664 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.665 */            "nullIdIsIgnoredAndEmptyIdClearsCursor",[0m
+    [36m| [0m[34m|[0m /* 6.666 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.667 */            body: nullIdIsIgnoredAndEmptyIdClearsCursorTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.668 */            )[0m
+    [36m| [0m[34m|[0m /* 6.669 */            )[0m
+    [36m| [0m[34m|[0m /* 6.670 */            [0m
+    [36m| [0m[34m|[0m /* 6.671 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.672 */        [0m
+    [36m| [0m[34m|[0m /* 6.673 */        [0m
+    [36m| [0m[34m|[0m /* 6.674 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.675 */            [0m
+    [36m| [0m[34m|[0m /* 6.676 */            let blankBlocksResetEventTypeAndFieldsNotNoProgressTestFunc = { => blankBlocksResetEventTypeAndFieldsNotNoProgress();() }[0m
+    [36m| [0m[34m|[0m /* 6.677 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.678 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.679 */            "blankBlocksResetEventTypeAndFieldsNotNoProgress",[0m
+    [36m| [0m[34m|[0m /* 6.680 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.681 */            body: blankBlocksResetEventTypeAndFieldsNotNoProgressTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.682 */            )[0m
+    [36m| [0m[34m|[0m /* 6.683 */            )[0m
+    [36m| [0m[34m|[0m /* 6.684 */            [0m
+    [36m| [0m[34m|[0m /* 6.685 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.686 */        [0m
+    [36m| [0m[34m|[0m /* 6.687 */        [0m
+    [36m| [0m[34m|[0m /* 6.688 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.689 */            [0m
+    [36m| [0m[34m|[0m /* 6.690 */            let malformedUtf8UsesEncodingStandardReplacementTestFunc = { => malformedUtf8UsesEncodingStandardReplacement();() }[0m
+    [36m| [0m[34m|[0m /* 6.691 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.692 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.693 */            "malformedUtf8UsesEncodingStandardReplacement",[0m
+    [36m| [0m[34m|[0m /* 6.694 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.695 */            body: malformedUtf8UsesEncodingStandardReplacementTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.696 */            )[0m
+    [36m| [0m[34m|[0m /* 6.697 */            )[0m
+    [36m| [0m[34m|[0m /* 6.698 */            [0m
+    [36m| [0m[34m|[0m /* 6.699 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.700 */        [0m
+    [36m| [0m[34m|[0m /* 6.701 */        [0m
+    [36m| [0m[34m|[0m /* 6.702 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.703 */            [0m
+    [36m| [0m[34m|[0m /* 6.704 */            let lineBoundChecksBeforeGrowthAndFailureReleasesStorageTestFunc = { => lineBoundChecksBeforeGrowthAndFailureReleasesStorage();() }[0m
+    [36m| [0m[34m|[0m /* 6.705 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.706 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.707 */            "lineBoundChecksBeforeGrowthAndFailureReleasesStorage",[0m
+    [36m| [0m[34m|[0m /* 6.708 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.709 */            body: lineBoundChecksBeforeGrowthAndFailureReleasesStorageTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.710 */            )[0m
+    [36m| [0m[34m|[0m /* 6.711 */            )[0m
+    [36m| [0m[34m|[0m /* 6.712 */            [0m
+    [36m| [0m[34m|[0m /* 6.713 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.714 */        [0m
+    [36m| [0m[34m|[0m /* 6.715 */        [0m
+    [36m| [0m[34m|[0m /* 6.716 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.717 */            [0m
+    [36m| [0m[34m|[0m /* 6.718 */            let eventByteBoundIncludesIgnoredFieldsAndBlankDelimiterTestFunc = { => eventByteBoundIncludesIgnoredFieldsAndBlankDelimiter();() }[0m
+    [36m| [0m[34m|[0m /* 6.719 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.720 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.721 */            "eventByteBoundIncludesIgnoredFieldsAndBlankDelimiter",[0m
+    [36m| [0m[34m|[0m /* 6.722 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.723 */            body: eventByteBoundIncludesIgnoredFieldsAndBlankDelimiterTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.724 */            )[0m
+    [36m| [0m[34m|[0m /* 6.725 */            )[0m
+    [36m| [0m[34m|[0m /* 6.726 */            [0m
+    [36m| [0m[34m|[0m /* 6.727 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.728 */        [0m
+    [36m| [0m[34m|[0m /* 6.729 */        [0m
+    [36m| [0m[34m|[0m /* 6.730 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.731 */            [0m
+    [36m| [0m[34m|[0m /* 6.732 */            let fieldsIncludeCommentsAndUnknownNamesTestFunc = { => fieldsIncludeCommentsAndUnknownNames();() }[0m
+    [36m| [0m[34m|[0m /* 6.733 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.734 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.735 */            "fieldsIncludeCommentsAndUnknownNames",[0m
+    [36m| [0m[34m|[0m /* 6.736 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.737 */            body: fieldsIncludeCommentsAndUnknownNamesTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.738 */            )[0m
+    [36m| [0m[34m|[0m /* 6.739 */            )[0m
+    [36m| [0m[34m|[0m /* 6.740 */            [0m
+    [36m| [0m[34m|[0m /* 6.741 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.742 */        [0m
+    [36m| [0m[34m|[0m /* 6.743 */        [0m
+    [36m| [0m[34m|[0m /* 6.744 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.745 */            [0m
+    [36m| [0m[34m|[0m /* 6.746 */            let noProgressIsNotResetByHeartbeatOrCursorOnlyBlocksTestFunc = { => noProgressIsNotResetByHeartbeatOrCursorOnlyBlocks();() }[0m
+    [36m| [0m[34m|[0m /* 6.747 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.748 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.749 */            "noProgressIsNotResetByHeartbeatOrCursorOnlyBlocks",[0m
+    [36m| [0m[34m|[0m /* 6.750 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.751 */            body: noProgressIsNotResetByHeartbeatOrCursorOnlyBlocksTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.752 */            )[0m
+    [36m| [0m[34m|[0m /* 6.753 */            )[0m
+    [36m| [0m[34m|[0m /* 6.754 */            [0m
+    [36m| [0m[34m|[0m /* 6.755 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.756 */        [0m
+    [36m| [0m[34m|[0m /* 6.757 */        [0m
+    [36m| [0m[34m|[0m /* 6.758 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.759 */            [0m
+    [36m| [0m[34m|[0m /* 6.760 */            let decodedIdBoundIncludesReplacementExpansionTestFunc = { => decodedIdBoundIncludesReplacementExpansion();() }[0m
+    [36m| [0m[34m|[0m /* 6.761 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.762 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.763 */            "decodedIdBoundIncludesReplacementExpansion",[0m
+    [36m| [0m[34m|[0m /* 6.764 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.765 */            body: decodedIdBoundIncludesReplacementExpansionTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.766 */            )[0m
+    [36m| [0m[34m|[0m /* 6.767 */            )[0m
+    [36m| [0m[34m|[0m /* 6.768 */            [0m
+    [36m| [0m[34m|[0m /* 6.769 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.770 */        [0m
+    [36m| [0m[34m|[0m /* 6.771 */        [0m
+    [36m| [0m[34m|[0m /* 6.772 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.773 */            [0m
+    [36m| [0m[34m|[0m /* 6.774 */            let windowsLifecycleAndHardCeilingsTestFunc = { => windowsLifecycleAndHardCeilings();() }[0m
+    [36m| [0m[34m|[0m /* 6.775 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.776 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.777 */            "windowsLifecycleAndHardCeilings",[0m
+    [36m| [0m[34m|[0m /* 6.778 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.779 */            body: windowsLifecycleAndHardCeilingsTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.780 */            )[0m
+    [36m| [0m[34m|[0m /* 6.781 */            )[0m
+    [36m| [0m[34m|[0m /* 6.782 */            [0m
+    [36m| [0m[34m|[0m /* 6.783 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.784 */        [0m
+    [36m| [0m[34m|[0m /* 6.785 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 6.786 */    }[0m
+    [36m| [0m[34m|[0m /* 6.787 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 6.788 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 6.789 */    }[0m
+    [36m| [0m[34m|[0m /* 6.790 */}[0m
+    [36m| [0m[34m|[0m /* 6.791 */[0m
+    [36m| [0m[34m|[0m /* 6.792 */[0m
+    [36m| [0m[34m|[0m /* 6.793 */interface TestPackageExtension_SseDecoderTests {[0m
+    [36m| [0m[34m|[0m /* 6.794 */    func registerSseDecoderTests(): Unit[0m
+    [36m| [0m[34m|[0m /* 6.795 */}[0m
+    [36m| [0m[34m|[0m /* 6.796 */extend TestPackage <: TestPackageExtension_SseDecoderTests {[0m
+    [36m| [0m[34m|[0m /* 6.797 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 6.798 */    public func registerSseDecoderTests() {[0m
+    [36m| [0m[34m|[0m /* 6.799 */        registerSuite({ => SseDecoderTests().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 6.800 */    }[0m
+    [36m| [0m[34m|[0m /* 6.801 */}[0m
+    [36m| [0m[34m|[0m /* 6.802 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.75 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.76 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.77 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.78 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.79 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.80 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m==>[0m <repo>/src/sse/streaming_profile_test.cj:122:312:
+    [36m| [0m
+[36m122[0m [36m| [0m        @ExpectThrows[SseException](session.receive())[0m
+    [36m| [0m                                                       [33m^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/sse/streaming_profile_test.cj:122:432:
+    [36m| [0m
+[36m122[0m [36m| [0m        @ExpectThrows[SseException](session.receive())[0m
+    [36m| [0m                                                       [33m^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/sse/streaming_profile_test.cj:122:542:
+    [36m| [0m
+[36m122[0m [36m| [0m        @ExpectThrows[SseException](session.receive())[0m
+    [36m| [0m                                                       [33m^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/sse/streaming_profile_test.cj:122:649:
+    [36m| [0m
+[36m122[0m [36m| [0m        @ExpectThrows[SseException](session.receive())[0m
+    [36m| [0m                                                       [33m^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused expression
+   [36m==>[0m <repo>/src/sse/streaming_profile_test.cj:122:1098:
+    [36m| [0m
+[36m122[0m [36m| [0m        @ExpectThrows[SseException](session.receive())[0m
+    [36m| [0m                                                       [33m^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.154 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.155 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.156 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.157 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.158 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.159 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.160 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.161 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.162 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.180 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.181 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.182 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.183 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.184 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.185 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.186 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.187 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.188 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.210 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.211 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.212 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.213 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.214 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.215 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.216 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.217 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.218 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.241 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.242 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.243 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.244 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.245 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.246 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.247 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.248 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.249 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.273 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.274 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.275 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.276 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.277 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.278 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.279 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.280 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.281 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.312 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.313 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.314 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.315 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.316 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.317 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.318 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.319 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.320 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.534 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.535 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.536 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.537 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.538 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.539 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.540 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.541 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.542 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.558 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.559 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.560 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.561 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.562 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.563 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 6.564 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 6.565 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 6.566 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m___________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/sse/decoder_test.cj:6:1:
+    [36m| [0m
+[36m6[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m   [36m| [0m[34m|[0m class SseDecoderTests {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m188[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+33 warnings generated, 33 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.sse, time elapsed: 7252468261 ns, RESULT:
+    TCS: SseDecoderTests, time elapsed: 267600040 ns, RESULT:
+    [ PASSED ] CASE: bomAndLineEndingsHaveIndependentExpectedEvents (31165696 ns)
+    [ PASSED ] CASE: incompleteUtf8PrefixReplacesOnceAtLineEndAndEofNeverDispatches (56089496 ns)
+    [ PASSED ] CASE: multilineEmptyDataAndOpaquePayload (15195600 ns)
+    [ PASSED ] CASE: cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommit (18865537 ns)
+    [ PASSED ] CASE: retryIsImmediateDigitOnlyClampedWithoutOverflow (10551307 ns)
+    [ PASSED ] CASE: nullIdIsIgnoredAndEmptyIdClearsCursor (14375726 ns)
+    [ PASSED ] CASE: blankBlocksResetEventTypeAndFieldsNotNoProgress (16445865 ns)
+    [ PASSED ] CASE: malformedUtf8UsesEncodingStandardReplacement (16515536 ns)
+    [ PASSED ] CASE: lineBoundChecksBeforeGrowthAndFailureReleasesStorage (13612625 ns)
+    [ PASSED ] CASE: eventByteBoundIncludesIgnoredFieldsAndBlankDelimiter (1565375 ns)
+    [ PASSED ] CASE: fieldsIncludeCommentsAndUnknownNames (11819312 ns)
+    [ PASSED ] CASE: noProgressIsNotResetByHeartbeatOrCursorOnlyBlocks (25647292 ns)
+    [ PASSED ] CASE: decodedIdBoundIncludesReplacementExpansion (13156019 ns)
+    [ PASSED ] CASE: windowsLifecycleAndHardCeilings (17635568 ns)
+    TCS: SseDeterministicFuzzTests, time elapsed: 2035660814 ns, RESULT:
+    [ PASSED ] CASE: normativeCorpusAtEveryCutBytewiseAndRandomMulticuts (208970710 ns)
+    [ PASSED ] CASE: deterministicMalformedMutationsStayBoundedAndChunkIndependent (530336202 ns)
+    [ PASSED ] CASE: boundedFailureCorpusIsIndependentOfCuts (1295293659 ns)
+    TCS: SseEncoderTest, time elapsed: 4076897087 ns, RESULT:
+    [ PASSED ] CASE: representableEventsRoundtripAcrossEveryCut (4054440297 ns)
+    [ PASSED ] CASE: commentsDoNotDispatchAndPreserveFollowingEvent (21253497 ns)
+    [ PASSED ] CASE: metadataAndCommentInjectionAreRejected (76839 ns)
+    [ PASSED ] CASE: serializedBoundsIncludePrefixesAndDelimiters (116545 ns)
+    TCS: SseNativeFramingTest, time elapsed: 51566436 ns, RESULT:
+    [ PASSED ] CASE: malformedChunkSizeIsFatalRatherThanAnAutomaticGetReconnect (14068883 ns)
+    [ PASSED ] CASE: prematureChunkEofRetainsTypedCauseAndNeverReplaysPost (24244472 ns)
+    [ PASSED ] CASE: absentContentTypeIsTypedInvalidResponseNotAnIndexFailure (12412753 ns)
+    TCS: SseNativeSessionTest, time elapsed: 641994860 ns, RESULT:
+    [ PASSED ] CASE: reconnectDuplicatesParsedCursorButNeverAcknowledgesApplicationProcessing (90544356 ns)
+    [ PASSED ] CASE: postIsNotReplayedOnEofOr307EvenWithExplicitRetrySafety (35124489 ns)
+    [ PASSED ] CASE: explicitCloseParentCancellationAndEofRemainDistinct (2976012 ns)
+    [ PASSED ] CASE: cancellationInterruptsBackoffWithoutAnotherSubmission (32709219 ns)
+    [ PASSED ] CASE: parentAbsoluteDeadlineCapsBackoffAndDurationAcrossReconnects (112727222 ns)
+    [ PASSED ] CASE: activeBodyIdleUsesCanonicalTimerButConsumerPauseDoesNot (189755184 ns)
+    [ PASSED ] CASE: noProgressAndInvalidMimeReleaseOwnedBodies (40697572 ns)
+    [ PASSED ] CASE: reconnectStormStopsAtCountAndRetainsNoWaitOrBodyOwners (119372672 ns)
+    [ PASSED ] CASE: unadmittableBufferFailsWithoutWaiterOrRequest (2881258 ns)
+    [ PASSED ] CASE: managedBufferAdmissionCancellationReleasesRealWaiterWithoutSending (12530044 ns)
+    TCS: SseWriterTest, time elapsed: 177963787 ns, RESULT:
+    [ PASSED ] CASE: tinyRingAppliesBackpressureAndPreservesBytes (458366 ns)
+    [ PASSED ] CASE: flushWaitsForReaderConsumption (27858302 ns)
+    [ PASSED ] CASE: cancellationWakesFullRingAndAbortsPartialEvent (9781662 ns)
+    [ PASSED ] CASE: deadlinesBoundBackpressureAndFlush (59750741 ns)
+    [ PASSED ] CASE: lifetimeCannotBeReplacedByBackgroundCallContext (10504068 ns)
+    [ PASSED ] CASE: closeWakesReaderAndProducerWithoutReportingEof (39017719 ns)
+    [ PASSED ] CASE: cancellationWakesFlushAndCompleteWakesEmptyReader (10719030 ns)
+    [ PASSED ] CASE: completeDrainsAndValidationDoesNotPoisonWriter (16017037 ns)
+    [ PASSED ] CASE: callerClockMayObserveWriterWithoutLockReentrancy (1500281 ns)
+Summary: TOTAL: 45
+    PASSED: 43, SKIPPED: 2, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 7260149079 ns, RESULT:
+TP: wirestack.*, time elapsed: 7260042334 ns, RESULT:
+    PASSED:
+    TP: wirestack.sse, time elapsed: 7252468261 ns
+Summary: TOTAL: 45
+    PASSED: 43, SKIPPED: 2, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

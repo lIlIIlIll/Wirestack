@@ -97,6 +97,7 @@ PUBLIC_PACKAGE_FILES = {
         "dns_wire.cj", "dns_client.cj", "dns_resolver.cj",
     ),
     "wirestack.observability": ("bounded_network_event_sink.cj",),
+    "wirestack.sse": ("model.cj", "decoder.cj", "encoder.cj", "writer.cj", "session_policy.cj", "session.cj"),
 }
 
 
