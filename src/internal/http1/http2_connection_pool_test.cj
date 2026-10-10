@@ -6,7 +6,7 @@ import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http2.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 @Test
 class Http2ConnectionPoolTest {
     @TestCase
@@ -234,7 +234,8 @@ private class PoolFakeFactory <: Http2MultiplexedConnectionFactory {
 
     init(capacity: UInt32) { this.capacity = capacity }
 
-    public func create(_: HttpConnectionPoolKey, _: OperationContext): Http2MultiplexedConnection {
+    public func create(_: HttpConnectionPoolKey, _: OperationContext,
+        _: ?internal.HttpResourceLease): Http2MultiplexedConnection {
         let value = PoolFakeConnection(capacity)
         synchronized(mutex) { created.add(value) }
         let _ = createCalls.fetchAdd(1)
@@ -296,7 +297,8 @@ private class PoolGatedFactory <: Http2MultiplexedConnectionFactory {
 
     init(gate: PoolAdmissionGate) { connection = PoolGatedConnection(gate) }
 
-    public func create(_: HttpConnectionPoolKey, _: OperationContext): Http2MultiplexedConnection {
+    public func create(_: HttpConnectionPoolKey, _: OperationContext,
+        _: ?internal.HttpResourceLease): Http2MultiplexedConnection {
         connection
     }
 

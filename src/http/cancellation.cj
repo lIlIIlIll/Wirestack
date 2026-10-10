@@ -151,6 +151,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     private var released = false
     private var responseReleased = false
     private var retainedLifetimes: Int64 = 0
+    private var retainedResources = ArrayList<Resource>()
+    private var resourcesReleased = false
     internal let context: OperationContext
     internal let connectionCancellation: transport.CancellationToken
 
@@ -217,6 +219,12 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         if (discard) { registration.unregister() }
     }
 
+    internal func retainResource(resource: Resource): Unit {
+        let discard = synchronized(mutex) {
+            if (resourcesReleased) { true } else { retainedResources.add(resource); false }
+        }
+        if (discard) { resource.close() }
+    }
     internal func retainLifetime(): Resource {
         synchronized(mutex) {
             if (released || responseReleased) {
@@ -238,7 +246,7 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             retainedLifetimes--
             responseReleased && retainedLifetimes == 0
         }
-        if (finished) { releaseRegistrations() }
+        if (finished) { releaseRegistrations(); releaseResources() }
     }
 /**
  * Wirestack 公开 API：completed。
@@ -265,7 +273,7 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             responseReleased = true
             retainedLifetimes == 0
         }
-        if (finished) { releaseRegistrations() }
+        if (finished) { releaseRegistrations(); releaseResources() }
     }
 
     private func releaseRegistrations(): Unit {
@@ -277,6 +285,16 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             result
         }
         for (registration in claimed) { registration.unregister() }
+    }
+    private func releaseResources(): Unit {
+        let claimed = synchronized(mutex) {
+            if (resourcesReleased || !responseReleased || retainedLifetimes != 0) { return }
+            resourcesReleased = true
+            let result = retainedResources
+            retainedResources = ArrayList<Resource>()
+            result
+        }
+        for (resource in claimed) { resource.close() }
     }
 }
 

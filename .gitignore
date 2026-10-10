@@ -131,6 +131,7 @@ Thumbs.db
 !docs/evidence/M9-003/**/*.json
 !docs/evidence/M9-003/**/*.log
 !docs/evidence/M9-003/**/*.hex
+!docs/evidence/M10-002/**/*.json
 *.tmp
 *.prof
 *.trace

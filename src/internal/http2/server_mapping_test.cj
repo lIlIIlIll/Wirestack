@@ -6,6 +6,7 @@ import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 @Test
 class Http2ServerMappingTest {
@@ -90,6 +91,54 @@ class Http2ServerMappingTest {
         exchange.request.close()
         @Expect(fixture.flow.snapshot(Http2StreamId(1u32)).bufferedReceiveBytes, 0)
         @Expect(fixture.sink.totalCredit(), 4)
+    }
+
+    @TestCase
+    func receiveBuffersAreSharedAcrossHttp2ConnectionsAndReleaseOnBodyClose(): Unit {
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = serverResourceBudget(8u64, 2u64)
+        let first = ServerFixture(resourceBudget: Some(budget), resourceOwner: Some(owner))
+        let second = ServerFixture(resourceBudget: Some(budget), resourceOwner: Some(owner))
+        let firstExchange = first.open(None<Int64>)
+        let secondExchange = second.open(None<Int64>)
+
+        firstExchange.acceptData(serverData([1u8, 2u8, 3u8, 4u8]))
+        @Expect(budget.snapshot().managedBufferBytes, 4u64)
+        expectServerRefusedStream({ => secondExchange.acceptData(serverData([5u8, 6u8, 7u8])) })
+        let snapshot = budget.snapshot()
+        @Expect(snapshot.managedBufferBytes, 4u64)
+        @Expect(snapshot.owners.size, 1)
+        @Expect(snapshot.owners[0].origin, "https://example.com:443")
+        @Expect(snapshot.owners[0].managedBufferBytes, 4u64)
+
+        firstExchange.request.close()
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+        secondExchange.acceptData(serverData([5u8, 6u8, 7u8]))
+        @Expect(budget.snapshot().managedBufferBytes, 3u64)
+        secondExchange.request.close()
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+    }
+    @TestCase
+    func parserBufferLeaseMovesToBodyAndReleasesAfterLastByteIsConsumed(): Unit {
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = serverResourceBudget(8u64, 2u64)
+        let fixture = ServerFixture(resourceBudget: Some(budget), resourceOwner: Some(owner))
+        let exchange = fixture.open(None<Int64>)
+        let parser = Http2FrameParser(
+            fixture.http2Limits, Some(budget), Some(owner)
+        )
+        let frames = parser.feed(serializeHttp2Frame(serverData([1u8, 2u8, 3u8, 4u8])))
+        @Expect(budget.snapshot().managedBufferBytes, 4u64)
+
+        exchange.acceptData(frames[0])
+        let buffer = Array<Byte>(2, repeat: 0u8)
+        @Expect(exchange.request.body.read(buffer), 2)
+        @Expect(buffer, [1u8, 2u8])
+        @Expect(budget.snapshot().managedBufferBytes, 4u64)
+        @Expect(exchange.request.body.read(buffer), 2)
+        @Expect(buffer, [3u8, 4u8])
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+        exchange.request.close()
     }
 
     @TestCase
@@ -285,10 +334,16 @@ private class ServerFixture {
     let flow: Http2FlowController
     let sink = RecordingServerSink()
     let http2Limits: Http2Limits
-    init(http2Limits!: Http2Limits = Http2Limits()) {
+    init(
+        http2Limits!: Http2Limits = Http2Limits(),
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
+    ) {
         this.http2Limits = http2Limits
         registry = Http2StreamRegistry(Http2ConnectionRole.Server, limits: http2Limits)
-        flow = Http2FlowController(limits: http2Limits)
+        flow = Http2FlowController(
+            limits: http2Limits, resourceBudget: resourceBudget, resourceOwner: resourceOwner
+        )
     }
     func open(contentLength: ?Int64): Http2ServerExchange {
         let fields = ArrayList<HpackHeaderField>()
@@ -328,6 +383,24 @@ private func expectServerField(
 ): Unit {
     @Expect(fields[index].field.name, name)
     @Expect(fields[index].field.value, value)
+}
+
+private func serverResourceBudget(
+    maximumManagedBufferBytes: UInt64,
+    reservedControlBufferBytes: UInt64
+): internal.HttpResourceBudget {
+    internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+        4, 2, 4, 8, 4, 8, 8, 4, 8,
+        maximumManagedBufferBytes, reservedControlBufferBytes, 8
+    ))
+}
+
+private func expectServerRefusedStream(action: () -> Unit): Unit {
+    var matched = false
+    try { action() } catch (error: Http2ProtocolException) {
+        matched = http2ErrorCodeToWire(error.code) == 7u32 && isServerStreamScope(error.scope)
+    }
+    @Expect(matched)
 }
 
 private func expectServerProtocol(action: () -> Unit): Unit {

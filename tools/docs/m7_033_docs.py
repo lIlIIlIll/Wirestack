@@ -76,6 +76,7 @@ PUBLIC_PACKAGE_FILES = {
         "proxy.cj",
         "redirect.cj",
         "resolver.cj",
+        "resource_budget.cj",
         "retry.cj",
         "server.cj",
         "tls.cj",

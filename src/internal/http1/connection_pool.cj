@@ -3,6 +3,7 @@ package wirestack.internal.http1
 import std.collection.ArrayList
 import std.sync.Mutex
 import std.time.*
+import wirestack.internal as internal
 import wirestack.internal.transport.*
 
 public class Http1ConnectionPoolConfig {
@@ -34,9 +35,12 @@ public class Http1ConnectionPoolConfig {
 }
 
 public interface Http1ConnectionFactory {
-    func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection
+    func create(
+        key: HttpConnectionPoolKey,
+        context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease
+    ): Http1ClientConnection
 }
-
 /** A unique claim on one connection. It cannot be duplicated or returned twice. */
 public class Http1PoolLease {
     public let connection: Http1ClientConnection
@@ -70,13 +74,16 @@ private class Http1PoolEntry {
     var id: Int64
     let key: HttpConnectionPoolKey
     let connection: Http1ClientConnection
+    let resourceLease: ?internal.HttpResourceLease
     var leased: Bool
     var idleSince: MonoTime
 
-    init(id: Int64, key: HttpConnectionPoolKey, connection: Http1ClientConnection, leased: Bool, idleSince: MonoTime) {
+    init(id: Int64, key: HttpConnectionPoolKey, connection: Http1ClientConnection,
+        resourceLease: ?internal.HttpResourceLease, leased: Bool, idleSince: MonoTime) {
         this.id = id
         this.key = key
         this.connection = connection
+        this.resourceLease = resourceLease
         this.leased = leased
         this.idleSince = idleSince
     }
@@ -85,13 +92,14 @@ private class Http1PoolEntry {
 private enum Http1PoolDecision {
     | Reuse(Http1PoolLease)
     | Reserve(Int64)
-    | Discard(Http1ClientConnection)
+    | Discard(Http1ClientConnection, ?internal.HttpResourceLease)
 }
 
 /** Bounded, cancellation-aware HTTP/1 connection pool with complete-key isolation. */
 public class Http1ConnectionPool <: Resource {
     private let config: Http1ConnectionPoolConfig
     private let clock: MonotonicClock
+    private let resourceBudget: ?internal.HttpResourceBudget
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private var entries = ArrayList<Http1PoolEntry>()
@@ -102,10 +110,12 @@ public class Http1ConnectionPool <: Resource {
 
     public init(
         config!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
-        clock!: MonotonicClock = SystemMonotonicClock()
+        clock!: MonotonicClock = SystemMonotonicClock(),
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
         this.config = config
         this.clock = clock
+        this.resourceBudget = resourceBudget
     }
 
     public func acquire(
@@ -120,12 +130,21 @@ public class Http1ConnectionPool <: Resource {
                     case Http1PoolDecision.Reuse(lease) =>
                         emitPoolAcquired(context, lease.id, NetworkEventOutcome.Reused)
                         return lease
-                    case Http1PoolDecision.Discard(connection) =>
+                    case Http1PoolDecision.Discard(connection, resourceLease) =>
                         closeQuietly(connection)
+                        closeOptionalResourceLease(resourceLease)
                     case Http1PoolDecision.Reserve(id) =>
                         var reservationOutstanding = true
+                        var resourceLease = None<internal.HttpResourceLease>
                         try {
-                            let connection = factory.create(key, context)
+                            resourceLease = match (resourceBudget) {
+                                case Some(budget) => Some(budget.acquireConnection(
+                                    httpResourceOwnerForPoolKey(key), context
+                                ))
+                                case None => None<internal.HttpResourceLease>
+                            }
+                            let connection = factory.create(key, context, resourceLease)
+                            if (let Some(value) <- resourceLease) { value.activate() }
                             let accepted = synchronized(mutex) {
                                 removeReservation(key)
                                 reservationOutstanding = false
@@ -133,19 +152,26 @@ public class Http1ConnectionPool <: Resource {
                                     changed.notifyAll()
                                     false
                                 } else {
-                                    entries.add(Http1PoolEntry(id, key, connection, true, clock.now()))
+                                    entries.add(Http1PoolEntry(
+                                        id, key, connection, resourceLease, true, clock.now()
+                                    ))
+                                    resourceLease = None<internal.HttpResourceLease>
                                     changed.notifyAll()
                                     true
                                 }
                             }
                             if (!accepted) {
                                 closeQuietly(connection)
+                                closeOptionalResourceLease(resourceLease)
+                                resourceLease = None<internal.HttpResourceLease>
                                 throw poolClosed()
                             }
                             let lease = Http1PoolLease(id, key, connection)
                             emitPoolAcquired(context, lease.id, NetworkEventOutcome.Succeeded)
                             return lease
                         } catch (error: Exception) {
+                            closeOptionalResourceLease(resourceLease)
+                            resourceLease = None<internal.HttpResourceLease>
                             if (reservationOutstanding) {
                                 synchronized(mutex) {
                                     removeReservation(key)
@@ -164,37 +190,41 @@ public class Http1ConnectionPool <: Resource {
         }
     }
 
-    /**
-     * Adopts one already-negotiated connection without exceeding pool bounds.
-     * Used only when ALPN discovers HTTP/1.1 while creating an automatic
-     * protocol connection.
-     */
+    /** Adopts one negotiated connection while preserving its aggregate lease. */
     public func adopt(
         key: HttpConnectionPoolKey,
         connection: Http1ClientConnection,
-        context!: OperationContext = OperationContext.background()
+        context!: OperationContext = OperationContext.background(),
+        resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ): Http1PoolLease {
-        preflight(context)
-        let lease = synchronized(mutex) {
-            if (closed) { throw poolClosed() }
-            if (entries.size + reservations.size >= config.maximumConnections ||
-                countForKey(key) >= config.maximumConnectionsPerKey) {
-                throw poolExhausted()
+        try {
+            preflight(context)
+            if (let Some(value) <- resourceLease) { value.activate() }
+            let lease = synchronized(mutex) {
+                if (closed) { throw poolClosed() }
+                if (entries.size + reservations.size >= config.maximumConnections ||
+                    countForKey(key) >= config.maximumConnectionsPerKey) {
+                    throw poolExhausted()
+                }
+                let id = nextId
+                nextId++
+                entries.add(Http1PoolEntry(id, key, connection, resourceLease, true, clock.now()))
+                changed.notifyAll()
+                Http1PoolLease(id, key, connection)
             }
-            let id = nextId
-            nextId++
-            entries.add(Http1PoolEntry(id, key, connection, true, clock.now()))
-            changed.notifyAll()
-            Http1PoolLease(id, key, connection)
+            emitPoolAcquired(context, lease.id, NetworkEventOutcome.Succeeded)
+            lease
+        } catch (error: Exception) {
+            closeOptionalResourceLease(resourceLease)
+            throw error
         }
-        emitPoolAcquired(context, lease.id, NetworkEventOutcome.Succeeded)
-        lease
     }
 
     /** Returns only a ready connection. Unsafe and failed claims are discarded; stale claims are ignored. */
     public func release(lease: Http1PoolLease,
         context!: OperationContext = OperationContext.background()): Unit {
         var closeConnection: ?Http1ClientConnection = None<Http1ClientConnection>
+        var closeResourceLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         var outcome = None<NetworkEventOutcome>
         synchronized(mutex) {
             let index = findEntry(lease.id)
@@ -212,13 +242,16 @@ public class Http1ConnectionPool <: Resource {
                 entry.idleSince = clock.now()
                 outcome = Some(NetworkEventOutcome.Released)
             } else {
-                closeConnection = Some(entries.remove(at: index).connection)
+                let removed = entries.remove(at: index)
+                closeConnection = Some(removed.connection)
+                closeResourceLease = removed.resourceLease
                 outcome = Some(NetworkEventOutcome.Discarded)
             }
             changed.notifyAll()
         }
         if (let Some(connection) <- closeConnection) {
             closeQuietly(connection)
+            closeOptionalResourceLease(closeResourceLease)
             emitPoolConnectionClosed(context, lease.id)
         }
         if (let Some(value) <- outcome) {
@@ -230,15 +263,19 @@ public class Http1ConnectionPool <: Resource {
     public func discard(lease: Http1PoolLease,
         context!: OperationContext = OperationContext.background()): Unit {
         var connection: ?Http1ClientConnection = None<Http1ClientConnection>
+        var resourceLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         synchronized(mutex) {
             let index = findEntry(lease.id)
             if (index >= 0 && entries[index].leased) {
-                connection = Some(entries.remove(at: index).connection)
+                let removed = entries.remove(at: index)
+                connection = Some(removed.connection)
+                resourceLease = removed.resourceLease
                 changed.notifyAll()
             }
         }
-        if (let Some(value) <- connection) { closeQuietly(value) }
-        if (connection.isSome()) {
+        if (let Some(value) <- connection) {
+            closeQuietly(value)
+            closeOptionalResourceLease(resourceLease)
             emitPoolReleased(context, lease.id, NetworkEventOutcome.Discarded)
             emitPoolConnectionClosed(context, lease.id)
         }
@@ -251,19 +288,22 @@ public class Http1ConnectionPool <: Resource {
     }
 
     public func close(): Unit {
-        let connections = synchronized(mutex) {
+        let claimed = synchronized(mutex) {
             if (closed) {
-                ArrayList<Http1ClientConnection>()
+                Array<Http1PoolEntry>()
             } else {
                 closed = true
-                let result = ArrayList<Http1ClientConnection>()
-                for (entry in entries) { result.add(entry.connection) }
+                let result = ArrayList<Http1PoolEntry>()
+                for (entry in entries) { result.add(entry) }
                 entries = ArrayList<Http1PoolEntry>()
                 changed.notifyAll()
-                result
+                result.toArray()
             }
         }
-        for (connection in connections) { closeQuietly(connection) }
+        for (entry in claimed) {
+            closeQuietly(entry.connection)
+            closeOptionalResourceLease(entry.resourceLease)
+        }
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
@@ -278,7 +318,8 @@ public class Http1ConnectionPool <: Resource {
 
                     let stale = findStaleIdle(clock.now())
                     if (stale >= 0) {
-                        return Http1PoolDecision.Discard(entries.remove(at: stale).connection)
+                        let removed = entries.remove(at: stale)
+                        return Http1PoolDecision.Discard(removed.connection, removed.resourceLease)
                     }
                     let idle = findIdle(key)
                     if (idle >= 0) {
@@ -388,6 +429,12 @@ private func closeQuietly(connection: Http1ClientConnection): Unit {
     try { connection.close() } catch (_: Exception) {}
 }
 
+private func closeOptionalResourceLease(lease: ?internal.HttpResourceLease): Unit {
+    match (lease) {
+        case Some(value) => value.close()
+        case None => ()
+    }
+}
 private func emitPoolAcquired(context: OperationContext, id: Int64,
     outcome: NetworkEventOutcome): Unit {
     emitNetworkEvent(context, NetworkEvent(
