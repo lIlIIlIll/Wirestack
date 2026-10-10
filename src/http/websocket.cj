@@ -47,6 +47,8 @@ public enum WebSocketErrorCode {
     | Closed
     /** Cancellation was requested or the absolute operation deadline expired. */
     | ContextStopped
+    /** The one pending same-direction admission slot is occupied; the session remains usable. */
+    | CapacityExceeded
     /** Transport I/O failed, ended without a close frame, or reported invalid progress. */
     | TransportFailure
     /** Secure random generation or handshake digest encoding failed. */
@@ -181,8 +183,9 @@ public enum WebSocketConnectResult {
 /**
  * Bounded, uncompressed RFC 6455 framing over a provider-neutral DuplexTransport.
  * The connection owns its transport. Extension bits are rejected because no extensions are negotiated.
- * Exactly one reader and one writer operate at a time. Control responses share
- * the same bounded writer gate and never splice bytes into a data frame.
+ * Exactly one reader and one writer operate at a time, with at most one pending caller per direction.
+ * Additional callers fail with CapacityExceeded without changing the session or writing frame bytes.
+ * Control responses share the same bounded writer gate and never splice bytes into a data frame.
  */
 public class WebSocketConnection <: Resource {
     /** Endpoint role that controls outbound and inbound masking requirements. */
@@ -199,9 +202,15 @@ public class WebSocketConnection <: Resource {
     private let writeProgress = WebSocketIoProgress()
     private var readerActive = false
     private var writerActive = false
+    private var readerWaiting = false
+    private var writerWaiting = false
     private var terminal = false
     private var closeSent = false
     private var closeReceived = false
+    private let lifetime: OperationContext
+    private var lifetimeRegistration: ?api.CancellationRegistration = None<api.CancellationRegistration>
+    private let lifetimeStop = api.CancellationSource()
+    private var cleanupComplete = false
 
     private var inboundFragment: ?WebSocketOpcode = None<WebSocketOpcode>
     private var inboundMessageBytes: Int64 = 0
@@ -215,7 +224,8 @@ public class WebSocketConnection <: Resource {
         transport: api.DuplexTransport,
         role: WebSocketRole,
         subProtocol!: ?String = None<String>,
-        limits!: WebSocketLimits = WebSocketLimits()
+        limits!: WebSocketLimits = WebSocketLimits(),
+        context!: OperationContext = OperationContext.background()
     ) {
         if (let Some(value) <- subProtocol) {
             validateWebSocketSubProtocol(value)
@@ -224,19 +234,47 @@ public class WebSocketConnection <: Resource {
         this.role = role
         this.subProtocol = subProtocol
         this.limits = limits
+        this.lifetime = context.withCancellation(lifetimeStop.token)
+        let registration = context.cancellation.register { =>
+            lifetimeStop.cancel()
+            failClosed(api.AbortReason.Cancelled)
+        }
+        let discard = synchronized(mutex) {
+            if (terminal) { true } else { lifetimeRegistration = Some(registration); false }
+        }
+        if (discard) { registration.unregister() }
+        if (context.deadline.isSome()) {
+            let _ = spawn {
+                synchronized(mutex) {
+                    while (!terminal && !lifetime.isDeadlineExceeded()) {
+                        let remaining = lifetime.deadline.getOrThrow().remaining()
+                        if (remaining <= Duration.Zero) { break }
+                        changed.wait(timeout: remaining)
+                    }
+                }
+                if (lifetime.isDeadlineExceeded()) { failClosed(api.AbortReason.DeadlineExceeded) }
+            }
+        }
     }
 
     /**
-     * Sends one frame under the caller's unchanged absolute operation budget.
+     * Sends one frame under the shorter of the session lifetime and caller's absolute budget.
      * Client-role connections mask the frame; server-role connections do not. A failure after transport
-     * I/O starts aborts the connection, while validation and context failures before I/O leave it usable.
+     * I/O starts aborts the connection. Per-call validation and context failures before I/O leave it usable.
      * @param frame Immutable frame to validate against this connection's frame and message bounds.
-     * @param context Cancellation and absolute deadline for writer admission and transport I/O.
+     * @param context Additional writer-admission and I/O deadline and cancellation; never extends the session lifetime.
      */
-    public func send(
-        frame: WebSocketFrame,
-        context!: OperationContext = OperationContext.background()
-    ): Unit {
+    public func send(frame: WebSocketFrame, context!: OperationContext = OperationContext.background()): Unit {
+        if (!context.cancellation.canBeCancelled) {
+            try { sendWithContext(frame, webSocketOperationContext(lifetime, context, lifetime.cancellation)) }
+            finally { awaitTerminalCleanup() }
+            return
+        }
+        let operation = WebSocketOperation(lifetime, context)
+        try { sendWithContext(frame, operation.context) } finally { operation.close(); awaitTerminalCleanup() }
+    }
+
+    private func sendWithContext(frame: WebSocketFrame, context: OperationContext): Unit {
         checkWebSocketContext(context)
         acquireWriter(context)
         let outboundUtf8State = outboundUtf8.snapshot()
@@ -269,11 +307,18 @@ public class WebSocketConnection <: Resource {
     /**
      * Receives one complete frame while retaining only its bounded payload.
      * Ping frames trigger a matching Pong before return. Close frames trigger a bounded reply and transport close.
-     * @param context Cancellation and absolute deadline for reader admission, transport I/O, and automatic replies.
+     * @param context Additional reader-admission, I/O, and reply budget; session cancellation and read-idle policy remain active.
      */
-    public func receive(
-        context!: OperationContext = OperationContext.background()
-    ): WebSocketFrame {
+    public func receive(context!: OperationContext = OperationContext.background()): WebSocketFrame {
+        if (!context.cancellation.canBeCancelled) {
+            try { return receiveWithContext(webSocketOperationContext(lifetime, context, lifetime.cancellation)) }
+            finally { awaitTerminalCleanup() }
+        }
+        let operation = WebSocketOperation(lifetime, context)
+        try { receiveWithContext(operation.context) } finally { operation.close(); awaitTerminalCleanup() }
+    }
+
+    private func receiveWithContext(context: OperationContext): WebSocketFrame {
         checkWebSocketContext(context)
         acquireReader(context)
         let attemptedIo = readProgress
@@ -317,17 +362,23 @@ public class WebSocketConnection <: Resource {
 
     /**
      * Sends a close frame, waits for the peer's close frame, and closes the transport.
-     * The wait uses the shorter of closeTimeout and the caller's existing absolute deadline.
+     * The wait uses the shortest of closeTimeout, the session lifetime, and the caller's absolute deadline.
      * Server-role connections reject close status 1010.
      * @param code RFC close status: 1000, 1001, 1002, 1003, 1007 through 1014, or 3000 through 4999.
      * @param reason UTF-8 close reason of at most 123 encoded bytes.
      * @param context Cancellation and absolute deadline for the complete closing handshake.
      */
-    public func close(
-        code: UInt16,
-        reason: String,
-        context!: OperationContext = OperationContext.background()
-    ): Unit {
+    public func close(code: UInt16, reason: String, context!: OperationContext = OperationContext.background()): Unit {
+        if (!context.cancellation.canBeCancelled) {
+            try { closeWithContext(code, reason, webSocketOperationContext(lifetime, context, lifetime.cancellation)) }
+            finally { awaitTerminalCleanup() }
+            return
+        }
+        let operation = WebSocketOperation(lifetime, context)
+        try { closeWithContext(code, reason, operation.context) } finally { operation.close(); awaitTerminalCleanup() }
+    }
+
+    private func closeWithContext(code: UInt16, reason: String, context: OperationContext): Unit {
         checkWebSocketContext(context)
         if (isServerRole(role) && code == 1010u16) {
             throw IllegalArgumentException("WebSocket servers cannot send close status 1010")
@@ -341,7 +392,7 @@ public class WebSocketConnection <: Resource {
                 return
             }
             try {
-                let _ = receive(context: bounded)
+                let _ = receiveWithContext(bounded)
             } catch (error: WebSocketException) {
                 if (synchronized(mutex) { closeReceived }) { return }
                 if (synchronized(mutex) { closeSent }) { failClosed(webSocketAbortReason(bounded)) }
@@ -350,13 +401,10 @@ public class WebSocketConnection <: Resource {
         }
     }
 
-    /** Prompt, terminal, idempotent resource cleanup; it never waits on protocol I/O. */
+    /** Terminal, idempotent cleanup; starts no protocol exchange and joins cleanup already in progress. */
     public func close(): Unit {
-        synchronized(mutex) {
-            terminal = true
-            changed.notifyAll()
-        }
-        transport.abort(reason: Some(api.AbortReason.ApplicationAbort))
+        failClosed(api.AbortReason.ApplicationAbort)
+        awaitTerminalCleanup()
     }
 
     /** Reports whether this connection has entered its terminal state. */
@@ -371,7 +419,23 @@ public class WebSocketConnection <: Resource {
     }
 
     private func acquireOperation(context: OperationContext, reader!: Bool): Unit {
-        checkWebSocketContext(context)
+        let waiting = synchronized(mutex) {
+            checkWebSocketContext(context)
+            if (terminal) { throw webSocketClosed() }
+            let busy = if (reader) { readerActive || readerWaiting } else { writerActive || writerWaiting }
+            if (busy) {
+                if (if (reader) { readerWaiting } else { writerWaiting }) {
+                    throw WebSocketException(WebSocketErrorCode.CapacityExceeded,
+                        "WebSocket same-direction admission capacity is exhausted")
+                }
+                if (reader) { readerWaiting = true } else { writerWaiting = true }
+                true
+            } else {
+                if (reader) { readerActive = true } else { writerActive = true }
+                false
+            }
+        }
+        if (!waiting) { return }
         let registration = context.cancellation.register { => wakeOperations() }
         try {
             synchronized(mutex) {
@@ -384,6 +448,10 @@ public class WebSocketConnection <: Resource {
                 if (reader) { readerActive = true } else { writerActive = true }
             }
         } finally {
+            synchronized(mutex) {
+                if (reader) { readerWaiting = false } else { writerWaiting = false }
+                changed.notifyAll()
+            }
             registration.unregister()
         }
     }
@@ -649,20 +717,99 @@ public class WebSocketConnection <: Resource {
             }
         }
         if (!shouldClose) { return }
+        releaseLifetimeRegistration()
         try {
             transport.close(context)
         } catch (_: Exception) {
             transport.abort(reason: Some(webSocketAbortReason(context)))
+        } finally {
+            finishTerminalCleanup()
         }
     }
 
     private func failClosed(reason: api.AbortReason): Unit {
-        synchronized(mutex) {
-            terminal = true
-            changed.notifyAll()
+        let claimed = synchronized(mutex) {
+            if (terminal) { false } else {
+                terminal = true
+                changed.notifyAll()
+                true
+            }
         }
-        transport.abort(reason: Some(reason))
+        if (!claimed) { return }
+        releaseLifetimeRegistration()
+        try { transport.abort(reason: Some(reason)) } finally { finishTerminalCleanup() }
     }
+
+    private func awaitTerminalCleanup(): Unit {
+        synchronized(mutex) { while (terminal && !cleanupComplete) { changed.wait() } }
+    }
+
+    private func finishTerminalCleanup(): Unit {
+        synchronized(mutex) { cleanupComplete = true; changed.notifyAll() }
+    }
+
+    private func releaseLifetimeRegistration(): Unit {
+        let registration = synchronized(mutex) {
+            let value = lifetimeRegistration
+            lifetimeRegistration = None<api.CancellationRegistration>
+            value
+        }
+        if (let Some(value) <- registration) { value.unregister() }
+    }
+}
+
+private class WebSocketOperation <: Resource {
+    private let closed = AtomicBool(false)
+    private let parentRegistration: api.CancellationRegistration
+    private let callerRegistration: api.CancellationRegistration
+    let context: OperationContext
+    init(parent: OperationContext, caller: OperationContext) {
+        let source = api.CancellationSource()
+        context = webSocketOperationContext(parent, caller, source.token)
+        parentRegistration = parent.cancellation.register { => source.cancel() }
+        callerRegistration = caller.cancellation.register { => source.cancel() }
+    }
+    /** Releases this operation's two cancellation registrations exactly once. */
+    public func close(): Unit {
+        if (closed.compareAndSwap(false, true)) {
+            parentRegistration.unregister()
+            callerRegistration.unregister()
+        }
+    }
+    /** Reports whether this operation has released its registrations. */
+    public func isClosed(): Bool { closed.load() }
+}
+
+/** No token bridge is allocated for ordinary frame calls; an explicit cancellable call owns its bridge. */
+private func webSocketOperationContext(parent: OperationContext, caller: OperationContext,
+    cancellation: api.CancellationToken): OperationContext {
+    let callerWins = match (caller.deadline) {
+        case Some(candidate) => match (parent.deadline) {
+            case Some(value) => candidate.expiresAt < value.expiresAt
+            case None => true
+        }
+        case None => false
+    }
+    if (!callerWins && caller.timeoutPolicy.streamReadIdle.isNone()) {
+        return parent.withCancellation(cancellation)
+    }
+    let idle = match ((parent.timeoutPolicy.streamReadIdle, caller.timeoutPolicy.streamReadIdle)) {
+        case (Some(a), Some(b)) => Some(min(a, b))
+        case (Some(a), None) => Some(a)
+        case (None, value) => value
+    }
+    let policy = parent.timeoutPolicy
+    OperationContext(deadline: if (callerWins) { caller.deadline } else { parent.deadline },
+        cancellation: cancellation, trace: parent.trace, eventSink: parent.eventSink,
+        requestId: parent.requestId, attemptId: parent.attemptId,
+        connectionId: parent.connectionId, streamId: parent.streamId,
+        stage: if (callerWins) { caller.stage } else { parent.stage },
+        deadlineStage: if (callerWins) { caller.deadlineStage } else { parent.deadlineStage },
+        timeoutPolicy: api.OperationTimeoutPolicy(requestAdmission: policy.requestAdmission,
+            connectionPool: policy.connectionPool, dns: policy.dns, tcpConnect: policy.tcpConnect,
+            proxyConnect: policy.proxyConnect, tlsHandshake: policy.tlsHandshake,
+            requestWrite: policy.requestWrite, responseHeaders: policy.responseHeaders,
+            bodyReadIdle: policy.bodyReadIdle, streamReadIdle: idle))
 }
 
 /** Generates one fresh canonical Sec-WebSocket-Key using AWS-LC RAND_bytes. */

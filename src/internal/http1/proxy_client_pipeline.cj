@@ -300,7 +300,7 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
                 emitProxyTunnelEvent(proxyContext, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
                 try {
                     let tls = handshaker.handshake(
-                        HostName(key.originHost), tunnel.transport,
+                        httpOriginIdentity(key.originHost), tunnel.transport,
                         context.forStage(OperationTimeoutStage.TlsHandshake)
                     )
                     Http1ClientConnection(tls, limits: limits, continueTimeout: continueTimeout)

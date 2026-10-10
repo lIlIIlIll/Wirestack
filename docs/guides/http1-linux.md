@@ -130,7 +130,7 @@ try {
 }
 ```
 
-For WebSocket, use the stream idle field and reuse the context for `receive`:
+For WebSocket, the upgrade context is the session lifetime; the stream idle field applies to active reads. A frame context can only shorten that budget:
 
 ```cj
 let streamContext = OperationContext(
@@ -143,17 +143,18 @@ let streamContext = OperationContext(
         streamReadIdle: Some(45 * Duration.second)
     )
 )
-let client = HttpClient.builder().build()
+let client = HttpClient.builder().requestTimeout(2 * 60 * 60 * Duration.second).build()
 try {
     match (client.connectWebSocket(
-        HttpUrl.parse("https://events.example.com/socket"), context: streamContext
+        WebSocketUrl.parse("wss://events.example.com/socket"), context: streamContext
     )) {
         case WebSocketConnectResult.Connected(socket) =>
             try {
                 let frame = socket.receive(context: streamContext)
                 let _ = frame.opcode
             } finally {
-                socket.close(1000u16, "done", context: streamContext)
+                try { socket.close(1000u16, "done", context: streamContext) }
+                finally { socket.close() }
             }
         case WebSocketConnectResult.Rejected(response) => response.close()
     }

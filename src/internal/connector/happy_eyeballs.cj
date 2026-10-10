@@ -139,6 +139,40 @@ public class HappyEyeballsConnector {
         runPlan(plan, resolved.diagnostics, connectContext)
     }
 
+    /** A literal has one DNS-free candidate; retain the same TCP stage and event coordinates. */
+    public func connectLiteral(address: IpAddress, port: UInt16,
+        context!: OperationContext = OperationContext.background()): DuplexTransport {
+        checkConnectContext(context)
+        emitNetworkEvent(context, NetworkEvent(NetworkEventKind.StageCompleted,
+            NetworkEventOutcome.NotExecuted, phase: Some(NetworkPhase.Dns),
+            stage: Some(OperationTimeoutStage.Dns)))
+        let tcp = context.forStage(OperationTimeoutStage.TcpConnect)
+        checkConnectContext(tcp)
+        emitNetworkEvent(tcp, NetworkEvent(NetworkEventKind.ConnectAttemptStarted,
+            NetworkEventOutcome.Started, phase: Some(NetworkPhase.TcpConnect),
+            connectionAttemptIndex: Some(1)))
+        try {
+            let connected = attemptFactory.connect(SocketEndpoint(address, port), tcp)
+            emitNetworkEvent(tcp, NetworkEvent(NetworkEventKind.ConnectAttemptCompleted,
+                NetworkEventOutcome.Succeeded, phase: Some(NetworkPhase.TcpConnect),
+                connectionAttemptIndex: Some(1)))
+            emitNetworkEvent(tcp, NetworkEvent(NetworkEventKind.TcpConnected,
+                NetworkEventOutcome.Succeeded, phase: Some(NetworkPhase.TcpConnect)))
+            connected
+        } catch (error: NetworkException) {
+            emitFailedEvent(tcp, NetworkEventKind.ConnectAttemptCompleted,
+                NetworkPhase.TcpConnect, error, candidateIndex: Some(1))
+            throw error
+        } catch (error: Exception) {
+            let failure = NetworkException(NetworkErrorCategory.Connect, NetworkPhase.TcpConnect,
+                NetworkErrorCode.SystemFailure, "literal connect failed with an unclassified exception",
+                cause: Some(error))
+            emitFailedEvent(tcp, NetworkEventKind.ConnectAttemptCompleted,
+                NetworkPhase.TcpConnect, failure, candidateIndex: Some(1))
+            throw failure
+        }
+    }
+
     private func runPlan(
         plan: AttemptPlan,
         dns: ResolveDiagnostics,
