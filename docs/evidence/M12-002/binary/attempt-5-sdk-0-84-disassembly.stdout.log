@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-crypto.digest.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000017c8 <_init@@Base>:
+    17c8:	sub    $0x8,%rsp
+    17cc:	mov    0x2017dd(%rip),%rax        # 202fb0 <__gmon_start__>
+    17d3:	test   %rax,%rax
+    17d6:	je     17da <_init@@Base+0x12>
+    17d8:	call   *%rax
+    17da:	add    $0x8,%rsp
+    17de:	ret
+
+Disassembly of section .plt:
+
+00000000000017e0 <_CGPahilHv@plt-0x10>:
+    17e0:	push   0x201822(%rip)        # 203008 <_fini@@Base+0x200b7c>
+    17e6:	jmp    *0x201824(%rip)        # 203010 <_fini@@Base+0x200b84>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "7f3b52dead7218fa1c89bc8d43f3c4ef2105d9460ca77bfdf69d07d20375f737"}

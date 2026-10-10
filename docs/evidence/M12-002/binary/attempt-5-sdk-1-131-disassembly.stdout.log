@@ -1,0 +1,21 @@
+
+<sdk-1>/tools/lib/libcangjie-frontend.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000a16b0 <_init@@Base>:
+   a16b0:	sub    $0x8,%rsp
+   a16b4:	mov    0xdac235(%rip),%rax        # e4d8f0 <__gmon_start__>
+   a16bb:	test   %rax,%rax
+   a16be:	je     a16c2 <_init@@Base+0x12>
+   a16c0:	call   *%rax
+   a16c2:	add    $0x8,%rsp
+   a16c6:	ret
+
+Disassembly of section .plt:
+
+00000000000a16d0 <_ZN7Cangjie7CodeGen9CGContextD1Ev@plt-0x10>:
+   a16d0:	push   0xda5dda(%rip)        # e474b0 <_ZTVN4llvm18ValueMapCallbackVHIPKNS_5ValueENS_14WeakTrackingVHENS_14ValueMapConfigIS3_NS_3sys10SmartMutexILb0EEEEEEE@@Base+0x290>
+   a16d6:	jmp    *0xda5ddc(%rip)        # e474b8 <_ZTVN4llvm18ValueMapCallbackVHIPKNS_5ValueENS_14WeakTrackingVHENS_14ValueMapConfigIS3_NS_3sys10SmartMutexILb0EEEEEEE@@Base+0x298>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "9647adb4a3dd51a70e8b4f2d49cdd7bec82f9d11d9d1f60c1c05b0f36e9eb95d"}

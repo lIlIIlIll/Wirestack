@@ -1,0 +1,21 @@
+
+/usr/lib/ld-linux-x86-64.so.2:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000001000 <_dl_call_libc_early_init.cold>:
+    1000:	lea    0x301f9(%rip),%rcx        # 31200 <__PRETTY_FUNCTION__.0>
+    1007:	mov    $0x25,%edx
+    100c:	lea    0x2ebc9(%rip),%rsi        # 2fbdc <_sys_errname+0x47c>
+    1013:	lea    0x2ebdc(%rip),%rdi        # 2fbf6 <_sys_errname+0x496>
+    101a:	call   1906 <__GI___assert_fail>
+
+000000000000101f <remove_slotinfo.cold>:
+    101f:	lea    0x301fa(%rip),%rcx        # 31220 <__PRETTY_FUNCTION__.0>
+    1026:	mov    $0x37,%edx
+    102b:	lea    0x2ec62(%rip),%rsi        # 2fc94 <_sys_errname+0x534>
+    1032:	lea    0x2ec66(%rip),%rdi        # 2fc9f <_sys_errname+0x53f>
+    1039:	call   1906 <__GI___assert_fail>
+
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0f305b4f4550f3a272602fa7c822c225605aaa15ab0d00478a1f1b8b9c6f6e6a"}

@@ -1,0 +1,17 @@
+
+Version symbols section '.gnu.version' contains 26 entries:
+ Addr: 0x00000000000006fe  Offset: 0x000006fe  Link: 3 (.dynsym)
+  000:   0 (*local*)       0 (*local*)       2 (CANGJIE)       2 (CANGJIE)    
+  004:   2 (CANGJIE)       0 (*local*)       2 (CANGJIE)       0 (*local*)    
+  008:   3 (GLIBC_2.2.5)   0 (*local*)       0 (*local*)       0 (*local*)    
+  00c:   2 (CANGJIE)       2 (CANGJIE)       1 (*global*)      1 (*global*)   
+  010:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  014:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  018:   1 (*global*)      1 (*global*)   
+
+Version needs section '.gnu.version_r' contains 2 entries:
+ Addr: 0x0000000000000738  Offset: 0x00000738  Link: 4 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 1
+  0x0010:   Name: GLIBC_2.2.5  Flags: none  Version: 3
+  0x0020: Version: 1  File: libcangjie-runtime.so  Cnt: 1
+  0x0030:   Name: CANGJIE  Flags: none  Version: 2

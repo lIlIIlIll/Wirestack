@@ -1,0 +1,24 @@
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(SIMD_support.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(atexit.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(endian.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(string_utf8.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(console_read.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(math.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(print.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(string.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(string_SIMD.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(string_strstr.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(typetemplate.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-core.a(core.o)

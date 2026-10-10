@@ -1,0 +1,22 @@
+
+<sdk-0>/bin/cjc:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000e4828 <.init>:
+   e4828:	sub    $0x8,%rsp
+   e482c:	mov    0x109ec54d(%rip),%rax        # 10ad0d80 <__gmon_start__>
+   e4833:	test   %rax,%rax
+   e4836:	je     e483a <dlerror@plt-0x16>
+   e4838:	call   *%rax
+   e483a:	add    $0x8,%rsp
+   e483e:	ret
+
+Disassembly of section .plt:
+
+00000000000e4840 <dlerror@plt-0x10>:
+   e4840:	push   0x109eb982(%rip)        # 10ad01c8 <_ZNSt7__cxx1112basic_stringIwSt11char_traitsIwESaIwEE9_M_mutateEmmPKwm@@Base+0x1038eb8>
+   e4846:	jmp    *0x109eb984(%rip)        # 10ad01d0 <_ZNSt7__cxx1112basic_stringIwSt11char_traitsIwESaIwEE9_M_mutateEmmPKwm@@Base+0x1038ec0>
+
+[Published excerpt only; full raw output retained privately at <task-scratch>/binary/run-1/sdk-0-0-disassembly.stdout.raw; digest {"domain":"artifact-bytes-v1","sha256":"aeaa6254614b8f59c2b55cfc5c558314a01cb3044904eec254631d9df3108b4f"}, bytes 2555868611.]

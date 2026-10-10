@@ -1,0 +1,78 @@
+{
+  "task_id": "M12-002",
+  "status": "PASS",
+  "owned_vm_supervisor_exit_code": 0,
+  "owned_vm_process_absent": true,
+  "unrelated_vm_touched": false,
+  "removed_agent_created_scaffolds_and_recoverable_images": [
+    {
+      "path": "<task-scratch>/platform/vm-westmere/overlay.qcow2",
+      "bytes": 3143565312
+    },
+    {
+      "path": "<task-scratch>/platform/jammy-server-cloudimg-amd64.img",
+      "bytes": 730497536
+    },
+    {
+      "path": "<task-scratch>/platform/sdk113.tar.gz",
+      "bytes": 373687525
+    },
+    {
+      "path": "<task-scratch>/platform/stable-consumers.tar.gz",
+      "bytes": 53877331
+    },
+    {
+      "path": "<task-scratch>/platform/support.tar.gz",
+      "bytes": 75059
+    },
+    {
+      "path": "<task-scratch>/platform/glibc244.tar.gz",
+      "bytes": 2357248
+    },
+    {
+      "path": "<task-scratch>/platform/image-prefix.bin",
+      "bytes": 1048576
+    },
+    {
+      "path": "<task-scratch>/platform/finalize-inputs.py",
+      "bytes": 7376
+    },
+    {
+      "path": "<task-scratch>/platform/retry-glibc-runtime.py",
+      "bytes": 1673
+    },
+    {
+      "path": "<task-scratch>/platform/run-glibc244.py",
+      "bytes": 3612
+    },
+    {
+      "path": "<task-scratch>/platform/resume-native.py",
+      "bytes": 1790
+    },
+    {
+      "path": "<task-scratch>/platform/transfer-run.py",
+      "bytes": 3378
+    },
+    {
+      "path": "<task-scratch>/platform/vm-server.py",
+      "bytes": 4217
+    }
+  ],
+  "retained": {
+    "binary": {
+      "path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/binary",
+      "logical_bytes": 16269460915,
+      "reason": "bound current capture, raw disassemblies, failed experiments and diagnosed crash core"
+    },
+    "source_sdk": {
+      "path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/source-sdk",
+      "logical_bytes": 397280111,
+      "reason": "qualified installed binaries and native archives required by current binary inventory"
+    },
+    "platform": {
+      "path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/platform",
+      "logical_bytes": 5570603,
+      "reason": "raw failure, original failed selector and VM orchestration evidence"
+    }
+  }
+}

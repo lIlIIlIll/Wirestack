@@ -1,0 +1,21 @@
+In archive $HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/source-sdk/candidate-native/relocated/consumers/trust/target/release/wirestack/libwirestack.gzip.a:
+
+wirestack.gzip.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCN14wirestack.gzip14GzipBodyStream10initializeHCNY_10GzipLimitsENNat6OptionICN9wirestack17CancellationTokenEEEL0_E$g-0x4>:
+       0:	add    %al,(%rax)
+	...
+
+0000000000000004 <_CCN14wirestack.gzip14GzipBodyStream10initializeHCNY_10GzipLimitsENNat6OptionICN9wirestack17CancellationTokenEEEL0_E$g>:
+       4:	push   %rbp
+       5:	mov    %rsp,%rbp
+       8:	call   d <_CCN14wirestack.gzip14GzipBodyStream10initializeHCNY_10GzipLimitsENNat6OptionICN9wirestack17CancellationTokenEEEL0_E$g+0x9>
+       d:	sub    $0x38,%rsp
+      11:	mov    0x28(%r15),%rax
+      15:	cmp    %rax,%rsp
+      18:	jbe    76 <_CCN14wirestack.gzip14GzipBodyStream10initializeHCNY_10GzipLimitsENNat6OptionICN9wirestack17CancellationTokenEEEL0_E$g+0x72>
+      1a:	mov    %rsi,-0x30(%rbp)
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0705e72bd25f35ca5df2a3ddb858f299449126660079fd92e776de3a2be24a72"}

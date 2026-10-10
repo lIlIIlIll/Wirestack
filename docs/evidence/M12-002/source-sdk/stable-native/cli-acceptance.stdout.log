@@ -1,0 +1,14 @@
+CHECK cli_success PASS
+CHECK cli_pre_cancel PASS
+CHECK cli_active_cancel PASS
+CHECK cli_deadline PASS
+CHECK cli_capacity PASS
+CHECK cli_output_failure PASS
+CHECK cli_explicit_close PASS
+CHECK cli_raw_gzip PASS
+CHECK cli_proxy_connect PASS
+PEER_TERMINAL http=stream_reset
+CHECK cli_peer_disconnect PASS
+RESOURCE cli_cleanup connections=0 requests=0 streams=0 buffers=0 admission_waiters=0
+CHECK cli_cleanup PASS
+APP_ACCEPTANCE_PASS

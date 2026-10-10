@@ -1,0 +1,52 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/m12_002_deployment.py",
+        "contracts"
+      ],
+      "duration_ms": 3516.668,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T15:02:10.678572Z",
+      "id": "deployment-behavioral-contracts",
+      "started_at_utc": "2026-10-09T15:02:07.161907Z",
+      "status": "PASS",
+      "stderr_excerpt": ".................\n----------------------------------------------------------------------\nRan 17 tests in 3.412s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M12-002/deployment-behavioral-contracts.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M12-002/deployment-behavioral-contracts.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m12_002_deployment.py",
+        "verify"
+      ],
+      "duration_ms": 8019.928,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-10-09T15:02:18.698603Z",
+      "id": "qualified-deployment-inputs",
+      "started_at_utc": "2026-10-09T15:02:10.678683Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M12-002/qualified-deployment-inputs.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M12_002_DEPLOYMENT_EVIDENCE_PASS\n",
+      "stdout_path": "build/repository-tooling/M12-002/qualified-deployment-inputs.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M12-002"
+}

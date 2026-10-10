@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000002f308 <_init@@Base>:
+   2f308:	sub    $0x8,%rsp
+   2f30c:	mov    0x262525(%rip),%rax        # 291838 <__gmon_start__>
+   2f313:	test   %rax,%rax
+   2f316:	je     2f31a <_init@@Base+0x12>
+   2f318:	call   *%rax
+   2f31a:	add    $0x8,%rsp
+   2f31e:	ret
+
+Disassembly of section .plt:
+
+000000000002f320 <_CNat16getRawStackTraceHv@plt-0x10>:
+   2f320:	push   0x262ce2(%rip)        # 292008 <_CNbv23UNKNOWN_LOCATION_STRINGE@@Base+0x2868>
+   2f326:	jmp    *0x262ce4(%rip)        # 292010 <_CNbv23UNKNOWN_LOCATION_STRINGE@@Base+0x2870>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "e4c2a4af50e557604a25649f6145d2a61197fd336d8ab1ee788f8cd80ac117da"}

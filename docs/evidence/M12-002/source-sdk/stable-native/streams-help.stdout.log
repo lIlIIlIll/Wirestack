@@ -1,0 +1,5 @@
+streams sse URL [--trust CERT.der] [--budget-ms N] [--max-events N] [--recover N] [--cursor-policy parsed|none] [--method GET|POST]
+streams websocket URL [--trust CERT.der] [--budget-ms N] [--max-frames N] [--recover N] [--command TEXT]
+streams self-check CERT.der KEY.pk8 UNTRUSTED.der
+streams fixture CERT.der KEY.pk8; stdin stop terminates the endpoint
+Recovery is finite and opt-in. SSE cursor is parsed, not acknowledged; duplicates are possible. POST is never replayed. WebSocket recovery sends a new recover command, not the old command.

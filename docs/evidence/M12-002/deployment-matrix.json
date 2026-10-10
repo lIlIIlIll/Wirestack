@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "release_qualification": "NOT_QUALIFIED",
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "payload_fingerprint": "6f7e9d20f021ffb84fa91a8cf28f7a17488b8e3fa17e607975ed2af6d568ac3e",
+  "production_source_count": 164,
+  "source_cells": [
+    {
+      "id": "stable-host-source",
+      "status": "SUPPORTED",
+      "scope": "installed package plus four consumers, actual operational commands and six trust cases",
+      "sdk_compiler": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "sdk_compiler_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+      },
+      "sdk_runtime_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "6ac1c91488100ef87c273bd9ab5015f712bc91f566f3bac74150a4485d2adc36"
+      },
+      "kernel": "7.2.7-arch1-1",
+      "glibc": "2.44",
+      "consumer_recompile_required": true,
+      "pass_checks": 47,
+      "evidence": "docs/evidence/M12-002/source-sdk/stable-native/report.json"
+    },
+    {
+      "id": "candidate-host-source",
+      "status": "SUPPORTED",
+      "scope": "installed package plus four consumers, actual operational commands and six trust cases",
+      "sdk_compiler": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "sdk_compiler_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "724b2a273d79195bdddda68f71b23346cdbecf2e4c4208ba200a29f16ffa036f"
+      },
+      "sdk_runtime_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f3de5cd3b5e1f24b3436e66909c67a4f29bfd9ba8ca9dd5054de8b65cf9ed528"
+      },
+      "kernel": "7.2.7-arch1-1",
+      "glibc": "2.44",
+      "consumer_recompile_required": true,
+      "pass_checks": 47,
+      "evidence": "docs/evidence/M12-002/source-sdk/candidate-native/report.json"
+    },
+    {
+      "id": "stable-westmere-source",
+      "status": "SUPPORTED",
+      "scope": "native recompiled installed package and four consumers under exact selected Linux SDK/runtime",
+      "compiler": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "native_cc": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "native_ld": "GNU ld (GNU Binutils for Ubuntu) 2.38",
+      "native_tool_files": {
+        "cc": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "821af3c74506283c179ca413bb33e6b528805a4dd8a5c09df125e5ad560a9e89"
+        },
+        "ld": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "58937fc20c21e147883b4fdaa0fc7438a8e8f2bb886cfcaa4896100ca91139e7"
+        }
+      },
+      "kernel": "5.15.0-198-generic",
+      "glibc": "glibc 2.44",
+      "cpu_model": "Westmere E56xx/L56xx/X56xx (Nehalem-C)",
+      "cpu_flags": [
+        "fpu",
+        "vme",
+        "de",
+        "pse",
+        "tsc",
+        "msr",
+        "pae",
+        "mce",
+        "cx8",
+        "apic",
+        "sep",
+        "mtrr",
+        "pge",
+        "mca",
+        "cmov",
+        "pat",
+        "pse36",
+        "clflush",
+        "mmx",
+        "fxsr",
+        "sse",
+        "sse2",
+        "ht",
+        "syscall",
+        "nx",
+        "lm",
+        "constant_tsc",
+        "rep_good",
+        "nopl",
+        "xtopology",
+        "cpuid",
+        "tsc_known_freq",
+        "pni",
+        "pclmulqdq",
+        "ssse3",
+        "cx16",
+        "sse4_1",
+        "sse4_2",
+        "x2apic",
+        "popcnt",
+        "aes",
+        "hypervisor",
+        "lahf_lm",
+        "cpuid_fault",
+        "pti",
+        "arat"
+      ],
+      "consumer_recompile_required": true,
+      "pass_checks": 47,
+      "evidence": "docs/evidence/M12-002/platform/westmere-glibc244/report.json"
+    }
+  ],
+  "binary_cells": [
+    {
+      "id": "stable-host-binary",
+      "status": "SUPPORTED",
+      "scope": "exact four rebuilt consumer executables on their own matching SDK/runtime, not arbitrary SDK ABI",
+      "kernel": "7.2.7-arch1-1",
+      "glibc": "2.44",
+      "consumer_binary_digests": {
+        "cli": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "1b9bce5f37fd7cad9df632864168db2b3fdf8908a8ff11c99976d313d9e269b5"
+        },
+        "decoded": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "c3ac0e64719630cbd33e2e2f626125c5a26aedfc8fe9c3f6c1e01748ef29af26"
+        },
+        "streams": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "d336ef4908f6f17e913dc25111b49d149d731ce48b26d49fb272435efad0660e"
+        },
+        "service": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "4c9d0c790dcf5c082d930ae7546fba26e1087ee8b2c065d8e7808adf1c2d6483"
+        }
+      },
+      "pass_checks": 47,
+      "evidence": "docs/evidence/M12-002/source-sdk/stable-native/report.json"
+    },
+    {
+      "id": "candidate-host-binary",
+      "status": "SUPPORTED",
+      "scope": "exact four rebuilt consumer executables on their own matching SDK/runtime, not arbitrary SDK ABI",
+      "kernel": "7.2.7-arch1-1",
+      "glibc": "2.44",
+      "consumer_binary_digests": {
+        "cli": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "90ac7abb94b6ac2e404437c1dfb27e9dc05593b070ae83d13e5f57576304ba32"
+        },
+        "decoded": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "29c870b3a5ed6945762a09e43008eac21a849b95c48813c79883ee6b4f32095e"
+        },
+        "streams": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "cde04258bd3c28cfc5d7034ef73d177aa4d962d23690b9656b615518c6e0ced2"
+        },
+        "service": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "d8810a268a994850f3cd1b7e91502246974cf4d2ff58d70f6eed9d2142b78b38"
+        }
+      },
+      "pass_checks": 47,
+      "evidence": "docs/evidence/M12-002/source-sdk/candidate-native/report.json"
+    },
+    {
+      "id": "stable-westmere-same-binary",
+      "status": "SUPPORTED",
+      "scope": "unchanged four stable host-built executables and exact Linux SDK bits in native KVM/private-glibc namespace",
+      "kernel": "5.15.0-198-generic",
+      "glibc": "glibc 2.44",
+      "cpu_model": "Westmere E56xx/L56xx/X56xx (Nehalem-C)",
+      "consumer_binary_digests": {
+        "cli": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "1b9bce5f37fd7cad9df632864168db2b3fdf8908a8ff11c99976d313d9e269b5"
+        },
+        "decoded": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "c3ac0e64719630cbd33e2e2f626125c5a26aedfc8fe9c3f6c1e01748ef29af26"
+        },
+        "streams": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "d336ef4908f6f17e913dc25111b49d149d731ce48b26d49fb272435efad0660e"
+        },
+        "service": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "4c9d0c790dcf5c082d930ae7546fba26e1087ee8b2c065d8e7808adf1c2d6483"
+        }
+      },
+      "pass_checks": 47,
+      "evidence": "docs/evidence/M12-002/platform/westmere-glibc244/report.json"
+    },
+    {
+      "id": "stable-westmere-glibc235",
+      "status": "UNSUPPORTED",
+      "scope": "actual unchanged CLI startup failed; other three consumers were not attempted on this profile",
+      "kernel": "5.15.0-198-generic",
+      "glibc": "glibc 2.35",
+      "cpu_model": "Westmere E56xx/L56xx/X56xx (Nehalem-C)",
+      "required_symbol_versions": [
+        "GLIBC_2.38",
+        "GLIBC_2.43",
+        "GLIBC_2.44"
+      ],
+      "evidence": "docs/evidence/M12-002/platform/westmere/report.json"
+    }
+  ],
+  "abi_policy": {
+    "default_consumer_recompile_after_sdk_change": true,
+    "probe_evidence": "separate binary boundary/coexistence report, with exact sample scope",
+    "not_inferred_from_source_build": true
+  },
+  "semantic_changes": {
+    "source_sdk_profiles": "identical 47-check behavior and operational results; six explicit/system CA outcomes per SDK",
+    "beyond_exercised_paths": "NOT_CLAIMED"
+  },
+  "native_dependencies": {
+    "target/native/current/lib/libwirestack_tls_provider.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a3ae2da76b1e432adde3cce3c1db581d8b3bf9ae4f83917d4fa185f2906e737d"
+    },
+    "target/native/resolver/current/lib/libwirestack_resolver.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dcef4fbe2f69e05fc7a52a427aa0ae91e6ce2e8fba94fd68e1f642e3e81e8faa"
+    },
+    "target/native/http_files/current/lib/libwirestack_http_files.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8524cf328f0b088b6f429dbed5827cc9429ba4ce32fd4e3e2ac82051aaba155a"
+    }
+  },
+  "optional_gzip_native_dependencies": [],
+  "minimum_verified_profile": "stable-westmere-same-binary",
+  "unverified": [
+    {
+      "target": "candidate SDK on minimum Westmere/kernel profile",
+      "status": "UNVERIFIED"
+    },
+    {
+      "target": "installed source on glibc2.35",
+      "status": "UNVERIFIED"
+    },
+    {
+      "target": "older kernel/CPU/glibc or unlisted combinations",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "excluded_targets": [
+    "musl",
+    "linux-aarch64",
+    "Windows",
+    "macOS"
+  ]
+}

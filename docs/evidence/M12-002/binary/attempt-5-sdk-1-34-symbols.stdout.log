@@ -1,0 +1,29 @@
+
+interop.o:
+0000000000000304 T _CGP11std.interopifHv
+0000000000000104 T _CGP11std.interopiiHv
+0000000000000064 T _CGP11std.interopilHv
+0000000000000294 T _CGP11std.interopirHv
+0000000000000360 V Closure<(std.interop:ExportedRef,std.interop:ForeignProxy)->Unit>.ti
+0000000000000164 T _CN11std.interop11ExportedRef14validateHandleHv
+00000000000001a0 T _CN11std.interop11ExportedRef6<init>HCNat3AnyECNY_14InteropContextE
+00000000000000d4 T _CN11std.interop11ExportTable14getExportedRefHm
+00000000000000f4 T _CN11std.interop11ExportTable17removeExportedRefHm
+0000000000000114 T _CN11std.interop11ExportTable18createExportHandleHCNY_11ExportedRefE
+0000000000000134 T _CN11std.interop11ExportTable18crossAccessBarrierHm
+0000000000000150 T _CN11std.interop11ExportTable6<init>Hv
+0000000000000210 T _CN11std.interop12ForeignProxy6<init>HCNY_14InteropContextE
+0000000000000250 T _CN11std.interop14InteropContext6<init>HF0uCNY_11ExportedRefECNY_12ForeignProxyEE
+0000000000000000 V DW.ref..L__cj_personality_v0$
+00000000000002a0 V std.core:Equal<std.interop:InteropContext>.ti
+0000000000000240 V std.core:Equatable<std.interop:InteropContext>.ti
+0000000000000300 V std.core:NotEqual<std.interop:InteropContext>.ti
+00000000000001e0 V std.core:Option<std.interop:ExportedRef>.ti
+00000000000003c0 V (std.interop:ExportedRef,std.interop:ForeignProxy)->Unit.ti
+0000000000000060 D std.interop:ExportedRef.ti
+0000000000000000 D std.interop:ExportTable.ti
+00000000000000c0 D std.interop:ForeignProxy.ti
+0000000000000120 D std.interop:InteropContext.ti
+0000000000000000 D std_std.interop.packageInfo
+0000000000000018 V Unit.Val
+0000000000000180 V VArray<Int8,0>.ti

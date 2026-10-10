@@ -1,0 +1,35 @@
+
+Dynamic section at offset 0x38c90 contains 32 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-core.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-runtime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libboundscheck.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN]
+ 0x000000000000000c (INIT)               0x1a060
+ 0x000000000000000d (FINI)               0x2e828
+ 0x0000000000000019 (INIT_ARRAY)         0x2382d0
+ 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x2382e0
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x0000000000000004 (HASH)               0x190
+ 0x000000006ffffef5 (GNU_HASH)           0x1838
+ 0x0000000000000005 (STRTAB)             0x8760
+ 0x0000000000000006 (SYMTAB)             0x3078
+ 0x000000000000000a (STRSZ)              28676 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x239000
+ 0x0000000000000002 (PLTRELSZ)           3984 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x190d0
+ 0x0000000000000007 (RELA)               0xff38
+ 0x0000000000000008 (RELASZ)             37272 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x0000000000000018 (BIND_NOW)           
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffffe (VERNEED)            0xfea8
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x000000006ffffff0 (VERSYM)             0xf764
+ 0x000000006ffffff9 (RELACOUNT)          372
+ 0x0000000000000000 (NULL)               0x0

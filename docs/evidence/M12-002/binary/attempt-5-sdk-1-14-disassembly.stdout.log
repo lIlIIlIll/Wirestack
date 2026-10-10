@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-concurrent.a:
+
+concurrent.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNcr11ThreadGroupIG_E6launchHF0G_EEL_E$g-0xc4>:
+       0:	mov    0x0(%rip),%rax        # 7 <_CCNcr11ThreadGroupIG_E6launchHF0G_EEL_E$g-0xbd>
+       7:	ret
+       8:	nopl   0x0(%rax,%rax,1)
+      10:	mov    (%rsi),%rax
+      13:	ret
+      14:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+      20:	push   %rbp
+      21:	mov    %rsp,%rbp
+      24:	mov    %rsi,%rdx
+      27:	mov    %edi,%esi
+      29:	mov    0x0(%rip),%rdi        # 30 <_CCNcr11ThreadGroupIG_E6launchHF0G_EEL_E$g-0x94>
+      30:	call   35 <_CCNcr11ThreadGroupIG_E6launchHF0G_EEL_E$g-0x8f>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "4cbccca3727168905a262dd2e24a7c4f49cc3f3afb2ab19612cfe79886169264"}

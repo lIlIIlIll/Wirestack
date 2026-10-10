@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.a:
+
+unittest.mock.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNac11HashMapKeysIG_G0_E8iteratorHvEL_E.52$g-0x10>:
+       0:	xor    %eax,%eax
+       2:	ret
+       3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000010 <_CCNac11HashMapKeysIG_G0_E8iteratorHvEL_E.52$g>:
+      10:	push   %rbp
+      11:	mov    %rsp,%rbp
+      14:	call   19 <_CCNac11HashMapKeysIG_G0_E8iteratorHvEL_E.52$g+0x9>
+      19:	push   %rbx
+      1a:	mov    %rdi,%rbx
+      1d:	mov    0x8(%rdx),%rax
+      21:	mov    %rax,%rcx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0223f1d4e4ac33dbf1a6599049cbc0a5b84645eec98f713936c674fcdf3a3f01"}
