@@ -100,3 +100,35 @@ GitHub Pages now uses `build_type=workflow`, removing the competing legacy
 check searched for `Deadline`, opened `wirestack.Deadline — struct`, and reached
 the `wirestack.Deadline` reference page. Configuration and browser observations
 are recorded in [`required-checks.json`](required-checks.json).
+
+## Bounded Doc IR CI repair
+
+The feature-stack failures are recorded in
+[failed-runs.json](ci-bounded-doc-ir/failed-runs.json). The combined strict check
+serialized the complete Doc IR twice: pretty JSON exceeded the unchanged 8 MiB
+JSON limit; the docs job also exhausted memory. Standalone package checks passed.
+The earlier M10-002 parameter documentation failure was already corrected by
+commit `62aebdd5d48deaa137987f9f74d70dd72bcba177`; this repair does not duplicate it.
+
+Both workflows apply a hash-gated patch to pinned cjdoc 0.7.2. It emits compact
+Doc IR, retains the schema round-trip, and memoizes exact regex pattern/value
+results within each immutable schema validation. The cache holds at most 65,536
+entries, caches both true and false, and uses the original budgeted matcher when
+full. No JSON, schema, encoding or actual-regex-work limit is raised. The docs
+gate renders API, coverage, Markdown and HTML in separate processes from the
+same complete Doc IR; no declarations or source packages are projected away.
+
+[Native qualification](ci-bounded-doc-ir/native.json) uses only STS 1.1.3.
+[The main-based full HTML gate](ci-bounded-doc-ir/main-docs.json) passed with
+2,486 declarations, 1,507 visible API entries and 100% symbol/parameter coverage.
+[Semantic comparison](ci-bounded-doc-ir/semantic-comparison.json) confirms the
+entire Doc IR, API surface and coverage are unchanged apart from JSON whitespace.
+[Browser evidence](ci-bounded-doc-ir/browser.json) records a real Deadline search
+and reference-page navigation with no page/request errors.
+
+Publication uses one independent M7-033 repair branch based on main. The 14
+existing feature PR heads are preserved; their historical failures do not become
+PASS when this branch passes. They need the shared repair in their base before
+new runs can qualify them. This evidence does not replace the deployed-revision
+Pages smoke or claim a new deployment, performance acceptance, non-STS SDK, or
+non-Linux platform result.

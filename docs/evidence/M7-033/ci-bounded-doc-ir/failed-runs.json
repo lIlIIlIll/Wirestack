@@ -1,0 +1,2669 @@
+{
+  "schemaVersion": 1,
+  "repository": "lIlIIlIll/Wirestack",
+  "audit": "Read-only GitHub specific-job-log diagnosis; no failure-confirmation reruns.",
+  "sourceHeadSHA": "1f780a75af67acf3de82b20b2333267ba41a8a66",
+  "counts": {
+    "combined-doc-ir-json-size": 18,
+    "combined-doc-ir-out-of-memory": 1,
+    "unavailable-job-log": 1,
+    "missing-resource-limits-parameter-docs": 2
+  },
+  "pullRequests": [
+    {
+      "pr": 212,
+      "branch": "publish/m12-003-gate-receipt",
+      "headSHA": "1f780a75af67acf3de82b20b2333267ba41a8a66",
+      "title": "M12-003: preserve ignored historical task gate receipt",
+      "failedRuns": [
+        38037030694,
+        38037030693
+      ]
+    },
+    {
+      "pr": 211,
+      "branch": "publish/m12-004-upgrade-repaired-server",
+      "headSHA": "d5d1dca027a09fd01e4d4a274c6ed3d04ee3c56a",
+      "title": "M12-004: upgrade rehearsal and repaired Server performance",
+      "failedRuns": [
+        38036391728,
+        38036391710
+      ]
+    },
+    {
+      "pr": 210,
+      "branch": "publish/m12-003-resilience",
+      "headSHA": "f4de583f250d77c6b8981917db671111834e268e",
+      "title": "M12-003: bounded fault and resilience evidence",
+      "failedRuns": [
+        38035644180,
+        38035644114
+      ]
+    },
+    {
+      "pr": 209,
+      "branch": "publish/m12-002-deployment",
+      "headSHA": "337d70609d4e0a2c4fa75e45858eaf84da1af480",
+      "title": "M12-002: deployment and source SDK compatibility",
+      "failedRuns": [
+        38035316730,
+        38035316727
+      ]
+    },
+    {
+      "pr": 208,
+      "branch": "publish/m12-001-baselines",
+      "headSHA": "df771c276ac0ee8b7b418f6f9870c39d7d0c188d",
+      "title": "M12-001: native end-to-end performance baselines",
+      "failedRuns": [
+        38034478048,
+        38034476916
+      ]
+    },
+    {
+      "pr": 207,
+      "branch": "publish/m11-004-installed-consumers",
+      "headSHA": "12787c998b1eb736a8310ef9b5bd9a4d1e8f4aa4",
+      "title": "M11-004: installed application consumers",
+      "failedRuns": [
+        38033854882,
+        38033854795
+      ]
+    },
+    {
+      "pr": 206,
+      "branch": "publish/m11-003-websocket",
+      "headSHA": "4e0493461eb2008f376c8fc74a5a252078939ce6",
+      "title": "M11-003: WebSocket URL and bounded lifecycle",
+      "failedRuns": [
+        38033602109,
+        38033602125
+      ]
+    },
+    {
+      "pr": 205,
+      "branch": "publish/m11-002-gzip",
+      "headSHA": "d69bb72ef64fc2046ceeba29137ae2678abf0e02",
+      "title": "M11-002: optional bounded gzip decoding",
+      "failedRuns": [
+        38032490557,
+        38032490549
+      ]
+    },
+    {
+      "pr": 204,
+      "branch": "publish/m11-001-sse",
+      "headSHA": "9ca74c2c422a14906e3818cec5518bccc9b25a0b",
+      "title": "M11-001: bounded SSE session lifecycle",
+      "failedRuns": [
+        38032147686,
+        38032147726
+      ]
+    },
+    {
+      "pr": 203,
+      "branch": "publish/m10-005-observability",
+      "headSHA": "b4efcffef065b27fac753dfb90ee2ae599bd620d",
+      "title": "M10-005: correlated bounded observability",
+      "failedRuns": [
+        38031966060,
+        38031966164
+      ]
+    },
+    {
+      "pr": 202,
+      "branch": "publish/m10-004-generation-rotation",
+      "headSHA": "9dd810e4a4160ea942b8399d43edcd9c76d67a07",
+      "title": "M10-004: configuration generation rotation",
+      "failedRuns": [],
+      "checks": [
+        {
+          "name": "architecture-guard",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646728/job/114153662394"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646733/job/114153662487"
+        },
+        {
+          "name": "Analyze (actions)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031671770/job/114153739026"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646700/job/114153662252"
+        },
+        {
+          "name": "gate-harness",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646734/job/114153662377"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646724/job/114153664820"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646731/job/114153662387"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646727/job/114153662392"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646711/job/114153662304"
+        },
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646706/job/114153662281"
+        },
+        {
+          "name": "Analyze (c-cpp)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031671770/job/114153738852"
+        },
+        {
+          "name": "Analyze (python)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031671770/job/114153739080"
+        },
+        {
+          "name": "clean-cangjie-build",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646733/job/114154073931"
+        },
+        {
+          "name": "Generate public API docs / cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646724/job/114154035170"
+        },
+        {
+          "name": "report-build-status",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646733/job/114155629686"
+        },
+        {
+          "name": "report-docs-status",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646724/job/114155874026"
+        },
+        {
+          "name": "Deploy latest main documentation",
+          "conclusion": "SKIPPED",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031646724/job/114155874799"
+        },
+        {
+          "name": "CodeQL",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/runs/114153841491"
+        }
+      ]
+    },
+    {
+      "pr": 201,
+      "branch": "publish/m10-003-safe-retry",
+      "headSHA": "3d39a7fcfb4e0a8dfbfdcebe263231e77423a2ee",
+      "title": "M10-003: fair pooling and safe retry",
+      "failedRuns": [],
+      "checks": [
+        {
+          "name": "architecture-guard",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464217/job/114153112965"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464206/job/114153112992"
+        },
+        {
+          "name": "Analyze (actions)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031671867/job/114153739216"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464195/job/114153113166"
+        },
+        {
+          "name": "gate-harness",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464152/job/114153112681"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464288/job/114153113063"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464214/job/114153113092"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464183/job/114153112734"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464178/job/114153112777"
+        },
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464194/job/114153112888"
+        },
+        {
+          "name": "Analyze (c-cpp)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031671867/job/114153739253"
+        },
+        {
+          "name": "Analyze (python)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031671867/job/114153739064"
+        },
+        {
+          "name": "clean-cangjie-build",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464206/job/114153498993"
+        },
+        {
+          "name": "Generate public API docs / cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464288/job/114153497547"
+        },
+        {
+          "name": "report-build-status",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464206/job/114154665534"
+        },
+        {
+          "name": "report-docs-status",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464288/job/114155427622"
+        },
+        {
+          "name": "Deploy latest main documentation",
+          "conclusion": "SKIPPED",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031464288/job/114155428545"
+        },
+        {
+          "name": "CodeQL",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/runs/114153865470"
+        }
+      ]
+    },
+    {
+      "pr": 199,
+      "branch": "publish/m10-001-deadlines",
+      "headSHA": "62aebdd5d48deaa137987f9f74d70dd72bcba177",
+      "title": "M10-001: unified deadline and stage budgets",
+      "failedRuns": [],
+      "checks": [
+        {
+          "name": "architecture-guard",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289729/job/114152597087"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289738/job/114152597280"
+        },
+        {
+          "name": "Analyze (actions)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031296240/job/114152617507"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289903/job/114152597721"
+        },
+        {
+          "name": "gate-harness",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289740/job/114152597363"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289821/job/114152597655"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289770/job/114152597867"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289721/job/114152597144"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289895/job/114152597923"
+        },
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289763/job/114152597380"
+        },
+        {
+          "name": "Analyze (c-cpp)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031296240/job/114152617439"
+        },
+        {
+          "name": "Analyze (python)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031296240/job/114152617518"
+        },
+        {
+          "name": "clean-cangjie-build",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289738/job/114152975357"
+        },
+        {
+          "name": "Generate public API docs / cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289821/job/114152999786"
+        },
+        {
+          "name": "report-build-status",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289738/job/114154925101"
+        },
+        {
+          "name": "report-docs-status",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289821/job/114155022646"
+        },
+        {
+          "name": "Deploy latest main documentation",
+          "conclusion": "SKIPPED",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031289821/job/114155023787"
+        },
+        {
+          "name": "CodeQL",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/runs/114152704319"
+        }
+      ]
+    },
+    {
+      "pr": 198,
+      "branch": "publish/m10-002-resource-budgets",
+      "headSHA": "66f6178ead3e262d32c91e53dae0b49fc114177f",
+      "title": "M10-002: aggregate HTTP resource budgets",
+      "failedRuns": [
+        38031065732,
+        38031065755
+      ],
+      "checks": [
+        {
+          "name": "architecture-guard",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065778/job/114151938057"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065732/job/114151937643"
+        },
+        {
+          "name": "Analyze (actions)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031064277/job/114151935447"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065721/job/114151937671"
+        },
+        {
+          "name": "gate-harness",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031066473/job/114151939734"
+        },
+        {
+          "name": "Build pinned cjdoc 0.7.2",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065755/job/114151938029"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065754/job/114151937621"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065717/job/114151937564"
+        },
+        {
+          "name": "harness-tests",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065722/job/114151937561"
+        },
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065742/job/114151937635"
+        },
+        {
+          "name": "Analyze (c-cpp)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031064277/job/114151935512"
+        },
+        {
+          "name": "Analyze (python)",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031064277/job/114151935398"
+        },
+        {
+          "name": "clean-cangjie-build",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065732/job/114152335430"
+        },
+        {
+          "name": "Generate public API docs / cjdoc 0.7.2",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065755/job/114152326057"
+        },
+        {
+          "name": "report-build-status",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065732/job/114152759337"
+        },
+        {
+          "name": "report-docs-status",
+          "conclusion": "FAILURE",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065755/job/114152609025"
+        },
+        {
+          "name": "Deploy latest main documentation",
+          "conclusion": "SKIPPED",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/38031065755/job/114152609794"
+        },
+        {
+          "name": "CodeQL",
+          "conclusion": "SUCCESS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/runs/114152042853"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "pr": 212,
+      "branch": "publish/m12-003-gate-receipt",
+      "headSHA": "1f780a75af67acf3de82b20b2333267ba41a8a66",
+      "runID": 38037030694,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114169877952,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        212
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114171537191,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114169877952.log",
+      "logBytes": 90529,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 212,
+      "branch": "publish/m12-003-gate-receipt",
+      "headSHA": "1f780a75af67acf3de82b20b2333267ba41a8a66",
+      "runID": 38037030693,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114169807843,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "An exception has occurred:\n    Out of memory",
+      "returncode": 1,
+      "signature": "combined-doc-ir-out-of-memory",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        212
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114170780554,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114169807843.log",
+      "logBytes": 72538,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 211,
+      "branch": "publish/m12-004-upgrade-repaired-server",
+      "headSHA": "d5d1dca027a09fd01e4d4a274c6ed3d04ee3c56a",
+      "runID": 38036391728,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114168017644,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        211
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114169681835,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114168017644.log",
+      "logBytes": 90527,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 211,
+      "branch": "publish/m12-004-upgrade-repaired-server",
+      "headSHA": "d5d1dca027a09fd01e4d4a274c6ed3d04ee3c56a",
+      "runID": 38036391710,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114167942927,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        211
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114169584346,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114167942927.log",
+      "logBytes": 74852,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 210,
+      "branch": "publish/m12-003-resilience",
+      "headSHA": "f4de583f250d77c6b8981917db671111834e268e",
+      "runID": 38035644180,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114165767021,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        210
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114167407305,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114165767021.log",
+      "logBytes": 87451,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 210,
+      "branch": "publish/m12-003-resilience",
+      "headSHA": "f4de583f250d77c6b8981917db671111834e268e",
+      "runID": 38035644114,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114165741656,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        210
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114167363191,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114165741656.log",
+      "logBytes": 71714,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 209,
+      "branch": "publish/m12-002-deployment",
+      "headSHA": "337d70609d4e0a2c4fa75e45858eaf84da1af480",
+      "runID": 38035316730,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114164753138,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        209
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114166391358,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114164753138.log",
+      "logBytes": 87442,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 209,
+      "branch": "publish/m12-002-deployment",
+      "headSHA": "337d70609d4e0a2c4fa75e45858eaf84da1af480",
+      "runID": 38035316727,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114164776754,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "Specific job log unavailable: TLS handshake timeout from GitHub job-log storage.",
+      "returncode": null,
+      "signature": "unavailable-job-log",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        209
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114166007716,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114164776754.log",
+      "logBytes": 0,
+      "logStatus": "missing",
+      "commands": []
+    },
+    {
+      "pr": 208,
+      "branch": "publish/m12-001-baselines",
+      "headSHA": "df771c276ac0ee8b7b418f6f9870c39d7d0c188d",
+      "runID": 38034478048,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114162326225,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        208
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114163622332,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114162326225.log",
+      "logBytes": 77690,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 208,
+      "branch": "publish/m12-001-baselines",
+      "headSHA": "df771c276ac0ee8b7b418f6f9870c39d7d0c188d",
+      "runID": 38034476916,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114162352715,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        208
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114163852476,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114162352715.log",
+      "logBytes": 71714,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 207,
+      "branch": "publish/m11-004-installed-consumers",
+      "headSHA": "12787c998b1eb736a8310ef9b5bd9a4d1e8f4aa4",
+      "runID": 38033854882,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114160498669,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        207
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114162147394,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114160498669.log",
+      "logBytes": 77689,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 207,
+      "branch": "publish/m11-004-installed-consumers",
+      "headSHA": "12787c998b1eb736a8310ef9b5bd9a4d1e8f4aa4",
+      "runID": 38033854795,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114160501461,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        207
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114161690938,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114160501461.log",
+      "logBytes": 71714,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 206,
+      "branch": "publish/m11-003-websocket",
+      "headSHA": "4e0493461eb2008f376c8fc74a5a252078939ce6",
+      "runID": 38033602109,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114159757955,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        206
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114161452961,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114159757955.log",
+      "logBytes": 77690,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 206,
+      "branch": "publish/m11-003-websocket",
+      "headSHA": "4e0493461eb2008f376c8fc74a5a252078939ce6",
+      "runID": 38033602125,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114159758783,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        206
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114161002143,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114159758783.log",
+      "logBytes": 71713,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 205,
+      "branch": "publish/m11-002-gzip",
+      "headSHA": "d69bb72ef64fc2046ceeba29137ae2678abf0e02",
+      "runID": 38032490557,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114156543225,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        205
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114158170997,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114156543225.log",
+      "logBytes": 77599,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 205,
+      "branch": "publish/m11-002-gzip",
+      "headSHA": "d69bb72ef64fc2046ceeba29137ae2678abf0e02",
+      "runID": 38032490549,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114156559745,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        205
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114158185100,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114156559745.log",
+      "logBytes": 71615,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.gzip",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 204,
+      "branch": "publish/m11-001-sse",
+      "headSHA": "9ca74c2c422a14906e3818cec5518bccc9b25a0b",
+      "runID": 38032147686,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114155465098,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        204
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114156905445,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114155465098.log",
+      "logBytes": 76220,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 204,
+      "branch": "publish/m11-001-sse",
+      "headSHA": "9ca74c2c422a14906e3818cec5518bccc9b25a0b",
+      "runID": 38032147726,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114155505974,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        204
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114157368852,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114155505974.log",
+      "logBytes": 70396,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.sse",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 203,
+      "branch": "publish/m10-005-observability",
+      "headSHA": "b4efcffef065b27fac753dfb90ee2ae599bd620d",
+      "runID": 38031966060,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114154958416,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        203
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114156322660,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114154958416.log",
+      "logBytes": 74660,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 203,
+      "branch": "publish/m10-005-observability",
+      "headSHA": "b4efcffef065b27fac753dfb90ee2ae599bd620d",
+      "runID": 38031966164,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114154985311,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "error: JSON value exceeds 8388608 bytes",
+      "returncode": 2,
+      "signature": "combined-doc-ir-json-size",
+      "taskOwner": "M7-033",
+      "affectedPRs": [
+        203
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114156134827,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114154985311.log",
+      "logBytes": 68684,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.tls",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.net",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.observability",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "combined",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 198,
+      "branch": "publish/m10-002-resource-budgets",
+      "headSHA": "66f6178ead3e262d32c91e53dae0b49fc114177f",
+      "runID": 38031065732,
+      "workflow": "Clean Cangjie Build",
+      "jobID": 114152335430,
+      "job": "clean-cangjie-build",
+      "failedStep": "Run current-source build and test gate",
+      "error": "warning[CJDOC3004]: undocumented parameter 'value'\n --> src/http/client.cj:92:5\nwarning[CJDOC3004]: undocumented parameter 'value'\n --> src/http/server.cj:360:5\ndocumentation coverage: symbols 1116/1116 (100%), parameters 522/524 (99%)\nerror: parameter documentation coverage 99% is below 100%",
+      "returncode": 1,
+      "signature": "missing-resource-limits-parameter-docs",
+      "taskOwner": "M10-002",
+      "affectedPRs": [
+        198
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114152759337,
+          "job": "report-build-status",
+          "failedStep": "Require both builds to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114152335430.log",
+      "logBytes": 70094,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "pr": 198,
+      "branch": "publish/m10-002-resource-budgets",
+      "headSHA": "66f6178ead3e262d32c91e53dae0b49fc114177f",
+      "runID": 38031065755,
+      "workflow": "M7-033 Developer Documentation",
+      "jobID": 114152326057,
+      "job": "Generate public API docs / cjdoc 0.7.2",
+      "failedStep": "Run the strict documentation and coverage gate",
+      "error": "warning[CJDOC3004]: undocumented parameter 'value'\n --> src/http/client.cj:92:5\nwarning[CJDOC3004]: undocumented parameter 'value'\n --> src/http/server.cj:360:5\ndocumentation coverage: symbols 1116/1116 (100%), parameters 522/524 (99%)\nerror: parameter documentation coverage 99% is below 100%",
+      "returncode": 1,
+      "signature": "missing-resource-limits-parameter-docs",
+      "taskOwner": "M10-002",
+      "affectedPRs": [
+        198
+      ],
+      "downstreamFailures": [
+        {
+          "jobID": 114152609025,
+          "job": "report-docs-status",
+          "failedStep": "Require documentation prerequisites to succeed",
+          "error": "Prerequisite failure propagation, not a separate root."
+        }
+      ],
+      "log": "job-114152326057.log",
+      "logBytes": 64120,
+      "logStatus": "fetched",
+      "commands": [
+        {
+          "package": "wirestack",
+          "kind": "check",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack",
+          "kind": "generate",
+          "status": "PASS"
+        },
+        {
+          "package": "wirestack.http",
+          "kind": "check",
+          "status": "FAIL"
+        }
+      ]
+    }
+  ],
+  "conclusion": "Two distinct roots. PR198 lacks parameter docs; PR203..212 fail combined documentation resource processing. Of 22 runs: 18 combined 8MiB failures, one combined-check OOM, two parameter-coverage failures, one unavailable specific job log.",
+  "roots": [
+    {
+      "id": "missing-resource-limits-parameter-docs",
+      "taskOwner": "M10-002",
+      "dependencies": [
+        "M9-001"
+      ],
+      "affectedPRs": [
+        198
+      ],
+      "evidence": "Both PR198 jobs report CJDOC3004 at src/http/client.cj:92 and src/http/server.cj:360. HttpClientBuilder.resourceLimits and HttpServerBuilder.resourceLimits omit @param value. Coverage is symbols 1116/1116, parameters 522/524.",
+      "exactFix": "Add @param value The per-instance aggregate resource limits for this client/server to the two public resourceLimits comments.",
+      "alreadyFixedAt": "62aebdd5d48deaa137987f9f74d70dd72bcba177",
+      "currentSource": "Both comments already repaired at selected top head; no new source change needed.",
+      "publication": "PR198 is an isolated earlier head. Repair it only through separately authorized new M10-002 branch if desired; preserve all existing 14 publication heads. Current independent M7-033 repair must not incorporate deadline implementation or modify PR198.",
+      "verification": [
+        "Using qualified STS 1.1.3 and pinned cjdoc 0.7.2 in isolated validation checkout: scripts/check-docs --html --json --output build/ci-repair-docs.json",
+        "scripts/check-code",
+        "scripts/check-m7-027-linux-examples --json"
+      ],
+      "expected": "No CJDOC3004; all public symbol and parameter coverage 100%; full HTML."
+    },
+    {
+      "id": "combined-doc-ir-resource-growth",
+      "taskOwner": "M7-033",
+      "dependencies": [
+        "M7-027",
+        "M7-032"
+      ],
+      "affectedPRs": [
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212
+      ],
+      "evidence": "18 jobs fail combined strict cjdoc check with JSON value exceeds 8388608 bytes. PR212 docs job fails that same combined check with Out of memory. Prior per-package checks/generation succeed.",
+      "diagnosis": "tools/docs/m7_033_docs.py copies all public files into combined/project then invokes _check before combined generation and HTML. This all-public operation breaches pinned JSON bounds. OOM is the same failing stage but logs do not prove identical allocation cause.",
+      "sourceSections": [
+        "tools/docs/m7_033_docs.py:_copy_public_view,_check,build_report combined sequence",
+        "scripts/check-code:14 calls docs before cjpm check/build/test",
+        "scripts/check-docs Python CLI wrapper",
+        ".github/workflows/clean-cangjie-build.yml:195-199,245-249",
+        ".github/workflows/m7-033-docs.yml:231-250"
+      ],
+      "fix": "Parallel worker owns bounded documentation processing and deterministic full artifact assembly. Preserve strict 100% parameter/symbol coverage, full Doc IR/API surface/Markdown, HTML/search, drift checks, pinned tool/version and limits; never skip HTML or raise limits.",
+      "publication": "User-selected independent M7-033 repair PR; preserve all 14 existing publication heads.",
+      "verification": [
+        "python3 -m unittest tools.tests.test_m7_033_docs tools.tests.test_linux_tls_provider_build tools.repository.tests.test_repository_tooling -v",
+        "scripts/check-docs --html --json --output build/ci-repair-docs.json",
+        "scripts/check-code",
+        "scripts/check-m7-027-linux-examples --json"
+      ],
+      "expected": "Exercise changed actual CLI on selected complete source with qualified STS 1.1.3 and pinned cjdoc 0.7.2, complete strict artifacts including HTML/search and no oversized/OOM processing; run both workflows on independent authorized branch."
+    }
+  ],
+  "uncertainties": [
+    {
+      "pr": 209,
+      "runID": 38035316727,
+      "jobID": 114164776754,
+      "confirmed": "Metadata confirms strict documentation gate failed; pinned cjdoc build succeeded.",
+      "missing": "Specific job body unavailable after gh run view --job --log retries and gh api job logs alternative, TLS handshake timeout.",
+      "inference": "Likely same combined resource failure as neighboring heads and sibling clean-build run, not proven or counted as observed 8MiB/OOM."
+    }
+  ],
+  "ancestry": {
+    "earliestPR": 198,
+    "headSHA": "66f6178ead3e262d32c91e53dae0b49fc114177f",
+    "parameterRepairInPR": 199,
+    "repairSHA": "62aebdd5d48deaa137987f9f74d70dd72bcba177",
+    "noFailedChecks": [
+      199,
+      201,
+      202
+    ],
+    "combinedResourceFailureFirstObservedPR": 203
+  },
+  "verificationExecutedByAuditor": false,
+  "notes": [
+    "No source mutations, commits, pushes, issue/PR writes, builds or tests by this auditor.",
+    "Status-report failures only propagate prerequisite errors.",
+    "Failing check-code docs step precedes cjpm check/build/test, so these source build/test stages were not reached in failed runs. Docs job also fails before installed consumer.",
+    "Parent validation results are independent evidence, not included as auditor-run checks."
+  ],
+  "references": [
+    "docs/product/prd.md:strict release gates and bounded resources",
+    "docs/architecture/adr/0001-cjpm-package-layout.md:Accepted package layout",
+    "docs/architecture/adr/0006-public-contract-ownership.md:Accepted public ownership and historical evidence",
+    "docs/planning/implementation-backlog.md:M7-033,M10-001,M10-002,M10-005",
+    "docs/planning/status.md:M7-033,M10-001,M10-002,M10-003"
+  ],
+  "scratchEvidence": "$HOME/.cache/agent-tmp/wirestack-ci-repair.06AlitJL",
+  "privacy": "Report excludes machine-specific absolute paths, local usernames, internal addresses and signed job-download URLs. Raw scratch logs require redaction before publication."
+}

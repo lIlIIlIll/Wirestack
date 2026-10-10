@@ -55,3 +55,17 @@ PASS。
 | T010 | S012,S013 | P011,P012 | Real Git subprocess regression preserves diagnostics and rejects dirty source |
 
 未运行的一小时 SSE、86,400 秒 soak 和非 Linux 平台门禁不属于本任务验收。
+
+## Bounded Doc IR repair verification
+
+The follow-up CI repair retains P003/P004/P005 and the complete source graph.
+Qualification uses the exact hash-gated cjdoc patch on STS 1.1.3. The complete
+generated Doc IR is compared as parsed JSON with its unpatched baseline,
+including private/internal records; API surface and coverage must be identical.
+Separate renderer processes must consume that same complete IR. A real HTML
+search must open the selected API reference, with no page/request errors.
+Malformed schema input, cached negative regex results, fresh-validation cache
+isolation, unchanged resource limits, and a full-cache uncached fallback are
+negative/boundary scenarios; never replace their native results with mock echoes.
+Reports are under `ci-bounded-doc-ir/`; historical Pages smoke remains bound to
+its original deployed revision.

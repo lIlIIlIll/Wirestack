@@ -323,7 +323,7 @@ def _validate_layer(output: Path, package: str) -> dict[str, Any]:
 
 
 def _generate(cjdoc: str, project: Path, output: Path, timeout: int, *,
-              formats: Sequence[str] = ("json", "api-surface", "coverage", "markdown")) -> dict[str, Any]:
+              formats: Sequence[str] = ("json",)) -> dict[str, Any]:
     argv = [cjdoc, "generate", "--project", str(project), "--audience", "external",
             "--lint-profile", "strict", "--jobs", "1", "--locale", "zh-CN"]
     for name, value in DOCUMENTATION_CFG.items():
@@ -332,6 +332,31 @@ def _generate(cjdoc: str, project: Path, output: Path, timeout: int, *,
         argv.extend(["--format", fmt])
     argv.extend(["--output", str(output)])
     return _run(argv, project, timeout)
+
+
+def _render(cjdoc: str, project: Path, doc_ir: Path, output: Path, timeout: int,
+            fmt: str) -> dict[str, Any]:
+    return _run([cjdoc, "render", "--input", str(doc_ir), "--format", fmt,
+                 "--locale", "zh-CN", "--output", str(output)], project, timeout)
+
+
+def _generate_layer(cjdoc: str, project: Path, output: Path, timeout: int,
+                    package: str, commands: list[dict[str, Any]]) -> None:
+    command = _generate(cjdoc, project, output, timeout)
+    commands.append({"package": package, "kind": "generate", **command})
+    if command["status"] != "PASS":
+        raise DocsError("CJDOC_GENERATE", f"{package} generation returned {command['returncode']}")
+    doc_ir = _artifact_paths(output)["docs"]
+    validate_doc_ir(_read_json(doc_ir, "DOC_IR_JSON"))
+    # Each renderer retains only its own serialized artifacts. All consume the
+    # same complete, schema-validated Doc IR rather than re-scanning the source.
+    for fmt in ("api-surface", "coverage", "markdown"):
+        rendered = output.parent / f"render-{fmt}"
+        command = _render(cjdoc, project, doc_ir, rendered, timeout, fmt)
+        commands.append({"package": package, "kind": f"render-{fmt}", **command})
+        if command["status"] != "PASS":
+            raise DocsError("CJDOC_RENDER", f"{package} {fmt} rendering returned {command['returncode']}")
+        shutil.copytree(rendered / fmt, output / fmt)
 
 
 def _check(cjdoc: str, project: Path, timeout: int) -> dict[str, Any]:
@@ -384,10 +409,7 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
                 report["commands"].append({"package": package, "kind": "check", **check_command})
                 if check_command["status"] != "PASS":
                     raise DocsError("CJDOC_CHECK", f"{package} strict check returned {check_command['returncode']}")
-                command = _generate(cjdoc, project, output, timeout)
-                report["commands"].append({"package": package, "kind": "generate", **command})
-                if command["status"] != "PASS":
-                    raise DocsError("CJDOC_GENERATE", f"{package} generation returned {command['returncode']}")
+                _generate_layer(cjdoc, project, output, timeout, package, report["commands"])
                 report["layers"].append(_validate_layer(output, package))
 
             combined_project = staging / "combined" / "project"
@@ -397,18 +419,17 @@ def build_report(root: Path = ROOT, *, include_html: bool = False,
             report["commands"].append({"package": "combined", "kind": "check", **check_command})
             if check_command["status"] != "PASS":
                 raise DocsError("CJDOC_CHECK", "combined strict check returned a non-zero status")
-            command = _generate(cjdoc, combined_project, combined_output, timeout)
-            report["commands"].append({"package": "combined", "kind": "generate", **command})
-            if command["status"] != "PASS":
-                raise DocsError("CJDOC_GENERATE", "combined generation returned a non-zero status")
+            _generate_layer(cjdoc, combined_project, combined_output, timeout,
+                            "combined", report["commands"])
             combined = _validate_layer(combined_output, "combined")
             if include_html:
                 # Keep HTML rendering out of the process retaining the other serialized formats.
                 html_output = staging / "combined" / "html-output"
-                command = _generate(cjdoc, combined_project, html_output, timeout, formats=("html",))
-                report["commands"].append({"package": "combined", "kind": "generate-html", **command})
+                command = _render(cjdoc, combined_project, _artifact_paths(combined_output)["docs"],
+                                  html_output, timeout, "html")
+                report["commands"].append({"package": "combined", "kind": "render-html", **command})
                 if command["status"] != "PASS":
-                    raise DocsError("CJDOC_GENERATE", "combined HTML generation returned a non-zero status")
+                    raise DocsError("CJDOC_RENDER", "combined HTML rendering returned a non-zero status")
                 paths = _artifact_paths(html_output)
                 for key in ("html", "search"):
                     if not paths[key].is_file():

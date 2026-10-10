@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "binarySha256": "f11c64723cb8ade51b1cfd31990b144e2631aade3f607b3beec2737c1969b0f0",
+  "cases": [
+    {
+      "case": "cache-full-control",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR domain at $.packages[0].symbolIds: unknown symbol\n"
+    },
+    {
+      "case": "cache-full-fallback",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: JSON algorithm JSON Schema regex steps budget exceeded: limit=4594304, consumed=4594305\n"
+    },
+    {
+      "case": "dangling-owner",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR domain at $.declarations[0].ownerId: unknown owner\n"
+    },
+    {
+      "case": "duplicate-json-key",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: Duplicate object key 'schemaVersion'\n"
+    },
+    {
+      "case": "duplicate-symbol-id",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR domain at $.declarations[1].id: duplicate SymbolId 'cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack::AbortReason::enumCase:ApplicationAbort#g0()'\n"
+    },
+    {
+      "case": "invalid-configuration",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR schema at /configuration/audience (https://github.com/lIlIIlIll/cjdoc/blob/main/docs/schema/doc-ir.schema.json#/$defs/configuration/properties/audience/enum): value must match one enum entry\n"
+    },
+    {
+      "case": "invalid-visibility",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR schema at /declarations/0/visibility (https://github.com/lIlIIlIll/cjdoc/blob/main/docs/schema/doc-ir.schema.json#/$defs/declaration/properties/visibility/enum): value must match one enum entry\n"
+    },
+    {
+      "case": "json-value-budget",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: JSON value exceeds 8388608 bytes\n"
+    },
+    {
+      "case": "unique-regex-work-budget",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: JSON algorithm JSON Schema regex steps budget exceeded: limit=4594304, consumed=4594305\n"
+    },
+    {
+      "case": "unknown-schema",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR at $.schemaVersion: expected 'cjdoc.doc-ir/8', 'cjdoc.doc-ir/7', or 'cjdoc.doc-ir/6'\n"
+    },
+    {
+      "case": "unsafe-source-path",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "error: invalid Doc IR domain at $.files[0]: unsafe/duplicate path or unknown module/package\n"
+    }
+  ]
+}

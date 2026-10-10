@@ -1,0 +1,17 @@
+{
+  "publication": {
+    "root": "<isolated-publication-clone>",
+    "initial_branch": "main",
+    "initial_head": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+    "merge_base": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+    "initial_dirty_paths": [],
+    "task_branch": "fix/m7-033-bounded-doc-ir"
+  },
+  "original_workspace": {
+    "root": "<original-repo>",
+    "policy": "read-only; unrelated/concurrent changes preserved",
+    "current_observation": "$HOME/playground/Wirestack\ngitbutler/workspace\ngitbutler/workspace\nfatal: Not a valid object name origin/main\n?? docs/evidence/M8-007/evidence-identity-audit.json\n\n\nWall time: 0.25 seconds"
+  },
+  "toolchain": "Linux x86_64\nglibc 2.44\nCangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu\nCangjie Project Manager: 1.1.3\n\n\nWall time: 0.59 seconds",
+  "user_decision": "independent repair PR; do not alter the existing 14 feature PR heads"
+}

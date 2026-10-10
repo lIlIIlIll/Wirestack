@@ -1,0 +1,112 @@
+--- a/src/render/json_encode.cj
++++ b/src/render/json_encode.cj
+@@ -393,51 +393,14 @@
+     out.toString()
+ }
+ 
+-private func appendIndent(out: StringBuilder, depth: Int64): Unit {
+-    var index: Int64 = 0
+-    while (index < depth) { out.append("  "); index++ }
+-}
+-
+-private func prettyJson(compact: String): String {
+-    let out = StringBuilder()
+-    var depth: Int64 = 0
+-    var inString = false
+-    var escaped = false
+-    for (rune in compact.runes()) {
+-        if (inString) {
+-            out.append(rune)
+-            if (escaped) {
+-                escaped = false
+-            } else {
+-                match (rune) {
+-                    case '\\' => escaped = true
+-                    case '"' => inString = false
+-                    case _ => ()
+-                }
+-            }
+-            continue
+-        }
+-        match (rune) {
+-            case '"' => inString = true; out.append(rune)
+-            case '{' | '[' => depth++; out.append(rune); out.append("\n"); appendIndent(out, depth)
+-            case '}' | ']' => depth--; out.append("\n"); appendIndent(out, depth); out.append(rune)
+-            case ',' => out.append(",\n"); appendIndent(out, depth)
+-            case ':' => out.append(": ")
+-            case _ => out.append(rune)
+-        }
+-    }
+-    out.append("\n")
+-    out.toString()
+-}
+-
+ public func encodeDocIr(documentation: DocumentationSet): String {
+     validateDocumentationSet(documentation)
+-    let encoded = prettyJson(compactDocIr(documentation))
++    let encoded = compactDocIr(documentation)
+     let _ = decodeDocIr(encoded)
+     encoded
+ }
+ 
+ func validateTypedDocumentationSet(documentation: DocumentationSet): Unit {
+     validateDocumentationSet(documentation)
+-    let _ = decodeDocIr(prettyJson(compactDocIr(documentation)))
++    let _ = decodeDocIr(compactDocIr(documentation))
+ }
+--- a/src/render/doc_ir_encoding_budget.cj
++++ b/src/render/doc_ir_encoding_budget.cj
+@@ -33,9 +33,9 @@
+         }
+         let rows = if (entries == 0) { 1 } else { entries }
+         let childIndent = 2 * (depth + 1)
+-        // prettyJson adds a newline/indent after the opener and every comma,
+-        // another newline/indent before the closer, and one space per object
+-        // colon. Charge those bytes in addition to the compact representation.
++        // Keep the established indentation charge as a conservative bound
++        // even though Doc IR output is now compact.
++        // No existing encoding budget is increased.
+         consumeBytes(rows * (1 + childIndent), path)
+         consumeBytes(1 + 2 * depth, path)
+         if (object) { consumeBytes(entries, path) }
+--- a/vendor/yjson_algorithms/src/lib_json_schema.cj
++++ b/vendor/yjson_algorithms/src/lib_json_schema.cj
+@@ -253,6 +253,10 @@
+     var stopAtFirst: Bool = false
+     var probeDepth: Int64 = 0
+     let regexBudget: LinearRegexBudget
++    // Match results are valid only within this immutable schema validation.
++    // Bound entries across all patterns; a full cache uses the normal matcher.
++    let regexResults = HashMap<String, HashMap<String, Bool>>()
++    var regexResultCount: Int64 = 0
+ 
+     init(limits: JsonSchemaLimits) {
+         this.regexBudget = LinearRegexBudget(limits.maxRegexSteps, "JSON Schema regex steps")
+@@ -1040,11 +1044,26 @@
+     }
+ 
+     private func regexFind(context: ValidationContext, pattern: String, value: String): Bool {
+-        match (schema.compiledRegex(pattern)) {
++        if (let Some(results) <- context.regexResults.get(pattern)) {
++            if (let Some(result) <- results.get(value)) { return result }
++        }
++        let result = match (schema.compiledRegex(pattern)) {
+             case Some(regex) => regex.find(value, context.regexBudget)
+             case None => throw JsonException("Schema regex was not compiled: ${pattern}",
+                 code: "invalid_regex")
+         }
++        if (context.regexResultCount < 65536) {
++            let results = match (context.regexResults.get(pattern)) {
++                case Some(existing) => existing
++                case None =>
++                    let created = HashMap<String, Bool>()
++                    context.regexResults[pattern] = created
++                    created
++            }
++            results[value] = result
++            context.regexResultCount++
++        }
++        result
+     }
+ 
+     private func validateType(context: ValidationContext,

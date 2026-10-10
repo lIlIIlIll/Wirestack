@@ -102,6 +102,7 @@
     "scripts/check-code",
     "scripts/check-docs",
     "tools/docs/m7_033_docs.py",
+    "tools/docs/cjdoc-0.7.2-bounded-doc-ir.patch",
     "tools/build_linux_tls_provider.py",
     "tools/tests/test_linux_tls_provider_build.py",
     "tools/tasks/M7-033.json",
