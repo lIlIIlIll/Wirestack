@@ -1,5 +1,7 @@
 package wirestack
 
+import std.collection.ArrayList
+
 /**
  * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
@@ -251,4 +253,90 @@ private func isAsciiAlphaNumeric(value: Byte): Bool {
     (value >= b'a' && value <= b'z') ||
         (value >= b'A' && value <= b'Z') ||
         (value >= b'0' && value <= b'9')
+}
+
+private func parseIpv4AddressLiteral(value: String): ?IpAddress {
+    let parts = value.split(".")
+    if (parts.size != 4) { return None<IpAddress> }
+    let octets = Array<Byte>(4, repeat: 0u8)
+    for (index in 0..4) {
+        let part = parts[index].toArray()
+        if (part.isEmpty() || part.size > 3 || (part.size > 1 && part[0] == b'0')) {
+            return None<IpAddress>
+        }
+        var number: Int64 = 0
+        for (digit in part) {
+            if (digit < b'0' || digit > b'9') { return None<IpAddress> }
+            number = number * 10 + Int64(digit - b'0')
+        }
+        if (number > 255) { return None<IpAddress> }
+        octets[index] = UInt8(number)
+    }
+    Some(IpAddress(IpAddressFamily.Ipv4, octets))
+}
+
+internal func parseIpAddressLiteral(value: String): ?IpAddress {
+    if (value.isEmpty() || value.size > 128) { return None<IpAddress> }
+    if (!value.contains(":")) { return parseIpv4AddressLiteral(value) }
+    let zoned = value.split("%")
+    if (zoned.size > 2) { return None<IpAddress> }
+    let zone = if (zoned.size == 2) { Some(zoned[1]) } else { None<String> }
+    if (let Some(name) <- zone) {
+        if (name.isEmpty() || name.size > 64) { return None<IpAddress> }
+        for (c in name.toArray()) {
+            if (!((c >= b'a' && c <= b'z') || (c >= b'A' && c <= b'Z') ||
+                (c >= b'0' && c <= b'9') || c == b'_' || c == b'-' || c == b'.')) {
+                return None<IpAddress>
+            }
+        }
+    }
+    let halves = zoned[0].split("::")
+    if (halves.size > 2) { return None<IpAddress> }
+    let left = ArrayList<UInt16>()
+    let right = ArrayList<UInt16>()
+    for (side in 0..halves.size) {
+        if (halves[side].isEmpty()) { continue }
+        let groups = halves[side].split(":")
+        for (index in 0..groups.size) {
+            let group = groups[index]
+            let destination = if (side == 0) { left } else { right }
+            if (group.contains(".")) {
+                if (side != halves.size - 1 || index != groups.size - 1) { return None<IpAddress> }
+                match (parseIpv4AddressLiteral(group)) {
+                    case Some(address) =>
+                        let bytes = address.toOctets()
+                        destination.add((UInt16(bytes[0]) << 8) | UInt16(bytes[1]))
+                        destination.add((UInt16(bytes[2]) << 8) | UInt16(bytes[3]))
+                    case None => return None<IpAddress>
+                }
+            } else {
+                if (group.isEmpty() || group.size > 4) { return None<IpAddress> }
+                var number: UInt16 = 0
+                for (digit in group.toArray()) {
+                    let nibble = if (digit >= b'0' && digit <= b'9') { Int64(digit - b'0') }
+                        else if (digit >= b'a' && digit <= b'f') { Int64(digit - b'a') + 10 }
+                        else if (digit >= b'A' && digit <= b'F') { Int64(digit - b'A') + 10 }
+                        else { -1 }
+                    if (nibble < 0) { return None<IpAddress> }
+                    number = (number << 4) | UInt16(nibble)
+                }
+                destination.add(number)
+            }
+        }
+    }
+    let count = left.size + right.size
+    if ((halves.size == 1 && count != 8) || (halves.size == 2 && count >= 8)) {
+        return None<IpAddress>
+    }
+    let bytes = Array<Byte>(16, repeat: 0u8)
+    for (index in 0..left.size) {
+        bytes[index * 2] = UInt8(left[index] >> 8)
+        bytes[index * 2 + 1] = UInt8(left[index] & 255u16)
+    }
+    for (index in 0..right.size) {
+        let offset = (8 - right.size + index) * 2
+        bytes[offset] = UInt8(right[index] >> 8)
+        bytes[offset + 1] = UInt8(right[index] & 255u16)
+    }
+    Some(IpAddress(IpAddressFamily.Ipv6, bytes, zone: zone))
 }

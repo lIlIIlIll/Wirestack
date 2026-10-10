@@ -76,6 +76,7 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 - [Linux 开发者入门](docs/guides/getting-started-linux.md)
 - [Linux 网络底座指南](docs/guides/network-foundation-linux.md)
 - [显式有界 gzip 解压](docs/guides/gzip.md)
+- [ws/wss WebSocket 接入与生命周期](docs/guides/websocket.md)
 - [公开 API 参考（cjdoc 0.7.2）](docs/api/README.md)
 - [在线 API 文档（GitHub Pages）](https://lIlIIlIll.github.io/Wirestack/)
 - [产品 PRD](docs/product/prd.md)

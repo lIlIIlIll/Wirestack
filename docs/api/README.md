@@ -57,9 +57,9 @@ CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --html --json
 pool hook 的异常不改变请求或连接租约的结果。`HttpServiceHook` 通过 server builder
 注册，失败时走服务端既有 handler-failure 路径。
 
-`upgrade` 和 `connectWebSocket` 返回已移交的双向连接或普通拒绝响应。拒绝响应仍由
-调用方消费或关闭。`connectWebSocket` 接受 `http`、`https` URL，通过 HTTP/1.1
-Upgrade 或 HTTP/2 extended CONNECT 建立不带压缩的 `WebSocketConnection`。
+`upgrade` 和 `connectWebSocket` 返回已移交的双向连接或普通拒绝响应。拒绝响应仍由调用方消费或关闭。
+`connectWebSocket` 只接受专用 `WebSocketUrl` 的 `ws`、`wss` 入口，经 HTTP/1.1 Upgrade 或 HTTP/2 extended CONNECT 建立无压缩连接；普通 `HttpUrl` 仍只接受 HTTP(S)。
+会话保留握手的绝对 deadline、取消、stream idle policy 和真实关联 IDs，逐帧 context 只能缩短预算。完整用法和迁移见 [WebSocket 指南](../guides/websocket.md)。
 HTTP/2 push 默认关闭；启用后通过父响应的 `pushes` 接收独立拥有 body 的
 `HttpPushedResponse`。
 

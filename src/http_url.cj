@@ -53,24 +53,42 @@ public class HttpUrl <: ToString {
  * @param value 待写入或配置的值。
  */
     public static func parse(value: String): HttpUrl {
+        parseAbsoluteUrl(value, false)
+    }
+
+    /** Reuses the HTTP authority/path contract while keeping ws/wss out of public HTTP parsing. */
+    internal static func parseWebSocket(value: String): HttpUrl {
+        parseAbsoluteUrl(value, true)
+    }
+
+    private static func parseAbsoluteUrl(value: String, webSocket: Bool): HttpUrl {
         let bytes = value.toArray()
         if (bytes.isEmpty() || bytes.size > 8192) {
             throw IllegalArgumentException("HTTP URL must contain 1 to 8192 ASCII bytes")
         }
-        validateUrlBytes(bytes)
 
         let schemeEnd = findSequence(bytes, [b':', b'/', b'/'], 0)
         if (schemeEnd < 0) {
             throw IllegalArgumentException("HTTP URL must be absolute and contain ://")
         }
         let rawScheme = bytesToString(bytes, 0, schemeEnd)
-        let scheme = rawScheme.toAsciiLower()
-        if (scheme != "http" && scheme != "https") {
-            throw IllegalArgumentException("HTTP URL scheme must be http or https")
+        let inputScheme = rawScheme.toAsciiLower()
+        let scheme = if (webSocket) {
+            match (inputScheme) {
+                case "ws" => "http"
+                case "wss" => "https"
+                case _ => throw IllegalArgumentException("WebSocket URL scheme must be ws or wss")
+            }
+        } else {
+            if (inputScheme != "http" && inputScheme != "https") {
+                throw IllegalArgumentException("HTTP URL scheme must be http or https")
+            }
+            inputScheme
         }
 
         let authorityStart = schemeEnd + 3
         let authorityEnd = findAuthorityEnd(bytes, authorityStart)
+        validateUrlBytes(bytes, webSocketTargetStart: if (webSocket) { authorityEnd } else { bytes.size })
         if (authorityStart == authorityEnd) {
             throw IllegalArgumentException("HTTP URL authority must not be empty")
         }
@@ -165,12 +183,17 @@ private func parseRequestTarget(bytes: Array<Byte>, start: Int64): String {
     bytesToString(bytes, start, bytes.size)
 }
 
-private func validateUrlBytes(bytes: Array<Byte>): Unit {
+private func validateUrlBytes(bytes: Array<Byte>, webSocketTargetStart!: Int64): Unit {
     var index = 0
     while (index < bytes.size) {
         let value = bytes[index]
         if (value <= 32u8 || value >= 127u8 || value == b'\\' || value == b'#') {
             throw IllegalArgumentException("HTTP URL contains an unsafe or non-ASCII byte")
+        }
+        if (index >= webSocketTargetStart && (value == 34u8 || value == 60u8 || value == 62u8 ||
+            value == 91u8 || value == 93u8 || value == 94u8 || value == 96u8 ||
+            value == 123u8 || value == 124u8 || value == 125u8)) {
+            throw IllegalArgumentException("WebSocket URL target contains a byte requiring percent encoding")
         }
         if (value == b'%') {
             if (index + 2 >= bytes.size || !isHex(bytes[index + 1]) || !isHex(bytes[index + 2])) {

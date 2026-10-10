@@ -46,6 +46,9 @@ public class CancellationToken {
         NONE
     }
 
+    /** Internal hot-path check; permanently active tokens need no linking allocation. */
+    internal prop canBeCancelled: Bool { get() { !permanentlyActive } }
+
 /**
  * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */

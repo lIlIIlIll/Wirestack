@@ -7,6 +7,7 @@ import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.ReferenceIdentity
 
 @Test
 class Http1HttpsClientTest {
@@ -73,9 +74,9 @@ private class PassthroughHttp1TlsHandshaker <: Http1TlsHandshaker {
     public prop clientIdentity: String { get() { "none" } }
     public prop providerIdentity: String { get() { "test-provider" } }
     public prop alpnPolicy: String { get() { "http/1.1" } }
-    public func handshake(host: HostName, transport: DuplexTransport,
+    public func handshake(reference: ReferenceIdentity, transport: DuplexTransport,
         context: OperationContext): DuplexTransport {
-        let _ = host
+        let _ = reference
         let _ = context
         handshakes.fetchAdd(1)
         transport

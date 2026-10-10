@@ -57,11 +57,14 @@ public class Http1Upgrade {
     public let responseHead: Http1ResponseHead
     public let protocol: String
     public let transport: DuplexTransport
+    public let operationContext: OperationContext
 
-    public init(responseHead: Http1ResponseHead, protocol: String, transport: DuplexTransport) {
+    public init(responseHead: Http1ResponseHead, protocol: String, transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()) {
         this.responseHead = responseHead
         this.protocol = protocol
         this.transport = transport
+        this.operationContext = context
     }
 }
 
@@ -250,7 +253,8 @@ public func performHttp1Upgrade(
                 return Http1UpgradeExchangeResult.Upgraded(
                     Http1Upgrade(
                         head, responseProtocol,
-                        Http1PrefixedTransport(transport, parsed.remaining, observer: observer, context: context)
+                        Http1PrefixedTransport(transport, parsed.remaining, observer: observer, context: context),
+                        context: context
                     )
                 )
             }
