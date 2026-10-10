@@ -1,0 +1,7 @@
+{
+  "task_id": "M12-003",
+  "status": "PASS",
+  "families": 3,
+  "required_coverage_keys": 25,
+  "formal_release_qualification": "NOT_QUALIFIED"
+}

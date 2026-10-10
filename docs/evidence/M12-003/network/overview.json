@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-003",
+  "family": "network",
+  "status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "seed": 12003,
+  "sdk_policy": "STS-only",
+  "current_source_bound_report": "docs/evidence/M12-003/network/current/report.json",
+  "current_replay_report": "docs/evidence/M12-003/network/replay-current/report.json",
+  "current_profile_count": 8,
+  "current_profiles_passed": 8,
+  "complete_network_profile_count": 12,
+  "profiles": [
+    {"id":"dns_no_response","coverage_keys":["dns_no_response"],"status":"PASS"},
+    {"id":"dns_late_result","coverage_keys":["dns_late"],"status":"PASS","stale_payload":"192.0.2.99","required_fresh_payload":"192.0.2.2"},
+    {"id":"rst","coverage_keys":["rst"],"status":"PASS","error_fidelity":"SystemFailure is recorded honestly; no fabricated ConnectionReset classification"},
+    {"id":"peer_no_read","coverage_keys":["peer_not_reading"],"status":"PASS"},
+    {"id":"peer_no_write","coverage_keys":["peer_not_writing"],"status":"PASS"},
+    {"id":"http_rst","coverage_keys":["rst","transient_recovery"],"status":"PASS"},
+    {"id":"http_no_write","coverage_keys":["peer_not_writing","transient_recovery"],"status":"PASS"},
+    {"id":"system_resolver_boundary","coverage_keys":[],"status":"PASS","test_only_interposer":true},
+    {"id":"ipv6_blackhole","coverage_keys":["ipv6_blackhole_ipv4_reachable"],"status":"BLOCKED","required_prerequisite":"Authorized isolated guest with clsact/flower/gact kernel support"},
+    {"id":"multicandidate_cancel","coverage_keys":["multi_candidate_cancel"],"status":"BLOCKED","required_prerequisite":"Authorized isolated guest with clsact/flower/gact kernel support"},
+    {"id":"delay_loss","coverage_keys":["delay","packet_loss","transient_recovery"],"status":"BLOCKED","required_prerequisite":"Authorized isolated guest with real netem kernel support","loss_shape":"Event-controlled loss100% interval after first request; counter proof before removal; original-response TCP retransmission, not application retry"},
+    {"id":"silent_disconnect","coverage_keys":["silent_disconnect","transient_recovery"],"status":"BLOCKED","required_prerequisite":"Authorized isolated guest with clsact/flower/gact kernel support"}
+  ],
+  "preserved_failure_reports": [
+    {"path":"docs/evidence/M12-003/network/report.json","meaning":"Original host tc exit2 and missing-qdisc failures preserved; not rerun unchanged"},
+    {"path":"docs/evidence/M12-003/network/reachable/report.json","meaning":"Pre-warmup lazy SDK eventpoll changed FD3 to FD4; original stricter reclamation failure retained"},
+    {"path":"docs/evidence/M12-003/network/reachable-final/report.json","meaning":"ConnectionReset-only assertion failed on existing public SystemFailure normalization; original failure retained"}
+  ],
+  "measurement_contract": {
+    "live_fd_and_socket_reclamation":"Native process acknowledges BASELINE after real public TCP warmup, and RECLAIMED after native owner cleanup; /proc descriptor kinds distinguish SDK eventpoll from sockets",
+    "native_registrations":"UNAVAILABLE: public APIs expose no registration counter",
+    "rss":"Measured distinctly from live objects; no fabricated leak-free RSS claim",
+    "http_pool_recovery":"Same public client requires second physical connection after failure, then exact response; all public resource counters reclaimed",
+    "formal_candidate_gate":"86,400-second formal gate not executed or replaced by these runs"
+  },
+  "transfer": {
+    "scratch":"$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run12",
+    "scratch_size":"48M",
+    "retained_slice_scratch_size":"447M",
+    "contract":"Transfer whole scratch with exact installed dependency and build-binding.json; replay requires matching current source, archive, STS and native executable bytes",
+    "packet_test_command":"WIRESTACK_NETWORK_PACKET_TESTS=1 python3 -m unittest tools.gates.tests.test_m12_003_network"
+  }
+}

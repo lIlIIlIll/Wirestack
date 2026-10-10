@@ -1,0 +1,329 @@
+{
+  "profiles": [
+    {
+      "id": "system_resolver_boundary",
+      "seed": 12003,
+      "status": "PASS",
+      "coverage_keys": [],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run12",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run12/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":303,\"abandoned_running_work\":1,\"rejected_queries\":7,\"recovery\":true}\nCLEANUP {\"active_queries\":0,\"running_work\":0,\"queued_queries\":0,\"resolver_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 303,
+          "abandoned_running_work": 1,
+          "rejected_queries": 7,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "active_queries": 0,
+          "running_work": 0,
+          "queued_queries": 0,
+          "resolver_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24232,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 52,
+            "process_count": 1,
+            "rss_kib": 24912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 99,
+            "process_count": 1,
+            "rss_kib": 24912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 146,
+            "process_count": 1,
+            "rss_kib": 24912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 193,
+            "process_count": 1,
+            "rss_kib": 24912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 239,
+            "process_count": 1,
+            "rss_kib": 24912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 286,
+            "process_count": 1,
+            "rss_kib": 24912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 331,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 378,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 424,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 470,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 517,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 565,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 610,
+            "process_count": 1,
+            "rss_kib": 24928,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 657,
+            "process_count": 1,
+            "rss_kib": 24936,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 705,
+            "process_count": 1,
+            "rss_kib": 24936,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 753,
+            "process_count": 1,
+            "rss_kib": 24936,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 798,
+            "process_count": 1,
+            "rss_kib": 24936,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 844,
+            "process_count": 1,
+            "rss_kib": 25912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 8
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24232,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 25912,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 8,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "TEST ONLY getaddrinfo operation delay; not a packet fault or production hook",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [],
+        "fixture_errors": [],
+        "system_operation_log": "GAI phase=enter seq=0 pid=3843757 tid=3843772 ns=627949802668691 result=0 node=localhost\nGAI phase=exit seq=0 pid=3843757 tid=3843772 ns=627950603277490 result=0 node=localhost\nGAI phase=enter seq=0 pid=3844361 tid=3844377 ns=627962302966440 result=0 node=localhost\nGAI phase=exit seq=0 pid=3844361 tid=3844377 ns=627963103515915 result=0 node=localhost\n"
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run12",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run12/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24316,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 46,
+            "process_count": 1,
+            "rss_kib": 24396,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24316,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24396,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "native_system_boundary": true,
+        "bounded_admission": true,
+        "new_connection_after_removal": true
+      }
+    }
+  ]
+}
