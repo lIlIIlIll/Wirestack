@@ -1,0 +1,13 @@
+CHECK decoded_success PASS
+CHECK decoded_pre_cancel PASS
+CHECK decoded_active_cancel PASS
+CHECK decoded_deadline PASS
+CHECK decoded_capacity PASS
+CHECK decoded_output_failure PASS
+CHECK decoded_explicit_close PASS
+CHECK decoded_decoded_gzip PASS
+PEER_TERMINAL http=protocol_violation
+CHECK decoded_peer_disconnect PASS
+RESOURCE decoded_cleanup connections=0 requests=0 streams=0 buffers=0 admission_waiters=0
+CHECK decoded_cleanup PASS
+APP_ACCEPTANCE_PASS
