@@ -1,0 +1,5 @@
+An exception has occurred:
+IllegalStateException: stream event barrier expired
+	 at wirestack_m12_001::perfRequire(Bool, std.core::String)(<scratch>/streams/src/common.cj:7)
+	 at wirestack_m12_001::StreamFixture::waitFor(() -> Bool)(<scratch>/streams/src/main.cj:74)
+	 at wirestack_m12_001::main(std.core::Array<...>)(<scratch>/streams/src/main.cj:198)
