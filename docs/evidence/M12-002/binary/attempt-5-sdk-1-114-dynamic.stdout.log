@@ -1,0 +1,40 @@
+
+Dynamic section at offset 0x419b8 contains 37 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-core.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-convert.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-math.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-collection.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-io.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-binary.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-runtime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libboundscheck.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN]
+ 0x000000000000000c (INIT)               0x163a0
+ 0x000000000000000d (FINI)               0x3b46c
+ 0x0000000000000019 (INIT_ARRAY)         0x23fd00
+ 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x23fd10
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x0000000000000004 (HASH)               0x190
+ 0x000000006ffffef5 (GNU_HASH)           0x1438
+ 0x0000000000000005 (STRTAB)             0x60a8
+ 0x0000000000000006 (SYMTAB)             0x21d8
+ 0x000000000000000a (STRSZ)              19918 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x242000
+ 0x0000000000000002 (PLTRELSZ)           5232 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x14f30
+ 0x0000000000000007 (RELA)               0xb438
+ 0x0000000000000008 (RELASZ)             39672 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x0000000000000018 (BIND_NOW)           
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffffe (VERNEED)            0xb3b8
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x000000006ffffff0 (VERSYM)             0xae76
+ 0x000000006ffffff9 (RELACOUNT)          696
+ 0x0000000000000000 (NULL)               0x0

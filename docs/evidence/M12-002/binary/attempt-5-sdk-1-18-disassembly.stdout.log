@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-core.a:
+
+SIMD_support.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_CORE_CanUseSIMD>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	movzbl 0x0(%rip),%eax        # 1c <CJ_CORE_CanUseSIMD+0x1c>
+  1c:	test   %al,%al
+  1e:	jns    46 <CJ_CORE_CanUseSIMD+0x46>
+  20:	call   25 <CJ_CORE_CanUseSIMD+0x25>
+  25:	mov    0x0(%rip),%eax        # 2b <CJ_CORE_CanUseSIMD+0x2b>
+  2b:	mov    %eax,%ecx
+  2d:	and    $0x200,%ecx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "d0faabd37d4ef12d0a54ab4c4fa94f6b82938f81f7c825e2e9f2d9c296820d79"}

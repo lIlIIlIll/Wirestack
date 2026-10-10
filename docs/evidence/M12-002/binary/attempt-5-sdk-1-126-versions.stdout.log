@@ -1,0 +1,47 @@
+
+Version symbols section '.gnu.version' contains 108 entries:
+ Addr: 0x0000000000001ae4  Offset: 0x00001ae4  Link: 3 (.dynsym)
+  000:   0 (*local*)       4 (GLIBC_2.3)     5 (GLIBC_2.2.5)   0 (*local*)    
+  004:   5 (GLIBC_2.2.5)   6 (GLIBC_2.4)     5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)
+  008:   5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)   7 (GLIBC_2.3.4)
+  00c:   7 (GLIBC_2.3.4)   0 (*local*)       8 (GLIBC_2.14)    5 (GLIBC_2.2.5)
+  010:   5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)
+  014:   5 (GLIBC_2.2.5)   5 (GLIBC_2.2.5)   0 (*local*)       5 (GLIBC_2.2.5)
+  018:   5 (GLIBC_2.2.5)   4 (GLIBC_2.3)     4 (GLIBC_2.3)     2 (PCRE2_10.47)
+  01c:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  020:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  024:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  028:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  02c:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  030:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  034:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  038:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  03c:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  040:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  044:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  048:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  04c:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  050:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  054:   3 (PCRE2_10.48)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  058:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  05c:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  060:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  064:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+  068:   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)   2 (PCRE2_10.47)
+
+Version definition section '.gnu.version_d' contains 3 entries:
+ Addr: 0x0000000000001bc0  Offset: 0x00001bc0  Link: 4 (.dynstr)
+  000000: Rev: 1  Flags: BASE  Index: 1  Cnt: 1  Name: libpcre2-8.so.0
+  0x001c: Rev: 1  Flags: none  Index: 2  Cnt: 1  Name: PCRE2_10.47
+  0x0038: Rev: 1  Flags: WEAK  Index: 3  Cnt: 2  Name: PCRE2_10.48
+  0x0054: Parent 1: PCRE2_10.47
+
+Version needs section '.gnu.version_r' contains 1 entry:
+ Addr: 0x0000000000001c20  Offset: 0x00001c20  Link: 4 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 6
+  0x0010:   Name: GLIBC_ABI_DT_RELR  Flags: none  Version: 9
+  0x0020:   Name: GLIBC_2.14  Flags: none  Version: 8
+  0x0030:   Name: GLIBC_2.3.4  Flags: none  Version: 7
+  0x0040:   Name: GLIBC_2.4  Flags: none  Version: 6
+  0x0050:   Name: GLIBC_2.2.5  Flags: none  Version: 5
+  0x0060:   Name: GLIBC_2.3  Flags: none  Version: 4

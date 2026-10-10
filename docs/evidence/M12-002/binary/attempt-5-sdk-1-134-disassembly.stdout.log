@@ -1,0 +1,21 @@
+
+<sdk-1>/tools/lib/libcjprof-jni.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000002c70 <_init@@Base>:
+    2c70:	sub    $0x8,%rsp
+    2c74:	mov    0x20936d(%rip),%rax        # 20bfe8 <__gmon_start__>
+    2c7b:	test   %rax,%rax
+    2c7e:	je     2c82 <_init@@Base+0x12>
+    2c80:	call   *%rax
+    2c82:	add    $0x8,%rsp
+    2c86:	ret
+
+Disassembly of section .plt:
+
+0000000000002c90 <_ZN6Cjprof14GetThreadInfosEm@plt-0x10>:
+    2c90:	push   0x2091e2(%rip)        # 20be78 <_ZSt19piecewise_construct@@Base+0x201a37>
+    2c96:	jmp    *0x2091e4(%rip)        # 20be80 <_ZSt19piecewise_construct@@Base+0x201a3f>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "07e28909886d5a39077205f746273576bf1607927eafa1d0e2bf1c40a4e86e1d"}

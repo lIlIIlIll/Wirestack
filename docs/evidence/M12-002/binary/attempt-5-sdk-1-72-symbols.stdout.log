@@ -1,0 +1,487 @@
+
+absvdi2.c.o:
+0000000000000000 T __absvdi2
+
+absvsi2.c.o:
+0000000000000000 T __absvsi2
+
+absvti2.c.o:
+0000000000000000 T __absvti2
+
+adddf3.c.o:
+0000000000000000 T __adddf3
+
+addsf3.c.o:
+0000000000000000 T __addsf3
+
+addvdi3.c.o:
+0000000000000000 T __addvdi3
+
+addvsi3.c.o:
+0000000000000000 T __addvsi3
+
+addvti3.c.o:
+0000000000000000 T __addvti3
+
+apple_versioning.c.o:
+
+ashldi3.c.o:
+0000000000000000 T __ashldi3
+
+ashlti3.c.o:
+0000000000000000 T __ashlti3
+
+ashrdi3.c.o:
+0000000000000000 T __ashrdi3
+
+ashrti3.c.o:
+0000000000000000 T __ashrti3
+
+bswapdi2.c.o:
+0000000000000000 T __bswapdi2
+
+bswapsi2.c.o:
+0000000000000000 T __bswapsi2
+
+clzdi2.c.o:
+0000000000000000 T __clzdi2
+
+clzsi2.c.o:
+0000000000000000 T __clzsi2
+
+clzti2.c.o:
+0000000000000000 T __clzti2
+
+cmpdi2.c.o:
+0000000000000000 T __cmpdi2
+
+cmpti2.c.o:
+0000000000000000 T __cmpti2
+
+comparedf2.c.o:
+0000000000000000 T __cmpdf2
+0000000000000000 T __eqdf2
+0000000000000000 T __gedf2
+0000000000000000 T __gtdf2
+0000000000000000 T __ledf2
+0000000000000000 T __ltdf2
+0000000000000000 T __nedf2
+0000000000000000 T __unorddf2
+
+comparesf2.c.o:
+0000000000000000 T __cmpsf2
+0000000000000000 T __eqsf2
+0000000000000000 T __gesf2
+0000000000000000 T __gtsf2
+0000000000000000 T __lesf2
+0000000000000000 T __ltsf2
+0000000000000000 T __nesf2
+0000000000000000 T __unordsf2
+
+ctzdi2.c.o:
+0000000000000000 T __ctzdi2
+
+ctzsi2.c.o:
+0000000000000000 T __ctzsi2
+
+ctzti2.c.o:
+0000000000000000 T __ctzti2
+
+divdc3.c.o:
+0000000000000000 T __divdc3
+
+divdf3.c.o:
+0000000000000000 T __divdf3
+
+divdi3.c.o:
+0000000000000000 T __divdi3
+
+divmoddi4.c.o:
+0000000000000000 T __divmoddi4
+
+divmodsi4.c.o:
+0000000000000000 T __divmodsi4
+
+divmodti4.c.o:
+0000000000000000 T __divmodti4
+
+divsc3.c.o:
+0000000000000000 T __divsc3
+
+divsf3.c.o:
+0000000000000000 T __divsf3
+
+divsi3.c.o:
+0000000000000000 T __divsi3
+
+divti3.c.o:
+0000000000000000 T __divti3
+
+extendsfdf2.c.o:
+0000000000000000 T __extendsfdf2
+
+ffsdi2.c.o:
+0000000000000000 T __ffsdi2
+
+ffssi2.c.o:
+0000000000000000 T __ffssi2
+
+ffsti2.c.o:
+0000000000000000 T __ffsti2
+
+fixdfdi.c.o:
+0000000000000000 T __fixdfdi
+
+fixdfsi.c.o:
+0000000000000000 T __fixdfsi
+
+fixdfti.c.o:
+0000000000000000 T __fixdfti
+
+fixsfdi.c.o:
+0000000000000000 T __fixsfdi
+
+fixsfsi.c.o:
+0000000000000000 T __fixsfsi
+
+fixsfti.c.o:
+0000000000000000 T __fixsfti
+
+fixunsdfdi.c.o:
+0000000000000000 T __fixunsdfdi
+
+fixunsdfsi.c.o:
+0000000000000000 T __fixunsdfsi
+
+fixunsdfti.c.o:
+0000000000000000 T __fixunsdfti
+
+fixunssfdi.c.o:
+0000000000000000 T __fixunssfdi
+
+fixunssfsi.c.o:
+0000000000000000 T __fixunssfsi
+
+fixunssfti.c.o:
+0000000000000000 T __fixunssfti
+
+floatsidf.c.o:
+0000000000000000 T __floatsidf
+
+floatsisf.c.o:
+0000000000000000 T __floatsisf
+
+floattidf.c.o:
+0000000000000000 T __floattidf
+
+floattisf.c.o:
+0000000000000000 T __floattisf
+
+floatunsidf.c.o:
+0000000000000000 T __floatunsidf
+
+floatunsisf.c.o:
+0000000000000000 T __floatunsisf
+
+floatuntidf.c.o:
+0000000000000000 T __floatuntidf
+
+floatuntisf.c.o:
+0000000000000000 T __floatuntisf
+
+int_util.c.o:
+0000000000000000 W __compilerrt_abort_impl
+
+lshrdi3.c.o:
+0000000000000000 T __lshrdi3
+
+lshrti3.c.o:
+0000000000000000 T __lshrti3
+
+moddi3.c.o:
+0000000000000000 T __moddi3
+
+modsi3.c.o:
+0000000000000000 T __modsi3
+
+modti3.c.o:
+0000000000000000 T __modti3
+
+muldc3.c.o:
+0000000000000000 T __muldc3
+
+muldf3.c.o:
+0000000000000000 T __muldf3
+
+muldi3.c.o:
+0000000000000000 T __muldi3
+
+mulodi4.c.o:
+0000000000000000 T __mulodi4
+
+mulosi4.c.o:
+0000000000000000 T __mulosi4
+
+muloti4.c.o:
+0000000000000000 T __muloti4
+
+mulsc3.c.o:
+0000000000000000 T __mulsc3
+
+mulsf3.c.o:
+0000000000000000 T __mulsf3
+
+multi3.c.o:
+0000000000000000 T __multi3
+
+mulvdi3.c.o:
+0000000000000000 T __mulvdi3
+
+mulvsi3.c.o:
+0000000000000000 T __mulvsi3
+
+mulvti3.c.o:
+0000000000000000 T __mulvti3
+
+negdf2.c.o:
+0000000000000000 T __negdf2
+
+negdi2.c.o:
+0000000000000000 T __negdi2
+
+negsf2.c.o:
+0000000000000000 T __negsf2
+
+negti2.c.o:
+0000000000000000 T __negti2
+
+negvdi2.c.o:
+0000000000000000 T __negvdi2
+
+negvsi2.c.o:
+0000000000000000 T __negvsi2
+
+negvti2.c.o:
+0000000000000000 T __negvti2
+
+os_version_check.c.o:
+
+paritydi2.c.o:
+0000000000000000 T __paritydi2
+
+paritysi2.c.o:
+0000000000000000 T __paritysi2
+
+parityti2.c.o:
+0000000000000000 T __parityti2
+
+popcountdi2.c.o:
+0000000000000000 T __popcountdi2
+
+popcountsi2.c.o:
+0000000000000000 T __popcountsi2
+
+popcountti2.c.o:
+0000000000000000 T __popcountti2
+
+powidf2.c.o:
+0000000000000000 T __powidf2
+
+powisf2.c.o:
+0000000000000000 T __powisf2
+
+subdf3.c.o:
+0000000000000000 T __subdf3
+
+subsf3.c.o:
+0000000000000000 T __subsf3
+
+subvdi3.c.o:
+0000000000000000 T __subvdi3
+
+subvsi3.c.o:
+0000000000000000 T __subvsi3
+
+subvti3.c.o:
+0000000000000000 T __subvti3
+
+trampoline_setup.c.o:
+
+truncdfsf2.c.o:
+0000000000000000 T __truncdfsf2
+
+ucmpdi2.c.o:
+0000000000000000 T __ucmpdi2
+
+ucmpti2.c.o:
+0000000000000000 T __ucmpti2
+
+udivdi3.c.o:
+0000000000000000 T __udivdi3
+
+udivmoddi4.c.o:
+0000000000000000 T __udivmoddi4
+
+udivmodsi4.c.o:
+0000000000000000 T __udivmodsi4
+
+udivmodti4.c.o:
+0000000000000000 T __udivmodti4
+
+udivsi3.c.o:
+0000000000000000 T __udivsi3
+
+udivti3.c.o:
+0000000000000000 T __udivti3
+
+umoddi3.c.o:
+0000000000000000 T __umoddi3
+
+umodsi3.c.o:
+0000000000000000 T __umodsi3
+
+umodti3.c.o:
+0000000000000000 T __umodti3
+
+truncdfbf2.c.o:
+0000000000000000 T __truncdfbf2
+
+truncsfbf2.c.o:
+0000000000000000 T __truncsfbf2
+
+emutls.c.o:
+0000000000000000 W __emutls_get_address
+
+enable_execute_stack.c.o:
+0000000000000000 T __enable_execute_stack
+
+eprintf.c.o:
+0000000000000000 T __eprintf
+
+gcc_personality_v0.c.o:
+0000000000000000 T __gcc_personality_v0
+
+clear_cache.c.o:
+0000000000000000 T __clear_cache
+
+addtf3.c.o:
+
+comparetf2.c.o:
+
+divtc3.c.o:
+0000000000000000 T __divtc3
+
+divtf3.c.o:
+
+extenddftf2.c.o:
+
+extendhftf2.c.o:
+
+extendsftf2.c.o:
+
+fixtfdi.c.o:
+
+fixtfsi.c.o:
+
+fixtfti.c.o:
+
+fixunstfdi.c.o:
+
+fixunstfsi.c.o:
+
+fixunstfti.c.o:
+
+floatditf.c.o:
+
+floatsitf.c.o:
+
+floattitf.c.o:
+
+floatunditf.c.o:
+
+floatunsitf.c.o:
+
+floatuntitf.c.o:
+
+multc3.c.o:
+0000000000000000 T __multc3
+
+multf3.c.o:
+
+powitf2.c.o:
+
+subtf3.c.o:
+
+trunctfdf2.c.o:
+
+trunctfhf2.c.o:
+
+trunctfsf2.c.o:
+
+cpu_model.c.o:
+0000000000000000 B __cpu_features2
+0000000000000000 T __cpu_indicator_init
+0000000000000000 B __cpu_model
+
+fp_mode.c.o:
+0000000000000000 T __fe_getround
+0000000000000000 T __fe_raise_inexact
+
+floatdidf.c.o:
+0000000000000000 T __floatdidf
+
+floatdisf.c.o:
+0000000000000000 T __floatdisf
+
+floatundidf.S.o:
+0000000000000000 T __floatundidf
+
+floatundisf.S.o:
+0000000000000000 T __floatundisf
+
+extendhfsf2.S.o:
+0000000000000000 T __extendhfsf2
+0000000000000000 T __gnu_h2f_ieee
+
+truncsfhf2.S.o:
+0000000000000000 T __gnu_f2h_ieee
+0000000000000000 T __truncsfhf2
+
+truncdfhf2.S.o:
+0000000000000000 T __truncdfhf2
+
+divxc3.c.o:
+0000000000000000 T __divxc3
+
+fixxfdi.c.o:
+0000000000000000 T __fixxfdi
+
+fixxfti.c.o:
+0000000000000000 T __fixxfti
+
+fixunsxfdi.c.o:
+0000000000000000 T __fixunsxfdi
+
+fixunsxfsi.c.o:
+0000000000000000 T __fixunsxfsi
+
+fixunsxfti.c.o:
+0000000000000000 T __fixunsxfti
+
+floattixf.c.o:
+0000000000000000 T __floattixf
+
+floatuntixf.c.o:
+0000000000000000 T __floatuntixf
+
+mulxc3.c.o:
+0000000000000000 T __mulxc3
+
+powixf2.c.o:
+0000000000000000 T __powixf2
+
+floatdixf.c.o:
+0000000000000000 T __floatdixf
+
+floatundixf.S.o:
+0000000000000000 T __floatundixf

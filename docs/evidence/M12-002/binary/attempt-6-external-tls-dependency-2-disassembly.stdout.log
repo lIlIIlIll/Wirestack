@@ -1,0 +1,21 @@
+
+/usr/lib/libz.so.1.3.2:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000003000 <_init>:
+    3000:	endbr64
+    3004:	sub    $0x8,%rsp
+    3008:	mov    0x16f19(%rip),%rax        # 19f28 <__gmon_start__>
+    300f:	test   %rax,%rax
+    3012:	je     3016 <_init+0x16>
+    3014:	call   *%rax
+    3016:	add    $0x8,%rsp
+    301a:	ret
+
+Disassembly of section .text:
+
+0000000000003040 <deregister_tm_clones>:
+    3040:	lea    0x16fc1(%rip),%rdi        # 1a008 <completed.0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "aec9ebf0f5379debd35ce7b2ebd8382e79109c8a9d500ce554c0b4151040ae69"}

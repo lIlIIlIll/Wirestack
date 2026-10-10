@@ -1,0 +1,890 @@
+In archive <scratch>/wirestack/target/native/resolver/current/lib/libwirestack_resolver.a:
+
+wirestack_resolver.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <wirestack_resolver_pool_create>:
+   0:	push   %rbp
+   1:	push   %r15
+   3:	push   %r14
+   5:	push   %r13
+   7:	push   %r12
+   9:	push   %rbx
+   a:	sub    $0x18,%rsp
+   e:	lea    -0x401(%rsi),%rax
+  15:	mov    $0x1,%r15d
+  1b:	cmp    $0xfffffffffffffc00,%rax
+  21:	jb     f2 <wirestack_resolver_pool_create+0xf2>
+  27:	mov    %rdi,%rbp
+  2a:	lea    -0x21(%rdi),%rax
+  2e:	cmp    $0xffffffffffffffe0,%rax
+  32:	jb     f2 <wirestack_resolver_pool_create+0xf2>
+  38:	mov    %rdx,%rbx
+  3b:	test   %rdx,%rdx
+  3e:	je     f2 <wirestack_resolver_pool_create+0xf2>
+  44:	test   %rcx,%rcx
+  47:	je     f2 <wirestack_resolver_pool_create+0xf2>
+  4d:	mov    %rsi,%r12
+  50:	movq   $0x0,(%rbx)
+  57:	movq   $0x0,(%rcx)
+  5e:	mov    $0x1,%edi
+  63:	mov    $0x110,%esi
+  68:	call   6d <wirestack_resolver_pool_create+0x6d>
+  6d:	mov    $0x2,%r15d
+  73:	test   %rax,%rax
+  76:	je     f2 <wirestack_resolver_pool_create+0xf2>
+  78:	mov    %rax,%r13
+  7b:	mov    $0x8,%esi
+  80:	mov    %rbp,%rdi
+  83:	call   88 <wirestack_resolver_pool_create+0x88>
+  88:	mov    %rax,0x90(%r13)
+  8f:	test   %rax,%rax
+  92:	je     ea <wirestack_resolver_pool_create+0xea>
+  94:	lea    0x8(%r13),%r14
+  98:	mov    %r14,%rdi
+  9b:	xor    %esi,%esi
+  9d:	call   a2 <wirestack_resolver_pool_create+0xa2>
+  a2:	test   %eax,%eax
+  a4:	jne    de <wirestack_resolver_pool_create+0xde>
+  a6:	lea    0x30(%r13),%rdi
+  aa:	mov    %rdi,(%rsp)
+  ae:	xor    %esi,%esi
+  b0:	call   b5 <wirestack_resolver_pool_create+0xb5>
+  b5:	test   %eax,%eax
+  b7:	jne    d6 <wirestack_resolver_pool_create+0xd6>
+  b9:	lea    0x60(%r13),%rdi
+  bd:	mov    %rdi,0x10(%rsp)
+  c2:	xor    %esi,%esi
+  c4:	call   c9 <wirestack_resolver_pool_create+0xc9>
+  c9:	test   %eax,%eax
+  cb:	je     104 <wirestack_resolver_pool_create+0x104>
+  cd:	mov    (%rsp),%rdi
+  d1:	call   d6 <wirestack_resolver_pool_create+0xd6>
+  d6:	mov    %r14,%rdi
+  d9:	call   de <wirestack_resolver_pool_create+0xde>
+  de:	mov    0x90(%r13),%rdi
+  e5:	call   ea <wirestack_resolver_pool_create+0xea>
+  ea:	mov    %r13,%rdi
+  ed:	call   f2 <wirestack_resolver_pool_create+0xf2>
+  f2:	mov    %r15d,%eax
+  f5:	add    $0x18,%rsp
+  f9:	pop    %rbx
+  fa:	pop    %r12
+  fc:	pop    %r13
+  fe:	pop    %r14
+ 100:	pop    %r15
+ 102:	pop    %rbp
+ 103:	ret
+ 104:	movabs $0x5753524553503031,%rax
+ 10e:	mov    %rax,0x0(%r13)
+ 112:	mov    %rbp,0xb0(%r13)
+ 119:	mov    %r12,0xb8(%r13)
+ 120:	movl   $0x1,0x100(%r13)
+ 12b:	mov    %r13,%rdi
+ 12e:	call   2d0 <reserve_pool_capacity>
+ 133:	test   %eax,%eax
+ 135:	je     1f0 <wirestack_resolver_pool_create+0x1f0>
+ 13b:	mov    %r14,0x8(%rsp)
+ 140:	xor    %r14d,%r14d
+ 143:	xor    %r12d,%r12d
+ 146:	mov    0x90(%r13),%rdi
+ 14d:	add    %r14,%rdi
+ 150:	xor    %esi,%esi
+ 152:	lea    0x1f7(%rip),%rdx        # 350 <resolver_worker>
+ 159:	mov    %r13,%rcx
+ 15c:	call   161 <wirestack_resolver_pool_create+0x161>
+ 161:	test   %eax,%eax
+ 163:	jne    232 <wirestack_resolver_pool_create+0x232>
+ 169:	inc    %r12
+ 16c:	add    $0x8,%r14
+ 170:	cmp    %r12,%rbp
+ 173:	jne    146 <wirestack_resolver_pool_create+0x146>
+ 175:	mov    %r13,%rdi
+ 178:	add    $0x98,%rdi
+ 17f:	lea    0x50a(%rip),%rdx        # 690 <resolver_reaper>
+ 186:	xor    %esi,%esi
+ 188:	mov    %r13,%rcx
+ 18b:	call   190 <wirestack_resolver_pool_create+0x190>
+ 190:	test   %eax,%eax
+ 192:	je     2af <wirestack_resolver_pool_create+0x2af>
+ 198:	mov    0x8(%rsp),%rbx
+ 19d:	mov    %rbx,%rdi
+ 1a0:	call   1a5 <wirestack_resolver_pool_create+0x1a5>
+ 1a5:	movabs $0x100000000,%rax
+ 1af:	mov    %rax,0x100(%r13)
+ 1b6:	mov    (%rsp),%rdi
+ 1ba:	call   1bf <wirestack_resolver_pool_create+0x1bf>
+ 1bf:	mov    %rbx,%rdi
+ 1c2:	call   1c7 <wirestack_resolver_pool_create+0x1c7>
+ 1c7:	xor    %ebx,%ebx
+ 1c9:	mov    0x90(%r13),%rax
+ 1d0:	mov    (%rax,%rbx,8),%rdi
+ 1d4:	xor    %esi,%esi
+ 1d6:	call   1db <wirestack_resolver_pool_create+0x1db>
+ 1db:	inc    %rbx
+ 1de:	cmp    %rbx,%rbp
+ 1e1:	jne    1c9 <wirestack_resolver_pool_create+0x1c9>
+ 1e3:	mov    %r13,%rdi
+ 1e6:	call   770 <free_pool>
+ 1eb:	jmp    f2 <wirestack_resolver_pool_create+0xf2>
+ 1f0:	movq   $0x0,0x0(%r13)
+ 1f8:	mov    0x10(%rsp),%rdi
+ 1fd:	call   202 <wirestack_resolver_pool_create+0x202>
+ 202:	mov    (%rsp),%rdi
+ 206:	call   20b <wirestack_resolver_pool_create+0x20b>
+ 20b:	mov    %r14,%rdi
+ 20e:	call   213 <wirestack_resolver_pool_create+0x213>
+ 213:	mov    0x90(%r13),%rdi
+ 21a:	call   21f <wirestack_resolver_pool_create+0x21f>
+ 21f:	mov    %r13,%rdi
+ 222:	call   227 <wirestack_resolver_pool_create+0x227>
+ 227:	mov    $0x4,%r15d
+ 22d:	jmp    f2 <wirestack_resolver_pool_create+0xf2>
+ 232:	mov    0x8(%rsp),%rbp
+ 237:	mov    %rbp,%rdi
+ 23a:	call   23f <wirestack_resolver_pool_create+0x23f>
+ 23f:	movabs $0x100000000,%rax
+ 249:	mov    %rax,0x100(%r13)
+ 250:	mov    (%rsp),%r14
+ 254:	mov    %r14,%rdi
+ 257:	call   25c <wirestack_resolver_pool_create+0x25c>
+ 25c:	mov    %rbp,%rdi
+ 25f:	call   264 <wirestack_resolver_pool_create+0x264>
+ 264:	test   %r12,%r12
+ 267:	je     285 <wirestack_resolver_pool_create+0x285>
+ 269:	xor    %ebx,%ebx
+ 26b:	mov    0x90(%r13),%rax
+ 272:	mov    (%rax,%rbx,8),%rdi
+ 276:	xor    %esi,%esi
+ 278:	call   27d <wirestack_resolver_pool_create+0x27d>
+ 27d:	inc    %rbx
+ 280:	cmp    %rbx,%r12
+ 283:	jne    26b <wirestack_resolver_pool_create+0x26b>
+ 285:	mov    %r13,%rdi
+ 288:	call   630 <release_pool_capacity>
+ 28d:	movq   $0x0,0x0(%r13)
+ 295:	mov    0x10(%rsp),%rdi
+ 29a:	call   29f <wirestack_resolver_pool_create+0x29f>
+ 29f:	mov    %r14,%rdi
+ 2a2:	call   2a7 <wirestack_resolver_pool_create+0x2a7>
+ 2a7:	mov    %rbp,%rdi
+ 2aa:	jmp    d9 <wirestack_resolver_pool_create+0xd9>
+ 2af:	mov    0x98(%r13),%rdi
+ 2b6:	call   2bb <wirestack_resolver_pool_create+0x2bb>
+ 2bb:	mov    %r13,(%rbx)
+ 2be:	xor    %r15d,%r15d
+ 2c1:	jmp    f2 <wirestack_resolver_pool_create+0xf2>
+ 2c6:	cs nopw 0x0(%rax,%rax,1)
+
+00000000000002d0 <reserve_pool_capacity>:
+ 2d0:	push   %rbp
+ 2d1:	push   %rbx
+ 2d2:	push   %rax
+ 2d3:	mov    %rdi,%rbx
+ 2d6:	lea    0x0(%rip),%rdi        # 2dd <reserve_pool_capacity+0xd>
+ 2dd:	call   2e2 <reserve_pool_capacity+0x12>
+ 2e2:	mov    0x0(%rip),%rax        # 2e9 <reserve_pool_capacity+0x19>
+ 2e9:	xor    %ebp,%ebp
+ 2eb:	cmp    $0x7,%rax
+ 2ef:	ja     32f <reserve_pool_capacity+0x5f>
+ 2f1:	mov    0xb0(%rbx),%rcx
+ 2f8:	mov    0x0(%rip),%rdx        # 2ff <reserve_pool_capacity+0x2f>
+ 2ff:	mov    $0x40,%esi
+ 304:	sub    %rdx,%rsi
+ 307:	cmp    %rsi,%rcx
+ 30a:	ja     32f <reserve_pool_capacity+0x5f>
+ 30c:	inc    %rax
+ 30f:	mov    %rax,0x0(%rip)        # 316 <reserve_pool_capacity+0x46>
+ 316:	add    %rcx,%rdx
+ 319:	mov    %rdx,0x0(%rip)        # 320 <reserve_pool_capacity+0x50>
+ 320:	movl   $0x1,0x108(%rbx)
+ 32a:	mov    $0x1,%ebp
+ 32f:	lea    0x0(%rip),%rdi        # 336 <reserve_pool_capacity+0x66>
+ 336:	call   33b <reserve_pool_capacity+0x6b>
+ 33b:	mov    %ebp,%eax
+ 33d:	add    $0x8,%rsp
+ 341:	pop    %rbx
+ 342:	pop    %rbp
+ 343:	ret
+ 344:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000350 <resolver_worker>:
+ 350:	push   %rbp
+ 351:	push   %r15
+ 353:	push   %r14
+ 355:	push   %r13
+ 357:	push   %r12
+ 359:	push   %rbx
+ 35a:	sub    $0x48,%rsp
+ 35e:	mov    %rdi,%rbx
+ 361:	mov    %fs:0x28,%rax
+ 36a:	mov    %rax,0x40(%rsp)
+ 36f:	lea    0x8(%rdi),%r14
+ 373:	lea    0x30(%rdi),%r15
+ 377:	lea    0x18(%rsp),%r13
+ 37c:	jmp    388 <resolver_worker+0x38>
+ 37e:	xchg   %ax,%ax
+ 380:	mov    %r14,%rdi
+ 383:	call   388 <resolver_worker+0x38>
+ 388:	mov    %r14,%rdi
+ 38b:	call   390 <resolver_worker+0x40>
+ 390:	mov    0xa0(%rbx),%rbp
+ 397:	test   %rbp,%rbp
+ 39a:	jne    3c0 <resolver_worker+0x70>
+ 39c:	cmpl   $0x0,0x104(%rbx)
+ 3a3:	jne    602 <resolver_worker+0x2b2>
+ 3a9:	mov    %r15,%rdi
+ 3ac:	mov    %r14,%rsi
+ 3af:	call   3b4 <resolver_worker+0x64>
+ 3b4:	jmp    390 <resolver_worker+0x40>
+ 3b6:	cs nopw 0x0(%rax,%rax,1)
+ 3c0:	mov    0x10(%rbp),%rax
+ 3c4:	mov    %rax,0xa0(%rbx)
+ 3cb:	test   %rax,%rax
+ 3ce:	jne    3db <resolver_worker+0x8b>
+ 3d0:	movq   $0x0,0xa8(%rbx)
+ 3db:	movq   $0x0,0x10(%rbp)
+ 3e3:	decq   0xc8(%rbx)
+ 3ea:	cmpl   $0x0,0x58(%rbp)
+ 3ee:	je     410 <resolver_worker+0xc0>
+ 3f0:	movabs $0x200000006,%rax
+ 3fa:	mov    %rax,0x4c(%rbp)
+ 3fe:	jmp    5aa <resolver_worker+0x25a>
+ 403:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+ 410:	movl   $0x1,0x50(%rbp)
+ 417:	incq   0xd0(%rbx)
+ 41e:	mov    %r14,%rdi
+ 421:	call   426 <resolver_worker+0xd6>
+ 426:	movq   $0x0,0x8(%rsp)
+ 42f:	xorps  %xmm0,%xmm0
+ 432:	movups %xmm0,0x10(%r13)
+ 437:	movups %xmm0,0x0(%r13)
+ 43c:	movq   $0x0,0x20(%r13)
+ 444:	mov    0x48(%rbp),%eax
+ 447:	cmp    $0x6,%eax
+ 44a:	mov    $0x0,%ecx
+ 44f:	mov    $0xa,%edx
+ 454:	cmove  %edx,%ecx
+ 457:	cmp    $0x4,%eax
+ 45a:	mov    $0x2,%eax
+ 45f:	cmove  %eax,%ecx
+ 462:	mov    %ecx,0x14(%rsp)
+ 466:	movl   $0x1,0x18(%rsp)
+ 46e:	movl   $0x20,0x10(%rsp)
+ 476:	call   47b <resolver_worker+0x12b>
+ 47b:	mov    %rax,%r12
+ 47e:	movl   $0x0,(%rax)
+ 484:	mov    0x18(%rbp),%rdi
+ 488:	mov    0x20(%rbp),%rsi
+ 48c:	lea    0x10(%rsp),%rdx
+ 491:	lea    0x8(%rsp),%rcx
+ 496:	call   49b <resolver_worker+0x14b>
+ 49b:	lea    0x8(%rax),%edx
+ 49e:	mov    $0x6,%ecx
+ 4a3:	cmp    $0x8,%edx
+ 4a6:	ja     4b5 <resolver_worker+0x165>
+ 4a8:	movslq %edx,%rcx
+ 4ab:	lea    0x0(%rip),%rdx        # 4b2 <resolver_worker+0x162>
+ 4b2:	mov    (%rdx,%rcx,4),%ecx
+ 4b5:	mov    (%r12),%edx
+ 4b9:	mov    %ecx,0x4c(%rbp)
+ 4bc:	cmp    $0xfffffff5,%eax
+ 4bf:	cmovne %eax,%edx
+ 4c2:	movslq %edx,%rcx
+ 4c5:	mov    %rcx,0x40(%rbp)
+ 4c9:	movq   $0x0,0x38(%rbp)
+ 4d1:	test   %eax,%eax
+ 4d3:	jne    585 <resolver_worker+0x235>
+ 4d9:	mov    0x8(%rsp),%rax
+ 4de:	test   %rax,%rax
+ 4e1:	je     57e <resolver_worker+0x22e>
+ 4e7:	xorps  %xmm1,%xmm1
+ 4ea:	jmp    4fd <resolver_worker+0x1ad>
+ 4ec:	nopl   0x0(%rax)
+ 4f0:	incq   0x38(%rbp)
+ 4f4:	mov    0x28(%rax),%rax
+ 4f8:	test   %rax,%rax
+ 4fb:	je     575 <resolver_worker+0x225>
+ 4fd:	mov    0x38(%rbp),%rdx
+ 501:	cmp    0x30(%rbp),%rdx
+ 505:	jae    579 <resolver_worker+0x229>
+ 507:	mov    0x28(%rbp),%rcx
+ 50b:	lea    (%rdx,%rdx,2),%rdx
+ 50f:	lea    (%rcx,%rdx,8),%rsi
+ 513:	movups %xmm1,(%rcx,%rdx,8)
+ 517:	movq   $0x0,0x10(%rcx,%rdx,8)
+ 520:	mov    0x4(%rax),%edi
+ 523:	cmp    $0xa,%edi
+ 526:	je     550 <resolver_worker+0x200>
+ 528:	cmp    $0x2,%edi
+ 52b:	jne    4f4 <resolver_worker+0x1a4>
+ 52d:	cmpl   $0x10,0x10(%rax)
+ 531:	jb     4f4 <resolver_worker+0x1a4>
+ 533:	mov    0x18(%rax),%rdi
+ 537:	movl   $0x4,(%rsi)
+ 53d:	mov    0x4(%rdi),%esi
+ 540:	mov    %esi,0x8(%rcx,%rdx,8)
+ 544:	jmp    4f0 <resolver_worker+0x1a0>
+ 546:	cs nopw 0x0(%rax,%rax,1)
+ 550:	cmpl   $0x1c,0x10(%rax)
+ 554:	jb     4f4 <resolver_worker+0x1a4>
+ 556:	mov    0x18(%rax),%rdi
+ 55a:	movl   $0x6,(%rsi)
+ 560:	mov    0x18(%rdi),%esi
+ 563:	mov    %esi,0x4(%rcx,%rdx,8)
+ 567:	movups 0x8(%rdi),%xmm0
+ 56b:	movups %xmm0,0x8(%rcx,%rdx,8)
+ 570:	jmp    4f0 <resolver_worker+0x1a0>
+ 575:	mov    0x38(%rbp),%rdx
+ 579:	test   %rdx,%rdx
+ 57c:	jne    585 <resolver_worker+0x235>
+ 57e:	movl   $0x2,0x4c(%rbp)
+ 585:	mov    0x8(%rsp),%rdi
+ 58a:	test   %rdi,%rdi
+ 58d:	je     594 <resolver_worker+0x244>
+ 58f:	call   594 <resolver_worker+0x244>
+ 594:	mov    %r14,%rdi
+ 597:	call   59c <resolver_worker+0x24c>
+ 59c:	decq   0xd0(%rbx)
+ 5a3:	movl   $0x2,0x50(%rbp)
+ 5aa:	incq   0xf0(%rbx)
+ 5b1:	decl   0x54(%rbp)
+ 5b4:	jne    380 <resolver_worker+0x30>
+ 5ba:	mov    0x8(%rbp),%r12
+ 5be:	mov    0x28(%rbp),%rdi
+ 5c2:	movq   $0x0,0x0(%rbp)
+ 5ca:	call   5cf <resolver_worker+0x27f>
+ 5cf:	mov    0x20(%rbp),%rdi
+ 5d3:	call   5d8 <resolver_worker+0x288>
+ 5d8:	mov    0x18(%rbp),%rdi
+ 5dc:	call   5e1 <resolver_worker+0x291>
+ 5e1:	mov    %rbp,%rdi
+ 5e4:	call   5e9 <resolver_worker+0x299>
+ 5e9:	decq   0xc0(%r12)
+ 5f1:	add    $0x60,%r12
+ 5f5:	mov    %r12,%rdi
+ 5f8:	call   5fd <resolver_worker+0x2ad>
+ 5fd:	jmp    380 <resolver_worker+0x30>
+ 602:	mov    %r14,%rdi
+ 605:	call   60a <resolver_worker+0x2ba>
+ 60a:	mov    %fs:0x28,%rax
+ 613:	cmp    0x40(%rsp),%rax
+ 618:	jne    62b <resolver_worker+0x2db>
+ 61a:	xor    %eax,%eax
+ 61c:	add    $0x48,%rsp
+ 620:	pop    %rbx
+ 621:	pop    %r12
+ 623:	pop    %r13
+ 625:	pop    %r14
+ 627:	pop    %r15
+ 629:	pop    %rbp
+ 62a:	ret
+ 62b:	call   630 <release_pool_capacity>
+
+0000000000000630 <release_pool_capacity>:
+ 630:	push   %r14
+ 632:	push   %rbx
+ 633:	push   %rax
+ 634:	cmpl   $0x0,0x108(%rdi)
+ 63b:	je     67d <release_pool_capacity+0x4d>
+ 63d:	mov    %rdi,%rbx
+ 640:	lea    0x0(%rip),%r14        # 647 <release_pool_capacity+0x17>
+ 647:	mov    %r14,%rdi
+ 64a:	call   64f <release_pool_capacity+0x1f>
+ 64f:	decq   0x0(%rip)        # 656 <release_pool_capacity+0x26>
+ 656:	mov    0xb0(%rbx),%rax
+ 65d:	sub    %rax,0x0(%rip)        # 664 <release_pool_capacity+0x34>
+ 664:	movl   $0x0,0x108(%rbx)
+ 66e:	mov    %r14,%rdi
+ 671:	add    $0x8,%rsp
+ 675:	pop    %rbx
+ 676:	pop    %r14
+ 678:	jmp    67d <release_pool_capacity+0x4d>
+ 67d:	add    $0x8,%rsp
+ 681:	pop    %rbx
+ 682:	pop    %r14
+ 684:	ret
+ 685:	data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000690 <resolver_reaper>:
+ 690:	push   %r15
+ 692:	push   %r14
+ 694:	push   %r12
+ 696:	push   %rbx
+ 697:	push   %rax
+ 698:	mov    %rdi,%r12
+ 69b:	lea    0x8(%rdi),%r14
+ 69f:	mov    %r14,%rdi
+ 6a2:	call   6a7 <resolver_reaper+0x17>
+ 6a7:	cmpl   $0x0,0x104(%r12)
+ 6b0:	jne    6d6 <resolver_reaper+0x46>
+ 6b2:	lea    0x60(%r12),%r15
+ 6b7:	nopw   0x0(%rax,%rax,1)
+ 6c0:	mov    %r15,%rdi
+ 6c3:	mov    %r14,%rsi
+ 6c6:	call   6cb <resolver_reaper+0x3b>
+ 6cb:	cmpl   $0x0,0x104(%r12)
+ 6d4:	je     6c0 <resolver_reaper+0x30>
+ 6d6:	mov    %r14,%rdi
+ 6d9:	call   6de <resolver_reaper+0x4e>
+ 6de:	cmpq   $0x0,0xb0(%r12)
+ 6e7:	je     710 <resolver_reaper+0x80>
+ 6e9:	xor    %ebx,%ebx
+ 6eb:	nopl   0x0(%rax,%rax,1)
+ 6f0:	mov    0x90(%r12),%rax
+ 6f8:	mov    (%rax,%rbx,8),%rdi
+ 6fc:	xor    %esi,%esi
+ 6fe:	call   703 <resolver_reaper+0x73>
+ 703:	inc    %rbx
+ 706:	cmp    0xb0(%r12),%rbx
+ 70e:	jb     6f0 <resolver_reaper+0x60>
+ 710:	mov    %r14,%rdi
+ 713:	call   718 <resolver_reaper+0x88>
+ 718:	cmpq   $0x0,0xc0(%r12)
+ 721:	je     746 <resolver_reaper+0xb6>
+ 723:	lea    0x60(%r12),%r15
+ 728:	nopl   0x0(%rax,%rax,1)
+ 730:	mov    %r15,%rdi
+ 733:	mov    %r14,%rsi
+ 736:	call   73b <resolver_reaper+0xab>
+ 73b:	cmpq   $0x0,0xc0(%r12)
+ 744:	jne    730 <resolver_reaper+0xa0>
+ 746:	mov    %r14,%rdi
+ 749:	call   74e <resolver_reaper+0xbe>
+ 74e:	mov    %r12,%rdi
+ 751:	call   770 <free_pool>
+ 756:	xor    %eax,%eax
+ 758:	add    $0x8,%rsp
+ 75c:	pop    %rbx
+ 75d:	pop    %r12
+ 75f:	pop    %r14
+ 761:	pop    %r15
+ 763:	ret
+ 764:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000770 <free_pool>:
+ 770:	push   %r14
+ 772:	push   %rbx
+ 773:	push   %rax
+ 774:	mov    %rdi,%rbx
+ 777:	cmpl   $0x0,0x108(%rdi)
+ 77e:	je     7b6 <free_pool+0x46>
+ 780:	lea    0x0(%rip),%r14        # 787 <free_pool+0x17>
+ 787:	mov    %r14,%rdi
+ 78a:	call   78f <free_pool+0x1f>
+ 78f:	decq   0x0(%rip)        # 796 <free_pool+0x26>
+ 796:	mov    0xb0(%rbx),%rax
+ 79d:	sub    %rax,0x0(%rip)        # 7a4 <free_pool+0x34>
+ 7a4:	movl   $0x0,0x108(%rbx)
+ 7ae:	mov    %r14,%rdi
+ 7b1:	call   7b6 <free_pool+0x46>
+ 7b6:	movq   $0x0,(%rbx)
+ 7bd:	lea    0x60(%rbx),%rdi
+ 7c1:	call   7c6 <free_pool+0x56>
+ 7c6:	lea    0x30(%rbx),%rdi
+ 7ca:	call   7cf <free_pool+0x5f>
+ 7cf:	lea    0x8(%rbx),%rdi
+ 7d3:	call   7d8 <free_pool+0x68>
+ 7d8:	mov    0x90(%rbx),%rdi
+ 7df:	call   7e4 <free_pool+0x74>
+ 7e4:	mov    %rbx,%rdi
+ 7e7:	add    $0x8,%rsp
+ 7eb:	pop    %rbx
+ 7ec:	pop    %r14
+ 7ee:	jmp    7f3 <free_pool+0x83>
+ 7f3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000800 <wirestack_resolver_pool_destroy>:
+ 800:	push   %r14
+ 802:	push   %rbx
+ 803:	push   %rax
+ 804:	mov    $0x1,%eax
+ 809:	test   %rdi,%rdi
+ 80c:	je     85c <wirestack_resolver_pool_destroy+0x5c>
+ 80e:	mov    %rdi,%rbx
+ 811:	movabs $0x5753524553503031,%rcx
+ 81b:	cmp    %rcx,(%rdi)
+ 81e:	jne    85c <wirestack_resolver_pool_destroy+0x5c>
+ 820:	lea    0x8(%rbx),%r14
+ 824:	mov    %r14,%rdi
+ 827:	call   82c <wirestack_resolver_pool_destroy+0x2c>
+ 82c:	movabs $0x100000000,%rax
+ 836:	mov    %rax,0x100(%rbx)
+ 83d:	lea    0x30(%rbx),%rdi
+ 841:	call   846 <wirestack_resolver_pool_destroy+0x46>
+ 846:	add    $0x60,%rbx
+ 84a:	mov    %rbx,%rdi
+ 84d:	call   852 <wirestack_resolver_pool_destroy+0x52>
+ 852:	mov    %r14,%rdi
+ 855:	call   85a <wirestack_resolver_pool_destroy+0x5a>
+ 85a:	xor    %eax,%eax
+ 85c:	add    $0x8,%rsp
+ 860:	pop    %rbx
+ 861:	pop    %r14
+ 863:	ret
+ 864:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000870 <wirestack_resolver_submit>:
+ 870:	push   %rbp
+ 871:	push   %r15
+ 873:	push   %r14
+ 875:	push   %r13
+ 877:	push   %r12
+ 879:	push   %rbx
+ 87a:	sub    $0x18,%rsp
+ 87e:	mov    $0x1,%ebp
+ 883:	test   %rdi,%rdi
+ 886:	je     b63 <wirestack_resolver_submit+0x2f3>
+ 88c:	mov    %rsi,%r14
+ 88f:	test   %rsi,%rsi
+ 892:	je     b63 <wirestack_resolver_submit+0x2f3>
+ 898:	test   %r9,%r9
+ 89b:	je     b63 <wirestack_resolver_submit+0x2f3>
+ 8a1:	mov    %rdi,%rbx
+ 8a4:	movabs $0x57535245534a3031,%rax
+ 8ae:	add    $0x60000,%rax
+ 8b4:	cmp    %rax,(%rdi)
+ 8b7:	jne    b63 <wirestack_resolver_submit+0x2f3>
+ 8bd:	mov    %ecx,%r13d
+ 8c0:	test   $0xfffffffb,%ecx
+ 8c6:	setne  %al
+ 8c9:	cmp    $0x6,%ecx
+ 8cc:	setne  %cl
+ 8cf:	test   %al,%cl
+ 8d1:	jne    b63 <wirestack_resolver_submit+0x2f3>
+ 8d7:	lea    -0x401(%r8),%rax
+ 8de:	cmp    $0xfffffffffffffc00,%rax
+ 8e4:	jb     b63 <wirestack_resolver_submit+0x2f3>
+ 8ea:	mov    %rdx,%r15
+ 8ed:	mov    %r8,0x10(%rsp)
+ 8f2:	mov    %r9,0x8(%rsp)
+ 8f7:	movq   $0x0,(%r9)
+ 8fe:	mov    $0xff,%esi
+ 903:	mov    %r14,%rdi
+ 906:	call   90b <wirestack_resolver_submit+0x9b>
+ 90b:	mov    %rax,%r12
+ 90e:	dec    %rax
+ 911:	cmp    $0xfd,%rax
+ 917:	ja     b63 <wirestack_resolver_submit+0x2f3>
+ 91d:	inc    %r12
+ 920:	mov    %r12,%rdi
+ 923:	call   928 <wirestack_resolver_submit+0xb8>
+ 928:	test   %rax,%rax
+ 92b:	je     b63 <wirestack_resolver_submit+0x2f3>
+ 931:	mov    %rax,(%rsp)
+ 935:	mov    %rax,%rdi
+ 938:	mov    %r14,%rsi
+ 93b:	mov    %r12,%rdx
+ 93e:	call   943 <wirestack_resolver_submit+0xd3>
+ 943:	test   %r15,%r15
+ 946:	je     992 <wirestack_resolver_submit+0x122>
+ 948:	cmpb   $0x0,(%r15)
+ 94c:	je     992 <wirestack_resolver_submit+0x122>
+ 94e:	mov    $0x40,%esi
+ 953:	mov    %r15,%rdi
+ 956:	call   95b <wirestack_resolver_submit+0xeb>
+ 95b:	mov    %rax,%r14
+ 95e:	dec    %rax
+ 961:	cmp    $0x3e,%rax
+ 965:	ja     ad0 <wirestack_resolver_submit+0x260>
+ 96b:	inc    %r14
+ 96e:	mov    %r14,%rdi
+ 971:	call   976 <wirestack_resolver_submit+0x106>
+ 976:	test   %rax,%rax
+ 979:	je     ad0 <wirestack_resolver_submit+0x260>
+ 97f:	mov    %rax,%r12
+ 982:	mov    %rax,%rdi
+ 985:	mov    %r15,%rsi
+ 988:	mov    %r14,%rdx
+ 98b:	call   990 <wirestack_resolver_submit+0x120>
+ 990:	jmp    995 <wirestack_resolver_submit+0x125>
+ 992:	xor    %r12d,%r12d
+ 995:	mov    $0x1,%edi
+ 99a:	mov    $0x60,%esi
+ 99f:	call   9a4 <wirestack_resolver_submit+0x134>
+ 9a4:	test   %rax,%rax
+ 9a7:	je     ae6 <wirestack_resolver_submit+0x276>
+ 9ad:	mov    %rax,%rbp
+ 9b0:	mov    $0x18,%esi
+ 9b5:	mov    0x10(%rsp),%r15
+ 9ba:	mov    %r15,%rdi
+ 9bd:	call   9c2 <wirestack_resolver_submit+0x152>
+ 9c2:	mov    %rax,0x28(%rbp)
+ 9c6:	test   %rax,%rax
+ 9c9:	je     ade <wirestack_resolver_submit+0x26e>
+ 9cf:	mov    %rax,%r14
+ 9d2:	movabs $0x57535245534a3031,%rax
+ 9dc:	mov    %rax,0x0(%rbp)
+ 9e0:	mov    %rbx,0x8(%rbp)
+ 9e4:	mov    (%rsp),%rax
+ 9e8:	mov    %rax,0x18(%rbp)
+ 9ec:	mov    %r12,0x20(%rbp)
+ 9f0:	mov    %r13d,0x48(%rbp)
+ 9f4:	mov    %r15,0x30(%rbp)
+ 9f8:	movl   $0x6,0x4c(%rbp)
+ 9ff:	movl   $0x2,0x54(%rbp)
+ a06:	lea    0x8(%rbx),%r15
+ a0a:	mov    %r15,%rdi
+ a0d:	call   a12 <wirestack_resolver_submit+0x1a2>
+ a12:	cmpl   $0x0,0x100(%rbx)
+ a19:	je     b35 <wirestack_resolver_submit+0x2c5>
+ a1f:	mov    0xb8(%rbx),%rdx
+ a26:	mov    0xc8(%rbx),%rax
+ a2d:	cmp    %rdx,%rax
+ a30:	jae    afe <wirestack_resolver_submit+0x28e>
+ a36:	mov    0xc0(%rbx),%rcx
+ a3d:	add    0xb0(%rbx),%rdx
+ a44:	cmp    %rdx,%rcx
+ a47:	jae    afe <wirestack_resolver_submit+0x28e>
+ a4d:	mov    0xa8(%rbx),%rdx
+ a54:	lea    0x10(%rdx),%rsi
+ a58:	lea    0xa0(%rbx),%rdi
+ a5f:	test   %rdx,%rdx
+ a62:	cmove  %rdi,%rsi
+ a66:	mov    %rbp,(%rsi)
+ a69:	mov    %rbp,0xa8(%rbx)
+ a70:	lea    0x1(%rcx),%rsi
+ a74:	mov    %rsi,0xc0(%rbx)
+ a7b:	lea    0x1(%rax),%rdx
+ a7f:	mov    %rdx,0xc8(%rbx)
+ a86:	incq   0xe8(%rbx)
+ a8d:	cmp    0xd8(%rbx),%rcx
+ a94:	jb     a9d <wirestack_resolver_submit+0x22d>
+ a96:	mov    %rsi,0xd8(%rbx)
+ a9d:	cmp    0xe0(%rbx),%rax
+ aa4:	mov    0x8(%rsp),%rax
+ aa9:	jb     ab2 <wirestack_resolver_submit+0x242>
+ aab:	mov    %rdx,0xe0(%rbx)
+ ab2:	mov    %rbp,(%rax)
+ ab5:	add    $0x30,%rbx
+ ab9:	mov    %rbx,%rdi
+ abc:	call   ac1 <wirestack_resolver_submit+0x251>
+ ac1:	mov    %r15,%rdi
+ ac4:	call   ac9 <wirestack_resolver_submit+0x259>
+ ac9:	xor    %ebp,%ebp
+ acb:	jmp    b63 <wirestack_resolver_submit+0x2f3>
+ ad0:	mov    (%rsp),%rdi
+ ad4:	call   ad9 <wirestack_resolver_submit+0x269>
+ ad9:	jmp    b63 <wirestack_resolver_submit+0x2f3>
+ ade:	mov    %rbp,%rdi
+ ae1:	call   ae6 <wirestack_resolver_submit+0x276>
+ ae6:	mov    %r12,%rdi
+ ae9:	call   aee <wirestack_resolver_submit+0x27e>
+ aee:	mov    (%rsp),%rdi
+ af2:	call   af7 <wirestack_resolver_submit+0x287>
+ af7:	mov    $0x2,%ebp
+ afc:	jmp    b63 <wirestack_resolver_submit+0x2f3>
+ afe:	incq   0xf8(%rbx)
+ b05:	mov    %r15,%rdi
+ b08:	call   b0d <wirestack_resolver_submit+0x29d>
+ b0d:	mov    %r14,%rdi
+ b10:	call   b15 <wirestack_resolver_submit+0x2a5>
+ b15:	mov    %r12,%rdi
+ b18:	call   b1d <wirestack_resolver_submit+0x2ad>
+ b1d:	mov    (%rsp),%rdi
+ b21:	call   b26 <wirestack_resolver_submit+0x2b6>
+ b26:	mov    %rbp,%rdi
+ b29:	call   b2e <wirestack_resolver_submit+0x2be>
+ b2e:	mov    $0x4,%ebp
+ b33:	jmp    b63 <wirestack_resolver_submit+0x2f3>
+ b35:	mov    %r15,%rdi
+ b38:	call   b3d <wirestack_resolver_submit+0x2cd>
+ b3d:	mov    %r14,%rdi
+ b40:	call   b45 <wirestack_resolver_submit+0x2d5>
+ b45:	mov    %r12,%rdi
+ b48:	call   b4d <wirestack_resolver_submit+0x2dd>
+ b4d:	mov    (%rsp),%rdi
+ b51:	call   b56 <wirestack_resolver_submit+0x2e6>
+ b56:	mov    %rbp,%rdi
+ b59:	call   b5e <wirestack_resolver_submit+0x2ee>
+ b5e:	mov    $0x3,%ebp
+ b63:	mov    %ebp,%eax
+ b65:	add    $0x18,%rsp
+ b69:	pop    %rbx
+ b6a:	pop    %r12
+ b6c:	pop    %r13
+ b6e:	pop    %r14
+ b70:	pop    %r15
+ b72:	pop    %rbp
+ b73:	ret
+ b74:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+
+0000000000000b80 <wirestack_resolver_poll>:
+ b80:	push   %rbp
+ b81:	push   %r15
+ b83:	push   %r14
+ b85:	push   %r13
+ b87:	push   %r12
+ b89:	push   %rbx
+ b8a:	sub    $0x18,%rsp
+ b8e:	mov    $0x1,%r15d
+ b94:	test   %rdi,%rdi
+ b97:	je     c24 <wirestack_resolver_poll+0xa4>
+ b9d:	cmpq   $0x0,0x58(%rsp)
+ ba3:	je     c24 <wirestack_resolver_poll+0xa4>
+ ba5:	cmpq   $0x0,0x50(%rsp)
+ bab:	je     c24 <wirestack_resolver_poll+0xa4>
+ bad:	mov    %r9,%r14
+ bb0:	test   %r9,%r9
+ bb3:	je     c24 <wirestack_resolver_poll+0xa4>
+ bb5:	mov    %rdi,%r13
+ bb8:	movabs $0x57535245534a3031,%rax
+ bc2:	cmp    %rax,(%rdi)
+ bc5:	jne    c24 <wirestack_resolver_poll+0xa4>
+ bc7:	mov    %rdx,%rbx
+ bca:	mov    %rsi,%r12
+ bcd:	mov    %r8,0x10(%rsp)
+ bd2:	mov    %rcx,0x8(%rsp)
+ bd7:	mov    0x8(%r13),%rbp
+ bdb:	add    $0x8,%rbp
+ bdf:	mov    %rbp,%rdi
+ be2:	call   be7 <wirestack_resolver_poll+0x67>
+ be7:	mov    $0x5,%r15d
+ bed:	cmpl   $0x2,0x50(%r13)
+ bf2:	jne    c1c <wirestack_resolver_poll+0x9c>
+ bf4:	mov    0x38(%r13),%rax
+ bf8:	mov    %rax,(%r14)
+ bfb:	mov    0x4c(%r13),%eax
+ bff:	mov    0x50(%rsp),%rcx
+ c04:	mov    %eax,(%rcx)
+ c06:	mov    0x40(%r13),%rax
+ c0a:	mov    0x58(%rsp),%rcx
+ c0f:	mov    %rax,(%rcx)
+ c12:	xor    %r15d,%r15d
+ c15:	cmpl   $0x0,0x4c(%r13)
+ c1a:	je     c36 <wirestack_resolver_poll+0xb6>
+ c1c:	mov    %rbp,%rdi
+ c1f:	call   c24 <wirestack_resolver_poll+0xa4>
+ c24:	mov    %r15d,%eax
+ c27:	add    $0x18,%rsp
+ c2b:	pop    %rbx
+ c2c:	pop    %r12
+ c2e:	pop    %r13
+ c30:	pop    %r14
+ c32:	pop    %r15
+ c34:	pop    %rbp
+ c35:	ret
+ c36:	mov    $0x6,%r15d
+ c3c:	cmpq   $0x0,0x8(%rsp)
+ c42:	je     c1c <wirestack_resolver_poll+0x9c>
+ c44:	test   %rbx,%rbx
+ c47:	je     c1c <wirestack_resolver_poll+0x9c>
+ c49:	test   %r12,%r12
+ c4c:	je     c1c <wirestack_resolver_poll+0x9c>
+ c4e:	mov    0x38(%r13),%rax
+ c52:	cmp    0x10(%rsp),%rax
+ c57:	ja     c1c <wirestack_resolver_poll+0x9c>
+ c59:	mov    $0x0,%r15d
+ c5f:	test   %rax,%rax
+ c62:	je     c1c <wirestack_resolver_poll+0x9c>
+ c64:	mov    $0x2,%eax
+ c69:	xor    %r15d,%r15d
+ c6c:	xor    %ecx,%ecx
+ c6e:	mov    0x8(%rsp),%rdi
+ c73:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+ c80:	mov    0x28(%r13),%rdx
+ c84:	mov    -0x8(%rdx,%rax,4),%esi
+ c88:	mov    %esi,(%r12,%rcx,4)
+ c8c:	mov    -0x4(%rdx,%rax,4),%esi
+ c90:	mov    %esi,(%rdi,%rcx,4)
+ c93:	movups (%rdx,%rax,4),%xmm0
+ c97:	movups %xmm0,(%rbx)
+ c9a:	inc    %rcx
+ c9d:	add    $0x6,%rax
+ ca1:	add    $0x10,%rbx
+ ca5:	cmp    0x38(%r13),%rcx
+ ca9:	jb     c80 <wirestack_resolver_poll+0x100>
+ cab:	jmp    c1c <wirestack_resolver_poll+0x9c>
+
+0000000000000cb0 <wirestack_resolver_job_release>:
+ cb0:	push   %r15
+ cb2:	push   %r14
+ cb4:	push   %rbx
+ cb5:	test   %rdi,%rdi
+ cb8:	je     d40 <wirestack_resolver_job_release+0x90>
+ cbe:	mov    %rdi,%rbx
+ cc1:	movabs $0x57535245534a3031,%rax
+ ccb:	cmp    %rax,(%rdi)
+ cce:	jne    d40 <wirestack_resolver_job_release+0x90>
+ cd0:	mov    0x8(%rbx),%r14
+ cd4:	add    $0x8,%r14
+ cd8:	mov    %r14,%rdi
+ cdb:	call   ce0 <wirestack_resolver_job_release+0x30>
+ ce0:	cmpl   $0x0,0x58(%rbx)
+ ce4:	jne    d33 <wirestack_resolver_job_release+0x83>
+ ce6:	movl   $0x1,0x58(%rbx)
+ ced:	decl   0x54(%rbx)
+ cf0:	jne    d33 <wirestack_resolver_job_release+0x83>
+ cf2:	movq   $0x0,(%rbx)
+ cf9:	mov    0x8(%rbx),%r15
+ cfd:	mov    0x28(%rbx),%rdi
+ d01:	call   d06 <wirestack_resolver_job_release+0x56>
+ d06:	mov    0x20(%rbx),%rdi
+ d0a:	call   d0f <wirestack_resolver_job_release+0x5f>
+ d0f:	mov    0x18(%rbx),%rdi
+ d13:	call   d18 <wirestack_resolver_job_release+0x68>
+ d18:	mov    %rbx,%rdi
+ d1b:	call   d20 <wirestack_resolver_job_release+0x70>
+ d20:	decq   0xc0(%r15)
+ d27:	add    $0x60,%r15
+ d2b:	mov    %r15,%rdi
+ d2e:	call   d33 <wirestack_resolver_job_release+0x83>
+ d33:	mov    %r14,%rdi
+ d36:	pop    %rbx
+ d37:	pop    %r14
+ d39:	pop    %r15
+ d3b:	jmp    d40 <wirestack_resolver_job_release+0x90>
+ d40:	pop    %rbx
+ d41:	pop    %r14
+ d43:	pop    %r15
+ d45:	ret
+ d46:	cs nopw 0x0(%rax,%rax,1)
+
+0000000000000d50 <wirestack_resolver_pool_metrics>:
+ d50:	push   %r15
+ d52:	push   %r14
+ d54:	push   %rbx
+ d55:	mov    $0x1,%eax
+ d5a:	test   %rdi,%rdi
+ d5d:	je     e12 <wirestack_resolver_pool_metrics+0xc2>
+ d63:	cmp    $0xa,%rdx
+ d67:	jb     e12 <wirestack_resolver_pool_metrics+0xc2>
+ d6d:	mov    %rsi,%r14
+ d70:	test   %rsi,%rsi
+ d73:	je     e12 <wirestack_resolver_pool_metrics+0xc2>
+ d79:	mov    %rdi,%rbx
+ d7c:	movabs $0x5753524553503031,%rcx
+ d86:	cmp    %rcx,(%rdi)
+ d89:	jne    e12 <wirestack_resolver_pool_metrics+0xc2>
+ d8f:	lea    0x8(%rbx),%r15
+ d93:	mov    %r15,%rdi
+ d96:	call   d9b <wirestack_resolver_pool_metrics+0x4b>
+ d9b:	mov    0xb0(%rbx),%rax
+ da2:	mov    %rax,(%r14)
+ da5:	mov    0xb8(%rbx),%rax
+ dac:	mov    %rax,0x8(%r14)
+ db0:	mov    0xc0(%rbx),%rax
+ db7:	mov    %rax,0x10(%r14)
+ dbb:	mov    0xc8(%rbx),%rax
+ dc2:	mov    %rax,0x18(%r14)
+ dc6:	mov    0xd0(%rbx),%rax
+ dcd:	mov    %rax,0x20(%r14)
+ dd1:	mov    0xd8(%rbx),%rax
+ dd8:	mov    %rax,0x28(%r14)
+ ddc:	mov    0xe0(%rbx),%rax
+ de3:	mov    %rax,0x30(%r14)
+ de7:	mov    0xe8(%rbx),%rax
+ dee:	mov    %rax,0x38(%r14)
+ df2:	mov    0xf0(%rbx),%rax
+ df9:	mov    %rax,0x40(%r14)
+ dfd:	mov    0xf8(%rbx),%rax
+ e04:	mov    %rax,0x48(%r14)
+ e08:	mov    %r15,%rdi
+ e0b:	call   e10 <wirestack_resolver_pool_metrics+0xc0>
+ e10:	xor    %eax,%eax
+ e12:	pop    %rbx
+ e13:	pop    %r14
+ e15:	pop    %r15
+ e17:	ret

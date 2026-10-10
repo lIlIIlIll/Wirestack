@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-crypto.cipher.a:
+
+crypto.cipher.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CGPcnflHv-0x14>:
+   0:	xor    %eax,%eax
+   2:	ret
+   3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  10:	add    %al,(%rax)
+	...
+
+0000000000000014 <_CGPcnflHv>:
+  14:	push   %rbp
+  15:	mov    %rsp,%rbp
+  18:	call   1d <_CGPcnflHv+0x9>
+  1d:	push   %rax
+  1e:	mov    0x28(%r15),%rax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "05ce4bce3277fcf06bb673b06c261265d96e7c3b1e8deea9e278044afd37d17c"}

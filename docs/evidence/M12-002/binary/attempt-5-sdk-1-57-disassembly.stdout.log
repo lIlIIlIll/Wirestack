@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-sync.a:
+
+sync.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNab10tickDuringHRNat8DurationEY2_F0NNat6OptionIY2_EEEL0_E$g-0x4>:
+       0:	add    %al,(%rax)
+	...
+
+0000000000000004 <_CCNab10tickDuringHRNat8DurationEY2_F0NNat6OptionIY2_EEEL0_E$g>:
+       4:	push   %rbp
+       5:	mov    %rsp,%rbp
+       8:	call   d <_CCNab10tickDuringHRNat8DurationEY2_F0NNat6OptionIY2_EEEL0_E$g+0x9>
+       d:	push   %r14
+       f:	push   %rbx
+      10:	sub    $0x18,%rsp
+      14:	mov    0x28(%r15),%rax
+      18:	cmp    %rax,%rsp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "61fc9603cd95c96bd22af81b21d709be58019c11b437c45eb7fa4554276da079"}

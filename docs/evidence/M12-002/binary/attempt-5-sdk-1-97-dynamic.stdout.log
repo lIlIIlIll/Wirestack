@@ -1,0 +1,38 @@
+
+Dynamic section at offset 0x30b78 contains 35 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-core.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-io.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-time.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-collection.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-runtime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libboundscheck.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN]
+ 0x000000000000000c (INIT)               0xe088
+ 0x000000000000000d (FINI)               0x2b02c
+ 0x0000000000000019 (INIT_ARRAY)         0x22f470
+ 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x22f480
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x0000000000000004 (HASH)               0x190
+ 0x000000006ffffef5 (GNU_HASH)           0xc58
+ 0x0000000000000005 (STRTAB)             0x3c38
+ 0x0000000000000006 (SYMTAB)             0x1460
+ 0x000000000000000a (STRSZ)              10821 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x231000
+ 0x0000000000000002 (PLTRELSZ)           3624 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0xd260
+ 0x0000000000000007 (RELA)               0x6a50
+ 0x0000000000000008 (RELASZ)             26640 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x0000000000000018 (BIND_NOW)           
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffffe (VERNEED)            0x69d0
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x000000006ffffff0 (VERSYM)             0x667e
+ 0x000000006ffffff9 (RELACOUNT)          381
+ 0x0000000000000000 (NULL)               0x0

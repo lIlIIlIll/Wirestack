@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-deriving.impl.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000001c868 <_init@@Base>:
+   1c868:	sub    $0x8,%rsp
+   1c86c:	mov    0x234735(%rip),%rax        # 250fa8 <__gmon_start__>
+   1c873:	test   %rax,%rax
+   1c876:	je     1c87a <_init@@Base+0x12>
+   1c878:	call   *%rax
+   1c87a:	add    $0x8,%rsp
+   1c87e:	ret
+
+Disassembly of section .plt:
+
+000000000001c880 <_CNax9TokenKindneHNNaxY0_E@plt-0x10>:
+   1c880:	push   0x234782(%rip)        # 251008 <_fini@@Base+0x204f80>
+   1c886:	jmp    *0x234784(%rip)        # 251010 <_fini@@Base+0x204f88>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "3e277a094ee0bd3e977cbf8f4907dd72281646da9c8a0d46c23fee0676eceb82"}

@@ -1,0 +1,203 @@
+{
+  "task_id": "M12-002",
+  "status": "PASS",
+  "scope": "direct main integration smoke of four exact SDK/runtime TLS and arithmetic combinations",
+  "commands": [
+    {
+      "command": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<sdk-0>",
+        "--cwd",
+        "<scratch>",
+        "<scratch>/coexist-0/target/release/bin/main",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8"
+      ],
+      "environment": {
+        "WIRESTACK_FIXTURE_OPENSSL_LIBRARY": "/usr/lib/libssl.so.3",
+        "WIRESTACK_FIXTURE_OPENSSL_CRYPTO_LIBRARY": "/usr/lib/libcrypto.so.3",
+        "WIRESTACK_FIXTURE_CA_FILE": "<scratch>/certificate.pem",
+        "LD_DEBUG": "libs"
+      },
+      "exit_code": 0,
+      "check_count": 5,
+      "logs": {
+        "stdout": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-0-to-0.stdout.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "abbce96577c71590ccbdd49f8f51a2703e2d0869bfbd7f339e54e8d908ba00fd"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-0-to-0.stderr.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "8e4872960a654ff7bbdcb7da9c2776b2daf29f2e5b645e3eca153d003dab3c87"
+          }
+        }
+      }
+    },
+    {
+      "command": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<sdk-1>",
+        "--cwd",
+        "<scratch>",
+        "<scratch>/coexist-0/target/release/bin/main",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8"
+      ],
+      "environment": {
+        "WIRESTACK_FIXTURE_OPENSSL_LIBRARY": "/usr/lib/libssl.so.3",
+        "WIRESTACK_FIXTURE_OPENSSL_CRYPTO_LIBRARY": "/usr/lib/libcrypto.so.3",
+        "WIRESTACK_FIXTURE_CA_FILE": "<scratch>/certificate.pem",
+        "LD_DEBUG": "libs"
+      },
+      "exit_code": 0,
+      "check_count": 5,
+      "logs": {
+        "stdout": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-0-to-1.stdout.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "31f0506716295226441486d78b40d070c730cb3de639f7749ef42f02bcd6ac57"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-0-to-1.stderr.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "b0d7d71955eb4cc1e20a4b65e9b55fdffbe0cc759bb97d9c615e55dc6b1ae8ed"
+          }
+        }
+      }
+    },
+    {
+      "command": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<sdk-0>",
+        "--cwd",
+        "<scratch>",
+        "<scratch>/coexist-1/target/release/bin/main",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8"
+      ],
+      "environment": {
+        "WIRESTACK_FIXTURE_OPENSSL_LIBRARY": "/usr/lib/libssl.so.3",
+        "WIRESTACK_FIXTURE_OPENSSL_CRYPTO_LIBRARY": "/usr/lib/libcrypto.so.3",
+        "WIRESTACK_FIXTURE_CA_FILE": "<scratch>/certificate.pem",
+        "LD_DEBUG": "libs"
+      },
+      "exit_code": 0,
+      "check_count": 5,
+      "logs": {
+        "stdout": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-1-to-0.stdout.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "93d2f69eee7c285b9d2860469b8ab5938b340089888976b145c356b5dcd242b8"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-1-to-0.stderr.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "d41cb33ccd1564cdbffb260c7e74181ed63f1b13328261b17051e417619fe9b0"
+          }
+        }
+      }
+    },
+    {
+      "command": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "<sdk-1>",
+        "--cwd",
+        "<scratch>",
+        "<scratch>/coexist-1/target/release/bin/main",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8"
+      ],
+      "environment": {
+        "WIRESTACK_FIXTURE_OPENSSL_LIBRARY": "/usr/lib/libssl.so.3",
+        "WIRESTACK_FIXTURE_OPENSSL_CRYPTO_LIBRARY": "/usr/lib/libcrypto.so.3",
+        "WIRESTACK_FIXTURE_CA_FILE": "<scratch>/certificate.pem",
+        "LD_DEBUG": "libs"
+      },
+      "exit_code": 0,
+      "check_count": 5,
+      "logs": {
+        "stdout": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-1-to-1.stdout.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "4cf8f7309ef7f25c7d398e76bcd7161234e58e750994d2544fc79de4a9a09617"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M12-002/integration/attempt-9-abi-1-to-1.stderr.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "9408b288c847358302836c261a9d2a43a96c284a9a7908283b2b86fb61cf82cf"
+          }
+        }
+      }
+    }
+  ]
+}

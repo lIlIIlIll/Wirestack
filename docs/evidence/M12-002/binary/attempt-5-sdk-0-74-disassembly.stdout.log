@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000600000 <_init@@CANGJIE>:
+  600000:	sub    $0x8,%rsp
+  600004:	mov    0x42bfcd(%rip),%rax        # a2bfd8 <__gmon_start__>
+  60000b:	test   %rax,%rax
+  60000e:	je     600012 <_init@@CANGJIE+0x12>
+  600010:	call   *%rax
+  600012:	add    $0x8,%rsp
+  600016:	ret
+
+Disassembly of section .plt:
+
+0000000000600020 <sem_destroy@plt-0x10>:
+  600020:	push   0x42bfe2(%rip)        # a2c008 <_ZTVN12MapleRuntime6CJFileE@@CANGJIE+0x4b0>
+  600026:	jmp    *0x42bfe4(%rip)        # a2c010 <_ZTVN12MapleRuntime6CJFileE@@CANGJIE+0x4b8>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "19ca9533f0f3669ebdebd7ed52a5cc872586d7aed362708e08732465b5f75545"}

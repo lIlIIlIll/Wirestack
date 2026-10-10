@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-convert.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000000ce30 <_init@@Base>:
+    ce30:	sub    $0x8,%rsp
+    ce34:	mov    0x21a03d(%rip),%rax        # 226e78 <__gmon_start__>
+    ce3b:	test   %rax,%rax
+    ce3e:	je     ce42 <_init@@Base+0x12>
+    ce40:	call   *%rax
+    ce42:	add    $0x8,%rsp
+    ce46:	ret
+
+Disassembly of section .plt:
+
+000000000000ce50 <CJ_MCC_NewArray64@plt-0x10>:
+    ce50:	push   0x21a1b2(%rip)        # 227008 <_CNai19MAX_FLOAT_PRECISIONE@@Base+0x205968>
+    ce56:	jmp    *0x21a1b4(%rip)        # 227010 <_CNai19MAX_FLOAT_PRECISIONE@@Base+0x205970>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "8d83c86d7d856c9706c4b371c807ccb9dec424f1a2a6a55b4cc8efaa330d86c3"}
