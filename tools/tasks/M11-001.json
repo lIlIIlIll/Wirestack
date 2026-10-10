@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-001",
+  "dependencies": [
+    "M9-001",
+    "M10-001",
+    "M10-002",
+    "M10-003",
+    "M10-005"
+  ],
+  "allowed_paths": [
+    "src/http/client.cj",
+    "src/http/cancellation.cj",
+    "src/http/error.cj",
+    "src/http/error_test.cj",
+    "src/http/resource_budget.cj",
+    "src/sse/model.cj",
+    "src/sse/decoder.cj",
+    "src/sse/encoder.cj",
+    "src/sse/writer.cj",
+    "src/sse/session_policy.cj",
+    "src/sse/session.cj",
+    "src/sse/decoder_test.cj",
+    "src/sse/deterministic_fuzz_test.cj",
+    "src/sse/encoder_test.cj",
+    "src/sse/writer_test.cj",
+    "src/sse/native_session_test.cj",
+    "src/sse/native_framing_test.cj",
+    "src/sse/native_support_test.cj",
+    "src/sse/streaming_profile_test.cj",
+    "examples/linux/m11_001/sse.cj",
+    "tools/m11_001_native_sse.py",
+    "tools/gates/m11_001_sse_streaming_profile.py",
+    "tools/architecture_guard.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/m7_026_linux_api_freeze.py",
+    "tools/m7_032_public_api_inventory.py",
+    "tools/tests/test_m7_026_linux_api_freeze.py",
+    "tools/tests/test_m7_032_public_api_contract.py",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m11-001.json",
+    "docs/guides/http1-linux.md",
+    "docs/guides/sse-linux.md",
+    "docs/references/whatwg-server-sent-events-2026-10-08.md",
+    "docs/planning/status.md",
+    "tools/tasks/M11-001.json",
+    "docs/evidence/M11-001",
+    "docs/api/generated"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "current-public-api",
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "native-sse-and-regression",
+      "argv": [
+        "cjpm",
+        "test",
+        "--target-dir",
+        "target/m11-001-native",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "--timeout-each",
+        "60s"
+      ],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "api-validator-behavior",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_032_public_api_contract"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "installed-sse",
+      "argv": [
+        "python3",
+        "tools/m11_001_native_sse.py"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "public-documentation",
+      "argv": [
+        "env",
+        "cjHeapSize=1GB",
+        "scripts/check-docs",
+        "--html",
+        "--json",
+        "--output",
+        "docs/evidence/M11-001/docs-report.json"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "one-hour-production-sse",
+      "argv": [
+        "python3",
+        "tools/gates/m11_001_sse_streaming_profile.py",
+        "--target-dir",
+        "target/m11-001-streaming",
+        "--output",
+        "docs/evidence/M11-001/streaming/report.json",
+        "--duration-seconds",
+        "3600",
+        "--minimum-events",
+        "1000000"
+      ],
+      "timeout_seconds": 5400,
+      "long_running": true,
+      "gate": "long"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M11-001/verification.json",
+    "docs/evidence/M11-001/installed/report.json",
+    "docs/evidence/M11-001/docs-report.json",
+    "docs/evidence/M11-001/public-api.json",
+    "docs/evidence/M11-001/streaming/report.json"
+  ],
+  "timeout_seconds": 7200,
+  "long_running_gate": true,
+  "source_paths": [
+    "src/http/client.cj",
+    "src/http/cancellation.cj",
+    "src/http/error.cj",
+    "src/http/error_test.cj",
+    "src/http/resource_budget.cj",
+    "src/sse/model.cj",
+    "src/sse/decoder.cj",
+    "src/sse/encoder.cj",
+    "src/sse/writer.cj",
+    "src/sse/session_policy.cj",
+    "src/sse/session.cj",
+    "src/sse/decoder_test.cj",
+    "src/sse/deterministic_fuzz_test.cj",
+    "src/sse/encoder_test.cj",
+    "src/sse/writer_test.cj",
+    "src/sse/native_session_test.cj",
+    "src/sse/native_framing_test.cj",
+    "src/sse/native_support_test.cj",
+    "src/sse/streaming_profile_test.cj",
+    "examples/linux/m11_001/sse.cj",
+    "tools/m11_001_native_sse.py",
+    "tools/gates/m11_001_sse_streaming_profile.py",
+    "tools/architecture_guard.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/m7_026_linux_api_freeze.py",
+    "tools/m7_032_public_api_inventory.py",
+    "tools/tests/test_m7_026_linux_api_freeze.py",
+    "tools/tests/test_m7_032_public_api_contract.py",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m11-001.json",
+    "docs/guides/http1-linux.md",
+    "docs/guides/sse-linux.md",
+    "docs/references/whatwg-server-sent-events-2026-10-08.md",
+    "docs/planning/status.md",
+    "tools/tasks/M11-001.json"
+  ]
+}

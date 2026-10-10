@@ -500,7 +500,8 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
                 }
             }
         }
-        delegate.read(destination)
+        try { delegate.read(destination) }
+        catch (error: Exception) { throw wrapHttpBodyError(error) }
     }
 /**
  * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。

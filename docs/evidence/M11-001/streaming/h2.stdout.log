@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.sse, time elapsed: 3600080216301 ns, RESULT:
+    TCS: M11Http2SseStreamingProfileTest, time elapsed: 3600076333157 ns, RESULT:
+    [ PASSED ] CASE: http2StreamsWithoutLifetimeAccumulationAndPreservesSibling (3600075749313 ns)
+    STDOUT:
+    SSE_SAMPLE protocol=h2 elapsedMs=300000 events=7126385 produced=7126784 leadEvents=399 usedHeapBytes=95952896 managedBufferBytes=3474944 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=600000 events=15635878 produced=15636224 leadEvents=346 usedHeapBytes=85483520 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=900009 events=24057602 produced=24057856 leadEvents=254 usedHeapBytes=96776192 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=1200000 events=33537913 produced=33538304 leadEvents=391 usedHeapBytes=101036032 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=1500005 events=43084290 produced=43084563 leadEvents=273 usedHeapBytes=85045248 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=1800002 events=53137410 produced=53137693 leadEvents=283 usedHeapBytes=101036032 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=2100000 events=62918697 produced=62919168 leadEvents=471 usedHeapBytes=48652288 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=2400000 events=70970331 produced=70970500 leadEvents=169 usedHeapBytes=87580672 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=2700006 events=79574530 produced=79574793 leadEvents=263 usedHeapBytes=87973888 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=3000000 events=89264642 produced=89264896 leadEvents=254 usedHeapBytes=99246080 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=3300000 events=99969684 produced=99969792 leadEvents=108 usedHeapBytes=101216256 managedBufferBytes=3475200 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=3600022 events=111021569 produced=111022080 leadEvents=511 usedHeapBytes=106340352 managedBufferBytes=0 sessionReservedBytes=3465728
+    SSE_RESULT protocol=h2 requestedSeconds=3600 elapsedMs=3600026 minimumEvents=1000000 events=111021569 sequenceErrors=0 produced=111022080 maxLeadEvents=2067 slowLeadEvents=2067 slowReadGapNs=26899023958 serverReadCalls=433680 cancelLatencyNs=4028917 siblingBefore=true siblingAfter=true bodyLimitBytes=65536 applicationPendingBytes=0 sessionReservedBytes=3465728 managedAfterSessionBytes=0
+    SSE_CLEANUP protocol=h2 managedBufferBytes=0
+Summary: TOTAL: 44
+    PASSED: 1, SKIPPED: 43, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3600087153124 ns, RESULT:
+TP: wirestack.*, time elapsed: 3600087069628 ns, RESULT:
+    PASSED:
+    TP: wirestack.sse, time elapsed: 3600080216301 ns
+Summary: TOTAL: 44
+    PASSED: 1, SKIPPED: 43, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
