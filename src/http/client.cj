@@ -494,7 +494,7 @@ public class HttpClient <: Resource {
             var redirectCount: Int64 = 0
             while (true) {
                 let requestLease = resourceBudget.acquireRequest(
-                    resourceOwner(current.url), operation
+                    resourceOwner(current.url), operation.forStage(transport.OperationTimeoutStage.RequestAdmission)
                 )
                 cancellation.retainResource(requestLease)
                 let response = executeWithRetries(

@@ -88,8 +88,9 @@ public class Http1ClientConnection <: Resource {
                 )
             } else {
                 let _ = writeHttp1Request(
-                    transport, request, context: context, limits: limits, trailer: trailer,
-                    targetForm: targetForm
+                    transport, request,
+                    context: context.forStage(OperationTimeoutStage.RequestWrite),
+                    limits: limits, trailer: trailer, targetForm: targetForm
                 )
                 readHttp1Response(
                     transport, request.method,

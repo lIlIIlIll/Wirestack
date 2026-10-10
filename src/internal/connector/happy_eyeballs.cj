@@ -111,28 +111,32 @@ public class HappyEyeballsConnector {
         context!: OperationContext = OperationContext.background()
     ): ConnectResult {
         checkConnectContext(context)
-        emitNetworkEvent(context, NetworkEvent(
+        let dnsContext = context.forStage(OperationTimeoutStage.Dns)
+        checkDnsContext(dnsContext)
+        emitNetworkEvent(dnsContext, NetworkEvent(
             NetworkEventKind.DnsStarted,
             NetworkEventOutcome.Started,
-            trace: context.trace,
+            trace: dnsContext.trace,
             phase: Some(NetworkPhase.Dns)
         ))
         let resolved = try {
-            let value = resolver.resolve(host, None<String>, options, context)
-            emitNetworkEvent(context, NetworkEvent(
+            let value = resolver.resolve(host, None<String>, options, dnsContext)
+            emitNetworkEvent(dnsContext, NetworkEvent(
                 NetworkEventKind.DnsCompleted,
                 NetworkEventOutcome.Succeeded,
-                trace: context.trace,
+                trace: dnsContext.trace,
                 phase: Some(NetworkPhase.Dns)
             ))
             value
         } catch (error: Exception) {
-            emitFailedEvent(context, NetworkEventKind.DnsCompleted, NetworkPhase.Dns, error)
+            emitFailedEvent(dnsContext, NetworkEventKind.DnsCompleted, NetworkPhase.Dns, error)
             throw error
         }
-        checkConnectContext(context)
+        checkDnsContext(dnsContext)
         let plan = buildAttemptPlan(resolved.addresses, port, attemptDelay: attemptDelay)
-        runPlan(plan, resolved.diagnostics, context)
+        let connectContext = context.forStage(OperationTimeoutStage.TcpConnect)
+        checkConnectContext(connectContext)
+        runPlan(plan, resolved.diagnostics, connectContext)
     }
 
     private func runPlan(
@@ -214,7 +218,8 @@ public class HappyEyeballsConnector {
                 deadline: parent.deadline,
                 cancellation: cancellation,
                 trace: parent.trace,
-                eventSink: parent.eventSink
+                eventSink: parent.eventSink,
+                timeoutPolicy: parent.timeoutPolicy
             )
             emitNetworkEvent(parent, NetworkEvent(
                 NetworkEventKind.ConnectAttemptStarted,
@@ -429,6 +434,21 @@ private class AttemptCoordinator {
 
     func wake(): Unit {
         synchronized(mutex) { changed.notifyAll() }
+    }
+}
+
+private func checkDnsContext(context: OperationContext): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled, NetworkPhase.Dns, NetworkErrorCode.Cancelled,
+            "DNS operation cancelled", retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded, NetworkPhase.Dns, NetworkErrorCode.TimedOut,
+            "DNS deadline exceeded", retryability: Retryability.Temporary
+        )
     }
 }
 
