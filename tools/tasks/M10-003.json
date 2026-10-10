@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-003",
+  "dependencies": [
+    "M10-001",
+    "M10-002"
+  ],
+  "allowed_paths": [
+    "docs/evidence/M10-003",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "src/http/retry.cj",
+    "src/http/retry_test.cj",
+    "src/internal/http1",
+    "src/internal/http2/client_connection_test.cj",
+    "tools/tasks/M10-003.json"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": ["python3", "tools/architecture_guard.py", "--root", ".", "--format", "text"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "network-capability-contract",
+      "argv": ["python3", "tools/check_network_capabilities.py", "--check"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cjpm-check",
+      "argv": ["cjpm", "check"],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cjpm-build",
+      "argv": ["cjpm", "build"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "http-native-tests",
+      "argv": ["cjpm", "test", "--exclude-tags=Performance", "--parallel", "1", "--no-progress", "--no-color", "src/internal/http1", "src/internal/http2", "src/http"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "documentation-check",
+      "argv": ["scripts/check-docs", "--json"],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-check",
+      "argv": ["scripts/check"],
+      "timeout_seconds": 1800,
+      "long_running": false,
+      "gate": "full"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M10-003/scenario-matrix.json",
+    "docs/evidence/M10-003/verification.json"
+  ],
+  "timeout_seconds": 3600,
+  "long_running_gate": false,
+  "source_paths": [
+    "docs/evidence/M10-003/scenario-matrix.json",
+    "docs/evidence/M10-003/verification.json",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "src/http/retry.cj",
+    "src/http/retry_test.cj",
+    "src/internal/http1/client_connection.cj",
+    "src/internal/http1/client_connection_test.cj",
+    "src/internal/http1/connection_pool.cj",
+    "src/internal/http1/connection_pool_test.cj",
+    "src/internal/http1/http2_connection_pool.cj",
+    "src/internal/http1/http2_connection_pool_test.cj",
+    "src/internal/http1/pool_admission.cj",
+    "src/internal/http1/request_writer.cj",
+    "src/internal/http2/client_connection_test.cj",
+    "tools/tasks/M10-003.json"
+  ]
+}

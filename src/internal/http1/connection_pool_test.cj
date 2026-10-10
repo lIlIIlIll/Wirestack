@@ -182,6 +182,70 @@ class Http1ConnectionPoolTest {
         @Expect(pool.snapshot().connections, 0)
         pool.close()
     }
+
+    @TestCase
+    func evictsLeasedConnectionAtMaximumLifetimeOnRelease(): Unit {
+        let clock = PoolTestClock()
+        let pool = Http1ConnectionPool(
+            config: Http1ConnectionPoolConfig(idleTimeout: 3600 * Duration.second),
+            clock: clock
+        )
+        let factory = PoolTestFactory()
+        let expired = pool.acquire(poolTestKey(), factory)
+        clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)
+        pool.release(expired)
+
+        @Expect(pool.snapshot().connections, 0)
+        let replacement = pool.acquire(poolTestKey(), factory)
+        @Expect(replacement.id != expired.id)
+        @Expect(factory.calls.load(), 2)
+        pool.release(replacement)
+        pool.close()
+    }
+
+    @TestCase
+    func expiresConnectionsAtMaximumLifetime(): Unit {
+        let clock = PoolTestClock()
+        let pool = Http1ConnectionPool(
+            config: Http1ConnectionPoolConfig(idleTimeout: 3600 * Duration.second),
+            clock: clock
+        )
+        let factory = PoolTestFactory()
+        let expired = pool.acquire(poolTestKey(), factory)
+        pool.release(expired)
+        clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)
+
+        let replacement = pool.acquire(poolTestKey(), factory)
+        @Expect(replacement.id != expired.id)
+        @Expect(factory.calls.load(), 2)
+        pool.release(replacement)
+        pool.close()
+    }
+
+    @TestCase
+    func admissionRotatesOriginsAndYieldsTheFullPoolSlot(): Unit {
+        let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
+            maximumConnections: 1, maximumConnectionsPerKey: 1,
+            maximumIdleConnections: 1, maximumWaiters: 2
+        ))
+        let factory = PoolTestFactory()
+        let first = pool.acquire(poolTestKey(), factory)
+        let sameOrigin = spawn { pool.acquire(poolTestKey(), factory) }
+        @Expect(pool.waitUntilWaiters(1, Duration.second))
+        let otherOrigin = spawn { pool.acquire(poolTestKey(host: "other.test"), factory) }
+        @Expect(pool.waitUntilWaiters(2, Duration.second))
+
+        pool.release(first)
+        let second = sameOrigin.get(Duration.second)
+        @Expect(factory.calls.load(), 1)
+        @Expect(pool.snapshot().waiters, 1)
+
+        pool.release(second)
+        let third = otherOrigin.get(Duration.second)
+        @Expect(factory.calls.load(), 2)
+        pool.release(third)
+        pool.close()
+    }
 }
 
 private func expectPoolEvent(event: NetworkEvent, kind: NetworkEventKind,

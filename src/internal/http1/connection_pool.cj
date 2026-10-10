@@ -77,6 +77,7 @@ private class Http1PoolEntry {
     let resourceLease: ?internal.HttpResourceLease
     var leased: Bool
     var idleSince: MonoTime
+    let createdAt: MonoTime
 
     init(id: Int64, key: HttpConnectionPoolKey, connection: Http1ClientConnection,
         resourceLease: ?internal.HttpResourceLease, leased: Bool, idleSince: MonoTime) {
@@ -86,6 +87,7 @@ private class Http1PoolEntry {
         this.resourceLease = resourceLease
         this.leased = leased
         this.idleSince = idleSince
+        this.createdAt = idleSince
     }
 }
 
@@ -100,6 +102,7 @@ public class Http1ConnectionPool <: Resource {
     private let config: Http1ConnectionPoolConfig
     private let clock: MonotonicClock
     private let resourceBudget: ?internal.HttpResourceBudget
+    private let admissionQueue: HttpPoolAdmissionQueue
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private var entries = ArrayList<Http1PoolEntry>()
@@ -116,6 +119,7 @@ public class Http1ConnectionPool <: Resource {
         this.config = config
         this.clock = clock
         this.resourceBudget = resourceBudget
+        this.admissionQueue = HttpPoolAdmissionQueue(config.maximumWaiters)
     }
 
     public func acquire(
@@ -236,8 +240,20 @@ public class Http1ConnectionPool <: Resource {
                 case Http1ClientConnectionState.Ready => true
                 case _ => false
             }
-            let reusable = entry.leased && entry.key == lease.key && ready && !closed &&
-                idleCount() < config.maximumIdleConnections
+            let now = clock.now()
+            let nextWaitingKey = admissionQueue.firstEligibleKey({ candidate =>
+                candidate == entry.key || findIdle(candidate) >= 0 ||
+                    countForKey(candidate) < config.maximumConnectionsPerKey
+            })
+            let nextNeedsNewSlot = match (nextWaitingKey) {
+                case Some(value) => value != entry.key && findIdle(value) < 0
+                case None => false
+            }
+            let cedeFullSlot = entries.size + reservations.size >= config.maximumConnections &&
+                nextNeedsNewSlot
+            let expired = now - entry.createdAt >= HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second
+            let reusable = entry.leased && entry.key == lease.key && ready && !closed && !expired &&
+                !cedeFullSlot && idleCount() < config.maximumIdleConnections
             if (reusable) {
                 entry.leased = false
                 entry.idleSince = clock.now()
@@ -310,7 +326,7 @@ public class Http1ConnectionPool <: Resource {
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
     private func decide(key: HttpConnectionPoolKey, context: OperationContext): Http1PoolDecision {
-        var countedWaiter = false
+        var waiterId: Int64 = 0
         try {
             synchronized(mutex) {
                 while (true) {
@@ -320,27 +336,45 @@ public class Http1ConnectionPool <: Resource {
                     let stale = findStaleIdle(clock.now())
                     if (stale >= 0) {
                         let removed = entries.remove(at: stale)
+                        changed.notifyAll()
                         return Http1PoolDecision.Discard(removed.connection, removed.resourceLease)
                     }
+
                     let idle = findIdle(key)
-                    if (idle >= 0) {
-                        let entry = entries[idle]
-                        entry.leased = true
-                        entry.id = nextId
-                        nextId++
-                        return Http1PoolDecision.Reuse(Http1PoolLease(entry.id, entry.key, entry.connection))
+                    let canReuse = idle >= 0
+                    let canReserve = entries.size + reservations.size < config.maximumConnections &&
+                        countForKey(key) < config.maximumConnectionsPerKey
+                    let next = admissionQueue.firstEligible({ candidate => canAcquire(candidate) })
+                    let ownsTurn = match (next) {
+                        case Some(waiter) => waiter.id == waiterId
+                        case None => waiterId == 0
                     }
-                    if (entries.size + reservations.size < config.maximumConnections &&
-                        countForKey(key) < config.maximumConnectionsPerKey) {
+                    if ((canReuse || canReserve) && ownsTurn) {
+                        if (waiterId != 0) {
+                            removeWaiterLocked(waiterId, true)
+                            waiterId = 0
+                        }
+                        if (canReuse) {
+                            let entry = entries[idle]
+                            entry.leased = true
+                            entry.id = nextId
+                            nextId++
+                            return Http1PoolDecision.Reuse(
+                                Http1PoolLease(entry.id, entry.key, entry.connection)
+                            )
+                        }
                         let id = nextId
                         nextId++
                         reservations.add(key)
                         return Http1PoolDecision.Reserve(id)
                     }
-                    if (!countedWaiter) {
-                        if (waiters >= config.maximumWaiters) { throw poolExhausted() }
+
+                    if (waiterId == 0) {
+                        waiterId = match (admissionQueue.enqueue(key)) {
+                            case Some(id) => id
+                            case None => throw poolExhausted()
+                        }
                         waiters++
-                        countedWaiter = true
                         changed.notifyAll()
                     }
                     waitForChange(context)
@@ -348,8 +382,22 @@ public class Http1ConnectionPool <: Resource {
                 throw poolClosed()
             }
         } finally {
-            if (countedWaiter) { synchronized(mutex) { waiters-- } }
+            if (waiterId != 0) {
+                synchronized(mutex) { removeWaiterLocked(waiterId, false) }
+            }
         }
+    }
+
+    private func removeWaiterLocked(id: Int64, granted: Bool): Unit {
+        if (admissionQueue.remove(id, granted)) {
+            waiters--
+            changed.notifyAll()
+        }
+    }
+    private func canAcquire(key: HttpConnectionPoolKey): Bool {
+        findIdle(key) >= 0 ||
+            (entries.size + reservations.size < config.maximumConnections &&
+                countForKey(key) < config.maximumConnectionsPerKey)
     }
 
     private func waitForChange(context: OperationContext): Unit {
@@ -377,7 +425,9 @@ public class Http1ConnectionPool <: Resource {
     private func findStaleIdle(now: MonoTime): Int64 {
         for (index in 0..entries.size) {
             let entry = entries[index]
-            if (!entry.leased && (entry.connection.isClosed() || now - entry.idleSince >= config.idleTimeout)) {
+            if (!entry.leased && (entry.connection.isClosed() ||
+                now - entry.idleSince >= config.idleTimeout ||
+                now - entry.createdAt >= HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)) {
                 return index
             }
         }

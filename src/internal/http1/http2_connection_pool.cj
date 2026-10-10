@@ -2,6 +2,7 @@ package wirestack.internal.http1
 
 import std.collection.ArrayList
 import std.sync.*
+import std.time.*
 import wirestack.internal.http2.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
@@ -249,12 +250,14 @@ private class Http2PoolEntry {
     let id: Int64
     let key: HttpConnectionPoolKey
     let connection: Http2MultiplexedConnection
+    let createdAt: MonoTime
     let resourceLease: ?internal.HttpResourceLease
     init(id: Int64, key: HttpConnectionPoolKey, connection: Http2MultiplexedConnection,
-        resourceLease: ?internal.HttpResourceLease) {
+        createdAt: MonoTime, resourceLease: ?internal.HttpResourceLease) {
         this.id = id
         this.key = key
         this.connection = connection
+        this.createdAt = createdAt
         this.resourceLease = resourceLease
     }
 }
@@ -272,6 +275,8 @@ private enum Http2PoolDecision {
  */
 public class Http2ConnectionPool <: Resource {
     private let config: Http2ConnectionPoolConfig
+    private let clock: MonotonicClock
+    private let admissionQueue: HttpPoolAdmissionQueue
     private let resourceBudget: ?internal.HttpResourceBudget
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
@@ -287,6 +292,19 @@ public class Http2ConnectionPool <: Resource {
     ) {
         this.config = config
         this.resourceBudget = resourceBudget
+        this.clock = SystemMonotonicClock()
+        this.admissionQueue = HttpPoolAdmissionQueue(config.maximumWaiters)
+    }
+
+    internal init(
+        config!: Http2ConnectionPoolConfig,
+        resourceBudget!: ?internal.HttpResourceBudget,
+        clock!: MonotonicClock
+    ) {
+        this.config = config
+        this.resourceBudget = resourceBudget
+        this.clock = clock
+        this.admissionQueue = HttpPoolAdmissionQueue(config.maximumWaiters)
     }
 
     public func acquire(
@@ -352,7 +370,7 @@ public class Http2ConnectionPool <: Resource {
                                         changed.notifyAll()
                                         (false, rejectedByClose)
                                     } else {
-                                        entries.add(Http2PoolEntry(id, key, created, connectionResourceLease))
+                                        entries.add(Http2PoolEntry(id, key, created, clock.now(), connectionResourceLease))
                                         connectionResourceLease = None<internal.HttpResourceLease>
                                         changed.notifyAll()
                                         (true, false)
@@ -438,7 +456,7 @@ public class Http2ConnectionPool <: Resource {
                 if (let Some(value) <- connectionResourceLease) { value.activate() }
                 let admission = connection.openStream(listener, endStream)
                 if (let Some(value) <- streamResourceLease) { value.activate() }
-                entries.add(Http2PoolEntry(id, key, connection, connectionResourceLease))
+                entries.add(Http2PoolEntry(id, key, connection, clock.now(), connectionResourceLease))
                 connectionResourceLease = None<internal.HttpResourceLease>
                 changed.notifyAll()
                 Http2PoolLease(id, key, connection, admission, streamResourceLease: streamResourceLease)
@@ -460,9 +478,21 @@ public class Http2ConnectionPool <: Resource {
             let index = findHttp2Entry(lease.connectionId)
             if (index >= 0) {
                 let entry = entries[index]
-                if (entry.key == lease.key &&
-                    (!entry.connection.acceptingNewStreams || entry.connection.isClosed()) &&
-                    entry.connection.ownedStreamCount == 0) {
+                let now = clock.now()
+                let expired = now - entry.createdAt >= HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second
+                let nextWaitingKey = admissionQueue.firstEligibleKey({ candidate =>
+                    candidate == entry.key || hasAvailableHttp2(candidate, now) ||
+                        (!hasHttp2Reservation(candidate) &&
+                            countHttp2ForKey(candidate) < config.maximumConnectionsPerKey)
+                })
+                let nextNeedsNewSlot = match (nextWaitingKey) {
+                    case Some(value) => value != entry.key && !hasAvailableHttp2(value, now)
+                    case None => false
+                }
+                let yieldSlot = entries.size + reservations.size >= config.maximumConnections &&
+                    nextNeedsNewSlot
+                if (entry.key == lease.key && entry.connection.ownedStreamCount == 0 &&
+                    (!entry.connection.acceptingNewStreams || entry.connection.isClosed() || expired || yieldSlot)) {
                     discard = Some(entries.remove(at: index))
                 }
             }
@@ -512,7 +542,17 @@ public class Http2ConnectionPool <: Resource {
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
-
+    internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {
+        let expiresAt = MonoTime.now() + timeout
+        synchronized(mutex) {
+            while (waiters < expected && !closed) {
+                let remaining = expiresAt - MonoTime.now()
+                if (remaining <= Duration.Zero) { return false }
+                changed.wait(timeout: remaining)
+            }
+            waiters >= expected
+        }
+    }
     private func decide(
         key: HttpConnectionPoolKey,
         listener: Http2GoAwayListener,
@@ -520,60 +560,86 @@ public class Http2ConnectionPool <: Resource {
         context: OperationContext,
         streamResourceLease: ?internal.HttpResourceLease
     ): Http2PoolDecision {
-        var countedWaiter = false
+        var waiterId: Int64 = 0
         try {
             synchronized(mutex) {
                 while (true) {
                     checkHttp2PoolContext(context)
                     if (closed) { throw http2PoolClosed() }
-                    let unusable = findUnusableEmptyConnection()
+                    let now = clock.now()
+                    let unusable = findUnusableEmptyConnection(now)
                     if (unusable >= 0) {
                         let removed = entries.remove(at: unusable)
+                        changed.notifyAll()
                         return Http2PoolDecision.Discard(removed.connection, removed.resourceLease)
                     }
-                    for (entry in entries) {
-                        if (entry.key == key && entry.connection.acceptingNewStreams &&
-                            !entry.connection.isClosed() &&
-                            entry.connection.activeStreamCount < Int64(entry.connection.streamCapacity)) {
-                            try {
-                                let admission = entry.connection.openStream(listener, endStream)
-                                if (let Some(value) <- streamResourceLease) { value.activate() }
-                                return Http2PoolDecision.Reuse(Http2PoolLease(
-                                    entry.id, entry.key, entry.connection, admission,
-                                    streamResourceLease: streamResourceLease
-                                ))
-                            } catch (_: Http2StreamLimitException) {
-                                // SETTINGS or GOAWAY may race the observed capacity.
+                    let next = admissionQueue.firstEligible({ candidate => canAcquireHttp2(candidate, now) })
+                    let ownsTurn = match (next) {
+                        case Some(waiter) => waiter.id == waiterId
+                        case None => waiterId == 0
+                    }
+                    if (ownsTurn) {
+                        if (waiterId != 0) {
+                            removeHttp2WaiterLocked(waiterId, true)
+                            waiterId = 0
+                        }
+                        for (entry in entries) {
+                            if (entry.key == key && now - entry.createdAt < HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second &&
+                                entry.connection.acceptingNewStreams && !entry.connection.isClosed() &&
+                                entry.connection.activeStreamCount < Int64(entry.connection.streamCapacity)) {
+                                try {
+                                    let admission = entry.connection.openStream(listener, endStream)
+                                    if (let Some(value) <- streamResourceLease) { value.activate() }
+                                    return Http2PoolDecision.Reuse(Http2PoolLease(
+                                        entry.id, entry.key, entry.connection, admission,
+                                        streamResourceLease: streamResourceLease
+                                    ))
+                                } catch (_: Http2StreamLimitException) {
+                                    // SETTINGS or GOAWAY may race the observed capacity.
+                                }
                             }
                         }
+                        if (!hasHttp2Reservation(key) &&
+                            entries.size + reservations.size < config.maximumConnections &&
+                            countHttp2ForKey(key) < config.maximumConnectionsPerKey) {
+                            let id = nextId
+                            nextId++
+                            reservations.add(key)
+                            return Http2PoolDecision.Reserve(id)
+                        }
                     }
-                    if (!hasHttp2Reservation(key) &&
-                        entries.size + reservations.size < config.maximumConnections &&
-                        countHttp2ForKey(key) < config.maximumConnectionsPerKey) {
-                        let id = nextId
-                        nextId++
-                        reservations.add(key)
-                        return Http2PoolDecision.Reserve(id)
-                    }
-                    if (!countedWaiter) {
-                        if (waiters >= config.maximumWaiters) { throw http2PoolExhausted() }
-                        waiters++
-                        countedWaiter = true
+                    if (waiterId == 0) {
+                        match (admissionQueue.enqueue(key)) {
+                            case Some(id) =>
+                                waiterId = id
+                                waiters++
+                            case None => throw http2PoolExhausted()
+                        }
                     }
                     waitForHttp2PoolChange(context)
                 }
                 throw http2PoolClosed()
             }
         } finally {
-            if (countedWaiter) { synchronized(mutex) { waiters--; changed.notifyAll() } }
+            if (waiterId != 0) {
+                synchronized(mutex) { removeHttp2WaiterLocked(waiterId, false) }
+            }
         }
     }
 
-    private func findUnusableEmptyConnection(): Int64 {
+    private func removeHttp2WaiterLocked(id: Int64, granted: Bool): Unit {
+        if (admissionQueue.remove(id, granted)) {
+            waiters--
+            changed.notifyAll()
+        }
+    }
+
+    private func findUnusableEmptyConnection(now: MonoTime): Int64 {
         for (index in 0..entries.size) {
-            let connection = entries[index].connection
-            if ((!connection.acceptingNewStreams || connection.isClosed()) &&
-                connection.ownedStreamCount == 0) { return index }
+            let entry = entries[index]
+            if (entry.connection.ownedStreamCount == 0 &&
+                (!entry.connection.acceptingNewStreams || entry.connection.isClosed() ||
+                    now - entry.createdAt >= HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)) { return index }
         }
         -1
     }
@@ -590,6 +656,23 @@ public class Http2ConnectionPool <: Resource {
         for (entry in entries) { if (entry.key == key) { result++ } }
         for (reserved in reservations) { if (reserved == key) { result++ } }
         result
+    }
+
+    private func hasAvailableHttp2(key: HttpConnectionPoolKey, now: MonoTime): Bool {
+        for (entry in entries) {
+            let connection = entry.connection
+            if (entry.key == key && now - entry.createdAt < HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second &&
+                connection.acceptingNewStreams && !connection.isClosed() &&
+                connection.activeStreamCount < Int64(connection.streamCapacity)) { return true }
+        }
+        false
+    }
+
+    private func canAcquireHttp2(key: HttpConnectionPoolKey, now: MonoTime): Bool {
+        hasAvailableHttp2(key, now) ||
+            (!hasHttp2Reservation(key) &&
+                entries.size + reservations.size < config.maximumConnections &&
+                countHttp2ForKey(key) < config.maximumConnectionsPerKey)
     }
 
     private func hasHttp2Reservation(key: HttpConnectionPoolKey): Bool {
