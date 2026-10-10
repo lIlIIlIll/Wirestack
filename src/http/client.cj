@@ -88,7 +88,11 @@ public class HttpClientBuilder {
         configuredLimits = value
         this
     }
-    /** Sets the aggregate limits shared by every route and protocol pool. */
+    /**
+     * Sets the aggregate limits shared by every route and protocol pool.
+     *
+     * @param value The per-instance aggregate resource limits for this client.
+     */
     public func resourceLimits(value: HttpResourceLimits): HttpClientBuilder {
         configuredResourceLimits = value
         this
@@ -490,7 +494,7 @@ public class HttpClient <: Resource {
             var redirectCount: Int64 = 0
             while (true) {
                 let requestLease = resourceBudget.acquireRequest(
-                    resourceOwner(current.url), operation
+                    resourceOwner(current.url), operation.forStage(transport.OperationTimeoutStage.RequestAdmission)
                 )
                 cancellation.retainResource(requestLease)
                 let response = executeWithRetries(

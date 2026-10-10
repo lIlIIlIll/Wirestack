@@ -356,7 +356,11 @@ public class HttpServerBuilder {
  * @param value 参数 value。
  */
     public func limits(value: HttpLimits): HttpServerBuilder { configuredLimits = value; this }
-    /** Sets the aggregate limits shared by every request and HTTP/2 connection. */
+    /**
+     * Sets the aggregate limits shared by every request and HTTP/2 connection.
+     *
+     * @param value The per-instance aggregate resource limits for this server.
+     */
     public func resourceLimits(value: HttpResourceLimits): HttpServerBuilder {
         configuredResourceLimits = value
         this

@@ -296,16 +296,17 @@ public class Http2ConnectionPool <: Resource {
         context!: OperationContext = OperationContext.background(),
         endStream!: Bool = false
     ): Http2PoolLease {
-        let registration = context.cancellation.register { => wakeHttp2Pool() }
+        let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
+        let registration = poolContext.cancellation.register { => wakeHttp2Pool() }
         var streamResourceLease = None<internal.HttpResourceLease>
         var streamLeaseTransferred = false
         try {
             streamResourceLease = match (resourceBudget) {
-                case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), context))
+                case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), poolContext))
                 case None => None<internal.HttpResourceLease>
             }
             while (true) {
-                match (decide(key, listener, endStream, context, streamResourceLease)) {
+                match (decide(key, listener, endStream, poolContext, streamResourceLease)) {
                     case Http2PoolDecision.Reuse(lease) =>
                         streamLeaseTransferred = true
                         return lease
@@ -318,7 +319,7 @@ public class Http2ConnectionPool <: Resource {
                         try {
                             connectionResourceLease = match (resourceBudget) {
                                 case Some(budget) => Some(budget.acquireConnection(
-                                    httpResourceOwnerForPoolKey(key), context
+                                    httpResourceOwnerForPoolKey(key), poolContext
                                 ))
                                 case None => None<internal.HttpResourceLease>
                             }
@@ -404,16 +405,17 @@ public class Http2ConnectionPool <: Resource {
         endStream!: Bool = false,
         resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ): Http2PoolLease {
+        let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
         var connectionResourceLease = resourceLease
         let streamResourceLease = try {
             if (connectionResourceLease.isNone()) {
                 connectionResourceLease = match (resourceBudget) {
-                    case Some(budget) => Some(budget.acquireConnection(httpResourceOwnerForPoolKey(key), context))
+                    case Some(budget) => Some(budget.acquireConnection(httpResourceOwnerForPoolKey(key), poolContext))
                     case None => None<internal.HttpResourceLease>
                 }
             }
             match (resourceBudget) {
-                case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), context))
+                case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), poolContext))
                 case None => None<internal.HttpResourceLease>
             }
         } catch (error: Exception) {
@@ -421,7 +423,7 @@ public class Http2ConnectionPool <: Resource {
             throw error
         }
         try {
-            checkHttp2PoolContext(context)
+            checkHttp2PoolContext(poolContext)
             synchronized(mutex) {
                 if (closed) { throw http2PoolClosed() }
                 if (entries.size + reservations.size >= config.maximumConnections ||

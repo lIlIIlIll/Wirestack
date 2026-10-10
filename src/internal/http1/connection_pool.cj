@@ -123,12 +123,13 @@ public class Http1ConnectionPool <: Resource {
         factory: Http1ConnectionFactory,
         context!: OperationContext = OperationContext.background()
     ): Http1PoolLease {
-        let registration = context.cancellation.register { => wake() }
+        let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
+        let registration = poolContext.cancellation.register { => wake() }
         try {
             while (true) {
-                match (decide(key, context)) {
+                match (decide(key, poolContext)) {
                     case Http1PoolDecision.Reuse(lease) =>
-                        emitPoolAcquired(context, lease.id, NetworkEventOutcome.Reused)
+                        emitPoolAcquired(poolContext, lease.id, NetworkEventOutcome.Reused)
                         return lease
                     case Http1PoolDecision.Discard(connection, resourceLease) =>
                         closeQuietly(connection)
@@ -139,7 +140,7 @@ public class Http1ConnectionPool <: Resource {
                         try {
                             resourceLease = match (resourceBudget) {
                                 case Some(budget) => Some(budget.acquireConnection(
-                                    httpResourceOwnerForPoolKey(key), context
+                                    httpResourceOwnerForPoolKey(key), poolContext
                                 ))
                                 case None => None<internal.HttpResourceLease>
                             }
@@ -167,7 +168,7 @@ public class Http1ConnectionPool <: Resource {
                                 throw poolClosed()
                             }
                             let lease = Http1PoolLease(id, key, connection)
-                            emitPoolAcquired(context, lease.id, NetworkEventOutcome.Succeeded)
+                            emitPoolAcquired(poolContext, lease.id, NetworkEventOutcome.Succeeded)
                             return lease
                         } catch (error: Exception) {
                             closeOptionalResourceLease(resourceLease)
@@ -179,7 +180,7 @@ public class Http1ConnectionPool <: Resource {
                                     changed.notifyAll()
                                 }
                             }
-                            emitPoolAcquireFailed(context, error)
+                            emitPoolAcquireFailed(poolContext, error)
                             throw error
                         }
                 }
@@ -198,7 +199,7 @@ public class Http1ConnectionPool <: Resource {
         resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ): Http1PoolLease {
         try {
-            preflight(context)
+            preflight(context.forStage(OperationTimeoutStage.ConnectionPool))
             if (let Some(value) <- resourceLease) { value.activate() }
             let lease = synchronized(mutex) {
                 if (closed) { throw poolClosed() }
