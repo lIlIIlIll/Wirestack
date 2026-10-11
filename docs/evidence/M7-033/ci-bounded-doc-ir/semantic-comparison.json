@@ -1,0 +1,83 @@
+{
+  "status": "PASS",
+  "comparison": "complete parsed JSON values, including private/internal declarations; array order retained",
+  "artifacts": {
+    "docIR": {
+      "equal": true,
+      "beforeBytes": 7536812,
+      "afterBytes": 4614317,
+      "beforeKeys": [
+        "schemaVersion",
+        "generator",
+        "status",
+        "project",
+        "configuration",
+        "providers",
+        "modules",
+        "packages",
+        "files",
+        "declarations",
+        "assets",
+        "orphanDocComments",
+        "macroInvocations",
+        "unsupportedDeclarations",
+        "unboundSemanticDeclarations",
+        "diagnostics"
+      ],
+      "afterKeys": [
+        "schemaVersion",
+        "generator",
+        "status",
+        "project",
+        "configuration",
+        "providers",
+        "modules",
+        "packages",
+        "files",
+        "declarations",
+        "assets",
+        "orphanDocComments",
+        "macroInvocations",
+        "unsupportedDeclarations",
+        "unboundSemanticDeclarations",
+        "diagnostics"
+      ]
+    },
+    "api": {
+      "equal": true,
+      "beforeBytes": 793625,
+      "afterBytes": 793625,
+      "beforeKeys": [
+        "schemaVersion",
+        "project",
+        "audience",
+        "declarations",
+        "exposures"
+      ],
+      "afterKeys": [
+        "schemaVersion",
+        "project",
+        "audience",
+        "declarations",
+        "exposures"
+      ]
+    },
+    "coverage": {
+      "equal": true,
+      "beforeBytes": 215,
+      "afterBytes": 215,
+      "beforeKeys": [
+        "schemaVersion",
+        "audience",
+        "symbols",
+        "parameters"
+      ],
+      "afterKeys": [
+        "schemaVersion",
+        "audience",
+        "symbols",
+        "parameters"
+      ]
+    }
+  }
+}

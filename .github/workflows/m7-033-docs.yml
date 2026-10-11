@@ -149,6 +149,20 @@ jobs:
               1)
           decoder.write_text("".join(lines), encoding="utf-8")
           PY
+          (
+            cd "$source_dir"
+            sha256sum --check <<'SHA256' # wirestack-digest-domain: artifact-bytes-v1
+          e390acd9608ce88e1646b345d7540d12b2d1cbab37f4175086b113a14b092b42  src/render/json_encode.cj
+          26c4190c8cc9c5b7668972609865eaff259f0e4cdc2593f9cd6f4ea982c318c2  src/render/doc_ir_encoding_budget.cj
+          d2b301b266b3358e033347ea2da88c5f2431feffe5af5b64f2bcc3cc70c723a3  vendor/yjson_algorithms/src/lib_json_schema.cj
+          SHA256
+            git apply "$GITHUB_WORKSPACE/tools/docs/cjdoc-0.7.2-bounded-doc-ir.patch"
+            sha256sum --check <<'SHA256' # wirestack-digest-domain: artifact-bytes-v1
+          aa7051b4d6145f268ca284a1cf221647a3408413616de567668e9d80fbe1139a  src/render/json_encode.cj
+          856e6b3fb08f89923eaf15ea4dbb60c7477e5d2abe7aa76b52be9f3e0b78a2cd  src/render/doc_ir_encoding_budget.cj
+          c4d6dc1f63f5bd5add96875d5557ca4c530b00b0937b09cfcdde7b2481e26c51  vendor/yjson_algorithms/src/lib_json_schema.cj
+          SHA256
+          )
           (cd "$source_dir" && cjpm update --skip-script)
           python3 - "$HOME/.cjpm/git/markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml" \
             "$HOME/.cjpm/git/yjson/c91859feb77aeba392a1fad0f99d731df66be831/cjpm.toml" <<'PY'

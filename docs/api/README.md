@@ -34,6 +34,11 @@ docs/api/generated/markdown/
 CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --html --json
 ```
 
+CI 使用 STS 1.1.3 构建固定源码及仓库记录的有界 Doc IR 补丁。完整 JSON 使用紧凑编码；
+schema、诊断和 100% 覆盖率校验不变。每个格式在独立进程中渲染同一份完整 Doc IR，
+避免一个进程同时保留 JSON、API surface、coverage、Markdown 和 HTML。
+补丁及输入摘要见 [工具链记录](../references/m7-033-ci-toolchain.json)。
+
 仓库级 `scripts/check` 也会调用文档门禁。长时间 profile 不会被文档检查隐式触发。
 
 ## `wirestack.http`

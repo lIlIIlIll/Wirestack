@@ -13,6 +13,29 @@
     "dependency_commits": {
       "markdown": "db4f9527944b589db8436669f1d255192388cee2",
       "yjson": "c91859feb77aeba392a1fad0f99d731df66be831"
+    },
+    "build_patch": {
+      "path": "tools/docs/cjdoc-0.7.2-bounded-doc-ir.patch",
+      "sha256": "33f494d373d3f410a07c8bc6a06e6269b601fca977baf82b1ed1f39a9ad0efda",
+      "files": [
+        {
+          "path": "src/render/json_encode.cj",
+          "before": "e390acd9608ce88e1646b345d7540d12b2d1cbab37f4175086b113a14b092b42",
+          "after": "aa7051b4d6145f268ca284a1cf221647a3408413616de567668e9d80fbe1139a"
+        },
+        {
+          "path": "src/render/doc_ir_encoding_budget.cj",
+          "before": "26c4190c8cc9c5b7668972609865eaff259f0e4cdc2593f9cd6f4ea982c318c2",
+          "after": "856e6b3fb08f89923eaf15ea4dbb60c7477e5d2abe7aa76b52be9f3e0b78a2cd"
+        },
+        {
+          "path": "vendor/yjson_algorithms/src/lib_json_schema.cj",
+          "before": "d2b301b266b3358e033347ea2da88c5f2431feffe5af5b64f2bcc3cc70c723a3",
+          "after": "c4d6dc1f63f5bd5add96875d5557ca4c530b00b0937b09cfcdde7b2481e26c51"
+        }
+      ],
+      "regex_result_cache_entries": 65536,
+      "resource_limits": "unchanged; per-validation regex work only charged for uncached exact pattern/value pairs"
     }
   },
   "setup_cangjie": {
@@ -24,5 +47,6 @@
     "commit": "503caf32082f3914ba7409c8b48c8ebd75ccf513",
     "linux_amd64_archive_sha256": "772d64bd07540101e3d177f3b8919bad13057a6cdf70f10d7f318d1620ef5f57"
   },
-  "qualification": "docs/evidence/M7-033/ci-toolchain-native.json"
+  "base_qualification": "docs/evidence/M7-033/ci-toolchain-native.json",
+  "qualification": "docs/evidence/M7-033/ci-bounded-doc-ir/native.json"
 }

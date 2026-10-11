@@ -1,0 +1,152 @@
+{
+  "status": "PASS",
+  "originalSourceHead": "1f780a75af67acf3de82b20b2333267ba41a8a66",
+  "originalToolSha256": "5ff9a1573f1ab8a732d7746bb0fa74f427b976eeff47d20998790f3198fa64d1",
+  "sharedDeclarationAndFileRecordsIdentical": true,
+  "fullDeclarationUnion": 3266,
+  "fullSourceFileUnion": 71,
+  "completePublicApiUnion": 1870,
+  "historicalCanonicalRecordsMatchCurrentSourceOutputs": true,
+  "layers": [
+    {
+      "package": "wirestack",
+      "declarations": 915,
+      "apiDeclarations": 756,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 756,
+          "documented": 756,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 316,
+          "documented": 316,
+          "percent": 100
+        }
+      }
+    },
+    {
+      "package": "wirestack.http",
+      "declarations": 2121,
+      "apiDeclarations": 1257,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 1257,
+          "documented": 1257,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 603,
+          "documented": 603,
+          "percent": 100
+        }
+      }
+    },
+    {
+      "package": "wirestack.tls",
+      "declarations": 1121,
+      "apiDeclarations": 932,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 932,
+          "documented": 932,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 380,
+          "documented": 380,
+          "percent": 100
+        }
+      }
+    },
+    {
+      "package": "wirestack.net",
+      "declarations": 1464,
+      "apiDeclarations": 1024,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 1024,
+          "documented": 1024,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 508,
+          "documented": 508,
+          "percent": 100
+        }
+      }
+    },
+    {
+      "package": "wirestack.observability",
+      "declarations": 971,
+      "apiDeclarations": 786,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 786,
+          "documented": 786,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 327,
+          "documented": 327,
+          "percent": 100
+        }
+      }
+    },
+    {
+      "package": "wirestack.sse",
+      "declarations": 1088,
+      "apiDeclarations": 836,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 836,
+          "documented": 836,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 371,
+          "documented": 371,
+          "percent": 100
+        }
+      }
+    },
+    {
+      "package": "wirestack.gzip",
+      "declarations": 1076,
+      "apiDeclarations": 815,
+      "exposures": 0,
+      "coverage": {
+        "schemaVersion": "cjdoc.documentation-coverage/1",
+        "audience": "external",
+        "symbols": {
+          "total": 815,
+          "documented": 815,
+          "percent": 100
+        },
+        "parameters": {
+          "total": 338,
+          "documented": 338,
+          "percent": 100
+        }
+      }
+    }
+  ]
+}
