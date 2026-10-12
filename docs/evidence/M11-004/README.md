@@ -41,6 +41,10 @@ Native self-checks are not the only runtime proof. The runner also starts the ac
 - `readelf` requires only the SDK/glibc C++ runtime allowlist; `nm` proves the base consumer has no optional modules while enabled consumers actually contain gzip/SSE symbols. The three pinned static native archives and every packaged file digest are checked before and after execution.
 - Every build, help, native check and operational invocation sees an empty mount over the repository. Only that profile's own disk-backed scratch is writable. An explicit probe proves the checkout is empty.
 
+## Current review evidence
+
+[Review boundary tests](review-boundary-tests.log) pass 11 checks, including exact M9 mode markers. Separately, [the installed M9 review report](installed-review-m9/report.json) and per-mode logs record oversized custom-trust rejection in the cli, decoded and streams consumers. This is not release qualification.
+
 ## Canonical commands
 
 Run in the corresponding SDK environment:

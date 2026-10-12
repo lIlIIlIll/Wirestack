@@ -1,0 +1,18 @@
+COMMAND: python3 -m unittest -v tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest
+test_consumer_cannot_escape_into_checkout_or_an_extra_dependency (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_consumer_cannot_escape_into_checkout_or_an_extra_dependency) ... ok
+test_consumer_cannot_replace_native_linkage (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_consumer_cannot_replace_native_linkage) ... ok
+test_documentation_byte_drift_missing_app_and_duplicate_are_rejected (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_documentation_byte_drift_missing_app_and_duplicate_are_rejected) ... ok
+test_implicit_system_dependency_is_not_accepted (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_implicit_system_dependency_is_not_accepted) ... ok
+test_internal_net_or_legacy_import_is_rejected (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_internal_net_or_legacy_import_is_rejected) ... ok
+test_m9_marker_is_exactly_bound_to_consumer_mode_and_unique (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_m9_marker_is_exactly_bound_to_consumer_mode_and_unique) ... ok
+test_missing_or_duplicate_native_scenario_cannot_complete (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_missing_or_duplicate_native_scenario_cannot_complete) ... ok
+test_missing_static_archive_and_mutated_bytes_fail_inventory (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_missing_static_archive_and_mutated_bytes_fail_inventory) ... ok
+test_optional_module_cannot_leak_into_raw_cli (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_optional_module_cannot_leak_into_raw_cli) ... ok
+test_unused_proxy_is_stopped_without_retained_worker (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_unused_proxy_is_stopped_without_retained_worker) ... ok
+test_wrong_m9_mode_marker_cannot_mark_integration_pass (tools.tests.test_m11_004_installed_consumers.InstalledApplicationBoundaryTest.test_wrong_m9_mode_marker_cannot_mark_integration_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.217s
+
+OK
+EXIT_STATUS=0

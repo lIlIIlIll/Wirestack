@@ -2,6 +2,7 @@
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from tools import m11_004_installed_consumers as apps
 from tools.evidence_digest import artifact_byte_digest
@@ -106,6 +107,39 @@ wirestack = {{path = "../../install/wirestack"}}
                 with self.assertRaises(ValueError):
                     apps.validate_checks(text, "cli")
 
+
+    def test_m9_marker_is_exactly_bound_to_consumer_mode_and_unique(self):
+        all_markers = set(apps.M9_PASS_MARKERS.values())
+        for (consumer, mode), expected in apps.M9_PASS_MARKERS.items():
+            with self.subTest(consumer=consumer, mode=mode):
+                self.assertIsNone(apps.validate_m9_pass_marker(expected + "\n", consumer, mode))
+                wrong = next(marker for marker in all_markers if marker != expected)
+                for output in ("", wrong + "\n", expected + "\n" + expected + "\n",
+                               wrong + "\n" + expected + "\n"):
+                    with self.subTest(output=output), self.assertRaisesRegex(ValueError, "expected exactly"):
+                        apps.validate_m9_pass_marker(output, consumer, mode)
+
+    def test_wrong_m9_mode_marker_cannot_mark_integration_pass(self):
+        root = self.root
+        for path in (root / "examples/linux/m9_002/socket_options.cj",
+                     root / "examples/linux/m9_003/udp_lifecycle.cj"):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("// controlled installed-consumer fixture\n")
+        work = root / "work"
+        work.mkdir()
+        report = {"toolchain": {"compiler": "Compiler: 1.1.3 qualified"}}
+
+        def run(name, argv, cwd, **kwargs):
+            if name.endswith("-build"):
+                return ""
+            return "M9_002_HTTP_CONNECTOR_PASS\n"
+
+        with patch.object(apps, "ROOT", root), \
+             patch.object(apps.release, "consumer_manifest", return_value="wirestack_release_smoke"), \
+             patch.object(apps.socket, "if_nametoindex", return_value=1):
+            with self.assertRaisesRegex(ValueError, "M9 options/options marker mismatch"):
+                apps.run_m9(root / "install", work, {}, run, report)
+        self.assertNotIn("m9_integration", report)
     def test_unused_proxy_is_stopped_without_retained_worker(self):
         with apps.SingleConnectProxy() as proxy:
             thread = proxy.thread

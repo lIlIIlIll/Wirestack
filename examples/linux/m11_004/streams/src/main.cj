@@ -1,12 +1,34 @@
 package wirestack_m11_004_streams
 
 import std.convert.*
-import std.fs.File
+import std.fs.*
 import wirestack as api
 import wirestack.http.*
 import wirestack.sse.*
 
 func require(ok: Bool): Unit { if (!ok) { throw IllegalStateException("assertion") } }
+
+func boundedFile(path: String): Array<Byte> {
+    let file = File(path, OpenMode.Read)
+    try {
+        let info = file.info
+        require(info.isRegular() && info.size > 0 && info.size <= 65536)
+        let content = Array<Byte>(info.size, repeat: 0)
+        let chunk = Array<Byte>(8192, repeat: 0)
+        var total: Int64 = 0
+        while (true) {
+            let count = file.read(chunk)
+            if (count == 0) { break }
+            require(count > 0 && count <= chunk.size && count <= info.size - total)
+            for (index in 0 .. count) { content[total + index] = chunk[index] }
+            total += count
+        }
+        require(total == info.size)
+        content
+    } finally {
+        file.close()
+    }
+}
 func owner(ms!: Int64 = 10000): OperationContext { OperationContext(deadline: Some(Deadline.after(ms * Duration.millisecond))) }
 func policy(recover: Int64): SseSessionPolicy {
     SseSessionPolicy(maximumReconnects: recover, initialRetryDelay: 50 * Duration.millisecond, jitterPermille: 0)
@@ -108,7 +130,7 @@ main(args: Array<String>): Int64 {
         require(budget > 0 && budget <= 60000 && maximum > 0 && maximum <= 10000 && recover >= 0 && recover <= 8)
         require(cursorPolicy != "none" || recover == 0)
         let builder = HttpClient.builder()
-        if (!trust.isEmpty()) { builder.tls(HttpClientTlsConfig([File.readFrom(trust)])) }
+        if (!trust.isEmpty()) { builder.tls(HttpClientTlsConfig([boundedFile(trust)])) }
         let client = builder.build()
         try {
             if (args[0] == "sse") { let _ = consumeSse(client, args[1], post, recover, maximum, owner(ms: budget)) }

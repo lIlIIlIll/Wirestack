@@ -152,9 +152,25 @@ func runDownload(args: Array<String>): Int64 {
     } finally { if (let Some(value) <- client) { value.close() }; resolver.close(); tls.close() }
 }
 func boundedFile(path: String): Array<Byte> {
-    let info = FileInfo(path)
-    require(info.isRegular() && info.size > 0 && info.size <= 65536)
-    File.readFrom(path)
+    let file = File(path, OpenMode.Read)
+    try {
+        let info = file.info
+        require(info.isRegular() && info.size > 0 && info.size <= 65536)
+        let content = Array<Byte>(info.size, repeat: 0u8)
+        let chunk = Array<Byte>(8192, repeat: 0u8)
+        var total: Int64 = 0
+        while (true) {
+            let count = file.read(chunk)
+            if (count == 0) { break }
+            require(count > 0 && count <= chunk.size && count <= info.size - total)
+            for (index in 0 .. count) { content[total + index] = chunk[index] }
+            total += count
+        }
+        require(total == info.size)
+        content
+    } finally {
+        file.close()
+    }
 }
 func phaseName(value: NetworkPhase): String {
     match (value) {

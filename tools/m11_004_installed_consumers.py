@@ -47,6 +47,18 @@ NATIVE_ARCHIVES = (
 ALLOWED_NEEDED = frozenset(("libboundscheck.so", "libcangjie-runtime.so", "libc.so.6", "libm.so.6",
     "libdl.so.2", "libpthread.so.0", "libstdc++.so.6", "libgcc_s.so.1"))
 
+M9_PASS_MARKERS = {
+    ("options", "options"): "M9_002_OPTIONS_PASS",
+    ("options", "http"): "M9_002_HTTP_CONNECTOR_PASS",
+    ("options", "invalid"): "M9_002_INVALID_ADMISSION_PASS",
+    ("udp", "disconnect"): "M9_003_DISCONNECT_PASS",
+    ("udp", "broadcast"): "M9_003_BROADCAST_PASS",
+    ("udp", "ipv4-multicast"): "M9_003_IPV4_MULTICAST_PASS",
+    ("udp", "ipv6-multicast"): "M9_003_IPV6_MULTICAST_PASS",
+    ("udp", "membership-cleanup"): "M9_003_MEMBERSHIP_ERRORS_CLEANUP_PASS",
+    ("udp", "active-receive"): "M9_003_DISCONNECT_ACTIVE_RECEIVE_PASS",
+}
+
 
 def app_files(app: Path) -> list[Path]:
     return [app / "cjpm.toml", *sorted((app / "src").rglob("*.cj"))]
@@ -397,6 +409,8 @@ def main() -> int:
                     raise ValueError("optional-module symbol probe did not observe the enabled feature")
                 report["consumers"][name] = {"source_digests": source_digests, "public_imports": imports[name], "binary_digest": artifact_byte_digest(binary).to_json(),
                     "native_needed": needed, "pass_checks": checks, "feature_symbols": feature_symbols, "checkout_hidden_build_and_run": True}
+            oversized_trust = work / "oversized-trust.der"
+            oversized_trust.write_bytes(bytes(65537))
             operational = {}
             service = work / "consumers/service"
             service_binary = service / "target/release/bin/main"
@@ -413,12 +427,22 @@ def main() -> int:
                     diagnostic = (output / f"{name}-operational-pre-cancel.stderr.log").read_text()
                     if "category=network phase=http_body code=1" not in diagnostic or stopped_path.exists() or Path(str(stopped_path) + ".partial").exists():
                         raise ValueError("pre-cancel CLI failed typed phase diagnostics or output cleanup")
+                    oversized_path = work / f"{name}-oversized-trust.bin"
+                    run(f"{name}-oversized-trust", [str(app / "target/release/bin/main"), "download", "--url", f"https://127.0.0.1:{port}/download", "--output", str(oversized_path), "--trust", str(oversized_trust), "--budget-ms", "5000"], app, expected_exit=1)
+                    diagnostic = (output / f"{name}-oversized-trust.stderr.log").read_text()
+                    if "ERROR category=application code=90" not in diagnostic or oversized_path.exists() or Path(str(oversized_path) + ".partial").exists():
+                        raise ValueError("oversized trust file was not rejected by the bounded reader")
+                    operational[name]["oversized_trust_rejected"] = True
             stream_app = work / "consumers/streams"
             stream_binary = stream_app / "target/release/bin/main"
             with endpoint("streams-operational-fixture", [str(stream_binary), "fixture", *certificates[:2]], stream_app, "STREAM_READY", "STREAM_STOPPED") as port:
                 sse_text = run("streams-operational-sse", [str(stream_binary), "sse", f"https://127.0.0.1:{port}/stream", "--trust", certificates[0], "--budget-ms", "5000", "--max-events", "1", "--recover", "0"], stream_app)
                 socket_text = run("streams-operational-websocket", [str(stream_binary), "websocket", f"wss://127.0.0.1:{port}/socket", "--trust", certificates[0], "--budget-ms", "5000", "--max-frames", "1", "--recover", "0", "--command", "echo"], stream_app)
-                operational["streams"] = {"status": "PASS", "sse_output": sse_text.strip(), "websocket_output": socket_text.strip()}
+                run("streams-oversized-trust", [str(stream_binary), "sse", f"https://127.0.0.1:{port}/stream", "--trust", str(oversized_trust), "--budget-ms", "5000", "--max-events", "1", "--recover", "0"], stream_app, expected_exit=1)
+                diagnostic = (output / "streams-oversized-trust.stderr.log").read_text()
+                if "ERROR category=application phase=operation code=1" not in diagnostic:
+                    raise ValueError("oversized stream trust file did not produce the expected application failure")
+                operational["streams"] = {"status": "PASS", "sse_output": sse_text.strip(), "websocket_output": socket_text.strip(), "oversized_trust_rejected": True}
             operational["service"] = {"status": "PASS", "stdin_stop": "SERVICE_STOPPED", "fixture_bytes_verified": True}
             report["operational_commands"] = operational
             if args.include_m9:
@@ -438,6 +462,16 @@ def main() -> int:
             (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"status": report["status"], "report": str((output / "report.json").relative_to(ROOT))}))
     return 0 if report["status"] == "PASS" else 1
+
+
+
+def validate_m9_pass_marker(text: str, consumer: str, mode: str) -> None:
+    expected = M9_PASS_MARKERS.get((consumer, mode))
+    if expected is None:
+        raise ValueError(f"unknown installed M9 mode {consumer}/{mode}")
+    markers = [line for line in text.splitlines() if re.fullmatch(r"M9_00[23]_[A-Z0-9_]+_PASS", line)]
+    if markers != [expected]:
+        raise ValueError(f"installed M9 {consumer}/{mode} marker mismatch: expected exactly {expected}")
 
 
 def run_m9(installed: Path, work: Path, env: dict, run, report: dict) -> None:
@@ -460,8 +494,7 @@ def run_m9(installed: Path, work: Path, env: dict, run, report: dict) -> None:
             extra = {} if name == "options" else dict(WIRESTACK_M9_003_MODE=mode, WIRESTACK_M9_003_IPV4_INTERFACE_INDEX=str(socket.if_nametoindex("lo")), WIRESTACK_M9_003_IPV6_INTERFACE_INDEX=str(socket.if_nametoindex("lo")))
             argv = [str(binary), *([mode] if name == "options" else [])]
             text = run(f"m9-{name}-{mode}", argv, consumer, extra_env=extra, private_ipv6_route=name == "udp" and mode == "ipv6-multicast")
-            if not re.search(rf"^M9_00[23]_[A-Z0-9_]+_PASS$", text, re.MULTILINE):
-                raise ValueError("installed M9 native probe omitted its completion marker")
+            validate_m9_pass_marker(text, name, mode)
             outputs[mode] = "PASS"
         m9["consumers"][name] = {"source": str(source.relative_to(ROOT)), "digest": text_evidence_digest(source).to_json(),
             "binary_digest": artifact_byte_digest(binary).to_json(), "modes": outputs, "checkout_hidden_build_and_run": True}
