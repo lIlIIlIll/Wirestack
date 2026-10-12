@@ -1,7 +1,14 @@
 {
   "schema_version": 1,
   "task_id": "M10-003",
-  "status": "COMPLETE",
+  "status": "BLOCKED",
+  "review_validation": {
+    "sdk": "STS 1.1.3",
+    "exit_status": 0,
+    "passed": 717,
+    "skipped": 9,
+    "task_acceptance": false
+  },
   "scenario_matrix": "scenario-matrix.json",
   "workspace": {
     "task_branch": "m10-003-fair-pooling-safe-retry",
