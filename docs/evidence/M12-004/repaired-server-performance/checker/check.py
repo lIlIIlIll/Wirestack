@@ -3,7 +3,7 @@
 import argparse, ast, json, sys, tarfile
 from pathlib import Path
 BASE = Path(__file__).resolve().parent.parent
-INPUT = BASE / 'checker/recovered-input/input'
+INPUT = BASE.parent / 'server-performance/input'
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(INPUT / 'repo'))
 from tools import evidence_digest as d
@@ -14,6 +14,9 @@ def require(value, message):
     if not value:
         raise ValueError(message)
 
+class MissingEvidenceError(Exception):
+    """Required evidence was deliberately withheld or is not present."""
+
 def load(path):
     return json.loads(path.read_text(), parse_constant=lambda x: (_ for _ in ()).throw(ValueError('nonfinite JSON')))
 
@@ -21,11 +24,14 @@ def require_sdk(actual, oracle):
     require(actual == oracle['sdk_files'] and len(actual) == 392, 'SDK full392 binding differs from external qualified oracle')
 
 def static():
-    inputs = load(INPUT / 'inputs.json')
-    for name, digest in inputs['source_inputs'].items():
-        require(d.text_evidence_digest(INPUT / 'repo' / name).to_json() == digest, 'source binding drift: ' + name)
-    for name, digest in inputs['artifacts'].items():
-        require(d.artifact_byte_digest(INPUT / name).to_json() == digest, 'archive binding drift: ' + name)
+    inputs = load(BASE / 'input-manifest.json')
+    missing = sorted(name for name in inputs['artifacts'] if not (INPUT / name).is_file())
+    if missing:
+        raise MissingEvidenceError('required evidence archives unavailable: ' + ', '.join(missing))
+    for name, expected in inputs['source_inputs'].items():
+        require(d.text_evidence_digest(INPUT / 'repo' / name).to_json() == expected, 'source binding drift: ' + name)
+    for name, expected in inputs['artifacts'].items():
+        require(d.artifact_byte_digest(INPUT / name).to_json() == expected, 'archive binding drift: ' + name)
     require(d.text_evidence_digest(INPUT / 'sdk-oracle.json').to_json() == inputs['sdk_oracle'], 'external SDK oracle drift')
     oracle = load(INPUT / 'sdk-oracle.json')
     require(oracle['status'] == 'PASS' and len(oracle['sdk_files']) == 392, 'qualified SDK oracle is not PASS/full392')
@@ -33,16 +39,16 @@ def static():
     manifests = {}
     for label in ('baseline', 'candidate'):
         with tarfile.open(INPUT / (label + '.tar.gz')) as archive:
-            files = {m.name.split('/', 1)[1]: archive.extractfile(m).read() for m in archive.getmembers() if m.isfile()}
+            files = {m.name.split('/', 1)[1]: archive.extractfile(m).read() for m in archive.getmembers() if m.isfile() and '/' in m.name}
         manifest = json.loads(files['release-manifest.json'])
         entries = manifest['payload']
-        require(len({e['path'] for e in entries}) == len(entries), 'duplicate archive payload')
+        require(len({entry['path'] for entry in entries}) == len(entries), 'duplicate archive payload')
         for entry in entries:
             raw = files[entry['path']]
             require(len(raw) == entry['bytes'] and d.artifact_bytes_sha256(raw) == entry['sha256'], 'archive manifest payload mismatch')
         from tools.m7_021_linux_release import canonical_json
         require(d.text_evidence_bytes_sha256(canonical_json(entries)) == manifest['payload_sha256'], 'manifest aggregate mismatch')
-        payloads[label] = {e['path']: {'domain': 'artifact-bytes-v1', 'sha256': e['sha256']} for e in entries}
+        payloads[label] = {entry['path']: {'domain': 'artifact-bytes-v1', 'sha256': entry['sha256']} for entry in entries}
         require(set(files) == set(payloads[label]) | {'release-manifest.json'}, 'archive has undeclared files')
         payloads[label]['release-manifest.json'] = d.artifact_byte_digest_bytes(files['release-manifest.json']).to_json()
         manifests[label] = manifest
@@ -268,6 +274,11 @@ def main():
         result['performance_status'] = performance_status if performance_status else 'NOT_VERIFIED'
         result['verification_status'] = result['technical_verification_status']
         code = 1 if errors or performance_status == 'FAIL' else 0
+    except MissingEvidenceError as error:
+        result['technical_verification_status'] = result['verification_status'] = 'BLOCKED'
+        result['performance_status'] = 'NOT_VERIFIED'
+        result['blockers'] = [str(error)]
+        code = 2
     except Exception as error:
         result['technical_verification_status'] = result['verification_status'] = 'FAIL'
         result['error'] = str(error).replace(str(BASE), '<task>')

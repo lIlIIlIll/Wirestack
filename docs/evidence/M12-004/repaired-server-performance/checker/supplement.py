@@ -3,7 +3,7 @@ import tarfile
 from pathlib import Path
 import check as c
 
-PREVIOUS = Path.home()/'.cache/agent-tmp/wirestack-m12-004-server.wOQibd'
+PREVIOUS = c.BASE.parent/'server-performance'
 
 def static_extra(inputs, oracle, payloads, manifests):
     c.require(inputs == c.load(c.BASE/'input-manifest.json'), 'prepared input manifest differs')

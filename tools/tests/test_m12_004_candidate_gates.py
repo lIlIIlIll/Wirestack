@@ -8,7 +8,7 @@ from tools import m12_004_candidate_gates as gate
 
 class CandidateGatesTests(unittest.TestCase):
     def temporary(self):
-        return tempfile.TemporaryDirectory(dir=Path.home() / '.cache/agent-tmp')
+        return tempfile.TemporaryDirectory()
 
     def test_native_same_size_mutation_rejected(self):
         with self.temporary() as directory:
