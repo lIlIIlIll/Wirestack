@@ -85,7 +85,7 @@ public class SseSession <: Resource {
      * Sends an arbitrary request once and consumes its SSE response without any replay.
      * A replayable POST body and client retry/redirect settings cannot change this rule.
      * @param client Shared HTTP client, retained but never closed by this session.
-     * @param request Arbitrary one-shot HTTP request; its method and body are preserved.
+     * @param request Arbitrary one-shot HTTP request; method, body and Last-Event-ID are preserved.
      * @param limits Codec storage and work bounds.
      * @param policy Lifetime and idle bounds; reconnect count has no effect for this mode.
      * @param readBufferBytes Maximum retained unread body chunk.
@@ -198,7 +198,8 @@ public class SseSession <: Resource {
         checkSseContext(context)
         let headers = HttpHeaders.builder()
         for (entry in request.headers.entries) {
-            if (entry.name.toAsciiLower() != "last-event-id" && entry.name.toAsciiLower() != "accept") {
+            let name = entry.name.toAsciiLower()
+            if (name != "accept" && (!reconnect || name != "last-event-id")) {
                 headers.add(entry.name, entry.value)
             }
         }

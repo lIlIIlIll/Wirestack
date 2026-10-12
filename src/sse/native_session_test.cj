@@ -82,6 +82,23 @@ class SseNativeSessionTest {
     }
 
     @TestCase
+    func oneShotPostPreservesMixedCaseCallerLastEventIdOnWire(): Unit {
+        let fixture = NativeSseFixture()
+        let post = HttpRequest(HttpMethod("POST"), fixture.url("/post-cursor"),
+            body: RequestBody.string("payload"),
+            headers: HttpHeaders.builder().add("Content-Length", "7")
+                .add("lAsT-EvEnT-Id", "caller-cursor").build())
+        let session = SseSession.oneShot(fixture.client, post, policy: nativeSseFastPolicy(5))
+        try {
+            @Expect(session.receive().getOrThrow().data, "caller-cursor")
+            @Expect(session.receive().isNone())
+            @Expect(session.reconnectCount, 0)
+            @Expect(fixture.client.resourceSnapshot().activeRequests, 0)
+            @Expect(fixture.client.resourceSnapshot().managedBufferBytes, 0u64)
+        } finally { session.close(); fixture.close() }
+    }
+
+    @TestCase
     func explicitCloseParentCancellationAndEofRemainDistinct(): Unit {
         let fixture = NativeSseFixture()
         try {
@@ -303,6 +320,10 @@ private class NativeSseHandler <: HttpServerHandler {
             return reply("id:7\ndata:重复\n\nid:unfinished\n")
         }
         if (request.target == "/post") { postRequests.fetchAdd(1); return reply("data:ack\n\n") }
+        if (request.target == "/post-cursor") {
+            if (request.method != HttpMethod("POST")) { return reply("", status: 405) }
+            return reply("data:" + request.headers.getFirst("last-event-id").getOrDefault({ => "missing" }) + "\n\n")
+        }
         if (request.target == "/post307") {
             redirectRequests.fetchAdd(1)
             return reply("", status: 307, extra: HttpHeaders.builder().add("Location", "/post307-target").build())

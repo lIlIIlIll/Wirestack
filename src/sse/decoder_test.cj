@@ -85,6 +85,29 @@ class SseDecoderTests {
         decoder.close()
     }
     @TestCase
+    func zeroRetryCapIgnoresHintsAcrossEveryChunkBoundary(): Unit {
+        for (value in ["0", "00000", "42", "999999999999999999999999999999999999999999"]) {
+            let bytes = ("retry: " + value + "\r\n").toArray()
+            for (cut in 0..=bytes.size) {
+                let decoder = SseDecoder(limits: SseLimits(maximumRetryMilliseconds: 0u64))
+                let _ = decoder.decode(bytes, length: Some(cut))
+                @Expect(decoder.retryMilliseconds.isNone())
+                let _ = decoder.decode(bytes, offset: cut)
+                @Expect(decoder.retryMilliseconds.isNone())
+                decoder.close()
+            }
+        }
+        let zero = "retry:0\r\n".toArray()
+        for (cut in 0..=zero.size) {
+            let decoder = SseDecoder(limits: SseLimits(maximumRetryMilliseconds: 1u64))
+            let _ = decoder.decode("retry:1\n".toArray())
+            let _ = decoder.decode(zero, length: Some(cut))
+            let _ = decoder.decode(zero, offset: cut)
+            @Expect(decoder.retryMilliseconds, Some(0u64))
+            decoder.close()
+        }
+    }
+    @TestCase
     func nullIdIsIgnoredAndEmptyIdClearsCursor(): Unit {
         let decoder = SseDecoder(lastEventId: "previous")
         let first = decoder.decode("id: bad\u{0000}value\ndata: x\n\n".toArray()).event.getOrThrow()

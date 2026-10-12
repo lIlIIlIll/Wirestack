@@ -24,7 +24,7 @@ public class SseDecoder {
 
     /** Last cursor committed at a blank line, even for an id-only block. */
     public prop lastEventId: String { get() { cursor } }
-    /** Last valid digit-only retry, applied at its line ending and clamped. */
+    /** Last valid digit-only retry, applied at its line ending and clamped; zero cap ignores hints. */
     public prop retryMilliseconds: ?UInt64 { get() { retry } }
     /** Current retained arrays and UTF-8 strings, excluding returned events and input. */
     public prop retainedBytes: UInt64 {
@@ -208,7 +208,7 @@ public class SseDecoder {
         true
     }
     private func parseRetry(start: Int64): Unit {
-        if (start == lineSize) { return }
+        if (start == lineSize || limits.maximumRetryMilliseconds == 0u64) { return }
         var value = 0u64
         let cap = limits.maximumRetryMilliseconds
         for (index in start..lineSize) {
