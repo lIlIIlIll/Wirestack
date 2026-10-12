@@ -109,6 +109,7 @@ public class HttpResourceBudget {
     private var receivedBufferBytes: UInt64 = 0u64
     private var controlBufferBytes: UInt64 = 0u64
     private var cleanupBufferBytes: UInt64 = 0u64
+    private var requestAdmissionClosed = false
     private var highWaterConnections: Int64 = 0
     private var highWaterRequests: Int64 = 0
     private var highWaterStreams: Int64 = 0
@@ -136,6 +137,20 @@ public class HttpResourceBudget {
         context: OperationContext
     ): HttpResourceLease {
         acquireSlot(HttpResourceKind.Stream, owner, context)
+    }
+    protected func stopRequestAdmission(): Unit {
+        synchronized(mutex) {
+            requestAdmissionClosed = true
+            changed.notifyAll()
+        }
+    }
+
+    private func checkRequestAdmissionOpen(kind: HttpResourceKind): Unit {
+        match (kind) {
+            case HttpResourceKind.Request =>
+                if (requestAdmissionClosed) { throw resourceAdmissionClosed() }
+            case _ => ()
+        }
     }
 
     public func tryAcquireConnection(owner: HttpResourceOwnerKey): ?HttpResourceLease {
@@ -391,6 +406,7 @@ public class HttpResourceBudget {
                 try {
                     while (true) {
                         checkContext(context)
+                        checkRequestAdmissionOpen(kind)
                         if (isNextWaiterLocked(waiter)) {
                             removeWaiterLocked(waiter)
                             let lease = grantLocked(kind, owner, amount, control, false)
@@ -443,6 +459,7 @@ public class HttpResourceBudget {
         amount: UInt64,
         control: Bool
     ): Bool {
+        checkRequestAdmissionOpen(kind)
         if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) { return false }
         match (kind) {
             case HttpResourceKind.Connection =>
@@ -800,6 +817,16 @@ private func resourceWaitersExhausted(): NetworkException {
         NetworkErrorCode.ResourceExhausted,
         "HTTP aggregate resource waiter limit exceeded",
         retryability: Retryability.Temporary
+    )
+}
+
+private func resourceAdmissionClosed(): NetworkException {
+    NetworkException(
+        NetworkErrorCategory.Closed,
+        NetworkPhase.PoolAcquire,
+        NetworkErrorCode.Closed,
+        "HTTP client request admission is closed",
+        retryability: Retryability.Never
     )
 }
 

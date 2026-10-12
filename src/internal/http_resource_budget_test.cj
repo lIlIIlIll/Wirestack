@@ -319,6 +319,52 @@ class HttpResourceBudgetTest {
         @Expect(released.owners.size, 0)
     }
     @TestCase
+    func stopRequestAdmissionWakesWaitersAndPreservesHeldLease(): Unit {
+        let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 64u64, 8u64, 1)
+        let owner = HttpResourceOwnerKey("https://close.example:443", "direct")
+        let held = budget.tryAcquireRequest(owner).getOrThrow()
+        let closed = AtomicBool(false)
+        let unexpected = AtomicBool(false)
+        let waiter = spawn {
+            try {
+                let lease = budget.acquireRequest(owner, OperationContext.background())
+                lease.close()
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Closed => closed.store(true)
+                    case _ => unexpected.store(true)
+                }
+            }
+        }
+
+        @Expect(waitForBudgetWaiters(budget, 1, Duration.second))
+        budget.stopRequestAdmission()
+        waiter.get(Duration.second)
+
+        @Expect(closed.load())
+        @Expect(!unexpected.load())
+        @Expect(budget.snapshot().activeRequests, 1)
+        @Expect(budget.snapshot().admissionWaiters, 0)
+        held.close()
+        @Expect(budget.snapshot().activeRequests, 0)
+        @Expect(budget.snapshot().owners.size, 0)
+
+        let rejectedAfterClose = AtomicBool(false)
+        try {
+            match (budget.tryAcquireRequest(owner)) {
+                case Some(lease) => lease.close()
+                case None => ()
+            }
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.Closed => rejectedAfterClose.store(true)
+                case _ => unexpected.store(true)
+            }
+        }
+        @Expect(rejectedAfterClose.load())
+        @Expect(!unexpected.load())
+    }
+    @TestCase
     func retainedLeaseClosesExactlyOnceAcrossConcurrentOwners(): Unit {
         let budget = ledgerTestBudget(4, 2, 4, 4, 2, 4, 4, 2, 4, 64u64, 8u64, 4)
         let owner = HttpResourceOwnerKey("https://lease.example:443", "direct")

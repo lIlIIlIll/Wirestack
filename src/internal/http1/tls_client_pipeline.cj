@@ -494,7 +494,11 @@ private class AutomaticTlsNegotiator {
                             http2Limits: http2Limits,
                             pushConfig: pushConfig,
                             resourceBudget: resourceBudget,
-                            resourceOwner: Some(httpResourceOwnerForPoolKey(key))
+                            resourceOwner: if (resourceBudget.isSome()) {
+                                Some(httpResourceOwnerForPoolKey(key))
+                            } else {
+                                None<internal.HttpResourceOwnerKey>
+                            }
                         )),
                         retainOptionalHttpResourceLease(resourceLease)
                     )
