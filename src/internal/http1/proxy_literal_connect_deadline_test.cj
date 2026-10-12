@@ -127,6 +127,53 @@ class Http1LiteralProxyDialDeadlineReviewTest {
     }
 }
 
+@Test
+class Http1HttpsProxyDialCapReviewTest {
+    @TestCase
+    func httpsLiteralProxyDialTimesOutAtTcpConnectCap(): Unit {
+        let proxyAddress = IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 9u8])
+        let resolver = StaticResolver(ResolveResult(
+            [proxyAddress], HostName("proxy.test"), ResolverSource.Static
+        ))
+        let clock = ProxyReviewManualClock()
+        let factory = ProxyReviewDialTransportFactory(clock)
+        let handshaker = ProxyReviewPassthroughHandshaker()
+        let client = Http1HttpsProxyClient(
+            Http1ProxyEndpoint.address(proxyAddress, 3128, "proxy.test:3128"),
+            resolver, factory, handshaker
+        )
+        let cap = 50 * Duration.millisecond
+        let context = OperationContext(
+            deadline: Some(Deadline.after(2 * Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(tcpConnect: Some(cap))
+        )
+        try {
+            let error = @AssertThrows[api.NetworkException](
+                client.execute(HttpRequest.get("https://origin.test/path"), context: context)
+            )
+            match (error.code) {
+                case api.NetworkErrorCode.TimedOut => ()
+                case _ => @Fail("HTTPS literal proxy dial did not enforce the TCP connect cap")
+            }
+            match (error.phase) {
+                case api.NetworkPhase.TcpConnect => ()
+                case _ => @Fail("HTTPS literal proxy timeout lost its TCP connect phase")
+            }
+            @Expect(factory.calls, 1)
+            @Expect(factory.deadlineExpired, true)
+            @Expect(handshaker.handshakeCount, 0)
+            match (factory.deadlineRemaining) {
+                case Some(remaining) =>
+                    @Expect(remaining > Duration.Zero)
+                    @Expect(remaining <= cap)
+                case None => @Fail("HTTPS literal proxy dial did not carry the TCP connect deadline")
+            }
+        } finally {
+            client.close()
+        }
+    }
+}
+
 private class ProxyReviewManualClock <: MonotonicClock {
     private var current = MonoTime.now()
     public func now(): MonoTime { current }
