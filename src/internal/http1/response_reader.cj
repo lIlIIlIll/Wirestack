@@ -123,14 +123,10 @@ public func exchangeHttp1ExpectContinue(
         transport, request.method, limits, readBuffer: readBuffer
     )
     let interim = ArrayList<Http1InterimResponse>()
-    var responseHeadersContext = None<OperationContext>
     var bodySent = false
     while (true) {
-        if (bodySent && responseHeadersContext.isNone()) {
-            responseHeadersContext = Some(context.forStage(OperationTimeoutStage.ResponseHeaders))
-        }
         let waitContext = if (bodySent) {
-            responseHeadersContext.getOrThrow()
+            responseHeadersBudget
         } else {
             continueContext
         }

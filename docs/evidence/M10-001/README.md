@@ -43,7 +43,11 @@ The deadline path does not allocate a scheduled timer handle: it passes the rema
 - `scripts/check-code`: exit 1. The architecture guard and root API documentation pass (688/688 symbols and 275/275 parameters); the HTTP package documentation check reports existing undocumented `value` parameters in `src/http/client.cj` and `src/http/server.cj`. No M10 HTTP signature change is implicated.
 - Only the declared native Linux x86_64 glibc environment was exercised. Cross-platform behavior is not inferred from this run.
 
-## Workspace snapshot
+## Review follow-up
+
+The review regression run covers literal proxy TCP-connect budgets, reuse of one response-header budget across a `100-continue` body write, HTTP/2 flow-control updates under the total deadline, and retention of flow-control update-write failures. Exact commands and results: [review-deadline-regressions.md](review-deadline-regressions.md).
+
+## Workspace snapshot (initial task capture; historical)
 
 - GitButler workspace view: `gitbutler/workspace`; the M10-001 changes remain uncommitted in the workspace, and the named `m10-001-unified-deadline` branch has no task commits. HEAD: `b2ab351ab3ee`; merge base with `main`: `00d6864f5d`.
 - Existing unrelated dirty paths `.gitignore` and `tools/docs/m7_033_docs.py` were preserved. M10 source, guide, evidence, and status changes remain uncommitted. No commit, push, or PR was created.
