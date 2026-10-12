@@ -143,7 +143,7 @@ public class HappyEyeballsConnector {
     public func connectLiteral(address: IpAddress, port: UInt16,
         context!: OperationContext = OperationContext.background()): DuplexTransport {
         checkConnectContext(context)
-        emitNetworkEvent(context, NetworkEvent(NetworkEventKind.StageCompleted,
+        emitNetworkEvent(context, NetworkEvent(NetworkEventKind.DnsCompleted,
             NetworkEventOutcome.NotExecuted, phase: Some(NetworkPhase.Dns),
             stage: Some(OperationTimeoutStage.Dns)))
         let tcp = context.forStage(OperationTimeoutStage.TcpConnect)

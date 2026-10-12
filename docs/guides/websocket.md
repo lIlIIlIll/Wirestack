@@ -22,6 +22,8 @@ let socketUrl = WebSocketUrl.parse("wss://example.test:443/events?cursor=a%2Fb")
 
 IPv4/IPv6 literal 直接进入现有 connector，不经过 DNS-only `HostName`。`wss` 使用原始 origin 的 DNS/IP reference identity：DNS host 进入 SNI，IP literal 验证 IP SAN 且不发送 DNS SNI。`Host`/`:authority`、CONNECT target 和 TLS identity 都不能替换成 resolver 地址或 proxy host。proxy 认证只发往 proxy，不转发到 origin。
 
+literal 路径发出 `DnsCompleted` / `NotExecuted` 事件，不发出 `DnsStarted`，也不调用 resolver。
+
 ## 拥有连接或拒绝响应
 
 ```cj
@@ -94,6 +96,8 @@ stream-read-idle 检查 active transport read 的空闲，不证明应用消息�
 [安装后 public-only consumer](../../examples/linux/m11_003/websocket.cj) 覆盖真实 H1/H2、fragment/Ping/Pong/Close、拒绝 body、literal/default port、TLS identity、proxy 认证隔离、slow consumer、cancel/close race 和 HTTP/2 sibling。[native runner](../../tools/m11_003_native_websocket.py) 创建受控服务器、严格检查所有场景 marker，并将证据绑定到实际归档的 source bytes。
 
 native runner 按包名组件检查 consumer import：拒绝 `wirestack.internal`、`std.net` 及其成员或别名，不把类似包名中的子串当作私有 namespace。边界回归由 `python3 -m unittest tools.tests.test_m11_003_native_websocket -v` 执行。
+
+native runner 保存 stdout/stderr 前，将完整 URL token（任意 `scheme://...`）替换为 `<redacted-url>`；不保留 scheme、userinfo、host、port、path、query 或 fragment。URL 脱敏先于日志落盘，且不依赖 URL 是否包含 `std.net`。
 
 ```bash
 python3 tools/m11_003_native_websocket.py

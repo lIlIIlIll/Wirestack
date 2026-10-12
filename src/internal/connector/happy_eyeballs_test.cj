@@ -128,6 +128,15 @@ private class CorrelatedAttemptFactory <: TransportFactory {
     }
 }
 
+private class LiteralDialResolver <: Resolver {
+    let calls = AtomicInt64(0)
+    public func resolve(_: HostName, _: ?String, _: ResolveOptions,
+        _: OperationContext): ResolveResult {
+        calls.fetchAdd(1)
+        throw ResolveException(ResolveErrorCode.NameNotFound, "literal dial must not resolve DNS")
+    }
+}
+
 private class ConnectorEventSink <: NetworkEventSink {
     private let mutex = Mutex()
     private let recorded = ArrayList<NetworkEvent>()
@@ -236,6 +245,41 @@ class HappyEyeballsConnectorTest {
             @Expect(event.trace.getOrThrow().traceId, "connect-trace")
         }
         result.transport.close()
+    }
+
+    @TestCase
+    func literalDialEmitsDnsNotExecutedWithoutResolving(): Unit {
+        for (address in [ipv4Address(2), ipv6Address(2)]) {
+            let resolver = LiteralDialResolver()
+            let factory = CorrelatedAttemptFactory()
+            let sink = ConnectorEventSink()
+            let context = OperationContext(eventSink: Some(sink),
+                trace: Some(NetworkTraceContext("literal-trace")),
+                requestId: Some(21), attemptId: Some(22), connectionId: Some(23))
+            let transport = HappyEyeballsConnector(resolver, factory).connectLiteral(
+                address, 443, context: context)
+            try {
+                @Expect(resolver.calls.load(), 0)
+                @Expect(factory.calls.load(), 1)
+                let events = sink.events()
+                @Assert(events.size, 4)
+                @Expect(isEvent(events[0], NetworkEventKind.DnsCompleted, NetworkEventOutcome.NotExecuted))
+                match ((events[0].phase, events[0].stage)) {
+                    case (Some(NetworkPhase.Dns), Some(OperationTimeoutStage.Dns)) => ()
+                    case _ => @Fail("literal DNS event lost phase or stage")
+                }
+                @Expect(isEvent(events[1], NetworkEventKind.ConnectAttemptStarted, NetworkEventOutcome.Started))
+                @Expect(isEvent(events[2], NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Succeeded))
+                @Expect(isEvent(events[3], NetworkEventKind.TcpConnected, NetworkEventOutcome.Succeeded))
+                for (event in events) {
+                    @Expect(!sameConnectorKind(event.kind, NetworkEventKind.DnsStarted))
+                    @Expect(event.trace.getOrThrow().traceId, "literal-trace")
+                    @Expect(event.requestId, Some(21))
+                    @Expect(event.attemptId, Some(22))
+                    @Expect(event.connectionId, Some(23))
+                }
+            } finally { transport.close() }
+        }
     }
 
     @TestCase
@@ -447,6 +491,7 @@ private func sameConnectorOutcome(left: NetworkEventOutcome, right: NetworkEvent
     match ((left, right)) {
         case (NetworkEventOutcome.Started, NetworkEventOutcome.Started) => true
         case (NetworkEventOutcome.Succeeded, NetworkEventOutcome.Succeeded) => true
+        case (NetworkEventOutcome.NotExecuted, NetworkEventOutcome.NotExecuted) => true
         case _ => false
     }
 }

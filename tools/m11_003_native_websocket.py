@@ -41,6 +41,15 @@ def public_imports(source: str) -> list[str]:
     return imports
 
 
+def redact_output(text: str, replacements: list[tuple[str, str]]) -> str:
+    """Remove complete URL tokens before saving evidence."""
+    text = re.sub(r"\b[A-Za-z][A-Za-z0-9+.-]*://[^\s<>\"']+", "<redacted-url>", text)
+    for actual, replacement in replacements:
+        text = text.replace(actual, replacement)
+    return text.replace("127.0.0.1", "192.0.2.1").replace("[::1]", "[2001:db8::1]").replace("IP:::1", "IP:2001:db8::1")
+
+
+
 def client_hello_name(record: bytes) -> str | None:
     """Read the cleartext SNI extension, without terminating the fixture's TLS connection."""
     if len(record) < 9 or record[0] != 22 or record[5] != 1:
@@ -212,9 +221,7 @@ def main() -> int:
             (os.environ.get("CANGJIE_HOME", ""), "<sdk>"), (str(Path.home()), "$HOME")] if a), key=lambda row: -len(row[0]))
 
         def redact(text: str) -> str:
-            for actual, replacement in replacements:
-                text = text.replace(actual, replacement)
-            return text.replace("127.0.0.1", "192.0.2.1").replace("[::1]", "[2001:db8::1]").replace("IP:::1", "IP:2001:db8::1")
+            return redact_output(text, replacements)
 
         def run(name: str, argv: list[str], cwd: Path, timeout: int = 60) -> str:
             code, timed_out = None, False
