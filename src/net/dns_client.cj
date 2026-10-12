@@ -74,6 +74,7 @@ public class DnsClient <: Resource & api.ResolverResourceOwner {
     private var closed = false
     private let ownerId = api.nextNetworkCorrelationId()
     private var rejectedQueries: Int64 = 0
+    private var finalSnapshot: ?api.ResolverResourceSnapshot = None
 
     /** Resolver configuration captured for the lifetime of this client. */
     public let config: DnsResolverConfig
@@ -216,7 +217,11 @@ public class DnsClient <: Resource & api.ResolverResourceOwner {
         }
         for (source in cancellations) { source.cancel() }
         synchronized(lifecycleMutex) {
-            while (!active.isEmpty()) { lifecycleChanged.wait() }
+            while (!active.isEmpty() || queued != 0) { lifecycleChanged.wait() }
+            if (delegate.isNone() && finalSnapshot.isNone()) {
+                finalSnapshot = Some(api.ResolverResourceSnapshot(ownerId, 0, 0,
+                    0, cache.size, rejectedQueries, isLive: false))
+            }
         }
         match (delegate) {
             case Some(value) => value.close()
@@ -230,9 +235,11 @@ public class DnsClient <: Resource & api.ResolverResourceOwner {
     /** Samples bounded owner-local admission, retained cache, and actual work.
      * Native fallback work remains counted after a caller abandons it or closes this owner.
      * Admission/cache and fallback metrics are sampled under their respective owner locks.
+     * Explicit DNS counters become an immutable historical sample once close drains all callers.
      */
     public func resolverResourceSnapshot(): api.ResolverResourceSnapshot {
         synchronized(lifecycleMutex) {
+            if (let Some(value) <- finalSnapshot) { return value }
             let native = match (delegate) {
                 case Some(value) => Some(value.resolverResourceSnapshot())
                 case None => None<api.ResolverResourceSnapshot>

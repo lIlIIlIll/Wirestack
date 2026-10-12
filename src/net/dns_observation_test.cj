@@ -56,6 +56,7 @@ class DnsResourceObservationTest {
             @Expect(initial.activeQueries, 1)
             @Expect(initial.runningWork, 1)
             @Expect(initial.queuedQueries, 0)
+            @Expect(initial.isLive)
             let second = spawn { lookup() }
             observationDnsWait({=> resolver.resolverResourceSnapshot().queuedQueries == 1 })
             let queued = resolver.resolverResourceSnapshot()
@@ -84,11 +85,65 @@ class DnsResourceObservationTest {
             @Expect(closed.cacheEntries, 0)
             @Expect(closed.rejectedQueries, 1)
             @Expect(closed.activeQueries, 0)
+            @Expect(closed.queuedQueries, 0)
+            @Expect(closed.runningWork, 0)
+            @Expect(closed.isLive, false)
+            @Expect(closed.sampledAt >= idle.sampledAt)
+            sleep(Duration.millisecond)
+            resolver.close()
+            @ExpectThrows[api.ResolveException](lookup())
+            let historical = resolver.resolverResourceSnapshot()
+            @Expect(historical.ownerId, closed.ownerId)
+            @Expect(historical.sampledAt, closed.sampledAt)
+            @Expect(historical.isLive, false)
+            @Expect(historical.activeQueries, closed.activeQueries)
+            @Expect(historical.queuedQueries, closed.queuedQueries)
+            @Expect(historical.runningWork, closed.runningWork)
+            @Expect(historical.cacheEntries, closed.cacheEntries)
+            @Expect(historical.rejectedQueries, closed.rejectedQueries)
         } finally {
             release.store(true)
             resolver.close()
             server.close()
         }
+    }
+
+    @TestCase
+    func closeDrainsUdpActiveAndQueuedQueriesBeforeFreezingSnapshot(): Unit {
+        let server = UdpSocket.bind(api.SocketEndpoint(
+            api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 0))
+        let endpoint = match (server.localEndpoint) {
+            case Some(api.NetworkEndpoint.Internet(value)) => value
+            case _ => throw IllegalStateException("expected Internet endpoint")
+        }
+        let client = DnsClient(config: DnsResolverConfig(nameservers: [endpoint],
+            hostsPath: "", attempts: 1, queryTimeout: 3 * Duration.second),
+            workerCount: 1, queueCapacity: 1)
+        try {
+            let first = spawn { client.query("close-observation.test", DnsRecordType.A) }
+            let _ = server.receive(512,
+                context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+            let second = spawn { client.query("close-observation.test", DnsRecordType.A) }
+            observationDnsWait({=> client.resolverResourceSnapshot().queuedQueries == 1 })
+            let live = client.resolverResourceSnapshot()
+            @Expect(live.activeQueries, 2)
+            @Expect(live.runningWork, 1)
+            @Expect(live.isLive)
+            client.close()
+            let closed = client.resolverResourceSnapshot()
+            @Expect(closed.isLive, false)
+            @Expect(closed.ownerId, live.ownerId)
+            @Expect(closed.activeQueries, 0)
+            @Expect(closed.queuedQueries, 0)
+            @Expect(closed.runningWork, 0)
+            @Expect(closed.cacheEntries, 0)
+            @Expect(closed.rejectedQueries, 0)
+            @ExpectThrows[api.ResolveException](first.get(Duration.second))
+            @ExpectThrows[api.ResolveException](second.get(Duration.second))
+            sleep(Duration.millisecond)
+            client.close()
+            @Expect(client.resolverResourceSnapshot().sampledAt, closed.sampledAt)
+        } finally { client.close(); server.close() }
     }
 
     @Configure[skip: getVariable("WIRESTACK_GAI_DELAY_MS") != Some("500")]

@@ -1,0 +1,647 @@
+COMMAND: LD_PRELOAD=<task-temp>/gai_delay.so WIRESTACK_GAI_DELAY_MS=500 cjpm test src/internal/resolver --filter=SystemResolverResourceObservationTest.abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical,SystemResolverResourceObservationTest.closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample --no-color --no-progress
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 17.55 */                    if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 17.56 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 17.57 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 17.1 */@Attribute[TEST_GENERATED] class SystemResolverResourceObservationTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 17.2 */    @Attribute[TestCase_19][0m
+    [36m| [0m[34m|[0m /* 17.3 */    func realLocalhostCompletionPreservesOwnerAndFinalSample(): Unit {[0m
+    [36m| [0m[34m|[0m /* 17.4 */        let resolver = SystemResolver(workerCount: 1, queueCapacity: 1)[0m
+    [36m| [0m[34m|[0m /* 17.5 */        let initial = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.6 */        let other = SystemResolver(workerCount: 1, queueCapacity: 1)[0m
+    [36m| [0m[34m|[0m /* 17.7 */        try {[0m
+    [36m| [0m[34m|[0m /* 17.8 */            expectEqual("initial.ownerId > 0", "true", initial.ownerId > 0, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.9 */            expectEqual("initial.ownerId != other.resolverResourceSnapshot().ownerId", "true", initial.ownerId != other.resolverResourceSnapshot().ownerId, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.10 */            expectEqual("resolver.resolve(api.HostName(\"localhost\")).addresses.isEmpty()", "false", resolver.resolve(api.HostName("localhost")).addresses.isEmpty(), false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.11 */            let idle = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.12 */            expectEqual("idle.activeQueries", "0", idle.activeQueries, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.13 */            expectEqual("idle.runningWork", "0", idle.runningWork, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.14 */            expectEqual("idle.cacheEntries", "0", idle.cacheEntries, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.15 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.16 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.17 */            let final = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.18 */            expectEqual("final.ownerId", "initial.ownerId", final.ownerId, initial.ownerId, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.19 */            expectEqual("final.activeQueries", "0", final.activeQueries, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.20 */            expectEqual("final.sampledAt >= idle.sampledAt", "true", final.sampledAt >= idle.sampledAt, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.21 */            expectEqual("final.isLive", "false", final.isLive, false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.22 */            sleep(Duration.millisecond)[0m
+    [36m| [0m[34m|[0m /* 17.23 */            expectEqual("resolver.resolverResourceSnapshot().sampledAt", "final.sampledAt", resolver.resolverResourceSnapshot().sampledAt, final.sampledAt, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.24 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 17.25 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.26 */            other.close()[0m
+    [36m| [0m[34m|[0m /* 17.27 */        }[0m
+    [36m| [0m[34m|[0m /* 17.28 */    }[0m
+    [36m| [0m[34m|[0m /* 17.29 */    [0m
+    [36m| [0m[34m|[0m /* 17.30 */    @Attribute[Configure_21, TestCase_20][0m
+    [36m| [0m[34m|[0m /* 17.31 */    func abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical(): Unit {[0m
+    [36m| [0m[34m|[0m /* 17.32 */        let resolver = SystemResolver(workerCount: 1, queueCapacity: 1)[0m
+    [36m| [0m[34m|[0m /* 17.33 */        let source = api.CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 17.34 */        let context = api.OperationContext(cancellation: source.token)[0m
+    [36m| [0m[34m|[0m /* 17.35 */        let first = spawn { resolver.resolve(api.HostName("localhost"), context: context)[0m
+    [36m| [0m[34m|[0m /* 17.36 */        }[0m
+    [36m| [0m[34m|[0m /* 17.37 */        try {[0m
+    [36m| [0m[34m|[0m /* 17.38 */            observationResolverWait({ =>[0m
+    [36m| [0m[34m|[0m /* 17.39 */                resolver.resolverResourceSnapshot().runningWork == 1[0m
+    [36m| [0m[34m|[0m /* 17.40 */            })[0m
+    [36m| [0m[34m|[0m /* 17.41 */            let second = spawn { resolver.resolve(api.HostName("localhost"), context: context)[0m
+    [36m| [0m[34m|[0m /* 17.42 */            }[0m
+    [36m| [0m[34m|[0m /* 17.43 */            observationResolverWait({ =>[0m
+    [36m| [0m[34m|[0m /* 17.44 */                resolver.resolverResourceSnapshot().queuedQueries == 1[0m
+    [36m| [0m[34m|[0m /* 17.45 */            })[0m
+    [36m| [0m[34m|[0m /* 17.46 */            let full = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.47 */            expectEqual("full.activeQueries", "2", full.activeQueries, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.48 */            expectEqual("full.runningWork", "1", full.runningWork, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.49 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 17.50 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.51 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.52 */                    resolver.resolve(api.HostName("localhost"))[0m
+    [36m| [0m[34m|[0m /* 17.53 */                    fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.54 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 17.55 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.56 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.57 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.58 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.59 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.60 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.61 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.62 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.63 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.64 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.65 */                }[0m
+    [36m| [0m[34m|[0m /* 17.66 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.67 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.68 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.69 */                }[0m
+    [36m| [0m[34m|[0m /* 17.70 */                assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.71 */            }[0m
+    [36m| [0m[34m|[0m /* 17.72 */            [0m
+    [36m| [0m[34m|[0m /* 17.73 */            match(error.resolveCode) {[0m
+    [36m| [0m[34m|[0m /* 17.74 */                case api.ResolveErrorCode.TemporaryFailure =>()[0m
+    [36m| [0m[34m|[0m /* 17.75 */                case _ => fail("expected native bounded queue rejection")[0m
+    [36m| [0m[34m|[0m /* 17.76 */            }[0m
+    [36m| [0m[34m|[0m /* 17.77 */            expectEqual("resolver.resolverResourceSnapshot().rejectedQueries", "1", resolver.resolverResourceSnapshot().rejectedQueries, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.78 */            source.cancel()[0m
+    [36m| [0m[34m|[0m /* 17.79 */            try {[0m
+    [36m| [0m[34m|[0m /* 17.80 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.81 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.82 */                    first.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 17.83 */                    failExpect("@ExpectThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.84 */                    None < api.ResolveException >[0m
+    [36m| [0m[34m|[0m /* 17.85 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 17.86 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.87 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.88 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.89 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.90 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.91 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.92 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.93 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.94 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.95 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.96 */                }[0m
+    [36m| [0m[34m|[0m /* 17.97 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.98 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.99 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.100 */                }[0m
+    [36m| [0m[34m|[0m /* 17.101 */                expectCaughtUnexpectedE("@ExpectThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.102 */                None < api.ResolveException >[0m
+    [36m| [0m[34m|[0m /* 17.103 */            }[0m
+    [36m| [0m[34m|[0m /* 17.104 */            try {[0m
+    [36m| [0m[34m|[0m /* 17.105 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.106 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.107 */                    second.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 17.108 */                    failExpect("@ExpectThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.109 */                    None < api.ResolveException >[0m
+    [36m| [0m[34m|[0m /* 17.110 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 17.111 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.112 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.113 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.114 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.115 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.116 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.117 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.118 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.119 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.120 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.121 */                }[0m
+    [36m| [0m[34m|[0m /* 17.122 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.123 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.124 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.125 */                }[0m
+    [36m| [0m[34m|[0m /* 17.126 */                expectCaughtUnexpectedE("@ExpectThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.127 */                None < api.ResolveException >[0m
+    [36m| [0m[34m|[0m /* 17.128 */            }[0m
+    [36m| [0m[34m|[0m /* 17.129 */            let abandoned = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.130 */            expectEqual("abandoned.runningWork", "1", abandoned.runningWork, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.131 */            expectEqual("abandoned.activeQueries >= 1", "true", abandoned.activeQueries >= 1, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.132 */            observationResolverWait({ =>[0m
+    [36m| [0m[34m|[0m /* 17.133 */                resolver.resolverResourceSnapshot().activeQueries == 0[0m
+    [36m| [0m[34m|[0m /* 17.134 */            })[0m
+    [36m| [0m[34m|[0m /* 17.135 */            let final = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.136 */            expectEqual("final.runningWork", "0", final.runningWork, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.137 */            expectEqual("final.queuedQueries", "0", final.queuedQueries, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.138 */            expectEqual("final.rejectedQueries", "1", final.rejectedQueries, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.139 */            expectEqual("final.ownerId", "full.ownerId", final.ownerId, full.ownerId, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.140 */            expectEqual("final.isLive", "true", final.isLive, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.141 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.142 */            let historical = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.143 */            expectEqual("historical.isLive", "false", historical.isLive, false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.144 */            expectEqual("historical.activeQueries", "0", historical.activeQueries, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.145 */            sleep(Duration.millisecond)[0m
+    [36m| [0m[34m|[0m /* 17.146 */            expectEqual("resolver.resolverResourceSnapshot().sampledAt", "historical.sampledAt", resolver.resolverResourceSnapshot().sampledAt, historical.sampledAt, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.147 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 17.148 */            source.cancel()[0m
+    [36m| [0m[34m|[0m /* 17.149 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.150 */        }[0m
+    [36m| [0m[34m|[0m /* 17.151 */    }[0m
+    [36m| [0m[34m|[0m /* 17.152 */    [0m
+    [36m| [0m[34m|[0m /* 17.153 */    @Attribute[Configure_23, TestCase_22][0m
+    [36m| [0m[34m|[0m /* 17.154 */    func closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample(): Unit {[0m
+    [36m| [0m[34m|[0m /* 17.155 */        let resolver = SystemResolver(workerCount: 1, queueCapacity: 1)[0m
+    [36m| [0m[34m|[0m /* 17.156 */        let source = api.CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 17.157 */        let resolving = spawn { resolver.resolve(api.HostName("localhost"), context: api.OperationContext(cancellation: source.token))[0m
+    [36m| [0m[34m|[0m /* 17.158 */        }[0m
+    [36m| [0m[34m|[0m /* 17.159 */        try {[0m
+    [36m| [0m[34m|[0m /* 17.160 */            observationResolverWait({ =>[0m
+    [36m| [0m[34m|[0m /* 17.161 */                resolver.resolverResourceSnapshot().runningWork == 1[0m
+    [36m| [0m[34m|[0m /* 17.162 */            })[0m
+    [36m| [0m[34m|[0m /* 17.163 */            source.cancel()[0m
+    [36m| [0m[34m|[0m /* 17.164 */            try {[0m
+    [36m| [0m[34m|[0m /* 17.165 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.166 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.167 */                    resolving.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 17.168 */                    failExpect("@ExpectThrows: Expected 'api.ResolveException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.169 */                    None < api.ResolveException >[0m
+    [36m| [0m[34m|[0m /* 17.170 */                } catch(e: api.ResolveException) {[0m
+    [36m| [0m[34m|[0m /* 17.171 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.172 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.173 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.174 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.175 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.176 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.177 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.178 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.179 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.180 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.181 */                }[0m
+    [36m| [0m[34m|[0m /* 17.182 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.183 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.184 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.185 */                }[0m
+    [36m| [0m[34m|[0m /* 17.186 */                expectCaughtUnexpectedE("@ExpectThrows(api.ResolveException)", "api.ResolveException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.187 */                None < api.ResolveException >[0m
+    [36m| [0m[34m|[0m /* 17.188 */            }[0m
+    [36m| [0m[34m|[0m /* 17.189 */            let started = MonoTime.now()[0m
+    [36m| [0m[34m|[0m /* 17.190 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.191 */            expectEqual("MonoTime.now() - started < 100 * Duration.millisecond", "true", MonoTime.now() - started < 100 * Duration.millisecond, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.192 */            let historical = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.193 */            expectEqual("historical.isLive", "false", historical.isLive, false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.194 */            expectEqual("historical.runningWork", "1", historical.runningWork, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.195 */            expectEqual("historical.activeQueries", "1", historical.activeQueries, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.196 */            sleep(600 * Duration.millisecond)[0m
+    [36m| [0m[34m|[0m /* 17.197 */            let later = resolver.resolverResourceSnapshot()[0m
+    [36m| [0m[34m|[0m /* 17.198 */            expectEqual("later.sampledAt", "historical.sampledAt", later.sampledAt, historical.sampledAt, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.199 */            expectEqual("later.activeQueries", "historical.activeQueries", later.activeQueries, historical.activeQueries, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.200 */            expectEqual("later.isLive", "false", later.isLive, false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.201 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 17.202 */            source.cancel()[0m
+    [36m| [0m[34m|[0m /* 17.203 */            resolver.close()[0m
+    [36m| [0m[34m|[0m /* 17.204 */        }[0m
+    [36m| [0m[34m|[0m /* 17.205 */    }[0m
+    [36m| [0m[34m|[0m /* 17.206 */    [0m
+    [36m| [0m[34m|[0m /* 17.207 */    init() {[0m
+    [36m| [0m[34m|[0m /* 17.208 */    }[0m
+    [36m| [0m[34m|[0m /* 17.209 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 17.210 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.211 */        [0m
+    [36m| [0m[34m|[0m /* 17.212 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 17.213 */    }[0m
+    [36m| [0m[34m|[0m /* 17.214 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 17.215 */        [0m
+    [36m| [0m[34m|[0m /* 17.216 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 17.217 */        let suiteBuilder = TestSuite.builder("SystemResolverResourceObservationTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 17.218 */        [0m
+    [36m| [0m[34m|[0m /* 17.219 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.220 */            [0m
+    [36m| [0m[34m|[0m /* 17.221 */            let realLocalhostCompletionPreservesOwnerAndFinalSampleTestFunc = { => realLocalhostCompletionPreservesOwnerAndFinalSample();() }[0m
+    [36m| [0m[34m|[0m /* 17.222 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 17.223 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 17.224 */            "realLocalhostCompletionPreservesOwnerAndFinalSample",[0m
+    [36m| [0m[34m|[0m /* 17.225 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 17.226 */            body: realLocalhostCompletionPreservesOwnerAndFinalSampleTestFunc[0m
+    [36m| [0m[34m|[0m /* 17.227 */            )[0m
+    [36m| [0m[34m|[0m /* 17.228 */            )[0m
+    [36m| [0m[34m|[0m /* 17.229 */            [0m
+    [36m| [0m[34m|[0m /* 17.230 */        }()[0m
+    [36m| [0m[34m|[0m /* 17.231 */        [0m
+    [36m| [0m[34m|[0m /* 17.232 */        [0m
+    [36m| [0m[34m|[0m /* 17.233 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.234 */            caseConfig.set(KeySkip.skip, getVariable("WIRESTACK_GAI_DELAY_MS") != Some("500"))[0m
+    [36m| [0m[34m|[0m /* 17.235 */            [0m
+    [36m| [0m[34m|[0m /* 17.236 */            let abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistoricalTestFunc = { => abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical();() }[0m
+    [36m| [0m[34m|[0m /* 17.237 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 17.238 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 17.239 */            "abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical",[0m
+    [36m| [0m[34m|[0m /* 17.240 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 17.241 */            body: abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistoricalTestFunc[0m
+    [36m| [0m[34m|[0m /* 17.242 */            )[0m
+    [36m| [0m[34m|[0m /* 17.243 */            )[0m
+    [36m| [0m[34m|[0m /* 17.244 */            [0m
+    [36m| [0m[34m|[0m /* 17.245 */        }()[0m
+    [36m| [0m[34m|[0m /* 17.246 */        [0m
+    [36m| [0m[34m|[0m /* 17.247 */        [0m
+    [36m| [0m[34m|[0m /* 17.248 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.249 */            caseConfig.set(KeySkip.skip, getVariable("WIRESTACK_GAI_DELAY_MS") != Some("500"))[0m
+    [36m| [0m[34m|[0m /* 17.250 */            [0m
+    [36m| [0m[34m|[0m /* 17.251 */            let closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSampleTestFunc = { => closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample();() }[0m
+    [36m| [0m[34m|[0m /* 17.252 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 17.253 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 17.254 */            "closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample",[0m
+    [36m| [0m[34m|[0m /* 17.255 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 17.256 */            body: closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSampleTestFunc[0m
+    [36m| [0m[34m|[0m /* 17.257 */            )[0m
+    [36m| [0m[34m|[0m /* 17.258 */            )[0m
+    [36m| [0m[34m|[0m /* 17.259 */            [0m
+    [36m| [0m[34m|[0m /* 17.260 */        }()[0m
+    [36m| [0m[34m|[0m /* 17.261 */        [0m
+    [36m| [0m[34m|[0m /* 17.262 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 17.263 */    }[0m
+    [36m| [0m[34m|[0m /* 17.264 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 17.265 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 17.266 */    }[0m
+    [36m| [0m[34m|[0m /* 17.267 */}[0m
+    [36m| [0m[34m|[0m /* 17.268 */[0m
+    [36m| [0m[34m|[0m /* 17.269 */[0m
+    [36m| [0m[34m|[0m /* 17.270 */interface TestPackageExtension_SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m /* 17.271 */    func registerSystemResolverResourceObservationTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 17.272 */}[0m
+    [36m| [0m[34m|[0m /* 17.273 */extend TestPackage <: TestPackageExtension_SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m /* 17.274 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 17.275 */    public func registerSystemResolverResourceObservationTest() {[0m
+    [36m| [0m[34m|[0m /* 17.276 */        registerSuite({ => SystemResolverResourceObservationTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 17.277 */    }[0m
+    [36m| [0m[34m|[0m /* 17.278 */}[0m
+    [36m| [0m[34m|[0m /* 17.279 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 17.58 */                    if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 17.59 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 17.60 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 17.61 */                    if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 17.62 */                        throw e[0m
+   [36m| [0m[33m|[0m /* 17.63 */                    }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.84 */                    None < api.ResolveException >[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.86 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.87 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.88 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.89 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.90 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.91 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.92 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.93 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.94 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m_______________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.102 */                None < api.ResolveException >[0m
+    [36m| [0m                            [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.109 */                    None < api.ResolveException >[0m
+    [36m| [0m                                [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.111 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.112 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.113 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.114 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.115 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.116 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.117 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m__________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.118 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.119 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.127 */                None < api.ResolveException >[0m
+    [36m| [0m                            [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.169 */                    None < api.ResolveException >[0m
+    [36m| [0m                                [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.171 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.172 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.173 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.174 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.175 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.176 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 17.177 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m__________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 17.178 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 17.179 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.187 */                None < api.ResolveException >[0m
+    [36m| [0m                            [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/resolver/resolver_observation_test.cj:17:1:
+    [36m| [0m
+[36m17[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m  [36m| [0m[34m|[0m class SystemResolverResourceObservationTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m111[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+18 warnings generated, 18 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 1166114587 ns, RESULT:
+    TCS: SystemResolverResourceObservationTest, time elapsed: 1162516696 ns, RESULT:
+    [ PASSED ] CASE: abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical (529649447 ns)
+    [ PASSED ] CASE: closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample (631633554 ns)
+Summary: TOTAL: 34
+    PASSED: 2, SKIPPED: 32, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 1174147674 ns, RESULT:
+TP: wirestack.*, time elapsed: 1174050368 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.resolver, time elapsed: 1166114587 ns
+Summary: TOTAL: 34
+    PASSED: 2, SKIPPED: 32, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
+EXIT_STATUS=0
