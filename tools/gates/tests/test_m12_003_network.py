@@ -7,7 +7,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from tools.gates.m12_003_network import Fixture, dns_answer
+from tools.gates.m12_003_network import Fixture, dns_answer, evaluate, impairments_removed
 
 
 class DnsAnswerTests(unittest.TestCase):
@@ -25,6 +25,47 @@ class DnsAnswerTests(unittest.TestCase):
         for tail in (b'\xc0\x0c\x00\x01\x00\x01', b'\x01a\x00\x00\x01\x00\x01garbage'):
             with self.subTest(tail=tail), self.assertRaises(ValueError):
                 dns_answer(header + tail)
+
+
+class NetworkCleanupVerdictTests(unittest.TestCase):
+    def test_only_absent_owned_impairments_and_filters_are_clean(self):
+        self.assertTrue(impairments_removed('', ''))
+        self.assertTrue(impairments_removed('qdisc noqueue 0: root refcnt 2\n', ''))
+        for qdiscs, filters in (
+            ('qdisc netem 8001: root refcnt 2 limit 1000\n', ''),
+            ('qdisc clsact ffff: parent ffff:fff1\n', ''),
+            ('qdisc noqueue 0: root refcnt 2\nqdisc clsact ffff: parent ffff:fff1\n', ''),
+            ('qdisc noqueue 0: root refcnt 2\n', 'filter protocol ip pref 49152 flower\n'),
+        ):
+            with self.subTest(qdiscs=qdiscs, filters=filters):
+                self.assertFalse(impairments_removed(qdiscs, filters))
+
+    def valid_profile(self):
+        return {
+            'id': 'system_resolver_boundary',
+            'consumer': {
+                'exit_code': 0, 'result': {'rejected_queries': 1}, 'native_cleanup': {},
+                'process_reclaimed': True,
+                'resource_boundaries': {
+                    'BASELINE': {'process_count': 1, 'socket_count': 1, 'fd_count': 1},
+                    'RECLAIMED': {'process_count': 1, 'socket_count': 1, 'fd_count': 1},
+                },
+            },
+            'applied_fault_proof': {
+                'fixture_events': [], 'fixture_errors': [],
+                'system_operation_log': 'phase=enter\nphase=exit',
+            },
+            'cleanup': {'fixture_threads_joined': True, 'impairments_removed': True},
+        }
+
+    def test_network_pass_requires_each_cleanup_predicate_to_be_true(self):
+        self.assertEqual(evaluate(self.valid_profile())['status'], 'PASS')
+        for field in ('fixture_threads_joined', 'impairments_removed'):
+            for value in (False, None, 0, 1, 'PASS'):
+                profile = self.valid_profile()
+                profile['cleanup'][field] = value
+                with self.subTest(field=field, value=value):
+                    self.assertEqual(evaluate(profile)['status'], 'FAIL')
 
 
 class IsolatedFixtureTests(unittest.TestCase):

@@ -2,6 +2,9 @@
   "schema_version": 1,
   "task_id": "M12-003",
   "status": "PASS",
+  "status_scope": "HISTORICAL_ACCEPTANCE_FOR_ORIGINAL_SOURCE_SNAPSHOT",
+  "current_status": "BLOCKED",
+  "current_status_evidence": "verification.json",
   "sdk_policy": "STS_ONLY",
   "sdk_selection": "$HOME/cangjie_sdk/sts1.1.3",
   "sdk_files": {

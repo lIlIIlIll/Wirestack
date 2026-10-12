@@ -291,9 +291,18 @@ def evaluate(profile):
     elif mode in ('rst', 'http_rst'): checks['rst_applied'] = 'abortive_close' in names
     elif mode == 'peer_no_read': checks['backpressure_applied'] = 'receive_disabled' in names
     else: checks['peer_response_disabled'] = 'response_disabled' in names
+    cleanup = profile.get('cleanup', {})
+    checks['fixture_threads_joined'] = isinstance(cleanup, dict) and cleanup.get('fixture_threads_joined') is True
+    checks['impairments_removed'] = isinstance(cleanup, dict) and cleanup.get('impairments_removed') is True
     profile['semantic_criteria'] = checks
     profile['status'] = 'PASS' if all(checks.values()) else 'FAIL'
     return profile
+
+def impairments_removed(qdisc_raw, filter_raw):
+    task_qdisc_kinds = {line.split()[1] for line in qdisc_raw.splitlines()
+                        if line.startswith('qdisc ') and len(line.split()) > 1}
+    return not task_qdisc_kinds.intersection({'netem', 'clsact'}) and not filter_raw.strip()
+
 
 
 def inside(args):
@@ -335,8 +344,11 @@ def inside(args):
             recovery = Fixture('echo')
             try: profile['recovery'] = run_native(args, 'echo', recovery)
             finally: recovery.close()
-            profile['cleanup'] = {'fixture_threads_joined': not fixture.worker.is_alive(), 'impairments_removed': tc_stats('filter')['packets'] == 0,
-                                  'post_removal_qdisc': tc_stats('qdisc')['raw']}
+            post_removal_qdisc = tc_stats('qdisc')
+            post_removal_filter = tc_stats('filter')
+            profile['cleanup'] = {'fixture_threads_joined': not fixture.worker.is_alive(),
+                'impairments_removed': impairments_removed(post_removal_qdisc['raw'], post_removal_filter['raw']),
+                'post_removal_qdisc': post_removal_qdisc['raw'], 'post_removal_filter': post_removal_filter['raw']}
             evaluate(profile)
             profile['semantic_criteria']['new_connection_after_removal'] = profile['recovery']['exit_code'] == 0
             profile['status'] = 'PASS' if all(profile['semantic_criteria'].values()) else 'FAIL'

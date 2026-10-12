@@ -1,4 +1,7 @@
 # M12-003: STS native fault and resilience evidence
+## Current source status
+
+BLOCKED. Current source-bound campaign verification exits 1 because review fixes changed tools/gates/m12_003_network.py ([verifier log](current-source-verification.log)). The current Python contract suite ran 42 tests, 41 passed and one was skipped ([final log](review-contract-tests-final.log)). No native campaign has been rerun against the updated gates. Results below remain historical.
 
 ## Workspace and scope
 
@@ -18,7 +21,7 @@ Future SDK execution is STS-only. This task executed only the qualified STS 1.1.
 
 ## Native acceptance
 
-| Slice | Current execution | Result | Evidence |
+| Slice | Historical execution | Result | Evidence |
 |---|---|---|---|
 | Resource limits/admission | Eight supported cgroup/FD/quota scenarios, plus typed negative 96-MiB allocation experiment; seed 184003 | Supported 8/8 PASS; negative runtime OOM classified, native exit 23 remains FAIL | `resources/final/report.json` |
 | DNS/connect/transport | Twelve native scenarios, seeds 12003, 12004, 12005; own KVM guest and real qdisc/filter counters | 36/36 PASS | `network/native-guest/current/report.json`, `stress-12004/report.json`, `stress-12005/report.json` |
@@ -27,7 +30,7 @@ Future SDK execution is STS-only. This task executed only the qualified STS 1.1.
 | Native network regressions | Actual packet loss and original-response retransmission, DNS and native peer modes | 4/4 PASS, 0 skipped | `network/native-guest/unit-tests.log` |
 | Host behavioral suite | 37 discovered; packet regression unavailable on host | 36 PASS, 1 explicitly skipped | `unit-tests.log` |
 
-M12-003 is COMPLETE. The collector and source-bound verifier returned PASS for all 25 required coverage keys: resources seven, network eleven, lifecycle seven. Final closure is `acceptance.json`; `verification.json` preserves the executable decision. `scripts/check-task M12-003 --json --output docs/gates/M12-003-task.json` exited 0: both behavioral contracts and bound-native-evidence commands PASS. Architecture and public API checks were executed separately and passed.
+Historical record: the task gate reported PASS for the original source inputs. That receipt does not validate the updated gates. The current [task-gate disposition](verification.json) is BLOCKED because `tools/gates/m12_003_network.py` changed; no fresh native campaign validates the updated sources.
 
 Native semantics cover distinct DNS deadline/late response, IPv6 blackhole with reachable IPv4, multi-candidate cancellation, real delay/loss, RST, silent disconnect, peer backpressure, new connections after fault removal, bounded resolver admission, HTTP/2 slow consumers/GOAWAY/per-stream isolation, SSE/WebSocket cancellation/disconnect, gzip rejection/recovery, cancellation storms and rotation/shutdown races. Public ledgers and observable resolver work return to zero. Native FD/tasks/RSS are sampled separately; RSS is not a logical ownership counter. Unobservable cancellation-registration, reserved-request and local H2-window counters remain UNAVAILABLE.
 

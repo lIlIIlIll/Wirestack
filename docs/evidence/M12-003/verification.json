@@ -1,7 +1,24 @@
 {
   "task_id": "M12-003",
-  "status": "PASS",
-  "families": 3,
-  "required_coverage_keys": 25,
+  "status": "BLOCKED",
+  "historical_native_campaign": {
+    "status": "PASS",
+    "families": 3,
+    "required_coverage_keys": 25
+  },
+  "current_source_verification": {
+    "command": "python3 tools/gates/m12_003_campaign.py verify",
+    "exit_status": 1,
+    "failure": "bound input changed: tools/gates/m12_003_network.py",
+    "log": "current-source-verification.log"
+  },
+  "review_contract_tests": {
+    "command": "python3 -m unittest tools.gates.tests.test_m12_003_resources tools.gates.tests.test_m12_003_network tools.gates.tests.test_m12_003_lifecycle tools.gates.tests.test_m12_003_supervision tools.gates.tests.test_m12_003_campaign -v",
+    "exit_status": 0,
+    "discovered": 42,
+    "passed": 41,
+    "skipped": 1,
+    "log": "review-contract-tests-final.log"
+  },
   "formal_release_qualification": "NOT_QUALIFIED"
 }

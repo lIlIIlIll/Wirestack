@@ -75,8 +75,15 @@ def coverage(campaign, reports):
                     reference = {'report': path, 'profile': name, 'round': identity[1], 'status': profile['status']}
                     seen.setdefault(key, []).append(reference)
                     if profile['status'] == 'PASS':
-                        require(profile.get('semantic_criteria') and profile.get('cleanup'), 'passing profile lacks semantics/cleanup proof')
-                        require(all(value is not False for value in profile['semantic_criteria'].values()), 'passing profile contradicts semantic criteria')
+                        require(profile.get('semantic_criteria') and all(value is True for value in profile['semantic_criteria'].values()),
+                                'passing profile lacks strictly true semantic criteria')
+                        cleanup = profile.get('cleanup')
+                        require(isinstance(cleanup, dict) and cleanup,
+                                'passing profile lacks cleanup proof')
+                        if family == 'network':
+                            require(cleanup.get('fixture_threads_joined') is True
+                                    and cleanup.get('impairments_removed') is True,
+                                    'passing network profile lacks successful cleanup predicates')
                         proof = profile.get('applied_fault_proof', profile.get('wire_observation', profile.get('native')))
                         require(proof is not None or profile.get('measurement') is not None, 'passing profile lacks actual native observations')
                         passed.setdefault(key, []).append(reference)

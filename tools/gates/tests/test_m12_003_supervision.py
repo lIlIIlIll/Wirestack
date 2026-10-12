@@ -29,11 +29,36 @@ class OwnedProcessTests(unittest.TestCase):
 
     def wait_ready(self):
         stop = time.monotonic() + 5
-        while not self.pid_file.exists() and time.monotonic() < stop:
+        while time.monotonic() < stop:
+            try:
+                contents = self.pid_file.read_text().strip()
+            except FileNotFoundError:
+                contents = ''
+            if contents:
+                try:
+                    pid = int(contents)
+                except ValueError:
+                    pid = 0
+                if pid > 0:
+                    return pid
             time.sleep(.005)
-        self.assertTrue(self.pid_file.exists(), 'native fork fixture did not reach event barrier')
-        return int(self.pid_file.read_text())
+        self.fail('native fork fixture did not write a complete PID')
 
+    def test_wait_ready_ignores_empty_malformed_and_nonpositive_pid_contents(self):
+        self.pid_file.touch()
+
+        def publish_pid():
+            for contents in ('not-a-pid', '0', '-7', '12345'):
+                time.sleep(.02)
+                self.pid_file.write_text(contents)
+
+        writer = threading.Thread(target=publish_pid)
+        writer.start()
+        try:
+            self.assertEqual(self.wait_ready(), 12345)
+        finally:
+            writer.join(5)
+        self.assertFalse(writer.is_alive())
     def assert_gone(self, pid):
         path = Path('/proc') / str(pid) / 'stat'
         if path.exists():

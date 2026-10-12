@@ -16,7 +16,9 @@ def observation():
     return {'task_id': 'M12-003', 'family': 'network', 'seed': 184003, 'status': 'PASS',
             'profiles': [{'id': 'packet', 'status': 'PASS', 'coverage_keys': ['delay', 'loss'],
                           'semantic_criteria': {'affected_packets': True, 'recovery': True},
-                          'cleanup': {'reaped': True}, 'applied_fault_proof': {'dropped_packets': 3}}]}
+                          'cleanup': {'fixture_threads_joined': True, 'impairments_removed': True,
+                                      'post_removal_qdisc': 'qdisc noqueue 0: root refcnt 2'},
+                          'applied_fault_proof': {'dropped_packets': 3}}]}
 
 
 class CampaignContracts(unittest.TestCase):
@@ -31,14 +33,39 @@ class CampaignContracts(unittest.TestCase):
         result = gate.coverage(SPEC, {'network': [('first.json', failed), ('second.json', observation())]})['network']
         self.assertEqual(result['status'], 'FAIL')
 
-    def test_contradictory_semantics_cannot_pass(self):
-        report = observation(); report['profiles'][0]['semantic_criteria']['recovery'] = False
-        with self.assertRaises(ValueError): gate.coverage(SPEC, {'network': [('report.json', report)]})
+    def test_every_semantic_criterion_must_be_exactly_true(self):
+        for value in (False, None, 0, 1, 'FAIL', 'PASS'):
+            report = observation()
+            report['profiles'][0]['semantic_criteria']['recovery'] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                gate.coverage(SPEC, {'network': [('report.json', report)]})
+        result = gate.coverage(SPEC, {'network': [('report.json', observation())]})['network']
+        self.assertEqual(result['status'], 'PASS')
+
+    def test_cleanup_predicates_must_be_exactly_true(self):
+        for field in ('fixture_threads_joined', 'impairments_removed'):
+            for value in (False, None, 0, 1, 'PASS'):
+                report = observation()
+                report['profiles'][0]['cleanup'][field] = value
+                with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                    gate.coverage(SPEC, {'network': [('report.json', report)]})
 
     def test_cleanup_and_fault_observations_are_required(self):
         for field in ('cleanup', 'applied_fault_proof'):
             report = observation(); report['profiles'][0].pop(field)
             with self.assertRaises(ValueError): gate.coverage(SPEC, {'network': [('report.json', report)]})
+
+    def test_non_network_cleanup_uses_its_family_contract(self):
+        campaign = {'families': {'lifecycle': {'required_coverage': ['shutdown']}}}
+        report = {'task_id': 'M12-003', 'family': 'lifecycle', 'seed': 184003, 'status': 'PASS',
+                  'profiles': [{'id': 'shutdown', 'status': 'PASS', 'coverage_keys': ['shutdown'],
+                                'semantic_criteria': {'process_reaped': True},
+                                'cleanup': {'process_reaped': True, 'remaining_live_owned_processes': 0,
+                                            'sampler_alive': False},
+                                'applied_fault_proof': {'child_exit': 0}}]}
+        result = gate.coverage(campaign, {'lifecycle': [('report.json', report)]})['lifecycle']
+        self.assertEqual(result['status'], 'PASS')
+        self.assertEqual(result['missing'], [])
 
     def test_duplicate_execution_identity_is_rejected(self):
         report = observation(); report['profiles'].append(copy.deepcopy(report['profiles'][0]))
