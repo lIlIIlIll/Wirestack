@@ -1,14 +1,23 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "task_id": "M12-001",
-  "status": "COMPLETE",
+  "status": "BLOCKED",
+  "current_source_verification": {
+    "command": "python3 tools/benchmarks/m12_001_end_to_end.py verify",
+    "exit_status": 1,
+    "failure": "current production/probe source differs from measured native source",
+    "log": "current-source-verification.log"
+  },
   "candidate_committed": false,
   "committed_source_seal": "NOT_REQUESTED",
   "release_qualification": "NOT_QUALIFIED",
-  "production_source_count": 164,
-  "production_sources_equal_accepted_artifact": true,
-  "native_probe_sources_current": true,
-  "source_digests": {
+  "historical_production_source_count": 164,
+  "historical_source_claims": {
+    "production_sources_equal_accepted_artifact": true,
+    "native_probe_sources_current": true
+  },
+  "current_source_binding": "FAILED",
+  "historical_source_digests": {
     "examples/linux/m12_001/common.cj": {
       "domain": "text-utf8-lf-v1",
       "sha256": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
@@ -50,11 +59,11 @@
       "sha256": "ac2fefd5e8f90ec84142b7efca4c4713608b93d9932b99fea1405e238a072bb7"
     }
   },
-  "status_file_digest": {
+  "historical_status_file_digest": {
     "domain": "text-utf8-lf-v1",
     "sha256": "ffe729bab64d3d78be54ce3e572daef0dc0c122664ec6bb08a7891e8c54870be"
   },
-  "native": {
+  "historical_native": {
     "status": "PASS",
     "measured_processes": 462,
     "operation_latency_samples": 82236,
@@ -63,7 +72,7 @@
     "unexpected_failures": 0,
     "terminal_ownership_ledgers": "zero in every validated sample"
   },
-  "ci": {
+  "historical_ci": {
     "status": "NOISY",
     "case_verdicts": {
       "PASS": 3,
@@ -74,7 +83,7 @@
       "STABLE": 3
     }
   },
-  "candidate": {
+  "historical_candidate": {
     "decision": "REJECTED",
     "reason": "No reliable equivalent-work improvement with preserved tails; no production optimization or API added",
     "paired_rounds": 14,
@@ -136,7 +145,7 @@
     "unavailable_reason": "Fewer public read invocations does not prove fewer managed allocations or internal copies.",
     "P1-001_vectored_io": "DEFERRED: no measured copy bottleneck or supported native vectored SPI demonstrated."
   },
-  "acceptance": {
+  "historical_acceptance": {
     "full_layer_and_feature_baselines": "PASS",
     "raw_environment_and_reconstructable_installed_artifact": "PASS",
     "equivalent_work_correctness_cleanup_and_candidate_decision": "PASS; candidate REJECTED",

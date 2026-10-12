@@ -1,6 +1,7 @@
 # M12-001 — native end-to-end performance evidence
+Current status: BLOCKED. The source-bound verify command exits 1 because current production/probe source differs from the measured native source. All measurement results below are historical; rerun the baseline on exact current sources with STS 1.1.3 before marking COMPLETE. The current review suite passes 28/28 tests, including optional `cjprof` handling ([log](review-unit-tests.log)); it does not clear the source-binding failure. Clean-checkout archive reproduction is still unproved: reconstruction needs generated native inputs, while the exact historical archive remains withheld because its provider debug data embeds private machine paths.
 
-**COMPLETE: development measurement and candidate evaluation.** Not release qualification or proof of a performance gain.
+**Historical measurement: development measurement and candidate evaluation.** Not release qualification or proof of a performance gain.
 
 ## Artifact and environment
 
@@ -28,7 +29,7 @@ The original `cjprof` record file contains no sampling data; its failed report r
 
 The [slow-reader failure](failures/interpretation.json) is retained. A capacity-one 65,535-byte whole-frame reservation rejected a sibling even after a verified prefix read returned protocol credit. The corrected capacity-two receive reservation remains bounded at 131,070 bytes while per-route/per-origin limits and the actual physical connection count stay one. This is a scenario configuration correction, not an identical-work gain or production fix.
 
-[Final command results](final-command-results.json) record architecture, public API and task checks. [Task gate](task-gate.json) passes 23 behavioral contracts plus retained native-evidence verification. [Source-bound verification](verification.json) records acceptance, current working-tree digests and privacy/cleanup evidence; no committed-source seal is claimed.
+[Final command results](final-command-results.json) record the historical architecture, public API and task checks. The task-gate receipt records PASS for 23 behavioral contracts on the original source snapshot; it does not verify current review changes. [Current source-bound verification](verification.json) exits 1 ([log](current-source-verification.log)). All digests and acceptance values under historical_* fields describe the measured snapshot, not current working-tree source or acceptance. No committed-source seal is claimed.
 
 The publication privacy gate found an unredacted SDK loader path in capture metadata. [Privacy correction](privacy-correction.json) records the metadata-only redaction and capture-time fix; [live SDK metadata smoke](metadata-smoke/report.json) proves the corrected path with the qualified SDK. Native measurements and command-log digests are unchanged.
 

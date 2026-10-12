@@ -16,6 +16,7 @@ import statistics
 import subprocess
 import sys
 import threading
+import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -388,12 +389,15 @@ class Campaign:
         print(f"NATIVE_SAMPLE {case} round={round_number} warmup={warmup} operations={row['operations']} failures={row['failures']}", flush=True)
 
     def profile(self, binary: Path) -> dict:
+        profiler = shutil.which("cjprof")
+        if profiler is None:
+            return {"status": "UNAVAILABLE", "reason": "optional cjprof executable is not installed"}
         destination = self.work / "native-http-cpu.data"
-        text, command = self.run("native-http-cpu-profile", ["cjprof", "record", "-f", "199", "-o", str(destination), "--",
+        text, command = self.run("native-http-cpu-profile", [profiler, "record", "-f", "199", "-o", str(destination), "--",
                           str(binary), "h1_bulk_4096", str(self.work / "certificate.der"), str(self.work / "key.pk8")], binary.parent, check=False)
         if command["exit_code"] != 0 or command["timed_out"] or not destination.is_file():
             return {"status": "UNAVAILABLE", "command": command["id"], "reason": "Profiler execution did not produce a valid sample file; raw failure retained"}
-        _, view = self.run("native-http-cpu-report", ["cjprof", "report", "-i", str(destination)], binary.parent, check=False)
+        _, view = self.run("native-http-cpu-report", [profiler, "report", "-i", str(destination)], binary.parent, check=False)
         return {"status": "CAPTURED" if view["exit_code"] == 0 else "CAPTURED_REPORT_UNAVAILABLE",
                 "record_command": command["id"], "report_command": view["id"],
                 "data_digest": artifact_byte_digest(destination).to_json(),
@@ -470,6 +474,24 @@ def selected_round_summaries(report: dict, selection: str | None) -> tuple[dict,
     return {case: summarize(sorted(values, key=lambda r: r["round"])) for case, values in rows.items()}, rounds
 
 
+
+def verify_baseline_archive(report: dict, archive: Path) -> None:
+    expected = report['artifact']['archive_digest']
+    if archive.exists():
+        if not archive.is_file() or artifact_byte_digest(archive).to_json() != expected:
+            raise ValueError('retained development baseline artifact differs')
+        return
+    try:
+        payload, manifest = release.collect_payload(ROOT)
+    except Exception as error:
+        raise ValueError(f'exact baseline payload reconstruction is unavailable: {error}') from error
+    if not schema_artifact_sha256_equal(manifest['payload_sha256'], report['artifact']['payload_sha256']):
+        raise ValueError('reconstructed baseline payload differs from measured development artifact')
+    with tempfile.TemporaryDirectory(prefix='wirestack-m12-001-verify-') as directory:
+        reconstructed = Path(directory) / archive.name
+        release.write_reproducible_archive(reconstructed, payload)
+        if artifact_byte_digest(reconstructed).to_json() != expected:
+            raise ValueError('reconstructed baseline artifact differs from measured development artifact')
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -501,8 +523,7 @@ def main() -> int:
         archive = args.report.parent / "wirestack-baseline.tar.gz"
         if source != report["artifact"]["production_sources"] or probes != report["artifact"]["probe_sources"]:
             raise ValueError("current production/probe source differs from measured native source")
-        if artifact_byte_digest(archive).to_json() != report["artifact"]["archive_digest"]:
-            raise ValueError("retained development baseline artifact differs")
+        verify_baseline_archive(report, archive)
         print("M12_001_EVIDENCE_PASS")
         return 0
     try:

@@ -4,6 +4,7 @@ import unittest
 import json
 from pathlib import Path
 import tempfile
+from unittest.mock import patch
 
 from tools.benchmarks import m12_001_end_to_end as bench
 
@@ -159,6 +160,65 @@ class RawEvidenceBinding(unittest.TestCase):
         self.report["samples"][1]["command_id"] = self.report["samples"][0]["command_id"]
         with self.assertRaisesRegex(ValueError, "reused a native command"):
             self.load()
+
+
+class BaselineArchiveVerification(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.root = Path(self.directory.name)
+
+    def report(self, archive_digest, payload_sha256='a' * 64):
+        return {'artifact': {'archive_digest': archive_digest, 'payload_sha256': payload_sha256}}
+
+    def test_missing_archive_is_reconstructed_and_checked_against_payload_and_bytes(self):
+        expected_bytes = b'reproducible baseline archive bytes'
+        expected = self.root / 'expected.tar.gz'
+        expected.write_bytes(expected_bytes)
+        archive = self.root / 'missing.tar.gz'
+        report = self.report(bench.artifact_byte_digest(expected).to_json())
+
+        def write_archive(path, payload):
+            Path(path).write_bytes(expected_bytes)
+
+        with patch.object(bench.release, 'collect_payload', return_value=([], {'payload_sha256': 'a' * 64})) as collect, \
+             patch.object(bench.release, 'write_reproducible_archive', side_effect=write_archive):
+            bench.verify_baseline_archive(report, archive)
+        collect.assert_called_once_with(bench.ROOT)
+
+    def test_wrong_reconstructed_payload_or_archive_cannot_pass(self):
+        archive = self.root / 'missing.tar.gz'
+        expected = self.root / 'expected.tar.gz'
+        expected.write_bytes(b'expected archive')
+        report = self.report(bench.artifact_byte_digest(expected).to_json())
+        with patch.object(bench.release, 'collect_payload', return_value=([], {'payload_sha256': 'b' * 64})):
+            with self.assertRaisesRegex(ValueError, 'payload differs'):
+                bench.verify_baseline_archive(report, archive)
+        with patch.object(bench.release, 'collect_payload', return_value=([], {'payload_sha256': 'a' * 64})), \
+             patch.object(bench.release, 'write_reproducible_archive', side_effect=lambda path, payload: Path(path).write_bytes(b'wrong archive')):
+            with self.assertRaisesRegex(ValueError, 'artifact differs'):
+                bench.verify_baseline_archive(report, archive)
+
+    def test_missing_reconstruction_inputs_are_explicitly_unavailable(self):
+        with patch.object(bench.release, 'collect_payload', side_effect=FileNotFoundError('native archive input missing')):
+            with self.assertRaisesRegex(ValueError, 'exact baseline payload reconstruction is unavailable'):
+                bench.verify_baseline_archive(self.report({}), self.root / 'missing.tar.gz')
+
+    def test_existing_wrong_archive_fails_without_reconstruction(self):
+        archive = self.root / 'baseline.tar.gz'
+        archive.write_bytes(b'wrong')
+        with patch.object(bench.release, 'collect_payload') as collect:
+            with self.assertRaisesRegex(ValueError, 'retained development baseline artifact differs'):
+                bench.verify_baseline_archive(self.report({}), archive)
+        collect.assert_not_called()
+
+    def test_missing_profiler_returns_optional_unavailable_record(self):
+        campaign = object.__new__(bench.Campaign)
+        campaign.work = self.root
+        with patch.object(bench.shutil, 'which', return_value=None):
+            result = campaign.profile(self.root / 'unused-binary')
+        self.assertEqual(result['status'], 'UNAVAILABLE')
+        self.assertIn('cjprof', result['reason'])
 
 class RoundCohortSelection(unittest.TestCase):
     def test_warmup_and_old_rounds_cannot_hide_later_regression(self):
