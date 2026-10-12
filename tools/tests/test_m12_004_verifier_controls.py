@@ -26,8 +26,13 @@ class VerifierControlsTest(unittest.TestCase):
         cls.execution = subprocess.run(cls.command, cwd=controls.ROOT, capture_output=True, text=True, timeout=190)
         cls.report = json.loads(cls.output.read_text())
 
-    def test_real_cli_rejects_all_mutations_with_exact_codes(self):
+    def require_full_control_inputs(self):
+        if self.report.get("error") == "CONTROL_INPUTS_MISSING":
+            self.skipTest("release and native evidence archives are unavailable")
         self.assertEqual(0, self.execution.returncode, self.execution.stdout)
+
+    def test_real_cli_rejects_all_mutations_with_exact_codes(self):
+        self.require_full_control_inputs()
         expected = {
             "archive-replacement": "SUBJECT_DIGEST",
             "native-static-archive-replacement": "NATIVE_ARCHIVE_PROVENANCE",
@@ -49,6 +54,7 @@ class VerifierControlsTest(unittest.TestCase):
         self.assertEqual(len(expected), len(observed))
 
     def test_positive_fixtures_native_smoke_and_originals(self):
+        self.require_full_control_inputs()
         self.assertEqual("PASS", self.report["offline_positive"]["decision"])
         self.assertEqual("PASS", self.report["offline_restored"]["decision"])
         self.assertEqual("PASS", self.report["native_payload_positive"])
@@ -64,7 +70,12 @@ class VerifierControlsTest(unittest.TestCase):
         self.assertEqual("verifier-controls", self.report["family"])
         self.assertEqual("STS_ONLY", self.report["SDKpolicy"])
         self.assertEqual("NOT_QUALIFIED", self.report["qualification"])
-        self.assertEqual("NOT_QUALIFIED", self.report["historical_fuzz_baseline"]["qualification"])
+        if self.report.get("error") == "CONTROL_INPUTS_MISSING":
+            self.assertEqual("BLOCKED", self.report["status"])
+            self.assertTrue(self.report["missing_inputs"])
+        else:
+            self.assertEqual("PASS", self.report["status"])
+            self.assertEqual("NOT_QUALIFIED", self.report["historical_fuzz_baseline"]["qualification"])
         self.assertTrue(self.report["limitations"])
         serialized = json.dumps(self.report)
         for secret in (str(Path.home()), str(controls.ROOT), str(self.scratch), "OPENSSH PRIVATE KEY"):
@@ -91,6 +102,7 @@ class VerifierControlsTest(unittest.TestCase):
             "test-only TLS key logging cannot enter a release artifact")))
 
     def test_external_native_artifact_is_bound_preserved_and_sanitized(self):
+        self.require_full_control_inputs()
         from tools import evidence_digest as digest
         with tempfile.TemporaryDirectory(prefix="external-input-", dir=self.scratch) as directory:
             root = Path(directory)
@@ -110,6 +122,20 @@ class VerifierControlsTest(unittest.TestCase):
             self.assertNotIn(str(root), json.dumps(report))
             self.assertNotIn(selected.name, json.dumps(report))
 
-
+    def test_explicit_missing_native_input_is_blocked_without_leaking_path(self):
+        with tempfile.TemporaryDirectory(prefix="missing-native-", dir=self.scratch) as directory:
+            root = Path(directory)
+            selected = root / "withheld-native.tar.gz"
+            output = root / "blocked-report.json"
+            execution = subprocess.run([sys.executable, "tools/m12_004_verifier_controls.py",
+                "--scratch-parent", str(root), "--native-artifact", str(selected),
+                "--output", str(output)], cwd=controls.ROOT, capture_output=True, text=True, timeout=30)
+            report = json.loads(output.read_text())
+            self.assertEqual(1, execution.returncode)
+            self.assertEqual("BLOCKED", report["status"])
+            self.assertEqual("CONTROL_INPUTS_MISSING", report["error"])
+            self.assertIn("<external-native-artifact>", report["missing_inputs"])
+            self.assertEqual("NOT_QUALIFIED", report["qualification"])
+            self.assertNotIn(str(root), json.dumps(report))
 if __name__ == "__main__":
     unittest.main()

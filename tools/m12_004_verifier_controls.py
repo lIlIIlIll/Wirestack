@@ -83,16 +83,26 @@ def input_name(path: Path) -> str:
     except ValueError:
         return "<external-native-artifact>"
 
+def required_control_inputs(native_artifact: Path) -> list[Path]:
+    return [signing.ARTIFACT, native_artifact, *[signing.SUPPLY_CHAIN / name for name in
+            ("bundle.json", "provider-manifest.json", "build-fingerprint.json", "sbom.spdx.json")],
+            ROOT / "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"]
 
 def run_controls(scratch_parent: Path, native_artifact: Path = NATIVE) -> dict:
     native_artifact = native_artifact.resolve()
     scratch_parent = scratch_parent.resolve()
     if ROOT == scratch_parent or ROOT in scratch_parent.parents:
         raise ValueError("scratch must be outside the repository")
+    files = required_control_inputs(native_artifact)
+    missing = sorted({input_name(path) for path in files if not path.is_file()})
+    if missing:
+        return {"schema_version": 1, "task_id": "M12-004", "family": "verifier-controls",
+                "status": "BLOCKED", "SDKpolicy": "STS_ONLY", "qualification": "NOT_QUALIFIED",
+                "error": "CONTROL_INPUTS_MISSING", "missing_inputs": missing,
+                "native_artifact": {"path": input_name(native_artifact), "digest": "NOT_AVAILABLE"},
+                "limitations": ["Verifier controls and native smoke were not run because required release evidence archives are unavailable.",
+                                "This blocked report does not qualify a candidate or SDK."]}
     scratch_parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    files = [signing.ARTIFACT, native_artifact, *[signing.SUPPLY_CHAIN / name for name in
-             ("bundle.json", "provider-manifest.json", "build-fingerprint.json", "sbom.spdx.json")],
-             ROOT / "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"]
     originals = {input_name(path): digest.artifact_byte_digest(path).to_json() for path in files}
     report = {"schema_version": 1, "task_id": "M12-004", "family": "verifier-controls",
               "status": "FAIL", "SDKpolicy": "STS_ONLY", "qualification": "NOT_QUALIFIED",
