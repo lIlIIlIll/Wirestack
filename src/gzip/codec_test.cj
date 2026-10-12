@@ -3,6 +3,7 @@ import wirestack.*
 import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
+import std.time.MonoTime
 
 internal class GzipFixtureSource <: HttpBodyStream {
     private let bytes: Array<Byte>
@@ -10,17 +11,31 @@ internal class GzipFixtureSource <: HttpBodyStream {
     private var offset: Int64 = 0
     private var closed = false
     internal var reads: Int64 = 0
-    internal init(bytes: Array<Byte>, chunk!: Int64 = 1) { this.bytes = bytes; this.chunk = chunk }
+    internal var closes: Int64 = 0
+    internal var beforeRead: () -> Unit = { => () }
+    private let throwsOnClose: Bool
+    internal init(bytes: Array<Byte>, chunk!: Int64 = 1, throwsOnClose!: Bool = false) {
+        this.bytes = bytes; this.chunk = chunk; this.throwsOnClose = throwsOnClose
+    }
     public prop contentLength: ?Int64 { get() { Some(bytes.size) } }
     public func read(destination: Array<Byte>): Int64 {
         if (closed) { throw HttpBodyException(HttpBodyErrorCode.Closed, "fixture closed") }
+        beforeRead()
         reads++
         let count = min(min(destination.size, chunk), bytes.size - offset)
         for (index in 0..count) { destination[index] = bytes[offset + index] }
         offset += count; count
     }
-    public func close(): Unit { closed = true }
+    public func close(): Unit {
+        closed = true; closes++
+        if (throwsOnClose) { throw IllegalStateException("fixture close failed") }
+    }
     public func isClosed(): Bool { closed }
+}
+private class GzipCodecClock <: MonotonicClock {
+    private var instant = MonoTime.now()
+    func advance(duration: Duration): Unit { instant = instant + duration }
+    public func now(): MonoTime { instant }
 }
 internal func gzipHex(value: String): Array<Byte> {
     let text = value.toArray(); let result = Array<Byte>(text.size / 2, repeat: 0)
@@ -161,5 +176,70 @@ class GzipCodecTest {
         @Expect(body.isClosed())
         @Expect(!body.integrityVerified)
         @Expect(body.decodedBytes, 3)
+    }
+    @TestCase
+    func preReadDeadlineClosesSourceWithoutReading(): Unit {
+        for (partial in [false, true]) {
+            let clock = GzipCodecClock()
+            let cancellation = CancellationSource()
+            let source = GzipFixtureSource(gzipHex(gzipFixtureFixed))
+            let body = GzipBodyStream(source, context: OperationContext(
+                deadline: Some(Deadline.after(Duration.second, clock: clock)), cancellation: cancellation.token))
+            if (partial) { @Expect(body.read(Array<Byte>(1, repeat: 0)), 1) }
+            let reads = source.reads
+            clock.advance(Duration.second)
+            let error = @AssertThrows[NetworkException](body.read(Array<Byte>(1, repeat: 0)))
+            match (error.code) { case NetworkErrorCode.TimedOut => (); case _ => @Fail("pre-read deadline must time out") }
+            @Expect(source.reads, reads)
+            @Expect(source.isClosed())
+            @Expect(body.isClosed())
+            @Expect(!body.integrityVerified)
+            @Expect(body.decodedBytes, if (partial) { 1 } else { 0 })
+            let closes = source.closes
+            cancellation.cancel()
+            body.close()
+            @Expect(source.closes, closes)
+        }
+    }
+    @TestCase
+    func decoderFailureSurvivesThrowingSourceClose(): Unit {
+        let bytes = gzipHex(gzipFixtureFixed)
+        bytes[bytes.size - 8] ^= 1
+        let source = GzipFixtureSource(bytes, throwsOnClose: true)
+        let body = GzipBodyStream(source)
+        let error = @AssertThrows[GzipException](gzipDrain(body))
+        @Expect(error.code, GzipErrorCode.ChecksumMismatch)
+        @Expect(body.decodedBytes, 10)
+        @Expect(source.isClosed())
+        @Expect(body.isClosed())
+        @Expect(!body.integrityVerified)
+        // Both the active close and terminal release encounter the throwing source.
+        @Expect(source.closes, 2)
+        let closed = @AssertThrows[GzipException](body.read(Array<Byte>(1, repeat: 0)))
+        @Expect(closed.code, GzipErrorCode.Closed)
+        body.close()
+        @Expect(source.closes, 2)
+    }
+    @TestCase
+    func publicCloseStillReportsSourceCloseFailure(): Unit {
+        let source = GzipFixtureSource(gzipHex(gzipFixtureFixed), throwsOnClose: true)
+        let body = GzipBodyStream(source)
+        let _ = @AssertThrows[IllegalStateException](body.close())
+        @Expect(body.isClosed())
+        body.close()
+        @Expect(source.closes, 2)
+    }
+    @TestCase
+    func rejectedConcurrentReadDoesNotCloseOwnedRead(): Unit {
+        let source = GzipFixtureSource(gzipHex(gzipFixtureFixed))
+        let body = GzipBodyStream(source)
+        source.beforeRead = { =>
+            let error = @AssertThrows[GzipException](body.read(Array<Byte>(1, repeat: 0)))
+            @Expect(error.code, GzipErrorCode.ConcurrentOperation)
+            @Expect(!source.isClosed())
+            @Expect(!body.isClosed())
+        }
+        @Expect(String.fromUtf8(gzipDrain(body)), "hello gzip")
+        @Expect(body.integrityVerified)
     }
 }

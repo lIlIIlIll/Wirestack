@@ -77,28 +77,32 @@ public class GzipBodyStream <: HttpBodyStream {
     public prop maximumWorkBetweenChecks: Int64 { get() { synchronized(mutex) { maximumWork } } }
 
     /** Reads bounded output; zero with a nonempty destination means verified physical EOF.
+     * Owned read failures release resources without replacing the read error with a close error.
      * @param destination Caller-owned output buffer, never retained or expanded by the decoder.
      * @return Decoded bytes written, at most the configured maximumReadBytes.
      */
     public func read(destination: Array<Byte>): Int64 {
-        checkActive()
-        synchronized(mutex) {
+        let codec = synchronized(mutex) {
             if (active) { throw GzipException(GzipErrorCode.ConcurrentOperation, "gzip reader already active") }
-            if (finished || destination.isEmpty()) { return 0 }
             active = true
+            decoder
         }
-        let codec = decoder.getOrThrow()
+        var failed = false
         try {
-            let count = codec.read(destination)
             checkActive()
-            if (count == 0) { synchronized(mutex) { finished = codec.validatedEof } }
+            if (synchronized(mutex) { finished } || destination.isEmpty()) { return 0 }
+            let value = codec.getOrThrow()
+            let count = value.read(destination)
+            checkActive()
+            if (count == 0) { synchronized(mutex) { finished = value.validatedEof } }
             count
         } catch (error: Exception) {
+            failed = true
             var contextual = None<Exception>
             try { checkGzipContext(context); extraCheck() }
             catch (failure: Exception) { contextual = Some(failure) }
             let locallyClosed = synchronized(mutex) { closed }
-            close()
+            try { close() } catch (_: Exception) { /* Preserve the read failure. */ }
             if (let Some(failure) <- contextual) {
                 match (failure) {
                     case value: NetworkException =>
@@ -114,14 +118,19 @@ public class GzipBodyStream <: HttpBodyStream {
             throw error
         } finally {
             synchronized(mutex) {
-                encoded = codec.encodedBytesRead; decoded = codec.decodedBytes
-                members = codec.memberCount; maximumWork = codec.maximumWorkBetweenChecks
+                if (let Some(value) <- codec) {
+                    encoded = value.encodedBytesRead; decoded = value.decodedBytes
+                    members = value.memberCount; maximumWork = value.maximumWorkBetweenChecks
+                }
                 active = false
             }
-            releaseIfTerminal()
+            if (failed) {
+                try { releaseIfTerminal() } catch (_: Exception) { /* Cleanup must not replace the read failure. */ }
+            } else { releaseIfTerminal() }
         }
     }
-    /** Idempotently interrupts only the owned source; does not close a shared client or sibling streams. */
+    /** Idempotently interrupts only the owned source; does not close a shared client or sibling streams.
+     * Source close errors may propagate, but owned resources are still released. */
     public func close(): Unit {
         let first = synchronized(mutex) { if (closed) { false } else { closed = true; true } }
         if (first) { try { source.close() } finally { releaseIfTerminal() } }

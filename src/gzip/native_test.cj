@@ -288,6 +288,24 @@ class GzipNativeTest {
     }
 
     @TestCase
+    func preReadDeadlineReleasesNativeBodyReservation(): Unit {
+        let fixture = GzipNativeFixture(requestTimeout: 5 * Duration.second)
+        let clock = GzipNativeClock()
+        let response = GzipClient(fixture.client).send(fixture.request("/large"), context:
+            OperationContext(deadline: Some(Deadline.after(10 * Duration.second, clock: clock))))
+        try {
+            @Expect(fixture.client.resourceSnapshot().managedBufferBytes > 0u64)
+            clock.expire()
+            let error = @AssertThrows[NetworkException](response.response.body.read(Array<Byte>(1, repeat: 0)))
+            match (error.code) { case NetworkErrorCode.TimedOut => (); case _ => @Fail("pre-read deadline must time out") }
+            @Expect(response.decodedBytes, 0)
+            @Expect(response.encodedBytesRead, 0)
+            @Expect(!response.integrityVerified)
+            gzipNativeExpectReleased(fixture.client)
+        } finally { response.close(); fixture.close() }
+    }
+
+    @TestCase
     func configuredRequestTimeoutSurvivesBufferedCpuDecoding(): Unit {
         let fixture = GzipNativeFixture(requestTimeout: Duration.second)
         let clock = GzipNativeClock()
@@ -408,6 +426,7 @@ private class GzipNativeClock <: MonotonicClock {
     private let ticks = AtomicInt64(0)
     private let armed = AtomicBool(false)
     func arm(): Unit { armed.store(true) }
+    func expire(): Unit { ticks.store(1000); armed.store(true) }
     public func now(): MonoTime {
         if (armed.load()) { return base + ticks.fetchAdd(1) * 100 * Duration.millisecond }
         base
