@@ -148,6 +148,20 @@ internal func wrapHttpError(error: Exception): Exception {
     }
 }
 
+// Body framing EOF is a typed disconnect, not successful SSE EOF or generic malformed framing.
+internal func wrapHttpBodyError(error: Exception): Exception {
+    match (error) {
+        case value: http1.Http1ChunkException => match (value.code) {
+            case http1.Http1ChunkErrorCode.UnexpectedEof => transport.NetworkException(
+                transport.NetworkErrorCategory.Read, transport.NetworkPhase.HttpBody,
+                transport.NetworkErrorCode.UnexpectedEof, "peer closed before completing the chunked body",
+                retryability: transport.Retryability.Never, cause: Some(error))
+            case _ => wrapHttpError(error)
+        }
+        case _ => wrapHttpError(error)
+    }
+}
+
 private func isPoolExhaustion(error: transport.NetworkException): Bool {
     match ((error.phase, error.code)) {
         case (transport.NetworkPhase.PoolAcquire, transport.NetworkErrorCode.ResourceExhausted) => true

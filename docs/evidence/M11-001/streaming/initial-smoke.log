@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.sse, time elapsed: 60083914185 ns, RESULT:
+    TCS: M11Http1SseStreamingProfileTest, time elapsed: 30005167734 ns, RESULT:
+    [ PASSED ] CASE: http1StreamsWithoutLifetimeAccumulationAndCancels (30004490559 ns)
+    STDOUT:
+    SSE_SAMPLE protocol=h1 elapsedMs=1000 events=185 produced=23808 leadEvents=23623 usedHeapBytes=23101440 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=2000 events=53041 produced=53248 leadEvents=207 usedHeapBytes=81829888 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=3000 events=90370 produced=90624 leadEvents=254 usedHeapBytes=76300288 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=4003 events=126210 produced=126464 leadEvents=254 usedHeapBytes=75800576 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=5000 events=162605 produced=162816 leadEvents=211 usedHeapBytes=76275712 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=6000 events=200223 produced=200448 leadEvents=225 usedHeapBytes=74969088 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=7002 events=238594 produced=238848 leadEvents=254 usedHeapBytes=80416768 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=8005 events=272386 produced=272640 leadEvents=254 usedHeapBytes=70053888 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=9000 events=307099 produced=307200 leadEvents=101 usedHeapBytes=72859648 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=10002 events=342786 produced=343040 leadEvents=254 usedHeapBytes=74915840 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=11000 events=377436 produced=377600 leadEvents=164 usedHeapBytes=74969088 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=12001 events=412418 produced=412672 leadEvents=254 usedHeapBytes=71294976 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=13002 events=443650 produced=443904 leadEvents=254 usedHeapBytes=66646016 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=14000 events=476963 produced=477184 leadEvents=221 usedHeapBytes=63365120 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=15000 events=511906 produced=512000 leadEvents=94 usedHeapBytes=74416128 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=16000 events=548423 produced=548608 leadEvents=185 usedHeapBytes=79294464 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=17000 events=584800 produced=584960 leadEvents=160 usedHeapBytes=73461760 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=18001 events=620034 produced=620288 leadEvents=254 usedHeapBytes=75026432 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=19000 events=658167 produced=658176 leadEvents=9 usedHeapBytes=79491072 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=20000 events=693506 produced=693760 leadEvents=254 usedHeapBytes=80338944 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=21001 events=729858 produced=730112 leadEvents=254 usedHeapBytes=77393920 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=22002 events=767234 produced=767488 leadEvents=254 usedHeapBytes=81661952 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=23001 events=804610 produced=804864 leadEvents=254 usedHeapBytes=81719296 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=24000 events=840450 produced=840704 leadEvents=254 usedHeapBytes=72540160 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=25000 events=875788 produced=876032 leadEvents=244 usedHeapBytes=76673024 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=26002 events=913410 produced=913664 leadEvents=254 usedHeapBytes=77787136 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=27000 events=946946 produced=947200 leadEvents=254 usedHeapBytes=72450048 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=28004 events=975874 produced=976128 leadEvents=254 usedHeapBytes=58441728 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=29000 events=1011970 produced=1012224 leadEvents=254 usedHeapBytes=78700544 managedBufferBytes=3465728 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h1 elapsedMs=30000 events=1045510 produced=1045760 leadEvents=250 usedHeapBytes=68816896 managedBufferBytes=0 sessionReservedBytes=3465728
+    SSE_RESULT protocol=h1 requestedSeconds=30 elapsedMs=30002 minimumEvents=1000 events=1045510 sequenceErrors=0 produced=1045760 maxLeadEvents=23623 slowLeadEvents=23370 slowReadGapNs=16083092 serverReadCalls=4085 cancelLatencyNs=140033 siblingBefore=false siblingAfter=false bodyLimitBytes=65536 applicationPendingBytes=0 sessionReservedBytes=3465728 managedAfterSessionBytes=0
+    TCS: M11Http2SseStreamingProfileTest, time elapsed: 30075102213 ns, RESULT:
+    [ PASSED ] CASE: http2StreamsWithoutLifetimeAccumulationAndPreservesSibling (30074631020 ns)
+    STDOUT:
+    SSE_SAMPLE protocol=h2 elapsedMs=1000 events=106 produced=2048 leadEvents=1942 usedHeapBytes=35065856 managedBufferBytes=3531263 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=2000 events=33492 produced=33536 leadEvents=44 usedHeapBytes=81330176 managedBufferBytes=3474432 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=3000 events=64770 produced=65039 leadEvents=268 usedHeapBytes=83103744 managedBufferBytes=3474432 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=4000 events=96634 produced=96995 leadEvents=361 usedHeapBytes=85463040 managedBufferBytes=3474432 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=5000 events=130460 produced=130560 leadEvents=100 usedHeapBytes=88018944 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=6000 events=160521 produced=160840 leadEvents=319 usedHeapBytes=76689408 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=7002 events=193026 produced=193291 leadEvents=265 usedHeapBytes=88674304 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=8000 events=225903 produced=226292 leadEvents=389 usedHeapBytes=90050560 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=9000 events=260470 produced=260810 leadEvents=339 usedHeapBytes=90963968 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=10000 events=293722 produced=293888 leadEvents=166 usedHeapBytes=86568960 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=11000 events=327437 produced=327705 leadEvents=267 usedHeapBytes=97103872 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=12003 events=358658 produced=358930 leadEvents=272 usedHeapBytes=86884352 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=13000 events=391528 produced=391936 leadEvents=408 usedHeapBytes=88457216 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=14004 events=425730 produced=426000 leadEvents=270 usedHeapBytes=90750976 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=15002 events=459266 produced=459530 leadEvents=264 usedHeapBytes=95514624 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=16000 events=492699 produced=493056 leadEvents=357 usedHeapBytes=87756800 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=17000 events=525291 produced=525568 leadEvents=277 usedHeapBytes=83083264 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=18000 events=556422 produced=556800 leadEvents=378 usedHeapBytes=86343680 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=19000 events=588242 produced=588288 leadEvents=46 usedHeapBytes=86433792 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=20000 events=620999 produced=621312 leadEvents=313 usedHeapBytes=91983872 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=21002 events=655106 produced=655387 leadEvents=280 usedHeapBytes=100986880 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=22000 events=687317 produced=687616 leadEvents=299 usedHeapBytes=88346624 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=23000 events=718105 produced=718396 leadEvents=291 usedHeapBytes=85577728 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=24002 events=752130 produced=752404 leadEvents=273 usedHeapBytes=92524544 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=25000 events=785410 produced=785681 leadEvents=271 usedHeapBytes=93900800 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=26000 events=819714 produced=819972 leadEvents=258 usedHeapBytes=93474816 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=27005 events=851714 produced=851968 leadEvents=254 usedHeapBytes=86401024 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=28000 events=883714 produced=883968 leadEvents=254 usedHeapBytes=78598144 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=29000 events=913475 produced=913664 leadEvents=189 usedHeapBytes=75927552 managedBufferBytes=3474688 sessionReservedBytes=3465728
+    SSE_SAMPLE protocol=h2 elapsedMs=30006 events=947201 produced=947642 leadEvents=441 usedHeapBytes=92737536 managedBufferBytes=0 sessionReservedBytes=3465728
+    SSE_RESULT protocol=h2 requestedSeconds=30 elapsedMs=30011 minimumEvents=1000 events=947201 sequenceErrors=0 produced=947712 maxLeadEvents=2034 slowLeadEvents=2034 slowReadGapNs=14739948 serverReadCalls=3702 cancelLatencyNs=215581 siblingBefore=true siblingAfter=true bodyLimitBytes=65536 applicationPendingBytes=0 sessionReservedBytes=3465728 managedAfterSessionBytes=0
+Summary: TOTAL: 32
+    PASSED: 2, SKIPPED: 30, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 60089004253 ns, RESULT:
+TP: wirestack.*, time elapsed: 60088951245 ns, RESULT:
+    PASSED:
+    TP: wirestack.sse, time elapsed: 60083914185 ns
+Summary: TOTAL: 32
+    PASSED: 2, SKIPPED: 30, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

@@ -425,10 +425,33 @@ release collector 同时检查 `test_only_key_log` 和 `key-log` capability，�
 RSA raw decrypt 和 test-only key logging。对应的 13 个 release 场景与 5 个 keylog
 场景见 [M8-006 资格记录](../evidence/M8-006/README.md)。
 
+## `wirestack.sse`
+
+`SseDecoder`, `SseEncoder` and `SseLimits` implement bounded UTF-8 event
+streams, including split BOM/CRLF, multiline/empty data, comments, cursor and
+ASCII-digit retry handling. Incomplete EOF does not dispatch. There is no
+decoded-event queue and no special application payload marker.
+
+`SseSession.eventSource` is GET-only; default reconnect count is zero. Explicit
+`SseSessionPolicy` caps reconnects, duration, backoff and active-read idle
+without introducing another timeout owner. `lastEventId` is a parsed cursor,
+not a processing acknowledgement. `oneShot` never replays POST or follows
+redirects, even for replayable/explicitly-safe requests. Session memory uses the
+same client's real managed-buffer ledger. Close owns only the request/body;
+H2 siblings survive.
+
+`SseWriter` is a bounded `HttpBodyStream`. `flush` acknowledges local body
+consumption, not peer delivery; `complete` drains to EOF and `close` aborts.
+`SseException.code` and its original cause distinguish parser limits, invalid
+responses and exhausted recovery. [SSE guide](../guides/sse-linux.md) records all
+defaults, hard ceilings, ownership and intentional browser-policy differences.
+[Installed example](../../examples/linux/m11_001/sse.cj) exercises H1/H2,
+duplicate cursors, truncated GET recovery, no-replay POST and cancellation.
+
 ## 稳定性和所有权
 
-[M8-007 inventory](baselines/wirestack-linux-pre1-m8-007.json) 记录最终候选的公开契约，共
-324 个 declaration 和 114 个 resolved alias。
+[M11-001 inventory](baselines/wirestack-linux-pre1-m11-001.json) records the current
+pre-1.0 public contract. [M8-007 snapshot](baselines/wirestack-linux-pre1-m8-007.json),
 [M8-006 snapshot](baselines/wirestack-linux-pre1-m8-006.json)、
 [M8-004 snapshot](baselines/wirestack-linux-pre1-m8-004.json)、
 [M8-003 snapshot](baselines/wirestack-linux-pre1-m8-003.json)、
@@ -448,11 +471,11 @@ RSA raw decrypt 和 test-only key logging。对应的 13 个 release 场景与 5
 校验当前 API inventory：
 
 ```sh
-scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-linux-pre1-m8-007.json
+scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-linux-pre1-m11-001.json --report docs/evidence/M11-001/public-api.json
 ```
 
-该 baseline 当前精确匹配，但它只证明 source inventory。它不证明二进制、未来版本或运行时
-语义兼容。最终发布状态见 [M8-007 验收记录](../evidence/M8-007/README.md)。
+This inventory is source-only, not an ABI, future-version or runtime-compatibility
+claim. Current SSE acceptance is recorded in [M11-001 evidence](../evidence/M11-001/README.md).
 
 M8-006 为 `TlsCapability` 增加 `ExternalDecryptor`、`KeyLog`，为 `TlsContextErrorCode`
 增加 `InvalidHook`。旧的穷尽匹配需要补充分支；当前 Cangjie context 布局也有变化。
