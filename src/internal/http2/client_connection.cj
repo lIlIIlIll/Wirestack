@@ -1188,9 +1188,12 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         }
     }
 
-    func fail(error: Exception): Unit {
+    func fail(error: Exception, observationContext!: ?OperationContext = None<OperationContext>): Unit {
         synchronized(mutex) {
-            if (failure.isNone()) { failure = Some(error) }
+            if (failure.isNone()) {
+                failure = Some(error)
+                if (let Some(context) <- observationContext) { failureContext = Some(context) }
+            }
             eof = true
             for (segment in segments) { segment.release(flow) }
             segments.clear()
@@ -1206,15 +1209,21 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     }
 
     public func readSome(destination: MutableByteSpan, context: OperationContext): ReadResult {
-        if (destination.isEmpty() || defaultContext.eventSink.isNone()) {
-            return readActive(destination, context)
+        if (destination.isEmpty()) { return ReadResult.Data(0) }
+        if (defaultContext.eventSink.isNone()) {
+            return readActive(destination, context, context)
         }
         let observed = context.withEventSink(defaultContext.eventSink).withEventCorrelation(
             requestId: defaultContext.requestId, attemptId: defaultContext.attemptId,
             connectionId: defaultContext.connectionId, streamId: defaultContext.streamId
         ).forStage(readTimeoutStage)
         try {
-            http2ObservedStage(observed, { => readActive(destination, observed, staged: true) })
+            http2ObservedStage(observed, {
+                => readActive(
+                    destination, context, context,
+                    observationContext: Some<OperationContext>(observed)
+                )
+            })
         } catch (error: Exception) {
             synchronized(mutex) {
                 if (failure.isNone()) { failure = Some(error); failureContext = Some(observed) }
@@ -1226,11 +1235,14 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     private func readActive(
         destination: MutableByteSpan,
         context: OperationContext,
+        writeContext: OperationContext,
+        observationContext!: ?OperationContext = None<OperationContext>,
         staged!: Bool = false
     ): ReadResult {
         if (destination.isEmpty()) { return ReadResult.Data(0) }
         submitClientUpdatesAndRetainFailure(
-            flow.flushStalledConnectionReceiveCredit(), context
+            flow.flushStalledConnectionReceiveCredit(), writeContext,
+            observationContext: observationContext
         )
         let readContext = if (staged) { context } else { context.forStage(readTimeoutStage) }
         let registration = readContext.cancellation.register { => wake() }
@@ -1266,7 +1278,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 }
                 ReadResult.Data(count)
             }
-            submitClientUpdatesAndRetainFailure(updates, context)
+            submitClientUpdatesAndRetainFailure(updates, writeContext, observationContext: observationContext)
             result
         } finally {
             registration.unregister()
@@ -1274,15 +1286,17 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     }
 
     private func submitClientUpdatesAndRetainFailure(
-        frames: Array<Http2Frame>, context: OperationContext
+        frames: Array<Http2Frame>, context: OperationContext,
+        observationContext!: ?OperationContext = None<OperationContext>
     ): Unit {
         try {
             submitClientUpdates(writer, frames, context)
         } catch (error: Exception) {
-            fail(error)
+            fail(error, observationContext: observationContext)
             throw error
         }
     }
+
     public func awaitEnd(context: OperationContext): Unit {
         let endContext = context.forStage(readTimeoutStage)
         let registration = endContext.cancellation.register { => wake() }
