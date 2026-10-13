@@ -1,0 +1,12 @@
+{
+  "task_id": "M11-004",
+  "status": "PASS",
+  "removed": "<task-specific disk-backed scratch>",
+  "size_before_removal": "198 MiB (du -sh)",
+  "preserved_evidence": "docs/evidence/M11-004",
+  "evidence_size": "23 MiB (du -sh)",
+  "earlier_task_workspaces": "PRESERVED",
+  "disposable_keys_extracted_packages_and_temporary_scripts": "REMOVED",
+  "host_network_and_modules": "NOT_MODIFIED",
+  "commits_pushes_prs_issues": "NONE"
+}

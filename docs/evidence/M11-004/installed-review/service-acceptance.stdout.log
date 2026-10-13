@@ -1,0 +1,20 @@
+CHECK service_untrusted_rejected PASS
+RESOURCE service_server_live requests=4 streams=4 owners=1
+RESOURCE service_overload requests=4 streams=4
+CHECK service_server_capacity PASS
+CHECK service_success PASS
+CHECK service_pre_cancel PASS
+CHECK service_active_cancel PASS
+CHECK service_deadline PASS
+RESOURCE service_live requests=1 streams=1 buffers=3481856
+CHECK service_capacity PASS
+CHECK service_explicit_close PASS
+CHECK service_peer_disconnect PASS
+CHECK service_ordinary_rotation PASS
+CHECK service_security_cancel PASS
+CHECK service_security_rotation PASS
+RESOURCE service_draining requests=1 streams=1
+RESOURCE service connections=0 requests=0 streams=0 reserved=0 buffers=0 waiters=0 owners=0
+CHECK service_graceful_stop PASS
+CHECK service_cleanup PASS
+APP_ACCEPTANCE_PASS

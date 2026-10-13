@@ -1,0 +1,3084 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-004",
+  "status": "PASS",
+  "platform": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "runner_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "05daa6700304e698e309cacfdff33b2e078162771e47933cbdf3461587792f9f"
+  },
+  "commands": [
+    {
+      "id": "checkout-hidden",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "python3",
+        "-c",
+        "from pathlib import Path; p=Path('<repo>'); assert p.is_dir() and not any(p.iterdir()); print('CHECKOUT_HIDDEN_PASS')"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/checkout-hidden.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "33380bb41d91b4a7701b3944af7ad5d1e5888da960a82405f670387b0592474f"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/checkout-hidden.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "compiler",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "cjc",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/compiler.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/compiler.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cjpm",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "cjpm",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cjpm.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "17031057b5f25ee3467ae2fe8e4fda592cf722f06f75ef3ff414bd382331bdf5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cjpm.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "certificate",
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=example.test",
+        "-addext",
+        "subjectAltName=DNS:example.test,IP:192.0.2.1",
+        "-keyout",
+        "<scratch>/key.pem",
+        "-out",
+        "<scratch>/certificate.pem"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": false,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fd610bcc81105a5a586effcb24b1de914ab196d7bc871af883f40d5834920c54"
+        }
+      }
+    },
+    {
+      "id": "certificate-der",
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/certificate.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/certificate.der"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": false,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/certificate-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/certificate-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "key-der",
+      "argv": [
+        "openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "<scratch>/key.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/key.pk8"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": false,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/key-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/key-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "untrusted",
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=other.test",
+        "-keyout",
+        "<scratch>/unused-key.pem",
+        "-out",
+        "<scratch>/untrusted.pem"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": false,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/untrusted.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/untrusted.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "96ba2a28e3eabb051c9cdf9c7f6265c05c423f532015d7c8f3e1242b666d5c51"
+        }
+      }
+    },
+    {
+      "id": "untrusted-der",
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/untrusted.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>",
+      "checkout_hidden": false,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/untrusted-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/untrusted-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f031f83cc480c2b4b8dea842e20cf333d4701f1e4e7114a7da38b7125ecbff95"
+        }
+      }
+    },
+    {
+      "id": "cli-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "<scratch>/consumers/cli/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a034542ea5b49b22ea76ed570adf5245b8e389d297630903501dae1dd6c71390"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/consumers/cli/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "cd92edd2fdb4b05229ea934a0c4ee5163fa1d747ef874e8febd30f960f666d25"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "<scratch>/consumers/cli/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8",
+        "<scratch>/untrusted.der",
+        "44163"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7c12c67248c1a291c76224d45104facc95624ce8eb0693740efb20a9dfcc31d5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-symbols",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "nm",
+        "--defined-only",
+        "<scratch>/consumers/cli/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-symbols.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fdf1cb4e166200322c705d2331f58047ba43e04ceea912f1c4af28c357b40368"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-symbols.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7b98fcaf3ad0947c17c400e47630adbbde011855d9496e0459401431f2ef2357"
+        }
+      }
+    },
+    {
+      "id": "decoded-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "<scratch>/consumers/decoded/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2297abc986ad9dbfcd16a6a6c76b06d6978666582b7a0ee0935bc1242b2a7953"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/consumers/decoded/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bc1c5a27b3b7b0a4294f204fad758d03b7cfe9a89a63b5086cbe31d85e38378c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "<scratch>/consumers/decoded/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6339fd07a76bf9104b93d8ffd0b9898cd35f8a3a3e0166b9a4a564dde7a89d7a"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-symbols",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "nm",
+        "--defined-only",
+        "<scratch>/consumers/decoded/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-symbols.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b35a7bcfbcae01e3d3b1851ba67d0c28900a4c47a17d1298730a960881cb22e7"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-symbols.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a57d679ad282dd5ddc0f97185e0c5b457fd2aa2b0327077f617ed50af999586a"
+        }
+      }
+    },
+    {
+      "id": "streams-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "<scratch>/consumers/streams/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8183ebb47da6e41572e8beb7072a2712044dfe16631228af3c4c75b00259bde4"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/consumers/streams/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6efa2c6f0f3a282e307afc6e2afb12afe449b5f9633a482219668ca17049fb8c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "<scratch>/consumers/streams/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "86d651fe64c7b34b24f0082bae35dd8bf328da3a11c1fa103f00aeb08ac23337"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-symbols",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "nm",
+        "--defined-only",
+        "<scratch>/consumers/streams/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-symbols.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ec7cfe63e21c684fe2ca03d04a152e415f4825bd7e91178807c92bf0ba51da7a"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-symbols.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/service",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumers/service",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c00202abaab68750e4079f4e77864894c6cb30ac2a96647219d5697bbac82e0a"
+        }
+      }
+    },
+    {
+      "id": "service-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/service",
+        "--",
+        "<scratch>/consumers/service/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/consumers/service",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "13b27f0af8027324dc6d1affa3ffe402ba7df472c4524df055a2b2933fd45b51"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/service",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/consumers/service/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/service",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ab828978b797d4a9a3d50b44a50b04d0ef4ab02983b5527a4eaf4fa527b45fab"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/service",
+        "--",
+        "<scratch>/consumers/service/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/consumers/service",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ddf0762c8ffa3493949b3a69e5794a228ae3fc503d7093d46b71c546f95484a5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-symbols",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/service",
+        "--",
+        "nm",
+        "--defined-only",
+        "<scratch>/consumers/service/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/service",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-symbols.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9d716774d21cbcc4515184e86464f91c5f924a304553d3580af4b0ce77682ea4"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-symbols.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-operational-download",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "<scratch>/consumers/cli/target/release/bin/main",
+        "download",
+        "--url",
+        "<controlled-url>",
+        "--output",
+        "<scratch>/cli-download.bin",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--budget-ms",
+        "5000"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-operational-download.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9476f4a8c793d41da08a8f8f250ab49e811a9677ffc92b33fbcff500a08e3df7"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-operational-download.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-operational-pre-cancel",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "<scratch>/consumers/cli/target/release/bin/main",
+        "download",
+        "--url",
+        "<controlled-url>",
+        "--output",
+        "<scratch>/cli-cancelled.bin",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--pre-cancel"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-operational-pre-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-operational-pre-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5bf3c00fff3d71b491ba1aa589855065f28589685101b3dcd1c09f31c42f2c5a"
+        }
+      }
+    },
+    {
+      "id": "cli-oversized-trust",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/cli",
+        "--",
+        "<scratch>/consumers/cli/target/release/bin/main",
+        "download",
+        "--url",
+        "<controlled-url>",
+        "--output",
+        "<scratch>/cli-oversized-trust.bin",
+        "--trust",
+        "<scratch>/oversized-trust.der",
+        "--budget-ms",
+        "5000"
+      ],
+      "cwd": "<scratch>/consumers/cli",
+      "checkout_hidden": true,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-oversized-trust.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/cli-oversized-trust.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8d2e15cd4ca7823c2babcbf521bd5562ed399ba034962943966ac0112277885a"
+        }
+      }
+    },
+    {
+      "id": "decoded-operational-download",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "<scratch>/consumers/decoded/target/release/bin/main",
+        "download",
+        "--url",
+        "<controlled-url>",
+        "--output",
+        "<scratch>/decoded-download.bin",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--budget-ms",
+        "5000"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-operational-download.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9476f4a8c793d41da08a8f8f250ab49e811a9677ffc92b33fbcff500a08e3df7"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-operational-download.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-operational-pre-cancel",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "<scratch>/consumers/decoded/target/release/bin/main",
+        "download",
+        "--url",
+        "<controlled-url>",
+        "--output",
+        "<scratch>/decoded-cancelled.bin",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--pre-cancel"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-operational-pre-cancel.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-operational-pre-cancel.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5bf3c00fff3d71b491ba1aa589855065f28589685101b3dcd1c09f31c42f2c5a"
+        }
+      }
+    },
+    {
+      "id": "decoded-oversized-trust",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/decoded",
+        "--",
+        "<scratch>/consumers/decoded/target/release/bin/main",
+        "download",
+        "--url",
+        "<controlled-url>",
+        "--output",
+        "<scratch>/decoded-oversized-trust.bin",
+        "--trust",
+        "<scratch>/oversized-trust.der",
+        "--budget-ms",
+        "5000"
+      ],
+      "cwd": "<scratch>/consumers/decoded",
+      "checkout_hidden": true,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-oversized-trust.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/decoded-oversized-trust.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8d2e15cd4ca7823c2babcbf521bd5562ed399ba034962943966ac0112277885a"
+        }
+      }
+    },
+    {
+      "id": "service-operational",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/service",
+        "--",
+        "<scratch>/consumers/service/target/release/bin/main",
+        "serve",
+        "--port",
+        "0",
+        "--certificate",
+        "<scratch>/certificate.der",
+        "--key",
+        "<scratch>/key.pk8",
+        "--budget-ms",
+        "20000"
+      ],
+      "cwd": "<scratch>/consumers/service",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-operational.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a3dc34724613e37fd724853e42bc3b560416ec475c96f0ec9b24b40449070489"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/service-operational.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-operational-sse",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "<scratch>/consumers/streams/target/release/bin/main",
+        "sse",
+        "<controlled-url>",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--budget-ms",
+        "5000",
+        "--max-events",
+        "1",
+        "--recover",
+        "0"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-operational-sse.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0103034d84913916b40eb4b3a39c26815611a5016f31a88123c0f3f7b35f043b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-operational-sse.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-operational-websocket",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "<scratch>/consumers/streams/target/release/bin/main",
+        "websocket",
+        "<controlled-url>",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--budget-ms",
+        "5000",
+        "--max-frames",
+        "1",
+        "--recover",
+        "0",
+        "--command",
+        "echo"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-operational-websocket.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1883f779a88e74a28fc9bedc5ad88acf3dfb7eca006b3eb8cbd37f53bdae7c14"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-operational-websocket.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-oversized-trust",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "<scratch>/consumers/streams/target/release/bin/main",
+        "sse",
+        "<controlled-url>",
+        "--trust",
+        "<scratch>/oversized-trust.der",
+        "--budget-ms",
+        "5000",
+        "--max-events",
+        "1",
+        "--recover",
+        "0"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-oversized-trust.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-oversized-trust.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "789bf676cd9d114315e7955cda557c6cd2dd695d367eb15086af7ab37871dc64"
+        }
+      }
+    },
+    {
+      "id": "streams-operational-fixture",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/streams",
+        "--",
+        "<scratch>/consumers/streams/target/release/bin/main",
+        "fixture",
+        "<scratch>/certificate.der",
+        "<scratch>/key.pk8"
+      ],
+      "cwd": "<scratch>/consumers/streams",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-operational-fixture.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "98483a76cc2c325a079a264ec32002bf37a7dfefd49c1b6fee60be6d9f95db50"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/streams-operational-fixture.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-options-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-options",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumers/m9-options",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a57d679ad282dd5ddc0f97185e0c5b457fd2aa2b0327077f617ed50af999586a"
+        }
+      }
+    },
+    {
+      "id": "m9-options-options",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-options",
+        "--",
+        "<scratch>/consumers/m9-options/target/release/bin/main",
+        "options"
+      ],
+      "cwd": "<scratch>/consumers/m9-options",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-options.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "3bc6fe409429db0a8c90f3dbe30343fba763b9cfcb8b7f2f59ddb8639daf4a2b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-options.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-options-http",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-options",
+        "--",
+        "<scratch>/consumers/m9-options/target/release/bin/main",
+        "http"
+      ],
+      "cwd": "<scratch>/consumers/m9-options",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-http.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "46e97c25f25969c07e43b12694d3b2976f91ae7d13a4ca8e9287d82ef557d9ff"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-http.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-options-invalid",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-options",
+        "--",
+        "<scratch>/consumers/m9-options/target/release/bin/main",
+        "invalid"
+      ],
+      "cwd": "<scratch>/consumers/m9-options",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-invalid.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6ed6b7755624b08725e7469de51ed3b86fe118870ea3dcb108baac2a7d8c8f42"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-options-invalid.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ad4b5187ef3a0cbdf483e6e1b4b996edf5e8473dcb9fcbf2d4bf3eb17e62137d"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-disconnect",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "<scratch>/consumers/m9-udp/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-disconnect.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8b2827b5306e0292c06d1cc7937dea56308524df71b8792483afe987fe901a13"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-disconnect.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-broadcast",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "<scratch>/consumers/m9-udp/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-broadcast.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "367271fa280fbb099f74275959faac982128fdb8fc45875e6b77d52673d861e3"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-broadcast.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-ipv4-multicast",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "<scratch>/consumers/m9-udp/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-ipv4-multicast.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1410fcdc2caaf6882cb67bb7ccaf933018561cb8110b66312b0ef753d910bab3"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-ipv4-multicast.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-ipv6-multicast",
+      "argv": [
+        "unshare",
+        "--user",
+        "--map-root-user",
+        "--net",
+        "--",
+        "python3",
+        "-c",
+        "import os,sys,fcntl,struct,socket,subprocess\nfd=os.open('/dev/net/tun',os.O_RDWR)\ntry:\n fcntl.ioctl(fd,0x400454ca,struct.pack('16sH',b'ws-mcast',0x1002))\n for command in (['ip','link','set','lo','up'],['ip','link','set','ws-mcast','up'],['ip','-6','addr','add','fe80::1/64','dev','ws-mcast','nodad'],['ip','-6','route','add','ff00::/8','dev','ws-mcast']): subprocess.run(command,check=True)\n environment=dict(os.environ,WIRESTACK_M9_003_IPV6_INTERFACE_INDEX=str(socket.if_nametoindex('ws-mcast')))\n result=subprocess.run(sys.argv[1:],env=environment).returncode\nfinally:\n os.close(fd)\nsys.exit(result)\n",
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "<scratch>/consumers/m9-udp/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-ipv6-multicast.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0c2bb65394c20dc810717ed25f52e7a4de57aba2e4be1bfe940511f3908c0a7c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-ipv6-multicast.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-membership-cleanup",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "<scratch>/consumers/m9-udp/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-membership-cleanup.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1ad371cb68b95b0624162efda0c336d911539873459728ec56105baa0ea6654d"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-membership-cleanup.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "m9-udp-active-receive",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/consumers/m9-udp",
+        "--",
+        "<scratch>/consumers/m9-udp/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/consumers/m9-udp",
+      "checkout_hidden": true,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-active-receive.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2b0ac6fe74a3fdf7cd5fa01e54e65498e6632cf012633a947ffa91096e33dc7c"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/installed-review-m9/m9-udp-active-receive.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "consumers": {
+    "cli": {
+      "source_digests": {
+        "examples/linux/m11_004/cli/cjpm.toml": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2990c7e28f508a42c9d3dd4e82ce8c0f182e33e8ec6afbd781e7be158fe54486"
+        },
+        "examples/linux/m11_004/cli/src/acceptance.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "66817afa6779aa5fe1b82aeb21f418b2caf208bbcffa5c1e04d43b0041ca9912"
+        },
+        "examples/linux/m11_004/cli/src/main.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b22b130fbafc91c8e867ddb0cc08e8c8c3df2a66ea6cc416d0898a99bc1ad8a3"
+        }
+      },
+      "public_imports": [
+        "std.fs.*",
+        "std.sync.*",
+        "std.time.*",
+        "wirestack.http.*",
+        "std.fs.*",
+        "std.convert.*",
+        "std.console.Console",
+        "std.io.*",
+        "std.sync.*",
+        "std.time.*",
+        "wirestack.http.*"
+      ],
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "004ce65fc0606846f118f4c0b59c33ab64c8d75f152ef1051363c5820f7399bf"
+      },
+      "native_needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ],
+      "pass_checks": {
+        "cli_success": 1,
+        "cli_pre_cancel": 1,
+        "cli_active_cancel": 1,
+        "cli_deadline": 1,
+        "cli_capacity": 1,
+        "cli_output_failure": 1,
+        "cli_explicit_close": 1,
+        "cli_raw_gzip": 1,
+        "cli_proxy_connect": 1,
+        "cli_peer_disconnect": 1,
+        "cli_cleanup": 1
+      },
+      "feature_symbols": {
+        "sse": false,
+        "gzip": false,
+        "observability": false
+      },
+      "checkout_hidden_build_and_run": true
+    },
+    "decoded": {
+      "source_digests": {
+        "examples/linux/m11_004/decoded/cjpm.toml": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "250447c22abc80d62cbbc337e8c324738c71fa681274e293aa75b9db1a6aadfd"
+        },
+        "examples/linux/m11_004/decoded/src/acceptance.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1e4f9e5a8ac60f05030bf1ee4e876f47e97721981f623de31959ed28ea9af46e"
+        },
+        "examples/linux/m11_004/decoded/src/main.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "eee04efd771bebfddd802ba58051a2d97b9ceb7ce81610b33891557f620886fb"
+        }
+      },
+      "public_imports": [
+        "std.fs.*",
+        "std.sync.*",
+        "std.time.*",
+        "wirestack.http.*",
+        "std.fs.*",
+        "std.convert.*",
+        "std.console.Console",
+        "std.io.*",
+        "std.sync.*",
+        "std.time.*",
+        "wirestack.http.*",
+        "wirestack.gzip.*"
+      ],
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "356a9a8a5f903be1e8925eb4828ae86cb6b4eea2ff8c8ed0cdfa00c613efccbb"
+      },
+      "native_needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ],
+      "pass_checks": {
+        "decoded_success": 1,
+        "decoded_pre_cancel": 1,
+        "decoded_active_cancel": 1,
+        "decoded_deadline": 1,
+        "decoded_capacity": 1,
+        "decoded_output_failure": 1,
+        "decoded_explicit_close": 1,
+        "decoded_decoded_gzip": 1,
+        "decoded_peer_disconnect": 1,
+        "decoded_cleanup": 1
+      },
+      "feature_symbols": {
+        "sse": false,
+        "gzip": true,
+        "observability": false
+      },
+      "checkout_hidden_build_and_run": true
+    },
+    "streams": {
+      "source_digests": {
+        "examples/linux/m11_004/streams/cjpm.toml": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "62ea29be65a7ec375ce56c6e4bc6d6baf6bebfee852813defcd91f258ed7ad0f"
+        },
+        "examples/linux/m11_004/streams/src/acceptance.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "bda1f56253aecbd41b4c9f26df927b457f3a0c3c81a69054638503f994e734a6"
+        },
+        "examples/linux/m11_004/streams/src/fixture.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "11d49b86bc0ae249cd95e1fba7a4b4d4ce29bedd6637c3ee9ccbc5e4ccd23b68"
+        },
+        "examples/linux/m11_004/streams/src/main.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7d7847f428cc6e353dcae8634ffef3be07fb5e5d4d8567420b904f23a0100527"
+        }
+      },
+      "public_imports": [
+        "std.fs.File",
+        "std.sync.*",
+        "wirestack as api",
+        "wirestack.http.*",
+        "wirestack.sse.*",
+        "std.env.*",
+        "std.fs.File",
+        "wirestack.http.*",
+        "std.convert.*",
+        "std.fs.*",
+        "wirestack as api",
+        "wirestack.http.*",
+        "wirestack.sse.*"
+      ],
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "0c88d1ac8860858b73e4c709f74411bbf1883745b89bdd6d4ab22a623ba14efc"
+      },
+      "native_needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ],
+      "pass_checks": {
+        "streams_success": 1,
+        "streams_cursor_duplicate_explicit_recover": 1,
+        "streams_peer_disconnect": 1,
+        "streams_post_exactly_once_after_peer_failure": 1,
+        "streams_active_cancel": 1,
+        "streams_deadline": 1,
+        "streams_pre_cancel": 1,
+        "streams_bounded_slow_consumer_h2_sibling": 1,
+        "streams_explicit_close": 1,
+        "streams_capacity": 1,
+        "streams_untrusted_chain": 1,
+        "streams_cleanup": 1
+      },
+      "feature_symbols": {
+        "sse": true,
+        "gzip": false,
+        "observability": false
+      },
+      "checkout_hidden_build_and_run": true
+    },
+    "service": {
+      "source_digests": {
+        "examples/linux/m11_004/service/cjpm.toml": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8e5260e1e8638edc922620a293e4e9e340689f8bfe78b5ec6448e2e7d2bb8b4f"
+        },
+        "examples/linux/m11_004/service/src/main.cj": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+        }
+      },
+      "public_imports": [
+        "std.fs.*",
+        "std.console.Console",
+        "std.convert.*",
+        "std.collection.ArrayList",
+        "std.sync.*",
+        "wirestack as api",
+        "wirestack.http.*",
+        "wirestack.sse.*"
+      ],
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "44eac14f823211eb47efb84db2c4776d6ef9a65796d6de609a929331dd5e15eb"
+      },
+      "native_needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ],
+      "pass_checks": {
+        "service_untrusted_rejected": 1,
+        "service_server_capacity": 1,
+        "service_success": 1,
+        "service_pre_cancel": 1,
+        "service_active_cancel": 1,
+        "service_deadline": 1,
+        "service_capacity": 1,
+        "service_explicit_close": 1,
+        "service_peer_disconnect": 1,
+        "service_ordinary_rotation": 1,
+        "service_security_cancel": 1,
+        "service_security_rotation": 1,
+        "service_graceful_stop": 1,
+        "service_cleanup": 1
+      },
+      "feature_symbols": {
+        "sse": true,
+        "gzip": false,
+        "observability": false
+      },
+      "checkout_hidden_build_and_run": true
+    }
+  },
+  "documented_regions": {
+    "cli/src/main.cj#cli-download": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b22b130fbafc91c8e867ddb0cc08e8c8c3df2a66ea6cc416d0898a99bc1ad8a3"
+    },
+    "decoded/src/main.cj#decoded-download": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "eee04efd771bebfddd802ba58051a2d97b9ceb7ce81610b33891557f620886fb"
+    },
+    "streams/src/main.cj#stream-sse": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d7847f428cc6e353dcae8634ffef3be07fb5e5d4d8567420b904f23a0100527"
+    },
+    "streams/src/main.cj#stream-websocket": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d7847f428cc6e353dcae8634ffef3be07fb5e5d4d8567420b904f23a0100527"
+    },
+    "service/src/main.cj#service-handler": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+    },
+    "service/src/main.cj#service-rotation": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+    }
+  },
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "bc33c7a8693ffdb433dd376d857d57d601d8cff7ba160a80c544bf0662d50be5"
+  },
+  "payload_sha256": "b9cb78f93d46c5336e9c5d5f6f9eb00fdf1acdf5c28df985fbe2ac7fbb769922",
+  "production_sources": {
+    "src/byte_span.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+    },
+    "src/cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d17cfd36391c38dcc4a30c2ad532b20039846f870535d46480c0e12267ec7a38"
+    },
+    "src/common.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a9264356fb3508b944f2919255dcf08a30fd3a828a97373fd0af75ea18b98cae"
+    },
+    "src/deadline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+    },
+    "src/gzip/body.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "da7513e8b2c3bbcfe49738d073e10e5a7ec904c14a0663c4feb5f7e16591ca84"
+    },
+    "src/gzip/client.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7dd5b31b36bb6ea36723573dfea6aabef6c73644ce6e3a74aee35e3cc1e04024"
+    },
+    "src/gzip/decoder.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ecbf181d97f852ba9eb914d1de38ceab498a7c52380ad609b91fa61eef3d4082"
+    },
+    "src/gzip/model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bdbe6f4703a77aacd004a80f7bb709afbd0c122bab597896b717dd651d151f26"
+    },
+    "src/hostname_verifier.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+    },
+    "src/http/cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2e598e224f402937c0e6054b98aa67ffe4db05800bef8ce455348eb126b0296c"
+    },
+    "src/http/client.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9136c2e7a44553c2dce257db953e44375d59b334555550cb8a6a692284027b1c"
+    },
+    "src/http/client_rotation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "492de359076836ee509543950872d4a3ee9ae55a97cf86f06f7cf000ce271b71"
+    },
+    "src/http/configuration_rotation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "81338be084b2ab6eb14d49e70d2769984c28e0c3e201e40eb216022a06679816"
+    },
+    "src/http/cookie.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+    },
+    "src/http/duplex.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7cfbf568d873ddf89b11465b6474584550e56546b7e0273cf0100fef95ad51d6"
+    },
+    "src/http/error.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bdbc8b908567971439758c1c9b6bd344f7a6f381d082d45adaa20b3d5cb93cb7"
+    },
+    "src/http/file_handler.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+    },
+    "src/http/hooks.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f3605fab36dc2b91c3a19576372ff11fdd4e39b59efa32fd5bfac158d30f9f6a"
+    },
+    "src/http/multipart.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+    },
+    "src/http/observability.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a36cac65dd05e2edf16c310b6d12d67d32768279ad3e80ae3cb8558924f6ea35"
+    },
+    "src/http/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+    },
+    "src/http/proxy.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+    },
+    "src/http/redirect.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+    },
+    "src/http/resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177"
+    },
+    "src/http/resource_budget.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0126e7e2cdcdef300bd0a8fa4bd219477177383af399f055d52c5345104917d8"
+    },
+    "src/http/retry.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957"
+    },
+    "src/http/server.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9b44d95acef40a700fafdd77d9156cdeacb0fcb9156bbc90405205d8658f7b18"
+    },
+    "src/http/tls.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+    },
+    "src/http/upgrade.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+    },
+    "src/http/websocket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4511bca2f41407997772dc43e61a48d3c9f7d71369a09635c9ca5c3ce5a1e5e0"
+    },
+    "src/http/websocket_handshake.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b1bd6429e8ef9977313f2812575d5663116fe0f122dca7a05bfd87f7fcd9b4d3"
+    },
+    "src/http/websocket_url.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "91f589b93950dcc0a32d7acdd9a185aa840f6af08f9614c64623cb1151363bcb"
+    },
+    "src/http_body.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+    },
+    "src/http_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+    },
+    "src/http_message.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1e324d3d5bc13bfc2d46984bb377fffe90b5370ef8134e0489658cd963d18a0a"
+    },
+    "src/http_model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+    },
+    "src/http_push.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+    },
+    "src/http_url.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0636a1ff272f384c9e6f8775947eb6db9efda9e27de21504ac6c5f138a155b49"
+    },
+    "src/internal/common/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+    },
+    "src/internal/connector/happy_eyeballs.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "16dcbfcfc31e5e8f793d7b9099de30fa242268060965d6c83f4d7964b9c154cb"
+    },
+    "src/internal/connector/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+    },
+    "src/internal/connector/route.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+    },
+    "src/internal/http1/chunked.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+    },
+    "src/internal/http1/client_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1b742d3afbebbe204f8a6d2ae79729f504f8cf9c16f3eeb07396137cf4b84da8"
+    },
+    "src/internal/http1/client_pipeline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "57dc5def43110b361eea51b1c99c3b24f93ad5673e1f0a0849a9cef6cd28b4e1"
+    },
+    "src/internal/http1/connection_pool.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5830e140cd22d48385bdd3d20b24a07792997d087229da58f8793bfb86d90c24"
+    },
+    "src/internal/http1/head_parser.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+    },
+    "src/internal/http1/http2_connection_pool.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f9fcd87da1ad6f8740801b2fac39ae29af7454d7e3f6559609504a556e921563"
+    },
+    "src/internal/http1/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+    },
+    "src/internal/http1/pool_admission.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "60faf41eebd2e5e549f1aaf5e35e0cbfd408660d7abdd5bcba412c6653743058"
+    },
+    "src/internal/http1/pool_key.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5e72b0cccb4c59e8f07828b8d9903be4053736fd16cd8de8463c3248a0507dac"
+    },
+    "src/internal/http1/protocol_upgrade.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "07f09eadce829979bd333e07cbf18de62e79af6615553233320f41989acc0f27"
+    },
+    "src/internal/http1/proxy_client_pipeline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6a191e3561973edab201c9af3e2d1cfc6a91e9d91e73abee21654c7315da45fc"
+    },
+    "src/internal/http1/request_writer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f136cf6ef23d024c473576f1c7a071c6dfdfe07c6fe8c3a045d8fe4bc8961650"
+    },
+    "src/internal/http1/response_reader.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b0a7a96696fa8774e19d729c9d318097ce3975f755b2b80c7ce53ab6c58608ad"
+    },
+    "src/internal/http1/serializer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+    },
+    "src/internal/http1/server.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+    },
+    "src/internal/http1/server_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9b69b2bd71fb5b19a214c083b75ed4a5c367dc59a9c57ab9c916129ad8942a20"
+    },
+    "src/internal/http1/server_reader.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+    },
+    "src/internal/http1/server_writer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+    },
+    "src/internal/http1/tls_client_pipeline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6b299db3e0a381592d43291f70e32578c43c0358a0ac3988bcde6943f20ae380"
+    },
+    "src/internal/http1/tls_server.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "23407a4258f4c4639df7baf28c40f84b9f0366e9498a5e0c9c68448670cba796"
+    },
+    "src/internal/http2/client_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "da0a322653d33b5464ab9802c1698dac74796c280b67138402b4ef2920ff72fd"
+    },
+    "src/internal/http2/client_mapping.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+    },
+    "src/internal/http2/client_push.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "96b45e9483324487dc5eb41f5ec603cd03ad7d74c3d4645cfefa3da7dca197f1"
+    },
+    "src/internal/http2/connection_state.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+    },
+    "src/internal/http2/duplex_stream.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+    },
+    "src/internal/http2/flow_control.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b296e490719597dab558988c621accc17301e235f35a44cc8813233f90591137"
+    },
+    "src/internal/http2/frame_codec.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ff25f15a331f00c21850e9ece84e392cd10ea1f77b76c1fc05964fa5841402d5"
+    },
+    "src/internal/http2/frame_model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+    },
+    "src/internal/http2/goaway.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+    },
+    "src/internal/http2/header_block.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+    },
+    "src/internal/http2/health_close.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+    },
+    "src/internal/http2/hpack_block.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+    },
+    "src/internal/http2/hpack_core.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    "src/internal/http2/hpack_dynamic_table.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+    },
+    "src/internal/http2/hpack_huffman.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+    },
+    "src/internal/http2/observability.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fc4d28b389b73c00f33db648ec2c1d76d57452ed755d8f2007cb61b19d752dce"
+    },
+    "src/internal/http2/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+    },
+    "src/internal/http2/reader_loop.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3e680b8bd8c005c7c3a067ab3955e33a8359c96220d76ebbee638a5c1da79015"
+    },
+    "src/internal/http2/server_cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8b718950bbe3e7de56e40b63e5d2262f7e6301ea61cb1b56c3530b4308cbe9c9"
+    },
+    "src/internal/http2/server_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5dd9ae32547c1c8adb779290044c60bdce31546b3b01b86330cfca028c66866e"
+    },
+    "src/internal/http2/server_mapping.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "be1efea8eae10d0bdec1976b69b5c42b2eb8a2b86f8962ad9863765a25304a4b"
+    },
+    "src/internal/http2/settings.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+    },
+    "src/internal/http2/stream_lifecycle.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+    },
+    "src/internal/http2/stream_reset.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c1a838f98f6fa9a8d7873e8986ef5b93b31433d9840e763c04fc59a457b77760"
+    },
+    "src/internal/http2/write_scheduler.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "50ed0bb79d8ac3c4cc9fe93d1f3b43a657d0ccec002e4345414ea8c869c3d2ed"
+    },
+    "src/internal/http_files/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+    },
+    "src/internal/http_model/body.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+    },
+    "src/internal/http_model/message.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+    },
+    "src/internal/http_model/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+    },
+    "src/internal/http_model/public_suffix.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+    },
+    "src/internal/http_model/public_suffix_data.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+    },
+    "src/internal/http_model/url.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+    },
+    "src/internal/http_resource_budget.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fc6431860cf192c005ee2bdd632413f1d61f75e31ed27fedac45a2fbc06b5df1"
+    },
+    "src/internal/http_resource_budget_types.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2d555765cb6ff9ac22f343666831b1e0492118ba5fcb82cb35aebd6c5839623c"
+    },
+    "src/internal/identity/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+    },
+    "src/internal/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+    },
+    "src/internal/platform/linux/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+    },
+    "src/internal/platform/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+    },
+    "src/internal/resolver/bounded_backend.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d536557035988f377c8c8269bfc8854d648f4f2e65d1792b0c8126f4621c56cd"
+    },
+    "src/internal/resolver/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+    },
+    "src/internal/resolver/system_resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "29fe44c8e6568d269452f3d54d0c48929415082fdf36e1afbddd66224f727923"
+    },
+    "src/internal/tls_engine/connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+    },
+    "src/internal/tls_engine/context.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+    },
+    "src/internal/tls_engine/engine.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+    },
+    "src/internal/tls_engine/identity.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+    },
+    "src/internal/tls_engine/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+    },
+    "src/internal/tls_engine/server_name.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+    },
+    "src/internal/tls_engine/session.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+    },
+    "src/internal/tls_engine/websocket_crypto.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+    },
+    "src/internal/transport/cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+    },
+    "src/internal/transport/completion.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+    },
+    "src/internal/transport/deadline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+    },
+    "src/internal/transport/lifecycle.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+    },
+    "src/internal/transport/memory_transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+    },
+    "src/internal/transport/memory_transport_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+    },
+    "src/internal/transport/network_error.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+    },
+    "src/internal/transport/network_event.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+    },
+    "src/internal/transport/operation_context.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+    },
+    "src/internal/transport/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+    },
+    "src/internal/transport/scripted_transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+    },
+    "src/internal/transport/transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    "src/internal/transport_stdnet/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+    },
+    "src/internal/transport_stdnet/socket_options.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
+    },
+    "src/internal/transport_stdnet/udp_socket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "32f78914fb335bf68dfd2a99ae3d06e823fe855bc7b583bb126b7622f6f364b2"
+    },
+    "src/internal/transport_stdnet/unix_address.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    "src/internal/transport_stdnet/unix_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    "src/internal/trust/hostname.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+    },
+    "src/internal/trust/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+    },
+    "src/net/datagram_socket_core.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "007a873cf52ccc3587db5c1c58d8b69cbb991585b09085c0abc861ca647709ce"
+    },
+    "src/net/dns_client.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3c7a7b33d8877023a28cf5436ec663e6ab1067b3361886a1865e370d7768acce"
+    },
+    "src/net/dns_resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7f9054340e354204b8571c6ff83f85b17025375a2ebc67d04b860e3e308e1eb1"
+    },
+    "src/net/dns_wire.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+    },
+    "src/net/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+    },
+    "src/net/socket_options.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+    },
+    "src/net/tcp_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+    },
+    "src/net/udp_socket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
+    },
+    "src/net/unix_datagram_socket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    "src/net/unix_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    "src/net/unix_stream.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    "src/network_error.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+    },
+    "src/network_event.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8b356f7f4ea634313f745a244cf1288dd9d4d960fb573870a8e0558b78e77956"
+    },
+    "src/network_event_buffer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b445222f06db9333f9c7660e9bafbd4c5e6e4b125238b4120b8dc95379a3eb33"
+    },
+    "src/network_pool_snapshot.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f19d0fc1cfdb8e952b3550153540afc342a9627bb3a862be4e559caa8aa7859c"
+    },
+    "src/observability/bounded_network_event_sink.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d11390cfc372f11c6d5d567ea58c88f633e0e147a213be34b0d072ad58cd7aa4"
+    },
+    "src/operation_context.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "98c98f6d7e325e61cdd239bf8c2e7abfa586ae662e11c892df2aa8428245eb43"
+    },
+    "src/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+    },
+    "src/private_key_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+    },
+    "src/resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+    },
+    "src/resolver_snapshot.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b1f82e6f120e77391595abda5289c0376c9013ce8a3d692721ac05669cfb0094"
+    },
+    "src/sse/decoder.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "18d5714996a532a4c87c11321c2f91ae5a14f8a216d3559eadcda33572b92e63"
+    },
+    "src/sse/encoder.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "099f94ce9d9363aff48611789fa31a84e048a386ceabf6d84806bc52c844ea7d"
+    },
+    "src/sse/model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6c018731253fb95b3ae59a29ae54d80cb7780302ed7151c8ace792c46c91bdee"
+    },
+    "src/sse/session.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "df9e308866fc1ae2d7445ca19d6832161b6bf85d28afc55abda464d249fc086f"
+    },
+    "src/sse/session_policy.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ca2b6ec5d9d7a006b05ea3c72cb49d4461974cc572bfb34598a74dcbaa903bf4"
+    },
+    "src/sse/writer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77520d6b36a837f2230cb3d5363f703a40c4b4710018f1553d20c3eafec722a4"
+    },
+    "src/tls/facade.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+    },
+    "src/tls/identity.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+    },
+    "src/tls/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+    },
+    "src/tls_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+    },
+    "src/transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+    },
+    "src/trust.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+    }
+  },
+  "source_digest_equality": true,
+  "checkout_hidden": {
+    "mechanism": "private bubblewrap mount namespace",
+    "probe": "PASS",
+    "build_and_runtime": true
+  },
+  "toolchain": {
+    "compiler": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "compiler_binary_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+    }
+  },
+  "proxy_observations": [
+    {
+      "method": "CONNECT",
+      "identity_kind": "dns",
+      "sni": "example.test",
+      "authorization_present": true,
+      "terminal": "reset",
+      "native_code": 104,
+      "terminal_side": "consumer"
+    }
+  ],
+  "operational_commands": {
+    "cli": {
+      "status": "PASS",
+      "bytes": 8,
+      "output_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "68ff63fb82e0e5dfec2a8496bf9afef608ad639ed552e740268eb537fa52067f"
+      },
+      "partial_file_absent": true,
+      "oversized_trust_rejected": true
+    },
+    "decoded": {
+      "status": "PASS",
+      "bytes": 8,
+      "output_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "68ff63fb82e0e5dfec2a8496bf9afef608ad639ed552e740268eb537fa52067f"
+      },
+      "partial_file_absent": true,
+      "oversized_trust_rejected": true
+    },
+    "streams": {
+      "status": "PASS",
+      "sse_output": "SUMMARY events=1 bytes=5 recoveries=0 cursor_bytes=8",
+      "websocket_output": "SUMMARY frames=1 bytes=5 recoveries=0",
+      "oversized_trust_rejected": true
+    },
+    "service": {
+      "status": "PASS",
+      "stdin_stop": "SERVICE_STOPPED",
+      "fixture_bytes_verified": true
+    }
+  },
+  "m9_integration": {
+    "status": "PASS",
+    "consumers": {
+      "options": {
+        "source": "examples/linux/m9_002/socket_options.cj",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1db761c6baecebc1f3b5ec80aac608fab4de8158fae8881f54d314d9c4e8006d"
+        },
+        "binary_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "8b8353b22582b5a54579fedf658eba71ea9386d35874041cd3e325e0e2af0e95"
+        },
+        "modes": {
+          "options": "PASS",
+          "http": "PASS",
+          "invalid": "PASS"
+        },
+        "checkout_hidden_build_and_run": true
+      },
+      "udp": {
+        "source": "examples/linux/m9_003/udp_lifecycle.cj",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9bef771e0048b9dd977c606e3927cd3f543080a7b5443696b78140a230aef019"
+        },
+        "binary_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "08d99c9073c6a96d4699328f829f2e0676ff1b52dec3c0dd6794c9af0631c4c2"
+        },
+        "modes": {
+          "disconnect": "PASS",
+          "broadcast": "PASS",
+          "ipv4-multicast": "PASS",
+          "ipv6-multicast": "PASS",
+          "membership-cleanup": "PASS",
+          "active-receive": "PASS"
+        },
+        "checkout_hidden_build_and_run": true
+      }
+    }
+  },
+  "pass_check_count": 47
+}
