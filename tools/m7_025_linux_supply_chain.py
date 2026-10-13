@@ -35,6 +35,7 @@ HTTP_FILES_MANIFEST = "target/native/http_files/current/http-files-manifest.json
 HTTP_FILES_ARCHIVE = "target/native/http_files/current/lib/libwirestack_http_files.a"
 HTTP_FILES_SPDX_ID = "SPDXRef-Package-Wirestack-HttpFiles"
 PUBLIC_SUFFIX_SPDX_ID = "SPDXRef-Package-PublicSuffixList"
+GZIP_SPDX_ID = "SPDXRef-Package-Wirestack-Gzip"
 QUALIFICATION = ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
 PROVIDER_PIN = SELECTED_PROVIDER.manifest_path
 DEFAULT_ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
@@ -533,6 +534,8 @@ def fingerprint_inputs(
             "licenseExpression": public_suffix["license"],
             "licenseSha256": public_suffix["license_sha256"],
         }
+    if release.get("optionalModules"):
+        inputs["optionalModules"] = release["optionalModules"]
     return inputs
 
 
@@ -610,6 +613,8 @@ def release_provider_manifest(
             ),
             "privateRuntimeAbi": http_files["private_runtime_abi"],
         }
+    if release.get("optionalModules"):
+        manifest["optionalModules"] = release["optionalModules"]
     return manifest
 
 
@@ -768,6 +773,17 @@ def spdx_document(
                 "primaryPackagePurpose": "SOURCE",
             }
         )
+    gzip = next((module for module in manifest.get("optionalModules", []) if module.get("package") == "wirestack.gzip"), None)
+    if gzip is not None:
+        packages.append({
+            "name": "Wirestack optional gzip", "SPDXID": GZIP_SPDX_ID,
+            "versionInfo": manifest["package"]["version"], "downloadLocation": "NOASSERTION",
+            "filesAnalyzed": False, "licenseConcluded": PROJECT_LICENSE_EXPRESSION,
+            "licenseDeclared": PROJECT_LICENSE_EXPRESSION, "copyrightText": "NOASSERTION",
+            "primaryPackagePurpose": "LIBRARY",
+            "checksums": [{"algorithm": "SHA256", "checksumValue": evidence_digest.text_evidence_bytes_sha256(canonical_json(gzip))}],
+            "comment": "Explicit package import; original Cangjie RFC1951/RFC1952 code; no additional native dependencies; checksum domain=text-utf8-lf-v1 source manifest.",
+        })
     artifact_id = "SPDXRef-Package-Wirestack-Artifact"
     relationships = [
         {
@@ -802,6 +818,8 @@ def spdx_document(
                 "relatedSpdxElement": PUBLIC_SUFFIX_SPDX_ID,
             }
         )
+    if gzip is not None:
+        relationships.append({"spdxElementId": artifact_id, "relationshipType": "CONTAINS", "relatedSpdxElement": GZIP_SPDX_ID})
     for dependency in (
         "SPDXRef-Package-Cangjie-Runtime",
         "SPDXRef-Package-glibc",
@@ -1033,6 +1051,35 @@ def validate_documents(
         required_package_ids.add(HTTP_FILES_SPDX_ID)
     if isinstance(fingerprint_public_suffix, dict):
         required_package_ids.add(PUBLIC_SUFFIX_SPDX_ID)
+    optional_modules = fingerprint.get("inputs", {}).get("optionalModules", [])
+    _require(isinstance(optional_modules, list) and all(isinstance(module, dict) for module in optional_modules),
+             "optional module fingerprint inventory invalid")
+    _require(len(optional_modules) <= 1 and all(module.get("package") == "wirestack.gzip" for module in optional_modules),
+             "optional module package inventory invalid")
+    _require(manifest.get("optionalModules", []) == optional_modules, "optional module fingerprint inventory mismatch")
+    gzip = next((module for module in optional_modules if module.get("package") == "wirestack.gzip"), None)
+    if gzip is not None:
+        _require(gzip.get("selection") == "explicit-package-import" and gzip.get("nativeDependencies") == []
+                 and gzip.get("license") == PROJECT_LICENSE_EXPRESSION, "gzip component dependency policy invalid")
+        _require(gzip.get("implementation") == "wirestack-cangjie-rfc1951-rfc1952",
+                 "gzip implementation identity invalid")
+        sources = gzip.get("sources")
+        _require(isinstance(sources, list) and all(isinstance(source, dict) for source in sources),
+                 "gzip source inventory invalid")
+        _require([source.get("path") for source in sources] ==
+                 [f"src/gzip/{name}.cj" for name in ("body", "client", "decoder", "model")],
+                 "gzip production source inventory invalid")
+        for source in sources:
+            try:
+                evidence_digest.parse_text_digest(source.get("sha256"))
+            except evidence_digest.DigestError as error:
+                raise SupplyChainError("gzip source digest domain invalid") from error
+        required_package_ids.add(GZIP_SPDX_ID)
+        package = _spdx_package(sbom, GZIP_SPDX_ID)
+        _require(package.get("licenseDeclared") == PROJECT_LICENSE_EXPRESSION and
+                 package.get("licenseConcluded") == PROJECT_LICENSE_EXPRESSION, "gzip component license mismatch")
+        _require(_package_checksum(sbom, GZIP_SPDX_ID) == evidence_digest.text_evidence_bytes_sha256(canonical_json(gzip)),
+                 "gzip component source manifest checksum mismatch")
     packages = sbom.get("packages")
     _require(isinstance(packages, list), "SPDX package inventory is absent")
     package_ids = [package.get("SPDXID") for package in packages if isinstance(package, dict)]
@@ -1193,6 +1240,8 @@ def validate_documents(
         expected_relationships.add(
             (artifact_id, "CONTAINS", PUBLIC_SUFFIX_SPDX_ID)
         )
+    if gzip is not None:
+        expected_relationships.add((artifact_id, "CONTAINS", GZIP_SPDX_ID))
     _require(
         relationship_tuples == expected_relationships,
         "SPDX relationships are incomplete or contain unknown entries",

@@ -1,0 +1,2027 @@
+COMMAND: cjpm test src/gzip --filter=GzipCodecTest.preReadDeadlineClosesSourceWithoutReading,GzipCodecTest.decoderFailureSurvivesThrowingSourceClose,GzipNativeTest.preReadDeadlineReleasesNativeBodyReservation --no-color --no-progress
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 7.15 */                        if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 7.16 */                            throw e[0m
+   [36m| [0m[33m|[0m /* 7.17 */                        }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 7.1 */@Attribute[TEST_GENERATED] class GzipDeterministicDifferentialTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 7.2 */    @Attribute[TestCase_16][0m
+    [36m| [0m[34m|[0m /* 7.3 */    func fixedSeedMalformedAndValidOracleCorpus(): Unit {[0m
+    [36m| [0m[34m|[0m /* 7.4 */        let corpus: Array <(String, String) >=[("1f8b08000000000000ff010000ffff0000000000000000", ""),("1d8b08000000000000ff630000942b6fd501000000", "!"),("1f8b08000000000000ff63620500f284850302000000", "0205"),("1f8b0c000000000000ff010300fcff28a24d0c2d435d03000000", "!"),("1f8b08000000000000ff63676763050029a2ec9f04000000", "07070605"),("1f8b0c002000000000ff63616160650100d233b6a205000000", "!"),("1f8b08000000000000ff010600f9ff78ac93e36abca100f0ba06000000", "78ac93e36abc"),("1f8308000000000000ff636367626363600700513ffb2607000100", "!"),("1f8b08000000000000ff63626262666660620600308e7a0308000000", "0202020303000203"),("1f8b08000000000000ff010900f6ffd9e70530a32e83bacc85b71b9909001000", "!"),("1f8b08000000000000ff636566606362646067650500393404270a000000", "05030006020100070505"),("1f8b28000000010000ff6367646065666661636165070033bd5c920b000000", "!"),("1f8b08000000000000ff010c00f3ff19307a03aea06838f9fd35f02ea28cce0c000000", "19307a03aea06838f9fd35f0"),("1f8b08000000000800ff6366636664652262666365676400007081d0960d000000", "!"),("1f8b08000000000000ff63666061676363626564666263630100242db19a0e000000", "0300040706060205010302060604"),("1f8b08000000000000ff010f00f0ffc5cfecfd7b866db79793e896bdb4f1f7fcf7eb0f008000", "!"),("1f8b08000000000000ff636565606366676761636765616464640100638298e510000000", "05050006030707040607050401010104"),("1f8b08000000000000ff637466616061616546636065606e67636006008b94f3d211000000", "!"),("1f8b08000000000000ff011200edffd27040eafca0f5b3cf949cfc0d8995914d216928e98912000000", "d27040eafca0f5b3cf949cfc0d8995914d21"),("1f8b08000000000000ff63646460602661616762666162646667666066010056b1e3c313000000", "!"),("1f8b08000000000000ff63606263616267656666646166600352ec6c4c006d35e80214000000", "0002060402070503030104030006030301070602"),("1f8b08000002000000ff011500eaffc3d778c536bdbebd31daefdfe81366aaaa8bad1d8a221f339e15000000", "c3d778c536bdbebd31daefdfe81366aaaa8bad1d8a"),("1f8b08000000000000ff6361626761606266656162606060636064606365676500006ebd28ba16000000", "04020704000203050402000000060001000605070500"),("1f8b08000000000400ff05c1810100000ac2a0a666ff7f1c709933d936c2f216d003effe726917004000", "!"),("1f8b08000000000000ff011800e7ffeea0068c2eff64b63f0995620e5656431029efdc0c4a4bdc88becf4a18000000", "eea0068c2eff64b63f0995620e5656431029efdc0c4a4bdc"),("1f8b08000000000000ff636263646564626061626262656062606005d2ce0cec4cac00ba4538c219000000", "!"),("1f8b08000000000000ff05c1811100000c0131fe94fd376e225c4e1891b5358c443c1ef962ba1a000000", "0002010602050002010200020407060606010202070204040002"),("1f8b08000000000000ff011b00e4ffc96723113bd061ebe5abdcb8bc1ea60ca2410b1c608b6e2407e0eee173ec8e1b000000", "!"),("1f8b08000000000000ff636766646463646160626760636567616063616761676462646163620000da3cb3581c000000", "07030101060104000207000605070400060407040701020104060200"),("1f8b08000000000000ff05c1811100040c01b13a8f7d376e125138ab54539a73bc09d2075e7dea9e5d000000", "!"),("1f8b08000000000000ff011e00e1ff1d88189d0193d957977c1a48fb27ab65ab66dbc4bddcb4c81e51a7692ef0724553fe1e000000", "1d88189d0193d957977c1a48fb27ab65ab66dbc4bddcb4c81e51a7692ef0"),("1f8b08000000000000ff63656760636662666566656366666165646666606365626360020246567600ba6cdf5f1f000008", "!"),("1f8b08000000000000ff05c18101000008c2207559ff7f1c9c47c5e0ba3761c5a094c8977d03466fc120000000", "0701040005030103030105010507040203060003040300020503020001070206"),("1f8b08000000000000ff012100deff2fde2bae99d74efac35cbc832168df223d6c2a05baa60794d7c33b61c9611708e869cbdcf821000000", "!"),("1f8b08000000000000ff6365656660666667606567032366362646461656661606760636064666263600a2f0207722000000", "05050300030307000507060507060507030602010104050304000700060001030206"),("1f8b08000000000040ff0dc6414200000841b042fcffc7d969b09761662c514822b4e7765bea0104f405d823000000", "!"),("1f8b08000000000000ff012400dbfff3d9fe26b5084cef496be12e0dad609121f415daf845be02eba94961963f029b4632951e2f68814424000000", "f3d9fe26b5084cef496be12e0dad609121f415daf845be02eba94961963f029b4632951e"),("1f8b08000000000000ff63606766626764616162666761616066606666630322061656463606164766064606561600c6c668c625000000", "!"),("1f8b08000000000000ff0dc6b701c04010c3309d82b9ffc66f54b00e57221f668bd67fb703a7931bf400cc972d8f26000000", "0200010702040000070306070207050503000504060702010501070702030405000204030700"),("1f8b08000000000000ff012700d8ff9ce06dca904806bdcfa325c9b69047b4b30d87bcfe805789a86f1439a9be16ee986bb2b7857094597b1b2a27000000", "!"),("1f8b08000000000000ff6366656664636760606460676366666162676362616760636767676601f2599898599999d89898016aa7ad9b28000000", "03050301060700000100070603030402070602040700060707070304030304040203050302060203"),("1f8b08000000000000ff0dc7c1010030080231e140f7dfb8cd2f308cd1a1b61b4297607e962df678133d4e13d10429000008", "!"),("1f8b08000000000000ff012a00d5ff836efb02b9bcf61e27245e2da836f271fe3c93568c7f04c498d46afe330eda3ccd35c2fe0a7090e91ed29154f3c32a000000", "836efb02b9bcf61e27245e2da836f271fe3c93568c7f04c498d46afe330eda3ccd35c2fe0a7090e91ed2"),("1f8b08000000000000ff63656563666460636163656664636262646561226565666361606367646267000a3330b132b0b03133b3030054ce990e2b000000", "!"),("1f8b08000000000000ff05c187010000080220cdf5ffc7412ea1d46ebb32900673cd09961753a8adf40151a7a49b2c000000", "0502050501030306060707070206010500030307000401070605020300040304070504010300060404030506"),("1f8b08000000000000ff012d00d2ffc7e0867e1c04c6a204519b10e2cdf2563b8abe68ccb34a808b520179d8347276c6831161feac5f60a5ea2e629c233563c72d000000", "!"),("1f8b08000000000000ff6361656067636567606064606565676767616764646660626365656160636163676660666163616661626666646503002bbdd8f72e000000", "04050007060507000001000505070707040701010300020605050400060406070300030406040304020303010506"),("1f8b08000000000000ff05c18701000008022047eaff1f0796a0c3681a17552e8253c7596141ea82885c0f52d4d4782f000000", "!"),("1f8b08000000000000ff013000cfff174079a61411e8304d4e019c2220130842a0b6f71949b7ce1c1143fd9c109724eaea3931e1d8615bf944e1482516b8b3c830ec6a30000000", "174079a61411e8304d4e019c2220130842a0b6f71949b7ce1c1143fd9c109724eaea3931e1d8615bf944e1482516b8b3"),("1f8b08000000000000ff63666261616364606760646561656464626560656361616866606466636761636266676663606f6167666463626462666201006526e9c931000000", "!"),("1f8b08000000000000ff0dc8b70100200c033057fcffc744a31aba0c4ae88d5b9f944baeaa99a8b8120d2f371f5a1c01e732000000", "0504010305010400050100020607010707050602020404010301070502050301040402050006020202010300030704050301"),("1f8b08000000000000ff013300ccefdfe453eea3b554c3131133487e3863ea480c1272852d4b7607f77d41403cc800b3ac5d2a9e857e318b7fe76dab04e4ebc45cb4d479e83a33000000", "!"),("1f8b08000000000000ff6366656460676363606062676162646165034226a0083b03233b23231b1b3b230333031333032b2b0b032b0333131b230b3b00e530117a34000000", "03050100070606000002070402010405060506050200070607000107010106060701000300020300050504000500030206010407"),("1f8b08000000000000ff0dc8c90d003010c240201cfd379c95fc1839b2408f41c7d7d6cba90c1695b8825b000b3d32fd18b0ef8f35000000", "!"),("1f8b08000000000000ff013600c9ffa4e3fcd69e66cd0c2a6d1c4be11216b9510ed3cadddf78837283758ece8eef17d59513862eb4ca3df46520763ede113ace591a49e03120b103f536000000", "a4e3fcd69e66cd0c2a6d1c4be11216b9510ed3cadddf78837283758ece8eef17d59513862eb4ca3df46520763ede113ace591a49e031"),("1f8b08000000000000ff6362626541676565676066606666646060636260676363656764656761634107f21898d8d8d9d91958599998599859d8d95919d99958006da7ccb537000000", "!"),("1f8b08000000000000ff15c7b90d003010023038befd378ee2ce6538a231ba3bd2d6449953713bfc0f544328a89c6d0f8d32382738000000", "0601050107010006050400060702020101040403070301030401070306000207020004030703070001030605010003050006030405070707"),("1f8b08000000000000ff013900c6ff249334f4661317daf72b9e3bbf5a1112735e43e8f6e194e561998c2c8f226879dcb0cb8760f7c2d15a76fa8ec7eab5c5a67736877b1e540a166a272e0a39000000", "!"),("1f8b08000000000000ff6363626365606567636263626562616062676266616663666360676665008ab1b3b031b0b0b1b230303232b3b0b330b03231b033313031313103005143cfc33a000000", "06020605000507060206020502040002070203040306030600070305000602050704060004060504000101030407040005020007020002020203"),("1f8b08000000000000ff158a410200b0088232c9feffe325b981ae34d6b28809ad3d71abf5476d898e5de11fa7602ea7077464f64d3b000000", "!"),("1f8b08000000000000ff013c00c3ffc7965a6ddd197a3e593ab68c9f5befdab8aad741232e25deb3d38cc7539ce409e13c19fedc34729bf4f8e72e14430fc39f43af7eaae3dff474c2f1fe4ff9a3c83c000000", "c7965a6ddd197a3e593ab68c9f5befdab8aad741232e25deb3d38cc7539ce409e13c19fedc34729bf4f8e72e14430fc39f43af7eaae3dff474c2f1fe"),("1f8b08000000000000ff636463606360606467616466656661626561616260656367666361666322cab0b1b0b0022518585919d9189899d9195998d89899d8599940ca01e31d42893d000000", "!"),("1f8b08000000000000ff0dcab101000008c2301084ff3fd6b5e9721d8e3ab508555b6e0350eac3c7f9c3cad62f4e6253403c07c31952163e000000", "0501050406010203070207040301000307030507010507060000010303070102030301000204060104030605070401050704060606040401030000060402"),("1f8b08000000000000ff013f00c0ffc7756709af55da3d40a11c8a6a465f8764b074491a5b0f6f92eb3df2f931f956ebf6ade921de57bf3fbc23f56d50c7b974bb1be425460bdc8e7a8fddfbe30902f5ceb63f000000", "!"),("1f8b08000000000000ff63626367606360666406621676461666764626562646061606761626461620c5cac6cccac8c2c4c4c8ca0a94636467676464606065646267666465670000786983ee40000000", "02060700060003010300030104070104030701020502010004000704020104040007050603050104020201050507010201070701010000050102070301050700"),("1f8b08000000000620ff03000000000000000000", ""),("1f8b08000000000000ff010100fefff488d9d26801000000", "f4"),("1f8b08000000000000ff63670600a2d5918702000000", "!"),("1f8b08000000000000ff63606402007f89540803000000", "000102"),("1f8b08000000000200ff010400fbff211d93b792d85d2204000000", "211d93b7"),("1f8b08000000000000ff63676763630700235d662505000000", "0707060607"),("1f8b00004000000000ff636464756667050095774d4d06000000", "!"),("1f8b08000000000000ff010700f8ffa0048dd78ea931158a137607000000", "a0048dd78ea931"),("1f8b08000000000080ff636361656661612502007cb37d5b08000000", "!"),("1f8b08000000000000ff63636565646166646707003fff457309000000", "060505010403010707"),("1b8b08000000000000ff010a00f5ff7be291594784dba76988782581800a000000", "!"),("1f8b08000000000000ff63616160676066646262620600ce1f36610b000000", "0404000700030102020203"),("1f8b08000000002000ff63677263616264656260616307008d26d7620c000000", "!"),("1f8b08000000000000ff010d00f2ffdd2026f527d718b29e8f7bbe6fc15a5dac0d000000", "dd2026f527d718b29e8f7bbe6f"),("1f8b0a000000000000ff63666164674665636164636061650500ad3275020e000000", "!"),("1f8b08000000000000ff636466646764676660626067636362000077b9f7970f000000", "010301070107030002000706060200"),("1f8b08000000000000ff011000efff0022a4500392b4ffca15cf93d675b589cced994710000000", "!"),("1f8b08000000000000ff63656561666062626467646366666063620100c54669d111000000", "0505040300020201070106030300060204"),("1f8b08000000000000ff63676766656065626e6266636261676663650200f3d4661412010800", "!"),("1f8b08000000000000ff011300ecff8a4e8ee25819730f7e53ab13d9d954cd3f2f9639ec6d7713000000", "8a4e8ee25819730f7e53ab13d9d954cd3f2f96"),("1f8b08000000000000ff63636767666275676061656560626061636362610400487f9e5514000000", "!"),("1f8b08000000000000ff63646764626565676660646066616463616461676406004d09f1aa15000000", "010701020505070300010003040106040104070103"),("1f8b08000000000000ff011600e9ff5f3aa04e324a5af9defa9697aa5387bc77e82a092bf4e57a7e5616000000", "!"),("1f8b08000000000000ff63676465060226265656264626164606206062640000d97ec23f17000000", "0701050303030302020505020102040100000000020100"),("1f8b08400000000000ff05c18101000008c2a0346dff7f1c5c8ce75c9a5c318e4578a4ca7f2718000000", "!"),("1f8b08000000000000ff011900e6ff758177464da9377bc3a840a562395d5a0b0233e233d61d728d1a2c267519000000", "758177464da9377bc3a840a562395d5a0b0233e233d61d728d"),("1f8b08000000000000ff6362e364606560666561656162666265606264616567636267660000c77614471a000000", "!"),("1f8b08000000000000ff05c18701000008022035c7ff1f07a7c3c05506eda96590f4f6fff518881b000000", "030203000700010706020400010404070206060105000505060307"),("1f8b08000000000000ff811c00e3ff0a43919592b2232a06bdc99325507aee1261c631267c8d26fbcefa7a86c5fb121c000000", "0a43919592b2232a06bdc99325507aee1261c631267c8d26fbcefa7a"),("1f8b08000000000000ff636263656267646462616667666667640312ccacec6ceccc0c6cac8c00bc4f06a51d000000", "0206050207010102040307030307010603030703050706070300060501"),("1f8b08000000000000ff05c18701000808023073feff71201b251db563d5ec782116ab0f160806a91e000000", "!")][0m
+    [36m| [0m[34m|[0m /* 7.5 */        for((wire, expected) in corpus) {[0m
+    [36m| [0m[34m|[0m /* 7.6 */            let source = GzipFixtureSource(gzipHex(wire), chunk: 3)[0m
+    [36m| [0m[34m|[0m /* 7.7 */            let body = GzipBodyStream(source, limits: GzipLimits(maximumEncodedBytes: 1024, maximumDecodedBytes: 1024, maximumHeaderBytes: 128, maximumBlocks: 32, inputBufferBytes: 11, maximumReadBytes: 13))[0m
+    [36m| [0m[34m|[0m /* 7.8 */            if(expected == "!") {[0m
+    [36m| [0m[34m|[0m /* 7.9 */                let _ = try {[0m
+    [36m| [0m[34m|[0m /* 7.10 */                    try {[0m
+    [36m| [0m[34m|[0m /* 7.11 */                        assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 7.12 */                        gzipDrain(body)[0m
+    [36m| [0m[34m|[0m /* 7.13 */                        fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 7.14 */                    } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 7.15 */                        if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 7.16 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 7.17 */                        }[0m
+    [36m| [0m[34m|[0m /* 7.18 */                        if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 7.19 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 7.20 */                        }[0m
+    [36m| [0m[34m|[0m /* 7.21 */                        if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.22 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 7.23 */                        }[0m
+    [36m| [0m[34m|[0m /* 7.24 */                        e[0m
+    [36m| [0m[34m|[0m /* 7.25 */                    }[0m
+    [36m| [0m[34m|[0m /* 7.26 */                } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 7.27 */                    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 7.28 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 7.29 */                    }[0m
+    [36m| [0m[34m|[0m /* 7.30 */                    assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 7.31 */                }[0m
+    [36m| [0m[34m|[0m /* 7.32 */                [0m
+    [36m| [0m[34m|[0m /* 7.33 */                expectEqual("source.isClosed()", "true", source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.34 */                expectEqual("body.isClosed()", "true", body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.35 */                expectEqual("! body.integrityVerified", "true", ! body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.36 */            }[0m
+    [36m| [0m[34m|[0m /* 7.37 */            else {[0m
+    [36m| [0m[34m|[0m /* 7.38 */                let decoded = gzipDrain(body)[0m
+    [36m| [0m[34m|[0m /* 7.39 */                let oracle = gzipHex(expected)[0m
+    [36m| [0m[34m|[0m /* 7.40 */                assertEqual("decoded.size", "oracle.size", decoded.size, oracle.size, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.41 */                for(index in 0 .. decoded.size) {[0m
+    [36m| [0m[34m|[0m /* 7.42 */                    assertEqual("decoded[index]", "oracle[index]", decoded[index], oracle[index], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.43 */                }[0m
+    [36m| [0m[34m|[0m /* 7.44 */                expectEqual("body.integrityVerified", "true", body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.45 */                expectEqual("source.isClosed()", "true", source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.46 */            }[0m
+    [36m| [0m[34m|[0m /* 7.47 */            expectEqual("body.decodedBytes <= 1024", "true", body.decodedBytes <= 1024, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.48 */            expectEqual("body.maximumWorkBetweenChecks > 0 && body.maximumWorkBetweenChecks <= 512", "true", body.maximumWorkBetweenChecks > 0 && body.maximumWorkBetweenChecks <= 512, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 7.49 */        }[0m
+    [36m| [0m[34m|[0m /* 7.50 */    }[0m
+    [36m| [0m[34m|[0m /* 7.51 */    [0m
+    [36m| [0m[34m|[0m /* 7.52 */    init() {[0m
+    [36m| [0m[34m|[0m /* 7.53 */    }[0m
+    [36m| [0m[34m|[0m /* 7.54 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 7.55 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.56 */        [0m
+    [36m| [0m[34m|[0m /* 7.57 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 7.58 */    }[0m
+    [36m| [0m[34m|[0m /* 7.59 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 7.60 */        [0m
+    [36m| [0m[34m|[0m /* 7.61 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 7.62 */        let suiteBuilder = TestSuite.builder("GzipDeterministicDifferentialTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 7.63 */        [0m
+    [36m| [0m[34m|[0m /* 7.64 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 7.65 */            [0m
+    [36m| [0m[34m|[0m /* 7.66 */            let fixedSeedMalformedAndValidOracleCorpusTestFunc = { => fixedSeedMalformedAndValidOracleCorpus();() }[0m
+    [36m| [0m[34m|[0m /* 7.67 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 7.68 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 7.69 */            "fixedSeedMalformedAndValidOracleCorpus",[0m
+    [36m| [0m[34m|[0m /* 7.70 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 7.71 */            body: fixedSeedMalformedAndValidOracleCorpusTestFunc[0m
+    [36m| [0m[34m|[0m /* 7.72 */            )[0m
+    [36m| [0m[34m|[0m /* 7.73 */            )[0m
+    [36m| [0m[34m|[0m /* 7.74 */            [0m
+    [36m| [0m[34m|[0m /* 7.75 */        }()[0m
+    [36m| [0m[34m|[0m /* 7.76 */        [0m
+    [36m| [0m[34m|[0m /* 7.77 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 7.78 */    }[0m
+    [36m| [0m[34m|[0m /* 7.79 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 7.80 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 7.81 */    }[0m
+    [36m| [0m[34m|[0m /* 7.82 */}[0m
+    [36m| [0m[34m|[0m /* 7.83 */[0m
+    [36m| [0m[34m|[0m /* 7.84 */[0m
+    [36m| [0m[34m|[0m /* 7.85 */interface TestPackageExtension_GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[34m|[0m /* 7.86 */    func registerGzipDeterministicDifferentialTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 7.87 */}[0m
+    [36m| [0m[34m|[0m /* 7.88 */extend TestPackage <: TestPackageExtension_GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[34m|[0m /* 7.89 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 7.90 */    public func registerGzipDeterministicDifferentialTest() {[0m
+    [36m| [0m[34m|[0m /* 7.91 */        registerSuite({ => GzipDeterministicDifferentialTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 7.92 */    }[0m
+    [36m| [0m[34m|[0m /* 7.93 */}[0m
+    [36m| [0m[34m|[0m /* 7.94 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m_________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/deterministic_fuzz_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m130[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 7.18 */                        if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 7.19 */                            throw e[0m
+   [36m| [0m[33m|[0m /* 7.20 */                        }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/deterministic_fuzz_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m130[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 7.21 */                        if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 7.22 */                            throw e[0m
+   [36m| [0m[33m|[0m /* 7.23 */                        }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/deterministic_fuzz_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m8[0m   [36m| [0m[34m|[0m class GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m130[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 12.60 */                            if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 12.61 */                                throw e[0m
+   [36m| [0m[33m|[0m /* 12.62 */                            }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 12.1 */@Attribute[TEST_GENERATED] class GzipNativeTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 12.2 */    @Attribute[TestCase_18][0m
+    [36m| [0m[34m|[0m /* 12.3 */    func rawClientDoesNotNegotiateOrDecodeAndWrapperRetainsWireMetadata(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.4 */        for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.5 */            let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.6 */            try {[0m
+    [36m| [0m[34m|[0m /* 12.7 */                let raw = fixture.client.send(fixture.request("/gzip"))[0m
+    [36m| [0m[34m|[0m /* 12.8 */                try {[0m
+    [36m| [0m[34m|[0m /* 12.9 */                    expectEqual("fixture.handler.acceptEncoding", "None < String >", fixture.handler.acceptEncoding, None < String >, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.10 */                    expectEqual("raw.headers.getFirst(\"content-encoding\")", "Some(\"gzip\")", raw.headers.getFirst("content-encoding"), Some("gzip"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.11 */                    expectEqual("gzipNativeRead(raw.body)", "gzipNativeSmallMember()", gzipNativeRead(raw.body), gzipNativeSmallMember(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.12 */                } finally {[0m
+    [36m| [0m[34m|[0m /* 12.13 */                    raw.close()[0m
+    [36m| [0m[34m|[0m /* 12.14 */                }[0m
+    [36m| [0m[34m|[0m /* 12.15 */                let decoded = GzipClient(fixture.client).send(fixture.request("/gzip"))[0m
+    [36m| [0m[34m|[0m /* 12.16 */                try {[0m
+    [36m| [0m[34m|[0m /* 12.17 */                    expectEqual("fixture.handler.acceptEncoding", "Some(\"gzip\")", fixture.handler.acceptEncoding, Some("gzip"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.18 */                    expectEqual("decoded.isDecoded", "true", decoded.isDecoded, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.19 */                    expectEqual("decoded.wireHeaders.getFirst(\"content-encoding\")", "Some(\"gzip\")", decoded.wireHeaders.getFirst("content-encoding"), Some("gzip"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.20 */                    expectEqual("decoded.wireHeaders.getFirst(\"content-length\")", "Some(\"30\")", decoded.wireHeaders.getFirst("content-length"), Some("30"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.21 */                    expectEqual("decoded.wireContentLength", "Some(30)", decoded.wireContentLength, Some(30), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.22 */                    expectEqual("decoded.response.headers.getFirst(\"content-encoding\")", "None < String >", decoded.response.headers.getFirst("content-encoding"), None < String >, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.23 */                    expectEqual("decoded.response.headers.getFirst(\"content-length\")", "None < String >", decoded.response.headers.getFirst("content-length"), None < String >, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.24 */                    expectEqual("decoded.response.body.contentLength", "None < Int64 >", decoded.response.body.contentLength, None < Int64 >, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.25 */                    expectEqual("String.fromUtf8(gzipNativeRead(decoded.response.body))", "\"hello gzip\"", String.fromUtf8(gzipNativeRead(decoded.response.body)), "hello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.26 */                    expectEqual("decoded.encodedBytesRead", "30", decoded.encodedBytesRead, 30, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.27 */                    expectEqual("decoded.decodedBytes", "10", decoded.decodedBytes, 10, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.28 */                    expectEqual("decoded.memberCount", "1", decoded.memberCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.29 */                    expectEqual("decoded.integrityVerified", "true", decoded.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.30 */                } finally {[0m
+    [36m| [0m[34m|[0m /* 12.31 */                    decoded.close()[0m
+    [36m| [0m[34m|[0m /* 12.32 */                    decoded.close()[0m
+    [36m| [0m[34m|[0m /* 12.33 */                }[0m
+    [36m| [0m[34m|[0m /* 12.34 */                let caller = GzipClient(fixture.client).send(fixture.request("/gzip", headers: HttpHeaders.builder().add("Accept-Encoding", "identity, gzip;q=0.5").build()))[0m
+    [36m| [0m[34m|[0m /* 12.35 */                try {[0m
+    [36m| [0m[34m|[0m /* 12.36 */                    expectEqual("fixture.handler.acceptEncoding", "Some(\"identity, gzip;q=0.5\")", fixture.handler.acceptEncoding, Some("identity, gzip;q=0.5"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.37 */                    expectEqual("String.fromUtf8(gzipNativeRead(caller.response.body))", "\"hello gzip\"", String.fromUtf8(gzipNativeRead(caller.response.body)), "hello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.38 */                } finally {[0m
+    [36m| [0m[34m|[0m /* 12.39 */                    caller.close()[0m
+    [36m| [0m[34m|[0m /* 12.40 */                }[0m
+    [36m| [0m[34m|[0m /* 12.41 */                gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.42 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.43 */                fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.44 */            }[0m
+    [36m| [0m[34m|[0m /* 12.45 */        }[0m
+    [36m| [0m[34m|[0m /* 12.46 */    }[0m
+    [36m| [0m[34m|[0m /* 12.47 */    [0m
+    [36m| [0m[34m|[0m /* 12.48 */    @Attribute[TestCase_19][0m
+    [36m| [0m[34m|[0m /* 12.49 */    func unsupportedCodingFailsClosedUnlessExplicitRawPassThrough(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.50 */        for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.51 */            let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.52 */            try {[0m
+    [36m| [0m[34m|[0m /* 12.53 */                for(target in["/unknown", "/multi", "/repeated-coding"]) {[0m
+    [36m| [0m[34m|[0m /* 12.54 */                    let error = try {[0m
+    [36m| [0m[34m|[0m /* 12.55 */                        try {[0m
+    [36m| [0m[34m|[0m /* 12.56 */                            assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.57 */                            GzipClient(fixture.client).send(fixture.request(target))[0m
+    [36m| [0m[34m|[0m /* 12.58 */                            fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.59 */                        } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 12.60 */                            if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.61 */                                throw e[0m
+    [36m| [0m[34m|[0m /* 12.62 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.63 */                            if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.64 */                                throw e[0m
+    [36m| [0m[34m|[0m /* 12.65 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.66 */                            if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.67 */                                throw e[0m
+    [36m| [0m[34m|[0m /* 12.68 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.69 */                            e[0m
+    [36m| [0m[34m|[0m /* 12.70 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.71 */                    } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.72 */                        if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.73 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.74 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.75 */                        assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.76 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.77 */                    [0m
+    [36m| [0m[34m|[0m /* 12.78 */                    expectEqual("error.code", "GzipErrorCode.UnsupportedCoding", error.code, GzipErrorCode.UnsupportedCoding, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.79 */                    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.80 */                    let raw = GzipClient(fixture.client, passThroughUnsupported: true).send(fixture.request(target))[0m
+    [36m| [0m[34m|[0m /* 12.81 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.82 */                        expectEqual("! raw.isDecoded", "true", ! raw.isDecoded, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.83 */                        let expected = if(target == "/unknown") {[0m
+    [36m| [0m[34m|[0m /* 12.84 */                            "br"[0m
+    [36m| [0m[34m|[0m /* 12.85 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.86 */                        else if(target == "/multi") {[0m
+    [36m| [0m[34m|[0m /* 12.87 */                            "gzip, identity"[0m
+    [36m| [0m[34m|[0m /* 12.88 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.89 */                        else {[0m
+    [36m| [0m[34m|[0m /* 12.90 */                            "gzip"[0m
+    [36m| [0m[34m|[0m /* 12.91 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.92 */                        [0m
+    [36m| [0m[34m|[0m /* 12.93 */                        expectEqual("raw.response.headers.getFirst(\"content-encoding\")", "Some(expected)", raw.response.headers.getFirst("content-encoding"), Some(expected), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.94 */                        expectEqual("raw.wireHeaders.getFirst(\"content-encoding\")", "Some(expected)", raw.wireHeaders.getFirst("content-encoding"), Some(expected), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.95 */                        expectEqual("raw.response.headers.getFirst(\"content-length\")", "Some(\"30\")", raw.response.headers.getFirst("content-length"), Some("30"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.96 */                        expectEqual("raw.wireContentLength", "Some(30)", raw.wireContentLength, Some(30), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.97 */                        if(target == "/repeated-coding") {[0m
+    [36m| [0m[34m|[0m /* 12.98 */                            expectEqual("raw.response.headers.getAll(\"content-encoding\").size", "2", raw.response.headers.getAll("content-encoding").size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.99 */                            expectEqual("raw.wireHeaders.getAll(\"content-encoding\").size", "2", raw.wireHeaders.getAll("content-encoding").size, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.100 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.101 */                        expectEqual("raw.response.body.contentLength", "Some(30)", raw.response.body.contentLength, Some(30), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.102 */                        expectEqual("gzipNativeRead(raw.response.body)", "gzipNativeSmallMember()", gzipNativeRead(raw.response.body), gzipNativeSmallMember(), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.103 */                        expectEqual("! raw.integrityVerified", "true", ! raw.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.104 */                    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.105 */                        raw.close()[0m
+    [36m| [0m[34m|[0m /* 12.106 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.107 */                }[0m
+    [36m| [0m[34m|[0m /* 12.108 */                for(target in["/plain", "/identity"]) {[0m
+    [36m| [0m[34m|[0m /* 12.109 */                    let raw = GzipClient(fixture.client).send(fixture.request(target))[0m
+    [36m| [0m[34m|[0m /* 12.110 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.111 */                        expectEqual("! raw.isDecoded", "true", ! raw.isDecoded, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.112 */                        expectEqual("String.fromUtf8(gzipNativeRead(raw.response.body))", "\"ok\"", String.fromUtf8(gzipNativeRead(raw.response.body)), "ok", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.113 */                    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.114 */                        raw.close()[0m
+    [36m| [0m[34m|[0m /* 12.115 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.116 */                }[0m
+    [36m| [0m[34m|[0m /* 12.117 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.118 */                fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.119 */            }[0m
+    [36m| [0m[34m|[0m /* 12.120 */        }[0m
+    [36m| [0m[34m|[0m /* 12.121 */    }[0m
+    [36m| [0m[34m|[0m /* 12.122 */    [0m
+    [36m| [0m[34m|[0m /* 12.123 */    @Attribute[TestCase_20][0m
+    [36m| [0m[34m|[0m /* 12.124 */    func headAndBodylessStatusesSkipInvalidCoding(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.125 */        for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.126 */            let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.127 */            try {[0m
+    [36m| [0m[34m|[0m /* 12.128 */                let head = GzipClient(fixture.client).send(fixture.request("/head", method: "HEAD"))[0m
+    [36m| [0m[34m|[0m /* 12.129 */                try {[0m
+    [36m| [0m[34m|[0m /* 12.130 */                    expectEqual("! head.isDecoded", "true", ! head.isDecoded, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.131 */                    expectEqual("head.wireHeaders.getFirst(\"content-encoding\")", "Some(\"invalid, gzip\")", head.wireHeaders.getFirst("content-encoding"), Some("invalid, gzip"), isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.132 */                    expectEqual("head.response.body.read(Array < Byte >(1, repeat: 0u8))", "0", head.response.body.read(Array < Byte >(1, repeat: 0u8)), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.133 */                } finally {[0m
+    [36m| [0m[34m|[0m /* 12.134 */                    head.close()[0m
+    [36m| [0m[34m|[0m /* 12.135 */                }[0m
+    [36m| [0m[34m|[0m /* 12.136 */                for(status in[204, 205, 304]) {[0m
+    [36m| [0m[34m|[0m /* 12.137 */                    let response = GzipClient(fixture.client).send(fixture.request("/status-${status}"))[0m
+    [36m| [0m[34m|[0m /* 12.138 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.139 */                        expectEqual("response.response.status", "status", response.response.status, status, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.140 */                        expectEqual("! response.isDecoded", "true", ! response.isDecoded, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.141 */                        expectEqual("response.response.body.read(Array < Byte >(1, repeat: 0u8))", "0", response.response.body.read(Array < Byte >(1, repeat: 0u8)), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.142 */                    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.143 */                        response.close()[0m
+    [36m| [0m[34m|[0m /* 12.144 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.145 */                }[0m
+    [36m| [0m[34m|[0m /* 12.146 */                gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.147 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.148 */                fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.149 */            }[0m
+    [36m| [0m[34m|[0m /* 12.150 */        }[0m
+    [36m| [0m[34m|[0m /* 12.151 */    }[0m
+    [36m| [0m[34m|[0m /* 12.152 */    [0m
+    [36m| [0m[34m|[0m /* 12.153 */    @Attribute[TestCase_21][0m
+    [36m| [0m[34m|[0m /* 12.154 */    func concatenationRequiresExplicitMemberLimitAndExactOutputLimitValidatesEof(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.155 */        let fixture = GzipNativeFixture()[0m
+    [36m| [0m[34m|[0m /* 12.156 */        try {[0m
+    [36m| [0m[34m|[0m /* 12.157 */            let rejected = GzipClient(fixture.client).send(fixture.request("/members"))[0m
+    [36m| [0m[34m|[0m /* 12.158 */            try {[0m
+    [36m| [0m[34m|[0m /* 12.159 */                let error = try {[0m
+    [36m| [0m[34m|[0m /* 12.160 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.161 */                        assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.162 */                        gzipNativeRead(rejected.response.body)[0m
+    [36m| [0m[34m|[0m /* 12.163 */                        fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.164 */                    } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 12.165 */                        if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.166 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.167 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.168 */                        if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.169 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.170 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.171 */                        if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.172 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.173 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.174 */                        e[0m
+    [36m| [0m[34m|[0m /* 12.175 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.176 */                } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.177 */                    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.178 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 12.179 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.180 */                    assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.181 */                }[0m
+    [36m| [0m[34m|[0m /* 12.182 */                [0m
+    [36m| [0m[34m|[0m /* 12.183 */                expectEqual("error.code", "GzipErrorCode.MemberLimit", error.code, GzipErrorCode.MemberLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.184 */                expectEqual("! rejected.integrityVerified", "true", ! rejected.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.185 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.186 */                rejected.close()[0m
+    [36m| [0m[34m|[0m /* 12.187 */            }[0m
+    [36m| [0m[34m|[0m /* 12.188 */            let accepted = GzipClient(fixture.client, limits: GzipLimits(maximumMembers: 2, maximumEncodedBytes: 60, maximumDecodedBytes: 20, maximumReadBytes: 3)).send(fixture.request("/members"))[0m
+    [36m| [0m[34m|[0m /* 12.189 */            try {[0m
+    [36m| [0m[34m|[0m /* 12.190 */                expectEqual("String.fromUtf8(gzipNativeRead(accepted.response.body, bufferBytes: 2))", "\"hello gziphello gzip\"", String.fromUtf8(gzipNativeRead(accepted.response.body, bufferBytes: 2)), "hello gziphello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.191 */                expectEqual("accepted.memberCount", "2", accepted.memberCount, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.192 */                expectEqual("accepted.encodedBytesRead", "60", accepted.encodedBytesRead, 60, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.193 */                expectEqual("accepted.decodedBytes", "20", accepted.decodedBytes, 20, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.194 */                expectEqual("accepted.integrityVerified", "true", accepted.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.195 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.196 */                accepted.close()[0m
+    [36m| [0m[34m|[0m /* 12.197 */            }[0m
+    [36m| [0m[34m|[0m /* 12.198 */            gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.199 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 12.200 */            fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.201 */        }[0m
+    [36m| [0m[34m|[0m /* 12.202 */    }[0m
+    [36m| [0m[34m|[0m /* 12.203 */    [0m
+    [36m| [0m[34m|[0m /* 12.204 */    @Attribute[TestCase_22][0m
+    [36m| [0m[34m|[0m /* 12.205 */    func crcTruncationAndHighRatioOutputFailureReleaseRealReservations(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.206 */        for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.207 */            let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.208 */            try {[0m
+    [36m| [0m[34m|[0m /* 12.209 */                for((target, code) in[("/crc", GzipErrorCode.ChecksumMismatch),("/truncated", GzipErrorCode.UnexpectedEof),("/large", GzipErrorCode.OutputLimit)]) {[0m
+    [36m| [0m[34m|[0m /* 12.210 */                    let response = GzipClient(fixture.client, limits: GzipLimits(maximumDecodedBytes: 128, maximumReadBytes: 4)).send(fixture.request(target))[0m
+    [36m| [0m[34m|[0m /* 12.211 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.212 */                        expectEqual("fixture.client.resourceSnapshot().managedBufferBytes > 0u64", "true", fixture.client.resourceSnapshot().managedBufferBytes > 0u64, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.213 */                        expectEqual("response.response.body.read(Array < Byte >(1, repeat: 0u8))", "1", response.response.body.read(Array < Byte >(1, repeat: 0u8)), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.214 */                        let error = try {[0m
+    [36m| [0m[34m|[0m /* 12.215 */                            try {[0m
+    [36m| [0m[34m|[0m /* 12.216 */                                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.217 */                                gzipNativeRead(response.response.body)[0m
+    [36m| [0m[34m|[0m /* 12.218 */                                fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.219 */                            } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 12.220 */                                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.221 */                                    throw e[0m
+    [36m| [0m[34m|[0m /* 12.222 */                                }[0m
+    [36m| [0m[34m|[0m /* 12.223 */                                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.224 */                                    throw e[0m
+    [36m| [0m[34m|[0m /* 12.225 */                                }[0m
+    [36m| [0m[34m|[0m /* 12.226 */                                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.227 */                                    throw e[0m
+    [36m| [0m[34m|[0m /* 12.228 */                                }[0m
+    [36m| [0m[34m|[0m /* 12.229 */                                e[0m
+    [36m| [0m[34m|[0m /* 12.230 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.231 */                        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.232 */                            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.233 */                                throw e[0m
+    [36m| [0m[34m|[0m /* 12.234 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.235 */                            assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.236 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.237 */                        [0m
+    [36m| [0m[34m|[0m /* 12.238 */                        expectEqual("error.code", "code", error.code, code, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.239 */                        expectEqual("! response.integrityVerified", "true", ! response.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.240 */                        expectEqual("response.response.body.isClosed()", "true", response.response.body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.241 */                        gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.242 */                    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.243 */                        response.close()[0m
+    [36m| [0m[34m|[0m /* 12.244 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.245 */                    let subsequent = fixture.client.send(fixture.request("/plain"))[0m
+    [36m| [0m[34m|[0m /* 12.246 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.247 */                        expectEqual("String.fromUtf8(gzipNativeRead(subsequent.body))", "\"ok\"", String.fromUtf8(gzipNativeRead(subsequent.body)), "ok", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.248 */                    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.249 */                        subsequent.close()[0m
+    [36m| [0m[34m|[0m /* 12.250 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.251 */                }[0m
+    [36m| [0m[34m|[0m /* 12.252 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.253 */                fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.254 */            }[0m
+    [36m| [0m[34m|[0m /* 12.255 */        }[0m
+    [36m| [0m[34m|[0m /* 12.256 */    }[0m
+    [36m| [0m[34m|[0m /* 12.257 */    [0m
+    [36m| [0m[34m|[0m /* 12.258 */    @Attribute[TestCase_23][0m
+    [36m| [0m[34m|[0m /* 12.259 */    func pendingNativeReadWakesOnParentCancellationAndLocalClose(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.260 */        for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.261 */            for(localClose in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.262 */                let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.263 */                let source = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 12.264 */                let readSignal = GzipNativeReadSignal()[0m
+    [36m| [0m[34m|[0m /* 12.265 */                let response = GzipClient(fixture.client).send(fixture.request("/stall"), context: OperationContext(deadline: Some(Deadline.after(3 * Duration.second)), cancellation: source.token, eventSink: Some(readSignal)))[0m
+    [36m| [0m[34m|[0m /* 12.266 */                try {[0m
+    [36m| [0m[34m|[0m /* 12.267 */                    fixture.handler.stall.waitUntilBlocked()[0m
+    [36m| [0m[34m|[0m /* 12.268 */                    let reading = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 12.269 */                        let _ = response.response.body.read(Array < Byte >(1, repeat: 0u8))[0m
+    [36m| [0m[34m|[0m /* 12.270 */                        false[0m
+    [36m| [0m[34m|[0m /* 12.271 */                    } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 12.272 */                        match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.273 */                            case NetworkErrorCode.Cancelled => if(localClose) {[0m
+    [36m| [0m[34m|[0m /* 12.274 */                                fail("local close surfaced NetworkErrorCode.Cancelled, TLS=${tls}")[0m
+    [36m| [0m[34m|[0m /* 12.275 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.276 */                            true[0m
+    [36m| [0m[34m|[0m /* 12.277 */                            case NetworkErrorCode.Closed => if(! localClose) {[0m
+    [36m| [0m[34m|[0m /* 12.278 */                                fail("parent cancellation surfaced NetworkErrorCode.Closed, TLS=${tls}")[0m
+    [36m| [0m[34m|[0m /* 12.279 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.280 */                            true[0m
+    [36m| [0m[34m|[0m /* 12.281 */                            case _ => throw error[0m
+    [36m| [0m[34m|[0m /* 12.282 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.283 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.284 */                    catch(error: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 12.285 */                        if(! localClose || error.code != GzipErrorCode.Closed) {[0m
+    [36m| [0m[34m|[0m /* 12.286 */                            throw error[0m
+    [36m| [0m[34m|[0m /* 12.287 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.288 */                        true[0m
+    [36m| [0m[34m|[0m /* 12.289 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.290 */                    catch(error: HttpBodyException) {[0m
+    [36m| [0m[34m|[0m /* 12.291 */                        match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.292 */                            case HttpBodyErrorCode.Closed => if(! localClose) {[0m
+    [36m| [0m[34m|[0m /* 12.293 */                                fail("parent cancellation surfaced HttpBodyErrorCode.Closed, TLS=${tls}")[0m
+    [36m| [0m[34m|[0m /* 12.294 */                            }[0m
+    [36m| [0m[34m|[0m /* 12.295 */                            true[0m
+    [36m| [0m[34m|[0m /* 12.296 */                            case _ => throw error[0m
+    [36m| [0m[34m|[0m /* 12.297 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.298 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.299 */                }[0m
+    [36m| [0m[34m|[0m /* 12.300 */                readSignal.waitUntilReadStarted()[0m
+    [36m| [0m[34m|[0m /* 12.301 */                expectEqual("fixture.client.resourceSnapshot().managedBufferBytes > 0u64", "true", fixture.client.resourceSnapshot().managedBufferBytes > 0u64, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.302 */                if(localClose) {[0m
+    [36m| [0m[34m|[0m /* 12.303 */                    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.304 */                }[0m
+    [36m| [0m[34m|[0m /* 12.305 */                else {[0m
+    [36m| [0m[34m|[0m /* 12.306 */                    source.cancel()[0m
+    [36m| [0m[34m|[0m /* 12.307 */                }[0m
+    [36m| [0m[34m|[0m /* 12.308 */                expectEqual("reading.get(Duration.second)", "true", reading.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.309 */                gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.310 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 12.311 */                response.close()[0m
+    [36m| [0m[34m|[0m /* 12.312 */                fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.313 */            }[0m
+    [36m| [0m[34m|[0m /* 12.314 */        }[0m
+    [36m| [0m[34m|[0m /* 12.315 */    }[0m
+    [36m| [0m[34m|[0m /* 12.316 */}[0m
+    [36m| [0m[34m|[0m /* 12.317 */[0m
+    [36m| [0m[34m|[0m /* 12.318 */@Attribute[TestCase_24][0m
+    [36m| [0m[34m|[0m /* 12.319 */func parentAbsoluteDeadlineInterruptsNativeBodyRead(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.320 */    for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.321 */        let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.322 */        let deadline = Deadline.after(200 * Duration.millisecond)[0m
+    [36m| [0m[34m|[0m /* 12.323 */        let response = GzipClient(fixture.client).send(fixture.request("/stall"), context: OperationContext(deadline: Some(deadline)))[0m
+    [36m| [0m[34m|[0m /* 12.324 */        try {[0m
+    [36m| [0m[34m|[0m /* 12.325 */            expectEqual("response.response.operationContext.getOrThrow().deadline.getOrThrow().expiresAt", "deadline.expiresAt", response.response.operationContext.getOrThrow().deadline.getOrThrow().expiresAt, deadline.expiresAt, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.326 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 12.327 */                try {[0m
+    [36m| [0m[34m|[0m /* 12.328 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.329 */                    response.response.body.read(Array < Byte >(1, repeat: 0u8))[0m
+    [36m| [0m[34m|[0m /* 12.330 */                    fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.331 */                } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 12.332 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.333 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 12.334 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.335 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.336 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 12.337 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.338 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.339 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 12.340 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.341 */                    e[0m
+    [36m| [0m[34m|[0m /* 12.342 */                }[0m
+    [36m| [0m[34m|[0m /* 12.343 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.344 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.345 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 12.346 */                }[0m
+    [36m| [0m[34m|[0m /* 12.347 */                assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.348 */            }[0m
+    [36m| [0m[34m|[0m /* 12.349 */            [0m
+    [36m| [0m[34m|[0m /* 12.350 */            match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.351 */                case NetworkErrorCode.TimedOut =>()[0m
+    [36m| [0m[34m|[0m /* 12.352 */                case _ => fail("native body read must time out")[0m
+    [36m| [0m[34m|[0m /* 12.353 */            }[0m
+    [36m| [0m[34m|[0m /* 12.354 */            expectEqual("! response.integrityVerified", "true", ! response.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.355 */            gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.356 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 12.357 */            response.close()[0m
+    [36m| [0m[34m|[0m /* 12.358 */            fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.359 */        }[0m
+    [36m| [0m[34m|[0m /* 12.360 */    }[0m
+    [36m| [0m[34m|[0m /* 12.361 */}[0m
+    [36m| [0m[34m|[0m /* 12.362 */[0m
+    [36m| [0m[34m|[0m /* 12.363 */@Attribute[TestCase_25][0m
+    [36m| [0m[34m|[0m /* 12.364 */func http2TypedStreamCancellationReclaimsDecoderWithoutClosingSibling(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.365 */    let fixture = GzipNativeFixture(tls: true)[0m
+    [36m| [0m[34m|[0m /* 12.366 */    let handle = HttpStreamCancellationHandle()[0m
+    [36m| [0m[34m|[0m /* 12.367 */    let readSignal = GzipNativeReadSignal()[0m
+    [36m| [0m[34m|[0m /* 12.368 */    let response = GzipClient(fixture.client).send(fixture.request("/stall"), cancellation: HttpCancellationHandles(stream: Some(handle)), context: OperationContext(deadline: Some(Deadline.after(3 * Duration.second)), eventSink: Some(readSignal)))[0m
+    [36m| [0m[34m|[0m /* 12.369 */    let sibling = fixture.client.send(fixture.request("/sibling"))[0m
+    [36m| [0m[34m|[0m /* 12.370 */    try {[0m
+    [36m| [0m[34m|[0m /* 12.371 */        let reading = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 12.372 */            let _ = response.response.body.read(Array < Byte >(1, repeat: 0u8))[0m
+    [36m| [0m[34m|[0m /* 12.373 */            false[0m
+    [36m| [0m[34m|[0m /* 12.374 */        } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 12.375 */            match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.376 */                case NetworkErrorCode.Cancelled => true[0m
+    [36m| [0m[34m|[0m /* 12.377 */                case _ => false[0m
+    [36m| [0m[34m|[0m /* 12.378 */            }[0m
+    [36m| [0m[34m|[0m /* 12.379 */        }[0m
+    [36m| [0m[34m|[0m /* 12.380 */    }[0m
+    [36m| [0m[34m|[0m /* 12.381 */    readSignal.waitUntilReadStarted()[0m
+    [36m| [0m[34m|[0m /* 12.382 */    expectEqual("handle.cancel()", "true", handle.cancel(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.383 */    expectEqual("! handle.cancel()", "true", ! handle.cancel(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.384 */    expectEqual("reading.get(Duration.second)", "true", reading.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.385 */    expectEqual("String.fromUtf8(gzipNativeRead(sibling.body))", "\"sibling remains readable\"", String.fromUtf8(gzipNativeRead(sibling.body)), "sibling remains readable", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.386 */    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.387 */    expectEqual("fixture.client.resourceSnapshot().activeConnections", "1", fixture.client.resourceSnapshot().activeConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.388 */} finally {[0m
+    [36m| [0m[34m|[0m /* 12.389 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.390 */    sibling.close()[0m
+    [36m| [0m[34m|[0m /* 12.391 */    fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.392 */}[0m
+    [36m| [0m[34m|[0m /* 12.393 */}[0m
+    [36m| [0m[34m|[0m /* 12.394 */[0m
+    [36m| [0m[34m|[0m /* 12.395 */@Attribute[TestCase_26][0m
+    [36m| [0m[34m|[0m /* 12.396 */func http2GzipCloseAndMalformedMemberLeaveActiveSiblingAlive(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.397 */for(target in["/stall", "/crc", "/truncated", "/large"]) {[0m
+    [36m| [0m[34m|[0m /* 12.398 */    let fixture = GzipNativeFixture(tls: true)[0m
+    [36m| [0m[34m|[0m /* 12.399 */    try {[0m
+    [36m| [0m[34m|[0m /* 12.400 */        let decoded = GzipClient(fixture.client, limits: GzipLimits(maximumDecodedBytes: 128, maximumReadBytes: 4)).send(fixture.request(target))[0m
+    [36m| [0m[34m|[0m /* 12.401 */        let sibling = fixture.client.send(fixture.request("/sibling"))[0m
+    [36m| [0m[34m|[0m /* 12.402 */        try {[0m
+    [36m| [0m[34m|[0m /* 12.403 */            expectEqual("decoded.response.version", "HttpVersion.Http2", decoded.response.version, HttpVersion.Http2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.404 */            expectEqual("sibling.version", "HttpVersion.Http2", sibling.version, HttpVersion.Http2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.405 */            expectEqual("fixture.client.resourceSnapshot().activeConnections", "1", fixture.client.resourceSnapshot().activeConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.406 */            expectEqual("fixture.client.resourceSnapshot().activeStreams", "2", fixture.client.resourceSnapshot().activeStreams, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.407 */            if(target == "/stall") {[0m
+    [36m| [0m[34m|[0m /* 12.408 */                decoded.close()[0m
+    [36m| [0m[34m|[0m /* 12.409 */            }[0m
+    [36m| [0m[34m|[0m /* 12.410 */            else {[0m
+    [36m| [0m[34m|[0m /* 12.411 */                let _ = try {[0m
+    [36m| [0m[34m|[0m /* 12.412 */                    try {[0m
+    [36m| [0m[34m|[0m /* 12.413 */                        assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.414 */                        gzipNativeRead(decoded.response.body)[0m
+    [36m| [0m[34m|[0m /* 12.415 */                        fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.416 */                    } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 12.417 */                        if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.418 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.419 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.420 */                        if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.421 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.422 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.423 */                        if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.424 */                            throw e[0m
+    [36m| [0m[34m|[0m /* 12.425 */                        }[0m
+    [36m| [0m[34m|[0m /* 12.426 */                        e[0m
+    [36m| [0m[34m|[0m /* 12.427 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.428 */                } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.429 */                    if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.430 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 12.431 */                    }[0m
+    [36m| [0m[34m|[0m /* 12.432 */                    assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.433 */                }[0m
+    [36m| [0m[34m|[0m /* 12.434 */                [0m
+    [36m| [0m[34m|[0m /* 12.435 */            }[0m
+    [36m| [0m[34m|[0m /* 12.436 */            gzipNativeAwait({ =>[0m
+    [36m| [0m[34m|[0m /* 12.437 */                fixture.client.resourceSnapshot().activeStreams == 1[0m
+    [36m| [0m[34m|[0m /* 12.438 */            })[0m
+    [36m| [0m[34m|[0m /* 12.439 */            expectEqual("fixture.client.resourceSnapshot().activeConnections", "1", fixture.client.resourceSnapshot().activeConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.440 */            expectEqual("String.fromUtf8(gzipNativeRead(sibling.body))", "\"sibling remains readable\"", String.fromUtf8(gzipNativeRead(sibling.body)), "sibling remains readable", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.441 */            gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.442 */            expectEqual("fixture.client.resourceSnapshot().activeConnections", "1", fixture.client.resourceSnapshot().activeConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.443 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 12.444 */            decoded.close()[0m
+    [36m| [0m[34m|[0m /* 12.445 */            sibling.close()[0m
+    [36m| [0m[34m|[0m /* 12.446 */        }[0m
+    [36m| [0m[34m|[0m /* 12.447 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.448 */        fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.449 */    }[0m
+    [36m| [0m[34m|[0m /* 12.450 */}[0m
+    [36m| [0m[34m|[0m /* 12.451 */}[0m
+    [36m| [0m[34m|[0m /* 12.452 */[0m
+    [36m| [0m[34m|[0m /* 12.453 */@Attribute[TestCase_27][0m
+    [36m| [0m[34m|[0m /* 12.454 */func http1UnreadWideBodyAbandonsConnectionWithoutDrainingUnboundedInput(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.455 */let fixture = GzipNativeFixture()[0m
+    [36m| [0m[34m|[0m /* 12.456 */let response = GzipClient(fixture.client).send(fixture.request("/wide"))[0m
+    [36m| [0m[34m|[0m /* 12.457 */try {[0m
+    [36m| [0m[34m|[0m /* 12.458 */    expectEqual("response.response.body.read(Array < Byte >(1, repeat: 0u8))", "1", response.response.body.read(Array < Byte >(1, repeat: 0u8)), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.459 */    expectEqual("response.encodedBytesRead < gzipNativeWideMember().size", "true", response.encodedBytesRead < gzipNativeWideMember().size, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.460 */    expectEqual("fixture.client.resourceSnapshot().activeRequests", "1", fixture.client.resourceSnapshot().activeRequests, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.461 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.462 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.463 */    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.464 */    gzipNativeAwait({ =>[0m
+    [36m| [0m[34m|[0m /* 12.465 */        fixture.client.resourceSnapshot().activeConnections == 0[0m
+    [36m| [0m[34m|[0m /* 12.466 */    })[0m
+    [36m| [0m[34m|[0m /* 12.467 */    let next = fixture.client.send(fixture.request("/plain"))[0m
+    [36m| [0m[34m|[0m /* 12.468 */    try {[0m
+    [36m| [0m[34m|[0m /* 12.469 */        expectEqual("String.fromUtf8(gzipNativeRead(next.body))", "\"ok\"", String.fromUtf8(gzipNativeRead(next.body)), "ok", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.470 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 12.471 */        next.close()[0m
+    [36m| [0m[34m|[0m /* 12.472 */    }[0m
+    [36m| [0m[34m|[0m /* 12.473 */} finally {[0m
+    [36m| [0m[34m|[0m /* 12.474 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.475 */    fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.476 */}[0m
+    [36m| [0m[34m|[0m /* 12.477 */}[0m
+    [36m| [0m[34m|[0m /* 12.478 */[0m
+    [36m| [0m[34m|[0m /* 12.479 */@Attribute[TestCase_28][0m
+    [36m| [0m[34m|[0m /* 12.480 */func preReadDeadlineReleasesNativeBodyReservation(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.481 */let fixture = GzipNativeFixture(requestTimeout: 5 * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 12.482 */let clock = GzipNativeClock()[0m
+    [36m| [0m[34m|[0m /* 12.483 */let response = GzipClient(fixture.client).send(fixture.request("/large"), context: OperationContext(deadline: Some(Deadline.after(10 * Duration.second, clock: clock))))[0m
+    [36m| [0m[34m|[0m /* 12.484 */try {[0m
+    [36m| [0m[34m|[0m /* 12.485 */    expectEqual("fixture.client.resourceSnapshot().managedBufferBytes > 0u64", "true", fixture.client.resourceSnapshot().managedBufferBytes > 0u64, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.486 */    clock.expire()[0m
+    [36m| [0m[34m|[0m /* 12.487 */    let error = try {[0m
+    [36m| [0m[34m|[0m /* 12.488 */        try {[0m
+    [36m| [0m[34m|[0m /* 12.489 */            assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.490 */            response.response.body.read(Array < Byte >(1, repeat: 0))[0m
+    [36m| [0m[34m|[0m /* 12.491 */            fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.492 */        } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 12.493 */            if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.494 */                throw e[0m
+    [36m| [0m[34m|[0m /* 12.495 */            }[0m
+    [36m| [0m[34m|[0m /* 12.496 */            if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.497 */                throw e[0m
+    [36m| [0m[34m|[0m /* 12.498 */            }[0m
+    [36m| [0m[34m|[0m /* 12.499 */            if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.500 */                throw e[0m
+    [36m| [0m[34m|[0m /* 12.501 */            }[0m
+    [36m| [0m[34m|[0m /* 12.502 */            e[0m
+    [36m| [0m[34m|[0m /* 12.503 */        }[0m
+    [36m| [0m[34m|[0m /* 12.504 */    } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.505 */        if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.506 */            throw e[0m
+    [36m| [0m[34m|[0m /* 12.507 */        }[0m
+    [36m| [0m[34m|[0m /* 12.508 */        assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.509 */    }[0m
+    [36m| [0m[34m|[0m /* 12.510 */    [0m
+    [36m| [0m[34m|[0m /* 12.511 */    match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.512 */        case NetworkErrorCode.TimedOut =>()[0m
+    [36m| [0m[34m|[0m /* 12.513 */        case _ => fail("pre-read deadline must time out")[0m
+    [36m| [0m[34m|[0m /* 12.514 */    }[0m
+    [36m| [0m[34m|[0m /* 12.515 */    expectEqual("response.decodedBytes", "0", response.decodedBytes, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.516 */    expectEqual("response.encodedBytesRead", "0", response.encodedBytesRead, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.517 */    expectEqual("! response.integrityVerified", "true", ! response.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.518 */    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.519 */} finally {[0m
+    [36m| [0m[34m|[0m /* 12.520 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.521 */    fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.522 */}[0m
+    [36m| [0m[34m|[0m /* 12.523 */}[0m
+    [36m| [0m[34m|[0m /* 12.524 */[0m
+    [36m| [0m[34m|[0m /* 12.525 */@Attribute[TestCase_29][0m
+    [36m| [0m[34m|[0m /* 12.526 */func configuredRequestTimeoutSurvivesBufferedCpuDecoding(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.527 */let fixture = GzipNativeFixture(requestTimeout: Duration.second)[0m
+    [36m| [0m[34m|[0m /* 12.528 */let clock = GzipNativeClock()[0m
+    [36m| [0m[34m|[0m /* 12.529 */let parent = Deadline.after(10 * Duration.second, clock: clock)[0m
+    [36m| [0m[34m|[0m /* 12.530 */let response = GzipClient(fixture.client, limits: GzipLimits(maximumReadBytes: 65536)).send(fixture.request("/large"), context: OperationContext(deadline: Some(parent)))[0m
+    [36m| [0m[34m|[0m /* 12.531 */try {[0m
+    [36m| [0m[34m|[0m /* 12.532 */    expectEqual("response.response.operationContext.getOrThrow().deadline.getOrThrow().expiresAt < parent.expiresAt", "true", response.response.operationContext.getOrThrow().deadline.getOrThrow().expiresAt < parent.expiresAt, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.533 */    expectEqual("response.response.body.read(Array < Byte >(1, repeat: 0u8))", "1", response.response.body.read(Array < Byte >(1, repeat: 0u8)), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.534 */    expectEqual("response.encodedBytesRead", "gzipNativeLargeMember().size", response.encodedBytesRead, gzipNativeLargeMember().size, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.535 */    clock.arm()[0m
+    [36m| [0m[34m|[0m /* 12.536 */    let error = try {[0m
+    [36m| [0m[34m|[0m /* 12.537 */        try {[0m
+    [36m| [0m[34m|[0m /* 12.538 */            assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 12.539 */            gzipNativeRead(response.response.body, bufferBytes: 65536)[0m
+    [36m| [0m[34m|[0m /* 12.540 */            fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 12.541 */        } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 12.542 */            if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 12.543 */                throw e[0m
+    [36m| [0m[34m|[0m /* 12.544 */            }[0m
+    [36m| [0m[34m|[0m /* 12.545 */            if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 12.546 */                throw e[0m
+    [36m| [0m[34m|[0m /* 12.547 */            }[0m
+    [36m| [0m[34m|[0m /* 12.548 */            if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.549 */                throw e[0m
+    [36m| [0m[34m|[0m /* 12.550 */            }[0m
+    [36m| [0m[34m|[0m /* 12.551 */            e[0m
+    [36m| [0m[34m|[0m /* 12.552 */        }[0m
+    [36m| [0m[34m|[0m /* 12.553 */    } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 12.554 */        if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 12.555 */            throw e[0m
+    [36m| [0m[34m|[0m /* 12.556 */        }[0m
+    [36m| [0m[34m|[0m /* 12.557 */        assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 12.558 */    }[0m
+    [36m| [0m[34m|[0m /* 12.559 */    [0m
+    [36m| [0m[34m|[0m /* 12.560 */    match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.561 */        case NetworkErrorCode.TimedOut =>()[0m
+    [36m| [0m[34m|[0m /* 12.562 */        case _ => fail("buffered decoding must time out")[0m
+    [36m| [0m[34m|[0m /* 12.563 */    }[0m
+    [36m| [0m[34m|[0m /* 12.564 */    expectEqual("response.decodedBytes < 1048576", "true", response.decodedBytes < 1048576, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.565 */    expectEqual("! response.integrityVerified", "true", ! response.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.566 */    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.567 */} finally {[0m
+    [36m| [0m[34m|[0m /* 12.568 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.569 */    fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.570 */}[0m
+    [36m| [0m[34m|[0m /* 12.571 */}[0m
+    [36m| [0m[34m|[0m /* 12.572 */[0m
+    [36m| [0m[34m|[0m /* 12.573 */@Attribute[TestCase_30][0m
+    [36m| [0m[34m|[0m /* 12.574 */func dataAdmissionUsesSameRequestTimeoutAndParentCancellationBeforeSend(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.575 */let resourceLimits = HttpResourceLimits(maximumConnections: 8, maximumConnectionsPerRoute: 8, maximumConnectionsPerOrigin: 8, maximumManagedBufferBytes: 8u64 * 1024u64 * 1024u64, maximumManagedBufferBytesPerRoute: 8u64 * 1024u64 * 1024u64, maximumManagedBufferBytesPerOrigin: 8u64 * 1024u64 * 1024u64)[0m
+    [36m| [0m[34m|[0m /* 12.576 */for(cancel in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.577 */    let fixture = GzipNativeFixture(resourceLimits: resourceLimits, requestTimeout: 200 * Duration.millisecond)[0m
+    [36m| [0m[34m|[0m /* 12.578 */    let capacity = resourceLimits.maximumManagedBufferBytes - resourceLimits.reservedControlBufferBytes - UInt64(resourceLimits.maximumConnections) * 65535u64[0m
+    [36m| [0m[34m|[0m /* 12.579 */    let lease = fixture.client.reserveResponseBuffer(fixture.url("/gzip"), capacity)[0m
+    [36m| [0m[34m|[0m /* 12.580 */    let source = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 12.581 */    try {[0m
+    [36m| [0m[34m|[0m /* 12.582 */        let sending = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 12.583 */            let response = GzipClient(fixture.client).send(fixture.request("/gzip"), context: OperationContext(deadline: Some(Deadline.after(2 * Duration.second)), cancellation: source.token))[0m
+    [36m| [0m[34m|[0m /* 12.584 */            response.close()[0m
+    [36m| [0m[34m|[0m /* 12.585 */            false[0m
+    [36m| [0m[34m|[0m /* 12.586 */        } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 12.587 */            match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 12.588 */                case NetworkErrorCode.Cancelled => cancel[0m
+    [36m| [0m[34m|[0m /* 12.589 */                case NetworkErrorCode.TimedOut => ! cancel[0m
+    [36m| [0m[34m|[0m /* 12.590 */                case _ => false[0m
+    [36m| [0m[34m|[0m /* 12.591 */            }[0m
+    [36m| [0m[34m|[0m /* 12.592 */        }[0m
+    [36m| [0m[34m|[0m /* 12.593 */    }[0m
+    [36m| [0m[34m|[0m /* 12.594 */    gzipNativeAwait({ =>[0m
+    [36m| [0m[34m|[0m /* 12.595 */        fixture.client.resourceSnapshot().admissionWaiters == 1[0m
+    [36m| [0m[34m|[0m /* 12.596 */    })[0m
+    [36m| [0m[34m|[0m /* 12.597 */    if(cancel) {[0m
+    [36m| [0m[34m|[0m /* 12.598 */        source.cancel()[0m
+    [36m| [0m[34m|[0m /* 12.599 */    }[0m
+    [36m| [0m[34m|[0m /* 12.600 */    expectEqual("sending.get(Duration.second)", "true", sending.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.601 */    expectEqual("fixture.handler.gzipRequests.load()", "0", fixture.handler.gzipRequests.load(), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.602 */    expectEqual("fixture.client.resourceSnapshot().admissionWaiters", "0", fixture.client.resourceSnapshot().admissionWaiters, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.603 */    expectEqual("fixture.client.resourceSnapshot().managedBufferBytes", "capacity", fixture.client.resourceSnapshot().managedBufferBytes, capacity, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.604 */    lease.close()[0m
+    [36m| [0m[34m|[0m /* 12.605 */    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.606 */} finally {[0m
+    [36m| [0m[34m|[0m /* 12.607 */    lease.close()[0m
+    [36m| [0m[34m|[0m /* 12.608 */    fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.609 */}[0m
+    [36m| [0m[34m|[0m /* 12.610 */}[0m
+    [36m| [0m[34m|[0m /* 12.611 */}[0m
+    [36m| [0m[34m|[0m /* 12.612 */[0m
+    [36m| [0m[34m|[0m /* 12.613 */@Attribute[TestCase_31][0m
+    [36m| [0m[34m|[0m /* 12.614 */func nativeLargeBodyDecodesIncrementallyWithBoundedReadsAndReservation(): Unit {[0m
+    [36m| [0m[34m|[0m /* 12.615 */for(tls in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 12.616 */let fixture = GzipNativeFixture(tls: tls)[0m
+    [36m| [0m[34m|[0m /* 12.617 */let response = GzipClient(fixture.client, limits: GzipLimits(maximumReadBytes: 1024)).send(fixture.request("/large"))[0m
+    [36m| [0m[34m|[0m /* 12.618 */try {[0m
+    [36m| [0m[34m|[0m /* 12.619 */    let buffer = Array < Byte >(8192, repeat: 0u8)[0m
+    [36m| [0m[34m|[0m /* 12.620 */    var count: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 12.621 */    var reads: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 12.622 */    var invalidBytes: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 12.623 */    let reserved = fixture.client.resourceSnapshot().managedBufferBytes[0m
+    [36m| [0m[34m|[0m /* 12.624 */    expectEqual("reserved > 0u64", "true", reserved > 0u64, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.625 */    while(true) {[0m
+    [36m| [0m[34m|[0m /* 12.626 */        let n = response.response.body.read(buffer)[0m
+    [36m| [0m[34m|[0m /* 12.627 */        if(n == 0) {[0m
+    [36m| [0m[34m|[0m /* 12.628 */            break[0m
+    [36m| [0m[34m|[0m /* 12.629 */        }[0m
+    [36m| [0m[34m|[0m /* 12.630 */        expectEqual("n <= 1024", "true", n <= 1024, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.631 */        for(i in 0 .. n) {[0m
+    [36m| [0m[34m|[0m /* 12.632 */            if(buffer[i] != b'a') {[0m
+    [36m| [0m[34m|[0m /* 12.633 */                invalidBytes ++[0m
+    [36m| [0m[34m|[0m /* 12.634 */            }[0m
+    [36m| [0m[34m|[0m /* 12.635 */        }[0m
+    [36m| [0m[34m|[0m /* 12.636 */        count += n[0m
+    [36m| [0m[34m|[0m /* 12.637 */        reads ++[0m
+    [36m| [0m[34m|[0m /* 12.638 */        expectEqual("fixture.client.resourceSnapshot().managedBufferBytes <= reserved", "true", fixture.client.resourceSnapshot().managedBufferBytes <= reserved, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.639 */    }[0m
+    [36m| [0m[34m|[0m /* 12.640 */    expectEqual("count", "1048576", count, 1048576, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.641 */    expectEqual("reads", "1024", reads, 1024, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.642 */    expectEqual("invalidBytes", "0", invalidBytes, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.643 */    expectEqual("response.integrityVerified", "true", response.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 12.644 */    gzipNativeExpectReleased(fixture.client)[0m
+    [36m| [0m[34m|[0m /* 12.645 */} finally {[0m
+    [36m| [0m[34m|[0m /* 12.646 */    response.close()[0m
+    [36m| [0m[34m|[0m /* 12.647 */    fixture.close()[0m
+    [36m| [0m[34m|[0m /* 12.648 */}[0m
+    [36m| [0m[34m|[0m /* 12.649 */}[0m
+    [36m| [0m[34m|[0m /* 12.650 */}[0m
+    [36m| [0m[34m|[0m /* 12.651 */[0m
+    [36m| [0m[34m|[0m /* 12.652 */init() {[0m
+    [36m| [0m[34m|[0m /* 12.653 */}[0m
+    [36m| [0m[34m|[0m /* 12.654 */private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 12.655 */let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.656 */[0m
+    [36m| [0m[34m|[0m /* 12.657 */return configuration[0m
+    [36m| [0m[34m|[0m /* 12.658 */}[0m
+    [36m| [0m[34m|[0m /* 12.659 */public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 12.660 */[0m
+    [36m| [0m[34m|[0m /* 12.661 */let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 12.662 */let suiteBuilder = TestSuite.builder("GzipNativeTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 12.663 */[0m
+    [36m| [0m[34m|[0m /* 12.664 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.665 */[0m
+    [36m| [0m[34m|[0m /* 12.666 */let rawClientDoesNotNegotiateOrDecodeAndWrapperRetainsWireMetadataTestFunc = { => rawClientDoesNotNegotiateOrDecodeAndWrapperRetainsWireMetadata();() }[0m
+    [36m| [0m[34m|[0m /* 12.667 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.668 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.669 */"rawClientDoesNotNegotiateOrDecodeAndWrapperRetainsWireMetadata",[0m
+    [36m| [0m[34m|[0m /* 12.670 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.671 */body: rawClientDoesNotNegotiateOrDecodeAndWrapperRetainsWireMetadataTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.672 */)[0m
+    [36m| [0m[34m|[0m /* 12.673 */)[0m
+    [36m| [0m[34m|[0m /* 12.674 */[0m
+    [36m| [0m[34m|[0m /* 12.675 */}()[0m
+    [36m| [0m[34m|[0m /* 12.676 */[0m
+    [36m| [0m[34m|[0m /* 12.677 */[0m
+    [36m| [0m[34m|[0m /* 12.678 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.679 */[0m
+    [36m| [0m[34m|[0m /* 12.680 */let unsupportedCodingFailsClosedUnlessExplicitRawPassThroughTestFunc = { => unsupportedCodingFailsClosedUnlessExplicitRawPassThrough();() }[0m
+    [36m| [0m[34m|[0m /* 12.681 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.682 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.683 */"unsupportedCodingFailsClosedUnlessExplicitRawPassThrough",[0m
+    [36m| [0m[34m|[0m /* 12.684 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.685 */body: unsupportedCodingFailsClosedUnlessExplicitRawPassThroughTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.686 */)[0m
+    [36m| [0m[34m|[0m /* 12.687 */)[0m
+    [36m| [0m[34m|[0m /* 12.688 */[0m
+    [36m| [0m[34m|[0m /* 12.689 */}()[0m
+    [36m| [0m[34m|[0m /* 12.690 */[0m
+    [36m| [0m[34m|[0m /* 12.691 */[0m
+    [36m| [0m[34m|[0m /* 12.692 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.693 */[0m
+    [36m| [0m[34m|[0m /* 12.694 */let headAndBodylessStatusesSkipInvalidCodingTestFunc = { => headAndBodylessStatusesSkipInvalidCoding();() }[0m
+    [36m| [0m[34m|[0m /* 12.695 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.696 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.697 */"headAndBodylessStatusesSkipInvalidCoding",[0m
+    [36m| [0m[34m|[0m /* 12.698 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.699 */body: headAndBodylessStatusesSkipInvalidCodingTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.700 */)[0m
+    [36m| [0m[34m|[0m /* 12.701 */)[0m
+    [36m| [0m[34m|[0m /* 12.702 */[0m
+    [36m| [0m[34m|[0m /* 12.703 */}()[0m
+    [36m| [0m[34m|[0m /* 12.704 */[0m
+    [36m| [0m[34m|[0m /* 12.705 */[0m
+    [36m| [0m[34m|[0m /* 12.706 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.707 */[0m
+    [36m| [0m[34m|[0m /* 12.708 */let concatenationRequiresExplicitMemberLimitAndExactOutputLimitValidatesEofTestFunc = { => concatenationRequiresExplicitMemberLimitAndExactOutputLimitValidatesEof();() }[0m
+    [36m| [0m[34m|[0m /* 12.709 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.710 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.711 */"concatenationRequiresExplicitMemberLimitAndExactOutputLimitValidatesEof",[0m
+    [36m| [0m[34m|[0m /* 12.712 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.713 */body: concatenationRequiresExplicitMemberLimitAndExactOutputLimitValidatesEofTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.714 */)[0m
+    [36m| [0m[34m|[0m /* 12.715 */)[0m
+    [36m| [0m[34m|[0m /* 12.716 */[0m
+    [36m| [0m[34m|[0m /* 12.717 */}()[0m
+    [36m| [0m[34m|[0m /* 12.718 */[0m
+    [36m| [0m[34m|[0m /* 12.719 */[0m
+    [36m| [0m[34m|[0m /* 12.720 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.721 */[0m
+    [36m| [0m[34m|[0m /* 12.722 */let crcTruncationAndHighRatioOutputFailureReleaseRealReservationsTestFunc = { => crcTruncationAndHighRatioOutputFailureReleaseRealReservations();() }[0m
+    [36m| [0m[34m|[0m /* 12.723 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.724 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.725 */"crcTruncationAndHighRatioOutputFailureReleaseRealReservations",[0m
+    [36m| [0m[34m|[0m /* 12.726 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.727 */body: crcTruncationAndHighRatioOutputFailureReleaseRealReservationsTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.728 */)[0m
+    [36m| [0m[34m|[0m /* 12.729 */)[0m
+    [36m| [0m[34m|[0m /* 12.730 */[0m
+    [36m| [0m[34m|[0m /* 12.731 */}()[0m
+    [36m| [0m[34m|[0m /* 12.732 */[0m
+    [36m| [0m[34m|[0m /* 12.733 */[0m
+    [36m| [0m[34m|[0m /* 12.734 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.735 */[0m
+    [36m| [0m[34m|[0m /* 12.736 */let pendingNativeReadWakesOnParentCancellationAndLocalCloseTestFunc = { => pendingNativeReadWakesOnParentCancellationAndLocalClose();() }[0m
+    [36m| [0m[34m|[0m /* 12.737 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.738 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.739 */"pendingNativeReadWakesOnParentCancellationAndLocalClose",[0m
+    [36m| [0m[34m|[0m /* 12.740 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.741 */body: pendingNativeReadWakesOnParentCancellationAndLocalCloseTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.742 */)[0m
+    [36m| [0m[34m|[0m /* 12.743 */)[0m
+    [36m| [0m[34m|[0m /* 12.744 */[0m
+    [36m| [0m[34m|[0m /* 12.745 */}()[0m
+    [36m| [0m[34m|[0m /* 12.746 */[0m
+    [36m| [0m[34m|[0m /* 12.747 */[0m
+    [36m| [0m[34m|[0m /* 12.748 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.749 */[0m
+    [36m| [0m[34m|[0m /* 12.750 */let parentAbsoluteDeadlineInterruptsNativeBodyReadTestFunc = { => parentAbsoluteDeadlineInterruptsNativeBodyRead();() }[0m
+    [36m| [0m[34m|[0m /* 12.751 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.752 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.753 */"parentAbsoluteDeadlineInterruptsNativeBodyRead",[0m
+    [36m| [0m[34m|[0m /* 12.754 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.755 */body: parentAbsoluteDeadlineInterruptsNativeBodyReadTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.756 */)[0m
+    [36m| [0m[34m|[0m /* 12.757 */)[0m
+    [36m| [0m[34m|[0m /* 12.758 */[0m
+    [36m| [0m[34m|[0m /* 12.759 */}()[0m
+    [36m| [0m[34m|[0m /* 12.760 */[0m
+    [36m| [0m[34m|[0m /* 12.761 */[0m
+    [36m| [0m[34m|[0m /* 12.762 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.763 */[0m
+    [36m| [0m[34m|[0m /* 12.764 */let http2TypedStreamCancellationReclaimsDecoderWithoutClosingSiblingTestFunc = { => http2TypedStreamCancellationReclaimsDecoderWithoutClosingSibling();() }[0m
+    [36m| [0m[34m|[0m /* 12.765 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.766 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.767 */"http2TypedStreamCancellationReclaimsDecoderWithoutClosingSibling",[0m
+    [36m| [0m[34m|[0m /* 12.768 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.769 */body: http2TypedStreamCancellationReclaimsDecoderWithoutClosingSiblingTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.770 */)[0m
+    [36m| [0m[34m|[0m /* 12.771 */)[0m
+    [36m| [0m[34m|[0m /* 12.772 */[0m
+    [36m| [0m[34m|[0m /* 12.773 */}()[0m
+    [36m| [0m[34m|[0m /* 12.774 */[0m
+    [36m| [0m[34m|[0m /* 12.775 */[0m
+    [36m| [0m[34m|[0m /* 12.776 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.777 */[0m
+    [36m| [0m[34m|[0m /* 12.778 */let http2GzipCloseAndMalformedMemberLeaveActiveSiblingAliveTestFunc = { => http2GzipCloseAndMalformedMemberLeaveActiveSiblingAlive();() }[0m
+    [36m| [0m[34m|[0m /* 12.779 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.780 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.781 */"http2GzipCloseAndMalformedMemberLeaveActiveSiblingAlive",[0m
+    [36m| [0m[34m|[0m /* 12.782 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.783 */body: http2GzipCloseAndMalformedMemberLeaveActiveSiblingAliveTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.784 */)[0m
+    [36m| [0m[34m|[0m /* 12.785 */)[0m
+    [36m| [0m[34m|[0m /* 12.786 */[0m
+    [36m| [0m[34m|[0m /* 12.787 */}()[0m
+    [36m| [0m[34m|[0m /* 12.788 */[0m
+    [36m| [0m[34m|[0m /* 12.789 */[0m
+    [36m| [0m[34m|[0m /* 12.790 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.791 */[0m
+    [36m| [0m[34m|[0m /* 12.792 */let http1UnreadWideBodyAbandonsConnectionWithoutDrainingUnboundedInputTestFunc = { => http1UnreadWideBodyAbandonsConnectionWithoutDrainingUnboundedInput();() }[0m
+    [36m| [0m[34m|[0m /* 12.793 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.794 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.795 */"http1UnreadWideBodyAbandonsConnectionWithoutDrainingUnboundedInput",[0m
+    [36m| [0m[34m|[0m /* 12.796 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.797 */body: http1UnreadWideBodyAbandonsConnectionWithoutDrainingUnboundedInputTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.798 */)[0m
+    [36m| [0m[34m|[0m /* 12.799 */)[0m
+    [36m| [0m[34m|[0m /* 12.800 */[0m
+    [36m| [0m[34m|[0m /* 12.801 */}()[0m
+    [36m| [0m[34m|[0m /* 12.802 */[0m
+    [36m| [0m[34m|[0m /* 12.803 */[0m
+    [36m| [0m[34m|[0m /* 12.804 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.805 */[0m
+    [36m| [0m[34m|[0m /* 12.806 */let preReadDeadlineReleasesNativeBodyReservationTestFunc = { => preReadDeadlineReleasesNativeBodyReservation();() }[0m
+    [36m| [0m[34m|[0m /* 12.807 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.808 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.809 */"preReadDeadlineReleasesNativeBodyReservation",[0m
+    [36m| [0m[34m|[0m /* 12.810 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.811 */body: preReadDeadlineReleasesNativeBodyReservationTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.812 */)[0m
+    [36m| [0m[34m|[0m /* 12.813 */)[0m
+    [36m| [0m[34m|[0m /* 12.814 */[0m
+    [36m| [0m[34m|[0m /* 12.815 */}()[0m
+    [36m| [0m[34m|[0m /* 12.816 */[0m
+    [36m| [0m[34m|[0m /* 12.817 */[0m
+    [36m| [0m[34m|[0m /* 12.818 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.819 */[0m
+    [36m| [0m[34m|[0m /* 12.820 */let configuredRequestTimeoutSurvivesBufferedCpuDecodingTestFunc = { => configuredRequestTimeoutSurvivesBufferedCpuDecoding();() }[0m
+    [36m| [0m[34m|[0m /* 12.821 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.822 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.823 */"configuredRequestTimeoutSurvivesBufferedCpuDecoding",[0m
+    [36m| [0m[34m|[0m /* 12.824 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.825 */body: configuredRequestTimeoutSurvivesBufferedCpuDecodingTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.826 */)[0m
+    [36m| [0m[34m|[0m /* 12.827 */)[0m
+    [36m| [0m[34m|[0m /* 12.828 */[0m
+    [36m| [0m[34m|[0m /* 12.829 */}()[0m
+    [36m| [0m[34m|[0m /* 12.830 */[0m
+    [36m| [0m[34m|[0m /* 12.831 */[0m
+    [36m| [0m[34m|[0m /* 12.832 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.833 */[0m
+    [36m| [0m[34m|[0m /* 12.834 */let dataAdmissionUsesSameRequestTimeoutAndParentCancellationBeforeSendTestFunc = { => dataAdmissionUsesSameRequestTimeoutAndParentCancellationBeforeSend();() }[0m
+    [36m| [0m[34m|[0m /* 12.835 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.836 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.837 */"dataAdmissionUsesSameRequestTimeoutAndParentCancellationBeforeSend",[0m
+    [36m| [0m[34m|[0m /* 12.838 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.839 */body: dataAdmissionUsesSameRequestTimeoutAndParentCancellationBeforeSendTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.840 */)[0m
+    [36m| [0m[34m|[0m /* 12.841 */)[0m
+    [36m| [0m[34m|[0m /* 12.842 */[0m
+    [36m| [0m[34m|[0m /* 12.843 */}()[0m
+    [36m| [0m[34m|[0m /* 12.844 */[0m
+    [36m| [0m[34m|[0m /* 12.845 */[0m
+    [36m| [0m[34m|[0m /* 12.846 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 12.847 */[0m
+    [36m| [0m[34m|[0m /* 12.848 */let nativeLargeBodyDecodesIncrementallyWithBoundedReadsAndReservationTestFunc = { => nativeLargeBodyDecodesIncrementallyWithBoundedReadsAndReservation();() }[0m
+    [36m| [0m[34m|[0m /* 12.849 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 12.850 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 12.851 */"nativeLargeBodyDecodesIncrementallyWithBoundedReadsAndReservation",[0m
+    [36m| [0m[34m|[0m /* 12.852 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 12.853 */body: nativeLargeBodyDecodesIncrementallyWithBoundedReadsAndReservationTestFunc[0m
+    [36m| [0m[34m|[0m /* 12.854 */)[0m
+    [36m| [0m[34m|[0m /* 12.855 */)[0m
+    [36m| [0m[34m|[0m /* 12.856 */[0m
+    [36m| [0m[34m|[0m /* 12.857 */}()[0m
+    [36m| [0m[34m|[0m /* 12.858 */[0m
+    [36m| [0m[34m|[0m /* 12.859 */return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 12.860 */}[0m
+    [36m| [0m[34m|[0m /* 12.861 */private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 12.862 */throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 12.863 */}[0m
+    [36m| [0m[34m|[0m /* 12.864 */}[0m
+    [36m| [0m[34m|[0m /* 12.865 */[0m
+    [36m| [0m[34m|[0m /* 12.866 */[0m
+    [36m| [0m[34m|[0m /* 12.867 */interface TestPackageExtension_GzipNativeTest {[0m
+    [36m| [0m[34m|[0m /* 12.868 */func registerGzipNativeTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 12.869 */}[0m
+    [36m| [0m[34m|[0m /* 12.870 */extend TestPackage <: TestPackageExtension_GzipNativeTest {[0m
+    [36m| [0m[34m|[0m /* 12.871 */@Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 12.872 */public func registerGzipNativeTest() {[0m
+    [36m| [0m[34m|[0m /* 12.873 */registerSuite({ => GzipNativeTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 12.874 */}[0m
+    [36m| [0m[34m|[0m /* 12.875 */}[0m
+    [36m| [0m[34m|[0m /* 12.876 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 12.63 */                            if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 12.64 */                                throw e[0m
+   [36m| [0m[33m|[0m /* 12.65 */                            }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 12.66 */                            if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m_________________________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 12.67 */                                throw e[0m
+   [36m| [0m[33m|[0m /* 12.68 */                            }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m_______________________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.165 */                        if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.166 */                            throw e[0m
+    [36m| [0m[33m|[0m /* 12.167 */                        }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.168 */                        if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.169 */                            throw e[0m
+    [36m| [0m[33m|[0m /* 12.170 */                        }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.171 */                        if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.172 */                            throw e[0m
+    [36m| [0m[33m|[0m /* 12.173 */                        }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.220 */                                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.221 */                                    throw e[0m
+    [36m| [0m[33m|[0m /* 12.222 */                                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.223 */                                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.224 */                                    throw e[0m
+    [36m| [0m[33m|[0m /* 12.225 */                                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.226 */                                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.227 */                                    throw e[0m
+    [36m| [0m[33m|[0m /* 12.228 */                                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.188 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.189 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.190 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 80.1 */@Attribute[TEST_GENERATED] class GzipCodecTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 80.2 */    @Attribute[TestCase_0][0m
+    [36m| [0m[34m|[0m /* 80.3 */    func storedFixedDynamicAndOptionalFields(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.4 */        for(fixture in[gzipFixtureStored, gzipFixtureFixed, gzipFixtureOptional]) {[0m
+    [36m| [0m[34m|[0m /* 80.5 */            for(chunk in[1, 2, 7, 4096]) {[0m
+    [36m| [0m[34m|[0m /* 80.6 */                let source = GzipFixtureSource(gzipHex(fixture), chunk: chunk)[0m
+    [36m| [0m[34m|[0m /* 80.7 */                let body = GzipBodyStream(source, limits: GzipLimits(inputBufferBytes: 7, maximumReadBytes: 3))[0m
+    [36m| [0m[34m|[0m /* 80.8 */                expectEqual("String.fromUtf8(gzipDrain(body))", "\"hello gzip\"", String.fromUtf8(gzipDrain(body)), "hello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.9 */                expectEqual("body.integrityVerified", "true", body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.10 */                expectEqual("body.memberCount", "1", body.memberCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.11 */                expectEqual("body.decodedBytes", "10", body.decodedBytes, 10, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.12 */                expectEqual("body.encodedBytesRead", "gzipHex(fixture).size", body.encodedBytesRead, gzipHex(fixture).size, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.13 */                expectEqual("source.isClosed()", "true", source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.14 */                expectEqual("body.maximumWorkBetweenChecks > 0 && body.maximumWorkBetweenChecks <= 512", "true", body.maximumWorkBetweenChecks > 0 && body.maximumWorkBetweenChecks <= 512, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.15 */            }[0m
+    [36m| [0m[34m|[0m /* 80.16 */        }[0m
+    [36m| [0m[34m|[0m /* 80.17 */        let body = GzipBodyStream(GzipFixtureSource(gzipHex(gzipFixtureDynamic)))[0m
+    [36m| [0m[34m|[0m /* 80.18 */        let decoded = gzipDrain(body)[0m
+    [36m| [0m[34m|[0m /* 80.19 */        assertEqual("decoded.size", "10000", decoded.size, 10000, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.20 */        let pattern = "abcde".toArray()[0m
+    [36m| [0m[34m|[0m /* 80.21 */        for(index in 0 .. decoded.size) {[0m
+    [36m| [0m[34m|[0m /* 80.22 */            assertEqual("decoded[index]", "pattern[index % 5]", decoded[index], pattern[index % 5], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.23 */        }[0m
+    [36m| [0m[34m|[0m /* 80.24 */        expectEqual("body.integrityVerified", "true", body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.25 */    }[0m
+    [36m| [0m[34m|[0m /* 80.26 */    [0m
+    [36m| [0m[34m|[0m /* 80.27 */    @Attribute[TestCase_1][0m
+    [36m| [0m[34m|[0m /* 80.28 */    func exactLimitsAndConcatenatedMembers(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.29 */        let bytes = gzipHex(gzipFixtureFixed)[0m
+    [36m| [0m[34m|[0m /* 80.30 */        let body = GzipBodyStream(GzipFixtureSource(bytes), limits: GzipLimits(maximumEncodedBytes: bytes.size, maximumDecodedBytes: 10))[0m
+    [36m| [0m[34m|[0m /* 80.31 */        expectEqual("String.fromUtf8(gzipDrain(body))", "\"hello gzip\"", String.fromUtf8(gzipDrain(body)), "hello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.32 */        expectEqual("body.integrityVerified", "true", body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.33 */        expectEqual("gzipFailure(bytes, GzipLimits(maximumDecodedBytes: 9))", "GzipErrorCode.OutputLimit", gzipFailure(bytes, GzipLimits(maximumDecodedBytes: 9)), GzipErrorCode.OutputLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.34 */        expectEqual("gzipFailure(bytes, GzipLimits(maximumEncodedBytes: bytes.size - 1))", "GzipErrorCode.InputLimit", gzipFailure(bytes, GzipLimits(maximumEncodedBytes: bytes.size - 1)), GzipErrorCode.InputLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.35 */        let joined = gzipHex(gzipFixtureFixed + gzipFixtureFixed)[0m
+    [36m| [0m[34m|[0m /* 80.36 */        expectEqual("gzipFailure(joined, GzipLimits())", "GzipErrorCode.MemberLimit", gzipFailure(joined, GzipLimits()), GzipErrorCode.MemberLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.37 */        expectEqual("gzipFailure(joined, GzipLimits(maximumMembers: 2, maximumDecodedBytes: 19))", "GzipErrorCode.OutputLimit", gzipFailure(joined, GzipLimits(maximumMembers: 2, maximumDecodedBytes: 19)), GzipErrorCode.OutputLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.38 */        expectEqual("gzipFailure(joined, GzipLimits(maximumMembers: 2, maximumBlocks: 1))", "GzipErrorCode.BlockLimit", gzipFailure(joined, GzipLimits(maximumMembers: 2, maximumBlocks: 1)), GzipErrorCode.BlockLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.39 */        let multiple = GzipBodyStream(GzipFixtureSource(joined), limits: GzipLimits(maximumMembers: 2, maximumDecodedBytes: 20))[0m
+    [36m| [0m[34m|[0m /* 80.40 */        expectEqual("String.fromUtf8(gzipDrain(multiple))", "\"hello gziphello gzip\"", String.fromUtf8(gzipDrain(multiple)), "hello gziphello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.41 */        expectEqual("multiple.memberCount", "2", multiple.memberCount, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.42 */        expectEqual("multiple.integrityVerified", "true", multiple.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.43 */        expectEqual("gzipFailure(gzipHex(gzipFixtureOptional), GzipLimits(maximumHeaderBytes: 29))", "GzipErrorCode.HeaderLimit", gzipFailure(gzipHex(gzipFixtureOptional), GzipLimits(maximumHeaderBytes: 29)), GzipErrorCode.HeaderLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.44 */        let optional = GzipBodyStream(GzipFixtureSource(gzipHex(gzipFixtureOptional)), limits: GzipLimits(maximumHeaderBytes: 30))[0m
+    [36m| [0m[34m|[0m /* 80.45 */        expectEqual("String.fromUtf8(gzipDrain(optional))", "\"hello gzip\"", String.fromUtf8(gzipDrain(optional)), "hello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.46 */    }[0m
+    [36m| [0m[34m|[0m /* 80.47 */    [0m
+    [36m| [0m[34m|[0m /* 80.48 */    @Attribute[TestCase_2][0m
+    [36m| [0m[34m|[0m /* 80.49 */    func emptyAndEveryTruncation(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.50 */        let empty = GzipBodyStream(GzipFixtureSource(gzipHex(gzipFixtureEmpty)))[0m
+    [36m| [0m[34m|[0m /* 80.51 */        expectEqual("gzipDrain(empty).size", "0", gzipDrain(empty).size, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.52 */        expectEqual("empty.integrityVerified", "true", empty.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.53 */        expectEqual("gzipFailure(Array < Byte >(), GzipLimits())", "GzipErrorCode.UnexpectedEof", gzipFailure(Array < Byte >(), GzipLimits()), GzipErrorCode.UnexpectedEof, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.54 */        for(fixture in[gzipFixtureStored, gzipFixtureFixed, gzipFixtureDynamic, gzipFixtureOptional]) {[0m
+    [36m| [0m[34m|[0m /* 80.55 */            let bytes = gzipHex(fixture)[0m
+    [36m| [0m[34m|[0m /* 80.56 */            for(cut in 0 .. bytes.size) {[0m
+    [36m| [0m[34m|[0m /* 80.57 */                let truncated = Array < Byte >(cut, { index =>[0m
+    [36m| [0m[34m|[0m /* 80.58 */                    bytes[index][0m
+    [36m| [0m[34m|[0m /* 80.59 */                })[0m
+    [36m| [0m[34m|[0m /* 80.60 */                expectEqual("gzipFailure(truncated, GzipLimits())", "GzipErrorCode.UnexpectedEof", gzipFailure(truncated, GzipLimits()), GzipErrorCode.UnexpectedEof, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.61 */            }[0m
+    [36m| [0m[34m|[0m /* 80.62 */        }[0m
+    [36m| [0m[34m|[0m /* 80.63 */    }[0m
+    [36m| [0m[34m|[0m /* 80.64 */    [0m
+    [36m| [0m[34m|[0m /* 80.65 */    @Attribute[TestCase_3][0m
+    [36m| [0m[34m|[0m /* 80.66 */    func checksumSizeFlagsStoredLengthAndTrailing(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.67 */        let checksum = gzipHex(gzipFixtureFixed)[0m
+    [36m| [0m[34m|[0m /* 80.68 */        checksum[checksum.size - 8] ^= 1[0m
+    [36m| [0m[34m|[0m /* 80.69 */        expectEqual("gzipFailure(checksum, GzipLimits())", "GzipErrorCode.ChecksumMismatch", gzipFailure(checksum, GzipLimits()), GzipErrorCode.ChecksumMismatch, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.70 */        let size = gzipHex(gzipFixtureFixed)[0m
+    [36m| [0m[34m|[0m /* 80.71 */        size[size.size - 4] ^= 1[0m
+    [36m| [0m[34m|[0m /* 80.72 */        expectEqual("gzipFailure(size, GzipLimits())", "GzipErrorCode.SizeMismatch", gzipFailure(size, GzipLimits()), GzipErrorCode.SizeMismatch, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.73 */        let flags = gzipHex(gzipFixtureFixed)[0m
+    [36m| [0m[34m|[0m /* 80.74 */        flags[3] = 32[0m
+    [36m| [0m[34m|[0m /* 80.75 */        expectEqual("gzipFailure(flags, GzipLimits())", "GzipErrorCode.InvalidHeader", gzipFailure(flags, GzipLimits()), GzipErrorCode.InvalidHeader, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.76 */        let nlen = gzipHex(gzipFixtureStored)[0m
+    [36m| [0m[34m|[0m /* 80.77 */        nlen[13] ^= 1[0m
+    [36m| [0m[34m|[0m /* 80.78 */        expectEqual("gzipFailure(nlen, GzipLimits())", "GzipErrorCode.InvalidDeflate", gzipFailure(nlen, GzipLimits()), GzipErrorCode.InvalidDeflate, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.79 */        let fhcrc = gzipHex(gzipFixtureOptional)[0m
+    [36m| [0m[34m|[0m /* 80.80 */        fhcrc[28] ^= 1[0m
+    [36m| [0m[34m|[0m /* 80.81 */        expectEqual("gzipFailure(fhcrc, GzipLimits())", "GzipErrorCode.ChecksumMismatch", gzipFailure(fhcrc, GzipLimits()), GzipErrorCode.ChecksumMismatch, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.82 */        expectEqual("gzipFailure(gzipHex(gzipFixtureFixed + \"00\"), GzipLimits())", "GzipErrorCode.TrailingData", gzipFailure(gzipHex(gzipFixtureFixed + "00"), GzipLimits()), GzipErrorCode.TrailingData, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.83 */        expectEqual("gzipFailure(gzipHex(gzipFixtureFixed + \"ffff\"), GzipLimits(maximumMembers: 2))", "GzipErrorCode.TrailingData", gzipFailure(gzipHex(gzipFixtureFixed + "ffff"), GzipLimits(maximumMembers: 2)), GzipErrorCode.TrailingData, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.84 */    }[0m
+    [36m| [0m[34m|[0m /* 80.85 */    [0m
+    [36m| [0m[34m|[0m /* 80.86 */    @Attribute[TestCase_4][0m
+    [36m| [0m[34m|[0m /* 80.87 */    func largeOverlapBombAndBoundedWork(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.88 */        let source = GzipFixtureSource(gzipHex(gzipFixtureBomb), chunk: 4096)[0m
+    [36m| [0m[34m|[0m /* 80.89 */        let body = GzipBodyStream(source, limits: GzipLimits(maximumDecodedBytes: 131072))[0m
+    [36m| [0m[34m|[0m /* 80.90 */        let decoded = gzipDrain(body)[0m
+    [36m| [0m[34m|[0m /* 80.91 */        assertEqual("decoded.size", "131072", decoded.size, 131072, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.92 */        for(byte in decoded) {[0m
+    [36m| [0m[34m|[0m /* 80.93 */            assertEqual("byte", "b\'A\'", byte, b'A', isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.94 */        }[0m
+    [36m| [0m[34m|[0m /* 80.95 */        expectEqual("body.integrityVerified", "true", body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.96 */        expectEqual("body.maximumWorkBetweenChecks <= 512", "true", body.maximumWorkBetweenChecks <= 512, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.97 */        expectEqual("gzipFailure(gzipHex(gzipFixtureBomb), GzipLimits(maximumDecodedBytes: 131071))", "GzipErrorCode.OutputLimit", gzipFailure(gzipHex(gzipFixtureBomb), GzipLimits(maximumDecodedBytes: 131071)), GzipErrorCode.OutputLimit, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.98 */    }[0m
+    [36m| [0m[34m|[0m /* 80.99 */    [0m
+    [36m| [0m[34m|[0m /* 80.100 */    @Attribute[TestCase_5][0m
+    [36m| [0m[34m|[0m /* 80.101 */    func incrementalOwnershipAndUnverifiedClose(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.102 */        let source = GzipFixtureSource(gzipHex(gzipFixtureBomb), chunk: 7)[0m
+    [36m| [0m[34m|[0m /* 80.103 */        let body = GzipBodyStream(source, limits: GzipLimits(maximumReadBytes: 3))[0m
+    [36m| [0m[34m|[0m /* 80.104 */        let buffer = Array < Byte >(100, repeat: 0)[0m
+    [36m| [0m[34m|[0m /* 80.105 */        expectEqual("body.read(buffer)", "3", body.read(buffer), 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.106 */        expectEqual("body.decodedBytes", "3", body.decodedBytes, 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.107 */        expectEqual("! body.integrityVerified", "true", ! body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.108 */        expectEqual("! source.isClosed()", "true", ! source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.109 */        expectEqual("body.contentLength", "None < Int64 >", body.contentLength, None < Int64 >, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.110 */        body.close()[0m
+    [36m| [0m[34m|[0m /* 80.111 */        body.close()[0m
+    [36m| [0m[34m|[0m /* 80.112 */        expectEqual("source.isClosed()", "true", source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.113 */        expectEqual("body.isClosed()", "true", body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.114 */        expectEqual("! body.integrityVerified", "true", ! body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.115 */        expectEqual("body.decodedBytes", "3", body.decodedBytes, 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.116 */    }[0m
+    [36m| [0m[34m|[0m /* 80.117 */    [0m
+    [36m| [0m[34m|[0m /* 80.118 */    @Attribute[TestCase_6][0m
+    [36m| [0m[34m|[0m /* 80.119 */    func preReadDeadlineClosesSourceWithoutReading(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.120 */        for(partial in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 80.121 */            let clock = GzipCodecClock()[0m
+    [36m| [0m[34m|[0m /* 80.122 */            let cancellation = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 80.123 */            let source = GzipFixtureSource(gzipHex(gzipFixtureFixed))[0m
+    [36m| [0m[34m|[0m /* 80.124 */            let body = GzipBodyStream(source, context: OperationContext(deadline: Some(Deadline.after(Duration.second, clock: clock)), cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 80.125 */            if(partial) {[0m
+    [36m| [0m[34m|[0m /* 80.126 */                expectEqual("body.read(Array < Byte >(1, repeat: 0))", "1", body.read(Array < Byte >(1, repeat: 0)), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.127 */            }[0m
+    [36m| [0m[34m|[0m /* 80.128 */            let reads = source.reads[0m
+    [36m| [0m[34m|[0m /* 80.129 */            clock.advance(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 80.130 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 80.131 */                try {[0m
+    [36m| [0m[34m|[0m /* 80.132 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 80.133 */                    body.read(Array < Byte >(1, repeat: 0))[0m
+    [36m| [0m[34m|[0m /* 80.134 */                    fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 80.135 */                } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 80.136 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 80.137 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 80.138 */                    }[0m
+    [36m| [0m[34m|[0m /* 80.139 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 80.140 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 80.141 */                    }[0m
+    [36m| [0m[34m|[0m /* 80.142 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.143 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 80.144 */                    }[0m
+    [36m| [0m[34m|[0m /* 80.145 */                    e[0m
+    [36m| [0m[34m|[0m /* 80.146 */                }[0m
+    [36m| [0m[34m|[0m /* 80.147 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 80.148 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.149 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.150 */                }[0m
+    [36m| [0m[34m|[0m /* 80.151 */                assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 80.152 */            }[0m
+    [36m| [0m[34m|[0m /* 80.153 */            [0m
+    [36m| [0m[34m|[0m /* 80.154 */            match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 80.155 */                case NetworkErrorCode.TimedOut =>()[0m
+    [36m| [0m[34m|[0m /* 80.156 */                case _ => fail("pre-read deadline must time out")[0m
+    [36m| [0m[34m|[0m /* 80.157 */            }[0m
+    [36m| [0m[34m|[0m /* 80.158 */            expectEqual("source.reads", "reads", source.reads, reads, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.159 */            expectEqual("source.isClosed()", "true", source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.160 */            expectEqual("body.isClosed()", "true", body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.161 */            expectEqual("! body.integrityVerified", "true", ! body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.162 */            expectEqual("body.decodedBytes", "if(partial) {\n    1\n}\nelse {\n    0\n}\n", body.decodedBytes, if(partial) {[0m
+    [36m| [0m[34m|[0m /* 80.163 */                1[0m
+    [36m| [0m[34m|[0m /* 80.164 */            }[0m
+    [36m| [0m[34m|[0m /* 80.165 */            else {[0m
+    [36m| [0m[34m|[0m /* 80.166 */                0[0m
+    [36m| [0m[34m|[0m /* 80.167 */            }[0m
+    [36m| [0m[34m|[0m /* 80.168 */            , isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.169 */            let closes = source.closes[0m
+    [36m| [0m[34m|[0m /* 80.170 */            cancellation.cancel()[0m
+    [36m| [0m[34m|[0m /* 80.171 */            body.close()[0m
+    [36m| [0m[34m|[0m /* 80.172 */            expectEqual("source.closes", "closes", source.closes, closes, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.173 */        }[0m
+    [36m| [0m[34m|[0m /* 80.174 */    }[0m
+    [36m| [0m[34m|[0m /* 80.175 */    [0m
+    [36m| [0m[34m|[0m /* 80.176 */    @Attribute[TestCase_7][0m
+    [36m| [0m[34m|[0m /* 80.177 */    func decoderFailureSurvivesThrowingSourceClose(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.178 */        let bytes = gzipHex(gzipFixtureFixed)[0m
+    [36m| [0m[34m|[0m /* 80.179 */        bytes[bytes.size - 8] ^= 1[0m
+    [36m| [0m[34m|[0m /* 80.180 */        let source = GzipFixtureSource(bytes, throwsOnClose: true)[0m
+    [36m| [0m[34m|[0m /* 80.181 */        let body = GzipBodyStream(source)[0m
+    [36m| [0m[34m|[0m /* 80.182 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 80.183 */            try {[0m
+    [36m| [0m[34m|[0m /* 80.184 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 80.185 */                gzipDrain(body)[0m
+    [36m| [0m[34m|[0m /* 80.186 */                fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 80.187 */            } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 80.188 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 80.189 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.190 */                }[0m
+    [36m| [0m[34m|[0m /* 80.191 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 80.192 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.193 */                }[0m
+    [36m| [0m[34m|[0m /* 80.194 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.195 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.196 */                }[0m
+    [36m| [0m[34m|[0m /* 80.197 */                e[0m
+    [36m| [0m[34m|[0m /* 80.198 */            }[0m
+    [36m| [0m[34m|[0m /* 80.199 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 80.200 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.201 */                throw e[0m
+    [36m| [0m[34m|[0m /* 80.202 */            }[0m
+    [36m| [0m[34m|[0m /* 80.203 */            assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 80.204 */        }[0m
+    [36m| [0m[34m|[0m /* 80.205 */        [0m
+    [36m| [0m[34m|[0m /* 80.206 */        expectEqual("error.code", "GzipErrorCode.ChecksumMismatch", error.code, GzipErrorCode.ChecksumMismatch, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.207 */        expectEqual("body.decodedBytes", "10", body.decodedBytes, 10, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.208 */        expectEqual("source.isClosed()", "true", source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.209 */        expectEqual("body.isClosed()", "true", body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.210 */        expectEqual("! body.integrityVerified", "true", ! body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.211 */        expectEqual("source.closes", "2", source.closes, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.212 */        let closed = try {[0m
+    [36m| [0m[34m|[0m /* 80.213 */            try {[0m
+    [36m| [0m[34m|[0m /* 80.214 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 80.215 */                body.read(Array < Byte >(1, repeat: 0))[0m
+    [36m| [0m[34m|[0m /* 80.216 */                fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 80.217 */            } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 80.218 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 80.219 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.220 */                }[0m
+    [36m| [0m[34m|[0m /* 80.221 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 80.222 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.223 */                }[0m
+    [36m| [0m[34m|[0m /* 80.224 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.225 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.226 */                }[0m
+    [36m| [0m[34m|[0m /* 80.227 */                e[0m
+    [36m| [0m[34m|[0m /* 80.228 */            }[0m
+    [36m| [0m[34m|[0m /* 80.229 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 80.230 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.231 */                throw e[0m
+    [36m| [0m[34m|[0m /* 80.232 */            }[0m
+    [36m| [0m[34m|[0m /* 80.233 */            assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 80.234 */        }[0m
+    [36m| [0m[34m|[0m /* 80.235 */        [0m
+    [36m| [0m[34m|[0m /* 80.236 */        expectEqual("closed.code", "GzipErrorCode.Closed", closed.code, GzipErrorCode.Closed, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.237 */        body.close()[0m
+    [36m| [0m[34m|[0m /* 80.238 */        expectEqual("source.closes", "2", source.closes, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.239 */    }[0m
+    [36m| [0m[34m|[0m /* 80.240 */    [0m
+    [36m| [0m[34m|[0m /* 80.241 */    @Attribute[TestCase_8][0m
+    [36m| [0m[34m|[0m /* 80.242 */    func publicCloseStillReportsSourceCloseFailure(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.243 */        let source = GzipFixtureSource(gzipHex(gzipFixtureFixed), throwsOnClose: true)[0m
+    [36m| [0m[34m|[0m /* 80.244 */        let body = GzipBodyStream(source)[0m
+    [36m| [0m[34m|[0m /* 80.245 */        let _ = try {[0m
+    [36m| [0m[34m|[0m /* 80.246 */            try {[0m
+    [36m| [0m[34m|[0m /* 80.247 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 80.248 */                body.close()[0m
+    [36m| [0m[34m|[0m /* 80.249 */                fail("@AssertThrows: Expected 'IllegalStateException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 80.250 */            } catch(e: IllegalStateException) {[0m
+    [36m| [0m[34m|[0m /* 80.251 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 80.252 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.253 */                }[0m
+    [36m| [0m[34m|[0m /* 80.254 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 80.255 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.256 */                }[0m
+    [36m| [0m[34m|[0m /* 80.257 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.258 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.259 */                }[0m
+    [36m| [0m[34m|[0m /* 80.260 */                e[0m
+    [36m| [0m[34m|[0m /* 80.261 */            }[0m
+    [36m| [0m[34m|[0m /* 80.262 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 80.263 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.264 */                throw e[0m
+    [36m| [0m[34m|[0m /* 80.265 */            }[0m
+    [36m| [0m[34m|[0m /* 80.266 */            assertCaughtUnexpectedE("@AssertThrows(IllegalStateException)", "IllegalStateException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 80.267 */        }[0m
+    [36m| [0m[34m|[0m /* 80.268 */        [0m
+    [36m| [0m[34m|[0m /* 80.269 */        expectEqual("body.isClosed()", "true", body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.270 */        body.close()[0m
+    [36m| [0m[34m|[0m /* 80.271 */        expectEqual("source.closes", "2", source.closes, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.272 */    }[0m
+    [36m| [0m[34m|[0m /* 80.273 */    [0m
+    [36m| [0m[34m|[0m /* 80.274 */    @Attribute[TestCase_9][0m
+    [36m| [0m[34m|[0m /* 80.275 */    func rejectedConcurrentReadDoesNotCloseOwnedRead(): Unit {[0m
+    [36m| [0m[34m|[0m /* 80.276 */        let source = GzipFixtureSource(gzipHex(gzipFixtureFixed))[0m
+    [36m| [0m[34m|[0m /* 80.277 */        let body = GzipBodyStream(source)[0m
+    [36m| [0m[34m|[0m /* 80.278 */        source.beforeRead = { =>[0m
+    [36m| [0m[34m|[0m /* 80.279 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 80.280 */                try {[0m
+    [36m| [0m[34m|[0m /* 80.281 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 80.282 */                    body.read(Array < Byte >(1, repeat: 0))[0m
+    [36m| [0m[34m|[0m /* 80.283 */                    fail("@AssertThrows: Expected 'GzipException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 80.284 */                } catch(e: GzipException) {[0m
+    [36m| [0m[34m|[0m /* 80.285 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 80.286 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 80.287 */                    }[0m
+    [36m| [0m[34m|[0m /* 80.288 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 80.289 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 80.290 */                    }[0m
+    [36m| [0m[34m|[0m /* 80.291 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.292 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 80.293 */                    }[0m
+    [36m| [0m[34m|[0m /* 80.294 */                    e[0m
+    [36m| [0m[34m|[0m /* 80.295 */                }[0m
+    [36m| [0m[34m|[0m /* 80.296 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 80.297 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 80.298 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 80.299 */                }[0m
+    [36m| [0m[34m|[0m /* 80.300 */                assertCaughtUnexpectedE("@AssertThrows(GzipException)", "GzipException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 80.301 */            }[0m
+    [36m| [0m[34m|[0m /* 80.302 */            [0m
+    [36m| [0m[34m|[0m /* 80.303 */            expectEqual("error.code", "GzipErrorCode.ConcurrentOperation", error.code, GzipErrorCode.ConcurrentOperation, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.304 */            expectEqual("! source.isClosed()", "true", ! source.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.305 */            expectEqual("! body.isClosed()", "true", ! body.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.306 */        }[0m
+    [36m| [0m[34m|[0m /* 80.307 */        expectEqual("String.fromUtf8(gzipDrain(body))", "\"hello gzip\"", String.fromUtf8(gzipDrain(body)), "hello gzip", isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.308 */        expectEqual("body.integrityVerified", "true", body.integrityVerified, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 80.309 */    }[0m
+    [36m| [0m[34m|[0m /* 80.310 */    [0m
+    [36m| [0m[34m|[0m /* 80.311 */    init() {[0m
+    [36m| [0m[34m|[0m /* 80.312 */    }[0m
+    [36m| [0m[34m|[0m /* 80.313 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 80.314 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.315 */        [0m
+    [36m| [0m[34m|[0m /* 80.316 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 80.317 */    }[0m
+    [36m| [0m[34m|[0m /* 80.318 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 80.319 */        [0m
+    [36m| [0m[34m|[0m /* 80.320 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 80.321 */        let suiteBuilder = TestSuite.builder("GzipCodecTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 80.322 */        [0m
+    [36m| [0m[34m|[0m /* 80.323 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.324 */            [0m
+    [36m| [0m[34m|[0m /* 80.325 */            let storedFixedDynamicAndOptionalFieldsTestFunc = { => storedFixedDynamicAndOptionalFields();() }[0m
+    [36m| [0m[34m|[0m /* 80.326 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.327 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.328 */            "storedFixedDynamicAndOptionalFields",[0m
+    [36m| [0m[34m|[0m /* 80.329 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.330 */            body: storedFixedDynamicAndOptionalFieldsTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.331 */            )[0m
+    [36m| [0m[34m|[0m /* 80.332 */            )[0m
+    [36m| [0m[34m|[0m /* 80.333 */            [0m
+    [36m| [0m[34m|[0m /* 80.334 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.335 */        [0m
+    [36m| [0m[34m|[0m /* 80.336 */        [0m
+    [36m| [0m[34m|[0m /* 80.337 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.338 */            [0m
+    [36m| [0m[34m|[0m /* 80.339 */            let exactLimitsAndConcatenatedMembersTestFunc = { => exactLimitsAndConcatenatedMembers();() }[0m
+    [36m| [0m[34m|[0m /* 80.340 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.341 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.342 */            "exactLimitsAndConcatenatedMembers",[0m
+    [36m| [0m[34m|[0m /* 80.343 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.344 */            body: exactLimitsAndConcatenatedMembersTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.345 */            )[0m
+    [36m| [0m[34m|[0m /* 80.346 */            )[0m
+    [36m| [0m[34m|[0m /* 80.347 */            [0m
+    [36m| [0m[34m|[0m /* 80.348 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.349 */        [0m
+    [36m| [0m[34m|[0m /* 80.350 */        [0m
+    [36m| [0m[34m|[0m /* 80.351 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.352 */            [0m
+    [36m| [0m[34m|[0m /* 80.353 */            let emptyAndEveryTruncationTestFunc = { => emptyAndEveryTruncation();() }[0m
+    [36m| [0m[34m|[0m /* 80.354 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.355 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.356 */            "emptyAndEveryTruncation",[0m
+    [36m| [0m[34m|[0m /* 80.357 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.358 */            body: emptyAndEveryTruncationTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.359 */            )[0m
+    [36m| [0m[34m|[0m /* 80.360 */            )[0m
+    [36m| [0m[34m|[0m /* 80.361 */            [0m
+    [36m| [0m[34m|[0m /* 80.362 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.363 */        [0m
+    [36m| [0m[34m|[0m /* 80.364 */        [0m
+    [36m| [0m[34m|[0m /* 80.365 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.366 */            [0m
+    [36m| [0m[34m|[0m /* 80.367 */            let checksumSizeFlagsStoredLengthAndTrailingTestFunc = { => checksumSizeFlagsStoredLengthAndTrailing();() }[0m
+    [36m| [0m[34m|[0m /* 80.368 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.369 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.370 */            "checksumSizeFlagsStoredLengthAndTrailing",[0m
+    [36m| [0m[34m|[0m /* 80.371 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.372 */            body: checksumSizeFlagsStoredLengthAndTrailingTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.373 */            )[0m
+    [36m| [0m[34m|[0m /* 80.374 */            )[0m
+    [36m| [0m[34m|[0m /* 80.375 */            [0m
+    [36m| [0m[34m|[0m /* 80.376 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.377 */        [0m
+    [36m| [0m[34m|[0m /* 80.378 */        [0m
+    [36m| [0m[34m|[0m /* 80.379 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.380 */            [0m
+    [36m| [0m[34m|[0m /* 80.381 */            let largeOverlapBombAndBoundedWorkTestFunc = { => largeOverlapBombAndBoundedWork();() }[0m
+    [36m| [0m[34m|[0m /* 80.382 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.383 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.384 */            "largeOverlapBombAndBoundedWork",[0m
+    [36m| [0m[34m|[0m /* 80.385 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.386 */            body: largeOverlapBombAndBoundedWorkTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.387 */            )[0m
+    [36m| [0m[34m|[0m /* 80.388 */            )[0m
+    [36m| [0m[34m|[0m /* 80.389 */            [0m
+    [36m| [0m[34m|[0m /* 80.390 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.391 */        [0m
+    [36m| [0m[34m|[0m /* 80.392 */        [0m
+    [36m| [0m[34m|[0m /* 80.393 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.394 */            [0m
+    [36m| [0m[34m|[0m /* 80.395 */            let incrementalOwnershipAndUnverifiedCloseTestFunc = { => incrementalOwnershipAndUnverifiedClose();() }[0m
+    [36m| [0m[34m|[0m /* 80.396 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.397 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.398 */            "incrementalOwnershipAndUnverifiedClose",[0m
+    [36m| [0m[34m|[0m /* 80.399 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.400 */            body: incrementalOwnershipAndUnverifiedCloseTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.401 */            )[0m
+    [36m| [0m[34m|[0m /* 80.402 */            )[0m
+    [36m| [0m[34m|[0m /* 80.403 */            [0m
+    [36m| [0m[34m|[0m /* 80.404 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.405 */        [0m
+    [36m| [0m[34m|[0m /* 80.406 */        [0m
+    [36m| [0m[34m|[0m /* 80.407 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.408 */            [0m
+    [36m| [0m[34m|[0m /* 80.409 */            let preReadDeadlineClosesSourceWithoutReadingTestFunc = { => preReadDeadlineClosesSourceWithoutReading();() }[0m
+    [36m| [0m[34m|[0m /* 80.410 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.411 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.412 */            "preReadDeadlineClosesSourceWithoutReading",[0m
+    [36m| [0m[34m|[0m /* 80.413 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.414 */            body: preReadDeadlineClosesSourceWithoutReadingTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.415 */            )[0m
+    [36m| [0m[34m|[0m /* 80.416 */            )[0m
+    [36m| [0m[34m|[0m /* 80.417 */            [0m
+    [36m| [0m[34m|[0m /* 80.418 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.419 */        [0m
+    [36m| [0m[34m|[0m /* 80.420 */        [0m
+    [36m| [0m[34m|[0m /* 80.421 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.422 */            [0m
+    [36m| [0m[34m|[0m /* 80.423 */            let decoderFailureSurvivesThrowingSourceCloseTestFunc = { => decoderFailureSurvivesThrowingSourceClose();() }[0m
+    [36m| [0m[34m|[0m /* 80.424 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.425 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.426 */            "decoderFailureSurvivesThrowingSourceClose",[0m
+    [36m| [0m[34m|[0m /* 80.427 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.428 */            body: decoderFailureSurvivesThrowingSourceCloseTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.429 */            )[0m
+    [36m| [0m[34m|[0m /* 80.430 */            )[0m
+    [36m| [0m[34m|[0m /* 80.431 */            [0m
+    [36m| [0m[34m|[0m /* 80.432 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.433 */        [0m
+    [36m| [0m[34m|[0m /* 80.434 */        [0m
+    [36m| [0m[34m|[0m /* 80.435 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.436 */            [0m
+    [36m| [0m[34m|[0m /* 80.437 */            let publicCloseStillReportsSourceCloseFailureTestFunc = { => publicCloseStillReportsSourceCloseFailure();() }[0m
+    [36m| [0m[34m|[0m /* 80.438 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.439 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.440 */            "publicCloseStillReportsSourceCloseFailure",[0m
+    [36m| [0m[34m|[0m /* 80.441 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.442 */            body: publicCloseStillReportsSourceCloseFailureTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.443 */            )[0m
+    [36m| [0m[34m|[0m /* 80.444 */            )[0m
+    [36m| [0m[34m|[0m /* 80.445 */            [0m
+    [36m| [0m[34m|[0m /* 80.446 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.447 */        [0m
+    [36m| [0m[34m|[0m /* 80.448 */        [0m
+    [36m| [0m[34m|[0m /* 80.449 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 80.450 */            [0m
+    [36m| [0m[34m|[0m /* 80.451 */            let rejectedConcurrentReadDoesNotCloseOwnedReadTestFunc = { => rejectedConcurrentReadDoesNotCloseOwnedRead();() }[0m
+    [36m| [0m[34m|[0m /* 80.452 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 80.453 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 80.454 */            "rejectedConcurrentReadDoesNotCloseOwnedRead",[0m
+    [36m| [0m[34m|[0m /* 80.455 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 80.456 */            body: rejectedConcurrentReadDoesNotCloseOwnedReadTestFunc[0m
+    [36m| [0m[34m|[0m /* 80.457 */            )[0m
+    [36m| [0m[34m|[0m /* 80.458 */            )[0m
+    [36m| [0m[34m|[0m /* 80.459 */            [0m
+    [36m| [0m[34m|[0m /* 80.460 */        }()[0m
+    [36m| [0m[34m|[0m /* 80.461 */        [0m
+    [36m| [0m[34m|[0m /* 80.462 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 80.463 */    }[0m
+    [36m| [0m[34m|[0m /* 80.464 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 80.465 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 80.466 */    }[0m
+    [36m| [0m[34m|[0m /* 80.467 */}[0m
+    [36m| [0m[34m|[0m /* 80.468 */[0m
+    [36m| [0m[34m|[0m /* 80.469 */[0m
+    [36m| [0m[34m|[0m /* 80.470 */interface TestPackageExtension_GzipCodecTest {[0m
+    [36m| [0m[34m|[0m /* 80.471 */    func registerGzipCodecTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 80.472 */}[0m
+    [36m| [0m[34m|[0m /* 80.473 */extend TestPackage <: TestPackageExtension_GzipCodecTest {[0m
+    [36m| [0m[34m|[0m /* 80.474 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 80.475 */    public func registerGzipCodecTest() {[0m
+    [36m| [0m[34m|[0m /* 80.476 */        registerSuite({ => GzipCodecTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 80.477 */    }[0m
+    [36m| [0m[34m|[0m /* 80.478 */}[0m
+    [36m| [0m[34m|[0m /* 80.479 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.191 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.192 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.193 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.194 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.195 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.196 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.218 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.219 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.220 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.221 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.222 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.223 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.224 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.225 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.226 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.251 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.252 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.253 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.254 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.255 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.256 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.257 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.258 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 80.259 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.285 */                    if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.286 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 80.287 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.288 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.289 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 80.290 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 80.291 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m__________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 80.292 */                        throw e[0m
+    [36m| [0m[33m|[0m /* 80.293 */                    }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/codec_test.cj:80:1:
+    [36m| [0m
+[36m80[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m81[0m  [36m| [0m[34m|[0m class GzipCodecTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m245[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.417 */                        if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.418 */                            throw e[0m
+    [36m| [0m[33m|[0m /* 12.419 */                        }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.420 */                        if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.421 */                            throw e[0m
+    [36m| [0m[33m|[0m /* 12.422 */                        }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 12.423 */                        if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 12.424 */                            throw e[0m
+    [36m| [0m[33m|[0m /* 12.425 */                        }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m13[0m  [36m| [0m[34m|[0m class GzipNativeTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m394[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+27 warnings generated, 27 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.gzip, time elapsed: 15666845 ns, RESULT:
+    TCS: GzipCodecTest, time elapsed: 7039094 ns, RESULT:
+    [ PASSED ] CASE: preReadDeadlineClosesSourceWithoutReading (3680810 ns)
+    [ PASSED ] CASE: decoderFailureSurvivesThrowingSourceClose (1670672 ns)
+    TCS: GzipNativeTest, time elapsed: 8159656 ns, RESULT:
+    [ PASSED ] CASE: preReadDeadlineReleasesNativeBodyReservation (6471670 ns)
+Summary: TOTAL: 29
+    PASSED: 3, SKIPPED: 26, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 23414093 ns, RESULT:
+TP: wirestack.*, time elapsed: 23362398 ns, RESULT:
+    PASSED:
+    TP: wirestack.gzip, time elapsed: 15666845 ns
+Summary: TOTAL: 29
+    PASSED: 3, SKIPPED: 26, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
+EXIT_STATUS=0
