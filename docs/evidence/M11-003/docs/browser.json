@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-003",
+  "status": "PASS",
+  "engine": "actual managed Chromium",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "steps": [
+    "Opened generated seven-package API index",
+    "Searched WebSocketUrl and opened the class result",
+    "Observed the rendered class signature, bounded ASCII URI profile and public members",
+    "Searched connectWebSocket and navigated to HttpClient",
+    "Observed connectWebSocket(url: WebSocketUrl, ...), canonical session context and no retries/redirect replay",
+    "Closed the managed tab"
+  ],
+  "class_page": "symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a576562536f636b657455726c2367302829.html",
+  "connector_page": "symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48747470436c69656e742367302829.html#symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a48747470436c69656e743a3a66756e6374696f6e3a636f6e6e656374576562536f636b657423673028576562536f636b657455726c2c41727261793c537472696e673e2c48747470486561646572732c576562536f636b65744c696d6974732c4f7065726174696f6e436f6e7465787429",
+  "observed_connector_signature": "public func connectWebSocket(url: WebSocketUrl, protocols!: Array<String>, headers!: HttpHeaders, webSocketLimits!: WebSocketLimits, context!: OperationContext): WebSocketConnectResult",
+  "observed_no_old_http_url_entry": true,
+  "page_or_request_errors": 0,
+  "visual_proof": "docs/evidence/M11-003/docs/websocket-url.webp",
+  "capture_note": "Backend transient PNG was immediately reencoded to the durable disk-backed proof; no local browser origin is stored in this receipt."
+}

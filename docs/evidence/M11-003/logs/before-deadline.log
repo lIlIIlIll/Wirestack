@@ -1,0 +1,23 @@
+passed: 0, failed: 0                   0% [--------------------]  0/7 (00:00:02) --------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 3046621346 ns, RESULT:
+    TCS: WebSocketLifecycleTest, time elapsed: 3046621346 ns, RESULT:
+    [ ERROR  ] CASE: explicitFrameDeadlineCannotExtendSessionDeadline (3045135806 ns)
+    REASON: An exception has occurred:TimeoutException
+	at wirestack.http/test.WebSocketLifecycleTest.explicitFrameDeadlineCannotExtendSessionDeadline()(<baseline>/src/http/websocket_lifecycle_test.cj:38)
+	at wirestack.http/test.WebSocketLifecycleTest.asTestSuite.lambda.1.lambda.0()(<baseline>/src/http/websocket_lifecycle_test.cj:31)
+Summary: TOTAL: 7
+    PASSED: 0, SKIPPED: 6, ERROR: 1
+    FAILED: 0, listed below:
+            TCS: WebSocketLifecycleTest, CASE: explicitFrameDeadlineCannotExtendSessionDeadline
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3053216066 ns, RESULT:
+TP: wirestack.*, time elapsed: 3053173498 ns, RESULT:
+    FAILED:
+    TP: wirestack.http, time elapsed: 3046621346 ns, RESULT:
+        TCS: WebSocketLifecycleTest, time elapsed: 3046621346 ns, RESULT:
+        [ ERROR  ] CASE: explicitFrameDeadlineCannotExtendSessionDeadline (3045135806 ns)
+Summary: TOTAL: 7
+    PASSED: 0, SKIPPED: 6, ERROR: 1
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed

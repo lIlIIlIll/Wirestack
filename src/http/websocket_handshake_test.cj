@@ -37,7 +37,9 @@ private func exerciseNativeWebSocket(secure: Bool): Unit {
     let scheme = if (secure) { "https" } else { "http" }
     let base = "${scheme}://example.com:${server.localEndpoint.port}"
     try {
-        let result = client.connectWebSocket(HttpUrl.parse("${base}/socket"), protocols: ["echo"])
+        let socketScheme = if (secure) { "wss" } else { "ws" }
+        let result = client.connectWebSocket(WebSocketUrl.parse(
+            "${socketScheme}://example.com:${server.localEndpoint.port}/socket"), protocols: ["echo"])
         let session = match (result) {
             case WebSocketConnectResult.Connected(value) => value
             case WebSocketConnectResult.Rejected(response) =>

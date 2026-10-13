@@ -20,7 +20,7 @@ public interface Http1TlsHandshaker <: Resource {
     prop clientIdentity: String
     prop providerIdentity: String
     prop alpnPolicy: String
-    func handshake(host: HostName, transport: DuplexTransport, context: OperationContext): DuplexTransport
+    func handshake(reference: ReferenceIdentity, transport: DuplexTransport, context: OperationContext): DuplexTransport
 }
 
 /** One TLS transport plus the protocol selected by its immutable ALPN policy. */
@@ -42,7 +42,7 @@ public interface HttpAlpnTlsHandshaker <: Resource {
     prop providerIdentity: String
     prop alpnPolicy: String
     func handshakeNegotiated(
-        host: HostName,
+        reference: ReferenceIdentity,
         transport: DuplexTransport,
         context: OperationContext
     ): HttpNegotiatedTlsTransport
@@ -193,9 +193,9 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
     public prop providerIdentity: String { get() { provider.manifest().fingerprint } }
     public prop alpnPolicy: String { get() { joinHttpAlpn(context.alpnProtocols()) } }
 
-    public func handshake(host: HostName, transport: DuplexTransport,
+    public func handshake(reference: ReferenceIdentity, transport: DuplexTransport,
         operation: OperationContext): DuplexTransport {
-        let negotiated = handshakeNegotiated(host, transport, operation)
+        let negotiated = handshakeNegotiated(reference, transport, operation)
         if (!isNegotiatedHttp11(negotiated.protocol)) {
             negotiated.transport.abort(reason: Some(AbortReason.ProtocolFailure))
             throw TlsEngineException(TlsEngineErrorCode.NoSharedAlpn,
@@ -204,7 +204,7 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
         negotiated.transport
     }
 
-    public func handshakeNegotiated(host: HostName, transport: DuplexTransport,
+    public func handshakeNegotiated(reference: ReferenceIdentity, transport: DuplexTransport,
         operation: OperationContext): HttpNegotiatedTlsTransport {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTPS handshaker is closed") }
@@ -214,8 +214,11 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
         try {
             let engine = provider.createClientEngine(
                 context,
-                ReferenceIdentity.Dns(host),
-                serverName: Some(host)
+                reference,
+                serverName: match (reference) {
+                    case ReferenceIdentity.Dns(host) => Some(host)
+                    case ReferenceIdentity.Ip(_) => None<HostName>
+                }
             )
             let connection = TlsConnection.handshake(
                 engine, transport, context: handshakeContext, pump: TlsEnginePump()
@@ -534,14 +537,15 @@ private class AutomaticTlsNegotiator {
         context: OperationContext
     ): HttpNegotiatedTlsTransport {
         if (key.scheme != "https") { throw IllegalArgumentException("automatic TLS factory requires https") }
-        let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
+        let reference = httpOriginIdentity(key.originHost)
+        let connected = connectHttpOrigin(connector, reference, key.originPort, context)
         try {
             handshaker.handshakeNegotiated(
-                HostName(key.originHost), connected.transport,
+                reference, connected,
                 context.forStage(OperationTimeoutStage.TlsHandshake)
             )
         } catch (error: Exception) {
-            connected.transport.abort(reason: Some(AbortReason.ProtocolFailure))
+            connected.abort(reason: Some(AbortReason.ProtocolFailure))
             throw error
         }
     }
@@ -864,15 +868,16 @@ private class Http1TlsConnectionFactory <: Http1ConnectionFactory {
     public func create(key: HttpConnectionPoolKey, context: OperationContext,
         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         if (key.scheme != "https") { throw IllegalArgumentException("TLS factory requires https pool key") }
-        let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
+        let reference = httpOriginIdentity(key.originHost)
+        let connected = connectHttpOrigin(connector, reference, key.originPort, context)
         try {
             let tls = handshaker.handshake(
-                HostName(key.originHost), connected.transport,
+                reference, connected,
                 context.forStage(OperationTimeoutStage.TlsHandshake)
             )
             Http1ClientConnection(tls, limits: limits, continueTimeout: continueTimeout)
         } catch (error: Exception) {
-            connected.transport.abort(reason: Some(AbortReason.ProtocolFailure))
+            connected.abort(reason: Some(AbortReason.ProtocolFailure))
             throw error
         }
     }

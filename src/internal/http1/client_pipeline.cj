@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import wirestack.NetworkConnectionPoolSnapshot
+import wirestack as api
 
 import wirestack.internal.http_model.*
 import wirestack.internal.common.*
@@ -90,8 +91,24 @@ private class Http1CleartextConnectionFactory <: Http1ConnectionFactory {
     public func create(key: HttpConnectionPoolKey, context: OperationContext,
         resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         if (key.scheme != "http") { throw IllegalArgumentException("cleartext factory requires http pool key") }
-        let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
-        Http1ClientConnection(connected.transport, limits: limits, continueTimeout: continueTimeout)
+        let transport = connectHttpOrigin(connector, httpOriginIdentity(key.originHost), key.originPort, context)
+        Http1ClientConnection(transport, limits: limits, continueTimeout: continueTimeout)
+    }
+}
+
+/** Origin literals are not DNS names and must retain IP SAN verification without SNI. */
+internal func httpOriginIdentity(host: String): api.ReferenceIdentity {
+    match (api.parseIpAddressLiteral(host)) {
+        case Some(address) => api.ReferenceIdentity.Ip(address)
+        case None => api.ReferenceIdentity.Dns(HostName(host))
+    }
+}
+
+internal func connectHttpOrigin(connector: HappyEyeballsConnector, reference: api.ReferenceIdentity,
+    port: UInt16, context: OperationContext): DuplexTransport {
+    match (reference) {
+        case api.ReferenceIdentity.Ip(address) => connector.connectLiteral(address, port, context: context)
+        case api.ReferenceIdentity.Dns(host) => connector.connect(host, port, context: context).transport
     }
 }
 

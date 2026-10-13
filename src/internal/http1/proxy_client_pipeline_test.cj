@@ -8,6 +8,7 @@ import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.ReferenceIdentity
 
 @Test
 class Http1ProxyClientPipelineTest {
@@ -136,11 +137,14 @@ private class ProxyPassthroughHandshaker <: Http1TlsHandshaker {
     public prop clientIdentity: String { get() { "none" } }
     public prop providerIdentity: String { get() { "proxy-test-provider" } }
     public prop alpnPolicy: String { get() { "http/1.1" } }
-    public func handshake(host: HostName, transport: DuplexTransport,
+    public func handshake(reference: ReferenceIdentity, transport: DuplexTransport,
         context: OperationContext): DuplexTransport {
         let _ = context
         handshakes.fetchAdd(1)
-        if (host.ascii == "origin.test") { originWasUsed.store(1) }
+        match (reference) {
+            case ReferenceIdentity.Dns(host) => if (host.ascii == "origin.test") { originWasUsed.store(1) }
+            case ReferenceIdentity.Ip(_) => ()
+        }
         transport
     }
     public func close(): Unit { closed = true }
