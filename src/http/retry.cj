@@ -43,9 +43,10 @@ public class HttpRetryPolicy {
             case HttpRetrySafety.Default => if (!isIdempotentMethod(request.method)) { return false }
         }
         match (error) {
-            case value: transport.NetworkException => retryable(value.retryability)
-            case value: http1.Http1RequestWriteException => retryWriteFailure(value)
+            case value: http1.Http1RequestExecutionException => retryHttp1Execution(value)
             case value: http2.Http2GoAwayException => value.evidence.definitelyNotProcessed
+            case value: http1.Http1RequestWriteException => retryWriteFailure(value)
+            case value: transport.NetworkException => retryBeforeRequestSubmission(value)
             case _ => false
         }
     }
@@ -58,6 +59,15 @@ private func isIdempotentMethod(method: HttpMethod): Bool {
     }
 }
 
+private func retryHttp1Execution(error: http1.Http1RequestExecutionException): Bool {
+    match (error.retryability) {
+        case transport.Retryability.SafeBeforeWrite => !error.evidence.requestCommitted
+        case transport.Retryability.SafeIfReplayable | transport.Retryability.Temporary =>
+            error.evidence.requestCommitted
+        case transport.Retryability.Never | transport.Retryability.Unknown => false
+    }
+}
+
 private func retryWriteFailure(error: http1.Http1RequestWriteException): Bool {
     match (error.cause) {
         case Some(value: transport.NetworkException) => match (value.retryability) {
@@ -67,6 +77,16 @@ private func retryWriteFailure(error: http1.Http1RequestWriteException): Bool {
         }
         case _ => false
     }
+}
+
+private func retryBeforeRequestSubmission(error: transport.NetworkException): Bool {
+    let beforeSubmission = match (error.phase) {
+        case transport.NetworkPhase.Dns | transport.NetworkPhase.AddressSelection |
+            transport.NetworkPhase.TcpConnect | transport.NetworkPhase.ProxyConnect |
+            transport.NetworkPhase.TlsHandshake | transport.NetworkPhase.PoolAcquire => true
+        case _ => false
+    }
+    beforeSubmission && retryable(error.retryability)
 }
 
 private func retryable(value: transport.Retryability): Bool {

@@ -2,11 +2,20 @@ package wirestack.internal.http1
 
 import std.collection.ArrayList
 import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http2.*
 import wirestack.internal.transport.*
 import wirestack.internal as internal
+
+private class Http2PoolTestClock <: MonotonicClock {
+    private var current: MonoTime
+    init() { current = MonoTime.now() }
+    public func now(): MonoTime { current }
+    func advance(duration: Duration): Unit { current = current + duration }
+}
+
 @Test
 class Http2ConnectionPoolTest {
     @TestCase
@@ -223,6 +232,86 @@ class Http2ConnectionPoolTest {
 
         @Expect(factory.createCalls.load(), 2)
         for (connection in factory.connections()) { @Expect(connection.abortCalls.load(), 1) }
+    }
+    @TestCase
+    func drainsExpiredHttp2ConnectionAfterActiveStreamCompletion(): Unit {
+        let clock = Http2PoolTestClock()
+        let pool = Http2ConnectionPool(
+            config: Http2ConnectionPoolConfig(),
+            resourceBudget: None<internal.HttpResourceBudget>,
+            clock: clock
+        )
+        let factory = PoolFakeFactory(1u32)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let expired = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        let oldConnection = factory.connection(0)
+        @Expect(oldConnection.activeStreamCount, 1)
+
+        clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)
+        @Expect(oldConnection.closeCalls.load(), 0)
+        factory.finish(expired)
+        pool.release(expired)
+
+        @Expect(oldConnection.closeCalls.load(), 1)
+        @Expect(pool.snapshot().connections, 0)
+        let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        @Expect(replacement.connectionId != expired.connectionId)
+        @Expect(factory.createCalls.load(), 2)
+        factory.finish(replacement)
+        pool.release(replacement)
+        pool.close()
+    }
+
+    @TestCase
+    func expiresConnectionsAtMaximumLifetime(): Unit {
+        let clock = Http2PoolTestClock()
+        let pool = Http2ConnectionPool(
+            config: Http2ConnectionPoolConfig(),
+            resourceBudget: None<internal.HttpResourceBudget>,
+            clock: clock
+        )
+        let factory = PoolFakeFactory(1u32)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let expired = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        factory.finish(expired)
+        pool.release(expired)
+        clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)
+
+        let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        @Expect(factory.createCalls.load(), 2)
+        @Expect(pool.snapshot().connections, 1)
+        factory.finish(replacement)
+        pool.release(replacement)
+        pool.close()
+    }
+
+    @TestCase
+    func admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot(): Unit {
+        let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(
+            maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2
+        ))
+        let factory = PoolFakeFactory(1u32)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let otherKey = poolKey("other.example", "h2,http/1.1")
+        let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        let sameOrigin = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory) }
+        @Expect(pool.waitUntilWaiters(1, Duration.second))
+        let otherOrigin = spawn { pool.acquire(otherKey, PoolNoopGoAwayListener(), factory) }
+        @Expect(pool.waitUntilWaiters(2, Duration.second))
+
+        factory.finish(first)
+        pool.release(first)
+        let second = sameOrigin.get(Duration.second)
+        @Expect(factory.createCalls.load(), 1)
+        @Expect(pool.snapshot().waiters, 1)
+
+        factory.finish(second)
+        pool.release(second)
+        let third = otherOrigin.get(Duration.second)
+        @Expect(factory.createCalls.load(), 2)
+        factory.finish(third)
+        pool.release(third)
+        pool.close()
     }
 }
 

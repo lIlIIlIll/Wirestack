@@ -79,24 +79,39 @@ public class Http1ClientConnection <: Resource {
             let expectsContinue = headerContainsToken(request.headers, "expect", "100-continue") &&
                 request.body.contentLength != Some(0)
             let result = if (expectsContinue) {
-                exchangeHttp1ExpectContinue(
-                    transport, request, Http1RequestWriter(
-                        request, limits: limits, trailer: trailer, targetForm: targetForm
-                    ),
-                    continueTimeout, context: context, limits: limits, observer: observer,
-                    readBuffer: Some(responseReadBuffer)
+                let writer = Http1RequestWriter(
+                    request, limits: limits, trailer: trailer, targetForm: targetForm
                 )
+                try {
+                    exchangeHttp1ExpectContinue(
+                        transport, request, writer, continueTimeout, context: context,
+                        limits: limits, observer: observer,
+                        readBuffer: Some(responseReadBuffer)
+                    )
+                } catch (error: NetworkException) {
+                    if (writer.evidence.requestCommitted) {
+                        throw Http1RequestExecutionException(writer.evidence, error)
+                    }
+                    throw error
+                }
             } else {
-                let _ = writeHttp1Request(
+                let evidence = writeHttp1Request(
                     transport, request,
                     context: context.forStage(OperationTimeoutStage.RequestWrite),
                     limits: limits, trailer: trailer, targetForm: targetForm
                 )
-                readHttp1Response(
-                    transport, request.method,
-                    context: context, limits: limits, observer: observer,
-                    readBuffer: Some(responseReadBuffer)
-                )
+                try {
+                    readHttp1Response(
+                        transport, request.method,
+                        context: context, limits: limits, observer: observer,
+                        readBuffer: Some(responseReadBuffer)
+                    )
+                } catch (error: NetworkException) {
+                    if (evidence.requestCommitted) {
+                        throw Http1RequestExecutionException(evidence, error)
+                    }
+                    throw error
+                }
             }
             let reusable = result.reusableCandidate &&
                 !headerContainsToken(request.headers, "connection", "close")
