@@ -1,0 +1,28 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 34  of event 'cpu-clock:u'
+# Event count (approx.): 34034034
+#
+# Overhead  Symbol                                                                                                                                                                            IPC   [IPC Coverage]
+# ........  ................................................................................................................................................................................  ....................
+#
+    58.82%  [.] _CN17wirestack_m12_0018readPerfHCN9wirestack12HttpResponseERNat5ArrayIhElb                                                                                                    -      -            
+    11.76%  [.] 0x00000000000a08f2                                                                                                                                                            -      -            
+     2.94%  [.] MRT_GetCurrentThreadID                                                                                                                                                        -      -            
+     2.94%  [.] _CN17wirestack_m12_0018PerfBody4readHRNat5ArrayIhE                                                                                                                            -      -            
+     2.94%  [.] _CN24wirestack.internal.http1U000000037zMlh27Http1ResponseSequenceReader6<init>HCN9wirestack15DuplexTransportERNY6_10HttpMethodECNY6_10HttpLimitsENNat6OptionIRNat5ArrayIhEE  -      -            
+     2.94%  [.] _CNab5Mutex4lockHv                                                                                                                                                            -      -            
+     2.94%  [.] _CNat6StringeqHRNatY0_E                                                                                                                                                       -      -            
+     2.94%  [.] _ZN12MapleRuntime15TypeInfoManager11AddTypeInfoEPNS_8TypeInfoE                                                                                                                -      -            
+     2.94%  [.] _ZN12MapleRuntime15TypeInfoManager14SetMethodInfosEPNS_8EnumInfoES2_PNS_8TypeInfoE                                                                                            -      -            
+     2.94%  [.] memcpy@plt                                                                                                                                                                    -      -            
+     2.94%  [.] 0x000000000000b1ca                                                                                                                                                            -      -            
+     2.94%  [.] 0x00000000000a71bd                                                                                                                                                            -      -            
+
+
+#
+# (Tip: To measure approximate function latency with Processor Trace use perf record -e intel_pt// ... ; perf script --call-ret-trace)
+#

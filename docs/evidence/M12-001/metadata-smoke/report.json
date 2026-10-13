@@ -1,0 +1,493 @@
+{
+  "status": "PASS",
+  "environment": {
+    "platform": {
+      "os": "linux",
+      "architecture": "x86_64",
+      "libc": "glibc",
+      "libc_version": "2.44"
+    },
+    "kernel": "7.2.7-arch1-1",
+    "network": "Native same-host loopback; no injected RTT/loss; both peers in one executable",
+    "optimization": "-O2 -g for dependency and consumer",
+    "load": "One measured process at a time; case-specific bounded concurrency",
+    "reuse": "Case-defined: persistent transport/TLS and H1/H2 reuse versus explicit fresh connections",
+    "TLS": "Static AWS-LC5.5.0, pinned commit991e67ff4cf04df4dd89e407f8b920c6936cb56a; H1 HTTPcasesplaintext, H2 and SSE/WebSocketcases native custom-root TLS",
+    "runtime_environment": {
+      "CJ_SDK_LIBPATH": "<sdk>/linux_x86_64_cjnative/dynamic/stdx:<sdk>/runtime/lib/linux_x86_64_cjnative:<sdk>/tools/lib"
+    },
+    "resource_boundary": "Whole native workload process /proc RSS/threads/fds includes runtime and both peers; not Wirestack-exclusive memory",
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "cpu": {
+      "lscpu": [
+        {
+          "field": "Architecture:",
+          "data": "x86_64"
+        },
+        {
+          "field": "CPU op-mode(s):",
+          "data": "32-bit, 64-bit"
+        },
+        {
+          "field": "Address sizes:",
+          "data": "39 bits physical, 48 bits virtual"
+        },
+        {
+          "field": "Byte Order:",
+          "data": "Little Endian"
+        },
+        {
+          "field": "CPU(s):",
+          "data": "12"
+        },
+        {
+          "field": "On-line CPU(s) list:",
+          "data": "0-11"
+        },
+        {
+          "field": "Vendor ID:",
+          "data": "GenuineIntel"
+        },
+        {
+          "field": "Model name:",
+          "data": "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
+        },
+        {
+          "field": "CPU family:",
+          "data": "6"
+        },
+        {
+          "field": "Model:",
+          "data": "158"
+        },
+        {
+          "field": "Thread(s) per core:",
+          "data": "2"
+        },
+        {
+          "field": "Core(s) per socket:",
+          "data": "6"
+        },
+        {
+          "field": "Socket(s):",
+          "data": "1"
+        },
+        {
+          "field": "Stepping:",
+          "data": "10"
+        },
+        {
+          "field": "Microcode version:",
+          "data": "0xfa"
+        },
+        {
+          "field": "CPU(s) scaling MHz:",
+          "data": "93%"
+        },
+        {
+          "field": "CPU max MHz:",
+          "data": "4600.0000"
+        },
+        {
+          "field": "CPU min MHz:",
+          "data": "800.0000"
+        },
+        {
+          "field": "BogoMIPS:",
+          "data": "6399.96"
+        },
+        {
+          "field": "Flags:",
+          "data": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb pti ssbd ibrs ibpb stibp tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid mpx rdseed adx smap clflushopt intel_pt xsaveopt xsavec xgetbv1 xsaves dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp vnmi md_clear flush_l1d arch_capabilities"
+        },
+        {
+          "field": "Virtualization:",
+          "data": "VT-x"
+        },
+        {
+          "field": "L1d cache:",
+          "data": "192 KiB (6 instances)"
+        },
+        {
+          "field": "L1i cache:",
+          "data": "192 KiB (6 instances)"
+        },
+        {
+          "field": "L2 cache:",
+          "data": "1.5 MiB (6 instances)"
+        },
+        {
+          "field": "L3 cache:",
+          "data": "12 MiB (1 instance)"
+        },
+        {
+          "field": "NUMA node(s):",
+          "data": "1"
+        },
+        {
+          "field": "NUMA node0 CPU(s):",
+          "data": "0-11"
+        },
+        {
+          "field": "Vulnerability Gather data sampling:",
+          "data": "Mitigation; Microcode"
+        },
+        {
+          "field": "Vulnerability Ghostwrite:",
+          "data": "Not affected"
+        },
+        {
+          "field": "Vulnerability Indirect target selection:",
+          "data": "Not affected"
+        },
+        {
+          "field": "Vulnerability Itlb multihit:",
+          "data": "KVM: Mitigation: Split huge pages"
+        },
+        {
+          "field": "Vulnerability L1tf:",
+          "data": "Mitigation; PTE Inversion; VMX conditional cache flushes, SMT vulnerable"
+        },
+        {
+          "field": "Vulnerability Mds:",
+          "data": "Mitigation; Clear CPU buffers; SMT vulnerable"
+        },
+        {
+          "field": "Vulnerability Meltdown:",
+          "data": "Mitigation; PTI"
+        },
+        {
+          "field": "Vulnerability Mmio stale data:",
+          "data": "Mitigation; Clear CPU buffers; SMT vulnerable"
+        },
+        {
+          "field": "Vulnerability Old microcode:",
+          "data": "Not affected"
+        },
+        {
+          "field": "Vulnerability Reg file data sampling:",
+          "data": "Not affected"
+        },
+        {
+          "field": "Vulnerability Retbleed:",
+          "data": "Mitigation; IBRS"
+        },
+        {
+          "field": "Vulnerability Spec rstack overflow:",
+          "data": "Not affected"
+        },
+        {
+          "field": "Vulnerability Spec store bypass:",
+          "data": "Mitigation; Speculative Store Bypass disabled via prctl"
+        },
+        {
+          "field": "Vulnerability Spectre v1:",
+          "data": "Mitigation; usercopy/swapgs barriers and __user pointer sanitization"
+        },
+        {
+          "field": "Vulnerability Spectre v2:",
+          "data": "Mitigation; IBRS; IBPB conditional; STIBP conditional; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected"
+        },
+        {
+          "field": "Vulnerability Srbds:",
+          "data": "Mitigation; Microcode"
+        },
+        {
+          "field": "Vulnerability Tsa:",
+          "data": "Not affected"
+        },
+        {
+          "field": "Vulnerability Tsx async abort:",
+          "data": "Mitigation; TSX disabled"
+        },
+        {
+          "field": "Vulnerability Vmscape:",
+          "data": "Mitigation; IBPB before exit to userspace"
+        }
+      ]
+    },
+    "compiler_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+    },
+    "runtime_binaries": {
+      "libcangjie-runtime.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "6ac1c91488100ef87c273bd9ab5015f712bc91f566f3bac74150a4485d2adc36"
+      },
+      "libcangjie-std-argopt.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b1d1aa0be96ff3cf48823a48ebf7a609505fa107d3313179c515d315606ca277"
+      },
+      "libcangjie-std-ast.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "af27a9c2800f368489976cd209c0e53bdd6bcd154f885080fe44814c833ebf0c"
+      },
+      "libcangjie-std-binary.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "09bbe09af8452aef0e8f8280f5a42b7720d5be5f6bd6924b607065547da52989"
+      },
+      "libcangjie-std-collection.concurrent.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "12ae9bfcf43085196fc07e816366ad1d556593b2664a52d3d040764c7f6053ec"
+      },
+      "libcangjie-std-collection.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "85127c92d25b82cda2d507cc915f0520367fef1e9e18c80fb62810796cde40f5"
+      },
+      "libcangjie-std-console.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "6703c39fc563d68aaf7740c1d65910d226645f3a4df6e57e8b7839f20169bccc"
+      },
+      "libcangjie-std-convert.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "aa8161e43d737553f6c4775a833f2a302491821ec9ab6c38ee0e6cca7ea7c2eb"
+      },
+      "libcangjie-std-core.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "0b0d3b71159f44343093a24baf77abaee9a676152efea74ce9ffaa8e17c808b9"
+      },
+      "libcangjie-std-crypto.cipher.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "36a79980277b951a704057be0a0fe29e8a9c7af66d7d7d6c8dd22ee23d39b453"
+      },
+      "libcangjie-std-crypto.digest.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "3d3f2ca137ea93b05c74ef3e8549780819abc5728b74b5f79d5e808071fcddb3"
+      },
+      "libcangjie-std-crypto.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "7c6933c01535bc9e92e8c0355f716237c3b34c8a9ac18fe0b00ba9facb3e1b3b"
+      },
+      "libcangjie-std-database.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "34536f6491f4c64083c24ca98daeb391c5d1ecb4e0d0e33165668ccbe68c83cf"
+      },
+      "libcangjie-std-database.sql.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "06bbbef5387a6e9f37f693a16f0e493c52c05a4f73f60a9d4c848875e122b0f9"
+      },
+      "libcangjie-std-deriving.api.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "fc1920d1225dc7f879e06085a94064ebf3390992c8c9339a470f095440d07ef3"
+      },
+      "libcangjie-std-deriving.builtins.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "10e56ac2c4dcf9c96b14388ff47448702e55f2f459fe552cc93da229ee79942b"
+      },
+      "libcangjie-std-deriving.impl.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e814b5e8ab96b9fe3b14d7301a284f32d894843837ee4b9e75f924c21d06fc17"
+      },
+      "libcangjie-std-deriving.resolve.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8a09ec9236d984ab8e6cb171ff3f1005ecf65dffc8c387d5bb0da380a21d111f"
+      },
+      "libcangjie-std-deriving.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "cfb23d217583cbfb355c36283145079c482d9b048307c64141e2a9b0f6659c08"
+      },
+      "libcangjie-std-env.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2862f7b02705a6f1220bfc5e35dd963f7a4013ce91b7b0f64e8ec37f04d00e05"
+      },
+      "libcangjie-std-fs.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "28a008b59998b7ef1d8ccc20acac56d3389da4902d40c4650dd8073c4fe99e1a"
+      },
+      "libcangjie-std-interop.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e22087ffd87f1bed75b3caf0104f991959bf51a318014a4272e9e943b6acdbc7"
+      },
+      "libcangjie-std-io.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "508c4e10eaad2f370a4f5032a431a3db691f5399569a9053b3e62ea8e5c8cf54"
+      },
+      "libcangjie-std-math.numeric.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "4d8211d392d27b2542872b2a843a51e042efe3a3e6a92e25f3c77dbfd16c13d0"
+      },
+      "libcangjie-std-math.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "68a882c0e7afe7f8806ef5d61e08a98e5e23e95058b66ab7c5abdd05cce3a41b"
+      },
+      "libcangjie-std-net.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "cd7588abc0c38e1a5dee08ff8bcc8f0135fbab9ea53401e8b8f84bd9cb975242"
+      },
+      "libcangjie-std-objectpool.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "323fddd7aefc9e39a41dcabb46f0e9d086bd040c5c43a625717d00a6afe92b7c"
+      },
+      "libcangjie-std-overflow.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "1108c9b1f443b5dfcf34825f4d0fabd9759fafe89dd955560f0b9e09ce6047ea"
+      },
+      "libcangjie-std-posix.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bd3eedf96a312655fd3aee894373ceb270e803cc605e541bfe1a35f8b92b4031"
+      },
+      "libcangjie-std-process.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "cd54956b8aac46ba2dacc26ff30030a62e5d8fdb37ab5b05d12d359ad5b3e02a"
+      },
+      "libcangjie-std-random.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "654e8e6847dcc3301ad72c274445edc8946aa63d35140f78a73c72f50a71f40c"
+      },
+      "libcangjie-std-ref.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2a154756d21fe73da9bc0e2b99d16fe599271e07d836fc6d1f0ae7d6e5274675"
+      },
+      "libcangjie-std-reflect.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "79adb6e93da0b34fe7b5a9d98d44c0d873d90ddeedf61d715494b1d3f7322207"
+      },
+      "libcangjie-std-regex.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "043a4b0bcec488c32c28b7273a5b1c5c9d34f1380ccae3a8faf7704d9fb46f3a"
+      },
+      "libcangjie-std-runtime.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "01e9a5f76a88f92f26b788978a9c47fc2395855b660053e1a7ec936dc69e43fc"
+      },
+      "libcangjie-std-sort.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8a327db0dd4a501409156f4b1cf8f0fdcf28d44645e9cdca4bd366728556cb34"
+      },
+      "libcangjie-std-sync.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "fa8551c78f15e871f82d399b7034b24b301f7207bb95c39ff7428bed06a556df"
+      },
+      "libcangjie-std-time.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b361fd9a7d8f328db2eada13b42f0703dd0f88dd841f9ea741ef29d765d43e43"
+      },
+      "libcangjie-std-unicode.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f292e2cf69fb869efbdb06f871a8d58fd6a59cf098cee69a8d333b693facbb5f"
+      },
+      "libcangjie-std-unittest.common.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ca9df5e93b250977aab8319472821698a8729205bb177731766ee5d687e260a8"
+      },
+      "libcangjie-std-unittest.diff.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2e12900a3a85c9e5a4af8e1195db44c4881a88811f8340148595a0d3247eed7e"
+      },
+      "libcangjie-std-unittest.mock.internal.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "825580d521b3810b362b077bb836d653e00283c35a02610f26bf0a6aa37c2545"
+      },
+      "libcangjie-std-unittest.mock.mockmacro.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "9420dc64ea15eabbdcba29fb9032865659b3901d7eb0c4be004c470f66fcc8de"
+      },
+      "libcangjie-std-unittest.mock.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b8b3debac790f12fe76a88fdcc2ea397d39987689a5e8597edaf478abec9fd8a"
+      },
+      "libcangjie-std-unittest.prop_test.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "9a13c784efdb1dd6540142141533b85dd50bff4262ebd156d2a7412ccf22873c"
+      },
+      "libcangjie-std-unittest.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "4c21a510da617013827d2885816174b77790215aac515bfa4d385b31925f89cc"
+      },
+      "libcangjie-std-unittest.testmacro.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "2f9bdc028d80e40b596bbdcb02d99e649f5af921e067eb7301cd7bf502136334"
+      },
+      "libcangjie-std.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f56df0210b5574682d0e90d1a172167ff95fe0ff29d2467c4df2534804fcf031"
+      },
+      "libcangjie-trace.so": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "1bc6252d54f919db1026434aee2a2c9a01f83a33b267ef335e1df9e3c5876dc0"
+      }
+    }
+  },
+  "commands": [
+    {
+      "id": "0001-cjc",
+      "argv": [
+        "cjc",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ns": 164325964,
+      "process_samples": [],
+      "stdout": {
+        "path": "docs/evidence/M12-001/metadata-smoke/0001-cjc.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M12-001/metadata-smoke/0001-cjc.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "0002-cjpm",
+      "argv": [
+        "cjpm",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ns": 214164024,
+      "process_samples": [],
+      "stdout": {
+        "path": "docs/evidence/M12-001/metadata-smoke/0002-cjpm.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "17031057b5f25ee3467ae2fe8e4fda592cf722f06f75ef3ff414bd382331bdf5"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M12-001/metadata-smoke/0002-cjpm.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "0003-cpu",
+      "argv": [
+        "lscpu",
+        "-J"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ns": 17218029,
+      "process_samples": [],
+      "stdout": {
+        "path": "docs/evidence/M12-001/metadata-smoke/0003-cpu.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "b62de9264cff4b0dc05f9d6a712305e252824d5de7733eeb29f59a21d3ea9277"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M12-001/metadata-smoke/0003-cpu.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ]
+}
