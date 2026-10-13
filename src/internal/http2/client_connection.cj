@@ -1137,10 +1137,10 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         context: OperationContext
     ): ReadResult {
         if (destination.isEmpty()) { return ReadResult.Data(0) }
-        let readContext = context.forStage(readTimeoutStage)
-        submitClientUpdates(
-            writer, flow.flushStalledConnectionReceiveCredit(), readContext
+        submitClientUpdatesAndRetainFailure(
+            flow.flushStalledConnectionReceiveCredit(), context
         )
+        let readContext = context.forStage(readTimeoutStage)
         let registration = readContext.cancellation.register { => wake() }
         var updates = Array<Http2Frame>()
         try {
@@ -1174,13 +1174,23 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 }
                 ReadResult.Data(count)
             }
-            submitClientUpdates(writer, updates, readContext)
+            submitClientUpdatesAndRetainFailure(updates, context)
             result
         } finally {
             registration.unregister()
         }
     }
 
+    private func submitClientUpdatesAndRetainFailure(
+        frames: Array<Http2Frame>, context: OperationContext
+    ): Unit {
+        try {
+            submitClientUpdates(writer, frames, context)
+        } catch (error: Exception) {
+            fail(error)
+            throw error
+        }
+    }
     public func awaitEnd(context: OperationContext): Unit {
         let endContext = context.forStage(readTimeoutStage)
         let registration = endContext.cancellation.register { => wake() }
