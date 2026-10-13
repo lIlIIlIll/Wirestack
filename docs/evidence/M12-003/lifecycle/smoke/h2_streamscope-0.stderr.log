@@ -1,0 +1,7 @@
+An exception has occurred:
+HttpException: HTTP protocol violation
+	 at wirestack.http::wrapHttpError(std.core::Exception)(<scratch>/install/wirestack-0.1.0/src/http/error.cj:145)
+	 at wirestack.http::HttpClient::sendInternal(wirestack::HttpRequest, wirestack::OperationContext, wirestack::HttpTrailer, std.core::Option<...>, std.core::Option<...>, std.core::Option<...>, Bool)(<scratch>/install/wirestack-0.1.0/src/http/client.cj:649)
+	 at wirestack.http::HttpClient::send(wirestack::HttpRequest, wirestack::OperationContext, wirestack::HttpTrailer)(<scratch>/install/wirestack-0.1.0/src/http/client.cj:379)
+	 at wirestack.http::HttpClient::get(std.core::String, wirestack::OperationContext)(<scratch>/install/wirestack-0.1.0/src/http/client.cj:342)
+	 at wirestack_m12_003_protocol::main(std.core::Array<...>)(<scratch>/protocol/src/main.cj:58)
