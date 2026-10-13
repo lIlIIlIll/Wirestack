@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-time.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000163a0 <_init@@Base>:
+   163a0:	sub    $0x8,%rsp
+   163a4:	mov    0x22b945(%rip),%rax        # 241cf0 <__gmon_start__>
+   163ab:	test   %rax,%rax
+   163ae:	je     163b2 <_init@@Base+0x12>
+   163b0:	call   *%rax
+   163b2:	add    $0x8,%rsp
+   163b6:	ret
+
+Disassembly of section .plt:
+
+00000000000163c0 <_CNbb11parseFieldsHCNbb9ArrReaderE@plt-0x10>:
+   163c0:	push   0x22bc42(%rip)        # 242008 <_CNbb6TZPATHE@@Base+0x2228>
+   163c6:	jmp    *0x22bc44(%rip)        # 242010 <_CNbb6TZPATHE@@Base+0x2230>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "31e9de6b0d4efdf5455bfb673f554857b1918164e31d10ba5ab9b7d7598a6e89"}

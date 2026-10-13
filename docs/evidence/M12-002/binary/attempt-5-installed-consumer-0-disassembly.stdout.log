@@ -1,0 +1,21 @@
+
+$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/source-sdk/stable-native/relocated/consumers/cli/target/release/bin/main:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000001e1c18 <_init>:
+  1e1c18:	endbr64
+  1e1c1c:	sub    $0x8,%rsp
+  1e1c20:	mov    0x9b0339(%rip),%rax        # b91f60 <__gmon_start__>
+  1e1c27:	test   %rax,%rax
+  1e1c2a:	je     1e1c2e <_init+0x16>
+  1e1c2c:	call   *%rax
+  1e1c2e:	add    $0x8,%rsp
+  1e1c32:	ret
+
+Disassembly of section .plt:
+
+00000000001e1c40 <CJ_MCC_DecodeStackTrace@plt-0x10>:
+  1e1c40:	push   0x9b03aa(%rip)        # b91ff0 <_GLOBAL_OFFSET_TABLE_+0x8>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "5a0b244855b926456d8479f38e85a71e43a7d9113a15253f20b0c2521fa471ef"}

@@ -1,0 +1,134 @@
+{
+  "task_id": "M12-002",
+  "status": "PASS",
+  "scope": "real changed-input verification boundaries; not SDK qualification",
+  "baseline_report_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "9606fc65a475127b9db4cd0b0327a47a7f85bc075d61845848c95c6be0622ebc"
+  },
+  "unchanged_compiler_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+  },
+  "original_runtime_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "6ac1c91488100ef87c273bd9ab5015f712bc91f566f3bac74150a4485d2adc36"
+  },
+  "replacement_runtime_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "f3de5cd3b5e1f24b3436e66909c67a4f29bfd9ba8ca9dd5054de8b65cf9ed528"
+  },
+  "original_archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "recompressed_archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "28302651430b2e88f7e4e627f5f6f3c8b445b4ed164ef00a08570b6f3926bbd9"
+  },
+  "same_uncompressed_tar_stream": true,
+  "results": [
+    {
+      "case": "changed-sdk-runtime",
+      "result": "PASS_REJECTED_CHANGED_INPUT",
+      "command": "input-rejection-changed-sdk-runtime",
+      "expected_rejection": "SDK compiler/runtime/library changed; recapture required",
+      "semantic_execution": "NOT_ATTEMPTED"
+    },
+    {
+      "case": "recompressed-archive",
+      "result": "PASS_REJECTED_CHANGED_INPUT",
+      "command": "input-rejection-recompressed-archive",
+      "expected_rejection": "archive changed; recapture required",
+      "semantic_execution": "NOT_ATTEMPTED"
+    }
+  ],
+  "commands": [
+    {
+      "id": "input-rejection-changed-sdk-runtime",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo>/tools/m12_002_binary.py",
+        "--archive",
+        "<repo>/docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",
+        "--sdk",
+        "<scratch>/changed-sdk",
+        "--sdk",
+        "<sdk-1>",
+        "--scratch",
+        "<task-scratch>/run-9",
+        "--wrapper",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--openssl-library",
+        "/usr/lib/libssl.so.3",
+        "--openssl-crypto-library",
+        "/usr/lib/libcrypto.so.3",
+        "--verify"
+      ],
+      "cwd": "<repo>",
+      "checkout_hidden": false,
+      "environment": {},
+      "stdout": {
+        "path": "docs/evidence/M12-002/binary/input-rejection-changed-sdk-runtime.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M12-002/binary/input-rejection-changed-sdk-runtime.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "25c4bc617195c683d6d1be8545efc44179fca728f2beb8e039b4fdd15cda5f97"
+        }
+      },
+      "exit_code": 1
+    },
+    {
+      "id": "input-rejection-recompressed-archive",
+      "argv": [
+        "/usr/bin/python3",
+        "<repo>/tools/m12_002_binary.py",
+        "--archive",
+        "<scratch>/recompressed.tar.gz",
+        "--sdk",
+        "<sdk-0>",
+        "--sdk",
+        "<sdk-1>",
+        "--scratch",
+        "<task-scratch>/run-9",
+        "--wrapper",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--openssl-library",
+        "/usr/lib/libssl.so.3",
+        "--openssl-crypto-library",
+        "/usr/lib/libcrypto.so.3",
+        "--verify"
+      ],
+      "cwd": "<repo>",
+      "checkout_hidden": false,
+      "environment": {},
+      "stdout": {
+        "path": "docs/evidence/M12-002/binary/input-rejection-recompressed-archive.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M12-002/binary/input-rejection-recompressed-archive.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e396b4a82d7eebce1f30ae6bf980ee73b9b7badd9660584c2a12ec6927139bcd"
+        }
+      },
+      "exit_code": 1
+    }
+  ],
+  "setup": [
+    "cp -a --reflink=auto <sdk-0> <scratch>/changed-sdk",
+    "cp --remove-destination --reflink=auto <sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so <scratch>/changed-sdk/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so",
+    "gzip -dc <selected-archive> | gzip -n > <scratch>/recompressed.tar.gz"
+  ],
+  "baseline_report_preserved_at": "docs/evidence/M12-002/binary/report-pre-compaction.json"
+}

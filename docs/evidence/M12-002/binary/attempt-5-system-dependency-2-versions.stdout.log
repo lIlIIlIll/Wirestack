@@ -1,0 +1,22 @@
+
+Version symbols section '.gnu.version' contains 11 entries:
+ Addr: 0x0000000000000564  Offset: 0x00000564  Link: 3 (.dynsym)
+  000:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  004:   5 (GLIBC_2.2.5)   3 (GLIBC_2.3.3)   4 (GLIBC_2.3.4)   2h(GLIBC_2.2.5)
+  008:   4h(GLIBC_2.3.4)   3h(GLIBC_2.3.3)   2 (GLIBC_2.2.5)
+
+Version definition section '.gnu.version_d' contains 4 entries:
+ Addr: 0x0000000000000580  Offset: 0x00000580  Link: 4 (.dynstr)
+  000000: Rev: 1  Flags: BASE  Index: 1  Cnt: 1  Name: libdl.so.2
+  0x001c: Rev: 1  Flags: none  Index: 2  Cnt: 1  Name: GLIBC_2.2.5
+  0x0038: Rev: 1  Flags: none  Index: 3  Cnt: 2  Name: GLIBC_2.3.3
+  0x0054: Parent 1: GLIBC_2.2.5
+  0x005c: Rev: 1  Flags: none  Index: 4  Cnt: 2  Name: GLIBC_2.3.4
+  0x0078: Parent 1: GLIBC_2.3.3
+
+Version needs section '.gnu.version_r' contains 1 entry:
+ Addr: 0x0000000000000600  Offset: 0x00000600  Link: 4 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 3
+  0x0010:   Name: GLIBC_ABI_DT_X86_64_PLT  Flags: none  Version: 7
+  0x0020:   Name: GLIBC_ABI_DT_RELR  Flags: none  Version: 6
+  0x0030:   Name: GLIBC_2.2.5  Flags: none  Version: 5

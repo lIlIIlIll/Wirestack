@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-unicode.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000005650 <_init@@Base>:
+    5650:	sub    $0x8,%rsp
+    5654:	mov    0x2208cd(%rip),%rax        # 225f28 <__gmon_start__>
+    565b:	test   %rax,%rax
+    565e:	je     5662 <_init@@Base+0x12>
+    5660:	call   *%rax
+    5662:	add    $0x8,%rsp
+    5666:	ret
+
+Disassembly of section .plt:
+
+0000000000005670 <CJ_MCC_NewArray64@plt-0x10>:
+    5670:	push   0x220992(%rip)        # 226008 <_CNas21MAX_UNICODE_CODEPOINTE@@Base+0x2027a8>
+    5676:	jmp    *0x220994(%rip)        # 226010 <_CNas21MAX_UNICODE_CODEPOINTE@@Base+0x2027b0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "5e070d62cde17a6ebf83d050e2e9317788a13d9eb992a1a4a65b8632090eaae3"}

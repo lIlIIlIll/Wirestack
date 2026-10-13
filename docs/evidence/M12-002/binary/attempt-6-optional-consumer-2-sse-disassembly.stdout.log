@@ -1,0 +1,21 @@
+In archive $HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/source-sdk/stable-native/relocated/consumers/streams/target/release/wirestack/libwirestack.sse.a:
+
+wirestack.sse.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCN13wirestack.sse9SseWriter7commentHRNat6StringERN9wirestack16OperationContextEEL_E$g-0x4>:
+       0:	add    %al,(%rax)
+	...
+
+0000000000000004 <_CCN13wirestack.sse9SseWriter7commentHRNat6StringERN9wirestack16OperationContextEEL_E$g>:
+       4:	push   %rbp
+       5:	mov    %rsp,%rbp
+       8:	call   d <_CCN13wirestack.sse9SseWriter7commentHRNat6StringERN9wirestack16OperationContextEEL_E$g+0x9>
+       d:	sub    $0x48,%rsp
+      11:	mov    0x28(%r15),%rax
+      15:	cmp    %rax,%rsp
+      18:	jbe    b0 <_CCN13wirestack.sse9SseWriter7commentHRNat6StringERN9wirestack16OperationContextEEL_E$g+0xac>
+      1e:	mov    %rsi,-0x40(%rbp)
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "91f9e13519e473a16f4aa286983f1f8a56aa34bfc91d581550b11f2c5bcdac09"}

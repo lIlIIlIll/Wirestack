@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "status": "PASS",
+  "start_dependencies": [
+    {
+      "task_id": "M9-001",
+      "planning_status": "COMPLETE",
+      "verification_status": "PASS",
+      "evidence": "docs/evidence/M9-001/verification.json",
+      "evidence_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1d1aa3a656e6f381ea0f51603dc436096fcc08ecaa448c91a6af98b27c3359d4"
+      }
+    }
+  ],
+  "reused_acceptance": [
+    "M11-004 installed consumer scenario contracts",
+    "M11-004 qualified stable and candidate SDK compiler bindings",
+    "M12-001 selected development archive and 164 production inputs"
+  ],
+  "current_input_verification": "tools/m12_002_deployment.py current_inputs validates the current production source, native archives, selected SDKs and native compiler",
+  "other_task_statuses_modified": false,
+  "upstream_repositories_or_sdks_modified": false
+}

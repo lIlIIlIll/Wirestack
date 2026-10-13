@@ -1,0 +1,6 @@
+
+floatparse.c.o:
+0000000000000000 T CJ_STRTOD
+
+string.c.o:
+0000000000000000 T CJ_FORMAT_Float64Formatter

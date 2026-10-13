@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt.fuzzer_no_main.a:
+
+FuzzerCrossOver.cpp.o:     file format elf64-x86-64
+
+
+Disassembly of section .text._ZN6fuzzer18MutationDispatcher9CrossOverEPKhmS2_mPhm:
+
+0000000000000000 <_ZN6fuzzer18MutationDispatcher9CrossOverEPKhmS2_mPhm>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	push   %r15
+   6:	push   %r14
+   8:	push   %r13
+   a:	push   %r12
+   c:	push   %rbx
+   d:	sub    $0x58,%rsp
+  11:	mov    %r9,-0x78(%rbp)
+  15:	mov    %rdx,%r9
+  18:	mov    %rsi,%r11
+  1b:	mov    0x10(%rbp),%rsi
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "04e7192f10c53b942dff63895b1f6d52f4f60c638298e90cdd6ccdba10afbee0"}
