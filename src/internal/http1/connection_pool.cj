@@ -76,6 +76,7 @@ private class Http1PoolEntry {
     let connection: Http1ClientConnection
     let resourceLease: ?internal.HttpResourceLease
     var leased: Bool
+    var transferred = false
     var idleSince: MonoTime
     let createdAt: MonoTime
 
@@ -110,6 +111,7 @@ public class Http1ConnectionPool <: Resource {
     private var nextId: Int64 = 1
     private var waiters: Int64 = 0
     private var closed = false
+    private var retiring = false
 
     public init(
         config!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
@@ -224,6 +226,20 @@ public class Http1ConnectionPool <: Resource {
             throw error
         }
     }
+    /** Transfers close ownership while retaining the aggregate lease until session cleanup. */
+    public func transfer(lease: Http1PoolLease): Unit {
+        synchronized(mutex) {
+            let index = findEntry(lease.id)
+            if (index < 0 || closed) { throw poolClosed() }
+            let entry = entries[index]
+            if (!entry.leased || entry.key != lease.key) { throw poolClosed() }
+            match (entry.connection.currentState()) {
+                case Http1ClientConnectionState.Upgraded => entry.transferred = true
+                case _ => throw IllegalStateException("only upgraded HTTP/1 ownership can transfer")
+            }
+        }
+    }
+
 
     /** Returns only a ready connection. Unsafe and failed claims are discarded; stale claims are ignored. */
     public func release(lease: Http1PoolLease,
@@ -252,7 +268,7 @@ public class Http1ConnectionPool <: Resource {
             let cedeFullSlot = entries.size + reservations.size >= config.maximumConnections &&
                 nextNeedsNewSlot
             let expired = now - entry.createdAt >= HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second
-            let reusable = entry.leased && entry.key == lease.key && ready && !closed && !expired &&
+            let reusable = entry.leased && entry.key == lease.key && ready && !closed && !retiring && !expired &&
                 !cedeFullSlot && idleCount() < config.maximumIdleConnections
             if (reusable) {
                 entry.leased = false
@@ -304,6 +320,25 @@ public class Http1ConnectionPool <: Resource {
         }
     }
 
+    /** Stops new claims, evicts idle entries, and lets reserved/leased exchanges finish. */
+    public func retire(): Unit {
+        let claimed = synchronized(mutex) {
+            retiring = true
+            let result = ArrayList<Http1PoolEntry>()
+            var index: Int64 = entries.size
+            while (index > 0) {
+                index--
+                if (!entries[index].leased) { result.add(entries.remove(at: index)) }
+            }
+            changed.notifyAll()
+            result.toArray()
+        }
+        for (entry in claimed) {
+            closeQuietly(entry.connection)
+            closeOptionalResourceLease(entry.resourceLease)
+        }
+    }
+
     public func close(): Unit {
         let claimed = synchronized(mutex) {
             if (closed) {
@@ -311,8 +346,11 @@ public class Http1ConnectionPool <: Resource {
             } else {
                 closed = true
                 let result = ArrayList<Http1PoolEntry>()
-                for (entry in entries) { result.add(entry) }
-                entries = ArrayList<Http1PoolEntry>()
+                let transferred = ArrayList<Http1PoolEntry>()
+                for (entry in entries) {
+                    if (entry.transferred) { transferred.add(entry) } else { result.add(entry) }
+                }
+                entries = transferred
                 changed.notifyAll()
                 result.toArray()
             }
@@ -331,7 +369,7 @@ public class Http1ConnectionPool <: Resource {
             synchronized(mutex) {
                 while (true) {
                     preflight(context)
-                    if (closed) { throw poolClosed() }
+                    if (closed || retiring) { throw poolClosed() }
 
                     let stale = findStaleIdle(clock.now())
                     if (stale >= 0) {

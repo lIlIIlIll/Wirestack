@@ -1,0 +1,162 @@
+[33mwarning[0m: unreachable expression
+   [36m==>[0m <repo>/src/internal/http2/flow_control.cj:231:9:
+    [36m| [0m
+[36m231[0m [36m| [0m          try {[0m
+    [36m| [0m [33m_[0m[33m________^[0m
+[36m232[0m [36m| [0m[33m|[0m             synchronized(mutex) {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m263[0m [36m| [0m[33m|[0m         }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________^ unreachable expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/client_pipeline.cj:88:9:
+   [36m| [0m
+[36m88[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:234:9:
+    [36m| [0m
+[36m234[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:283:9:
+    [36m| [0m
+[36m283[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/tls_client_pipeline.cj:844:9:
+    [36m| [0m
+[36m844[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'expectResetQueueFull'
+   [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:219:1:
+    [36m| [0m
+[36m219[0m [36m| [0m  private func expectResetQueueFull(action: () -> Unit): Unit {[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m220[0m [36m| [0m[33m|[0m     var matched = false[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m223[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http2/client_connection_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class Http2ClientConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m523[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http2/client_connection_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class Http2ClientConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m523[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http2/client_connection_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class Http2ClientConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m523[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+5 warnings generated, 5 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 187241049 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 166118755 ns, RESULT:
+    [ PASSED ] CASE: encodedHeaderFailureClosesTheConnection (1524169 ns)
+    [ PASSED ] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (1940240 ns)
+    [ PASSED ] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (1191311 ns)
+    [ PASSED ] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (1281722 ns)
+    [ PASSED ] CASE: completedResponseRetainsBufferedBodyAfterGracefulPeerEof (642672 ns)
+    [ PASSED ] CASE: peerEofBeforeEndStreamStillFailsTheAdmittedResponse (1952209 ns)
+    [ PASSED ] CASE: earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof (1052492 ns)
+    [ PASSED ] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (950148 ns)
+    [ PASSED ] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (1409747 ns)
+    [ PASSED ] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (1307120 ns)
+    [ PASSED ] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (1489238 ns)
+    [ PASSED ] CASE: connectedStreamOutlivesHandshakeCancellationAndUsesOperationContexts (995995 ns)
+    [ PASSED ] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (1100982 ns)
+    [ PASSED ] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (11120045 ns)
+    [ PASSED ] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (10055602 ns)
+    [ PASSED ] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (110073773 ns)
+    [ PASSED ] CASE: queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (9525990 ns)
+    [ PASSED ] CASE: rejectedConnectReturnsFullResponseAndClosesRequestDirection (1487103 ns)
+    [ PASSED ] CASE: enabledPushAttachesBoundedCallerDrivenResponses (2846761 ns)
+Summary: TOTAL: 190
+    PASSED: 19, SKIPPED: 171, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 193612766 ns, RESULT:
+TP: wirestack.*, time elapsed: 193581688 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http2, time elapsed: 187241049 ns
+Summary: TOTAL: 190
+    PASSED: 19, SKIPPED: 171, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

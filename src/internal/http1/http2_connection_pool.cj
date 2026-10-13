@@ -285,6 +285,7 @@ public class Http2ConnectionPool <: Resource {
     private var nextId: Int64 = 1
     private var waiters: Int64 = 0
     private var closed = false
+    private var retiring = false
 
     public init(
         config!: Http2ConnectionPoolConfig = Http2ConnectionPoolConfig(),
@@ -492,7 +493,7 @@ public class Http2ConnectionPool <: Resource {
                 let yieldSlot = entries.size + reservations.size >= config.maximumConnections &&
                     nextNeedsNewSlot
                 if (entry.key == lease.key && entry.connection.ownedStreamCount == 0 &&
-                    (!entry.connection.acceptingNewStreams || entry.connection.isClosed() || expired || yieldSlot)) {
+                    (retiring || !entry.connection.acceptingNewStreams || entry.connection.isClosed() || expired || yieldSlot)) {
                     discard = Some(entries.remove(at: index))
                 }
             }
@@ -520,6 +521,27 @@ public class Http2ConnectionPool <: Resource {
             Http2ConnectionPoolSnapshot(
                 entries.size, active, owned, available, reservations.size, waiters, closed
             )
+        }
+    }
+
+    /** Blocks every future stream claim without interrupting owned streams. */
+    public func retire(): Unit {
+        let claimed = synchronized(mutex) {
+            retiring = true
+            let result = ArrayList<Http2PoolEntry>()
+            var index: Int64 = entries.size
+            while (index > 0) {
+                index--
+                if (entries[index].connection.ownedStreamCount == 0) {
+                    result.add(entries.remove(at: index))
+                }
+            }
+            changed.notifyAll()
+            result.toArray()
+        }
+        for (entry in claimed) {
+            closeHttp2Quietly(entry.connection)
+            closeOptionalHttp2ResourceLease(entry.resourceLease)
         }
     }
 
@@ -565,7 +587,7 @@ public class Http2ConnectionPool <: Resource {
             synchronized(mutex) {
                 while (true) {
                     checkHttp2PoolContext(context)
-                    if (closed) { throw http2PoolClosed() }
+                    if (closed || retiring) { throw http2PoolClosed() }
                     let now = clock.now()
                     let unusable = findUnusableEmptyConnection(now)
                     if (unusable >= 0) {

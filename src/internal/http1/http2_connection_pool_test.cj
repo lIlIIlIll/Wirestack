@@ -19,6 +19,54 @@ private class Http2PoolTestClock <: MonotonicClock {
 @Test
 class Http2ConnectionPoolTest {
     @TestCase
+    func retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination(): Unit {
+        let pool = Http2ConnectionPool()
+        let factory = PoolFakeFactory(8u32)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let active = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+        pool.retire()
+        @Expect(!active.connection.isClosed())
+        @ExpectThrows[NetworkException](pool.acquire(key, PoolNoopGoAwayListener(), factory))
+        @Expect(factory.createCalls.load(), 1)
+        factory.finish(active)
+        pool.release(active)
+        @Expect(active.connection.isClosed())
+        @Expect(pool.snapshot().connections, 0)
+        pool.release(active)
+        pool.close()
+    }
+
+    @TestCase
+    func retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult(): Unit {
+        for (strict in [false, true]) {
+            let pool = Http2ConnectionPool()
+            let gate = PoolAdmissionGate()
+            let factory = PoolGatedFactory(gate)
+            let key = poolKey("origin.example", "h2,http/1.1")
+            let pending = spawn {
+                try { Some(pool.acquire(key, PoolNoopGoAwayListener(), factory)) }
+                catch (_: NetworkException) { None<Http2PoolLease> }
+            }
+            gate.waitUntilEntered()
+            if (strict) { pool.close() } else { pool.retire() }
+            gate.release()
+            let result = pending.get(Duration.second)
+            if (strict) {
+                @Expect(result.isNone())
+                @Expect(factory.connectionClosed)
+            } else {
+                let lease = result.getOrThrow()
+                @Expect(!factory.connectionClosed)
+                factory.finish(lease); pool.release(lease)
+                @Expect(factory.connectionClosed)
+            }
+            @Expect(pool.snapshot().connections, 0)
+            @Expect(pool.snapshot().reservations, 0)
+            pool.close()
+        }
+    }
+
+    @TestCase
     func alpnPrefersH2AndFallsBackOnlyToHttp11(): Unit {
         @Expect(httpClientAlpnProtocols(), ["h2", "http/1.1"])
         @Expect(isNegotiatedHttp2(selectHttpNegotiatedProtocol(Some("h2"))))

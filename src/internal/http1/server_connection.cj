@@ -2,6 +2,27 @@ package wirestack.internal.http1
 
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import std.sync.*
+
+/** Serializes request admission with graceful connection retirement. */
+public class Http1ServerDrainControl {
+    private let mutex = Mutex()
+    private let transport: DuplexTransport
+    private var draining = false
+    private var admitted = false
+
+    public init(transport: DuplexTransport) { this.transport = transport }
+    public func admit(): Bool {
+        synchronized(mutex) {
+            if (draining) { false } else { admitted = true; true }
+        }
+    }
+    public func complete(): Bool { synchronized(mutex) { admitted = false; !draining } }
+    public func beginDrain(): Unit {
+        let idle = synchronized(mutex) { draining = true; !admitted }
+        if (idle) { transport.abort(reason: Some(AbortReason.ApplicationAbort)) }
+    }
+}
 
 /** Handler-owned response plus optional chunk trailer. */
 public class Http1ServerResponse {
@@ -52,7 +73,8 @@ public func serveHttp1Connection(
     handler: Http1ServerHandler,
     context!: OperationContext = OperationContext.background(),
     limits!: HttpLimits = HttpLimits(),
-    maximumRequests!: Int64 = 1000
+    maximumRequests!: Int64 = 1000,
+    drainControl!: ?Http1ServerDrainControl = None<Http1ServerDrainControl>
 ): Http1ServerConnectionResult {
     if (maximumRequests <= 0 || maximumRequests > 1000000) {
         throw IllegalArgumentException("HTTP/1 maximum requests per connection is invalid")
@@ -69,6 +91,9 @@ public func serveHttp1Connection(
                 transport, context: context, limits: limits,
                 readBuffer: Some(requestReadBuffer)
             )
+            if (let Some(control) <- drainControl) {
+                if (!control.admit()) { request.close(); break }
+            }
             var produced: ?Http1ServerResponse = None<Http1ServerResponse>
             try {
                 produced = Some(handler.handle(request, context))
@@ -97,6 +122,9 @@ public func serveHttp1Connection(
                 try { handoff.serve(upgraded, context) }
                 finally { upgraded.close() }
                 return Http1ServerConnectionResult(served, false, None<DuplexTransport>)
+            }
+            if (let Some(control) <- drainControl) {
+                if (!control.complete()) { break }
             }
             tunnel = evidence.tunnelEstablished
             if (tunnel) { tunnelRemainder = request.upgradeRemainder }
