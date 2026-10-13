@@ -1,0 +1,138 @@
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Node.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(RecoverDesugar.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Types.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(IntLiteral.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Walker.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Clone.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Create.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Utils.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Identifier.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Comment.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(AttachComment.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseAnnotations.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseAtom.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseCJMPDecl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseDecl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseExpr.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseImports.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseFeatures.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseMacro.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseModifiers.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParsePattern.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseQuote.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParseType.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Parser.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParserDiag.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParserImpl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParserModifierRules.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParserUtils.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(FFIParserImpl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(JFFIParserImpl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParserDiag.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(OCFFIParserImpl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ParserDiag.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Lexer.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(LexerDiag.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(LexerImpl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(StringConvertor.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(DiagnosticEngine.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(DiagnosticEngineImpl.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(InteropCJPackageConfigReader.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Position.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(SourceManager.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Display.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(DiagnosticEmitter.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(DiagnosticJsonFormatter.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Utils.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Print.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Version.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(OptionAction.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Option.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(OptionTable.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(NodeSerialization.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ExprSerialization.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(TokenSerialization.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(MacroCommon.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(MacroCall.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(FileUtil.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(SafePointer.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(FloatFormat.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Utils.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ICEUtil.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Semaphore.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(StdUtils.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(Unicode.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(UnicodeNFC.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(UnicodeWidth.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ConvertUTF.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(TempFileManager.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a(ast_api.cpp.o)

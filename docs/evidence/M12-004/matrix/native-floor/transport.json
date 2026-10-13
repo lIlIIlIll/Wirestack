@@ -1,0 +1,367 @@
+[
+  {
+    "id": "guest-prerequisites",
+    "argv": [
+      "ssh",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-p",
+      "41957",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=3",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "-o",
+      "LogLevel=ERROR",
+      "tester@192.0.2.1",
+      "sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential python3-tomli; sudo mkdir -p /opt/wirestack-matrix; sudo chown tester:tester /opt/wirestack-matrix"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "guest-prerequisites.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "27fd41318987fed3c8156486c3a040df1150f0a2e185457024e7bc2f443c7a77"
+      }
+    },
+    "stderr": {
+      "path": "guest-prerequisites.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "pack-sdk",
+    "argv": [
+      "tar",
+      "-czf",
+      "<scratch>/native-floor/sdk.tar.gz",
+      "-C",
+      "$HOME/cangjie_sdk/sts1.1.3",
+      "."
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "pack-sdk.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "pack-sdk.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "pack-consumers",
+    "argv": [
+      "tar",
+      "-czf",
+      "<scratch>/native-floor/consumers.tar.gz",
+      "-C",
+      "<scratch>/installed-source/sts113-upgrade/relocated",
+      "."
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "pack-consumers.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "pack-consumers.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "pack-support",
+    "argv": [
+      "tar",
+      "-czf",
+      "<scratch>/native-floor/support.tar.gz",
+      "-C",
+      "<scratch>/native-floor/support",
+      "."
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "pack-support.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "pack-support.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "transfer",
+    "argv": [
+      "scp",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-P",
+      "41957",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "<scratch>/native-floor/sdk.tar.gz",
+      "<scratch>/native-floor/consumers.tar.gz",
+      "<scratch>/native-floor/support.tar.gz",
+      "tester@192.0.2.1:/opt/wirestack-matrix/"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "transfer.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "transfer.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "guest-unpack",
+    "argv": [
+      "ssh",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-p",
+      "41957",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=3",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "-o",
+      "LogLevel=ERROR",
+      "tester@192.0.2.1",
+      "cd /opt/wirestack-matrix && mkdir sdk consumers support && tar -xzf sdk.tar.gz -C sdk && tar -xzf consumers.tar.gz -C consumers && tar -xzf support.tar.gz -C support"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "guest-unpack.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "guest-unpack.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "stock-glibc235-diagnostic",
+    "argv": [
+      "ssh",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-p",
+      "41957",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=3",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "-o",
+      "LogLevel=ERROR",
+      "tester@192.0.2.1",
+      "getconf GNU_LIBC_VERSION; LD_LIBRARY_PATH=/opt/wirestack-matrix/sdk/runtime/lib/linux_x86_64_cjnative:/opt/wirestack-matrix/sdk/tools/lib /opt/wirestack-matrix/consumers/consumers/cli/target/release/bin/main --help"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": null,
+    "stdout": {
+      "path": "stock-glibc235-diagnostic.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2c6c80f81a99db1604b04e9bb1bef2e7e215b2322cd3e465b70f05ad2a9e8896"
+      }
+    },
+    "stderr": {
+      "path": "stock-glibc235-diagnostic.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c692a618bb4fbf3bca3897437809e5606a66e7543a20811666ab912dd2dff86f"
+      }
+    }
+  },
+  {
+    "id": "guest-native-glibc244",
+    "argv": [
+      "ssh",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-p",
+      "41957",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=3",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "-o",
+      "LogLevel=ERROR",
+      "tester@192.0.2.1",
+      "sudo unshare --mount --propagation private python3 /opt/wirestack-matrix/support/tools/m12_002_glibc_namespace.py --runtime /opt/wirestack-matrix/support/glibc244 --provenance /opt/wirestack-matrix/support/glibc244/provenance.json --uid $(id -u) --gid $(id -g) -- python3 /opt/wirestack-matrix/support/tools/m12_002_platform.py --sdk-root /opt/wirestack-matrix/sdk --tree /opt/wirestack-matrix/consumers --fixtures /opt/wirestack-matrix/support/fixtures --stable-report /opt/wirestack-matrix/support/stable-report.json --host-kernel 7.2.7-arch1-1 --image-provenance /opt/wirestack-matrix/support/image-provenance.json --output /opt/wirestack-matrix/native-glibc244"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": null,
+    "stdout": {
+      "path": "guest-native-glibc244.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "57986798e821342b8088db53747085b522b182eb50067be2d99adc3afa3b461a"
+      }
+    },
+    "stderr": {
+      "path": "guest-native-glibc244.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "collect-native",
+    "argv": [
+      "scp",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-P",
+      "41957",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "-r",
+      "tester@192.0.2.1:/opt/wirestack-matrix/native-glibc244",
+      "<repo>/docs/evidence/M12-004/matrix/native-floor"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "collect-native.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "stderr": {
+      "path": "collect-native.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "verify-native",
+    "argv": [
+      "python3",
+      "<repo>/tools/m12_002_platform.py",
+      "--stable-report",
+      "<repo>/docs/evidence/M12-004/matrix/installed/sts113-upgrade/report.json",
+      "--verify",
+      "<repo>/docs/evidence/M12-004/matrix/native-floor/native-glibc244/report.json"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "verify-native.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "66f17fdb12d3b568954894d1b8277d067ebc5426f914e54768209313c2cfb49c"
+      }
+    },
+    "stderr": {
+      "path": "verify-native.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "id": "guest-outside-namespace-glibc",
+    "argv": [
+      "ssh",
+      "-i",
+      "<scratch>/native-floor/vm/identity",
+      "-p",
+      "41957",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=3",
+      "-o",
+      "StrictHostKeyChecking=accept-new",
+      "-o",
+      "UserKnownHostsFile=<scratch>/native-floor/vm/known-hosts",
+      "-o",
+      "LogLevel=ERROR",
+      "tester@192.0.2.1",
+      "getconf GNU_LIBC_VERSION"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": {
+      "path": "guest-outside-namespace-glibc.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2c6c80f81a99db1604b04e9bb1bef2e7e215b2322cd3e465b70f05ad2a9e8896"
+      }
+    },
+    "stderr": {
+      "path": "guest-outside-namespace-glibc.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  }
+]

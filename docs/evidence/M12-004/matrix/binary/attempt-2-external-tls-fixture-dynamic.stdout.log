@@ -1,0 +1,32 @@
+
+Dynamic section at offset 0xf2af0 contains 29 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libcrypto.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000e (SONAME)             Library soname: [libssl.so.3]
+ 0x0000000000000010 (SYMBOLIC)           0x0
+ 0x000000000000000c (INIT)               0x14000
+ 0x000000000000000d (FINI)               0xc1fd0
+ 0x0000000000000019 (INIT_ARRAY)         0xeb550
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0xeb558
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x2d0
+ 0x0000000000000005 (STRTAB)             0x8e30
+ 0x0000000000000006 (SYMTAB)             0x1be8
+ 0x000000000000000a (STRSZ)              25263 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000007 (RELA)               0xfc60
+ 0x0000000000000008 (RELASZ)             15096 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffc (VERDEF)             0xfa68
+ 0x000000006ffffffd (VERDEFNUM)          6
+ 0x000000000000001e (FLAGS)              SYMBOLIC BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW NODELETE
+ 0x000000006ffffffe (VERNEED)            0xfb30
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x000000006ffffff0 (VERSYM)             0xf0e0
+ 0x0000000000000024 (RELR)               0x13758
+ 0x0000000000000023 (RELRSZ)             792 (bytes)
+ 0x0000000000000025 (RELRENT)            8 (bytes)
+ 0x0000000000000000 (NULL)               0x0

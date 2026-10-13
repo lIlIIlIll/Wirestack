@@ -1,0 +1,127 @@
+
+fscanf_s.c.o:
+0000000000000000 T fscanf_s
+
+fwscanf_s.c.o:
+0000000000000000 T fwscanf_s
+
+gets_s.c.o:
+0000000000000000 T gets_s
+
+memcpy_s.c.o:
+0000000000000000 T memcpy_s
+0000000000000120 T memcpy_sOptAsm
+0000000000000850 T memcpy_sOptTc
+
+memmove_s.c.o:
+0000000000000000 T memmove_s
+
+memset_s.c.o:
+0000000000000000 T memset_s
+0000000000000090 T memset_sOptAsm
+00000000000006c0 T memset_sOptTc
+
+scanf_s.c.o:
+0000000000000000 T scanf_s
+
+securecutil.c.o:
+0000000000000000 T GetHwSecureCVersion
+
+secureinput_a.c.o:
+0000000000000000 T SecClearDestBuf
+00000000000003c0 T SecInputS
+
+secureinput_w.c.o:
+0000000000000000 T SecClearDestBufW
+00000000000003d0 T SecInputSW
+
+secureprintoutput_a.c.o:
+0000000000000000 T SecVsnprintfImpl
+
+secureprintoutput_w.c.o:
+0000000000000000 T SecVswprintfImpl
+
+snprintf_s.c.o:
+0000000000000000 T snprintf_s
+00000000000000c0 T snprintf_truncated_s
+
+sprintf_s.c.o:
+0000000000000000 T sprintf_s
+
+sscanf_s.c.o:
+0000000000000000 T sscanf_s
+
+strcat_s.c.o:
+0000000000000000 T strcat_s
+
+strcpy_s.c.o:
+0000000000000000 T strcpy_error
+00000000000000a0 T strcpy_s
+
+strncat_s.c.o:
+0000000000000000 T strncat_s
+
+strncpy_s.c.o:
+0000000000000000 T strncpy_error
+00000000000000b0 T strncpy_s
+
+strtok_s.c.o:
+0000000000000000 T strtok_s
+
+swprintf_s.c.o:
+0000000000000000 T swprintf_s
+
+swscanf_s.c.o:
+0000000000000000 T swscanf_s
+
+vfscanf_s.c.o:
+0000000000000000 T vfscanf_s
+
+vfwscanf_s.c.o:
+0000000000000000 T vfwscanf_s
+
+vscanf_s.c.o:
+0000000000000000 T vscanf_s
+
+vsnprintf_s.c.o:
+0000000000000000 T vsnprintf_s
+00000000000000b0 T vsnprintf_truncated_s
+
+vsprintf_s.c.o:
+0000000000000000 T vsprintf_s
+
+vsscanf_s.c.o:
+0000000000000000 T vsscanf_s
+
+vswprintf_s.c.o:
+0000000000000000 T vswprintf_s
+
+vswscanf_s.c.o:
+0000000000000000 T vswscanf_s
+
+vwscanf_s.c.o:
+0000000000000000 T vwscanf_s
+
+wcscat_s.c.o:
+0000000000000000 T wcscat_s
+
+wcscpy_s.c.o:
+0000000000000000 T wcscpy_s
+
+wcsncat_s.c.o:
+0000000000000000 T wcsncat_s
+
+wcsncpy_s.c.o:
+0000000000000000 T wcsncpy_s
+
+wcstok_s.c.o:
+0000000000000000 T wcstok_s
+
+wmemcpy_s.c.o:
+0000000000000000 T wmemcpy_s
+
+wmemmove_s.c.o:
+0000000000000000 T wmemmove_s
+
+wscanf_s.c.o:
+0000000000000000 T wscanf_s

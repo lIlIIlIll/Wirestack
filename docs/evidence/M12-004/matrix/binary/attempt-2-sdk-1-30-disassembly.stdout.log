@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-fs.a:
+
+file_system_unix.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <GetDefaultResult>:
+       0:	push   %rbp
+       1:	mov    %rsp,%rbp
+       4:	sub    $0x10,%rsp
+       8:	mov    %fs:0x28,%rax
+      11:	mov    %rax,-0x8(%rbp)
+      15:	mov    $0x1,%edi
+      1a:	mov    $0x10,%esi
+      1f:	call   24 <GetDefaultResult+0x24>
+      24:	mov    %fs:0x28,%rcx
+      2d:	cmp    -0x8(%rbp),%rcx
+      31:	jne    39 <GetDefaultResult+0x39>
+      33:	add    $0x10,%rsp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "dc945ddfadc0813b464f00f6acc808d6b77c9b2bdea7dc0060f09902174184ff"}

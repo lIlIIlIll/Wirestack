@@ -1,0 +1,21 @@
+
+/usr/lib/libstdc++.so.6.0.36:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000009a000 <.init>:
+   9a000:	endbr64
+   9a004:	sub    $0x8,%rsp
+   9a008:	mov    0x2313b1(%rip),%rax        # 2cb3c0 <__gmon_start__>
+   9a00f:	test   %rax,%rax
+   9a012:	je     9a016 <_ZSt15__once_callable@@GLIBCXX_3.4.11+0x99ffe>
+   9a014:	call   *%rax
+   9a016:	add    $0x8,%rsp
+   9a01a:	ret
+
+Disassembly of section .text:
+
+000000000009a040 <__cxa_throw_bad_array_length@@CXXABI_1.3.8-0x24a>:
+   9a040:	sub    $0x1,%rdx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0af56b948efe75642198325fd332b9f93f77b0a1252fb65585e28ac3f7c466a8"}

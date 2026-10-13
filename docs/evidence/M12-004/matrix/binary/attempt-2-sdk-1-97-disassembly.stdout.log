@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-math.numeric.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000010bc8 <_init@@Base>:
+   10bc8:	sub    $0x8,%rsp
+   10bcc:	mov    0x23d2d5(%rip),%rax        # 24dea8 <__gmon_start__>
+   10bd3:	test   %rax,%rax
+   10bd6:	je     10bda <_init@@Base+0x12>
+   10bd8:	call   *%rax
+   10bda:	add    $0x8,%rsp
+   10bde:	ret
+
+Disassembly of section .plt:
+
+0000000000010be0 <_CNav6Random10nextUInt32Hv@plt-0x10>:
+   10be0:	push   0x23d422(%rip)        # 24e008 <_CNco17LETTER_LOWER_DIFFE@@Base+0x2066f0>
+   10be6:	jmp    *0x23d424(%rip)        # 24e010 <_CNco17LETTER_LOWER_DIFFE@@Base+0x2066f8>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "5bc3b44c9267f19274e5ef38e7e1ed2b0533701f75ca0ebc752876de9e3cd215"}

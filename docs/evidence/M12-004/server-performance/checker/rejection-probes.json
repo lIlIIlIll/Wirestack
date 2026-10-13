@@ -1,0 +1,40 @@
+{
+  "synthetic_is_not_campaign_success": true,
+  "probes": [
+    {
+      "probe": "missing-case",
+      "decision": "REJECTED",
+      "reason": "missing native case or round: baseline"
+    },
+    {
+      "probe": "tampered-log",
+      "decision": "REJECTED",
+      "reason": "text log digest mismatch: native.stdout.log"
+    },
+    {
+      "probe": "cleanup-owner",
+      "decision": "REJECTED",
+      "reason": "native operation owners were not reclaimed"
+    },
+    {
+      "probe": "SDK-binding-drift",
+      "decision": "REJECTED",
+      "reason": "SDK full392 binding differs from external qualified oracle"
+    },
+    {
+      "probe": "real-report-missing-native-sample",
+      "decision": "REJECTED",
+      "reason": "successful command missing native sample"
+    },
+    {
+      "probe": "bad-ratio",
+      "decision": "REJECTED",
+      "reason": "recomputed TLS ratio claim differs"
+    },
+    {
+      "probe": "binding-drift",
+      "decision": "REJECTED",
+      "reason": "producer/input binding drift"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: c609e8ec75de304410d3c69f79d96c7bd4d4fdf8
+
+Displaying notes found in: .note.gnu.property
+  Owner                Data size 	Description
+  GNU                  0x00000030	NT_GNU_PROPERTY_TYPE_0	      Properties: x86 feature: IBT, SHSTK, x86 feature used: x86, XMM, YMM, ZMM, FXSR, XSAVE, XSAVEC, x86 ISA used: x86-64-baseline, x86-64-v3, x86-64-v4
+
+Displaying notes found in: .note.stapsdt
+  Owner                Data size 	Description
+  stapsdt              0x00000038	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: unmap_start
+    Location: 0x0000000000002e48, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -8@%r14 8@%r12
+  stapsdt              0x0000003b	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: unmap_complete
+    Location: 0x00000000000030eb, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -8@%r14 8@%rbx
+  stapsdt              0x00000036	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: map_start
+    Location: 0x00000000000064dc, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -8@%r12 8@%rbx
+  stapsdt              0x00000044	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: map_complete
+    Location: 0x000000000000d54a, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -8@%r13 8@%r12 8@24(%rbx)
+  stapsdt              0x0000003c	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: reloc_start
+    Location: 0x000000000000d64b, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -8@32(%rdi) 8@%rsi
+  stapsdt              0x00000046	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: reloc_complete
+    Location: 0x000000000000e467, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -8@32(%rbx) 8@%r15 8@%r14
+  stapsdt              0x00000035	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: init_start
+    Location: 0x00000000000245e5, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -4@$0 8@%r13
+  stapsdt              0x00000038	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: init_complete
+    Location: 0x0000000000024b16, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: -4@$0 8@%rbx
+  stapsdt              0x0000003a	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: lll_lock_wait_private
+    Location: 0x0000000000027c04, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: 8@%rdi
+  stapsdt              0x00000032	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: lll_lock_wait
+    Location: 0x0000000000027c67, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: 8@%rdi
+  stapsdt              0x0000003a	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: setjmp
+    Location: 0x0000000000027db1, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: 8@%rdi -4@%esi 8@%rax
+  stapsdt              0x0000003b	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: longjmp
+    Location: 0x0000000000027e61, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: 8@%rdi -4@%esi 8@%rdx
+  stapsdt              0x00000042	NT_STAPSDT (SystemTap probe descriptors)	    Provider: rtld
+    Name: longjmp_target
+    Location: 0x0000000000027e7d, Base: 0x0000000000034c68, Semaphore: 0x0000000000000000
+    Arguments: 8@%rdi -4@%eax 8@%rdx

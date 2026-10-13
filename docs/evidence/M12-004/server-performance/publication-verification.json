@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "scope": "Published Server supplement byte bindings, selected privacy and existing-doc links; not performance acceptance or whole-repository privacy clearance",
+  "status": "PASS",
+  "bound_files_verified": 1128,
+  "existing_relative_links": 191,
+  "historical_local_report_unchanged": true,
+  "parent_task_status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "index": {
+    "path": "docs/evidence/M12-004/server-performance/index.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7d9b80f82a08dc4ff47fe5397f1afd5ecda441256dabb7b3ece3493587ee1a0d"
+    }
+  }
+}

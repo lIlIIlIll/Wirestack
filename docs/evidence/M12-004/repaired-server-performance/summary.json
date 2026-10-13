@@ -1,0 +1,399 @@
+{
+  "task_id": "M12-004",
+  "scope": "SERVER_REPAIRED_SOURCE_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "execution_status": "COMPLETED",
+  "performance_status": "NOISY",
+  "task_status": "BLOCKED",
+  "release_qualification": "NOT_QUALIFIED",
+  "source_inputs": {
+    "tools/evidence_digest.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44f03ada4f369f4b1d74f48312c71b32696094f4d9e3f6adb1a9f879b8b1db84"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"
+    },
+    "tools/benchmarks/m12_001_end_to_end.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "876a584cc146eafbce63c5c836f805aa05d1f456691c3a11c720452e401c26f6"
+    },
+    "tools/gates/m7_024_linux_performance.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47953663b686b99ec87fa48698550f09ac7e67ea6884dbc1e36e9e909bbcefad"
+    },
+    "tools/m12_004_candidate_gates.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "71d6e4d2458eb585cc05fa7e349d1e7b4140e03fee28a445ae51f4d55c59af57"
+    },
+    "tools/gates/campaigns/m7-024-linux-performance.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e5d3425fd2b31794b44d72d75c245f40bc96ed318ca8aba2eaf373ee46eab0d"
+    },
+    "examples/linux/m12_001/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
+    },
+    "examples/linux/m12_001/http.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7"
+    },
+    "examples/linux/m12_001/streams.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3701649e791d4551e7cc35f4fe38107c744521c19b736f81e5ce05ff61e99102"
+    },
+    "examples/linux/m12_001/transport_tls.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49f45578676208727f773128bd907320079500d11f099eb138218a20de8891e6"
+    }
+  },
+  "changed_sources": {
+    "examples/linux/m12_001/http.cj": {
+      "before": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9b1ad91a850538af9a07c46571a561e2570873c8102a7d059947813f103ffb68"
+      },
+      "after": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7"
+      }
+    }
+  },
+  "archives": {
+    "baseline.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+    },
+    "candidate.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+    }
+  },
+  "schedule": {
+    "capture_attempts": 1,
+    "cases": 33,
+    "archives": 2,
+    "warmups_per_archive": 1,
+    "measured_rounds_per_archive": 7,
+    "native_attempts": 528,
+    "native_campaign_attempts": 1,
+    "prerequisite_bootstrap_attempts": 2
+  },
+  "results": {
+    "successful_native_samples": 528,
+    "failed_native_commands": 0,
+    "warmup_samples": 66,
+    "measured_samples": 462,
+    "operation_latencies": 93984,
+    "unexpected_native_failures": 0,
+    "terminal_owner_failures": 0,
+    "classifier_counts": {
+      "PASS": 9,
+      "NOISY": 24
+    }
+  },
+  "tls_ratios": {
+    "name": "candidate-tls-baseline-ratios",
+    "decision": "PASS",
+    "checks": [
+      {
+        "name": "bulk throughput ratio",
+        "operator": "ge",
+        "expected": 0.9,
+        "actual": 1.034900101097179,
+        "decision": "PASS"
+      },
+      {
+        "name": "full handshake p50",
+        "operator": "le",
+        "expected": 1.1,
+        "actual": 0.9961124345287014,
+        "decision": "PASS"
+      },
+      {
+        "name": "full handshake p95",
+        "operator": "le",
+        "expected": 1.2,
+        "actual": 0.99430127207936,
+        "decision": "PASS"
+      }
+    ],
+    "metrics": {}
+  },
+  "classifiers": {
+    "tcp_bulk": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.017068410582749882,
+        "p99": -0.010106227338723128,
+        "throughput_loss": -0.014721967214482268
+      },
+      "relative_regression_limit": 0.05
+    },
+    "tcp_partial": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "tcp_cancel": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.0008821410460567725,
+        "p99": -0.001519493580623088
+      },
+      "relative_regression_limit": 0.05
+    },
+    "udp_packets": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "tls_full": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.005698727920639968,
+        "p99": -0.0058243393198470494,
+        "throughput_loss": -0.010283382841361766
+      },
+      "relative_regression_limit": 0.05
+    },
+    "tls_resumed": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "tls_small": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "tls_bulk": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "tls_failure": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.00034733447659551775,
+        "p99": 8.433599725155005e-05
+      },
+      "relative_regression_limit": 0.05
+    },
+    "tls_close": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h1_short_reuse": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h1_new_connection": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h1_bulk_4096": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "h1_bulk_32768": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "h1_concurrent": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h1_early_close": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h2_streams_1": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h2_streams_10": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h2_streams_100": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h2_slow_consumer": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "h2_stream_cancel": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "http_overload": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "http_observed": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "http_unobserved": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.013371515669384104,
+        "p99": -0.018734326078477026,
+        "throughput_loss": -0.01260445078058714
+      },
+      "relative_regression_limit": 0.05248638630153851
+    },
+    "sse_h1": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "sse_h2": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "sse_slow": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.00027492636409887083,
+        "p99": -0.0006609092108675885,
+        "throughput_loss": 0.005725517336533481
+      },
+      "relative_regression_limit": 0.05
+    },
+    "sse_cancel": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": 0.0015865304325382024,
+        "p99": -0.003412645517119728,
+        "throughput_loss": -0.000703445711757178
+      },
+      "relative_regression_limit": 0.05
+    },
+    "websocket_h1": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "websocket_h2": {
+      "status": "NOISY",
+      "reason": "candidate dispersion exceeds the frozen noise ceiling"
+    },
+    "websocket_fragmented": {
+      "status": "NOISY",
+      "reason": "baseline cannot support a stable performance gate"
+    },
+    "websocket_slow": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.00014603371202970283,
+        "p99": -0.0006790362574660147,
+        "throughput_loss": -0.0002518104259223719
+      },
+      "relative_regression_limit": 0.05
+    },
+    "websocket_disconnect": {
+      "status": "PASS",
+      "relative_changes": {
+        "p95": -0.0016034538386519026,
+        "p99": 0.004259635676019835,
+        "throughput_loss": 0.0009056560380539258
+      },
+      "relative_regression_limit": 0.05
+    }
+  },
+  "independent_verification_status": "PASS",
+  "verification": "checker/verification.json",
+  "capture": "capture/report.json",
+  "snapshot_index": "index.json",
+  "preservation": "postflight.json",
+  "binary_bindings": {
+    "baseline": {
+      "transport_tls": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "5c772e5116c72d6bbdc915d6c709ca0c7beb030cf129002f8778af220e231fd9"
+      },
+      "http": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "329bbdc0925be037e2aaf450f31df6d64a4cad346219b652e9985231b603da7f"
+      },
+      "streams": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "713130307d77b20834acbeffeb2aa185c13f599eeed05aec32b8568f20f6d68a"
+      }
+    },
+    "candidate": {
+      "transport_tls": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "59ec53313f6113cb1427c80bf62a52a498c32200d3ae11dfc0e556f80976dbc9"
+      },
+      "http": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "af8e4e70e7ecc8654d78dbfe6c91a52993bff8cee90d5ee8e1f723a9aff12b68"
+      },
+      "streams": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "a2ff9b37bbac91168c09deb33b6954a385e41981e47a8894d2776558a642d894"
+      }
+    }
+  },
+  "historical_reports_unchanged": {
+    "server": {
+      "path": "docs/evidence/M12-004/server-performance/capture/report.json",
+      "sha256": "8b291523b9a509e90cb4f1200ea155fee4dfcaff44812ef3a8672e28f547c3d9"
+    },
+    "local": {
+      "path": "docs/evidence/M12-004/candidate-gates/final2/report.json",
+      "sha256": "c5743509b7983daa2d7b177affdb86bbf5d8f28612f611728f60a1d3e7d2e828"
+    },
+    "repair": {
+      "path": "docs/evidence/M12-004/http-round-release/summary.json",
+      "sha256": "9789fd60c8baf0627b79a00199aa681932ea4baf070c5c92f6eb0e967f2d4058"
+    }
+  },
+  "scope_limits": [
+    "Native real Server Linux/x86_64, selected STS1.1.3 only, private readonlyglibc2.44; not stockglibc2.35 qualification.",
+    "CPU0-7 NUMA0 affinity is nonexclusive.",
+    "One repaired-source full paired development campaign. No retry to obtain green.",
+    "Historical capture decisions remain unchanged. Formal M7-024,86400-second soak,security approval,source publication andsigning are not granted."
+  ],
+  "snapshot_rules": "Full report JSON is compacted without discarding fields. Captured byte digests and published text digests are separate. Additional path normalization rebinds published command-log digests. Original private capture remains unchanged; compiled binaries/SDK/provider archives are not vendored into this directory.",
+  "prerequisite_recovery": {
+    "failed_bootstrap_exit": 1,
+    "sdk_executions_before_failure": 0,
+    "native_commands_before_failure": 0,
+    "failure": "os.execv(/bin/bash) PermissionError13: frozen closure loader lost executable mode",
+    "incorrect_bundle_sha256": "1a5e33c7fef74080884bcf6803819782a6f913a7d5757bf4888d9256b545e417",
+    "corrected_bundle_sha256": "ca320e9b6ed077fe2f739ccd2c00c72faf46bd0938be065c4862558537fba0d3",
+    "bundle_glibc_file_modes": {
+      "ld-linux-x86-64.so.2": 493,
+      "libBrokenLocale.so.1": 420,
+      "libanl.so.1": 420,
+      "libc.so.6": 420,
+      "libdl.so.2": 420,
+      "libm.so.6": 420,
+      "libmvec.so.1": 420,
+      "libnss_compat.so.2": 420,
+      "libnss_dns.so.2": 420,
+      "libnss_files.so.2": 420,
+      "libpthread.so.0": 420,
+      "libresolv.so.2": 420,
+      "librt.so.1": 420,
+      "libutil.so.1": 420
+    },
+    "private_extraction_umask": "077",
+    "expected_private_glibc_file_modes": {
+      "ld-linux-x86-64.so.2": 448,
+      "libBrokenLocale.so.1": 384,
+      "libanl.so.1": 384,
+      "libc.so.6": 384,
+      "libdl.so.2": 384,
+      "libm.so.6": 384,
+      "libmvec.so.1": 384,
+      "libnss_compat.so.2": 384,
+      "libnss_dns.so.2": 384,
+      "libnss_files.so.2": 384,
+      "libpthread.so.0": 384,
+      "libresolv.so.2": 384,
+      "librt.so.1": 384,
+      "libutil.so.1": 384
+    },
+    "scope": "Original local bundle metadata restored; private extraction masks group/other bits; bytes unchanged; first actual native campaign, not a native retry",
+    "evidence": "bootstrap-failure/launch.json"
+  }
+}

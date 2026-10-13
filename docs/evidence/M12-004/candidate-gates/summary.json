@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "family": "candidate-gates",
+  "status": "FAIL",
+  "qualification": "NOT_QUALIFIED",
+  "report": {
+    "path": "docs/evidence/M12-004/candidate-gates/final2/report.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c5743509b7983daa2d7b177affdb86bbf5d8f28612f611728f60a1d3e7d2e828"
+    },
+    "bytes": 8771047
+  },
+  "archive": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+  },
+  "baseline_archive": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "sdk": {
+    "policy": "STS_ONLY",
+    "version": "1.1.3",
+    "typed_file_bindings": "final2/report.json#sdk_files",
+    "before_after_equal": true
+  },
+  "source": {
+    "production_file_count": 164,
+    "typed_file_bindings": "final2/report.json#production_sources",
+    "before_after_equal": true,
+    "installed_payload_and_native_archives_unchanged": true,
+    "archive_sdk_gate_inputs_unchanged": true
+  },
+  "tls": {
+    "status": "PASS",
+    "modes_passed": 13,
+    "modes_required": 13,
+    "coverage": "TLS1.2/TLS1.3, external signer/decryptor success/error/cancellation/deadline, short decrypt output, non-RSA rejection, production keylog refusal"
+  },
+  "fuzz": {
+    "status": "PASS",
+    "targets_passed": 10,
+    "targets_required": 10,
+    "seed": 7023,
+    "original_manifest_and_iteration_budgets": true
+  },
+  "performance": {
+    "status": "FAIL",
+    "cases": 33,
+    "warmup_rounds_per_artifact": 1,
+    "measured_rounds_per_artifact": 7,
+    "samples_per_artifact": 264,
+    "total_native_samples": 528,
+    "unexpected_native_sample_failures": 0,
+    "existing_baseline_classifier": {"NOISY": 31, "PASS": 2},
+    "passing_classifier_cases": ["tcp_cancel", "websocket_disconnect"],
+    "m7_024_tls_threshold_checks": {
+      "bulk_throughput_ratio": {"value": 0.9720550879461274, "minimum": 0.9, "status": "PASS"},
+      "full_handshake_p50_ratio": {"value": 0.9948477879494897, "maximum": 1.1, "status": "PASS"},
+      "full_handshake_p95_ratio": {"value": 1.2051572750772457, "maximum": 1.2, "status": "FAIL"}
+    },
+    "formal_m7_024": "NOT_RUN",
+    "rerun_to_make_failure_pass": false
+  },
+  "soak": {"status": "NOT_RUN", "formal_seconds": 86400, "short_preflight_run": false},
+  "matrix": {
+    "status": "NOT_RUN",
+    "actual_leg": "Linux x86_64 glibc current host, qualified STS1.1.3",
+    "missing_in_this_report": ["Westmere minimum CPU / kernel5.15 / glibc2.44", "independent namespace coexistence"],
+    "outside_claimed_scope": ["aarch64", "musl"]
+  },
+  "unit_tests": {
+    "status": "PASS",
+    "count": 10,
+    "command": "python3 -m unittest tools.tests.test_m12_004_candidate_gates -v",
+    "stdout": "unit-tests.stdout.log",
+    "stderr": "unit-tests.stderr.log",
+    "retained_warning": "Python3.14 SyntaxWarning for return in the integrity-failure finally block; warning path normalized, not suppressed"
+  },
+  "cli_execution": {
+    "status": "COMPLETED",
+    "exit_code": 1,
+    "reason": "Actual performance threshold failure preserved",
+    "commands": "final2/report.json#commands"
+  },
+  "earlier_attempts": {
+    "initial": "Tool deadline interrupted execution after a consumer package-name build failure",
+    "run2": "TLS passed against old archive; fuzz fixture dependency and benchmark package-name build failures retained",
+    "run3": "Old archive run canceled on candidate notice replacement instruction; TLS/fuzz results remain old-archive-only",
+    "final": "Superseded driver run canceled before archive operand naming and matrix scope corrections"
+  },
+  "remaining_qualification_prerequisites": [
+    "Disposition of observed performance P95 failure and unstable measurements",
+    "Formal source freeze including complete orchestration/helper source closure",
+    "Approved independent source-bound security review and finding disposition",
+    "Authorized 86400-second formal soak",
+    "Fresh claimed native-floor and independent coexistence matrix evidence",
+    "Formal M7-024 stdx/network/memory campaign where required",
+    "Release/signing authorization"
+  ]
+}

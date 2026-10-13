@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a:
+
+GCDAProfiling.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text.llvm_gcda_start_file:
+
+0000000000000000 <llvm_gcda_start_file>:
+   0:	push   %rbp
+   1:	push   %r15
+   3:	push   %r14
+   5:	push   %r13
+   7:	push   %r12
+   9:	push   %rbx
+   a:	sub    $0x18,%rsp
+   e:	mov    %edx,%r14d
+  11:	mov    %esi,%r15d
+  14:	mov    %rdi,%r12
+  17:	mov    %fs:0x28,%rax
+  20:	mov    %rax,0x10(%rsp)
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "66622f56fdd12b71a25d6df92e0eb681d9a08cf785cfcbaa2a81bf847f9faa11"}

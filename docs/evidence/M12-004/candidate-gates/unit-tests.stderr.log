@@ -1,0 +1,17 @@
+<repo>/tools/m12_004_candidate_gates.py:235: SyntaxWarning: 'return' in a 'finally' block
+  return 1
+test_build_hides_checkout_and_never_invokes_builder (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_build_hides_checkout_and_never_invokes_builder) ... ok
+test_candidate_cli_destination_names_artifact_archive (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_candidate_cli_destination_names_artifact_archive) ... ok
+test_complete_manifest_and_original_budgets (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_complete_manifest_and_original_budgets) ... ok
+test_default_build_hook_rejected (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_default_build_hook_rejected) ... ok
+test_exact_archive_binding_is_typed (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_exact_archive_binding_is_typed) ... ok
+test_failures_do_not_reduce_fuzz_target_list (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_failures_do_not_reduce_fuzz_target_list) ... ok
+test_native_same_size_mutation_rejected (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_native_same_size_mutation_rejected) ... ok
+test_nested_tls_log_digest_rebound_after_normalization (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_nested_tls_log_digest_rebound_after_normalization) ... ok
+test_original_markers_reject_skip (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_original_markers_reject_skip) ... ok
+test_overlay_cannot_replace_production (tools.tests.test_m12_004_candidate_gates.CandidateGatesTests.test_overlay_cannot_replace_production) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.008s
+
+OK

@@ -271,7 +271,7 @@ def qualify(report: dict[str, Any], output: Path, profile: str, offline: bool) -
                 try:
                     release.collect_payload(installed)
                 except release.ReleaseError as error:
-                    if "TLS provider native archive provenance" not in str(error):
+                    if error.code != "NATIVE_ARCHIVE_PROVENANCE":
                         raise
                     archive_rejections.append({
                         "case": mutation, "status": "PASS", "error": str(error),
@@ -292,7 +292,7 @@ def qualify(report: dict[str, Any], output: Path, profile: str, offline: bool) -
             try:
                 release.collect_payload(installed)
             except release.ReleaseError as error:
-                if "test-only TLS key logging" not in str(error):
+                if error.code != "KEYLOG_CAPABILITY_FORBIDDEN":
                     raise
                 report["test_only_release_rejection"] = {"status": "PASS", "error": str(error)}
             else:

@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-objectpool.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000001b10 <_init@@Base>:
+    1b10:	sub    $0x8,%rsp
+    1b14:	mov    0x202475(%rip),%rax        # 203f90 <__gmon_start__>
+    1b1b:	test   %rax,%rax
+    1b1e:	je     1b22 <_init@@Base+0x12>
+    1b20:	call   *%rax
+    1b22:	add    $0x8,%rsp
+    1b26:	ret
+
+Disassembly of section .plt:
+
+0000000000001b30 <CJ_MCC_NewArrayGeneric@plt-0x10>:
+    1b30:	push   0x2024d2(%rip)        # 204008 <_CNal8MAX_SIZEE@@Base+0x2013e8>
+    1b36:	jmp    *0x2024d4(%rip)        # 204010 <_CNal8MAX_SIZEE@@Base+0x2013f0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "35034f643c6c0830663ddc94d21368f5707bf4b953fd714f817be4188cc20187"}

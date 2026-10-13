@@ -1,0 +1,97 @@
+{
+  "task_id": "M12-004",
+  "repair_status": "COMPLETE",
+  "acceptance_status": "BLOCKED",
+  "scope": "SERVER_STS_ONLY_HTTP_ROUND_RELEASE_CORRECTNESS_NOT_PERFORMANCE_ACCEPTANCE",
+  "source_change": {
+    "path": "examples/linux/m12_001/http.cj",
+    "before_retained_source_sha256": "9b1ad91a850538af9a07c46571a561e2570873c8102a7d059947813f103ffb68",
+    "after_sha256": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7",
+    "protocol": "Every round starts closed. The coordinator checks simultaneous response ownership only for concurrent rounds, then stores true for every round before joining futures.",
+    "unchanged": [
+      "60-second shared Deadline",
+      "OperationContext/cancellation",
+      "workload counts and checksums",
+      "provider archives",
+      "performance thresholds",
+      "public API"
+    ]
+  },
+  "results": {
+    "fresh_O2_builds": 2,
+    "native_commands": 28,
+    "unexpected_native_failures": 0,
+    "controller_timeouts": 0,
+    "terminal_owner_failures": 0,
+    "independent_negative_rejected": 11,
+    "existing_behavioral_contract_tests": 29
+  },
+  "archives": {
+    "baseline": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f",
+    "candidate": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+  },
+  "new_binaries": {
+    "baseline": "69daf2ca970ce28e5ef7d10edc024249c6f24fc217402ff6b8fd73086e716891",
+    "candidate": "3a9976c5ea476b799f8341575115887bc13302a1c2f4372cb6db89463797161c"
+  },
+  "environment": {
+    "selected_sdk": "STS 1.1.3 only",
+    "qualified_sdk_inputs": 392,
+    "private_read_only_glibc_files": 14,
+    "private_glibc": "2.44",
+    "host_glibc": "2.35",
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "exclusive_cores": false
+  },
+  "preservation": {
+    "status": "PASS",
+    "scope": "REPAIR_INPUT_AND_OWNED_PROCESS_INTEGRITY_ONLY",
+    "sdk392_unchanged": true,
+    "host_original_glibc14_unchanged": true,
+    "host_glibc": "2.35",
+    "both_original_http_binaries_unchanged": {
+      "baseline": "d132fe407098689cab5115c10d520486906fbf651b25dd3306f0d8910b29add1",
+      "candidate": "538e4c728db27d17db8d171a790fd8357fed0c62e3f668e87b1c835eb0992557"
+    },
+    "original_source_inputs_unchanged": 10,
+    "original_archives_unchanged": {
+      "baseline.tar.gz": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+      },
+      "candidate.tar.gz": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+      }
+    },
+    "fixed_consumer_inputs_unchanged": {
+      "http.cj": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7",
+      "common.cj": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
+    },
+    "owned_live_processes": [],
+    "fixture_private_keys_remaining": []
+  },
+  "before_evidence": "before/diagnosis.json",
+  "historical_server_capture": {
+    "path": "docs/evidence/M12-004/server-performance/capture/report.json",
+    "sha256": "8b291523b9a509e90cb4f1200ea155fee4dfcaff44812ef3a8672e28f547c3d9",
+    "status": "FAIL_UNCHANGED"
+  },
+  "verification": "checker/verification.json",
+  "evidence_index": "index.json",
+  "snapshot_rules": "Captured digests refer to the original private artifact bytes. Published text digests authenticate privacy-normalized snapshots; do not substitute them for original raw digests. The independent checker ran on the complete private native evidence including actual binaries and original manifests. Binaries and raw manifests remain in private task caches and are not vendored here.",
+  "remaining": [
+    "Original bad-build compiler/cache origin remains unproven.",
+    "No new full33 paired performance acceptance campaign is included. Historical performance failures are not promoted or replaced.",
+    "All other M12-004 release/security/soak/signing blockers remain unchanged."
+  ]
+}

@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-argopt.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000009418 <_init@@Base>:
+    9418:	sub    $0x8,%rsp
+    941c:	mov    0x210a25(%rip),%rax        # 219e48 <__gmon_start__>
+    9423:	test   %rax,%rax
+    9426:	je     942a <_init@@Base+0x12>
+    9428:	call   *%rax
+    942a:	add    $0x8,%rsp
+    942e:	ret
+
+Disassembly of section .plt:
+
+0000000000009430 <CJ_MCC_NewArray64@plt-0x10>:
+    9430:	push   0x210bd2(%rip)        # 21a008 <_fini@@Base+0x2019c4>
+    9436:	jmp    *0x210bd4(%rip)        # 21a010 <_fini@@Base+0x2019cc>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0ea6e1455f28c577cc6032e8e722efbf867a9bd3e07dacca3b7ee05e069b43ac"}

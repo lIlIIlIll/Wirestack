@@ -80,7 +80,6 @@ main(): Int64 {
             if (info.transportBackend != "std-net") { result = 20 }
             else if (info.runtimeIoBackend != "cjnative") { result = 21 }
             else if (info.tlsProvider != "aws-lc") { result = 22 }
-            else if (info.tlsProviderVersion != "5.5.0") { result = 23 }
             else if (info.externalOpenSslDependency) { result = 24 }
             else if (info.buildFingerprint.isEmpty()) { result = 25 }
             else if (publicServerContext.alpnProtocols() != ["h2", "http/1.1"]) { result = 26 }

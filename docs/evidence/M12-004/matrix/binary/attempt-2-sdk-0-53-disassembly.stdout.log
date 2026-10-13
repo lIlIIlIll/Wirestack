@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-runtimeFFI.a:
+
+runtime_ffi.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_OS_ProcessorCount>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	mov    $0x54,%edi
+  1a:	call   1f <CJ_OS_ProcessorCount+0x1f>
+  1f:	mov    %fs:0x28,%rcx
+  28:	cmp    -0x8(%rbp),%rcx
+  2c:	jne    34 <CJ_OS_ProcessorCount+0x34>
+  2e:	add    $0x10,%rsp
+  32:	pop    %rbp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "d74fe2b03fa8cb8211a44b426d1d40578278e3cb78f71adc98838455fd71e79c"}

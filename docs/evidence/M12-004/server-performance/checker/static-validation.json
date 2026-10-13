@@ -1,0 +1,7 @@
+{
+  "release_qualification": "NOT_QUALIFIED",
+  "schema_version": 1,
+  "scope": "SERVER_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "static_input_validation": "PASS",
+  "verification_status": "PASS"
+}

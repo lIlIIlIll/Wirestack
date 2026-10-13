@@ -1,0 +1,21 @@
+{
+  "task_id": "M12-004",
+  "first_checker_execution": {
+    "exit_code": 1,
+    "error": "missing overload rejection or wait",
+    "checker_sha256": "823d2613e915a6b0d8641093610b4d30a96e843e6f8d6aceb86cc30cd8f50e50",
+    "report_sha256": "27c85ed2085b15ec4f3b989d643fb94f47c074db30e354ec1b00616ade126341"
+  },
+  "finding": {
+    "field": "metrics.server_rejected_capacity",
+    "baseline": 0,
+    "candidate": 0,
+    "interpretation": "The workload asserts server HTTP status 503, not a positive terminal server rejection counter. The exported terminal counter is not proof of that status assertion.",
+    "contract_source": "<repo>/examples/linux/m12_001/http.cj:283-286"
+  },
+  "checker_correction": "Removed the unsupported positive terminal server counter requirement. Kept exact 6 operations, 4 successes, 2 expected rejections, 28 bytes, checksum 2984, client capacity rejection 1, queue high water 1, one positive correlated queue wait, and clean terminal owners.",
+  "runtime_or_report_mutations": false,
+  "native_reruns": 0,
+  "parent_status": "BLOCKED",
+  "existing_full_33_campaign": "FAIL"
+}

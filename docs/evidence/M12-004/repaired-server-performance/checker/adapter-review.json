@@ -1,0 +1,70 @@
+{
+  "scope": "SERVER_REPAIRED_SOURCE_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "status": "PASS",
+  "reviewed_private_adapter": {
+    "bootstrap.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "99580c69bf0d96e99083381e3bdcc0206c8e372d1bcb37cc74656580703e2c0a"
+    },
+    "cleanup.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce2c24bf5e349e393f3cc1ce584efb2da3c59a8684e54e5c11af403d8f0a63cd"
+    },
+    "controller.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "426d14587bad326712fb837164f04237d1fa117499cbd4b77aaa4393de1bbc4b"
+    },
+    "driver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "83db9412c9c927b7f1947dfb1bc9247e15793adc72c3c8129b442d7f456d3561"
+    },
+    "failure_finish.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0e20a8dc5c85b70f49f516fb27de91f8677564236d2f3073a8b4556886ab231f"
+    },
+    "finish.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b4c4c1bba2f9aa64757822ef506fd5e34d812a6df537104c759df3dbe7980528"
+    },
+    "launch.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2f0582a4ae12ec593d063f20b4b5b0f470850212a10636946416af6fc9c9a52"
+    },
+    "native_observe.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c510a885e6ddc2b08c474d84b5cf063df8268b2c98fe931bf5c52811b3f16d23"
+    },
+    "observe.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c5e1abd29c321b4bd53f56a0ca511edfaa47867e3100dbcfd52ed8cf2a072c52"
+    },
+    "summarize.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1d26329c5d954edd7d192628f924b698f9b3822d0b720e7ed7bd9e683a56e139"
+    },
+    "supervise.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "08410c811f3786f03748e9260dc806e4cdecc90aa6e5f7df1cb0c951a1df8d51"
+    }
+  },
+  "measurement_policy": "performance_gate extracted and executed unchanged AST; Runner passes original timeout, sampled, check and argv unchanged except cjpm child namespace wrapper; no sample/run override; one campaign",
+  "namespace": "readonly 14-file closure mounted before fresh exec; selected STS1.1.3 only; readonly 4KiB child checkout mask only for cjpm",
+  "postprocessing": "Privacy normalization with typed digests; report-only summary, bootstrap and mode metadata; no raw sample/order/classifier edits. Cleanup.py terminates only exact same-task native_observe argv, never a native sample.",
+  "runner_semantics": {
+    "class_ast_identical_to_previous_review": true,
+    "override_methods": [
+      "run",
+      "redact"
+    ],
+    "native_run_argv_order_timeouts_sample_logic": "UNCHANGED",
+    "source_measurement_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "71d6e4d2458eb585cc05fa7e349d1e7b4140e03fee28a445ae51f4d55c59af57"
+    },
+    "sample_measurement_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "876a584cc146eafbce63c5c836f805aa05d1f456691c3a11c720452e401c26f6"
+    }
+  },
+  "prerequisite_recovery": "Authorized metadata-only repair, declared tar modes compared with effective owner-only Server modes under umask077. First bootstrap launcher exit and terminated observer preserved separately; no SDK/native execution before successful fresh exec."
+}

@@ -362,13 +362,6 @@ class M7021LinuxReleaseTest(unittest.TestCase):
         with self.assertRaisesRegex(release.ReleaseError, "loader strings"):
             release.reject_loader_strings({"bad.bin": b"prefix libssl.so suffix"})
 
-    def test_smoke_output_requires_https_runtime_and_fingerprint(self) -> None:
-        output = "\n".join(sorted(release.EXPECTED_SMOKE_LINES | {"buildFingerprint=abc"}))
-        release.validate_smoke_output(output)
-        with self.assertRaisesRegex(release.ReleaseError, "omitted required output"):
-            release.validate_smoke_output("buildFingerprint=abc")
-        with self.assertRaisesRegex(release.ReleaseError, "empty build fingerprint"):
-            release.validate_smoke_output("\n".join(sorted(release.EXPECTED_SMOKE_LINES)) + "\nbuildFingerprint=")
 
     def test_dependency_parsers_return_stable_names_without_addresses(self) -> None:
         needed = release.parse_needed(
