@@ -4,6 +4,7 @@ import std.sync.Mutex
 import wirestack.internal.http1 as http1
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
+import wirestack.internal as internal
 
 /**
  * Wirestack 公开 API：表示稳定的错误分类。
@@ -45,6 +46,7 @@ public class HttpClientBuilder {
     private var configuredResolver: ?Resolver = None<Resolver>
     private var configuredRequestTimeout: ?Duration = None<Duration>
     private var configuredLimits = HttpLimits()
+    private var configuredResourceLimits = HttpResourceLimits.clientDefault()
     private var configuredRedirectPolicy = HttpRedirectPolicy()
     private var configuredRetryPolicy = HttpRetryPolicy()
     private var configuredProxy: ?HttpProxyConfig = None<HttpProxyConfig>
@@ -84,6 +86,15 @@ public class HttpClientBuilder {
  */
     public func limits(value: HttpLimits): HttpClientBuilder {
         configuredLimits = value
+        this
+    }
+    /**
+     * Sets the aggregate limits shared by every route and protocol pool.
+     *
+     * @param value The per-instance aggregate resource limits for this client.
+     */
+    public func resourceLimits(value: HttpResourceLimits): HttpClientBuilder {
+        configuredResourceLimits = value
         this
     }
 
@@ -163,6 +174,7 @@ public class HttpClientBuilder {
  * Wirestack 公开 API：build。
  */
     public func build(): HttpClient {
+        let resourceBudget = internal.HttpResourceBudget(configuredResourceLimits.toBudgetPolicy())
         var ownedSystemResolver = None<SystemResolver>
         let selected: Resolver = match (configuredResolver) {
             case Some(value) => value
@@ -184,6 +196,7 @@ public class HttpClientBuilder {
             }
             HttpClient(
                 selected, configuredRequestTimeout, configuredLimits,
+                configuredResourceLimits, resourceBudget,
                 configuredRedirectPolicy, configuredRetryPolicy, configuredProxy,
                 directTls, proxyTls, ownedSystemResolver,
                 selectedConnector, configuredCookieJar, configuredPoolHook, configuredPush
@@ -203,6 +216,8 @@ public class HttpClient <: Resource {
     private let ownedSystemResolver: ?SystemResolver
     private let requestTimeout: ?Duration
     private let limits: HttpLimits
+    private let resourceLimits: HttpResourceLimits
+    private let resourceBudget: internal.HttpResourceBudget
     private let redirectPolicy: HttpRedirectPolicy
     private let retryPolicy: HttpRetryPolicy
     private let proxy: ?HttpProxyConfig
@@ -218,6 +233,8 @@ public class HttpClient <: Resource {
     private var closed = false
 
     init(resolver: Resolver, requestTimeout: ?Duration, limits: HttpLimits,
+        resourceLimits: HttpResourceLimits,
+        resourceBudget: internal.HttpResourceBudget,
         redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
         proxy: ?HttpProxyConfig,
         directTlsHandshaker: ?http1.HttpAlpnTlsHandshaker,
@@ -231,6 +248,8 @@ public class HttpClient <: Resource {
         this.ownedSystemResolver = ownedSystemResolver
         this.requestTimeout = requestTimeout
         this.limits = limits
+        this.resourceLimits = resourceLimits
+        this.resourceBudget = resourceBudget
         this.redirectPolicy = redirectPolicy
         this.retryPolicy = retryPolicy
         this.proxy = proxy
@@ -238,23 +257,27 @@ public class HttpClient <: Resource {
         this.cookieJar = cookieJar
         this.poolHook = poolHook
         this.pushConfig = pushConfig
-        cleartext = http1.Http1CleartextClient(resolver, transportFactory, limits: limits)
+        cleartext = http1.Http1CleartextClient(
+            resolver, transportFactory, limits: limits, resourceBudget: Some(resourceBudget)
+        )
         forwardProxy = match (proxy) {
             case Some(value) => Some(http1.Http1ForwardProxyClient(
-                toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory, limits: limits
+                toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory,
+                limits: limits, resourceBudget: Some(resourceBudget)
             ))
             case None => None<http1.Http1ForwardProxyClient>
         }
         https = match (directTlsHandshaker) {
             case Some(value) => Some(http1.HttpAutomaticHttpsClient(
-                resolver, transportFactory, value, limits: limits, pushConfig: pushConfig
+                resolver, transportFactory, value, limits: limits, pushConfig: pushConfig,
+                resourceBudget: Some(resourceBudget)
             ))
             case None => None<http1.HttpAutomaticHttpsClient>
         }
         httpsProxy = match ((proxy, proxyTlsHandshaker)) {
             case (Some(value), Some(handshaker)) => Some(http1.Http1HttpsProxyClient(
                 toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory,
-                handshaker, limits: limits
+                handshaker, limits: limits, resourceBudget: Some(resourceBudget)
             ))
             case _ => None<http1.Http1HttpsProxyClient>
         }
@@ -470,6 +493,10 @@ public class HttpClient <: Resource {
             var current = request
             var redirectCount: Int64 = 0
             while (true) {
+                let requestLease = resourceBudget.acquireRequest(
+                    resourceOwner(current.url), operation
+                )
+                cancellation.retainResource(requestLease)
                 let response = executeWithRetries(
                     current, operation, trailer, cancellation.connectionCancellation
                 )
@@ -484,7 +511,10 @@ public class HttpClient <: Resource {
                 match (next) {
                     case Some(value) =>
                         try { let _ = response.body.drain(redirectPolicy.maximumDrainBytes) }
-                        finally { response.close() }
+                        finally {
+                            response.close()
+                            requestLease.close()
+                        }
                         current = value
                         redirectCount++
                     case None => return cancellation.wrap(response)
@@ -495,6 +525,18 @@ public class HttpClient <: Resource {
             cancellation.fail()
             throw wrapHttpError(error)
         }
+    }
+
+    private func resourceOwner(url: HttpUrl): internal.HttpResourceOwnerKey {
+        let route = match (proxy) {
+            case Some(value) =>
+                match (value.routeFor(url)) {
+                    case HttpProxyRoute.Direct => "direct"
+                    case HttpProxyRoute.Proxy(config) => "proxy:${config.endpoint.identity}"
+                }
+            case None => "direct"
+        }
+        internal.HttpResourceOwnerKey("${url.scheme}://${url.host}:${url.port}", route)
     }
 
     private func executeOnce(request: HttpRequest, operation: OperationContext,
@@ -578,6 +620,7 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：close。
  */
     public func close(): Unit {
+        resourceBudget.stopRequestAdmission()
         let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
                 (None<http1.HttpAutomaticHttpsClient>, None<http1.Http1HttpsProxyClient>)
@@ -597,6 +640,10 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
+    /** Returns a read-only snapshot of live aggregate resource counters. */
+    public func resourceSnapshot(): HttpResourceSnapshot {
+        resourceSnapshotFromLedger(resourceBudget.snapshot())
+    }
 
     private func httpsClient(): http1.HttpAutomaticHttpsClient {
         synchronized(mutex) {
@@ -608,7 +655,8 @@ public class HttpClient <: Resource {
                         resolver,
                         transportFactory,
                         http1.DefaultHttp1TlsHandshaker.systemDefaultAlpn(),
-                        limits: limits, pushConfig: pushConfig
+                        limits: limits, pushConfig: pushConfig,
+                        resourceBudget: Some(resourceBudget)
                     )
                     https = Some(value)
                     value
@@ -627,7 +675,7 @@ public class HttpClient <: Resource {
                         value.resolver,
                         transportFactory,
                         http1.DefaultHttp1TlsHandshaker.systemDefault(),
-                        limits: limits
+                        limits: limits, resourceBudget: Some(resourceBudget)
                     )
                     httpsProxy = Some(client)
                     client

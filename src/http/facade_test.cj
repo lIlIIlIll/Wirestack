@@ -107,6 +107,36 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func publicResourceLimitsReachClientSnapshot(): Unit {
+        let limits = HttpResourceLimits(
+            maximumConnections: 2,
+            maximumConnectionsPerRoute: 1,
+            maximumConnectionsPerOrigin: 2,
+            maximumManagedBufferBytes: 262144u64,
+            reservedControlBufferBytes: 34u64,
+            maximumManagedBufferBytesPerRoute: 65536u64,
+            maximumManagedBufferBytesPerOrigin: 131072u64
+        )
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [publicLoopback(80).address], HostName("limits.test"), ResolverSource.Static
+            )))
+            .resourceLimits(limits)
+            .build()
+        try {
+            let snapshot = client.resourceSnapshot()
+            @Expect(snapshot.limits.maximumConnections, 2)
+            @Expect(snapshot.limits.maximumConnectionsPerRoute, 1)
+            @Expect(snapshot.limits.maximumConnectionsPerOrigin, 2)
+            @Expect(snapshot.limits.maximumManagedBufferBytes, 262144u64)
+            @Expect(snapshot.limits.reservedControlBufferBytes, 34u64)
+            @Expect(snapshot.limits.maximumManagedBufferBytesPerRoute, 65536u64)
+            @Expect(snapshot.limits.maximumManagedBufferBytesPerOrigin, 131072u64)
+        } finally {
+            client.close()
+        }
+    }
+    @TestCase
     func cancellationWrapperPreservesProtocolCompletionPolicy(): Unit {
         let operation = HttpRequestCancellationOperation(
             OperationContext.background(),
@@ -218,21 +248,32 @@ class HttpFacadeTest {
             )
             @Expect(response.version, HttpVersion.Http11)
             @Expect(response.body.read(Array<Byte>(4096, repeat: 0u8)), 4096)
+            let snapshot = client.resourceSnapshot()
+            @Expect(snapshot.activeConnections, 1)
+            @Expect(snapshot.activeRequests, 1)
+            @Expect(snapshot.highWaterConnections, 1)
+            @Expect(snapshot.highWaterRequests, 1)
+            @Expect(snapshot.owners.size, 1)
+            @Expect(snapshot.owners[0].connections, 1)
+            @Expect(snapshot.owners[0].requests, 1)
+            @Expect(server.resourceSnapshot().activeConnections, 1)
             @Expect(connectionCancellation.cancel())
             @Expect(!connectionCancellation.cancel())
             @Expect(publicBodyReadWasCancelled(response.body))
             response.close()
-
+            @Expect(client.resourceSnapshot().activeRequests, 0)
             let next = client.get("http://cancel.test:${server.localEndpoint.port}/small")
             @Expect(readPublicBody(next.body), "ok")
             next.close()
             @Expect(handler.http1HandleChecks.load() >= 2)
             client.close()
+            @Expect(client.resourceSnapshot().activeConnections, 0)
             let result = server.shutdown(context: OperationContext(
                 deadline: Some(Deadline.after(5 * Duration.second))
             ))
             @Expect(result.activeAtReturn, 0)
             serving.get(5 * Duration.second)
+            @Expect(server.resourceSnapshot().activeConnections, 0)
         } finally {
             client.close()
             if (!server.isClosed()) {
@@ -444,6 +485,17 @@ class HttpFacadeTest {
                 client.get("https://example.com:${server.localEndpoint.port}/limit/first")
             }
             handler.waitForFirst()
+            let clientSnapshot = client.resourceSnapshot()
+            @Expect(clientSnapshot.activeConnections, 1)
+            @Expect(clientSnapshot.activeRequests, 1)
+            @Expect(clientSnapshot.activeStreams, 1)
+            @Expect(clientSnapshot.highWaterStreams, 1)
+            @Expect(clientSnapshot.owners.size, 1)
+            @Expect(clientSnapshot.owners[0].streams, 1)
+            let serverSnapshot = server.resourceSnapshot()
+            @Expect(serverSnapshot.activeConnections, 1)
+            @Expect(serverSnapshot.activeRequests, 1)
+            @Expect(serverSnapshot.activeStreams, 1)
             let second = spawn {
                 client.get("https://example.com:${server.localEndpoint.port}/limit/second")
             }
@@ -454,7 +506,10 @@ class HttpFacadeTest {
             secondResponse.close()
             firstResponse.close()
             @Expect(handler.maximumActive.load(), 2)
-
+            let settledSnapshot = client.resourceSnapshot()
+            @Expect(settledSnapshot.activeRequests, 0)
+            @Expect(settledSnapshot.activeStreams, 0)
+            @Expect(settledSnapshot.activeConnections, 2)
             let result = server.shutdown(context: OperationContext(
                 deadline: Some(Deadline.after(5 * Duration.second))
             ))
@@ -464,6 +519,7 @@ class HttpFacadeTest {
             serving.get(5 * Duration.second)
         } finally {
             client.close()
+            @Expect(client.resourceSnapshot().activeConnections, 0)
             clientTls.close()
             if (!server.isClosed()) {
                 let _ = server.shutdown(context: OperationContext(
@@ -471,6 +527,7 @@ class HttpFacadeTest {
                 ))
                 serving.get(5 * Duration.second)
             }
+            @Expect(server.resourceSnapshot().activeConnections, 0)
             serverTls.close()
         }
     }

@@ -3,6 +3,7 @@ package wirestack.internal.http2
 import std.collection.*
 import std.sync.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 private const HTTP2_READER_BUFFER_SIZE: Int64 = 16 * 1024
 
@@ -114,12 +115,14 @@ public class Http2ConnectionReader {
         machine: Http2ConnectionStateMachine,
         handler: Http2InboundFrameHandler,
         limits!: Http2Limits = Http2Limits(),
-        additionalStreamListeners!: UInt32 = 0u32
+        additionalStreamListeners!: UInt32 = 0u32,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ) {
         this.transport = transport
         this.machine = machine
         this.handler = handler
-        parser = Http2FrameParser(limits: limits)
+        parser = Http2FrameParser(limits, resourceBudget, resourceOwner)
         // The stream registry owns one connection-level listener in addition
         // to one request listener for every concurrently active stream.
         terminations = Http2ReaderTerminationRegistry(
@@ -157,6 +160,7 @@ public class Http2ConnectionReader {
             let _ = machine.failConnection(Http2ErrorCode.InternalError, error.message)
             abortReason = AbortReason.ProtocolFailure
         } finally {
+            parser.releasePartialFrame()
             let _ = machine.finish(reason: "HTTP/2 reader stopped")
             synchronized(lifecycleMutex) { running = false }
         }
@@ -207,9 +211,15 @@ public class Http2ConnectionReader {
         let remainder = Array<Byte>(bytes.size - offset, repeat: 0u8)
         for (index in 0..remainder.size) { remainder[index] = bytes[offset + index] }
         let frames = parser.feed(remainder)
-        for (frame in frames) {
-            let result = machine.receive(frame)
-            handler.handle(frame, result)
+        try {
+            for (frame in frames) {
+                let result = machine.receive(frame)
+                handler.handle(frame, result)
+                frame.releaseUnclaimedReceivedBufferReservation()
+            }
+        } catch (error: Exception) {
+            for (frame in frames) { frame.releaseUnclaimedReceivedBufferReservation() }
+            throw error
         }
     }
 }

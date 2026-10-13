@@ -3,7 +3,7 @@ package wirestack.internal.http2
 import std.collection.*
 import std.sync.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 private const HTTP2_MAX_CONTROL_BURST: Int64 = 8
 
 public enum Http2WriteState {
@@ -120,6 +120,8 @@ public class Http2WriteTicket {
 public class Http2WriteScheduler {
     private let transport: DuplexTransport
     private let limits: Http2Limits
+    private let resourceBudget: ?internal.HttpResourceBudget
+    private let resourceOwner: ?internal.HttpResourceOwnerKey
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let controls = ArrayList<Http2QueuedWrite>()
@@ -127,6 +129,12 @@ public class Http2WriteScheduler {
     private var nextId: Int64 = 1
     private var queuedCount: Int64 = 0
     private var queuedBytes: UInt64 = 0u64
+    private var reservedQueueCount: Int64 = 0
+    private var reservedQueueBytes: UInt64 = 0u64
+    private var cleanupQueueReserved = false
+    private var cleanupQueueClaimed = false
+    private var cleanupQueueQueued = false
+    private var cleanupQueueBytes: UInt64 = 0u64
     private var schedulerState = Http2WriteSchedulerState.Open
     private var writerClaimed = false
     private var writerRunning = false
@@ -146,9 +154,177 @@ public class Http2WriteScheduler {
     public prop maximumPendingBytes: UInt64 { get() { synchronized(mutex) { maximumQueuedBytes } } }
     public prop isWriterRunning: Bool { get() { synchronized(mutex) { writerRunning } } }
 
-    public init(transport: DuplexTransport, limits!: Http2Limits = Http2Limits()) {
+    public init(
+        transport: DuplexTransport,
+        limits!: Http2Limits = Http2Limits(),
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
+    ) {
+        if (resourceBudget.isSome() != resourceOwner.isSome()) {
+            throw IllegalArgumentException("HTTP/2 writer budget and owner must be supplied together")
+        }
         this.transport = transport
         this.limits = limits
+        this.resourceBudget = resourceBudget
+        this.resourceOwner = resourceOwner
+    }
+    private func reserveQueuedBuffer(
+        bytes: UInt64,
+        control: Bool,
+        cleanup!: Bool = false
+    ): ?internal.HttpResourceLease {
+        if (let Some(budget) <- resourceBudget) {
+            let owner = resourceOwner.getOrThrow()
+            match (budget.tryAcquireManagedBuffer(owner, bytes, control)) {
+                case Some(lease) => Some(lease)
+                case None =>
+                    if (cleanup && bytes <= 17u64) {
+                        match (budget.tryAcquireManagedBuffer(owner, bytes, true, cleanup: true)) {
+                            case Some(lease) => Some(lease)
+                            case None => throw Http2WriteQueueFullException(
+                                "HTTP aggregate control and cleanup buffer budgets are exhausted"
+                            )
+                        }
+                    } else {
+                        throw Http2WriteQueueFullException(
+                            "HTTP aggregate managed-buffer budget is exhausted"
+                        )
+                    }
+            }
+        } else { None<internal.HttpResourceLease> }
+    }
+
+    private func waitForQueuedBuffer(
+        bytes: UInt64, control: Bool, context: OperationContext
+    ): ?internal.HttpResourceLease {
+        if (let Some(budget) <- resourceBudget) {
+            Some(budget.acquireManagedBuffer(
+                resourceOwner.getOrThrow(), bytes, control, context
+            ))
+        } else { None<internal.HttpResourceLease> }
+    }
+
+    private func retainBufferLease(
+        lease: ?internal.HttpResourceLease
+    ): ?internal.HttpResourceLease {
+        match (lease) {
+            case Some(value) => Some(value.retain())
+            case None => None<internal.HttpResourceLease>
+        }
+    }
+
+    private func releaseBufferLease(lease: ?internal.HttpResourceLease): Unit {
+        if (let Some(value) <- lease) { value.close() }
+    }
+
+    /** Reserves bounded queue capacity before serialization allocates retained bytes. */
+    private func reserveQueueCapacityImmediately(
+        count: Int64,
+        bytes: UInt64,
+        cleanup: Bool
+    ): Bool {
+        synchronized(mutex) {
+            if (!isSchedulerOpen(schedulerState)) {
+                throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+            }
+            if (queueCapacityAvailableLocked(count, bytes)) {
+                reservedQueueCount += count
+                reservedQueueBytes += bytes
+                return false
+            }
+            if (cleanup && count == 1 && bytes <= 17u64 && !cleanupQueueClaimed) {
+                cleanupQueueReserved = true
+                cleanupQueueClaimed = true
+                return true
+            }
+            throw Http2WriteQueueFullException("HTTP/2 pending write limit reached")
+        }
+    }
+
+    private func reserveQueueCapacityWaiting(
+        count: Int64,
+        bytes: UInt64,
+        context: OperationContext
+    ): Unit {
+        let registration = context.cancellation.register { => wakeWriter() }
+        try {
+            synchronized(mutex) {
+                while (true) {
+                    checkWriterContext(context)
+                    if (!isSchedulerOpen(schedulerState)) {
+                        throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+                    }
+                    if (queueCapacityAvailableLocked(count, bytes)) {
+                        reservedQueueCount += count
+                        reservedQueueBytes += bytes
+                        return
+                    }
+                    waitWriterChange(context)
+                }
+                throw IllegalStateException("unreachable HTTP/2 queue reservation state")
+            }
+        } finally {
+            registration.unregister()
+        }
+    }
+
+    private func queueCapacityAvailableLocked(count: Int64, bytes: UInt64): Bool {
+        let reservedSlotCount = if (cleanupQueueQueued) { 1 } else { 0 }
+        let ordinaryCount = queuedCount - reservedSlotCount + reservedQueueCount
+        let ordinaryBytes = queuedBytes - cleanupQueueBytes + reservedQueueBytes
+        let maximumCount = Int64(limits.maxPendingWrites)
+        let maximumBytes = UInt64(limits.maxPendingWriteBytes)
+        count <= maximumCount - min(ordinaryCount, maximumCount) &&
+            bytes <= maximumBytes - min(ordinaryBytes, maximumBytes)
+    }
+
+    private func commitQueueCapacityLocked(
+        count: Int64,
+        bytes: UInt64,
+        cleanupSlot: Bool
+    ): Unit {
+        if (cleanupSlot) {
+            if (!cleanupQueueReserved || !cleanupQueueClaimed) {
+                throw IllegalStateException("HTTP/2 cleanup queue reservation was lost")
+            }
+            cleanupQueueReserved = false
+            cleanupQueueQueued = true
+            cleanupQueueBytes = bytes
+        } else {
+            if (reservedQueueCount < count || reservedQueueBytes < bytes) {
+                throw IllegalStateException("HTTP/2 queue reservation accounting underflow")
+            }
+            reservedQueueCount -= count
+            reservedQueueBytes -= bytes
+        }
+    }
+
+    private func releaseQueueCapacity(
+        count: Int64,
+        bytes: UInt64,
+        cleanupSlot: Bool
+    ): Unit {
+        synchronized(mutex) {
+            if (cleanupSlot) {
+                if (cleanupQueueReserved) {
+                    cleanupQueueReserved = false
+                    cleanupQueueClaimed = false
+                }
+            } else if (reservedQueueCount >= count && reservedQueueBytes >= bytes) {
+                reservedQueueCount -= count
+                reservedQueueBytes -= bytes
+            }
+            changed.notifyAll()
+        }
+    }
+
+    private func releaseCleanupQueueSlotLocked(item: Http2QueuedWrite): Unit {
+        if (item.reservedCleanupQueueSlot && cleanupQueueClaimed) {
+            cleanupQueueReserved = false
+            cleanupQueueClaimed = false
+            cleanupQueueQueued = false
+            cleanupQueueBytes = 0u64
+        }
     }
 
     /** Fails immediately instead of exceeding either configured queue bound. */
@@ -183,31 +359,34 @@ public class Http2WriteScheduler {
             abort(reason: AbortReason.ProtocolFailure)
             throw IllegalArgumentException("HTTP/2 control batch cannot be empty")
         }
-        let encoded = ArrayList<Array<Byte>>()
         var totalBytes = 0u64
-        try {
-            for (frame in frames) {
-                if (isDataFrame(frame.header.frameType)) {
-                    throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
-                }
-                let bytes = serializeHttp2Frame(frame)
-                encoded.add(bytes)
-                totalBytes += UInt64(bytes.size)
+        for (frame in frames) {
+            if (isDataFrame(frame.header.frameType)) {
+                abort(reason: AbortReason.ProtocolFailure)
+                throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
             }
-        } catch (error: Exception) {
-            abort(reason: AbortReason.ProtocolFailure)
-            throw error
+            totalBytes += UInt64(frame.header.length) + 9u64
         }
-        let admitted = synchronized(mutex) {
-            if (!isSchedulerOpen(schedulerState)) {
-                throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
-            }
-            if (frames.size > Int64(limits.maxPendingWrites) - queuedCount ||
-                totalBytes > UInt64(limits.maxPendingWriteBytes) -
-                    min(queuedBytes, UInt64(limits.maxPendingWriteBytes))) {
-                None<Array<Http2WriteTicket>>
-            } else {
-                let tickets = ArrayList<Http2WriteTicket>()
+        if (frames.size > Int64(limits.maxPendingWrites) ||
+            totalBytes > UInt64(limits.maxPendingWriteBytes)) {
+            abort(reason: AbortReason.ProtocolFailure)
+            throw Http2WriteQueueFullException("HTTP/2 control batch exceeds the configured queue bounds")
+        }
+
+        var bufferLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+        var queueReserved = false
+        try {
+            bufferLease = reserveQueuedBuffer(totalBytes, true)
+            let cleanupSlot = reserveQueueCapacityImmediately(frames.size, totalBytes, false)
+            queueReserved = true
+            let encoded = ArrayList<Array<Byte>>()
+            for (frame in frames) { encoded.add(serializeHttp2Frame(frame)) }
+            let tickets = synchronized(mutex) {
+                if (!isSchedulerOpen(schedulerState)) {
+                    throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+                }
+                commitQueueCapacityLocked(frames.size, totalBytes, cleanupSlot)
+                let output = ArrayList<Http2WriteTicket>()
                 let batchId = nextId
                 for (index in 0..frames.size) {
                     let frame = frames[index]
@@ -215,25 +394,28 @@ public class Http2WriteScheduler {
                     controls.add(Http2QueuedWrite(
                         nextId, frame.header.streamId, encoded[index], ticket,
                         controlBatchId: Some(batchId),
-                        endsControlBatch: index == frames.size - 1
+                        endsControlBatch: index == frames.size - 1,
+                        bufferLease: retainBufferLease(bufferLease)
                     ))
                     nextId++
                     queuedCount++
                     queuedBytes += UInt64(encoded[index].size)
                     recordQueueHighWaterLocked()
-                    tickets.add(ticket)
+                    output.add(ticket)
                 }
                 changed.notifyAll()
-                Some(tickets.toArray())
+                output.toArray()
             }
-        }
-        match (admitted) {
-            case Some(tickets) => tickets
-            case None =>
-                abort(reason: AbortReason.ProtocolFailure)
-                throw Http2WriteQueueFullException(
-                    "HTTP/2 control batch reached the pending write limit"
-                )
+            queueReserved = false
+            releaseBufferLease(bufferLease)
+            tickets
+        } catch (error: Exception) {
+            if (queueReserved) {
+                releaseQueueCapacity(frames.size, totalBytes, false)
+            }
+            releaseBufferLease(bufferLease)
+            abort(reason: AbortReason.ProtocolFailure)
+            throw error
         }
     }
 
@@ -243,53 +425,53 @@ public class Http2WriteScheduler {
         context!: OperationContext = OperationContext.background()
     ): Array<Http2WriteTicket> {
         if (frames.isEmpty()) { return [] }
-        let encoded = ArrayList<Array<Byte>>()
         var totalBytes = 0u64
         for (frame in frames) {
             if (isDataFrame(frame.header.frameType)) {
                 throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
             }
-            let bytes = serializeHttp2Frame(frame)
-            encoded.add(bytes)
-            totalBytes += UInt64(bytes.size)
+            totalBytes += UInt64(frame.header.length) + 9u64
         }
         if (frames.size > Int64(limits.maxPendingWrites) ||
             totalBytes > UInt64(limits.maxPendingWriteBytes)) {
             throw Http2WriteQueueFullException("HTTP/2 control batch exceeds the configured queue bounds")
         }
-        let registration = context.cancellation.register { => wakeWriter() }
+        var bufferLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+        var queueReserved = false
         try {
-            synchronized(mutex) {
-                while (true) {
-                    checkWriterContext(context)
-                    if (!isSchedulerOpen(schedulerState)) {
-                        throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
-                    }
-                    if (frames.size <= Int64(limits.maxPendingWrites) - queuedCount &&
-                        totalBytes <= UInt64(limits.maxPendingWriteBytes) -
-                            min(queuedBytes, UInt64(limits.maxPendingWriteBytes))) {
-                        let tickets = ArrayList<Http2WriteTicket>()
-                        for (index in 0..frames.size) {
-                            let frame = frames[index]
-                            let ticket = Http2WriteTicket(nextId, frame.header.streamId, this)
-                            controls.add(Http2QueuedWrite(
-                                nextId, frame.header.streamId, encoded[index], ticket
-                            ))
-                            nextId++
-                            queuedCount++
-                            queuedBytes += UInt64(encoded[index].size)
-                            recordQueueHighWaterLocked()
-                            tickets.add(ticket)
-                        }
-                        changed.notifyAll()
-                        return tickets.toArray()
-                    }
-                    waitWriterChange(context)
+            bufferLease = waitForQueuedBuffer(totalBytes, true, context)
+            reserveQueueCapacityWaiting(frames.size, totalBytes, context)
+            queueReserved = true
+            let encoded = ArrayList<Array<Byte>>()
+            for (frame in frames) { encoded.add(serializeHttp2Frame(frame)) }
+            let tickets = synchronized(mutex) {
+                checkWriterContext(context)
+                if (!isSchedulerOpen(schedulerState)) {
+                    throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
                 }
-                throw IllegalStateException("unreachable HTTP/2 control admission state")
+                commitQueueCapacityLocked(frames.size, totalBytes, false)
+                let output = ArrayList<Http2WriteTicket>()
+                for (index in 0..frames.size) {
+                    let frame = frames[index]
+                    let ticket = Http2WriteTicket(nextId, frame.header.streamId, this)
+                    controls.add(Http2QueuedWrite(
+                        nextId, frame.header.streamId, encoded[index], ticket,
+                        bufferLease: retainBufferLease(bufferLease)
+                    ))
+                    nextId++
+                    queuedCount++
+                    queuedBytes += UInt64(encoded[index].size)
+                    recordQueueHighWaterLocked()
+                    output.add(ticket)
+                }
+                changed.notifyAll()
+                output.toArray()
             }
+            queueReserved = false
+            tickets
         } finally {
-            registration.unregister()
+            if (queueReserved) { releaseQueueCapacity(frames.size, totalBytes, false) }
+            releaseBufferLease(bufferLease)
         }
     }
 
@@ -297,30 +479,44 @@ public class Http2WriteScheduler {
         frame: Http2Frame,
         permit: ?Http2SendPermit
     ): Http2WriteTicket {
-        let bytes = serializeHttp2Frame(frame)
-        synchronized(mutex) {
-            if (!isSchedulerOpen(schedulerState)) {
-                throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+        let size = UInt64(frame.header.length) + 9u64
+        let cleanup = isCleanupFrame(frame)
+        let control = !isDataFrame(frame.header.frameType) || cleanup
+        let bufferLease = reserveQueuedBuffer(size, control, cleanup: cleanup)
+        var cleanupSlot = false
+        var queueReserved = false
+        var transferred = false
+        try {
+            cleanupSlot = reserveQueueCapacityImmediately(1, size, cleanup)
+            queueReserved = true
+            let bytes = serializeHttp2Frame(frame)
+            let ticket = synchronized(mutex) {
+                if (!isSchedulerOpen(schedulerState)) {
+                    throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+                }
+                commitQueueCapacityLocked(1, size, cleanupSlot)
+                let id = nextId
+                nextId++
+                let created = Http2WriteTicket(id, frame.header.streamId, this)
+                let item = Http2QueuedWrite(
+                    id, frame.header.streamId, bytes, created,
+                    permit: permit, bufferLease: bufferLease,
+                    reservedCleanupQueueSlot: cleanupSlot
+                )
+                if (isDataFrame(frame.header.frameType)) { enqueueDataLocked(item) }
+                else { controls.add(item) }
+                queuedCount++
+                queuedBytes += size
+                recordQueueHighWaterLocked()
+                changed.notifyAll()
+                created
             }
-            if (queuedCount >= Int64(limits.maxPendingWrites)) {
-                throw Http2WriteQueueFullException("HTTP/2 pending write count reached the configured limit")
-            }
-            let size = UInt64(bytes.size)
-            if (size > UInt64(limits.maxPendingWriteBytes) -
-                min(queuedBytes, UInt64(limits.maxPendingWriteBytes))) {
-                throw Http2WriteQueueFullException("HTTP/2 pending write bytes reached the configured limit")
-            }
-            let id = nextId
-            nextId += 1
-            let ticket = Http2WriteTicket(id, frame.header.streamId, this)
-            let item = Http2QueuedWrite(id, frame.header.streamId, bytes, ticket, permit: permit)
-            if (isDataFrame(frame.header.frameType)) { enqueueDataLocked(item) }
-            else { controls.add(item) }
-            queuedCount += 1
-            queuedBytes += size
-            recordQueueHighWaterLocked()
-            changed.notifyAll()
+            queueReserved = false
+            transferred = true
             ticket
+        } finally {
+            if (queueReserved) { releaseQueueCapacity(1, size, cleanupSlot) }
+            if (!transferred) { releaseBufferLease(bufferLease) }
         }
     }
 
@@ -351,7 +547,10 @@ public class Http2WriteScheduler {
                 claimed
             }
         }
-        for (item in failed) { item.ticket.markFailed("HTTP/2 write scheduler aborted") }
+        for (item in failed) {
+            item.releaseBuffer()
+            item.ticket.markFailed("HTTP/2 write scheduler aborted")
+        }
         abortTransportOnce(reason)
     }
 
@@ -430,12 +629,14 @@ public class Http2WriteScheduler {
             for (item in items) {
                 queuedCount -= 1
                 queuedBytes -= UInt64(item.bytes.size)
+                releaseCleanupQueueSlotLocked(item)
             }
             if (!items.isEmpty()) { changed.notifyAll() }
             items
         }
         for (item in removed) {
             item.cancelPermit()
+            item.releaseBuffer()
             item.ticket.markCancelled()
         }
         !removed.isEmpty()
@@ -474,11 +675,16 @@ public class Http2WriteScheduler {
             for (item in claimed) {
                 queuedCount -= 1
                 queuedBytes -= UInt64(item.bytes.size)
+                releaseCleanupQueueSlotLocked(item)
             }
             if (!claimed.isEmpty()) { changed.notifyAll() }
             claimed.toArray()
         }
-        for (item in removed) { item.cancelPermit(); item.ticket.markCancelled() }
+        for (item in removed) {
+            item.cancelPermit()
+            item.releaseBuffer()
+            item.ticket.markCancelled()
+        }
         removed.size
     }
 
@@ -490,16 +696,24 @@ public class Http2WriteScheduler {
                 case Some(value) =>
                     value.ticket.markWriting()
                     if (!value.beginPermit(context)) {
-                        synchronized(mutex) { active = None<Http2QueuedWrite> }
+                        synchronized(mutex) {
+                            active = None<Http2QueuedWrite>
+                            releaseCleanupQueueSlotLocked(value)
+                            changed.notifyAll()
+                        }
+                        value.releaseBuffer()
                         value.ticket.markCancelled()
                         continue
                     }
-                    writeQueued(value, context)
+                    try { writeQueued(value, context) }
+                    finally { value.releaseBuffer() }
                     let shouldFail = synchronized(mutex) {
                         active = None<Http2QueuedWrite>
+                        releaseCleanupQueueSlotLocked(value)
                         if (value.endsControlBatch) {
                             startedControlBatch = None<Int64>
                         }
+                        changed.notifyAll()
                         isSchedulerFailed(schedulerState)
                     }
                     if (shouldFail) {
@@ -526,6 +740,10 @@ public class Http2WriteScheduler {
             let item = selectNextLocked()
             queuedCount -= 1
             queuedBytes -= UInt64(item.bytes.size)
+            if (item.reservedCleanupQueueSlot) {
+                cleanupQueueQueued = false
+                cleanupQueueBytes = 0u64
+            }
             active = Some(item)
             changed.notifyAll()
             Some(item)
@@ -598,6 +816,7 @@ public class Http2WriteScheduler {
         controls.clear()
         for (queue in dataStreams) { for (item in queue.items) { output.add(item) } }
         dataStreams.clear()
+        for (item in output) { releaseCleanupQueueSlotLocked(item) }
         queuedCount = 0
         queuedBytes = 0u64
         startedControlBatch = None<Int64>
@@ -609,12 +828,21 @@ public class Http2WriteScheduler {
             schedulerState = Http2WriteSchedulerState.Failed
             let pending = drainQueuedLocked()
             let current = active
+            if (let Some(item) <- current) { releaseCleanupQueueSlotLocked(item) }
             active = None<Http2QueuedWrite>
             changed.notifyAll()
             (pending, current)
         }
-        for (item in queued) { item.cancelPermit(); item.ticket.markFailed(reason) }
-        if (let Some(item) <- writing) { item.cancelPermit(); item.ticket.markFailed(reason) }
+        for (item in queued) {
+            item.cancelPermit()
+            item.releaseBuffer()
+            item.ticket.markFailed(reason)
+        }
+        if (let Some(item) <- writing) {
+            item.cancelPermit()
+            item.releaseBuffer()
+            item.ticket.markFailed(reason)
+        }
     }
 
     private func writeQueued(item: Http2QueuedWrite, context: OperationContext): Unit {
@@ -661,7 +889,9 @@ private class Http2QueuedWrite {
     let ticket: Http2WriteTicket
     let controlBatchId: ?Int64
     let endsControlBatch: Bool
+    let reservedCleanupQueueSlot: Bool
     private let permit: ?Http2SendPermit
+    private let bufferLease: ?internal.HttpResourceLease
     init(
         id: Int64,
         streamId: Http2StreamId,
@@ -669,7 +899,9 @@ private class Http2QueuedWrite {
         ticket: Http2WriteTicket,
         permit!: ?Http2SendPermit = None<Http2SendPermit>,
         controlBatchId!: ?Int64 = None<Int64>,
-        endsControlBatch!: Bool = false
+        endsControlBatch!: Bool = false,
+        bufferLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>,
+        reservedCleanupQueueSlot!: Bool = false
     ) {
         this.id = id
         this.streamId = streamId
@@ -678,6 +910,8 @@ private class Http2QueuedWrite {
         this.permit = permit
         this.controlBatchId = controlBatchId
         this.endsControlBatch = endsControlBatch
+        this.reservedCleanupQueueSlot = reservedCleanupQueueSlot
+        this.bufferLease = bufferLease
     }
 
     func belongsToControlBatch(batchId: Int64): Bool {
@@ -691,6 +925,7 @@ private class Http2QueuedWrite {
         match (permit) { case Some(value) => value.beginSend(context: context); case None => true }
     }
     func cancelPermit(): Unit { if (let Some(value) <- permit) { let _ = value.cancel() } }
+    func releaseBuffer(): Unit { if (let Some(value) <- bufferLease) { value.close() } }
 }
 
 private class Http2DataWriteQueue {
@@ -728,6 +963,17 @@ private func writerAbortReason(context: OperationContext): AbortReason {
 
 private func isDataFrame(frameType: Http2FrameType): Bool {
     match (frameType) { case Http2FrameType.Data => true; case _ => false }
+}
+
+private func isCleanupFrame(frame: Http2Frame): Bool {
+    match (frame.header.frameType) {
+        case Http2FrameType.RstStream => frame.header.length == 4u32
+        case Http2FrameType.GoAway => frame.header.length == 8u32
+        case Http2FrameType.Data =>
+            frame.header.length == 0u32 && frame.header.flags.isEndStream() &&
+                frame.header.streamId.isStream()
+        case _ => false
+    }
 }
 
 private func isTerminalWriteState(state: Http2WriteState): Bool {

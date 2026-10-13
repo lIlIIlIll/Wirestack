@@ -6,7 +6,7 @@ import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 private class PoolTestClock <: MonotonicClock {
     private var current: MonoTime
     init() { current = MonoTime.now() }
@@ -18,7 +18,8 @@ private class PoolTestFactory <: Http1ConnectionFactory {
     let calls = AtomicInt64(0)
     private let peers = ArrayList<MemoryTransport>()
 
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         let _ = key
         if (context.isCancellationRequested()) { throw Exception("factory called after cancellation") }
         calls.fetchAdd(1)
@@ -29,7 +30,8 @@ private class PoolTestFactory <: Http1ConnectionFactory {
 }
 
 private class FailingPoolFactory <: Http1ConnectionFactory {
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         let _ = key
         let _ = context
         throw Exception("connect failed")
