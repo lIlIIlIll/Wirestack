@@ -333,34 +333,143 @@ key reference until it is closed.
 
 ## Structured events and stable errors
 
-Install an event sink on the immutable operation context when a request needs
-diagnostic evidence:
+Install a caller-owned bounded buffer when an operation needs diagnostic evidence:
 
 ```cj
-class MySink <: NetworkEventSink {
-    public func emit(event: NetworkEvent): Unit {
-        // Enqueue quickly; emit may run concurrently for connection attempts.
-        metrics.record(event.kind, event.outcome)
-    }
-}
+import wirestack as api
+import wirestack.http.*
 
-let context = OperationContext(
-    trace: Some(NetworkTraceContext("request-42", spanId: "fetch")),
-    eventSink: Some(MySink())
+let events = api.NetworkEventBuffer(capacity: 256)
+let context = api.OperationContext(
+    deadline: Some(api.Deadline.after(10 * Duration.second)),
+    eventSink: Some<api.NetworkEventSink>(events),
+    requestId: Some(42)
 )
-let response = client.get("https://service.internal/data", context: context)
+let response = client.get("https://example.test/data", context: context)
+let retained = client.observationSnapshot(observations: Some<api.NetworkEventStatistics>(events))
+response.close()
+let completed = client.observationSnapshot(observations: Some<api.NetworkEventStatistics>(events))
+let records = events.drain()
 ```
 
-The sink is disabled by default. Sink exceptions are isolated from network I/O.
-Events contain only typed lifecycle outcome, phase, stable network error code,
-opaque trace identifiers and an optional connection ID. Their type has no field
-for URLs, headers, cookies, authorization values, bodies, certificates, keys or
-session secrets.
+The default context has no sink, worker or global event service. The buffer
+allocates fixed slots once, accepts concurrent producers, drops newest when
+full, and releases retained references on FIFO drain. Capacity is 1–4096;
+cumulative drops saturate rather than wrap.
 
-Public HTTP protocol/policy failures use `HttpException.code`, including
-`InvalidUrl`, `InvalidRequest`, `InvalidResponse`, `HeaderLimitExceeded`,
-`BodyLimitExceeded`, `InvalidFraming`, `ProxyFailure`, `PoolExhausted`,
-`RedirectLimit` and `BodyNotReplayable`. HTTP 4xx/5xx remain normal responses.
+### Correlation and completion
+
+| Field or event | Meaning |
+| --- | --- |
+| `requestId` | One logical client send across retries/redirects. Supplied positive IDs are preserved; observed sends allocate an absent ID. |
+| `attemptId` | One protocol execution, not a DNS candidate. Retries/redirects get distinct IDs. |
+| `connectionId` | Process-local physical identity, allocated before creation and preserved through ALPN adoption, reuse and drain. |
+| `streamId` | Actual H2 wire stream ID, scoped by connection. H1 invents no stream ID. |
+| `connectionAttemptIndex` | One-based Happy Eyeballs candidate position. Skipped candidates are `NotExecuted` without fake starts. |
+| `RequestCompleted` | Logical client send returned final headers or failed, once rather than per retry. It is not body consumption. Server request events surround handler dispatch. |
+| `AttemptCompleted` | One execution returned headers or failed; a retry may follow. |
+| `BodyCompleted` | The separately retained body owner terminated. Unread-body abandonment differs from successful EOF and logical request failure. |
+
+Body and connection terminal emissions are exactly once. Complete H2
+END_STREAM responses retain readable bytes after graceful connection EOF;
+that EOF does not retrospectively fail a completed stream. No identifier
+registry or per-identifier metric map exists. IDs are local correlations, not
+automatic HTTP-header propagation between processes.
+
+### Real stages and deadline causes
+
+Admission, pool acquisition, DNS, indexed TCP attempts, proxy CONNECT, TLS,
+request write, response headers and active body reads use their operative
+contexts. Release, drain and close follow actual ownership transitions.
+Reused connections report DNS/TLS `NotExecuted`, not zero-duration work.
+Incoming server headers and response writes retain their existing operation
+budget and direction-neutral phases; observation adds no timeout owner.
+
+`occurredAt` uses the operation's monotonic clock; `stage` is the active stage.
+For a proved expired effective budget, `timeoutReason` distinguishes
+`TotalDeadline` from `StageLimit`; `timeoutStage` names the cap owner, which
+can differ from the failing stage. Unexpired native timeouts and aggregate
+failures without that proof leave the cause absent. Join the real stage event
+with its request/attempt instead of inventing a cause from summary events.
+`LocalBackpressureStarted/Completed` measure actual H2 send flow-window or
+admitted-permit waits, not remote response delay.
+
+### Read-only owner snapshots
+
+`HttpClient.observationSnapshot()` combines its actual aggregate ledger,
+current/retained route pools, TLS/direct/proxy DNS generations, optional
+resolver owners and optional caller-supplied event statistics.
+`HttpServer.observationSnapshot()` combines its ledger, current/retained TLS
+generations and draining accepted connections. Each owner is sampled
+independently; the composite is deliberately not a cross-owner atomic instant.
+
+Pools expose leased, idle, connecting, queued, active/reserved stream and
+draining counts. The ledger exposes active/reserved requests, streams and
+managed bytes, real bounded-admission rejections and cancellation measurements.
+Latency starts when Wirestack observes cancellation and ends after the
+measured request/stream/exchange leases are released. It does not measure
+arbitrary callbacks that ran before Wirestack or unrelated connection writer
+reservations. No completed cancellation means absent latency, not fake zero.
+
+Stock `wirestack.http.SystemResolver`, `wirestack.net.DnsClient` and
+`wirestack.net.Resolver` expose `ResolverResourceOwner`: active/queued queries,
+running native/protocol work, cache entries and rejections. A cancelled caller
+can finish while uncancellable native getaddrinfo still runs; that work remains
+visible. A closed native owner retains its final sample with `isLive == false`
+and the original timestamp, not current zero work. A custom resolver without
+the capability increments `unavailableResolvers`; its counters are unknown.
+
+### Optional asynchronous export
+
+Import `wirestack.observability` only for asynchronous export. Implement
+`NetworkEventExporter.export(events, context)` and explicitly construct
+`BoundedNetworkEventSink` with `NetworkEventSinkConfig`. Producers never wait
+for capacity. Queue capacity is 1–4096, batch size 1–capacity, and sampling
+denominator 1–65536. Stable sampling selects request ID, then attempt ID, then
+connection ID; uncorrelated events are retained. No label map grows with hosts,
+requests or traces.
+
+The adapter owns a fixed ring, at most one active batch, one export worker and
+at most one lazy cancellation dispatcher. Full queues drop newest. Exporter
+exceptions drop that batch without retry or retained error text. Sampling,
+queue-full, closed, shutdown and exporter-fault counters are separate.
+Exporter-retained batches are its additional memory ownership.
+
+`flush(context)` waits for settled queue/in-flight work, not guaranteed delivery:
+inspect export faults/drops. `close(context)` rejects new events, discards
+pending events, requests canonical cancellation, and waits for worker/callbacks.
+Both use the earlier caller absolute deadline and positive configured cap
+(at most five seconds). Repeated/reentrant close starts no extra dispatcher.
+Arbitrary exporter/cancellation code cannot be preempted: a blocked callback
+makes close return false within its bound; the snapshot retains running work.
+
+Synchronous event, pool and service-hook exceptions are isolated. Callbacks
+run outside owner locks and may reenter snapshots or rotation. A slow
+synchronous callback still delays its task; use the optional adapter instead
+of exporter I/O in synchronous hooks.
+
+### Privacy and diagnosis
+
+Events have no URL, header, cookie, authorization, body, certificate, key or
+session-secret field. Opaque trace IDs are caller supplied: do not put secrets
+there or into custom exporters. Metric labels should be fixed kind/outcome/
+phase/code enums, never request IDs, endpoints or traces. Public HTTP policy/
+protocol failures use `HttpException.code`; HTTP 4xx/5xx are normal responses.
+Observer exceptions never replace original typed I/O failures.
+
+The [installed native example](../../examples/linux/m10_005/observability.cj)
+locates bounded pool wait, controlled slow DNS, a silent peer's TLS handshake,
+delayed response headers and actual H2 local send-flow backpressure. It checks
+separate lifetimes, real reclamation, secret-marker inputs, bounded export,
+native FD/task stability and measured disabled/buffer/async request samples
+without a monitoring dependency. In the qualified SDK environment, run:
+
+```sh
+python3 tools/m10_005_native_observation.py --output docs/evidence/M10-005/installed/report.json
+```
+
+The runner verifies a fresh extracted installation outside the checkout. This
+is source-candidate development acceptance, not release qualification.
 
 
 ## Rotate TLS and resolver configuration online

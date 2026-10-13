@@ -2,14 +2,15 @@ package wirestack.internal.resolver
 
 import wirestack.internal.common.HostName
 import wirestack.internal.transport.OperationContext
+import wirestack as api
 
 /**
  * Platform system resolver backed by a fixed native worker pool.
  *
- * Call close when the resolver is no longer needed. Closing is idempotent and
- * waits for native work that outlived caller cancellation or Deadline expiry.
+ * Stops admission immediately. Closed snapshots retain the last native sample
+ * with isLive false because native work may still be blocked after close.
  */
-public class SystemResolver <: Resolver & Resource {
+public class SystemResolver <: Resolver & Resource & api.ResolverResourceOwner {
     private let backend: BoundedSystemResolverBackend
 
     /** Creates one resolver with explicit worker and queue bounds. */
@@ -58,5 +59,10 @@ public class SystemResolver <: Resolver & Resource {
     /** Returns bounded scheduler counters for diagnostics and deterministic tests. */
     public func metrics(): ResolverPoolMetrics {
         backend.metrics()
+    }
+
+    /** Samples actual native work while live, or returns the unchanged last sample after close. */
+    public func resolverResourceSnapshot(): api.ResolverResourceSnapshot {
+        backend.resourceSnapshot()
     }
 }

@@ -1,0 +1,161 @@
+[?25l[0J7[;r8
+[1F7[9999E8[0J7[;r8
+
+[2F7[9999E[1F
+passed: 0, failed: 0                   0% [--------------------]  0/3 (00:00:00) 8--------------------------------------------------------------------------------------------------
+TP: wirestack.observability, time elapsed: 1537155 ns, RESULT:
+Summary: TOTAL: 10
+    PASSED: 0, SKIPPED: 10, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport, time elapsed: 8537666 ns, RESULT:
+Summary: TOTAL: 91
+    PASSED: 0, SKIPPED: 91, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.trust, time elapsed: 1349843 ns, RESULT:
+Summary: TOTAL: 10
+    PASSED: 0, SKIPPED: 10, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 5842700 ns, RESULT:
+Summary: TOTAL: 67
+    PASSED: 0, SKIPPED: 67, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.common, time elapsed: 952308 ns, RESULT:
+Summary: TOTAL: 9
+    PASSED: 0, SKIPPED: 9, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 21580019 ns, RESULT:
+Summary: TOTAL: 147
+    PASSED: 0, SKIPPED: 147, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal, time elapsed: 2361825 ns, RESULT:
+Summary: TOTAL: 11
+    PASSED: 0, SKIPPED: 11, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.platform.linux, time elapsed: 722869 ns, RESULT:
+Summary: TOTAL: 5
+    PASSED: 0, SKIPPED: 5, ERROR: 0
+    FAILED: 0
+[0J7[;r8
+
+
+
+[4F7[9999E[3F📦 group wirestack.net                 0% [--------------------]      (00:00:00)
+🧪 test DnsResourceObservationTest.snapshotsFollowActualUdpAd...      (00:00:00)
+
+passed: 0, failed: 0                   0% [--------------------]  0/5 (00:00:00) 8[0J7[;r8
+
+
+
+[4F7[9999E[3F📦 group wirestack.net                50% [||||||||||----------]      (00:00:00)
+🧪 test DnsResourceObservationTest.nativeFallbackSnapshotsRet...      (00:00:00)
+
+passed: 1, failed: 0                  20% [||||----------------]  1/5 (00:00:01) 8--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 553714546 ns, RESULT:
+    TCS: DnsResourceObservationTest, time elapsed: 537433018 ns, RESULT:
+    [ PASSED ] CASE: snapshotsFollowActualUdpAdmissionQueueRejectionCacheAndClose (21548205 ns)
+    [ PASSED ] CASE: nativeFallbackSnapshotsRetainAbandonedWorkAndHistoricalCloseSample (514196507 ns)
+Summary: TOTAL: 124
+    PASSED: 2, SKIPPED: 122, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.tls, time elapsed: 1472809 ns, RESULT:
+Summary: TOTAL: 9
+    PASSED: 0, SKIPPED: 9, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 11447297 ns, RESULT:
+Summary: TOTAL: 73
+    PASSED: 0, SKIPPED: 73, ERROR: 0
+    FAILED: 0
+[0J7[;r8
+
+
+
+
+[5F7[9999E[4F📦 group wirestack.net               100% [||||||||||||||||||||] ✓    (00:00:00)
+📦 group wirestack.internal.resolver   0% [--------------------]      (00:00:00)
+🧪 test SystemResolverResourceObservationTest.realLocalhostCo...      (00:00:00)
+
+passed: 2, failed: 0                  40% [||||||||------------]  2/5 (00:00:01) 8[0J7[;r8
+
+
+
+[4F7[9999E[3F📦 group wirestack.internal.resolver   0% [--------------------]      (00:00:00)
+🧪 test SystemResolverResourceObservationTest.realLocalhostCo...      (00:00:00)
+
+passed: 2, failed: 0                  40% [||||||||------------]  2/5 (00:00:01) 8[0J7[;r8
+
+
+
+[4F7[9999E[3F📦 group wirestack.internal.resolver  33% [||||||--------------]      (00:00:00)
+🧪 test SystemResolverResourceObservationTest.abandonedNative...      (00:00:00)
+
+passed: 3, failed: 0                  60% [||||||||||||--------]  3/5 (00:00:02) 8[0J7[;r8
+
+
+
+[4F7[9999E[3F📦 group wirestack.internal.resolver  66% [|||||||||||||-------]      (00:00:01)
+🧪 test SystemResolverResourceObservationTest.closeDuringBloc...      (00:00:00)
+
+passed: 4, failed: 0                  80% [||||||||||||||||----]  4/5 (00:00:02) 8[0J7[;r8
+
+
+
+[4F7[9999E[3F📦 group wirestack.internal.resolver  66% [|||||||||||||-------]      (00:00:01)
+🧪 test SystemResolverResourceObservationTest.closeDuringBloc...      (00:00:00)
+
+passed: 4, failed: 0                  80% [||||||||||||||||----]  4/5 (00:00:02) 8--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 1661548881 ns, RESULT:
+    TCS: SystemResolverResourceObservationTest, time elapsed: 1657614754 ns, RESULT:
+    [ PASSED ] CASE: realLocalhostCompletionPreservesOwnerAndFinalSample (516084147 ns)
+    [ PASSED ] CASE: abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical (515476172 ns)
+    [ PASSED ] CASE: closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample (624447356 ns)
+Summary: TOTAL: 34
+    PASSED: 3, SKIPPED: 31, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.connector, time elapsed: 2087750 ns, RESULT:
+Summary: TOTAL: 18
+    PASSED: 0, SKIPPED: 18, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 24789941 ns, RESULT:
+Summary: TOTAL: 141
+    PASSED: 0, SKIPPED: 141, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 112974281 ns, RESULT:
+Summary: TOTAL: 196
+    PASSED: 0, SKIPPED: 196, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2585665298 ns, RESULT:
+TP: wirestack.*, time elapsed: 2585598212 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.platform.linux, time elapsed: 722869 ns
+    TP: wirestack.internal.common, time elapsed: 952308 ns
+    TP: wirestack.observability, time elapsed: 1537155 ns
+    TP: wirestack.internal.transport, time elapsed: 8537666 ns
+    TP: wirestack.internal.trust, time elapsed: 1349843 ns
+    TP: wirestack.internal, time elapsed: 2361825 ns
+    TP: wirestack.internal.resolver, time elapsed: 1661548881 ns
+    TP: wirestack.internal.tls_engine, time elapsed: 11447297 ns
+    TP: wirestack.internal.connector, time elapsed: 2087750 ns
+    TP: wirestack.internal.http2, time elapsed: 112974281 ns
+    TP: wirestack.tls, time elapsed: 1472809 ns
+    TP: wirestack.internal.http1, time elapsed: 21580019 ns
+    TP: wirestack.internal.transport_stdnet, time elapsed: 5842700 ns
+    TP: wirestack.net, time elapsed: 553714546 ns
+    TP: wirestack.http, time elapsed: 24789941 ns
+Summary: TOTAL: 945
+    PASSED: 5, SKIPPED: 940, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+[0J7[;r8[?25hcjpm test success

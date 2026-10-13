@@ -165,7 +165,11 @@ class HttpServerRotationTest {
             try { @Expect(response.status, 204) } finally { response.close() }
             client.close()
             rotationWaitConnections(server, 0)
-            for (index in 0..80) { @Expect(server.rotateTls(material), UInt64(index + 2)) }
+            for (index in 0..80) {
+                // Evaluate the mutation once, independently of assertion diagnostics.
+                let published = server.rotateTls(material)
+                @Expect(published, UInt64(index + 2))
+            }
             @Expect(server.tlsGeneration(), 81u64)
             rotationShutdown(server, serving)
             @AssertThrows[IllegalStateException](server.rotateTls(material))

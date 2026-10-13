@@ -43,6 +43,7 @@ public class Http2SendPermit {
     public let amount: Int64
     private let controller: Http2FlowController
     internal var current = Http2SendPermitState.Reserved
+    internal var observationContext = None<OperationContext>
 
     public prop state: Http2SendPermitState { get() { controller.permitState(this) } }
 
@@ -226,40 +227,65 @@ public class Http2FlowController {
         context!: OperationContext = OperationContext.background()
     ): Http2SendPermit {
         requirePositiveFlowBytes(requested)
-        let registration = context.cancellation.register { => wakeFlowWaiters() }
+        // Observation runs only after releasing the flow mutex.
         var stalled = false
+        var failure = None<Exception>
+        let waiter = synchronized(mutex) {
+            requireFlowOpenLocked()
+            if (permits.size + reservationWaiters.size >= Int64(limits.maxPendingWrites)) {
+                throw Http2WriteQueueFullException("HTTP/2 flow reservation limit reached")
+            }
+            let value = Http2ReservationWaiter(nextReservationWaiterId, streamId, requested)
+            nextReservationWaiterId += 1
+            reservationWaiters.add(value)
+            changed.notifyAll()
+            value
+        }
+        let registration = context.cancellation.register { => wakeFlowWaiters() }
         try {
-            synchronized(mutex) {
-                requireFlowOpenLocked()
-                if (permits.size + reservationWaiters.size >= Int64(limits.maxPendingWrites)) {
-                    throw Http2WriteQueueFullException("HTTP/2 flow reservation limit reached")
+            while (true) {
+                let permit = synchronized(mutex) {
+                    checkFlowContext(context)
+                    requireFlowOpenLocked()
+                    let stream = requireFlowStreamLocked(streamId)
+                    let amount = reservableLocked(stream, requested)
+                    if (amount > 0 && isNextReservationWaiterLocked(waiter)) {
+                        Some(reserveLocked(stream, amount))
+                    } else { None<Http2SendPermit> }
                 }
-                let waiter = Http2ReservationWaiter(
-                    nextReservationWaiterId, streamId, requested
-                )
-                nextReservationWaiterId += 1
-                reservationWaiters.add(waiter)
-                changed.notifyAll()
-                try {
-                    while (true) {
-                        checkFlowContext(context)
-                        requireFlowOpenLocked()
-                        let stream = requireFlowStreamLocked(streamId)
-                        let amount = reservableLocked(stream, requested)
-                        if (amount > 0 && isNextReservationWaiterLocked(waiter)) {
-                            return reserveLocked(stream, amount)
-                        }
-                        if (!stalled) { sendStallCount += 1; stalled = true }
+                if (let Some(value) <- permit) {
+                    if (context.eventSink.isSome()) { value.observationContext = Some(context) }
+                    return value
+                }
+                if (!stalled) {
+                    synchronized(mutex) { sendStallCount += 1 }
+                    stalled = true
+                    http2Observe(context, NetworkEventKind.LocalBackpressureStarted, NetworkEventOutcome.Started)
+                }
+                synchronized(mutex) {
+                    checkFlowContext(context)
+                    requireFlowOpenLocked()
+                    let stream = requireFlowStreamLocked(streamId)
+                    if (reservableLocked(stream, requested) == 0 || !isNextReservationWaiterLocked(waiter)) {
                         waitFlowChangeLocked(context)
                     }
-                    throw IllegalStateException("unreachable HTTP/2 flow reservation state")
-                } finally {
-                    removeReservationWaiterLocked(waiter)
-                    changed.notifyAll()
                 }
             }
+            throw IllegalStateException("unreachable HTTP/2 flow reservation state")
+        } catch (error: Exception) {
+            failure = Some(error)
+            throw error
         } finally {
+            synchronized(mutex) {
+                removeReservationWaiterLocked(waiter)
+                changed.notifyAll()
+            }
             registration.unregister()
+            if (stalled) {
+                http2Observe(context, NetworkEventKind.LocalBackpressureCompleted,
+                    if (failure.isSome()) { NetworkEventOutcome.Failed } else { NetworkEventOutcome.Succeeded },
+                    error: failure)
+            }
         }
     }
 
@@ -433,34 +459,60 @@ public class Http2FlowController {
 
     internal func beginPermit(permit: Http2SendPermit, context: OperationContext): Bool {
         let registration = context.cancellation.register { => wakeFlowWaiters() }
+        let observed = match (permit.observationContext) { case Some(value) => value; case None => context }
         var stalled = false
+        var failure = None<Exception>
+        var succeeded = false
         try {
-            synchronized(mutex) {
-                while (true) {
-                    if (!isPermitReserved(permit.current)) { return false }
-                    checkFlowContext(context)
-                    requireFlowOpenLocked()
-                    let stream = requireFlowStreamLocked(permit.streamId)
-                    if (sendConnectionWindow >= permit.amount && stream.sendWindow >= permit.amount) {
-                        sendConnectionWindow -= permit.amount
-                        stream.sendWindow -= permit.amount
-                        reservedConnectionBytes -= permit.amount
-                        stream.reservedSendBytes -= permit.amount
-                        removePermitLocked(permit)
-                        permit.current = Http2SendPermitState.Sending
-                        changed.notifyAll()
-                        return true
+            while (true) {
+                let result = synchronized(mutex) {
+                    if (!isPermitReserved(permit.current)) { 2 }
+                    else {
+                        checkFlowContext(context)
+                        requireFlowOpenLocked()
+                        let stream = requireFlowStreamLocked(permit.streamId)
+                        if (sendConnectionWindow >= permit.amount && stream.sendWindow >= permit.amount) {
+                            sendConnectionWindow -= permit.amount
+                            stream.sendWindow -= permit.amount
+                            reservedConnectionBytes -= permit.amount
+                            stream.reservedSendBytes -= permit.amount
+                            removePermitLocked(permit)
+                            permit.current = Http2SendPermitState.Sending
+                            changed.notifyAll()
+                            1
+                        } else { 0 }
                     }
-                    if (!stalled) { sendStallCount += 1; stalled = true }
-                    waitFlowChangeLocked(context)
                 }
-                false
+                if (result != 0) { succeeded = result == 1; return succeeded }
+                if (!stalled) {
+                    stalled = true
+                    synchronized(mutex) { sendStallCount += 1 }
+                    http2Observe(observed, NetworkEventKind.LocalBackpressureStarted, NetworkEventOutcome.Started)
+                }
+                synchronized(mutex) {
+                    if (isPermitReserved(permit.current)) {
+                        checkFlowContext(context)
+                        requireFlowOpenLocked()
+                        let stream = requireFlowStreamLocked(permit.streamId)
+                        if (sendConnectionWindow < permit.amount || stream.sendWindow < permit.amount) {
+                            waitFlowChangeLocked(context)
+                        }
+                    }
+                }
             }
+            false
         } catch (error: NetworkException) {
+            failure = Some(error)
             let _ = cancelPermit(permit)
             throw error
         } finally {
             registration.unregister()
+            if (stalled) {
+                http2Observe(observed, NetworkEventKind.LocalBackpressureCompleted,
+                    if (failure.isSome()) { NetworkEventOutcome.Failed }
+                    else if (succeeded) { NetworkEventOutcome.Succeeded } else { NetworkEventOutcome.Discarded },
+                    error: failure)
+            }
         }
     }
 

@@ -85,7 +85,7 @@ public func readHttp1Response(
     let interim = ArrayList<Http1InterimResponse>()
     let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
     while (true) {
-        let parsed = reader.readNext(headerContext)
+        let parsed = observedHttp1ReadHead(reader, headerContext)
         let head = parsed.head
         if (head.status < 200 && head.status != 101) {
             addInterim(interim, head)
@@ -131,7 +131,7 @@ public func exchangeHttp1ExpectContinue(
             continueContext
         }
         let parsed = try {
-            reader.readNext(waitContext)
+            observedHttp1ReadHead(reader, waitContext)
         } catch (error: NetworkException) {
             if (!bodySent && !context.isDeadlineExceeded() &&
                 isContinueWaitTimeout(error) && continueBudget.isDeadlineExceeded() &&
@@ -180,7 +180,7 @@ public func performHttp1Connect(
         let interim = ArrayList<Http1InterimResponse>()
         let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
         while (true) {
-            let parsed = reader.readNext(headerContext)
+            let parsed = observedHttp1ReadHead(reader, headerContext)
             let head = parsed.head
             if (head.status < 200 && head.status != 101) {
                 addInterim(interim, head)
@@ -191,7 +191,7 @@ public func performHttp1Connect(
                     case Http1BodyFraming.Tunnel =>
                         return Http1ConnectExchangeResult.Tunnel(
                             Http1Tunnel(head, Http1PrefixedTransport(
-                                transport, parsed.remaining, observer: observer
+                                transport, parsed.remaining, observer: observer, context: context
                             ))
                         )
                     case _ => throw Http1ParseException(
@@ -235,7 +235,7 @@ public func performHttp1Upgrade(
         let interim = ArrayList<Http1InterimResponse>()
         let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
         while (true) {
-            let parsed = reader.readNext(headerContext)
+            let parsed = observedHttp1ReadHead(reader, headerContext)
             let head = parsed.head
             if (head.status < 200 && head.status != 101) {
                 addInterim(interim, head)
@@ -246,7 +246,7 @@ public func performHttp1Upgrade(
                 return Http1UpgradeExchangeResult.Upgraded(
                     Http1Upgrade(
                         head, responseProtocol,
-                        Http1PrefixedTransport(transport, parsed.remaining, observer: observer)
+                        Http1PrefixedTransport(transport, parsed.remaining, observer: observer, context: context)
                     )
                 )
             }
@@ -343,12 +343,15 @@ internal class Http1PrefixedTransport <: DuplexTransport {
     private var readActive = false
     private var terminal = false
     private let observer: ?ResponseBodyObserver
+    private let observationContext: ?OperationContext
 
     init(delegate: DuplexTransport, prefix: Array<Byte>,
-        observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>) {
+        observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>,
+        context!: OperationContext = OperationContext.background()) {
         this.delegate = delegate
         this.prefix = prefix
         this.observer = observer
+        this.observationContext = if (context.eventSink.isSome()) { Some(context) } else { None<OperationContext> }
     }
 
     public prop info: TransportInfo { get() { delegate.info } }
@@ -391,8 +394,17 @@ internal class Http1PrefixedTransport <: DuplexTransport {
                 offset += copied
                 copied
             }
-            if (count > 0) { ReadResult.Data(count) }
-            else { delegate.readSome(destination, context: context) }
+            let readContext = http1StreamObservationContext(context, observationContext).forStage(OperationTimeoutStage.StreamReadIdle)
+            emitHttpStage(readContext, true)
+            try {
+                let result = if (count > 0) { ReadResult.Data(count) }
+                    else { delegate.readSome(destination, context: readContext) }
+                emitHttpStage(readContext, false)
+                result
+            } catch (error: Exception) {
+                emitHttpStage(readContext, false, code: Some(httpObservationError(error)))
+                throw error
+            }
         } finally {
             synchronized(mutex) { readActive = false }
         }
@@ -436,6 +448,22 @@ internal class Http1PrefixedTransport <: DuplexTransport {
             if (terminal) { false } else { terminal = true; true }
         }
     }
+}
+
+private func http1StreamObservationContext(context: OperationContext, owner: ?OperationContext): OperationContext {
+    if (let Some(value) <- owner) {
+        if (context.eventSink.isSome() && context.connectionId.isSome() && context.requestId.isSome() && context.attemptId.isSome()) {
+            return context
+        }
+        return OperationContext(deadline: context.deadline, cancellation: context.cancellation,
+            timeoutPolicy: context.timeoutPolicy, stage: context.stage, deadlineStage: context.deadlineStage,
+            eventSink: if (context.eventSink.isSome()) { context.eventSink } else { value.eventSink },
+            trace: if (context.trace.isSome()) { context.trace } else { value.trace },
+            requestId: if (context.requestId.isSome()) { context.requestId } else { value.requestId },
+            attemptId: if (context.attemptId.isSome()) { context.attemptId } else { value.attemptId },
+            connectionId: value.connectionId, streamId: value.streamId)
+    }
+    context
 }
 
 internal func requireHttp1UpgradeContext(context: OperationContext): Unit {
@@ -492,9 +520,10 @@ private func finishResponse(
     }
     let source = responseBodySource(transport, head.framing, input, context, limits)
     let body = match (source) {
-        case Http1ResponseBodySource.Plain(stream) => ResponseBody(stream, observer: observer)
+        case Http1ResponseBodySource.Plain(stream) =>
+            observedHttp1ResponseBody(stream, observer, context, { => None<HttpTrailer> })
         case Http1ResponseBodySource.Chunked(stream) =>
-            ResponseBody(stream, observer: observer, trailerProvider: { => stream.trailer })
+            observedHttp1ResponseBody(stream, observer, context, { => stream.trailer })
     }
     Http1ResponseReadResult(
         HttpResponse(Int64(head.status), head.reason, body, version: head.version, headers: head.headers),
@@ -536,6 +565,18 @@ protected func headerContainsToken(headers: HttpHeaders, name: String, token: St
         }
     }
     false
+}
+
+private func observedHttp1ReadHead(reader: Http1ResponseSequenceReader, context: OperationContext): Http1ParsedResponseHead {
+    emitHttpStage(context, true)
+    try {
+        let parsed = reader.readNext(context)
+        emitHttpStage(context, false)
+        parsed
+    } catch (error: Exception) {
+        emitHttpStage(context, false, code: Some(httpObservationError(error)))
+        throw error
+    }
 }
 
 private class Http1ResponseSequenceReader {
@@ -632,7 +673,11 @@ private func responseBodySource(
     }
 }
 
-internal class Http1FixedBodyStream <: HttpBodyStream {
+internal interface Http1ObservedReadSource {
+    func readObserved(destination: Array<Byte>, context: OperationContext): Int64
+}
+
+internal class Http1FixedBodyStream <: HttpBodyStream & Http1ObservedReadSource {
     private let transport: DuplexTransport
     private let context: OperationContext
     private let initial: Array<Byte>
@@ -650,6 +695,9 @@ internal class Http1FixedBodyStream <: HttpBodyStream {
 
     public prop contentLength: ?Int64 { get() { Some(length) } }
     public func read(destination: Array<Byte>): Int64 {
+        readObserved(destination, context)
+    }
+    public func readObserved(destination: Array<Byte>, context: OperationContext): Int64 {
         ensureResponseStreamOpen(closed)
         if (destination.isEmpty()) { return 0 }
         checkHttp1BodyContext(context)
@@ -677,7 +725,7 @@ internal class Http1FixedBodyStream <: HttpBodyStream {
     public func isClosed(): Bool { closed }
 }
 
-private class Http1CloseBodyStream <: HttpBodyStream {
+private class Http1CloseBodyStream <: HttpBodyStream & Http1ObservedReadSource {
     private let transport: DuplexTransport
     private let context: OperationContext
     private let initial: Array<Byte>
@@ -693,6 +741,9 @@ private class Http1CloseBodyStream <: HttpBodyStream {
 
     public prop contentLength: ?Int64 { get() { None<Int64> } }
     public func read(destination: Array<Byte>): Int64 {
+        readObserved(destination, context)
+    }
+    public func readObserved(destination: Array<Byte>, context: OperationContext): Int64 {
         ensureResponseStreamOpen(closed)
         if (destination.isEmpty()) { return 0 }
         checkHttp1BodyContext(context)
@@ -717,7 +768,7 @@ private class Http1CloseBodyStream <: HttpBodyStream {
     public func isClosed(): Bool { closed }
 }
 
-internal class Http1ChunkedBodyStream <: HttpBodyStream {
+internal class Http1ChunkedBodyStream <: HttpBodyStream & Http1ObservedReadSource {
     private let transport: DuplexTransport
     private let context: OperationContext
     private let decoder: Http1ChunkedDecoder
@@ -749,6 +800,9 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
     }
 
     public func read(destination: Array<Byte>): Int64 {
+        readObserved(destination, context)
+    }
+    public func readObserved(destination: Array<Byte>, context: OperationContext): Int64 {
         ensureResponseStreamOpen(closed)
         if (destination.isEmpty()) { return 0 }
         checkHttp1BodyContext(context)
@@ -795,6 +849,91 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
     }
     public func close(): Unit { closed = true }
     public func isClosed(): Bool { closed }
+}
+
+internal func observedHttp1ResponseBody(stream: HttpBodyStream, observer: ResponseBodyObserver,
+    context: OperationContext, trailerProvider: () -> ?HttpTrailer): ResponseBody {
+    if (context.eventSink.isNone()) {
+        return ResponseBody(stream, observer: observer, trailerProvider: trailerProvider)
+    }
+    let observed = Http1ObservedResponseBody(stream, observer, context)
+    observed.start()
+    ResponseBody(observed, observer: observed, trailerProvider: trailerProvider)
+}
+
+private class Http1ObservedResponseBody <: HttpBodyStream & ResponseBodyObserver {
+    private let stream: HttpBodyStream
+    private let observer: ResponseBodyObserver
+    private let context: OperationContext
+    private let mutex = Mutex()
+    private var terminal = false
+    private var cancellation = None<CancellationRegistration>
+
+    init(stream: HttpBodyStream, observer: ResponseBodyObserver, context: OperationContext) {
+        this.stream = stream; this.observer = observer; this.context = context
+    }
+
+    func start(): Unit {
+        emitNetworkEvent(context, NetworkEvent(NetworkEventKind.BodyStarted, NetworkEventOutcome.Started))
+        match (observer) {
+            case owner: Http1BodyObservationOwner => owner.bindBodyObservation { code =>
+                let outcome = match (code) {
+                    case NetworkErrorCode.Closed => NetworkEventOutcome.Discarded
+                    case _ => NetworkEventOutcome.Failed
+                }
+                finish(outcome, Some(code), context)
+            }
+            case _ => ()
+        }
+        let registration = context.cancellation.register { =>
+            finish(NetworkEventOutcome.Failed, Some(NetworkErrorCode.Cancelled), context)
+        }
+        let discard = synchronized(mutex) {
+            if (terminal) { true } else { cancellation = Some(registration); false }
+        }
+        if (discard) { registration.unregister() }
+    }
+
+    public prop contentLength: ?Int64 { get() { stream.contentLength } }
+    public func read(destination: Array<Byte>): Int64 {
+        if (destination.isEmpty()) { return stream.read(destination) }
+        let readContext = context.forStage(OperationTimeoutStage.BodyReadIdle)
+        emitHttpStage(readContext, true)
+        try {
+            let count = match (stream) {
+                case source: Http1ObservedReadSource => source.readObserved(destination, readContext)
+                case _ => stream.read(destination)
+            }
+            emitHttpStage(readContext, false)
+            count
+        } catch (error: Exception) {
+            let code = Some(httpObservationError(error))
+            emitHttpStage(readContext, false, code: code)
+            finish(NetworkEventOutcome.Failed, code, readContext)
+            throw error
+        }
+    }
+    public func close(): Unit { stream.close() }
+    public func isClosed(): Bool { stream.isClosed() }
+    public func completed(): Unit {
+        finish(NetworkEventOutcome.Succeeded, None<NetworkErrorCode>, context)
+        observer.completed()
+    }
+    public func abandoned(): Unit {
+        finish(NetworkEventOutcome.Discarded, Some(NetworkErrorCode.Closed), context)
+        observer.abandoned()
+    }
+    private func finish(outcome: NetworkEventOutcome, code: ?NetworkErrorCode, evidence: OperationContext): Unit {
+        var registration = None<CancellationRegistration>
+        let won = synchronized(mutex) {
+            if (terminal) { false } else {
+                terminal = true; registration = cancellation; cancellation = None<CancellationRegistration>; true
+            }
+        }
+        if (!won) { return }
+        if (let Some(value) <- registration) { value.unregister() }
+        emitNetworkEvent(evidence, NetworkEvent(NetworkEventKind.BodyCompleted, outcome, errorCode: code))
+    }
 }
 
 private class InternalNoopBodyObserver <: ResponseBodyObserver {

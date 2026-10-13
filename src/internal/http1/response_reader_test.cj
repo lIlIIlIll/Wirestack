@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.sync.*
+import wirestack as api
 import std.collection.ArrayList
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -9,6 +10,102 @@ import wirestack.internal.transport.*
 
 @Test
 class Http1ResponseReaderTest {
+    @TestCase
+    func upgradedReadsKeepOwnerCorrelationWithoutReplacingCallerIdleBudget(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048)
+        writeAll(server, ByteSpan("HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\nx".toArray()))
+        let sink = api.NetworkEventBuffer(capacity: 64)
+        let request = HttpRequest.get("http://example.test/chat").withHeaders(
+            HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "websocket").build())
+        let result = performHttp1Upgrade(client, request, context: OperationContext(eventSink: Some(sink),
+            requestId: Some(801), attemptId: Some(802), connectionId: Some(803)))
+        let upgraded = match (result) { case Http1UpgradeExchangeResult.Upgraded(value) => value; case _ => throw Exception("upgrade rejected") }
+        let _ = sink.drain()
+        let context = OperationContext(deadline: Some(Deadline.after(Duration.second)),
+            timeoutPolicy: OperationTimeoutPolicy(streamReadIdle: Some(5 * Duration.millisecond)))
+        let bytes = Array<Byte>(1, repeat: 0)
+        match (upgraded.transport.readSome(MutableByteSpan(bytes), context: context)) {
+            case ReadResult.Data(1) => @Expect(bytes[0], 120u8)
+            case _ => @Fail("upgrade lost parser remainder")
+        }
+        let _ = @AssertThrows[NetworkException](upgraded.transport.readSome(MutableByteSpan(bytes), context: context))
+        var starts: Int64 = 0
+        var ends: Int64 = 0
+        var timedOut: Int64 = 0
+        for (event in sink.drain()) {
+            @Expect(event.requestId, Some(801)); @Expect(event.attemptId, Some(802)); @Expect(event.connectionId, Some(803))
+            match (event.kind) {
+                case NetworkEventKind.StageStarted => starts++
+                case NetworkEventKind.StageCompleted =>
+                    ends++
+                    match (event.errorCode) {
+                        case Some(NetworkErrorCode.TimedOut) =>
+                            timedOut++
+                            match (event.timeoutStage) { case Some(OperationTimeoutStage.StreamReadIdle) => (); case _ => @Fail("lost stream idle owner") }
+                        case _ => ()
+                    }
+                case _ => @Fail("stream read emitted an unrelated lifecycle event")
+            }
+        }
+        @Expect(starts, 2); @Expect(ends, 2); @Expect(timedOut, 1)
+        upgraded.transport.close(); server.close()
+    }
+
+    @TestCase
+    func bodyTerminationSeparatesIdleTimeoutAbandonmentEofAndCancellation(): Unit {
+        for (mode in 0..4) {
+            let (client, server) = MemoryTransport.pair(capacity: 2048)
+            writeAll(server, ByteSpan("HTTP/1.1 200 OK\r\nContent-Length: 1\r\n\r\n".toArray()))
+            if (mode == 2) { server.shutdown(ShutdownDirection.Write) }
+            let sink = api.NetworkEventBuffer(capacity: 64)
+            let source = CancellationSource()
+            let result = readHttp1Response(client, HttpMethod("GET"), context: OperationContext(
+                eventSink: Some(sink), cancellation: source.token, requestId: Some(41), attemptId: Some(42),
+                connectionId: Some(43), timeoutPolicy: OperationTimeoutPolicy(
+                    bodyReadIdle: Some(5 * Duration.millisecond))))
+            let initial = sink.drain()
+            var starts: Int64 = 0
+            for (event in initial) {
+                match (event.kind) { case NetworkEventKind.BodyStarted => starts++; case _ => () }
+            }
+            @Expect(starts, 1)
+            if (mode == 0 || mode == 2) {
+                let _ = @AssertThrows[NetworkException](result.response.body.read(Array<Byte>(1, repeat: 0)))
+            } else if (mode == 3) { source.cancel() }
+            result.response.close()
+            result.response.close()
+            var completed: Int64 = 0
+            for (event in sink.drain()) {
+                match (event.kind) {
+                    case NetworkEventKind.BodyCompleted =>
+                        completed++
+                        @Expect(event.connectionId, Some(43))
+                        @Expect(event.requestId, Some(41))
+                        @Expect(event.attemptId, Some(42))
+                        match ((mode, event.errorCode)) {
+                            case (0, Some(NetworkErrorCode.TimedOut)) =>
+                                match (event.timeoutReason) {
+                                    case Some(api.NetworkTimeoutReason.StageLimit) => ()
+                                    case _ => @Fail("body idle timeout lost its cap owner")
+                                }
+                                match (event.timeoutStage) {
+                                    case Some(OperationTimeoutStage.BodyReadIdle) => ()
+                                    case _ => @Fail("body idle timeout attributed to another stage")
+                                }
+                            case (1, Some(NetworkErrorCode.Closed)) =>
+                                match (event.outcome) { case NetworkEventOutcome.Discarded => (); case _ => @Fail("close became success") }
+                            case (2, Some(NetworkErrorCode.UnexpectedEof)) => ()
+                            case (3, Some(NetworkErrorCode.Cancelled)) => ()
+                            case _ => @Fail("wrong body terminal error")
+                        }
+                    case _ => ()
+                }
+            }
+            @Expect(completed, 1)
+            client.close(); server.close()
+        }
+    }
+
     @TestCase
     func explicitUpgradeTransfersOnlyAMatching101Protocol(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 64)

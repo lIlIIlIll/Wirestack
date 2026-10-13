@@ -2,6 +2,7 @@ package wirestack.http
 
 import std.sync.Mutex
 import std.collection.ArrayList
+import wirestack as api
 import wirestack.internal.http1 as http1
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
@@ -240,6 +241,7 @@ public class HttpClient <: Resource {
     private var secureSlot: ?ClientRotationSlot = None<ClientRotationSlot>
     private var tunnelSlot: ?ClientRotationSlot = None<ClientRotationSlot>
     private let generations = ArrayList<ClientRotationSlot>()
+    private let generationResolvers = ArrayList<Resolver>()
     private var tlsGeneration: UInt64 = 1
     private var directDnsGeneration: UInt64 = 1
     private var proxyDnsGeneration: UInt64 = 1
@@ -302,9 +304,10 @@ public class HttpClient <: Resource {
             case _ => None<http1.Http1HttpsProxyClient>
         }
         generations.add(cleartextSlot)
-        if (let Some(value) <- forwardProxy) { forwardSlot = Some(wrapForward(value)); generations.add(forwardSlot.getOrThrow()) }
-        if (let Some(value) <- https) { secureSlot = Some(wrapHttps(value, directTlsLease.getOrThrow().owner)); generations.add(secureSlot.getOrThrow()) }
-        if (let Some(value) <- httpsProxy) { tunnelSlot = Some(wrapTunnel(value, proxyTlsLease.getOrThrow().owner)); generations.add(tunnelSlot.getOrThrow()) }
+        generationResolvers.add(resolver)
+        if (let Some(value) <- forwardProxy) { forwardSlot = Some(wrapForward(value)); generations.add(forwardSlot.getOrThrow()); generationResolvers.add(proxyResolver.getOrThrow()) }
+        if (let Some(value) <- https) { secureSlot = Some(wrapHttps(value, directTlsLease.getOrThrow().owner)); generations.add(secureSlot.getOrThrow()); generationResolvers.add(resolver) }
+        if (let Some(value) <- httpsProxy) { tunnelSlot = Some(wrapTunnel(value, proxyTlsLease.getOrThrow().owner)); generations.add(tunnelSlot.getOrThrow()); generationResolvers.add(proxyResolver.getOrThrow()) }
     }
 
 /**
@@ -350,7 +353,8 @@ public class HttpClient <: Resource {
     }
 
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Sends one logical request across retries and redirects. RequestCompleted records the final header return
+ * or API failure, not response-body completion. Body ownership remains with the returned response.
  * @param context 控制本次操作的截止时间、取消和追踪范围。
  * @param request 待处理的 HTTP 请求。
  * @param trailer 调用方提供的输入值。
@@ -519,16 +523,28 @@ public class HttpClient <: Resource {
             case None => context
         }
         let cancellation = HttpRequestCancellationOperation(
-            bounded, requestCancellation, connectionCancellation, streamCancellation
+            observedRequestContext(bounded, poolHook.isSome()), requestCancellation, connectionCancellation, streamCancellation,
+            metrics: Some(resourceBudget)
         )
         let operation = withHttpPoolHook(cancellation.context, poolHook)
+        emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
+        var terminalContext = operation
         try {
             var current = request
             var redirectCount: Int64 = 0
             while (true) {
-                let requestLease = resourceBudget.acquireRequest(
-                    resourceOwner(current.url), operation.forStage(transport.OperationTimeoutStage.RequestAdmission)
-                )
+                let admission = operation.forStage(transport.OperationTimeoutStage.RequestAdmission)
+                terminalContext = admission
+                emitHttpObservation(admission, NetworkEventKind.StageStarted, NetworkEventOutcome.Started)
+                let requestLease = try {
+                    let lease = resourceBudget.acquireRequest(resourceOwner(current.url), admission)
+                    emitHttpObservation(admission, NetworkEventKind.StageCompleted, NetworkEventOutcome.Succeeded)
+                    lease
+                } catch (error: Exception) {
+                    emitHttpFailure(admission, NetworkEventKind.StageCompleted, error)
+                    throw error
+                }
+                terminalContext = operation
                 cancellation.retainResource(requestLease)
                 let response = executeWithRetries(
                     current, operation, trailer, cancellation.connectionCancellation
@@ -550,12 +566,16 @@ public class HttpClient <: Resource {
                         }
                         current = value
                         redirectCount++
-                    case None => return cancellation.wrap(response)
+                    case None =>
+                        let result = cancellation.wrap(response)
+                        emitHttpObservation(operation, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
+                        return result
                 }
             }
             throw Exception("unreachable HTTP redirect loop exit")
         } catch (error: Exception) {
             cancellation.fail()
+            emitHttpFailure(terminalContext, NetworkEventKind.RequestCompleted, error)
             throw wrapHttpError(error)
         }
     }
@@ -608,7 +628,16 @@ public class HttpClient <: Resource {
         while (true) {
             try {
                 let outgoing = requestWithCookies(request, operation)
-                let response = executeOnce(outgoing, operation, trailer, connectionCancellation)
+                let attemptContext = observedAttemptContext(operation)
+                emitHttpObservation(attemptContext, NetworkEventKind.AttemptStarted, NetworkEventOutcome.Started)
+                let response = try {
+                    let result = executeOnce(outgoing, attemptContext, trailer, connectionCancellation)
+                    emitHttpObservation(attemptContext, NetworkEventKind.AttemptCompleted, NetworkEventOutcome.Succeeded)
+                    result
+                } catch (error: Exception) {
+                    emitHttpFailure(attemptContext, NetworkEventKind.AttemptCompleted, error)
+                    throw error
+                }
                 try {
                     captureCookies(response.headers, request.url, operation)
                 } catch (error: Exception) {
@@ -667,6 +696,33 @@ public class HttpClient <: Resource {
     public func resourceSnapshot(): HttpResourceSnapshot {
         resourceSnapshotFromLedger(resourceBudget.snapshot())
     }
+    /** Samples real counters outside the client lock; modules are sampled independently.
+     * @param observations Optional caller-owned bounded observation statistics.
+     */
+    public func observationSnapshot(observations!: ?api.NetworkEventStatistics = None<api.NetworkEventStatistics>): HttpClientObservationSnapshot {
+        let (routes, resolvers, configuration) = synchronized(mutex) {
+            (generations.toArray(), generationResolvers.toArray(), configurationCounters())
+        }
+        var pools = api.NetworkConnectionPoolSnapshot()
+        let liveResolvers = ArrayList<Resolver>()
+        let tlsOwners = ArrayList<UInt64>()
+        for (index in 0..routes.size) {
+            let route = routes[index]
+            if (route.client.isClosed()) { continue }
+            pools = pools.combinedWith(sampleHttpPool(route.client))
+            liveResolvers.add(resolvers[index])
+            if (let Some(owner) <- route.tlsOwner) {
+                var found = false
+                for (id in tlsOwners) { if (id == owner.id) { found = true; break } }
+                if (!found) { tlsOwners.add(owner.id) }
+            }
+        }
+        let (rows, unavailable) = sampleHttpResolvers(liveResolvers.toArray())
+        let retained = HttpClientConfigurationSnapshot(configuration.tlsGeneration, configuration.directDnsGeneration,
+            configuration.proxyDnsGeneration, liveResolvers.size, tlsOwners.size)
+        HttpClientObservationSnapshot(resourceSnapshot(), pools, retained, rows, unavailable,
+            sampleHttpObservations(observations))
+    }
 
     /**
      * Atomically installs validated TLS contexts in fresh direct/proxy pools.
@@ -674,10 +730,12 @@ public class HttpClient <: Resource {
      * Transferred HTTP/1 duplex sessions retain their original context until close.
      * @param value Caller-owned reusable TLS material; validation precedes publication.
      * @param policy Explicit rotation policy, never inferred from certificate contents.
+     * @param context Optional observation sink and correlation; rotation does not acquire a timeout budget.
      * @return New TLS generation. Failed validation or retention capacity preserves the old configuration.
      */
     public func rotateTls(value: HttpClientTlsConfig,
-        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful): UInt64 {
+        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful,
+        context!: OperationContext = OperationContext.background()): UInt64 {
         let direct = value.createAlpnHandshaker()
         var tunneled = None<http1.Http1TlsHandshaker>
         var published = false
@@ -706,12 +764,14 @@ public class HttpClient <: Resource {
                 directTlsLease = Some(directLease); https = Some(secure); secureSlot = Some(secureGeneration)
                 proxyTlsLease = proxyLease; httpsProxy = tunnel; tunnelSlot = tunnelGeneration
                 generations.add(secureGeneration)
-                if (let Some(slot) <- tunnelGeneration) { generations.add(slot) }
+                generationResolvers.add(resolver)
+                if (let Some(slot) <- tunnelGeneration) { generations.add(slot); generationResolvers.add(proxyResolver.getOrThrow()) }
                 tlsGeneration++; nextTlsOwner += 2
                 published = true
                 (tlsGeneration, retirementSet(oldSecure, oldTunnel, 2, 3, policy))
             }
             for (slot in retiring) { slot.retire(policy) }
+            emitHttpObservation(context, NetworkEventKind.ConfigurationRotated, NetworkEventOutcome.Succeeded)
             generation
         } finally {
             if (!published) {
@@ -726,10 +786,12 @@ public class HttpClient <: Resource {
      * Existing queries keep the old resolver; no result or cache is transferred.
      * @param value New resolver, normally freshly constructed for hosts/search/nameserver changes.
      * @param policy Explicit in-flight policy. DNS TTL expiry alone never invokes rotation.
+     * @param context Optional publication observation sink; no resolver query or timeout stage is added.
      * @return New direct DNS generation.
      */
     public func rotateResolver(value: Resolver,
-        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful): UInt64 {
+        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful,
+        context!: OperationContext = OperationContext.background()): UInt64 {
         let (generation, retiring) = synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP client is closed") }
             if (directDnsGeneration == 18446744073709551615u64) {
@@ -753,11 +815,13 @@ public class HttpClient <: Resource {
             resolver = value; cleartext = clear; cleartextSlot = clearGeneration
             directTlsLease = handshaker; https = secure; secureSlot = secureGeneration
             generations.add(clearGeneration)
-            if (let Some(slot) <- secureGeneration) { generations.add(slot) }
+            generationResolvers.add(value)
+            if (let Some(slot) <- secureGeneration) { generations.add(slot); generationResolvers.add(value) }
             directDnsGeneration++
             (directDnsGeneration, retirementSet(Some(oldClear), oldSecure, 0, 2, policy))
         }
         for (slot in retiring) { slot.retire(policy) }
+        emitHttpObservation(context, NetworkEventKind.ConfigurationRotated, NetworkEventOutcome.Succeeded)
         generation
     }
 
@@ -765,10 +829,12 @@ public class HttpClient <: Resource {
      * Replaces proxy-endpoint DNS without changing direct DNS, NO_PROXY rules or authentication hooks.
      * @param value Caller-owned immutable proxy resolver snapshot.
      * @param policy Explicit in-flight policy.
+     * @param context Optional publication observation sink; no resolver query or timeout stage is added.
      * @return New proxy DNS generation; absence of an explicit proxy is rejected atomically.
      */
     public func rotateProxyResolver(value: Resolver,
-        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful): UInt64 {
+        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful,
+        context!: OperationContext = OperationContext.background()): UInt64 {
         let (generation, retiring) = synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP client is closed") }
             let route = proxy.getOrThrow()
@@ -793,11 +859,13 @@ public class HttpClient <: Resource {
             proxyResolver = Some(value); forwardProxy = Some(forward); forwardSlot = Some(forwardGeneration)
             proxyTlsLease = handshaker; httpsProxy = tunnel; tunnelSlot = tunnelGeneration
             generations.add(forwardGeneration)
-            if (let Some(slot) <- tunnelGeneration) { generations.add(slot) }
+            generationResolvers.add(value)
+            if (let Some(slot) <- tunnelGeneration) { generations.add(slot); generationResolvers.add(value) }
             proxyDnsGeneration++
             (proxyDnsGeneration, retirementSet(Some(oldForward), oldTunnel, 1, 3, policy))
         }
         for (slot in retiring) { slot.retire(policy) }
+        emitHttpObservation(context, NetworkEventKind.ConfigurationRotated, NetworkEventOutcome.Succeeded)
         generation
     }
 
@@ -805,17 +873,20 @@ public class HttpClient <: Resource {
     public func configurationSnapshot(): HttpClientConfigurationSnapshot {
         synchronized(mutex) {
             reserveGenerationSlots(0)
-            let owners = ArrayList<UInt64>()
-            for (slot in generations) {
-                if (let Some(owner) <- slot.tlsOwner) {
-                    var found = false
-                    for (id in owners) { if (id == owner.id) { found = true; break } }
-                    if (!found) { owners.add(owner.id) }
-                }
-            }
-            HttpClientConfigurationSnapshot(tlsGeneration, directDnsGeneration, proxyDnsGeneration,
-                generations.size, owners.size)
+            configurationCounters()
         }
+    }
+    private func configurationCounters(): HttpClientConfigurationSnapshot {
+        let owners = ArrayList<UInt64>()
+        for (slot in generations) {
+            if (let Some(owner) <- slot.tlsOwner) {
+                var found = false
+                for (id in owners) { if (id == owner.id) { found = true; break } }
+                if (!found) { owners.add(owner.id) }
+            }
+        }
+        HttpClientConfigurationSnapshot(tlsGeneration, directDnsGeneration, proxyDnsGeneration,
+            generations.size, owners.size)
     }
 
     private func retirementSet(oldFirst: ?ClientRotationSlot, oldSecond: ?ClientRotationSlot,
@@ -880,6 +951,7 @@ public class HttpClient <: Resource {
                 let value = makeHttps(resolver, handshaker)
                 directTlsLease = Some(handshaker); https = Some(value)
                 secureSlot = Some(wrapHttps(value, handshaker.owner)); generations.add(secureSlot.getOrThrow())
+                generationResolvers.add(resolver)
             }
             if (url.scheme == "https" && proxied && tunnelSlot.isNone()) {
                 reserveGenerationSlots(1)
@@ -889,6 +961,7 @@ public class HttpClient <: Resource {
                 let value = makeTunnel(proxy.getOrThrow(), proxyResolver.getOrThrow(), handshaker)
                 proxyTlsLease = Some(handshaker); httpsProxy = Some(value)
                 tunnelSlot = Some(wrapTunnel(value, handshaker.owner)); generations.add(tunnelSlot.getOrThrow())
+                generationResolvers.add(proxyResolver.getOrThrow())
             }
             let slot = match ((url.scheme, proxied)) {
                 case ("http", false) => cleartextSlot
@@ -905,7 +978,7 @@ public class HttpClient <: Resource {
         var index = generations.size
         while (index > 0) {
             index--
-            if (generations[index].collect()) { let _ = generations.remove(at: index) }
+            if (generations[index].collect()) { let _ = generations.remove(at: index); let _ = generationResolvers.remove(at: index) }
         }
         if (generations.size + count > 64) {
             throw IllegalStateException("HTTP client retained configuration generation limit reached")

@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.collection.ArrayList
+import wirestack as api
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
@@ -10,6 +11,31 @@ import wirestack.internal.transport.*
 
 @Test
 class Http1ClientConnectionTest {
+    @TestCase
+    func physicalCloseTerminatesAnUnconsumedObservedBodyOnce(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        writeAll(server, ByteSpan("HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\n".toArray()))
+        let sink = api.NetworkEventBuffer(capacity: 64)
+        let connection = Http1ClientConnection(client)
+        let response = connection.execute(HttpRequest.get("http://example.test/"),
+            context: OperationContext(eventSink: Some(sink), connectionId: Some(91)))
+        let _ = sink.drain()
+        connection.close()
+        response.response.close()
+        connection.close()
+        var completions: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyCompleted =>
+                    completions++
+                    match (event.errorCode) { case Some(NetworkErrorCode.Closed) => (); case _ => @Fail("close lost its terminal code") }
+                case _ => ()
+            }
+        }
+        @Expect(completions, 1)
+        server.close()
+    }
+
     @TestCase
     func expectContinueWaitsForApprovalBeforeOpeningBody(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 4096, maxChunk: 5)
