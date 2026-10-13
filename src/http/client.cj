@@ -650,7 +650,6 @@ public class HttpClient <: Resource {
         resourceBudget.stopRequestAdmission()
         let retiring = synchronized(mutex) {
             if (closed) { Array<ClientRotationSlot>() } else {
->>>>>>> Current commit: M10-004: configuration generation rotation
                 closed = true
                 for (slot in generations) { slot.markRetired() }
                 generations.toArray()
