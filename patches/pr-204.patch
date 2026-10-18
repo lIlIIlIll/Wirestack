@@ -1,3 +1,169 @@
+diff --git a/src/http/client.cj b/src/http/client.cj
+index 1c3e14e7..10301fe4 100644
+--- a/src/http/client.cj
++++ b/src/http/client.cj
+@@ -745,22 +745,26 @@ public class HttpClient <: Resource {
+             (generations.toArray(), generationResolvers.toArray(), configurationCounters())
+         }
+         var pools = api.NetworkConnectionPoolSnapshot()
+-        let liveResolvers = ArrayList<Resolver>()
++        let retainedResolvers = ArrayList<Resolver>()
+         let tlsOwners = ArrayList<UInt64>()
+         for (index in 0..routes.size) {
+             let route = routes[index]
+-            if (route.client.isClosed()) { continue }
+-            pools = pools.combinedWith(sampleHttpPool(route.client))
+-            liveResolvers.add(resolvers[index])
++            let pool = sampleHttpPool(route.client)
++            pools = pools.combinedWith(pool)
++            // A closed route can still retain a transferred duplex session until its
++            // transport closes. Keep reporting that pool and its configuration counts
++            // until the retained entries are actually collected.
++            if (route.client.isClosed() && !httpPoolRetainsEntries(pool)) { continue }
++            retainedResolvers.add(resolvers[index])
+             if (let Some(owner) <- route.tlsOwner) {
+                 var found = false
+                 for (id in tlsOwners) { if (id == owner.id) { found = true; break } }
+                 if (!found) { tlsOwners.add(owner.id) }
+             }
+         }
+-        let (rows, unavailable) = sampleHttpResolvers(liveResolvers.toArray())
++        let (rows, unavailable) = sampleHttpResolvers(retainedResolvers.toArray())
+         let retained = HttpClientConfigurationSnapshot(configuration.tlsGeneration, configuration.directDnsGeneration,
+-            configuration.proxyDnsGeneration, liveResolvers.size, tlsOwners.size)
++            configuration.proxyDnsGeneration, retainedResolvers.size, tlsOwners.size)
+         HttpClientObservationSnapshot(resourceSnapshot(), pools, retained, rows, unavailable,
+             sampleHttpObservations(observations))
+     }
+@@ -1033,7 +1037,10 @@ public class HttpClient <: Resource {
+      */
+     private func executeAdmittedDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
+         protocol: ?String, context: OperationContext): http1.HttpDuplexExchangeResult {
+-        let requestLease = resourceBudget.acquireRequest(resourceOwner(h1Request.url), context)
++        let requestLease = resourceBudget.acquireRequest(
++            resourceOwner(h1Request.url),
++            context.forStage(transport.OperationTimeoutStage.RequestAdmission)
++        )
+         let cancellation = HttpRequestCancellationOperation(
+             context,
+             None<HttpRequestCancellationHandle>,
+diff --git a/src/http/client_extensions_test.cj b/src/http/client_extensions_test.cj
+index df94b648..a0d6663d 100644
+--- a/src/http/client_extensions_test.cj
++++ b/src/http/client_extensions_test.cj
+@@ -147,6 +147,66 @@ class HttpClientExtensionsTest {
+         }
+     }
+ 
++    @TestCase
++    func duplexHandshakeAdmissionHonorsRequestAdmissionStageCap(): Unit {
++        let fixture = NativeHttpExtensionFixture()
++        let server = HttpServer.builder().listen(SocketEndpoint(
++            IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 0u16)).handler(fixture).build()
++        let serving = spawn { server.serve() }
++        let resourceLimits = HttpResourceLimits(
++            maximumConnections: 1,
++            maximumConnectionsPerRoute: 1,
++            maximumConnectionsPerOrigin: 1,
++            maximumRequests: 1,
++            maximumRequestsPerRoute: 1,
++            maximumRequestsPerOrigin: 1,
++            maximumStreams: 1,
++            maximumStreamsPerRoute: 1,
++            maximumStreamsPerOrigin: 1
++        )
++        // No total request timeout: the requestAdmission stage cap is the only bound.
++        let client = HttpClient.builder().connector(fixture).resourceLimits(resourceLimits).build()
++        let base = "http://127.0.0.1:${server.localEndpoint.port}"
++        try {
++            let held = client.get("${base}/held")
++            try {
++                @Expect(client.resourceSnapshot().activeRequests, 1)
++                let handshake = spawn {
++                    try {
++                        let _ = client.upgrade(
++                            HttpRequest(HttpMethod("CONNECT"), HttpUrl.parse("${base}/upgrade")),
++                            context: OperationContext(timeoutPolicy: api.OperationTimeoutPolicy(
++                                requestAdmission: Some(250 * Duration.millisecond)
++                            ))
++                        )
++                        false
++                    } catch (error: api.NetworkException) {
++                        match (error.category) {
++                            case api.NetworkErrorCategory.DeadlineExceeded =>
++                                match (error.phase) {
++                                    case api.NetworkPhase.PoolAcquire =>
++                                        match (error.code) {
++                                            case api.NetworkErrorCode.TimedOut => true
++                                            case _ => false
++                                        }
++                                    case _ => false
++                                }
++                            case _ => false
++                        }
++                    }
++                }
++                @Expect(handshake.get(2 * Duration.second))
++            } finally {
++                held.close()
++            }
++        } finally {
++            client.close()
++            let _ = server.shutdown(context: OperationContext(
++                deadline: Some(Deadline.after(5 * Duration.second))))
++            serving.get(5 * Duration.second)
++        }
++    }
++
+     @TestCase
+     func unavailableServerPushClosesTheOwnedResponse(): Unit {
+         let fixture = NativeHttpExtensionFixture()
+diff --git a/src/http/client_rotation_test.cj b/src/http/client_rotation_test.cj
+index 0f0522d5..ca284f69 100644
+--- a/src/http/client_rotation_test.cj
++++ b/src/http/client_rotation_test.cj
+@@ -319,6 +319,12 @@ class HttpClientRotationTest {
+             let _ = client.rotateResolver(selected, policy: HttpConfigurationRotation.SecurityReplacement)
+             client.close()
+             @Expect(client.configurationSnapshot().retainedGenerations, 1)
++            let retained = client.observationSnapshot()
++            @Expect(retained.resources.activeConnections > 0)
++            @Expect(retained.pools.leasedConnections, 1)
++            @Expect(retained.pools.drainingConnections, 1)
++            @Expect(retained.configuration.retainedGenerations, 1)
++            @Expect(retained.configuration.retainedTlsContexts, 0)
+             let context = OperationContext(deadline: Some(Deadline.after(5 * Duration.second)))
+             api.writeAll(session.transport, api.ByteSpan([b'r']), context: context)
+             let bytes = Array<Byte>(1, repeat: 0u8)
+@@ -326,6 +332,11 @@ class HttpClientRotationTest {
+             @Expect(bytes, [b'r'])
+             session.close(); session.close()
+             @Expect(client.configurationSnapshot().retainedGenerations, 0)
++            let collected = client.observationSnapshot()
++            @Expect(collected.pools.leasedConnections, 0)
++            @Expect(collected.pools.drainingConnections, 0)
++            @Expect(collected.configuration.retainedGenerations, 0)
++            @Expect(collected.resources.activeConnections, 0)
+         } finally {
+             match (transferred) { case Some(value) => value.close(); case None => () }
+             client.close(); rotationStop(server, serving)
+diff --git a/src/http/observability.cj b/src/http/observability.cj
+index 82f48230..995304f3 100644
+--- a/src/http/observability.cj
++++ b/src/http/observability.cj
+@@ -89,6 +89,12 @@ internal func sampleHttpPool(value: Resource): api.NetworkConnectionPoolSnapshot
+         case _ => throw IllegalStateException("unknown HTTP route pool")
+     }
+ }
++/** A closed route may still own a transferred duplex session until its transport closes. */
++internal func httpPoolRetainsEntries(value: api.NetworkConnectionPoolSnapshot): Bool {
++    value.leasedConnections > 0 || value.idleConnections > 0 || value.connectingConnections > 0 ||
++        value.queuedRequests > 0 || value.activeStreams > 0 || value.reservedStreams > 0 ||
++        value.drainingConnections > 0
++}
+ internal func sampleHttpResolvers(values: Array<Resolver>): (Array<api.ResolverResourceSnapshot>, Int64) {
+     let rows = ArrayList<api.ResolverResourceSnapshot>()
+     var unavailable: Int64 = 0
 diff --git a/src/http/server.cj b/src/http/server.cj
 index 7cd06e1e..ef624a02 100644
 --- a/src/http/server.cj
@@ -80,7 +246,7 @@ index e53b2b7a..e396a219 100644
          for (index in 0..entries.size) {
              let entry = entries[index]
 diff --git a/src/internal/http1/connection_pool_test.cj b/src/internal/http1/connection_pool_test.cj
-index 1d0d7387..c6aaf7d5 100644
+index 1d0d7387..667aa155 100644
 --- a/src/internal/http1/connection_pool_test.cj
 +++ b/src/internal/http1/connection_pool_test.cj
 @@ -296,6 +296,45 @@ class Http1ConnectionPoolTest {
@@ -129,7 +295,7 @@ index 1d0d7387..c6aaf7d5 100644
      @TestCase
      func failedCreationRollsBackItsCapacityReservation(): Unit {
          let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
-@@ -404,44 +443,29 @@ class Http1ConnectionPoolTest {
+@@ -404,44 +443,6 @@ class Http1ConnectionPoolTest {
          }
      }
  
@@ -137,19 +303,14 @@ index 1d0d7387..c6aaf7d5 100644
 -    func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {
 -        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
 -            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2
-+@TestCase
-+    func sequentialOriginChangeReclaimsIdleCrossKeyConnection(): Unit {
-+        let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
-+            maximumConnections: 1, maximumConnectionsPerKey: 1,
-+            maximumIdleConnections: 1, maximumWaiters: 1
-         ))
+-        ))
 -        let pool = Http1ConnectionPool(
 -            config: Http1ConnectionPoolConfig(
 -                maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1
 -            ),
 -            resourceBudget: Some(budget)
 -        )
-         let factory = PoolTestFactory()
+-        let factory = PoolTestFactory()
 -        let held = pool.acquire(poolTestKey(), factory)
 -        let blocker = spawn {
 -            try {
@@ -163,21 +324,7 @@ index 1d0d7387..c6aaf7d5 100644
 -            }
 -        }
 -        @Expect(waitForAggregateConnectionWaiter(budget, 1, Duration.second))
-+        let first = pool.acquire(poolTestKey(), factory)
-+        pool.release(first)
-+        @Expect(pool.snapshot().connections, 1)
-+        @Expect(pool.snapshot().idleConnections, 1)
-+
-+        let replacement = pool.acquire(
-+            poolTestKey(host: "other.test"), factory,
-+            context: OperationContext(deadline: Some(Deadline.after(Duration.second)))
-+        )
-+        @Expect(factory.calls.load(), 2)
-+        @Expect(pool.snapshot().connections, 1)
-+        @Expect(pool.snapshot().idleConnections, 0)
-+        @Expect(replacement.connection.isClosed(), false)
-+        pool.release(replacement)
-         pool.close()
+-        pool.close()
 -        var rejected = false
 -        try { rejected = blocker.get(Duration.second) } catch (_: Exception) {}
 -        @Expect(rejected)
@@ -190,11 +337,10 @@ index 1d0d7387..c6aaf7d5 100644
 -        @Expect(budget.snapshot().reservedConnections, 0)
 -        pool.release(held)
 -    }
-+
  }
  
  private class ReentrantPoolObservationSink <: NetworkEventSink {
-@@ -533,13 +557,3 @@ private class RotationPoolFactory <: Http1ConnectionFactory {
+@@ -533,13 +534,3 @@ private class RotationPoolFactory <: Http1ConnectionFactory {
      }
      func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
  }
@@ -209,7 +355,7 @@ index 1d0d7387..c6aaf7d5 100644
 -    true
 -}
 diff --git a/src/internal/http1/http2_connection_pool.cj b/src/internal/http1/http2_connection_pool.cj
-index b77d591f..e8438572 100644
+index b77d591f..b835260e 100644
 --- a/src/internal/http1/http2_connection_pool.cj
 +++ b/src/internal/http1/http2_connection_pool.cj
 @@ -575,11 +575,16 @@ public class Http2ConnectionPool <: Resource {
@@ -253,7 +399,48 @@ index b77d591f..e8438572 100644
                      }
                      if (waiterId == 0) {
                          match (admissionQueue.enqueue(key)) {
-@@ -744,6 +765,15 @@ public class Http2ConnectionPool <: Resource {
+@@ -730,10 +751,40 @@ public class Http2ConnectionPool <: Resource {
+     private func removeHttp2WaiterLocked(id: Int64, granted: Bool): Unit {
+         if (admissionQueue.remove(id, granted)) {
+             waiters--
++            // A cancelled or expired cross-key waiter must not pin a yield marker:
++            // the marker only exists to transfer the next drained slot to demand
++            // that is currently waiting.
++            refreshHttp2YieldingLocked(clock.now())
+             changed.notifyAll()
+         }
+     }
+ 
++    /** Clears yield markers whose cross-key demand disappeared or was satisfied. */
++    private func refreshHttp2YieldingLocked(now: MonoTime): Unit {
++        if (waiters == 0) {
++            for (entry in entries) { entry.yielding = false }
++            return
++        }
++        let saturated = entries.size + reservations.size >= config.maximumConnections
++        for (entry in entries) {
++            if (!entry.yielding) { continue }
++            if (!saturated) {
++                entry.yielding = false
++                continue
++            }
++            let nextWaitingKey = admissionQueue.firstEligibleKey({ candidate =>
++                candidate == entry.key || hasAvailableHttp2(candidate, now) ||
++                    (!hasHttp2Reservation(candidate) &&
++                        countHttp2ForKey(candidate) < config.maximumConnectionsPerKey)
++            })
++            let nextNeedsNewSlot = match (nextWaitingKey) {
++                case Some(value) => value != entry.key && !hasAvailableHttp2(value, now)
++                case None => false
++            }
++            if (!nextNeedsNewSlot) { entry.yielding = false }
++        }
++    }
++
+     private func findUnusableEmptyConnection(now: MonoTime): Int64 {
+         for (index in 0..entries.size) {
+             let entry = entries[index]
+@@ -744,6 +795,15 @@ public class Http2ConnectionPool <: Resource {
          -1
      }
  
@@ -269,7 +456,7 @@ index b77d591f..e8438572 100644
      private func findHttp2Entry(id: Int64): Int64 {
          for (index in 0..entries.size) {
              if (entries[index].id == id) { return index }
-@@ -772,8 +802,9 @@ public class Http2ConnectionPool <: Resource {
+@@ -772,8 +832,9 @@ public class Http2ConnectionPool <: Resource {
      private func canAcquireHttp2(key: HttpConnectionPoolKey, now: MonoTime): Bool {
          hasAvailableHttp2(key, now) ||
              (!hasHttp2Reservation(key) &&
@@ -282,10 +469,10 @@ index b77d591f..e8438572 100644
  
      private func hasHttp2Reservation(key: HttpConnectionPoolKey): Bool {
 diff --git a/src/internal/http1/http2_connection_pool_test.cj b/src/internal/http1/http2_connection_pool_test.cj
-index 1981210f..a24a3b73 100644
+index 1981210f..0d48d6ea 100644
 --- a/src/internal/http1/http2_connection_pool_test.cj
 +++ b/src/internal/http1/http2_connection_pool_test.cj
-@@ -467,6 +467,59 @@ class Http2ConnectionPoolTest {
+@@ -467,6 +467,122 @@ class Http2ConnectionPoolTest {
              try { let _ = refill.get(Duration.second) } catch (_: Exception) {}
          }
      }
@@ -341,6 +528,69 @@ index 1981210f..a24a3b73 100644
 +        pool.release(replacement)
 +        @Expect(pool.snapshot().availableStreamCapacity, 1)
 +        pool.close()
++    }
++
++    @TestCase
++    func cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuse(): Unit {
++        let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(
++            maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2
++        ))
++        let factory = PoolFakeFactory(2u32)
++        let key = poolKey("origin.example", "h2,http/1.1")
++        let otherKey = poolKey("other.example", "h2,http/1.1")
++        let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)
++        let second = pool.acquire(key, PoolNoopGoAwayListener(), factory)
++        let cancellation = CancellationSource()
++        let otherOrigin = spawn {
++            try {
++                let lease = pool.acquire(
++                    otherKey, PoolNoopGoAwayListener(), factory,
++                    context: OperationContext(cancellation: cancellation.token)
++                )
++                factory.finish(lease)
++                pool.release(lease)
++                false
++            } catch (error: NetworkException) {
++                match (error.category) {
++                    case NetworkErrorCategory.Cancelled =>
++                        match (error.phase) {
++                            case NetworkPhase.PoolAcquire => true
++                            case _ => false
++                        }
++                    case _ => false
++                }
++            }
++        }
++        @Expect(pool.waitUntilWaiters(1, Duration.second))
++        // Releasing one stream while the cross-key waiter is queued marks the
++        // saturated connection yielding even though a long-lived stream remains.
++        factory.finish(first)
++        pool.release(first)
++        @Expect(cancellation.cancel())
++        @Expect(otherOrigin.get(Duration.second))
++        // Cross-key demand is gone: same-key capacity must be reusable immediately
++        // instead of waiting for the unrelated long-lived stream to finish.
++        let reused = AtomicInt64(0)
++        let refill = spawn {
++            let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)
++            reused.store(lease.connectionId)
++            factory.finish(lease)
++            pool.release(lease)
++            true
++        }
++        try {
++            var restored = false
++            try { restored = refill.get(Duration.second) } catch (_: Exception) {}
++            @Expect(restored)
++            @Expect(reused.load(), first.connectionId)
++            @Expect(factory.createCalls.load(), 1)
++            @Expect(factory.connection(0).closeCalls.load(), 0)
++        } finally {
++            try { factory.finish(second) } catch (_: Exception) {}
++            try { pool.release(second) } catch (_: Exception) {}
++            pool.close()
++            try { let _ = refill.get(Duration.second) } catch (_: Exception) {}
++        }
 +    }
  }
  
@@ -569,10 +819,31 @@ index 1929c4cf..00d9b87f 100644
      let start = MonoTime.now()
      private var current = start
 diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
-index b1102504..a66dc911 100644
+index b1102504..2b69f537 100644
 --- a/src/internal/http2/client_connection.cj
 +++ b/src/internal/http2/client_connection.cj
-@@ -1220,8 +1220,8 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+@@ -899,6 +899,10 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
+                         case None => changed.wait()
+                     }
+                 }
++                // A final HEADERS frame published between the deadline expiring and
++                // this waiter reacquiring the mutex skips the loop check above; keep
++                // the response-header stage cap authoritative for that wakeup race.
++                checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
+                 if (let Some(error) <- failure) { throw error }
+                 response.getOrThrow()
+             }
+@@ -920,6 +924,9 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
+                         case None => changed.wait()
+                     }
+                 }
++                // CONNECT result publication after the header budget expires must not
++                // bypass the stage cap when this waiter wakes from the mutex wait.
++                checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
+                 if (let Some(error) <- failure) { throw error }
+                 connectResult.getOrThrow()
+             }
+@@ -1220,8 +1227,8 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
          try {
              http2ObservedStage(observed, {
                  => readActive(
@@ -583,6 +854,96 @@ index b1102504..a66dc911 100644
                  )
              })
          } catch (error: Exception) {
+diff --git a/src/internal/http2/client_connection_test.cj b/src/internal/http2/client_connection_test.cj
+index edd6d972..24f5ed9d 100644
+--- a/src/internal/http2/client_connection_test.cj
++++ b/src/internal/http2/client_connection_test.cj
+@@ -559,6 +559,85 @@ class Http2ClientConnectionTest {
+     }
+ }
+ 
++@Test
++class Http2ClientResponseHeaderWakeupRaceTest {
++    @TestCase
++    func publishedResponseAfterHeaderBudgetExpiryIsRejected(): Unit {
++        let fixture = ResponseHeaderWakeupRaceFixture()
++        let clock = ResponseHeaderRaceClock(MonoTime.now())
++        let operationContext = OperationContext(
++            deadline: Some(Deadline.after(Duration.second, clock: clock))
++        )
++        let waitContext = operationContext.forStage(OperationTimeoutStage.ResponseHeaders)
++        fixture.exchange.acceptHeaders([
++            HpackHeaderField(":status", "200"),
++            HpackHeaderField("content-length", "0")
++        ], false)
++        // The final HEADERS are already published; the stage budget expires before
++        // this waiter reacquires the exchange mutex and observes the response.
++        clock.advance(2 * Duration.second)
++        var timedOut = false
++        var published = None<HttpResponse>
++        try {
++            published = Some(fixture.exchange.awaitResponse(waitContext))
++        } catch (error: NetworkException) {
++            match (error.category) {
++                case NetworkErrorCategory.DeadlineExceeded =>
++                    match (error.phase) {
++                        case NetworkPhase.HttpHeaders => timedOut = true
++                        case _ => ()
++                    }
++                case _ => ()
++            }
++        } finally {
++            if (let Some(value) <- published) {
++                try { value.close() } catch (_: Exception) {}
++            }
++            fixture.dispose()
++        }
++        @Expect(timedOut)
++    }
++}
++
++private class ResponseHeaderRaceClock <: MonotonicClock {
++    private var current: MonoTime
++    init(start: MonoTime) { current = start }
++    public func now(): MonoTime { current }
++    func advance(value: Duration): Unit { current = current + value }
++}
++
++private class ResponseHeaderWakeupRaceFixture {
++    let exchange: Http2ClientExchange
++    private let transport: DuplexTransport
++
++    init() {
++        let (owned, _) = MemoryTransport.pair(capacity: 64 * 1024)
++        transport = owned
++        let registry = Http2StreamRegistry(Http2ConnectionRole.Client)
++        let flow = Http2FlowController()
++        let writer = Http2WriteScheduler(owned)
++        let machine = Http2ConnectionStateMachine(Http2ConnectionRole.Client)
++        let _ = machine.start()
++        let _ = machine.receive(encodeHttp2Settings([]))
++        let goAway = Http2GoAwayManager(machine, registry, flow, writer)
++        let signal = Http2ClientExecutionSignal()
++        let admission = goAway.openLocal(signal, endStream: false)
++        let reset = Http2StreamResetManager(registry, flow, writer)
++        let readerRegistry = Http2ReaderTerminationRegistry(8u32)
++        let termination = readerRegistry.register(signal)
++        exchange = Http2ClientExchange(
++            admission.stream.id, HttpMethod("GET"), registry, flow, writer, reset,
++            admission.registration, termination, signal,
++            OperationContext.background(), HttpLimits(), Http2Limits(),
++            None<Http2ClientPushSource>, false, { => }
++        )
++    }
++
++    func dispose(): Unit {
++        try { transport.abort(reason: None<AbortReason>) } catch (_: Exception) {}
++    }
++}
++
+ private class RejectedConnectHttp2Peer {
+     private let transport: DuplexTransport
+     private let machine = Http2ConnectionStateMachine(Http2ConnectionRole.Server)
 diff --git a/src/internal/http2/client_push.cj b/src/internal/http2/client_push.cj
 index 186ce92b..170794f0 100644
 --- a/src/internal/http2/client_push.cj
@@ -719,21 +1080,147 @@ index 6aa2e4d1..6941678b 100644
      func realZeroWindowWaitHasDistinctLocalBackpressureEvidence(): Unit {
          let flow = Http2FlowController()
          flow.applyPeerSettings(Http2SettingsUpdate(
+diff --git a/src/internal/http2/server_cancellation_test.cj b/src/internal/http2/server_cancellation_test.cj
+index 98e98a6f..156f0d41 100644
+--- a/src/internal/http2/server_cancellation_test.cj
++++ b/src/internal/http2/server_cancellation_test.cj
+@@ -26,7 +26,7 @@ class Http2ServerCancellationTest {
+             HpackHeaderField(":authority", "example.test"), HpackHeaderField(":path", "/held")
+         ], false, registry, flow, control,
+             onCancellationRequested: { => measurement.requested() },
+-            onOwnerTerminated: { => requestLease.close(); streamLease.close(); measurement.complete() })
++            onOwnerTerminated: { _ => requestLease.close(); streamLease.close(); measurement.complete() })
+         let parser = Http2FrameParser(Http2Limits(), Some(budget), Some(owner))
+         let received = parser.feed(serializeHttp2Frame(Http2Frame(
+             Http2FrameHeader(4u32, Http2FrameType.Data, Http2Flags(), Http2StreamId(1u32)),
+@@ -66,6 +66,64 @@ class Http2ServerCancellationTest {
+         }
+     }
+ 
++    @TestCase
++    func streamTerminalDispositionReachesOwnerAndSuccessfulReleaseStaysClean(): Unit {
++        let registry = Http2StreamRegistry(Http2ConnectionRole.Server)
++        let flow = Http2FlowController()
++        let sink = DiscardingServerControl()
++        let peerTerminal = TerminalCapture()
++        let peerReset = Http2ServerExchange.open(Http2StreamId(1u32), [
++            HpackHeaderField(":method", "GET"), HpackHeaderField(":scheme", "https"),
++            HpackHeaderField(":authority", "example.test"), HpackHeaderField(":path", "/peer-reset")
++        ], false, registry, flow, sink, onOwnerTerminated: { error => peerTerminal.set(error) })
++        peerReset.streamReset(Http2StreamResetEvent(
++            Http2StreamId(1u32), Http2ErrorCode.EnhanceYourCalm, "peer reset", true))
++        @Expect(peerTerminal.called)
++        @Expect(match (peerTerminal.value.getOrThrow()) {
++            case _: Http2ProtocolException => true
++            case _ => false
++        })
++
++        let localTerminal = TerminalCapture()
++        let localCancel = Http2ServerExchange.open(Http2StreamId(3u32), [
++            HpackHeaderField(":method", "GET"), HpackHeaderField(":scheme", "https"),
++            HpackHeaderField(":authority", "example.test"), HpackHeaderField(":path", "/local-cancel")
++        ], false, registry, flow, sink, onOwnerTerminated: { error => localTerminal.set(error) })
++        localCancel.streamReset(Http2StreamResetEvent(
++            Http2StreamId(3u32), Http2ErrorCode.Cancel, "local cancellation", false))
++        @Expect(localTerminal.called)
++        @Expect(match (localTerminal.value.getOrThrow()) {
++            case value: NetworkException => match (value.code) {
++                case NetworkErrorCode.Cancelled => true
++                case _ => false
++            }
++            case _ => false
++        })
++
++        let abortedTerminal = TerminalCapture()
++        let aborted = Http2ServerExchange.open(Http2StreamId(5u32), [
++            HpackHeaderField(":method", "GET"), HpackHeaderField(":scheme", "https"),
++            HpackHeaderField(":authority", "example.test"), HpackHeaderField(":path", "/aborted")
++        ], false, registry, flow, sink, onOwnerTerminated: { error => abortedTerminal.set(error) })
++        aborted.connectionTerminated(Http2ConnectionCompletion(
++            Http2ErrorCode.InternalError, "connection aborted"))
++        @Expect(abortedTerminal.called)
++        @Expect(match (abortedTerminal.value.getOrThrow()) {
++            case _: Http2ProtocolException => true
++            case _ => false
++        })
++
++        let releasedTerminal = TerminalCapture()
++        let released = Http2ServerExchange.open(Http2StreamId(7u32), [
++            HpackHeaderField(":method", "GET"), HpackHeaderField(":scheme", "https"),
++            HpackHeaderField(":authority", "example.test"), HpackHeaderField(":path", "/released")
++        ], false, registry, flow, sink, onOwnerTerminated: { error => releasedTerminal.set(error) })
++        released.completeOwner()
++        @Expect(releasedTerminal.called)
++        @Expect(releasedTerminal.value.isNone())
++        flow.close()
++    }
++
+     @TestCase
+     func productionServerMeasuresPublicLinkedAndPeerCancellationButNotOrdinaryCompletion(): Unit {
+         for (mode in [0, 1, 2]) {
+@@ -208,3 +266,18 @@ private class OrdinaryCancellationHandler <: Http2ServerHandler {
+         Http2ServerResponse(HttpResponse(204, "No Content", ResponseBody.empty()))
+     }
+ }
++
++private class DiscardingServerControl <: Http2ServerControlSink {
++    public func submit(frames: Array<Http2Frame>): Unit { let _ = frames }
++}
++
++private class TerminalCapture {
++    private let mutex = Mutex()
++    private var captured: ?Exception = None<Exception>
++    private var received = false
++    func set(error: ?Exception): Unit {
++        synchronized(mutex) { captured = error; received = true }
++    }
++    prop value: ?Exception { get() { synchronized(mutex) { captured } } }
++    prop called: Bool { get() { synchronized(mutex) { received } } }
++}
 diff --git a/src/internal/http2/server_connection.cj b/src/internal/http2/server_connection.cj
-index 5947cf5b..13c1607b 100644
+index 5947cf5b..35373380 100644
 --- a/src/internal/http2/server_connection.cj
 +++ b/src/internal/http2/server_connection.cj
-@@ -363,8 +363,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+@@ -336,12 +336,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+                                 )
+                             } catch (_: Exception) {}
+                         },
+-                        onOwnerTerminated: { =>
++                        onOwnerTerminated: { terminal =>
+                             if (let Some(lease) <- terminalRequestLease) { lease.close() }
+                             if (let Some(lease) <- terminalStreamLease) { lease.close() }
+                             removeExchange(block.streamId)
+                             if (let Some(measurement) <- cancellationMeasurement) { measurement.complete() }
+-                            http2Observe(streamContext, NetworkEventKind.Http2StreamClosed, NetworkEventOutcome.Released)
++                            let outcome = if (terminal.isSome()) { NetworkEventOutcome.Failed }
++                                else { NetworkEventOutcome.Released }
++                            http2Observe(streamContext, NetworkEventKind.Http2StreamClosed, outcome, error: terminal)
+                         },
+                         onCancellationRequested: { =>
+                             if (let Some(measurement) <- cancellationMeasurement) { measurement.requested() }
+@@ -363,9 +365,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                  let response = exchange.start(handler, context: streamContext)
                  let _ = spawn {
                      var transferred = false
 -                    try { transferred = sendResponse(exchange, response.get(),
 -                        streamContext.forStage(OperationTimeoutStage.RequestWrite)) }
++                    var failure = None<Exception>
 +                    try { transferred = sendResponse(exchange, response.get(), streamContext) }
                      catch (error: Exception) {
++                        failure = Some(error)
                          try {
                              let _ = cancelLocalStream(
-@@ -384,11 +383,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+                                 block.streamId, Http2ErrorCode.InternalError,
+@@ -373,7 +376,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+                             )
+                         } catch (_: Exception) {}
+                     } finally {
+-                        if (!transferred) { exchange.completeOwner() }
++                        if (!transferred) { exchange.completeOwner(error: failure) }
+                     }
+                 }
+         }
+@@ -384,11 +387,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
          plan: Http2ServerResponsePlan,
          context: OperationContext
      ): Bool {
@@ -750,7 +1237,7 @@ index 5947cf5b..13c1607b 100644
          var duplexStarted = false
          try {
              waitWrites(enqueueActiveServerHeaders(
-@@ -438,9 +440,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+@@ -438,9 +444,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
              throw error
          } finally {
              let outcome = if (failure.isSome()) { NetworkEventOutcome.Failed } else { NetworkEventOutcome.Succeeded }
@@ -762,3 +1249,205 @@ index 5947cf5b..13c1607b 100644
              }
          }
      }
+diff --git a/src/internal/http2/server_mapping.cj b/src/internal/http2/server_mapping.cj
+index 777f37c7..bb907ad0 100644
+--- a/src/internal/http2/server_mapping.cj
++++ b/src/internal/http2/server_mapping.cj
+@@ -122,7 +122,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+     private var resetRegistration: ?Http2StreamResetRegistration = None<Http2StreamResetRegistration>
+     private var duplexTransport: ?Http2StreamTransport = None<Http2StreamTransport>
+     private var ownerComplete = false
+-    private let onOwnerTerminated: () -> Unit
++    private var terminalCause: ?Exception = None<Exception>
++    private let onOwnerTerminated: (?Exception) -> Unit
+     private let onCancellationRequested: () -> Unit
+ 
+     private init(
+@@ -135,7 +136,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+         limits: HttpLimits,
+         http2Limits: Http2Limits,
+         peerEnded: Bool,
+-        onOwnerTerminated: () -> Unit,
++        onOwnerTerminated: (?Exception) -> Unit,
+         onCancellationRequested: () -> Unit
+     ) {
+         this.streamId = streamId
+@@ -166,7 +167,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+             _ => None<Http2ServerPushSender>
+         },
+         localCancellation!: () -> Unit = { => },
+-        onOwnerTerminated!: () -> Unit = { => },
++        onOwnerTerminated!: (?Exception) -> Unit = { _ => },
+         onCancellationRequested!: () -> Unit = { => }
+     ): Http2ServerExchange {
+         if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
+@@ -257,10 +258,15 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+     }
+ 
+     /** Releases registry, reset, flow and connection ownership exactly once. */
+-    internal func completeOwner(): Unit {
+-        let (won, duplexOwned) = synchronized(mutex) {
+-            if (ownerComplete) { (false, false) }
+-            else { ownerComplete = true; (true, duplexTransport.isSome()) }
++    internal func completeOwner(error!: ?Exception = None<Exception>): Unit {
++        let (won, duplexOwned, cause) = synchronized(mutex) {
++            if (ownerComplete) {
++                (false, false, None<Exception>)
++            } else {
++                ownerComplete = true
++                if (let Some(value) <- error) { terminalCause = Some(value) }
++                (true, duplexTransport.isSome(), terminalCause)
++            }
+         }
+         if (!won) { return }
+         try { bodyChannel.close() } catch (_: Exception) {}
+@@ -277,7 +283,14 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+         try {
+             if (!updates.isEmpty()) { sink.submit(updates) }
+         } finally {
+-            onOwnerTerminated()
++            onOwnerTerminated(cause)
++        }
++    }
++
++    /** Retains the first terminal disposition before a duplex transport closes. */
++    private func retainTerminalCause(error: Exception): Unit {
++        synchronized(mutex) {
++            if (terminalCause.isNone()) { terminalCause = Some(error) }
+         }
+     }
+ 
+@@ -323,6 +336,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+         if (http2ErrorCodeToWire(event.code) == http2ErrorCodeToWire(Http2ErrorCode.Cancel)) {
+             onCancellationRequested()
+         }
++        retainTerminalCause(serverStreamResetDisposition(streamId, event))
+         bodyChannel.reset(event)
+         if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
+             transport.peerTerminated(resetStream: true)
+@@ -335,6 +349,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+         let event = Http2StreamResetEvent(
+             streamId, completion.code, completion.reason, true
+         )
++        retainTerminalCause(Http2ProtocolException(
++            completion.code, Http2ErrorScope.Connection, completion.reason
++        ))
+         bodyChannel.reset(event)
+         if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
+             transport.peerTerminated(resetStream: true)
+@@ -1323,3 +1340,14 @@ private func serverLocalContentLengthError(): Nothing {
+ private func serverStreamError(streamId: Http2StreamId, message: String): Nothing {
+     throw Http2ProtocolException(Http2ErrorCode.ProtocolError, Http2ErrorScope.Stream(streamId), message)
+ }
++
++/** Maps one reset event to the typed terminal cause observers receive. */
++private func serverStreamResetDisposition(streamId: Http2StreamId,
++    event: Http2StreamResetEvent): Exception {
++    if (http2ErrorCodeToWire(event.code) == http2ErrorCodeToWire(Http2ErrorCode.Cancel)) {
++        return NetworkException(NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody,
++            NetworkErrorCode.Cancelled, "HTTP/2 server stream cancelled",
++            retryability: Retryability.Never)
++    }
++    return Http2ProtocolException(event.code, Http2ErrorScope.Stream(streamId), event.reason)
++}
+diff --git a/src/sse/decoder.cj b/src/sse/decoder.cj
+index 7e3bc558..6843ac66 100644
+--- a/src/sse/decoder.cj
++++ b/src/sse/decoder.cj
+@@ -92,7 +92,6 @@ public class SseDecoder {
+         if (closed || ended) { return }
+         ended = true
+         releaseBuffers()
+-        pendingId = cursor
+     }
+     /** Idempotently releases all arrays and strings, including cursor and retry state. */
+     public func close(): Unit {
+@@ -199,6 +198,9 @@ public class SseDecoder {
+                 throw SseException(SseErrorCode.IdLimit, "SSE cursor exceeds byte limit")
+             }
+             pendingId = String.fromUtf8(scratch[0..size])
++            // WHATWG updates the last event ID buffer when the id field is processed.
++            // EOF discards the pending data event but keeps this cursor update.
++            cursor = pendingId
+         }
+         None<SseEvent>
+     }
+diff --git a/src/sse/decoder_test.cj b/src/sse/decoder_test.cj
+index 4e251ce6..e0fcb00d 100644
+--- a/src/sse/decoder_test.cj
++++ b/src/sse/decoder_test.cj
+@@ -57,15 +57,16 @@ class SseDecoderTests {
+         decoder.close()
+     }
+     @TestCase
+-    func cursorCommitsWithoutDispatchAndIncompleteCursorDoesNotCommit(): Unit {
++    func idLineCommitsCursorImmediatelyAndEofKeepsItWithoutDispatch(): Unit {
+         let decoder = SseDecoder(lastEventId: "old")
+         let _ = decoder.decode("id: next\n".toArray())
+-        @Expect(decoder.lastEventId, "old")
++        @Expect(decoder.lastEventId, "next")
+         @Expect(decoder.decode("\n".toArray()).event.isNone())
+         @Expect(decoder.lastEventId, "next")
+         let _ = decoder.decode("id: unfinished\ndata: pending\n".toArray())
++        @Expect(decoder.lastEventId, "unfinished")
+         decoder.finish()
+-        @Expect(decoder.lastEventId, "next")
++        @Expect(decoder.lastEventId, "unfinished")
+         @Expect(@AssertThrows[SseException](decoder.decode(Array<Byte>())).code == SseErrorCode.Closed)
+         decoder.close()
+     }
+diff --git a/src/sse/native_session_test.cj b/src/sse/native_session_test.cj
+index 17c10ec6..a3ec65af 100644
+--- a/src/sse/native_session_test.cj
++++ b/src/sse/native_session_test.cj
+@@ -30,7 +30,9 @@ class SseNativeSessionTest {
+             @Expect(duplicate.data, first.data)
+             @Expect(duplicate.lastEventId, first.lastEventId)
+             @Expect(fixture.handler.duplicateRequests.load(), 2)
+-            @Expect(fixture.handler.lastCursor, Some("7"))
++            // The complete "id: unfinished" line commits even though EOF follows
++            // before a blank delimiter, so the reconnect uses that newer cursor.
++            @Expect(fixture.handler.lastCursor, Some("unfinished"))
+             @Expect(session.receive().isNone())
+             @Expect(session.receive().isNone())
+             @Expect(session.reconnectCount, 2)
+@@ -112,6 +114,18 @@ class SseNativeSessionTest {
+         } finally { session.close(); fixture.close() }
+     }
+ 
++    @TestCase
++    func cursorCommittedByAnIdLineIsSentOnReconnectAfterEof(): Unit {
++        let fixture = NativeSseFixture()
++        let session = SseSession.eventSource(fixture.client, fixture.url("/id-eof"),
++            policy: nativeSseFastPolicy(1))
++        try {
++            @Expect(session.receive().getOrThrow().data, "next")
++            @Expect(session.reconnectCount, 1)
++            @Expect(fixture.handler.lastCursor, Some("next"))
++        } finally { session.close(); fixture.close() }
++    }
++
+     @TestCase
+     func explicitCloseParentCancellationAndEofRemainDistinct(): Unit {
+         let fixture = NativeSseFixture()
+@@ -320,6 +334,7 @@ private class NativeSseHandler <: HttpServerHandler {
+     let duplicateRequests = AtomicInt64(0)
+     let postRequests = AtomicInt64(0)
+     let eofRequests = AtomicInt64(0)
++    let idEofRequests = AtomicInt64(0)
+     let mimeRequests = AtomicInt64(0)
+     let redirectRequests = AtomicInt64(0)
+     let redirectTargets = AtomicInt64(0)
+@@ -346,6 +361,12 @@ private class NativeSseHandler <: HttpServerHandler {
+         }
+         if (request.target == "/post307-target") { redirectTargets.fetchAdd(1); return reply("data:replayed\n\n") }
+         if (request.target == "/eof") { eofRequests.fetchAdd(1); return reply("") }
++        if (request.target == "/id-eof") {
++            let count = idEofRequests.fetchAdd(1) + 1
++            synchronized(mutex) { receivedCursor = request.headers.getFirst("last-event-id") }
++            if (count == 1) { return reply("id: next\n") }
++            return reply("data:" + request.headers.getFirst("last-event-id").getOrDefault({ => "missing" }) + "\n\n")
++        }
+         if (request.target == "/mime") { mimeRequests.fetchAdd(1); return reply("not-sse", mime: "text/plain") }
+         if (request.target == "/comments") { return reply(":x\n:x\n:x\n:x\n:x\n:x\n:x\n:x\n:x\n:x\n") }
+         if (request.target == "/idle") {

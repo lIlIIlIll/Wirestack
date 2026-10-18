@@ -17,6 +17,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: r198
+            base_ref: publish/m10-002-resource-budgets
+            patch: patches/pr-198.patch
+          - name: r199
+            base_ref: publish/m10-001-deadlines
+            patch: patches/pr-199.patch
+          - name: r201
+            base_ref: publish/m10-003-safe-retry
+            patch: patches/pr-201.patch
+          - name: r202
+            base_ref: publish/m10-004-generation-rotation
+            patch: patches/pr-202.patch
+          - name: r203
+            base_ref: publish/m10-005-observability
+            patch: patches/pr-203.patch
           - name: r204
             base_ref: publish/m11-001-sse
             patch: patches/pr-204.patch
