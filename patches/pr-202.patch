@@ -1,197 +1,40 @@
-diff --git a/src/http/client.cj b/src/http/client.cj
-index 4ad3b838..238bd588 100644
---- a/src/http/client.cj
-+++ b/src/http/client.cj
-@@ -1035,7 +1035,11 @@ private class HttpAdmissionRetainedTransport <: transport.DuplexTransport {
-     /** Reports whether this transport or its delegate has terminated. */
-     public func isClosed(): Bool {
-         if (synchronized(mutex) { terminal }) { return true }
--        delegate.isClosed()
-+        if (!delegate.isClosed()) { return false }
-+        // Delegate termination is terminal for this wrapper: release the retained
-+        // request admission even when the caller only observes isClosed().
-+        if (claimTerminal()) { cancellation.fail() }
-+        true
-     }
- 
-     /**
 diff --git a/src/http/server.cj b/src/http/server.cj
-index 85bd73ff..87de61c7 100644
+index 87de61c7..0eab8500 100644
 --- a/src/http/server.cj
 +++ b/src/http/server.cj
-@@ -815,8 +815,12 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
-     private func serveHttp2(value: transport.DuplexTransport, context: transport.OperationContext,
-         entry: PublicServerConnectionEntry): Unit {
-         let cancellation = entry.connectionCancellation
-+        let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-+            publicServerRequestOwner(authority)
-+        }
-         let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
--            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner))
-+            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
-+                requestOwnerFactory: Some(requestOwnerFactory))
-         let registration = cancellation.cancellationToken.register { => created.abort() }
-         entry.installHttp2(created)
-         try { created.serve(context: context) }
-diff --git a/src/internal/http1/connection_pool.cj b/src/internal/http1/connection_pool.cj
-index caad3917..48fcbbad 100644
---- a/src/internal/http1/connection_pool.cj
-+++ b/src/internal/http1/connection_pool.cj
-@@ -150,6 +150,9 @@ public class Http1ConnectionPool <: Resource {
-                                 ))
-                                 case None => None<internal.HttpResourceLease>
-                             }
-+                            // Aggregate admission can return after close() released another
-+                            // request's slot; never start factory work for a closed pool.
-+                            if (isClosed()) { throw poolClosed() }
-                             let connection = factory.create(key, context, resourceLease)
-                             if (let Some(value) <- resourceLease) { value.activate() }
-                             let accepted = synchronized(mutex) {
-diff --git a/src/internal/http1/connection_pool_test.cj b/src/internal/http1/connection_pool_test.cj
-index ef2bdd37..4bdac2e3 100644
---- a/src/internal/http1/connection_pool_test.cj
-+++ b/src/internal/http1/connection_pool_test.cj
-@@ -292,6 +292,44 @@ class Http1ConnectionPoolTest {
-         }
+@@ -561,11 +561,24 @@ public class HttpServer <: Resource {
      }
- 
-+    @TestCase
-+    func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {
-+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
-+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2
-+        ))
-+        let pool = Http1ConnectionPool(
-+            config: Http1ConnectionPoolConfig(
-+                maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1
-+            ),
-+            resourceBudget: Some(budget)
-+        )
-+        let factory = PoolTestFactory()
-+        let held = pool.acquire(poolTestKey(), factory)
-+        let blocker = spawn {
-+            try {
-+                let _ = pool.acquire(poolTestKey(), factory)
-+                false
-+            } catch (error: NetworkException) {
-+                match (error.code) {
-+                    case NetworkErrorCode.Closed => true
-+                    case _ => false
-+                }
-+            }
-+        }
-+        @Expect(waitForAggregateConnectionWaiter(budget, 1, Duration.second))
-+        pool.close()
-+        var rejected = false
-+        try { rejected = blocker.get(Duration.second) } catch (_: Exception) {}
-+        @Expect(rejected)
-+        // close() released the held connection only after aggregate admission; no
-+        // factory work may run for the already-closed pool.
-+        @Expect(factory.calls.load(), 1)
-+        @Expect(pool.snapshot().reservations, 0)
-+        @Expect(pool.snapshot().closed)
-+        @Expect(budget.snapshot().activeConnections, 0)
-+        @Expect(budget.snapshot().reservedConnections, 0)
-+        pool.release(held)
-+    }
  }
  
- private func expectPoolEvent(event: NetworkEvent, kind: NetworkEventKind,
-@@ -366,3 +404,13 @@ private class RotationPoolFactory <: Http1ConnectionFactory {
-     }
-     func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
- }
-+
-+private func waitForAggregateConnectionWaiter(budget: internal.HttpResourceBudget,
-+    expected: Int64, timeout: Duration): Bool {
-+    let expiresAt = MonoTime.now() + timeout
-+    while (budget.snapshot().admissionWaiters < expected) {
-+        if (MonoTime.now() >= expiresAt) { return false }
-+        sleep(Duration.millisecond)
++/** Extracts the parser-validated authority from one HTTP/1 request head. */
++private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): String {
++    match (request.head.headers.getFirst("host")) {
++        case Some(value) => value
++        case None => ""
 +    }
-+    true
 +}
-diff --git a/src/internal/http1/http2_connection_pool.cj b/src/internal/http1/http2_connection_pool.cj
-index 27faadc9..3b734ae3 100644
---- a/src/internal/http1/http2_connection_pool.cj
-+++ b/src/internal/http1/http2_connection_pool.cj
-@@ -345,6 +345,9 @@ public class Http2ConnectionPool <: Resource {
-                                 ))
-                                 case None => None<internal.HttpResourceLease>
-                             }
-+                            // Aggregate admission can return after close() released another
-+                            // request's slot; never start factory work for a closed pool.
-+                            if (isClosed()) { throw http2PoolClosed() }
-                             let created = factory.create(key, context, connectionResourceLease)
-                             if (let Some(value) <- connectionResourceLease) { value.activate() }
-                             let admission = try {
-diff --git a/src/internal/http2/server_connection.cj b/src/internal/http2/server_connection.cj
-index 8773dbee..96f5a18c 100644
---- a/src/internal/http2/server_connection.cj
-+++ b/src/internal/http2/server_connection.cj
-@@ -22,6 +22,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-     private let http2Limits: Http2Limits
-     private let resourceBudget: ?internal.HttpResourceBudget
-     private let resourceOwner: ?internal.HttpResourceOwnerKey
-+    private let requestOwnerFactory: Option<(String) -> internal.HttpResourceOwnerKey>
-     private let mutex = Mutex()
-     private let pushAdmissionMutex = Mutex()
-     private let exchanges = ArrayList<Http2ServerExchange>()
-@@ -43,7 +44,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-         limits!: HttpLimits = HttpLimits(),
-         http2Limits!: Http2Limits = Http2Limits(),
-         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
--        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
-+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
-+        requestOwnerFactory!: Option<(String) -> internal.HttpResourceOwnerKey> =
-+            None<(String) -> internal.HttpResourceOwnerKey>
-     ) {
-         this.transport = transport
-         this.handler = handler
-@@ -51,6 +54,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-         this.http2Limits = http2Limits
-         this.resourceBudget = resourceBudget
-         this.resourceOwner = resourceOwner
-+        this.requestOwnerFactory = requestOwnerFactory
-         if (resourceBudget.isSome() != resourceOwner.isSome()) {
-             throw IllegalArgumentException("HTTP/2 resource budget and owner must be supplied together")
-         }
-@@ -85,6 +89,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-         ))
-     }
- 
-+    /**
-+     * Resolves the aggregate-budget owner for one validated request authority.
-+     * Connections and connection buffers stay owned by the listener.
-+     */
-+    private func requestOwner(authority: String): internal.HttpResourceOwnerKey {
-+        match (requestOwnerFactory) {
-+            case Some(factory) => factory(authority)
-+            case None => resourceOwner.getOrThrow()
-+        }
-+    }
 +
-     public func serve(context!: OperationContext = OperationContext.background()): Unit {
-         operationContext = context
-         if (synchronized(mutex) { closed }) { return }
-@@ -259,7 +274,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-                 var requestLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
-                 var streamLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
-                 if (let Some(budget) <- resourceBudget) {
--                    let owner = resourceOwner.getOrThrow()
-+                    let owner = requestOwner(requestHead.authority)
-                     requestLease = budget.tryAcquireRequest(owner)
-                     if (requestLease.isSome()) { streamLease = budget.tryAcquireStream(owner) }
-                     if (requestLease.isNone() || streamLease.isNone()) {
-@@ -428,8 +443,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-             acquirePushSlot(context)
-             slotOwned = true
-             match ((resourceBudget, resourceOwner)) {
--                case (Some(budget), Some(owner)) =>
--                    streamLease = Some(budget.acquireStream(owner, context))
-+                case (Some(budget), Some(_)) =>
-+                    streamLease = Some(budget.acquireStream(
-+                        requestOwner(parentOrigin.authority), context
-+                    ))
-                 case _ => ()
-             }
-             // Reserve the promised id first, then perform response mapping
++/** Derives request and stream budget owners from the validated request authority. */
++private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
++    let origin = if (authority.isEmpty()) { "server" } else { authority }
++    internal.HttpResourceOwnerKey(origin, "listener")
++}
++
+ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+     private let delegate: HttpServerHandler
+     private let connectionCancellation: HttpConnectionCancellationHandle
+     private let resourceBudget: internal.HttpResourceBudget
+-    private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
+     init(
+         delegate: HttpServerHandler,
+         resourceBudget: internal.HttpResourceBudget,
+@@ -583,7 +596,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+  */
+     public func handle(request: http1.Http1ServerRequest,
+         context: transport.OperationContext): http1.Http1ServerResponse {
+-        let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
++        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request))
++        let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
+             case Some(value) => value
+             case None =>
+                 let headers = HttpHeaders.builder()

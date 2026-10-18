@@ -1,293 +1,40 @@
-diff --git a/docs/performance/end-to-end-baselines.md b/docs/performance/end-to-end-baselines.md
-index 1c5dc301..ff8eded0 100644
---- a/docs/performance/end-to-end-baselines.md
-+++ b/docs/performance/end-to-end-baselines.md
-@@ -32,7 +32,11 @@ checks every production source and archive digest against the SDK 1.1.3 installe
- acceptance report, and compiles three installed consumers with `-O2 -g`.
- A source or archive mismatch stops capture; it does not silently select another
- baseline. A different accepted artifact needs an explicit task-scoped update
--of that binding. The prior P1-015 archive could not be reconstructed exactly;
-+of that binding. The capture also records every benchmark source declared by
-+`tools/tasks/M12-001.json`: the four native probes, this runner, its tests, the
-+task contract and the three benchmark documents. `verify` rechecks that complete
-+inventory, so a changed runner, test, task contract or document cannot reuse an
-+older capture. The prior P1-015 archive could not be reconstructed exactly;
- it is not substituted or presented as a measured before-version.
- 
- ## Work and accounting
 diff --git a/src/http/server.cj b/src/http/server.cj
-index f3be7436..07e5b7e3 100644
+index 07e5b7e3..7cd06e1e 100644
 --- a/src/http/server.cj
 +++ b/src/http/server.cj
-@@ -850,8 +850,12 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
-     private func serveHttp2(value: transport.DuplexTransport, context: transport.OperationContext,
-         entry: PublicServerConnectionEntry): Unit {
-         let cancellation = entry.connectionCancellation
-+        let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-+            publicServerRequestOwner(authority)
-+        }
-         let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
--            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner))
-+            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
-+                requestOwnerFactory: Some(requestOwnerFactory))
-         let registration = cancellation.cancellationToken.register { => created.abort() }
-         entry.installHttp2(created)
-         try { created.serve(context: context) }
-diff --git a/src/internal/http1/connection_pool.cj b/src/internal/http1/connection_pool.cj
-index b94bc03a..e53b2b7a 100644
---- a/src/internal/http1/connection_pool.cj
-+++ b/src/internal/http1/connection_pool.cj
-@@ -165,6 +165,9 @@ public class Http1ConnectionPool <: Resource {
-                                 case None => None<internal.HttpResourceLease>
-                             }
-                             if (poolStageOpen) { emitHttpStage(poolContext, false); poolStageOpen = false }
-+                            // Aggregate admission can return after close() released another
-+                            // request's slot; never start factory work for a closed pool.
-+                            if (isClosed()) { throw poolClosed() }
-                             let connection = factory.create(key, connectionEventContext(context, id), resourceLease)
-                             if (let Some(value) <- resourceLease) { value.activate() }
-                             let accepted = synchronized(mutex) {
-diff --git a/src/internal/http1/connection_pool_test.cj b/src/internal/http1/connection_pool_test.cj
-index 443605af..1d0d7387 100644
---- a/src/internal/http1/connection_pool_test.cj
-+++ b/src/internal/http1/connection_pool_test.cj
-@@ -404,6 +404,44 @@ class Http1ConnectionPoolTest {
-         }
+@@ -572,11 +572,24 @@ public class HttpServer <: Resource {
      }
- 
-+    @TestCase
-+    func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {
-+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
-+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2
-+        ))
-+        let pool = Http1ConnectionPool(
-+            config: Http1ConnectionPoolConfig(
-+                maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1
-+            ),
-+            resourceBudget: Some(budget)
-+        )
-+        let factory = PoolTestFactory()
-+        let held = pool.acquire(poolTestKey(), factory)
-+        let blocker = spawn {
-+            try {
-+                let _ = pool.acquire(poolTestKey(), factory)
-+                false
-+            } catch (error: NetworkException) {
-+                match (error.code) {
-+                    case NetworkErrorCode.Closed => true
-+                    case _ => false
-+                }
-+            }
-+        }
-+        @Expect(waitForAggregateConnectionWaiter(budget, 1, Duration.second))
-+        pool.close()
-+        var rejected = false
-+        try { rejected = blocker.get(Duration.second) } catch (_: Exception) {}
-+        @Expect(rejected)
-+        // close() released the held connection only after aggregate admission; no
-+        // factory work may run for the already-closed pool.
-+        @Expect(factory.calls.load(), 1)
-+        @Expect(pool.snapshot().reservations, 0)
-+        @Expect(pool.snapshot().closed)
-+        @Expect(budget.snapshot().activeConnections, 0)
-+        @Expect(budget.snapshot().reservedConnections, 0)
-+        pool.release(held)
-+    }
  }
  
- private class ReentrantPoolObservationSink <: NetworkEventSink {
-@@ -495,3 +533,13 @@ private class RotationPoolFactory <: Http1ConnectionFactory {
-     }
-     func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
- }
-+
-+private func waitForAggregateConnectionWaiter(budget: internal.HttpResourceBudget,
-+    expected: Int64, timeout: Duration): Bool {
-+    let expiresAt = MonoTime.now() + timeout
-+    while (budget.snapshot().admissionWaiters < expected) {
-+        if (MonoTime.now() >= expiresAt) { return false }
-+        sleep(Duration.millisecond)
++/** Extracts the parser-validated authority from one HTTP/1 request head. */
++private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): String {
++    match (request.head.headers.getFirst("host")) {
++        case Some(value) => value
++        case None => ""
 +    }
-+    true
 +}
-diff --git a/src/internal/http1/http2_connection_pool.cj b/src/internal/http1/http2_connection_pool.cj
-index dbdd2a89..b77d591f 100644
---- a/src/internal/http1/http2_connection_pool.cj
-+++ b/src/internal/http1/http2_connection_pool.cj
-@@ -361,6 +361,9 @@ public class Http2ConnectionPool <: Resource {
-                                 case None => None<internal.HttpResourceLease>
-                             }
-                             if (poolStageOpen) { emitHttpStage(poolContext, false); poolStageOpen = false }
-+                            // Aggregate admission can return after close() released another
-+                            // request's slot; never start factory work for a closed pool.
-+                            if (isClosed()) { throw http2PoolClosed() }
-                             let created = factory.create(key, connectionEventContext(context, id), connectionResourceLease)
-                             if (let Some(value) <- connectionResourceLease) { value.activate() }
-                             let admission = try {
-diff --git a/src/internal/http2/server_connection.cj b/src/internal/http2/server_connection.cj
-index b382648e..5947cf5b 100644
---- a/src/internal/http2/server_connection.cj
-+++ b/src/internal/http2/server_connection.cj
-@@ -22,6 +22,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-     private let http2Limits: Http2Limits
-     private let resourceBudget: ?internal.HttpResourceBudget
-     private let resourceOwner: ?internal.HttpResourceOwnerKey
-+    private let requestOwnerFactory: Option<(String) -> internal.HttpResourceOwnerKey>
-     private let mutex = Mutex()
-     private let pushAdmissionMutex = Mutex()
-     private let exchanges = ArrayList<Http2ServerExchange>()
-@@ -43,7 +44,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-         limits!: HttpLimits = HttpLimits(),
-         http2Limits!: Http2Limits = Http2Limits(),
-         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
--        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
-+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
-+        requestOwnerFactory!: Option<(String) -> internal.HttpResourceOwnerKey> =
-+            None<(String) -> internal.HttpResourceOwnerKey>
-     ) {
-         this.transport = transport
-         this.handler = handler
-@@ -51,6 +54,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-         this.http2Limits = http2Limits
-         this.resourceBudget = resourceBudget
-         this.resourceOwner = resourceOwner
-+        this.requestOwnerFactory = requestOwnerFactory
-         if (resourceBudget.isSome() != resourceOwner.isSome()) {
-             throw IllegalArgumentException("HTTP/2 resource budget and owner must be supplied together")
-         }
-@@ -85,6 +89,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-         ))
-     }
- 
-+    /**
-+     * Resolves the aggregate-budget owner for one validated request authority.
-+     * Connections and connection buffers stay owned by the listener.
-+     */
-+    private func requestOwner(authority: String): internal.HttpResourceOwnerKey {
-+        match (requestOwnerFactory) {
-+            case Some(factory) => factory(authority)
-+            case None => resourceOwner.getOrThrow()
-+        }
-+    }
 +
-     public func serve(context!: OperationContext = OperationContext.background()): Unit {
-         operationContext = context
-         if (synchronized(mutex) { closed }) { return }
-@@ -270,7 +285,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-                 var requestLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
-                 var streamLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
-                 if (let Some(budget) <- resourceBudget) {
--                    let owner = resourceOwner.getOrThrow()
-+                    let owner = requestOwner(requestHead.authority)
-                     requestLease = budget.tryAcquireRequest(owner)
-                     if (requestLease.isSome()) { streamLease = budget.tryAcquireStream(owner) }
-                     if (requestLease.isNone() || streamLease.isNone()) {
-@@ -469,8 +484,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
-             acquirePushSlot(context)
-             slotOwned = true
-             match ((resourceBudget, resourceOwner)) {
--                case (Some(budget), Some(owner)) =>
--                    streamLease = Some(budget.acquireStream(owner, context))
-+                case (Some(budget), Some(_)) =>
-+                    streamLease = Some(budget.acquireStream(
-+                        requestOwner(parentOrigin.authority), context
-+                    ))
-                 case _ => ()
-             }
-             // Reserve the promised id first, then perform response mapping
-diff --git a/tools/benchmarks/m12_001_end_to_end.py b/tools/benchmarks/m12_001_end_to_end.py
-index 5bf2b420..41834f94 100755
---- a/tools/benchmarks/m12_001_end_to_end.py
-+++ b/tools/benchmarks/m12_001_end_to_end.py
-@@ -290,7 +290,8 @@ class Campaign:
-                     "production_sources": sources, "compile_flags": flags,
-                     "prior_development_acceptance": {"path": str(prior_path.relative_to(ROOT)), "digest": text_evidence_digest(prior_path).to_json(),
-                                                      "checks": prior["pass_check_count"], "release_qualification": "NOT_QUALIFIED"},
--                    "probe_sources": {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json() for p in sorted(SOURCES.glob("*.cj"))}}
-+                    "probe_sources": {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json() for p in sorted(SOURCES.glob("*.cj"))},
-+                    "task_source_digests": task_source_digests()}
-         binaries = {}
-         for layer in CASES:
-             consumer = self.work / layer
-@@ -363,6 +364,8 @@ class Campaign:
-             after = {str(p.relative_to(ROOT)): artifact_byte_digest(p).to_json() for p in release.production_sources(ROOT)}
-             if after != report["artifact"]["production_sources"]:
-                 raise ValueError("production source changed during campaign")
-+            if task_source_digests() != report["artifact"]["task_source_digests"]:
-+                raise ValueError("benchmark runner, tests, task contract or documentation changed during campaign")
-             report["status"] = "PASS"
-         except Exception as error:
-             report["error"] = self.redact(f"{type(error).__name__}: {error}")
-@@ -478,6 +481,21 @@ def selected_round_summaries(report: dict, selection: str | None) -> tuple[dict,
- 
- 
- 
-+def task_source_digests() -> dict:
-+    """Every benchmark source declared by the task contract, not only native probes or production files."""
-+    task = json.loads((ROOT / "tools/tasks/M12-001.json").read_text())
-+    return {relative: text_evidence_digest(ROOT / relative).to_json() for relative in task["source_paths"]}
++/** Derives request and stream budget owners from the validated request authority. */
++private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
++    let origin = if (authority.isEmpty()) { "server" } else { authority }
++    internal.HttpResourceOwnerKey(origin, "listener")
++}
 +
-+
-+def verify_task_sources(report: dict) -> None:
-+    actual = task_source_digests()
-+    expected = report.get("artifact", {}).get("task_source_digests")
-+    if not isinstance(expected, dict) or expected.keys() != actual.keys():
-+        raise ValueError("retained evidence does not bind the complete benchmark task source inventory")
-+    if expected != actual:
-+        raise ValueError("current benchmark runner, tests, task contract or documentation differs from measured native source")
-+
-+
- def verify_baseline_archive(report: dict, archive: Path) -> None:
-     expected = report['artifact']['archive_digest']
-     if archive.exists():
-@@ -526,6 +544,7 @@ def main() -> int:
-         archive = args.report.parent / "wirestack-baseline.tar.gz"
-         if source != report["artifact"]["production_sources"] or probes != report["artifact"]["probe_sources"]:
-             raise ValueError("current production/probe source differs from measured native source")
-+        verify_task_sources(report)
-         verify_baseline_archive(report, archive)
-         print("M12_001_EVIDENCE_PASS")
-         return 0
-diff --git a/tools/benchmarks/tests/test_m12_001_end_to_end.py b/tools/benchmarks/tests/test_m12_001_end_to_end.py
-index dd1f4724..ef137a28 100644
---- a/tools/benchmarks/tests/test_m12_001_end_to_end.py
-+++ b/tools/benchmarks/tests/test_m12_001_end_to_end.py
-@@ -220,6 +220,38 @@ class BaselineArchiveVerification(unittest.TestCase):
-         self.assertEqual(result['status'], 'UNAVAILABLE')
-         self.assertIn('cjprof', result['reason'])
- 
-+class TaskSourceInventory(unittest.TestCase):
-+    def test_declared_inventory_covers_runner_tests_contract_and_documentation(self):
-+        task = json.loads((bench.ROOT / "tools/tasks/M12-001.json").read_text())
-+        inventory = bench.task_source_digests()
-+        self.assertEqual(set(inventory), set(task["source_paths"]))
-+        for relative in ("tools/benchmarks/m12_001_end_to_end.py",
-+                         "tools/benchmarks/tests/test_m12_001_end_to_end.py",
-+                         "tools/tasks/M12-001.json",
-+                         "docs/performance/end-to-end-baselines.md",
-+                         "docs/performance/http1-benchmark.md",
-+                         "docs/performance/http2-benchmark.md"):
-+            self.assertIn(relative, inventory)
-+
-+    def test_capture_that_omits_or_changes_task_sources_cannot_verify(self):
-+        inventory = bench.task_source_digests()
-+        with self.assertRaisesRegex(ValueError, "complete benchmark task source inventory"):
-+            bench.verify_task_sources({"artifact": {}})
-+        incomplete = dict(inventory)
-+        incomplete.pop("tools/benchmarks/tests/test_m12_001_end_to_end.py")
-+        with self.assertRaisesRegex(ValueError, "complete benchmark task source inventory"):
-+            bench.verify_task_sources({"artifact": {"task_source_digests": incomplete}})
-+
-+    def test_changed_runner_or_documentation_is_rejected(self):
-+        inventory = bench.task_source_digests()
-+        changed = dict(inventory)
-+        changed["docs/performance/end-to-end-baselines.md"] = {"domain": "text-utf8-lf-v1", "sha256": "0" * 64}
-+        with patch.object(bench, "task_source_digests", return_value=inventory):
-+            bench.verify_task_sources({"artifact": {"task_source_digests": inventory}})
-+            with self.assertRaisesRegex(ValueError, "runner, tests, task contract or documentation"):
-+                bench.verify_task_sources({"artifact": {"task_source_digests": changed}})
-+
-+
- class RoundCohortSelection(unittest.TestCase):
-     def test_warmup_and_old_rounds_cannot_hide_later_regression(self):
-         samples = [{**row(), "round": i, "warmup": False} for i in range(7)]
+ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+     private let delegate: HttpServerHandler
+     private let connectionCancellation: HttpConnectionCancellationHandle
+     private let resourceBudget: internal.HttpResourceBudget
+-    private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
+     init(
+         delegate: HttpServerHandler,
+         resourceBudget: internal.HttpResourceBudget,
+@@ -596,7 +609,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+         context: transport.OperationContext): http1.Http1ServerResponse {
+         let operation = observedRequestContext(context, delegate is ServiceHookHandler)
+         emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
+-        let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
++        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request))
++        let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
+             case Some(value) => value
+             case None =>
+                 resourceBudget.recordAdmissionRejection()
