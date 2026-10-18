@@ -23,7 +23,7 @@ public class HttpResourceLimits {
     public let maximumStreamsPerRoute: Int64
     /** Maximum active streams across all routes for one origin. */
     public let maximumStreamsPerOrigin: Int64
-    /** Maximum aggregate bytes held by resource-accounted HTTP/2 buffers. */
+    /** Maximum aggregate bytes held by accounted HTTP/2 buffers and response-consumer reservations. */
     public let maximumManagedBufferBytes: UInt64
     /** Bytes reserved for HTTP/2 general control and cleanup frames. */
     public let reservedControlBufferBytes: UInt64
@@ -247,7 +247,7 @@ public struct HttpResourceSnapshot {
     public let activeStreams: Int64
     /** Stream slots reserved before a protocol stream is opened. */
     public let reservedStreams: Int64
-    /** Current bytes admitted to resource-accounted HTTP/2 buffers. */
+    /** Current bytes admitted to HTTP/2 storage and explicit response-consumer reservations. */
     public let managedBufferBytes: UInt64
     /** Monotonic instant of the ledger's single-lock snapshot. */
     public let sampledAt: MonoTime

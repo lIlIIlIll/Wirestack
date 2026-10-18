@@ -523,3 +523,13 @@ python3 tools/m10_004_native_rotation.py
 
 Expected final marker: `M10_004_INSTALLED_ROTATION_PASS` in `docs/evidence/M10-004/installed/consumer-run.stdout.log`. This is Linux development acceptance, not release qualification.
 
+
+## Bounded server-sent events
+
+Use the opt-in `wirestack.sse` package for bounded incremental decoding,
+server body publication and explicit GET reconnect sessions. Ordinary HTTP
+retry policy does not opt a stream into reconnection. POST `oneShot` never
+replays, even with an explicitly-safe replayable request. The
+[SSE guide](sse-linux.md) covers cursor versus acknowledgement, shared deadline
+and DATA-buffer admission, local flush semantics and H1/H2 body ownership.
+`examples/linux/m11_001/sse.cj` is the extracted-install consumer.
