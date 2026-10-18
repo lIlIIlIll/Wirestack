@@ -5,7 +5,7 @@ on:
     branches:
       - tmp/docgen
     paths:
-      - 'docs-harness-trigger/**'
+      - 'patches/**'
   workflow_dispatch:
 
 permissions:
@@ -209,33 +209,6 @@ jobs:
           - name: r203
             base_ref: publish/m10-005-observability
             patch: patches/pr-203.patch
-          - name: r204
-            base_ref: publish/m11-001-sse
-            patch: patches/pr-204.patch
-          - name: r205
-            base_ref: publish/m11-002-gzip
-            patch: patches/pr-205.patch
-          - name: r206
-            base_ref: publish/m11-003-websocket
-            patch: patches/pr-206.patch
-          - name: r207
-            base_ref: publish/m11-004-installed-consumers
-            patch: patches/pr-207.patch
-          - name: r208
-            base_ref: publish/m12-001-baselines
-            patch: patches/pr-208.patch
-          - name: r209
-            base_ref: publish/m12-002-deployment
-            patch: patches/pr-209.patch
-          - name: r210
-            base_ref: publish/m12-003-resilience
-            patch: patches/pr-210.patch
-          - name: r211
-            base_ref: publish/m12-004-upgrade-repaired-server
-            patch: patches/pr-211.patch
-          - name: r212
-            base_ref: publish/m12-003-gate-receipt
-            patch: patches/pr-212.patch
     steps:
       - name: Check out the target branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
