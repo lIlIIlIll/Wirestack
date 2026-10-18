@@ -1,0 +1,24 @@
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.http[0m, time elapsed: 3428599484 ns, RESULT:
+    TCS: [33mHttpServerRotationTest[0m, time elapsed: 3411401059 ns, RESULT:
+    [[32m PASSED [0m] CASE: invalidAndClosedUpdatesRollbackWhileUnreferencedUpdatesStayBounded (980755459 ns)
+    [[32m PASSED [0m] CASE: gracefulHttp1FinishesAdmittedResponseAndRejectsOldKeepalive (49182496 ns)
+    [[32m PASSED [0m] CASE: securityHttp1CancelsActiveExchangeAndGracefulRotationClosesIdleKeepalive (65722544 ns)
+    [[32m PASSED [0m] CASE: gracefulHttp2DrainsOldStreamsAndNewHandshakesUseReplacementAuthentication (96248373 ns)
+    [[32m PASSED [0m] CASE: securityHttp2CancelsAdmittedStreamWithoutClosingListener (50815359 ns)
+    [[32m PASSED [0m] CASE: pendingHandshakeKeepsSnapshotAndSecurityReplacementAbortsPendingSocket (153906234 ns)
+    [[32m PASSED [0m] CASE: retainedHandshakeGenerationCapRejectsAtomicallyAndCloseReleasesAll (1765545740 ns)
+    [[32m PASSED [0m] CASE: closeAndSecurityRotationRaceLeavesListenerClosedAndNoOwners (244878723 ns)
+Summary: TOTAL: 141
+    [32mPASSED[0m: 8, [32mSKIPPED[0m: 133, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3434090578 ns, RESULT:
+TP: [33mwirestack[0m.*, time elapsed: 3433994205 ns, RESULT:
+    PASSED:
+    TP: [33mwirestack.http[0m, time elapsed: 3428599484 ns
+Summary: TOTAL: 141
+    [32mPASSED[0m: 8, [32mSKIPPED[0m: 133, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

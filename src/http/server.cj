@@ -446,7 +446,7 @@ public class HttpServerBuilder {
             )
             let core = http1.Http1Server(
                 bound,
-                PublicHttp1Handler(selectedHandler, resourceBudget),
+                PublicHttp1Handler(selectedHandler, resourceBudget, tlsConfig.isSome()),
                 config: http1.Http1ServerConfig(
                     maximumConnections: effectiveResourceLimits.maximumConnections,
                     maximumRequestsPerConnection: maximumRequestsPerConnection,
@@ -835,7 +835,7 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
         entry: PublicServerConnectionEntry): Unit {
         let cancellation = entry.connectionCancellation
         let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-            publicServerRequestOwner(authority)
+            publicServerRequestOwner(authority, false)
         }
         let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
             limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),

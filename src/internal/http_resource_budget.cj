@@ -115,8 +115,27 @@ public class HttpResourceBudget {
     private var highWaterStreams: Int64 = 0
     private var highWaterManagedBufferBytes: UInt64 = 0u64
     private var highWaterWaiters: Int64 = 0
+    private var rejectedOperations: Int64 = 0
+    private var completedCancellations: Int64 = 0
+    private var lastCancellationCompletionLatency = None<Duration>
 
     public init(limits: HttpResourceBudgetPolicy) { this.limits = limits }
+
+    /** Records one operational admission refusal reported by a bounded try-acquire caller.
+     * Diagnostic try-acquire probes stay uncounted unless their caller reports a real refusal.
+     */
+    public func recordAdmissionRejection(): Unit {
+        synchronized(mutex) { recordRejectionLocked() }
+    }
+
+    /** Records one measured cancellation only after its owned cleanup completes. */
+    public func recordCancellationCompletion(latency: Duration): Unit {
+        if (latency < Duration.Zero) { throw IllegalArgumentException("cancellation latency must be non-negative") }
+        synchronized(mutex) {
+            if (completedCancellations < Int64.Max) { completedCancellations++ }
+            lastCancellationCompletionLatency = Some(latency)
+        }
+    }
 
     public func acquireConnection(
         owner: HttpResourceOwnerKey,
@@ -300,7 +319,9 @@ public class HttpResourceBudget {
                 highWaterRequests, highWaterStreams, highWaterManagedBufferBytes,
                 highWaterWaiters, ownerSnapshots.toArray(),
                 sampledAt: sampledAt, reservedConnections: reservedConnections,
-                reservedStreams: reservedStreams
+                reservedStreams: reservedStreams, rejectedOperations: rejectedOperations,
+                completedCancellations: completedCancellations,
+                lastCancellationCompletionLatency: lastCancellationCompletionLatency
             )
         }
     }
@@ -445,12 +466,16 @@ public class HttpResourceBudget {
                 checkContext(context)
                 checkAdmissionOpen()
                 if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) {
+                    recordRejectionLocked()
                     throw resourceOwnersExhausted()
                 }
                 if (nextWaiterLocked(kind).isNone() && canAcquireLocked(kind, owner, amount, control)) {
                     return grantLocked(kind, owner, amount, control, false)
                 }
-                if (waiters.size >= limits.maximumWaiters) { throw resourceWaitersExhausted() }
+                if (waiters.size >= limits.maximumWaiters) {
+                    recordRejectionLocked()
+                    throw resourceWaitersExhausted()
+                }
                 let waiter = HttpResourceWaiter(nextWaiterId, kind, owner, amount, control)
                 nextWaiterId++
                 waiters.add(waiter)
@@ -711,7 +736,10 @@ public class HttpResourceBudget {
         match (findOwnerLocked(owner)) {
             case Some(value) => value
             case None =>
-                if (owners.size >= limits.maximumOwners) { throw resourceOwnersExhausted() }
+                if (owners.size >= limits.maximumOwners) {
+                    recordRejectionLocked()
+                    throw resourceOwnersExhausted()
+                }
                 let value = HttpResourceOwnerCounts(owner)
                 value.lastGrantSequence = grantSequence
                 owners.add(value)
@@ -765,6 +793,10 @@ public class HttpResourceBudget {
         highWaterRequests = max(highWaterRequests, activeRequests)
         highWaterStreams = max(highWaterStreams, activeStreams + reservedStreams)
         highWaterManagedBufferBytes = max(highWaterManagedBufferBytes, managedBufferBytes)
+    }
+
+    private func recordRejectionLocked(): Unit {
+        if (rejectedOperations < Int64.Max) { rejectedOperations++ }
     }
 }
 

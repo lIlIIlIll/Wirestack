@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import wirestack.internal.http_model.*
+import wirestack.nextNetworkCorrelationId
 import wirestack.internal.transport.*
 import std.sync.*
 
@@ -83,26 +84,40 @@ public func serveHttp1Connection(
     var unread = false
     var tunnel = false
     var tunnelRemainder = Array<Byte>()
+    var tunnelContext = context
     var pendingHandoff = None<Http1DuplexHandler>
     let requestReadBuffer = Array<Byte>(16 * 1024, repeat: 0)
     try {
         while (served < maximumRequests) {
-            let request = readHttp1ServerRequest(
-                transport, context: context, limits: limits,
-                readBuffer: Some(requestReadBuffer)
-            )
+            let requestContext = http1ServerRequestContext(context)
+            let headerContext = http1ServerObservationContext(requestContext)
+            emitHttp1ServerPhase(headerContext, NetworkPhase.HttpHeaders, true)
+            let parsed = try {
+                let value = readHttp1ServerRequest(transport, context: requestContext, limits: limits,
+                    readBuffer: Some(requestReadBuffer))
+                emitHttp1ServerPhase(headerContext, NetworkPhase.HttpHeaders, false)
+                value
+            } catch (error: Exception) {
+                emitHttp1ServerPhase(headerContext, NetworkPhase.HttpHeaders, false, code: Some(httpObservationError(error)))
+                throw error
+            }
+            let request = if (requestContext.eventSink.isSome()) {
+                Http1ServerRequest(parsed.head, observedHttp1ResponseBody(
+                    Http1ServerObservedBodySource(parsed.body), Http1ServerObservationObserver(), requestContext,
+                    { => parsed.body.trailer }), upgradeRemainder: parsed.upgradeRemainder)
+            } else { parsed }
             if (let Some(control) <- drainControl) {
                 if (!control.admit()) { request.close(); break }
             }
             var produced: ?Http1ServerResponse = None<Http1ServerResponse>
             try {
-                produced = Some(handler.handle(request, context))
+                produced = Some(handler.handle(request, requestContext))
                 pendingHandoff = produced.getOrThrow().duplexHandler
                 validateServerHandoff(request, produced.getOrThrow())
             } catch (error: Exception) {
                 request.close()
                 if (let Some(value) <- produced) { value.response.close() }
-                writeServerFailure(transport, request.head.method, context, limits)
+                writeServerFailure(transport, request.head.method, requestContext, limits)
                 served += 1
                 return Http1ServerConnectionResult(served, true, None<DuplexTransport>)
             }
@@ -110,16 +125,23 @@ public func serveHttp1Connection(
             let requestConsumed = request.body.isFullyConsumed() || request.body.contentLength == Some(0)
             request.close()
             let output = produced.getOrThrow()
-            let evidence = writeHttp1Response(
-                transport, request.head.method, output.response,
-                context: context, limits: limits, trailer: output.trailer
-            )
+            let writeContext = http1ServerObservationContext(requestContext)
+            emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, true)
+            let evidence = try {
+                let value = writeHttp1Response(transport, request.head.method, output.response,
+                    context: writeContext, limits: limits, trailer: output.trailer)
+                emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, false)
+                value
+            } catch (error: Exception) {
+                emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, false, code: Some(httpObservationError(error)))
+                throw error
+            }
             served += 1
             unread = !requestConsumed
             if (let Some(handoff) <- output.duplexHandler) {
-                let upgraded = Http1PrefixedTransport(transport, request.upgradeRemainder)
+                let upgraded = Http1PrefixedTransport(transport, request.upgradeRemainder, context: requestContext)
                 pendingHandoff = None<Http1DuplexHandler>
-                try { handoff.serve(upgraded, context) }
+                try { handoff.serve(upgraded, requestContext) }
                 finally { upgraded.close() }
                 return Http1ServerConnectionResult(served, false, None<DuplexTransport>)
             }
@@ -127,7 +149,7 @@ public func serveHttp1Connection(
                 if (!control.complete()) { break }
             }
             tunnel = evidence.tunnelEstablished
-            if (tunnel) { tunnelRemainder = request.upgradeRemainder }
+            if (tunnel) { tunnelRemainder = request.upgradeRemainder; tunnelContext = requestContext }
             if (unread || tunnel || !request.upgradeRemainder.isEmpty() || evidence.mustClose ||
                 headerContainsToken(request.head.headers, "connection", "close") ||
                 headerContainsToken(output.response.headers, "connection", "close")) {
@@ -137,7 +159,7 @@ public func serveHttp1Connection(
         Http1ServerConnectionResult(
             served, unread,
             if (tunnel) {
-                Some<DuplexTransport>(Http1PrefixedTransport(transport, tunnelRemainder))
+                Some<DuplexTransport>(Http1PrefixedTransport(transport, tunnelRemainder, context: tunnelContext))
             } else { None<DuplexTransport> }
         )
     } finally {
@@ -147,6 +169,42 @@ public func serveHttp1Connection(
             if (!tunnel) { transport.close() }
         }
     }
+}
+
+private func http1ServerObservationContext(context: OperationContext): OperationContext {
+    if (context.eventSink.isNone() || context.stage.isNone()) { return context }
+    OperationContext(deadline: context.deadline, cancellation: context.cancellation, timeoutPolicy: context.timeoutPolicy,
+        eventSink: context.eventSink, trace: context.trace, requestId: context.requestId, attemptId: context.attemptId,
+        connectionId: context.connectionId, streamId: context.streamId, deadlineStage: context.deadlineStage)
+}
+
+private func emitHttp1ServerPhase(context: OperationContext, phase: NetworkPhase, started: Bool, code!: ?NetworkErrorCode = None<NetworkErrorCode>): Unit {
+    if (context.eventSink.isNone()) { return }
+    emitNetworkEvent(context, NetworkEvent(
+        if (started) { NetworkEventKind.StageStarted } else { NetworkEventKind.StageCompleted },
+        if (started) { NetworkEventOutcome.Started } else if (code.isSome()) { NetworkEventOutcome.Failed } else { NetworkEventOutcome.Succeeded },
+        phase: Some(phase), errorCode: code))
+}
+
+private func http1ServerRequestContext(context: OperationContext): OperationContext {
+    if (context.eventSink.isNone()) { return context }
+    context.withEventCorrelation(requestId: Some(nextNetworkCorrelationId()),
+        attemptId: Some(nextNetworkCorrelationId()), connectionId: context.connectionId,
+        streamId: None<Int64>)
+}
+
+private class Http1ServerObservedBodySource <: HttpBodyStream {
+    private let body: ResponseBody
+    init(body: ResponseBody) { this.body = body }
+    public prop contentLength: ?Int64 { get() { body.contentLength } }
+    public func read(destination: Array<Byte>): Int64 { body.read(destination) }
+    public func close(): Unit { body.close() }
+    public func isClosed(): Bool { body.isClosed() }
+}
+
+private class Http1ServerObservationObserver <: ResponseBodyObserver {
+    public func completed(): Unit {}
+    public func abandoned(): Unit {}
 }
 
 private func writeServerFailure(transport: DuplexTransport, method: HttpMethod,

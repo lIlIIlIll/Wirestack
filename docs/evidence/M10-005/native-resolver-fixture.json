@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "task": "M10-005",
+  "status": "PASS",
+  "platform": "native Linux x86_64 glibc",
+  "fixture": {
+    "source": "tools/gates/native/gai_delay.c",
+    "build": "cc -shared -fPIC tools/gates/native/gai_delay.c -o <scratch>/gai-delay.so -ldl -lpthread",
+    "build_exit_code": 0,
+    "configuration": {
+      "WIRESTACK_GAI_DELAY_MS": "500",
+      "LD_PRELOAD": "<scratch>/gai-delay.so"
+    },
+    "purpose": "Delay actual native getaddrinfo, not a mocked resolver, so timeout/cancellation can leave the real worker active until completion."
+  },
+  "commands": [
+    {
+      "sdk": "1.3.0-alpha.06",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> WIRESTACK_GAI_DELAY_MS=500 LD_PRELOAD=<scratch>/gai-delay.so $HOME/.codex/scripts/codex_cangjie_env cjpm test --target-dir <scratch>/alpha-native-all --filter \"SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*\" --no-progress --no-color",
+      "exit_code": 0,
+      "total": 945,
+      "passed": 5,
+      "skipped": 940,
+      "errors": 0,
+      "failed": 0,
+      "fixture_skipped_cases": 0,
+      "log": "logs/alpha-final-native-fixture.log"
+    },
+    {
+      "name": "prepared-native-fixture",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> WIRESTACK_GAI_DELAY_MS=500 LD_PRELOAD=<scratch>/gai-delay.so $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --skip-build --target-dir <scratch>/stable113-integration --no-progress --filter 'SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*'",
+      "exit_code": 0,
+      "status": "passed",
+      "total": 945,
+      "passed": 5,
+      "skipped": 940,
+      "fixture_skipped_cases": 0,
+      "filter_skipped_cases": 940,
+      "selected_cases": 5,
+      "errors": 0,
+      "failed": 0,
+      "log": "sdk113/stable113-delta-native-fixture.log",
+      "fixture_sha256": "5cac6efb9940072e631ff7e3e16af5920087b8d55dd3be3a29870c89df287b29",
+      "classes": {
+        "SystemResolverResourceObservationTest": 3,
+        "DnsResourceObservationTest": 2
+      },
+      "sdk": "1.1.3"
+    }
+  ],
+  "absent_fixture": [
+    {
+      "sdk": "1.3.0-alpha.06",
+      "passed": 2,
+      "skipped": 156,
+      "total": 158,
+      "fixture_skipped_cases": 3,
+      "filter_skipped_cases": 153,
+      "log": "logs/honest-fixture-skip-alpha.log"
+    },
+    {
+      "name": "recompile-test-metadata-no-fixture",
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> env -u WIRESTACK_GAI_DELAY_MS -u LD_PRELOAD $HOME/.codex/scripts/codex_cangjie_env --sdk-root \"$HOME/cangjie_sdk/sts1.1.3\" cjpm test --target-dir <scratch>/stable113-integration --no-progress --filter 'SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*'",
+      "exit_code": 0,
+      "status": "passed",
+      "total": 945,
+      "passed": 2,
+      "skipped": 943,
+      "fixture_skipped_cases": 3,
+      "filter_skipped_cases": 940,
+      "selected_cases": 5,
+      "errors": 0,
+      "failed": 0,
+      "log": "sdk113/stable113-delta-no-env.log",
+      "compilation": "changed test metadata compiled by cjpm test without --skip-build",
+      "sdk": "1.1.3"
+    }
+  ],
+  "no_false_pass": "Required fixture cases use @Configure[skip: ...], never a returning test body. A skipped fixture is not native acceptance."
+}

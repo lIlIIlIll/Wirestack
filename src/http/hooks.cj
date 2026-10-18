@@ -8,7 +8,7 @@ public type HttpConnector = api.TransportFactory
 /**
  * Non-blocking pool observations using the existing secret-safe network event contract.
  * Callbacks run outside pool locks. Their exceptions cannot alter connection ownership or I/O.
- * Connection identifiers are local to a pool; trace metadata identifies the operation.
+ * Connection identifiers are process-local; request and attempt identifiers correlate operations.
  */
 public interface HttpConnectionPoolHook {
     /**
@@ -26,7 +26,9 @@ public interface HttpConnectionPoolHook {
     func released(event: NetworkEvent, context: OperationContext): Unit
 }
 
-/** Synchronous service interception. Exceptions use the server's normal handler-failure path. */
+/** Synchronous observations outside server locks. Callback exceptions do not alter I/O.
+ * Callers must keep callbacks non-blocking; arbitrary user code cannot be preempted.
+ */
 public interface HttpServiceHook {
     /**
      * Runs before the handler without a server or connection state lock.
@@ -36,7 +38,7 @@ public interface HttpServiceHook {
     func before(request: HttpServerRequest, context: OperationContext): Unit
 
     /**
-     * Runs after a handler returns and before response commitment. A failure closes that response.
+     * Observes a handler result before response commitment. Exceptions are isolated.
      * @param response Handler-owned response awaiting commitment.
      * @param context Shared request cancellation, absolute deadline, trace, and event sink.
      */
@@ -72,8 +74,12 @@ private class HttpPoolHookSink <: NetworkEventSink {
         // suppress a pool observation. The outer dispatch isolates hook exceptions as well.
         api.emitNetworkEvent(context, event)
         match (event.kind) {
-            case NetworkEventKind.HttpConnectionAcquired => hook.acquired(event, context)
-            case NetworkEventKind.HttpConnectionReleased => hook.released(event, context)
+            case NetworkEventKind.HttpConnectionAcquired => hook.acquired(event,
+                context.withEventCorrelation(requestId: event.requestId, attemptId: event.attemptId,
+                    connectionId: event.connectionId, streamId: event.streamId))
+            case NetworkEventKind.HttpConnectionReleased => hook.released(event,
+                context.withEventCorrelation(requestId: event.requestId, attemptId: event.attemptId,
+                    connectionId: event.connectionId, streamId: event.streamId))
             case _ => ()
         }
     }
@@ -90,20 +96,14 @@ internal class ServiceHookHandler <: HttpServerHandler {
 
     /**
      * Runs the before hook, delegate, and after hook in order.
-     * A before or delegate exception follows normal handler failure. An after exception closes the produced
-     * response, suppresses any close exception, and rethrows the callback exception.
+     * Only hook exceptions are isolated. Delegate errors retain normal handler failure semantics.
      * @param request Incoming request retained under the server's existing ownership.
      * @param context Request cancellation, absolute deadline, trace, and event sink.
      */
     public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
-        hook.before(request, context)
+        try { hook.before(request, context) } catch (_: Exception) {}
         let response = delegate.handle(request, context)
-        try {
-            hook.after(response, context)
-            response
-        } catch (error: Exception) {
-            try { response.response.close() } catch (_: Exception) {}
-            throw error
-        }
+        try { hook.after(response, context) } catch (_: Exception) {}
+        response
     }
 }
