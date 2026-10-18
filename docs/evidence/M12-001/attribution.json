@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-001",
+  "native_report": {
+    "path": "docs/evidence/M12-001/native-final/report.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "951c51779c82cdeb80ddd873a529afae65181348f888963231945ba4873977f4"
+    }
+  },
+  "e2e": {
+    "count": 2800,
+    "sum_ns": 363436219,
+    "mean_ns": 129798.64964285714,
+    "stages": {
+      "admission": {
+        "count": 2800,
+        "sum_ns": 5210844,
+        "mean_ns": 1861.0157142857142
+      },
+      "pool": {
+        "count": 2800,
+        "sum_ns": 5116485,
+        "mean_ns": 1827.3160714285714
+      },
+      "dns": {
+        "count": 0,
+        "sum_ns": 0,
+        "mean_ns": null
+      },
+      "connect": {
+        "count": 0,
+        "sum_ns": 0,
+        "mean_ns": null
+      },
+      "proxy": {
+        "count": 0,
+        "sum_ns": 0,
+        "mean_ns": null
+      },
+      "tls": {
+        "count": 0,
+        "sum_ns": 0,
+        "mean_ns": null
+      },
+      "write": {
+        "count": 5600,
+        "sum_ns": 32682580,
+        "mean_ns": 5836.175
+      },
+      "headers": {
+        "count": 2800,
+        "sum_ns": 229749964,
+        "mean_ns": 82053.55857142857
+      },
+      "body": {
+        "count": 5600,
+        "sum_ns": 21120745,
+        "mean_ns": 3771.561607142857
+      },
+      "stream": {
+        "count": 0,
+        "sum_ns": 0,
+        "mean_ns": null
+      }
+    },
+    "boundary": "Correlated native RequestStarted to BodyCompleted; overlapping stage sums are not summed as E2E. Observer drain/correlation is inside campaign duration but outside the request span."
+  },
+  "read_buffer_candidate": {
+    "decision": "REJECTED",
+    "reason": "No reliable equivalent-work improvement with preserved tails; no production optimization or API added",
+    "paired_rounds": 14,
+    "positive_rounds": 0,
+    "paired_speedup_ratios": [
+      0.6171226862998537,
+      0.5965669601641195,
+      0.5813227376429031,
+      0.4873202870197714,
+      0.6640100116552745,
+      0.6505013321237264,
+      0.5877390151300439,
+      0.5601373398105203,
+      0.5903954868161729,
+      0.6549946595809971,
+      0.5311165820966919,
+      0.5813886789436225,
+      0.6553804311553326,
+      0.7329011298313879
+    ],
+    "median_speedup_fraction": -0.4065187765098538,
+    "two_sided_sign_test_p": 0.0001220703125,
+    "tail_within_10_percent": false,
+    "noisy": false,
+    "body_read_calls_before": [
+      2050,
+      2050,
+      2050,
+      2050,
+      2050,
+      2049,
+      2050,
+      2058,
+      2050,
+      2049,
+      2050,
+      2050,
+      2050,
+      2059
+    ],
+    "body_read_calls_after": [
+      514,
+      513,
+      514,
+      514,
+      514,
+      514,
+      513,
+      514,
+      514,
+      514,
+      514,
+      514,
+      514,
+      517
+    ],
+    "allocations_reduced": null,
+    "copied_bytes_reduced": null,
+    "unavailable_reason": "Fewer public read invocations does not prove fewer managed allocations or internal copies.",
+    "P1-001_vectored_io": "DEFERRED: no measured copy bottleneck or supported native vectored SPI demonstrated."
+  },
+  "profile": {
+    "status": "CAPTURED_REPORT_UNAVAILABLE",
+    "record_command": "0541-native-http-cpu-profile",
+    "report_command": "0542-native-http-cpu-report",
+    "data_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8fc22a9a74141a60367068fbf899072c767408b55e16205d1a5da07b4b157c6f"
+    },
+    "interpretation": "Sampled CPU residency, not wall-stage duration, allocation count, copied bytes or mutex wait."
+  },
+  "resource_attribution": {
+    "h2_slow_consumer": {
+      "native_connections": {
+        "samples": 14,
+        "median": 1.0,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "flow_stall_events": {
+        "samples": 14,
+        "median": 509.0,
+        "minimum": 508,
+        "maximum": 510
+      },
+      "managed_buffer_after_prefix": {
+        "samples": 14,
+        "median": 65535.0,
+        "minimum": 65535,
+        "maximum": 65535
+      },
+      "managed_buffer_high_water": {
+        "samples": 14,
+        "median": 65548.0,
+        "minimum": 65548,
+        "maximum": 65561
+      },
+      "effective_receive_reserve_bytes": {
+        "samples": 14,
+        "median": 131070.0,
+        "minimum": 131070,
+        "maximum": 131070
+      },
+      "initial_read_latency_ns": {
+        "samples": 14,
+        "median": 25340.5,
+        "minimum": 23756,
+        "maximum": 33236
+      },
+      "close_latency_ns": {
+        "samples": 14,
+        "median": 2141070.0,
+        "minimum": 2100415,
+        "maximum": 2242319
+      }
+    },
+    "http_overload": {
+      "queue_wait_ns": {
+        "samples": 14,
+        "median": 6560830.5,
+        "minimum": 2916792,
+        "maximum": 6930391
+      },
+      "queue_wait_count": {
+        "samples": 14,
+        "median": 1.0,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "queue_high_water": {
+        "samples": 14,
+        "median": 1.0,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "client_rejected_capacity": {
+        "samples": 14,
+        "median": 1.0,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "server_rejected_capacity": {
+        "samples": 14,
+        "median": 0.0,
+        "minimum": 0,
+        "maximum": 0
+      },
+      "close_latency_ns": {
+        "samples": 14,
+        "median": 1071197.5,
+        "minimum": 1052626,
+        "maximum": 1100325
+      }
+    },
+    "sse_slow": {
+      "maximum_outstanding_messages": {
+        "samples": 14,
+        "median": 1.0,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "producer_backpressure_ns": {
+        "samples": 14,
+        "median": 4572665312.5,
+        "minimum": 4410321236,
+        "maximum": 4715534859
+      },
+      "managed_buffer_highwater_bytes": {
+        "samples": 14,
+        "median": 6091.0,
+        "minimum": 6091,
+        "maximum": 6091
+      },
+      "first_event_ns": {
+        "samples": 14,
+        "median": 2556412.5,
+        "minimum": 2408038,
+        "maximum": 3251960
+      },
+      "cleanup_ns": {
+        "samples": 14,
+        "median": 2172472.5,
+        "minimum": 2118469,
+        "maximum": 2311755
+      }
+    },
+    "websocket_slow": {
+      "maximum_outstanding_messages": {
+        "samples": 14,
+        "median": 1.0,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "producer_backpressure_ns": {
+        "samples": 14,
+        "median": 2655740943.0,
+        "minimum": 2628709642,
+        "maximum": 2676334382
+      },
+      "managed_buffer_highwater_bytes": {
+        "samples": 14,
+        "median": 124.0,
+        "minimum": 124,
+        "maximum": 124
+      },
+      "first_message_ns": {
+        "samples": 14,
+        "median": 2493584.5,
+        "minimum": 2380876,
+        "maximum": 3197890
+      },
+      "cleanup_ns": {
+        "samples": 14,
+        "median": 11573295.0,
+        "minimum": 2144279,
+        "maximum": 21503157
+      }
+    }
+  },
+  "unavailable_costs": {
+    "cangjie_allocations_per_io": {
+      "value": null,
+      "reason": "Unavailable: CPU samples and /proc RSS do not count managed allocation events."
+    },
+    "context_cancel_registration_allocations": {
+      "value": null,
+      "reason": "Unavailable: no per-operation managed allocation counter in the public contract."
+    },
+    "tls_pump_copied_bytes": {
+      "value": null,
+      "reason": "Unavailable: public TLS transport byte counts are not copy counts."
+    },
+    "http_body_copied_bytes": {
+      "value": null,
+      "reason": "Unavailable: caller read count does not identify internal copying."
+    },
+    "http2_writer_lock_wait_ns": {
+      "value": null,
+      "reason": "Unavailable: public snapshots expose ownership/bounds, not lock acquisition duration."
+    },
+    "pool_lock_wait_ns": {
+      "value": null,
+      "reason": "Unavailable: admission/pool queue duration is not mutex wait duration."
+    },
+    "udp_allocations_per_packet": {
+      "value": null,
+      "reason": "Unavailable: packet throughput/RSS cannot be converted into allocation counts."
+    }
+  },
+  "cpu_evidence": {
+    "cjprof_status": "UNAVAILABLE",
+    "cjprof_reason": "No sampling data is available. A captured record file is not proof of CPU samples.",
+    "alternate_perf": {
+      "path": "docs/evidence/M12-001/native-perf.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "defd87d79021c90f35052036fb67ea369ac17ba3ef84d01bc28258cdf28186d1"
+      }
+    },
+    "sample_count": 34,
+    "read_inlined_region_samples": 20,
+    "interpretation": "Low-count CPU residency in a mixed consumer/checksum/inlined-read boundary; inspection only, not quantitative bottleneck or allocation/copy proof."
+  }
+}

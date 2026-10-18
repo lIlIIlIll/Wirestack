@@ -42,3 +42,10 @@ is recorded separately by M6-018.
 
 The accepted raw report is
 [`docs/evidence/M6-020/http2-benchmark.json`](../evidence/M6-020/http2-benchmark.json).
+
+## Native full-stack baseline
+
+[M12-001](end-to-end-baselines.md) adds installed public H2 workloads on real
+TCP/TLS with1/10/100 concurrently retained streams, a real receive-window stall,
+stream cancellation, resource snapshots and sibling recovery. Its measurements
+do not reuse this MemoryTransport result as a native socket/TLS baseline.

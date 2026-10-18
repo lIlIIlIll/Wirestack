@@ -1,0 +1,52 @@
+[
+  {
+    "id": "build",
+    "exit_code": 0,
+    "argv": [
+      "cjpm",
+      "build"
+    ],
+    "log": "docs/evidence/M12-001/serialization-build.log"
+  },
+  {
+    "id": "native",
+    "exit_code": 0,
+    "argv": [
+      "./target/release/bin/main",
+      "tcp_partial",
+      "<scratch>/certificate.der",
+      "<scratch>/key.pk8",
+      "2"
+    ],
+    "log": "docs/evidence/M12-001/serialization-native.log"
+  },
+  {
+    "native_sample": {
+      "scenario": "tcp_partial",
+      "regime": "native",
+      "duration_ns": 348592,
+      "latencies_ns": [
+        150771,
+        151514
+      ],
+      "operations": 2,
+      "successes": 2,
+      "failures": 0,
+      "expected_rejections": 0,
+      "bytes": 512,
+      "checksum": 32512,
+      "runtime_heap_after_bytes": 368688,
+      "gc_count_after": 0,
+      "metrics": {
+        "cleanup_owners": 0,
+        "io_calls_include_warmup": true,
+        "read_calls": 228,
+        "write_calls": 228,
+        "partial_write_calls": 0,
+        "partial_read_calls": 0,
+        "buffer_high_water_bytes": 384,
+        "native_connection_count": 1
+      }
+    }
+  }
+]
