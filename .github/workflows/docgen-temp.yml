@@ -5,7 +5,7 @@ on:
     branches:
       - tmp/docgen
     paths:
-      - 'patches/**'
+      - 'docs-harness-trigger/**'
   workflow_dispatch:
 
 permissions:
