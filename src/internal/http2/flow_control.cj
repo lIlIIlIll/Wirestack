@@ -142,6 +142,36 @@ public class Http2FlowController {
             budget.releaseReceivedBuffer(resourceOwner.getOrThrow(), bytes)
         }
     }
+
+    /** Reserves retained payload bytes against the validated stream authority owner. */
+    internal func tryReserveReceivedBufferFor(
+        owner: ?internal.HttpResourceOwnerKey,
+        bytes: UInt64
+    ): Bool {
+        if (bytes == 0u64) { return true }
+        match (resourceBudget) {
+            case Some(budget) => budget.tryReserveReceivedBuffer(bufferOwner(owner), bytes)
+            case None => true
+        }
+    }
+
+    /** Releases retained payload bytes from the validated stream authority owner. */
+    internal func releaseReceivedBufferFor(
+        owner: ?internal.HttpResourceOwnerKey,
+        bytes: UInt64
+    ): Unit {
+        if (bytes == 0u64) { return }
+        if (let Some(budget) <- resourceBudget) {
+            budget.releaseReceivedBuffer(bufferOwner(owner), bytes)
+        }
+    }
+
+    private func bufferOwner(owner: ?internal.HttpResourceOwnerKey): internal.HttpResourceOwnerKey {
+        match (owner) {
+            case Some(value) => value
+            case None => resourceOwner.getOrThrow()
+        }
+    }
     public func openStream(streamId: Http2StreamId): Unit {
         if (!streamId.isStream()) { throw IllegalArgumentException("HTTP/2 flow stream id must be non-zero") }
         synchronized(mutex) {

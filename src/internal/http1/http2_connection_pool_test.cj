@@ -439,7 +439,7 @@ class Http2ConnectionPoolTest {
         // saturated connection yielding even though a long-lived stream remains.
         factory.finish(first)
         pool.release(first)
-        @Expect(cancellation.cancel())
+        let _ = cancellation.cancel()
         @Expect(otherOrigin.get(Duration.second))
         // Cross-key demand is gone: same-key capacity must be reusable immediately
         // instead of waiting for the unrelated long-lived stream to finish.

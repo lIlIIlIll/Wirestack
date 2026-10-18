@@ -620,7 +620,7 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：close。
  */
     public func close(): Unit {
-        resourceBudget.stopRequestAdmission()
+        resourceBudget.closeAdmission()
         let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
                 (None<http1.HttpAutomaticHttpsClient>, None<http1.Http1HttpsProxyClient>)

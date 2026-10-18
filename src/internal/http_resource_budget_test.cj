@@ -111,6 +111,32 @@ class HttpResourceBudgetTest {
     }
 
     @TestCase
+    func retainedReceivedBufferCanMoveToTheLateStreamAuthority(): Unit {
+        let budget = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 4,
+            maximumManagedBufferBytesPerRoute: 4u64,
+            maximumManagedBufferBytesPerOrigin: 6u64,
+            maximumOwners: 3
+        ))
+        let listener = HttpResourceOwnerKey("server", "listener")
+        let authority = HttpResourceOwnerKey("example.com", "listener")
+        @Expect(budget.tryReserveReceivedBuffer(listener, 4u64))
+        @Expect(budget.reattributeReceivedBuffer(listener, authority, 4u64))
+        let moved = budget.snapshot()
+        @Expect(moved.managedBufferBytes, 4u64)
+        @Expect(moved.owners.size, 1)
+        @Expect(moved.owners[0].origin, "example.com")
+        @Expect(moved.owners[0].managedBufferBytes, 4u64)
+        @Expect(!budget.reattributeReceivedBuffer(listener, authority, 1u64))
+        @Expect(!budget.reattributeReceivedBuffer(
+            authority, HttpResourceOwnerKey("other.example", "listener"), 5u64
+        ))
+        budget.releaseReceivedBuffer(authority, 4u64)
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+        @Expect(budget.snapshot().owners.size, 0)
+    }
+
+    @TestCase
     func ownerRowsStayWithinConfiguredBoundAndRecycleAfterRelease(): Unit {
         let budget = HttpResourceBudget(HttpResourceBudgetPolicy(
             1, 1, 1, 2, 2, 2, 1, 1, 1, 65552u64, 17u64, 4,
@@ -319,7 +345,7 @@ class HttpResourceBudgetTest {
         @Expect(released.owners.size, 0)
     }
     @TestCase
-    func stopRequestAdmissionWakesWaitersAndPreservesHeldLease(): Unit {
+    func closeAdmissionWakesRequestWaitersAndPreservesHeldLease(): Unit {
         let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 64u64, 8u64, 1)
         let owner = HttpResourceOwnerKey("https://close.example:443", "direct")
         let held = budget.tryAcquireRequest(owner).getOrThrow()
@@ -338,7 +364,7 @@ class HttpResourceBudgetTest {
         }
 
         @Expect(waitForBudgetWaiters(budget, 1, Duration.second))
-        budget.stopRequestAdmission()
+        budget.closeAdmission()
         waiter.get(Duration.second)
 
         @Expect(closed.load())
@@ -363,6 +389,71 @@ class HttpResourceBudgetTest {
         }
         @Expect(rejectedAfterClose.load())
         @Expect(!unexpected.load())
+    }
+    @TestCase
+    func closeAdmissionWakesConnectionStreamAndBufferWaiters(): Unit {
+        let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 64u64, 8u64, 4)
+        let owner = HttpResourceOwnerKey("https://close.example:443", "direct")
+        let heldConnection = budget.tryAcquireConnection(owner).getOrThrow()
+        let heldStream = budget.tryAcquireStream(owner).getOrThrow()
+        let heldBuffer = budget.tryAcquireManagedBuffer(owner, 8u64, true, cleanup: true).getOrThrow()
+        let closedConnections = AtomicBool(false)
+        let closedStreams = AtomicBool(false)
+        let closedBuffers = AtomicBool(false)
+        let unexpected = AtomicBool(false)
+        let connectionWaiter = spawn {
+            try {
+                let lease = budget.acquireConnection(owner, OperationContext.background())
+                lease.close()
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Closed => closedConnections.store(true)
+                    case _ => unexpected.store(true)
+                }
+            }
+        }
+        let streamWaiter = spawn {
+            try {
+                let lease = budget.acquireStream(owner, OperationContext.background())
+                lease.close()
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Closed => closedStreams.store(true)
+                    case _ => unexpected.store(true)
+                }
+            }
+        }
+        let bufferWaiter = spawn {
+            try {
+                let lease = budget.acquireManagedBuffer(
+                    owner, 8u64, true, OperationContext.background()
+                )
+                lease.close()
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Closed => closedBuffers.store(true)
+                    case _ => unexpected.store(true)
+                }
+            }
+        }
+        @Expect(waitForBudgetWaiters(budget, 3, Duration.second))
+        budget.closeAdmission()
+        connectionWaiter.get(Duration.second)
+        streamWaiter.get(Duration.second)
+        bufferWaiter.get(Duration.second)
+        @Expect(closedConnections.load())
+        @Expect(closedStreams.load())
+        @Expect(closedBuffers.load())
+        @Expect(!unexpected.load())
+        let retained = budget.snapshot()
+        @Expect(retained.admissionWaiters, 0)
+        @Expect(retained.reservedConnections, 1)
+        @Expect(retained.reservedStreams, 1)
+        @Expect(retained.managedBufferBytes, 8u64)
+        heldConnection.close()
+        heldStream.close()
+        heldBuffer.close()
+        @Expect(budget.snapshot().owners.size, 0)
     }
     @TestCase
     func retainedLeaseClosesExactlyOnceAcrossConcurrentOwners(): Unit {

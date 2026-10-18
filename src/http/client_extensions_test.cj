@@ -1,7 +1,7 @@
 package wirestack.http
 
 import std.collection.ArrayList
-import std.sync.AtomicInt64
+import std.sync.*
 import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -148,62 +148,57 @@ class HttpClientExtensionsTest {
     }
 
     @TestCase
-    func duplexHandshakeAdmissionHonorsRequestAdmissionStageCap(): Unit {
-        let fixture = NativeHttpExtensionFixture()
-        let server = HttpServer.builder().listen(SocketEndpoint(
-            IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 0u16)).handler(fixture).build()
-        let serving = spawn { server.serve() }
+    func closingClientWakesStalledConnectorConnectionAdmission(): Unit {
+        let connector = StallingHttpConnector()
         let resourceLimits = HttpResourceLimits(
             maximumConnections: 1,
             maximumConnectionsPerRoute: 1,
             maximumConnectionsPerOrigin: 1,
-            maximumRequests: 1,
-            maximumRequestsPerRoute: 1,
-            maximumRequestsPerOrigin: 1,
+            maximumRequests: 2,
+            maximumRequestsPerRoute: 2,
+            maximumRequestsPerOrigin: 2,
             maximumStreams: 1,
             maximumStreamsPerRoute: 1,
             maximumStreamsPerOrigin: 1
         )
-        // No total request timeout: the requestAdmission stage cap is the only bound.
-        let client = HttpClient.builder().connector(fixture).resourceLimits(resourceLimits).build()
-        let base = "http://127.0.0.1:${server.localEndpoint.port}"
-        try {
-            let held = client.get("${base}/held")
+        let client = HttpClient.builder().connector(connector).resourceLimits(resourceLimits).build()
+        let url = "http://127.0.0.1:9/stalled"
+        let first: Future<Bool> = spawn {
             try {
-                @Expect(client.resourceSnapshot().activeRequests, 1)
-                let handshake = spawn {
-                    try {
-                        let _ = client.upgrade(
-                            HttpRequest(HttpMethod("CONNECT"), HttpUrl.parse("${base}/upgrade")),
-                            context: OperationContext(timeoutPolicy: api.OperationTimeoutPolicy(
-                                requestAdmission: Some(250 * Duration.millisecond)
-                            ))
-                        )
-                        false
-                    } catch (error: api.NetworkException) {
-                        match (error.category) {
-                            case api.NetworkErrorCategory.DeadlineExceeded =>
-                                match (error.phase) {
-                                    case api.NetworkPhase.PoolAcquire =>
-                                        match (error.code) {
-                                            case api.NetworkErrorCode.TimedOut => true
-                                            case _ => false
-                                        }
-                                    case _ => false
-                                }
-                            case _ => false
-                        }
+                let response = client.get(url)
+                response.close()
+                false
+            } catch (_: Exception) { true }
+        }
+        var second: ?Future<Bool> = None<Future<Bool>>
+        try {
+            @Expect(waitForHttpConnectionReservation(client, 1, Duration.second))
+            second = Some(spawn {
+                try {
+                    let response = client.get(url)
+                    response.close()
+                    false
+                } catch (error: api.NetworkException) {
+                    match (error.code) {
+                        case api.NetworkErrorCode.Closed => true
+                        case _ => false
                     }
                 }
-                @Expect(handshake.get(2 * Duration.second))
-            } finally {
-                held.close()
-            }
-        } finally {
+            })
+            @Expect(waitForHttpAdmissionWaiter(client, 1, Duration.second))
             client.close()
-            let _ = server.shutdown(context: OperationContext(
-                deadline: Some(Deadline.after(5 * Duration.second))))
-            serving.get(5 * Duration.second)
+            client.close()
+            var secondRejected = false
+            try { secondRejected = second.getOrThrow().get(Duration.second) } catch (_: Exception) { }
+            @Expect(secondRejected)
+            @Expect(client.resourceSnapshot().admissionWaiters, 0)
+        } finally {
+            connector.release()
+            client.close()
+            try { let _ = first.get(5 * Duration.second) } catch (_: Exception) { }
+            if (let Some(value) <- second) {
+                try { let _ = value.get(5 * Duration.second) } catch (_: Exception) { }
+            }
         }
     }
 
@@ -301,4 +296,40 @@ private func waitForHttpAdmissionWaiter(
         sleep(Duration.millisecond)
     }
     false
+}
+
+private func waitForHttpConnectionReservation(
+    client: HttpClient,
+    expected: Int64,
+    timeout: Duration
+): Bool {
+    let expiresAt = MonoTime.now() + timeout
+    while (true) {
+        if (client.resourceSnapshot().reservedConnections >= expected) { return true }
+        if (expiresAt - MonoTime.now() <= Duration.Zero) { return false }
+        sleep(Duration.millisecond)
+    }
+    false
+}
+
+private class StallingHttpConnector <: HttpConnector {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var released = false
+
+    public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
+        let _ = endpoint
+        let _ = context
+        synchronized(mutex) {
+            while (!released) { changed.wait() }
+        }
+        throw Exception("stalled connector released without a transport")
+    }
+
+    func release(): Unit {
+        synchronized(mutex) {
+            released = true
+            changed.notifyAll()
+        }
+    }
 }

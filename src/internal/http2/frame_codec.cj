@@ -73,13 +73,24 @@ public class Http2Frame {
 internal class Http2ReceivedBufferReservation {
     let bytes: UInt64
     private let budget: internal.HttpResourceBudget
-    private let owner: internal.HttpResourceOwnerKey
+    private var owner: internal.HttpResourceOwnerKey
     private let released = AtomicBool(false)
 
     init(budget: internal.HttpResourceBudget, owner: internal.HttpResourceOwnerKey, bytes: UInt64) {
         this.budget = budget
         this.owner = owner
         this.bytes = bytes
+    }
+
+    /**
+     * Moves this reservation onto the stream authority that validated the DATA frame.
+     * Returns false when the target route or origin allowance is already exhausted.
+     */
+    internal func reattribute(target: internal.HttpResourceOwnerKey): Bool {
+        if (owner == target) { return true }
+        if (!budget.reattributeReceivedBuffer(owner, target, bytes)) { return false }
+        owner = target
+        true
     }
 
     func close(): Unit {
@@ -98,6 +109,7 @@ public class Http2FrameParser {
     private let limits: Http2Limits
     private let resourceBudget: ?internal.HttpResourceBudget
     private let resourceOwner: ?internal.HttpResourceOwnerKey
+    private let streamBufferOwners: ?Http2StreamBufferOwners
     private let headerBytes = ArrayList<Byte>()
     private var payloadBytes: Array<Byte> = []
     private var payloadOffset: Int64 = 0
@@ -111,12 +123,14 @@ public class Http2FrameParser {
         this.limits = limits
         resourceBudget = None<internal.HttpResourceBudget>
         resourceOwner = None<internal.HttpResourceOwnerKey>
+        streamBufferOwners = None<Http2StreamBufferOwners>
     }
 
     internal init(
         limits: Http2Limits,
         resourceBudget: ?internal.HttpResourceBudget,
-        resourceOwner: ?internal.HttpResourceOwnerKey
+        resourceOwner: ?internal.HttpResourceOwnerKey,
+        streamBufferOwners!: ?Http2StreamBufferOwners = None<Http2StreamBufferOwners>
     ) {
         if (resourceBudget.isSome() != resourceOwner.isSome()) {
             throw IllegalArgumentException("HTTP/2 parser budget and owner must be supplied together")
@@ -124,6 +138,15 @@ public class Http2FrameParser {
         this.limits = limits
         this.resourceBudget = resourceBudget
         this.resourceOwner = resourceOwner
+        this.streamBufferOwners = streamBufferOwners
+    }
+
+    /** Uses the already-validated stream authority owner when the reader thread knows it. */
+    private func receivedBufferOwner(streamId: Http2StreamId): internal.HttpResourceOwnerKey {
+        if (let Some(owners) <- streamBufferOwners) {
+            if (let Some(value) <- owners.ownerFor(Int64(streamId.value))) { return value }
+        }
+        resourceOwner.getOrThrow()
     }
 
     public func feed(input: Array<Byte>): Array<Http2Frame> {
@@ -140,13 +163,14 @@ public class Http2FrameParser {
                             headerBytes.clear()
                             if (isDataFrameType(header.frameType) && header.length > 0u32) {
                                 if (let Some(budget) <- resourceBudget) {
+                                    let owner = receivedBufferOwner(header.streamId)
                                     if (!budget.tryReserveReceivedBuffer(
-                                        resourceOwner.getOrThrow(), UInt64(header.length)
+                                        owner, UInt64(header.length)
                                     )) {
                                         rejectingDataPayload = true
                                     } else {
                                         currentReservation = Some(Http2ReceivedBufferReservation(
-                                            budget, resourceOwner.getOrThrow(), UInt64(header.length)
+                                            budget, owner, UInt64(header.length)
                                         ))
                                     }
                                 }
