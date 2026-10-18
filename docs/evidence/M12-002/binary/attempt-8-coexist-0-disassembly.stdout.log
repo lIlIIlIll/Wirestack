@@ -1,0 +1,21 @@
+
+<scratch>/coexist-0/target/release/bin/main:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000001e10d8 <_init>:
+  1e10d8:	endbr64
+  1e10dc:	sub    $0x8,%rsp
+  1e10e0:	mov    0x999e79(%rip),%rax        # b7af60 <__gmon_start__>
+  1e10e7:	test   %rax,%rax
+  1e10ea:	je     1e10ee <_init+0x16>
+  1e10ec:	call   *%rax
+  1e10ee:	add    $0x8,%rsp
+  1e10f2:	ret
+
+Disassembly of section .plt:
+
+00000000001e1100 <CJ_MCC_DecodeStackTrace@plt-0x10>:
+  1e1100:	push   0x999eea(%rip)        # b7aff0 <_GLOBAL_OFFSET_TABLE_+0x8>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "56bca6ef13257dca8216d36d51886a146997ec30667f95219a952f2406ae1f1b"}

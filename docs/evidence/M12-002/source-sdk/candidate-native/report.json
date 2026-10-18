@@ -1,0 +1,5187 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "profile": "candidate-native",
+  "status": "PASS",
+  "release_qualification": "NOT_QUALIFIED",
+  "binary_cross_sdk": "NOT_CLAIMED",
+  "consumer_recompile_required": true,
+  "runner_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "bf315a0ba6529064faaacf3d9e68b77d235c083126edc6aa0e0cfe9bdce30a1d"
+  },
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "commands": [
+    {
+      "id": "cjc",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "cjc",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cjc.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6a21c72a644dd53b5051245b1cf10a54f6f4ad3f08d97d4627cf527f5ad07c92"
+        }
+      },
+      "stderr": {
+        "path": "cjc.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cjpm",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "cjpm",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cjpm.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7f3c8e40124497dcae7763539ca5bf57d7f50a0760b359128b23056427dfb650"
+        }
+      },
+      "stderr": {
+        "path": "cjpm.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "native-cc",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "cc",
+        "--version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "native-cc.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "52fa390d1b33ef5e0b20f39de6624190ade494b52dd543bd8121f350ec88e0e5"
+        }
+      },
+      "stderr": {
+        "path": "native-cc.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "fixture-openssl",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "openssl",
+        "version"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "fixture-openssl.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "274b40e1fe43001d8dfc409de34925f93a508c634bf9b5756222d61e3cabe5e9"
+        }
+      },
+      "stderr": {
+        "path": "fixture-openssl.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "checkout-hidden",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>",
+        "--",
+        "python3",
+        "-c",
+        "from pathlib import Path; assert not any(Path('<repo>').iterdir()); print('CHECKOUT_HIDDEN_PASS')"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "checkout-hidden.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "33380bb41d91b4a7701b3944af7ad5d1e5888da960a82405f670387b0592474f"
+        }
+      },
+      "stderr": {
+        "path": "checkout-hidden.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/original/consumers/cli",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/original/consumers/cli",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cli-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "cli-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2717987921c2a7e86b66ca440a6188c518688a674e711e76f594f2f17fa2deaa"
+        }
+      }
+    },
+    {
+      "id": "decoded-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/original/consumers/decoded",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/original/consumers/decoded",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "decoded-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "decoded-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a1e4c237b909d80c115acb4b1455bb2c8e603dcbc000254a02256f16e887b139"
+        }
+      }
+    },
+    {
+      "id": "streams-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/original/consumers/streams",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/original/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "streams-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "streams-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e2a56df27df1e520792ff49f39ab201368390202aed8b2dd23964533a62060a7"
+        }
+      }
+    },
+    {
+      "id": "service-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/original/consumers/service",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/original/consumers/service",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "service-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "service-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0a3898dc61a4d426d56df605bd82678e29e5e77c264251c3d8fe22a4a67405cc"
+        }
+      }
+    },
+    {
+      "id": "trust-build",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--chdir",
+        "<scratch>/original/consumers/trust",
+        "--",
+        "cjpm",
+        "build"
+      ],
+      "cwd": "<scratch>/original/consumers/trust",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "trust-build.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        }
+      },
+      "stderr": {
+        "path": "trust-build.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "25ab0885f1b6ccb6f13c28ca4bc75fa238cf9e1c4ea78716a91586c0aed4383f"
+        }
+      }
+    },
+    {
+      "id": "certificate",
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "2",
+        "-subj",
+        "/CN=example.test",
+        "-keyout",
+        "<scratch>/certificate.key",
+        "-out",
+        "<scratch>/certificate.pem",
+        "-addext",
+        "subjectAltName=DNS:example.test,IP:192.0.2.1"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "certificate.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "certificate.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e106ba292f0ddfc6538c11aec297d004e76d6ae77838be02eb0413d363ddf71c"
+        }
+      }
+    },
+    {
+      "id": "certificate-der",
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/certificate.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/certificate.der"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "certificate-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "certificate-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "untrusted",
+      "argv": [
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "2",
+        "-subj",
+        "/CN=other.test",
+        "-keyout",
+        "<scratch>/untrusted.key",
+        "-out",
+        "<scratch>/untrusted.pem"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "untrusted.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "untrusted.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "dd436dd20b48cd6e54e38b2a6709c2d618afe8db15021f7277a75f51868bb999"
+        }
+      }
+    },
+    {
+      "id": "untrusted-der",
+      "argv": [
+        "openssl",
+        "x509",
+        "-in",
+        "<scratch>/untrusted.pem",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "untrusted-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "untrusted-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "key-der",
+      "argv": [
+        "openssl",
+        "pkcs8",
+        "-topk8",
+        "-nocrypt",
+        "-in",
+        "<scratch>/certificate.key",
+        "-outform",
+        "DER",
+        "-out",
+        "<scratch>/key.der"
+      ],
+      "cwd": "<scratch>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "key-der.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "key-der.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/cli",
+        "--",
+        "<scratch>/relocated/consumers/cli/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/relocated/consumers/cli",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cli-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a034542ea5b49b22ea76ed570adf5245b8e389d297630903501dae1dd6c71390"
+        }
+      },
+      "stderr": {
+        "path": "cli-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/cli",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/relocated/consumers/cli/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/relocated/consumers/cli",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cli-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "210ed8f8cada1e8fbee68fe541fc885a27588a1db5c3488f3c6a0ac1dabf3a9d"
+        }
+      },
+      "stderr": {
+        "path": "cli-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/cli",
+        "--",
+        "<scratch>/relocated/consumers/cli/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.der",
+        "<scratch>/untrusted.der",
+        "58365"
+      ],
+      "cwd": "<scratch>/relocated/consumers/cli",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cli-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7decbdb37787e0d3cde9ad5b99f5816ac7b860186d8143ea178a61c034facf69"
+        }
+      },
+      "stderr": {
+        "path": "cli-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/decoded",
+        "--",
+        "<scratch>/relocated/consumers/decoded/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/relocated/consumers/decoded",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "decoded-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2297abc986ad9dbfcd16a6a6c76b06d6978666582b7a0ee0935bc1242b2a7953"
+        }
+      },
+      "stderr": {
+        "path": "decoded-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/decoded",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/relocated/consumers/decoded/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/relocated/consumers/decoded",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "decoded-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9256845c36946da928c61b156e191cf9a9ba0415a536377248545b361b4eb071"
+        }
+      },
+      "stderr": {
+        "path": "decoded-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/decoded",
+        "--",
+        "<scratch>/relocated/consumers/decoded/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.der",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/decoded",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "decoded-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "6339fd07a76bf9104b93d8ffd0b9898cd35f8a3a3e0166b9a4a564dde7a89d7a"
+        }
+      },
+      "stderr": {
+        "path": "decoded-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/streams",
+        "--",
+        "<scratch>/relocated/consumers/streams/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/relocated/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "streams-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "8183ebb47da6e41572e8beb7072a2712044dfe16631228af3c4c75b00259bde4"
+        }
+      },
+      "stderr": {
+        "path": "streams-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/streams",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/relocated/consumers/streams/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/relocated/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "streams-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2723ad37203ccea389314d38a154349267614cd9a38c5ef73b484089ad13e01a"
+        }
+      },
+      "stderr": {
+        "path": "streams-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/streams",
+        "--",
+        "<scratch>/relocated/consumers/streams/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.der",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "streams-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "86d651fe64c7b34b24f0082bae35dd8bf328da3a11c1fa103f00aeb08ac23337"
+        }
+      },
+      "stderr": {
+        "path": "streams-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-help",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/service",
+        "--",
+        "<scratch>/relocated/consumers/service/target/release/bin/main",
+        "--help"
+      ],
+      "cwd": "<scratch>/relocated/consumers/service",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "service-help.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "13b27f0af8027324dc6d1affa3ffe402ba7df472c4524df055a2b2933fd45b51"
+        }
+      },
+      "stderr": {
+        "path": "service-help.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-dependencies",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/service",
+        "--",
+        "readelf",
+        "-d",
+        "<scratch>/relocated/consumers/service/target/release/bin/main"
+      ],
+      "cwd": "<scratch>/relocated/consumers/service",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "service-dependencies.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0a2fd9c2254bca2c47bc12062b4d689bcba7e14b18fc51551a86ae757b7f7440"
+        }
+      },
+      "stderr": {
+        "path": "service-dependencies.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-acceptance",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/service",
+        "--",
+        "<scratch>/relocated/consumers/service/target/release/bin/main",
+        "self-check",
+        "<scratch>/certificate.der",
+        "<scratch>/key.der",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/service",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "service-acceptance.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "ddf0762c8ffa3493949b3a69e5794a228ae3fc503d7093d46b71c546f95484a5"
+        }
+      },
+      "stderr": {
+        "path": "service-acceptance.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "cli-download",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/cli",
+        "--",
+        "<scratch>/relocated/consumers/cli/target/release/bin/main",
+        "download",
+        "--url",
+        "https://192.0.2.1:42609/download",
+        "--output",
+        "<scratch>/cli-download.bin",
+        "--trust",
+        "<scratch>/certificate.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/cli",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "cli-download.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9476f4a8c793d41da08a8f8f250ab49e811a9677ffc92b33fbcff500a08e3df7"
+        }
+      },
+      "stderr": {
+        "path": "cli-download.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "decoded-download",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/decoded",
+        "--",
+        "<scratch>/relocated/consumers/decoded/target/release/bin/main",
+        "download",
+        "--url",
+        "https://192.0.2.1:42609/download",
+        "--output",
+        "<scratch>/decoded-download.bin",
+        "--trust",
+        "<scratch>/certificate.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/decoded",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "decoded-download.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9476f4a8c793d41da08a8f8f250ab49e811a9677ffc92b33fbcff500a08e3df7"
+        }
+      },
+      "stderr": {
+        "path": "decoded-download.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "explicit-ca",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/trust",
+        "--",
+        "<scratch>/relocated/consumers/trust/target/release/bin/main",
+        "explicit",
+        "https://192.0.2.1:42609/download",
+        "<scratch>/certificate.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/trust",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "explicit-ca.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7de0c41f0c77a60f0873673b833662269df3c4a5fce9f1ab8c9c6e64086d7be8"
+        }
+      },
+      "stderr": {
+        "path": "explicit-ca.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "missing-explicit-ca",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/trust",
+        "--",
+        "<scratch>/relocated/consumers/trust/target/release/bin/main",
+        "explicit",
+        "https://192.0.2.1:42609/download",
+        "<scratch>/missing.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/trust",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "missing-explicit-ca.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a3f4fc27dbe2118adf6d76f35f6877ec7c5544775ee5d8acdb5cb074cd2fc38d"
+        }
+      },
+      "stderr": {
+        "path": "missing-explicit-ca.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "incorrect-explicit-ca",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/trust",
+        "--",
+        "<scratch>/relocated/consumers/trust/target/release/bin/main",
+        "explicit",
+        "https://192.0.2.1:42609/download",
+        "<scratch>/untrusted.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/trust",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "incorrect-explicit-ca.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0b525ccc8bc0850aab423cf9e0c10705b47d323dcc6918aa6c0c607f55a3fba3"
+        }
+      },
+      "stderr": {
+        "path": "incorrect-explicit-ca.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "system-ca-installed",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--tmpfs",
+        "/etc/ssl",
+        "--dir",
+        "/etc/ssl/certs",
+        "--ro-bind",
+        "<scratch>/certificate.pem",
+        "/etc/ssl/certs/ca-certificates.crt",
+        "--chdir",
+        "<scratch>/relocated/consumers/trust",
+        "--",
+        "<scratch>/relocated/consumers/trust/target/release/bin/main",
+        "system",
+        "https://192.0.2.1:42609/download"
+      ],
+      "cwd": "<scratch>/relocated/consumers/trust",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "system-ca-installed.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "7de0c41f0c77a60f0873673b833662269df3c4a5fce9f1ab8c9c6e64086d7be8"
+        }
+      },
+      "stderr": {
+        "path": "system-ca-installed.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "system-ca-missing",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--tmpfs",
+        "/etc/ssl",
+        "--dir",
+        "/etc/ssl/certs",
+        "--chdir",
+        "<scratch>/relocated/consumers/trust",
+        "--",
+        "<scratch>/relocated/consumers/trust/target/release/bin/main",
+        "system",
+        "https://192.0.2.1:42609/download"
+      ],
+      "cwd": "<scratch>/relocated/consumers/trust",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "system-ca-missing.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0fdcc6d2e2e3aa35dde42bd5e45f1bf5edc24b0a05981716ba92f9654fd0321d"
+        }
+      },
+      "stderr": {
+        "path": "system-ca-missing.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "system-ca-incorrect",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--tmpfs",
+        "/etc/ssl",
+        "--dir",
+        "/etc/ssl/certs",
+        "--ro-bind",
+        "<scratch>/untrusted.pem",
+        "/etc/ssl/certs/ca-certificates.crt",
+        "--chdir",
+        "<scratch>/relocated/consumers/trust",
+        "--",
+        "<scratch>/relocated/consumers/trust/target/release/bin/main",
+        "system",
+        "https://192.0.2.1:42609/download"
+      ],
+      "cwd": "<scratch>/relocated/consumers/trust",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "timed_out": false,
+      "stdout": {
+        "path": "system-ca-incorrect.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0b525ccc8bc0850aab423cf9e0c10705b47d323dcc6918aa6c0c607f55a3fba3"
+        }
+      },
+      "stderr": {
+        "path": "system-ca-incorrect.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "service-operational",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/service",
+        "--",
+        "<scratch>/relocated/consumers/service/target/release/bin/main",
+        "serve",
+        "--port",
+        "0",
+        "--certificate",
+        "<scratch>/certificate.der",
+        "--key",
+        "<scratch>/key.der",
+        "--budget-ms",
+        "60000"
+      ],
+      "cwd": "<scratch>/relocated/consumers/service",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "service-operational.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "68785130b52cb29078e8404e40b004d32fb65b3a6d8c136e3bb4ed6e17c9e264"
+        }
+      },
+      "stderr": {
+        "path": "service-operational.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "sse-operational",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/streams",
+        "--",
+        "<scratch>/relocated/consumers/streams/target/release/bin/main",
+        "sse",
+        "https://192.0.2.1:33211/stream",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--max-events",
+        "1",
+        "--recover",
+        "0"
+      ],
+      "cwd": "<scratch>/relocated/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "sse-operational.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0103034d84913916b40eb4b3a39c26815611a5016f31a88123c0f3f7b35f043b"
+        }
+      },
+      "stderr": {
+        "path": "sse-operational.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "wss-operational",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/streams",
+        "--",
+        "<scratch>/relocated/consumers/streams/target/release/bin/main",
+        "websocket",
+        "wss://192.0.2.1:33211/socket",
+        "--trust",
+        "<scratch>/certificate.der",
+        "--max-frames",
+        "1",
+        "--recover",
+        "0",
+        "--command",
+        "echo"
+      ],
+      "cwd": "<scratch>/relocated/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "wss-operational.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1883f779a88e74a28fc9bedc5ad88acf3dfb7eca006b3eb8cbd37f53bdae7c14"
+        }
+      },
+      "stderr": {
+        "path": "wss-operational.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "streams-operational",
+      "argv": [
+        "bwrap",
+        "--die-with-parent",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "<scratch>",
+        "<scratch>",
+        "--tmpfs",
+        "<repo>",
+        "--tmpfs",
+        "<scratch>/original",
+        "--chdir",
+        "<scratch>/relocated/consumers/streams",
+        "--",
+        "<scratch>/relocated/consumers/streams/target/release/bin/main",
+        "fixture",
+        "<scratch>/certificate.der",
+        "<scratch>/key.der"
+      ],
+      "cwd": "<scratch>/relocated/consumers/streams",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "timed_out": false,
+      "stdout": {
+        "path": "streams-operational.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "1a000991f71c9d61726ae6cccecea73d56967eea32d6cf0f33ce636071871cec"
+        }
+      },
+      "stderr": {
+        "path": "streams-operational.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "platform": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "kernel": "7.2.7-arch1-1",
+  "consumers": {
+    "cli": {
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "90ac7abb94b6ac2e404437c1dfb27e9dc05593b070ae83d13e5f57576304ba32"
+      },
+      "pass_checks": {
+        "cli_success": 1,
+        "cli_pre_cancel": 1,
+        "cli_active_cancel": 1,
+        "cli_deadline": 1,
+        "cli_capacity": 1,
+        "cli_output_failure": 1,
+        "cli_explicit_close": 1,
+        "cli_raw_gzip": 1,
+        "cli_proxy_connect": 1,
+        "cli_peer_disconnect": 1,
+        "cli_cleanup": 1
+      },
+      "needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ]
+    },
+    "decoded": {
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "29c870b3a5ed6945762a09e43008eac21a849b95c48813c79883ee6b4f32095e"
+      },
+      "pass_checks": {
+        "decoded_success": 1,
+        "decoded_pre_cancel": 1,
+        "decoded_active_cancel": 1,
+        "decoded_deadline": 1,
+        "decoded_capacity": 1,
+        "decoded_output_failure": 1,
+        "decoded_explicit_close": 1,
+        "decoded_decoded_gzip": 1,
+        "decoded_peer_disconnect": 1,
+        "decoded_cleanup": 1
+      },
+      "needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ]
+    },
+    "streams": {
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "cde04258bd3c28cfc5d7034ef73d177aa4d962d23690b9656b615518c6e0ced2"
+      },
+      "pass_checks": {
+        "streams_success": 1,
+        "streams_cursor_duplicate_explicit_recover": 1,
+        "streams_peer_disconnect": 1,
+        "streams_post_exactly_once_after_peer_failure": 1,
+        "streams_active_cancel": 1,
+        "streams_deadline": 1,
+        "streams_pre_cancel": 1,
+        "streams_bounded_slow_consumer_h2_sibling": 1,
+        "streams_explicit_close": 1,
+        "streams_capacity": 1,
+        "streams_untrusted_chain": 1,
+        "streams_cleanup": 1
+      },
+      "needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ]
+    },
+    "service": {
+      "binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "d8810a268a994850f3cd1b7e91502246974cf4d2ff58d70f6eed9d2142b78b38"
+      },
+      "pass_checks": {
+        "service_untrusted_rejected": 1,
+        "service_server_capacity": 1,
+        "service_success": 1,
+        "service_pre_cancel": 1,
+        "service_active_cancel": 1,
+        "service_deadline": 1,
+        "service_capacity": 1,
+        "service_explicit_close": 1,
+        "service_peer_disconnect": 1,
+        "service_ordinary_rotation": 1,
+        "service_security_cancel": 1,
+        "service_security_rotation": 1,
+        "service_graceful_stop": 1,
+        "service_cleanup": 1
+      },
+      "needed": [
+        "libboundscheck.so",
+        "libc.so.6",
+        "libcangjie-runtime.so",
+        "libm.so.6"
+      ]
+    }
+  },
+  "consumer_sources": {
+    "examples/linux/m11_004/cli/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2990c7e28f508a42c9d3dd4e82ce8c0f182e33e8ec6afbd781e7be158fe54486"
+    },
+    "examples/linux/m11_004/cli/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "66817afa6779aa5fe1b82aeb21f418b2caf208bbcffa5c1e04d43b0041ca9912"
+    },
+    "examples/linux/m11_004/cli/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b1458c6f1717c0e843f3121592853553a9ed94c767a4c9778692a9645f80d876"
+    },
+    "examples/linux/m11_004/decoded/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "250447c22abc80d62cbbc337e8c324738c71fa681274e293aa75b9db1a6aadfd"
+    },
+    "examples/linux/m11_004/decoded/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1e4f9e5a8ac60f05030bf1ee4e876f47e97721981f623de31959ed28ea9af46e"
+    },
+    "examples/linux/m11_004/decoded/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9237ba16adcd47a089a700f9c9370fdf8e1a6ff59af4ee36b1ce71000c0fab1b"
+    },
+    "examples/linux/m11_004/streams/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "62ea29be65a7ec375ce56c6e4bc6d6baf6bebfee852813defcd91f258ed7ad0f"
+    },
+    "examples/linux/m11_004/streams/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bda1f56253aecbd41b4c9f26df927b457f3a0c3c81a69054638503f994e734a6"
+    },
+    "examples/linux/m11_004/streams/src/fixture.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "11d49b86bc0ae249cd95e1fba7a4b4d4ce29bedd6637c3ee9ccbc5e4ccd23b68"
+    },
+    "examples/linux/m11_004/streams/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "751177c08d2aa594f3e09b203db3052c8852a5925c690943c5f5c95a58b4f16e"
+    },
+    "examples/linux/m11_004/service/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8e5260e1e8638edc922620a293e4e9e340689f8bfe78b5ec6448e2e7d2bb8b4f"
+    },
+    "examples/linux/m11_004/service/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+    },
+    "examples/linux/m12_002/sdk/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9247985ecdcba616248b1b746de7db28bfdb10678e20a479b49e93cf18e772fa"
+    },
+    "examples/linux/m12_002/sdk/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e4e4fa8fcaea54ea4c3eb5972afca4ccd83222111433d39689974fb964526bdb"
+    }
+  },
+  "sdk_files": {
+    "bin/cjc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "724b2a273d79195bdddda68f71b23346cdbecf2e4c4208ba200a29f16ffa036f"
+    },
+    "tools/bin/cjpm": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "092e42385cf67e7471918f413f19e1313de0c06b0bce980ed78ef0f86d9994fa"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libboundscheck.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3ad04fe38be88d5123078bd11d78cbc82377c114f6e6514b393ecd374e559bb7"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f3de5cd3b5e1f24b3436e66909c67a4f29bfd9ba8ca9dd5054de8b65cf9ed528"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-argopt.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3e6ba2aff996370ef7d4c718b173e4b5710de98dcfe56fb53d38f5fb018d23ae"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-ast.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f5a5df6a367b7e0d8b97c8a6d53c34769072a596ec2c4298b694af96ae2f7eca"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-binary.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "afba452bab95ae456844ebf211fb5c5334eae149e78e45dbce5e75fa79272e5a"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-collection.concurrent.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b35179794d077b66ee9f73fe14dc1765c3498971ebfcff108ce418690fe13831"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-collection.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "58f785f9bef9b351be470faa902b8dc51fb9e53a615c439a3cec763eb2e82914"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-concurrent.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4ac90623be5a5ec2c35be47e0ad57fd1642f58b32fd28eb0060fefa0ef956863"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-console.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "34dfa03fad67a79f522aa9d2864bd699e46de747e860fba9d80bbe1d0202ad8d"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-convert.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "70948fd7539f0363f67f83911cfb935ed28bb3000958812363089bd9f08bcd6b"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-core.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "27a0d1455ddf13ccf8cb18b3a11da54af12c84e53eff05924a01de6c785f6d25"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-crypto.cipher.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bf84ed89f5fed9480872e72a578ee349b8b986bb71daf8c5f84f80b0b65ad2a2"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-crypto.digest.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "655348839d775386dc5eb492b0bb95fa18d186af5588bc76b9c4c9b17024c7de"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-crypto.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "385ca75cc12b802d55d1d9a12f9b5ac645c3b03aad0d9d320861ff2eba240cb2"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-database.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5d6aed6e275faeba9ae256bee63ea777bbbfc8773eae095cb651779e0532a5bf"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-database.sql.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "318f27aaccf147d14a309a3842b431215848b49851dd14c78dab0f850ed72192"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-deriving.api.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8a96f06fd874a2a6981509b0d41bb749d632e207d2d0d71879f816f08683b596"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-deriving.builtins.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "24ca22ea93df6e65fcfae57606f5d3cb3587d836bf0212b42c19d7676e86c4dd"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-deriving.impl.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3b4aa2e41f94c5333050ae1eb5c48d2a9340b6238e3c4a65d45b472d187b730d"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-deriving.resolve.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "71f230ff8ebfa0ac6f9ecd82475811d0bc38897750e49ff55bef9608528a292e"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-deriving.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e0d09f837b2af697797c5d70024cc7e0a6c4713fbe87741d781a5593fb065a49"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-env.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "30cf9deeef1cdc731842d78df737bbbcb7f295b8cd1977b94006190cc25ca3f7"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-fs.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dd6da6339624ef9022f249ec9412a8ac0915f4338b93395ab60d5d99868da832"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-interop.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "86554fabb94a8f7bb03ee777af362e2dd4d0c7a463a40074bd7f6dbbbe2f8d4a"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-io.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2b4f01e0377b3fe4efb3a9f9db09ebd8d92a21f01e293a11ed939efab4458eed"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-math.numeric.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "536cf37fa89b2c5a6986738038ff12ea1c52f0b3554d478abfe58f722cf56d5c"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-math.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fbbc5bf7a3655a38697c39ad30bc3ee66156204a1506d7ebabe0e8d87269e633"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-net.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0799d6c70c7c4a9745f6c8478786a41ab091a30138220d8144b218beda65d6ad"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-objectpool.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b30cf90beea9390594faf729f0094f39cd8e356617b76cb5a424906335387684"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-overflow.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bd59ac79a0fe0dbe61856292377babecf2a3a3190be4cb854103cef1c3ba3fe4"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-posix.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "22074ce067581f019239b106c84adc9ab364512731dbc047eaa98ffc8ad12ac4"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-process.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5597e8323a12e737e27a6225586c21e48d80c7085e7eb978fbcd9d3ca7ff7fc9"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-random.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b81f7bdaa9f66dad33cf3dc483885d2d15b47eebe1c6e34c6756fd6a36ad91f9"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-ref.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4794e35726d41b69ef5466137ee42b944e8b7146fabd4df6b0664283486581b2"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-reflect.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3c8449fabdff62d7808c9fa43ecd21d823474c3169b8144301d5e8477ad4df8f"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-regex.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "263dc2b3a0f0e360db30e3d243254df9bacfb22b3b9527f389ca21013ba67fde"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-runtime.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b0d53a04c85b44ba450f679dbbf921e5c743d300404d1142f0a2a693ba99184b"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-sort.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dc7fe3354837b963c622de6e8d55788735f476c18ecd62a0befb8baa30f820f3"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-sync.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4ed25728d9a2eb091aa34257cbf8aa0c191ec3946aa20c7305e69859d3df07f6"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-time.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "825f7bb14a87c9508852838f300a1d146f9a04ebe4a012037971ac215600cc65"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unicode.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "87acfc6c9e7ff56c1e4886f335dc28d7107ed36a4c0e4e11aa342616b15a0497"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.common.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "46ed65b7f4c7c8273e4029d9e37d6a38f23b8616ef34112f6498ff3d467c67f3"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.diff.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a3eff8f229084e3a57d9df7e6afa7ddc89083565df5f4cd368833f077ee027e1"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.internal.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b85f894c1b78b2ec80f7c59a73640b81c52bb46a85b696ef99690b46d25cc818"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.mockmacro.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4daaae261565858d59c9a45c3105520043c00fd8630467d178b20e2fb8d0a1f1"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8f6b883427f69e7b9856ff7322f631b43c3045f6aa02e1d83d23b977caf2a8f1"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.prop_test.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ca5d88bc91e8e9140cb17085baf457e25c40063c7a87730c1be7fe50080e6d2b"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c8483a49015770f34398049acb352fce28fe23d5b0aaac5e17c967a1d19588ea"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std-unittest.testmacro.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "890427370b48061bf07792e35f2a4fae2d864488376f076a5bfd6fe670c7c09a"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-std.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "12bda718a45b42877072919f5eaa677fe9290efcc7a8b82634934270373a56f7"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libcangjie-trace.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1bc6252d54f919db1026434aee2a2c9a01f83a33b267ef335e1df9e3c5876dc0"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libpcre2-8.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cb615af32644bbb8f13a582b45dd52a73b0b94fe365f149f94b577c711fb534c"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cb615af32644bbb8f13a582b45dd52a73b0b94fe365f149f94b577c711fb534c"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0.14.0": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a91177b1bf15410592a53f9faa0b912173c4f8b357ec108e080738ee07873630"
+    },
+    "runtime/lib/linux_x86_64_cjnative/libsecurec.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3ad04fe38be88d5123078bd11d78cbc82377c114f6e6514b393ecd374e559bb7"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libboundscheck.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "07b33dd3de22489b442cc32f0fe8ddfc80b753443b17fb2053133b2e7ffb6c78"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-runtime.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "51d918d6204c90dc2e77db18a13dd0fa9faecf420eb40176f9db2aea9180b6bc"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-runtime.dll.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b1931e00a40473625afda67abbd037a2d4dd7098a5d41584a62cb3c07433ee85"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-argopt.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "450dc8f33531d65dde873709ac8f69b3ef8815056af102c9f89b8d84aac123e8"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-ast.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6f9018ec042ce182b99cbd2cc0d74c43a6f9ee609aa35ab4532397300c2d0769"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-binary.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "75583e97ad1bb77a4754d3c0502c39b8db32870cbfb48317a5a5b3aa24113bd6"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-collection.concurrent.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f116f0fdf463d0e0a5b7631530ea61c5b083b6cd0b13891008670565677ecb7f"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-collection.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "78c5552492d5b969e0affa4bae6006fea9c07d08c9dc644c8f11277ac31c45cc"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-concurrent.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8f967476374d2d56adbc64f64563e5bfa9e9af390c03b37592e5eed1bef789fd"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-console.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8f069635cd025592433f3e816cfb92decf6e314720a0927f4162223ca0c61b58"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-convert.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "174c40da1339a863a9ba9c1194dead354dec70879d57a6aecfb8493983b00be0"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-core.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5ba780d4ea5d7eaefd4dcd779f2165a25f2b264d9e07011f9cba7c6040f6d527"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-crypto.cipher.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a1122042c047863aec14d28f23431fe2d1592f5223c0ad4c5e45bf80e8063c95"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-crypto.digest.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0c448d4caf99aa7d6c581f8439e8eb9fd176cb5ef995c70c9524cfd1d00e3763"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-crypto.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "25bb5085d8814ead140a1b66797755a669be4e83e0cdea90ab1f1ac153bb74a3"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-database.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3b7236c10a7b4ccceaeb031d66e9ea7fe8d43df3a13ec4d78503d38c19c1dd2f"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-database.sql.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "115abae6272ecfe73fb022fa03ddfe889c2795f05c189d2cebf914d004648a6b"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-deriving.api.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ce9c0590757eced9b3ddbd7f60b622569d974bd7be4044cdd5c0916bacf0a8d3"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-deriving.builtins.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8b8e5a87ed404dd2241e1bca938a9cb93185e0dc0d1970244db9543db8357f55"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-deriving.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "97be774973295132c4acf9a37a23fdd91edda459c01e05dbfa441122ba4cf800"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-deriving.impl.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c6f02562a3e00409b7cacd1c13034bfcfec4e4423bd98538a4aae8d8997e6365"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-deriving.resolve.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "15a0b4eff40e9644df5c498074a82b8114fa967a12fc6f08259f88b272cfdb60"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-env.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5fd8d91a71fef8d1ef21285c13a1ec5ba5c8a856e6b249ce9e602ac2998713b8"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-fs.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0241f85338afbca437615671db4cf1dd1176f810964cd9bf39d7c045f590f070"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-interop.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cb26a075fa0b852002c2816c77bf77b8daf053f10d0d6baa5db7e5063b0f978b"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-io.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9132a6eaab25423154bd83843624e8001b78c993fc3175195504f736c623fb7f"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-math.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1fe2af0d24216c8e6387d8a96914159a371e1b8cd953bf1b6feef2ee070c0c32"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-math.numeric.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6bca80043fa34cafa38e4afba9dd764c9e62e6f1dac4962221d5dffdb8b97bb"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-net.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2e8cbe8814846358c0de45962284c5d2461042ac9ba65f8cf14e6db24f33830d"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-objectpool.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "651e88c2d7866f84417aa105877f14834b57483a3946c3cdde0e0b992040f4a2"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-overflow.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ed3c2ce972bae0e3969bc2cb064413d7ce05002d4799c5a4534e7376815f15be"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-posix.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7df1d8a396c1e0337641c6ae7267ca1b42d10a32d05899f4374662014f607abd"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-process.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "04d85ee1f357059a31480e9ad17a9272b0cb5bb52a5dd8680128213e4ea0c3e4"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-random.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6b5e0e17d76f9615f410fafe7042945017bd03d532f08599a07653594a7aad2f"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-ref.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e028b0198fc7020516e6d5f082d88184e56616fad0d20d5a48f0592ac2f0d47c"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-reflect.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4fbb18535c0c0c28e4530bc1557c0fd68fd4a50b1cc0d0cc043d287749c3f67e"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-regex.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a0190185fe281a353fdad1335adf934f6ec05711afaecc716a01023896afcaab"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-runtime.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b0c826a83d4f239b7845b85f8d768b040b1d72a7e7df2756703f06212d321aef"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-sort.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "555c8ab5e406291576641339444052a7602ca4ef379d4d34ed490cb670cc8957"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-sync.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "800f1c960b582d57a96ba149dc6462c3bf0df6322a8b27f18a21669e09263be7"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-time.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7926f46cf76e4eb154d90c85c82f8863231084aea378183071be4ca7a4aca8d3"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unicode.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "16ca1024c6b6c5939b8c9d60f34260dc4d6d5a55eda5030610a8664e38cd300b"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.common.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a6772c661352abf71adc9f2368833ee8cd709d3a2be6614dd3fb75956d4dfbdf"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.diff.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0e4227050691a5568c15affc1879fd2bd0eca37e1cfb9324f1fbc171ca73a67f"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "70f5fcb6fc273fb2a403229e61cccd1d2bf7a0ca74a9719b444018f59328e44e"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.mock.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0924675fd12c169f8aa7d08c46ba27847c34c1e3cf5eba4cbdc84baeb8636b40"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.mock.internal.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "71fb039c549aa09de22baa0f720b254686eaa1fb7c4f24d226125d4c417e26f9"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.mock.mockmacro.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "62256c9c71936bfced800b55d6de5e3c1ec1d80769a525c9a2f02b66fd68f7a3"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.prop_test.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e203cec9645849d54a0b92c4ea11633b0350c2a3cb903a01c2d88d3512aeb7cb"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std-unittest.testmacro.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "beb9a840a31874128053bde3c76e1519db596511c693837981783b0511b38d5a"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-std.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dd0e91a5dbb9322f9b8447eab3f51a7b1489bcb725c78518ea1ca8d0ce665b03"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-trace.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d783a4a8a249b13db4c1083247ef08ff0dad58fec3cd8f931a7bbba5be5da4c0"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libcangjie-trace.dll.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "29b5bb3465d14b0611adab298ce02165c5f38d5bd5d8752e896e6ae28009236e"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libpcre2-8.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1f200b3fd991221503b97fe13672f307405a9f90369a8d98ee87224994b896fd"
+    },
+    "runtime/lib/windows_x86_64_cjnative/libsecurec.dll": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "07b33dd3de22489b442cc32f0fe8ddfc80b753443b17fb2053133b2e7ffb6c78"
+    },
+    "lib/libstdFFI.dll.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cb9dfa24dd59a1a7a55a0056a27e8958fcbe5895996ae56443ee1e0468c44bf9"
+    },
+    "lib/libstdFFI.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6db784201302bd3a24232e592d23904458325857aec7ca0b31a45a588140e876"
+    },
+    "lib/linux_x86_64_cjnative/libboundscheck-static.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "47bad86452faf4f7e39409fbd06329b874ca9240023527e57a1b8e1477468d30"
+    },
+    "lib/linux_x86_64_cjnative/libboundscheck.so": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a362a9d32c74a21054dba0dd8b3b5dd2788f489d47754dff880159637748e9be"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-aio.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "aeb79aef9c8fa772366e923712bc981ec741731bf1ebdbb5e925b94a26a30be6"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-ast-support.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "47034eb4b449f19a2bc50f84124843abd2ecd85c4e2489092adee98304b44490"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-runtime.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9fa846f6ffac5a9d6d346c740206f40f61b55f3f0937b825c3de61fc796dd98f"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-argopt.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5bd2c3ff46b44f3e142850e985f3f909672a4ff92e22450fa944913bdafe121e"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-ast.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e4fef1c414f490c890883978cb1710ed5149de4632d852524f83aadd23e63011"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cafc99d1098fabe48c0e7d1650fc1bf9ac0c9f184f234afc3cb8fce8b4197517"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-binary.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "282dea76465d6f9fb693be22c317a19abe95e286f997b3c3ee2a5d9780034800"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-collection.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "95da88b3d3497d3120a935bf9bc29118fd419ab98b25a4370ddc785f90b0a888"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-collection.concurrent.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6c978650fdc2820a2305e31eeabe7069241f8ea6328cb8310010a710afb8069"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-collection.concurrentFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d2dcae8fbb41578708549d9bd9f99ade30488197cc361c294476ed1353815316"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-concurrent.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c0aaab0843d1d938311eedd4b056f8c86622afd0ebf858440f82ae6a17fa3466"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-console.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1265c54cb4af25ede2d4fc89a8fc265a4adc1d254d809228c1767e651f8bc6cf"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-convert.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "30bd3a8632ee784aa529f7ef6257bafab95b5d7790c06e52bc1dce98a6d1b979"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-convertFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "af78c82ef5e5b7b84287aae7d5514c00847f3f396b555e996fd94438a1c34505"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-core.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7bea663b0983c68d65713b12a14790af421040bcbac25dcf4c67df5e79e91d64"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "631a6237ec9718abd92dcedb96c82abd9dd9ae5be7b374726a9d5aca1da97c45"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-crypto.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "daa332f518e843deee4cefe07e38b8b2736ffc79bb0ce69ff73f8ae95e960afb"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-crypto.cipher.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8e7598958e47933e2e350011967317bb3a6d1961c7d44a1a18f6e1645bbd0a73"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-crypto.digest.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ec0568dd097fd4b7c73596cc81c95088bf17bcd07111cbe73a7c2d82d52026bc"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-database.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "52a8f869973ec26cda7cd71b41b0ffbc661fcbf074cb4d848072b299273413a2"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-database.sql.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b56a43c76cd1575f21d0885315097364d1ebc45534dafb8a200c4888704846c6"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-deriving.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c03709db6fda8ce937c1ca2180ccd3a03ee9550524695e267148fcd78b0f2639"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-deriving.api.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "88b05914a2fc4bdcb04ee310f0647352560182ada8f0166b9a10d831eb348b74"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-deriving.builtins.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7af146a5d9edadcf0ca4044b340ffb8cac55302a86c2a022f99ae7bb1602efbe"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-deriving.impl.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6ec3e0f843139c248223c8eb490955fdb1265439e19c6aa758c2f30409c0487a"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-deriving.resolve.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "62007bd5ad3cd8ff9cfad3fe1dd61f0337899b4e7fd49af350494b98429ad104"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-env.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d5989d19e1b711d3367b0faa6dc86e5aa88ca296f47b06e8cd0aa23f217a8784"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-envFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "40104fa9794ebdbf424c678fb49c6ef3da5d5f3592545a44790c819f606a8ff9"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-fs.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ddc8003567009db532fa4f26e1b9330f71dfbbd03ca35a0d6b7833f93c3cfe9b"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-fsFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "010bf6b58ee0c0240e10b07e05172f662055122db60370abe7fd647d33685712"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-interop.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "24f659950d6e213d681aac5e34b5021aac0ef5f96b9506ea84f1f7cf1d412892"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-io.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "79be1dda1b74f3e1d757436cd191dc7f9788a66d651f151b9d741248a2284c7b"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-math.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b18ca7266fdf77eda4672e72378802a0824b3d8380a5e1e5b3a356de477c1de1"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-math.numeric.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d206a1567e1d7e2542854d992ec2403b9394e1a6e21d50fed1a17e95bae94a85"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-mathFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8c4a0ef39cacf24110592205eaa6c39a9bac9409583b99a86d3f653d909856e7"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-net.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "51f686d2b33c114335747cf61365f8fb1b3fc7731942939e261c2779038ffd5d"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-netFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "180bd2a894950b56de69790e77c407e419a431c87ed66d71325953b9adf69c92"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-objectpool.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "263d88b9b84d56d0ed15cc23921b4d1daff8a99111c790bff6d09363f7cc91a0"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-objectpoolFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ba73dbfe8bfddfe794153ea439cdfea85fbe646d130875cc3c503bd2cd7776cc"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-overflow.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b7e2d394444c1495811da3a0ff1a654a114e46f86f871701af60636339b52d82"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-posix.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b3b58671c2f283c64310d469495aa77bf3361f6b6875d9d3c98fa9160b6653f3"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-posixFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1e7feea24da97ccd9594322965f7e4ad27b68a076b8e12a3ada001563ee133dc"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-process.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d46dde27e02142a95e670ce2def5b46ac8a238cda6ab7115a5685dcba95ab82d"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-processFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "90cecbe4f44266d19c009a23660be45b97d60c4a87d56e8e006da94815667ffd"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-random.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ba45478a53fdfcc88e52a2eee6ea3f90b4c79d8bd1e076c7d4dc1295b6f61b24"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-randomFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b0c0f320609b20b87334b6a72ab48f0863c548c8e75b5d39a1eacb015009b5f4"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-ref.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a6cf9b91de681db83c036681a9cab70222eb12d30dd27a92f693de3e60d52a01"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-reflect.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1cb5dfb423c2052ad86929fd11e76d09660435e2365656374c67670d2bc800b2"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-regex.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "68d112e6b2c4512aa5f6355e55c37bca0e41a30da73c945bee215bcf8bdf398d"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-regexFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "99e3e624beed894e0d92ac0503707d320a7221556239b292abe9ac8be8bc0aa9"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-runtime.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8f2cbb971c066420f6bac0631783a2471aca527dcf8d4fcedf28f29cedaa90fa"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-runtimeFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cbac02f8c35dfe5d2d9dc6609f17b4a0f497b5215fe29bff80c13e8784be4585"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-sort.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "62c420f5b4412cb8b952454f85b795104b44243575972cc1f3b8d98504fa9bc0"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-sync.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ad17865c0617faa8a1a1b8d23ad500ff569434c3602566709f5cc698cbe92ba3"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-time.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "65f44bdafab4ff6ea9c0ecdeba991c46d13c993f50d1654e77a1ad476b5bc8eb"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-timeFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8e0a29e7fde2586ff97928bec3d7a4505938f94accb4943dc1b8703cc863c939"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unicode.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2bfc5f1dfa1014633346d8e02e260e866be526ce9055222f6260851122212536"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb74f0b7a73a38fb307de2d8a5fadf7f9534f75e2ffeae25ff70f115be7f74df"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.common.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "06bdffeb1fc2564b409c4f9b9cd200471b22f8468ac7a004d588f9289f7d62d4"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.diff.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d7a82d319cef2086cd766b1ad80de69dde095bc53463ab1697dacfb2a451f482"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "03ff707a7ab04632eb3a657012e312a70f4b13a9836ac9756687197982a4d890"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.internal.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9b2159539ff2d02235e3977ce1ddfb7e342065109fce27acabdffe9ff2541c46"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.mock.mockmacro.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "90a0033380e6cfd42b86b5d9939c22b5d170575b9f2c0f27b1198f520eb55942"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.prop_test.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1cf67521f379abab4f9e6f484ab9bf583f29d7302c0ba14f8f807a04efccc5f9"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittest.testmacro.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "91bc08b9c6cffe7976e8f070ec40fb0010e1f5434d5cbb9b696758a0f057d1b5"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std-unittestFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cfa05f6119c044952e5743db04899b5875dcf7a1c9c2467c196a0151531a5a20"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-std.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f5e88af7e9988ebf2dc6da30f4725bebe6a93f5d3864a7f7ed71ba964122f79e"
+    },
+    "lib/linux_x86_64_cjnative/libcangjie-thread.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fd8be25eb10abc87b1f4d9179da72760c5f22cfa890242d752596ef1606620d3"
+    },
+    "lib/linux_x86_64_cjnative/libclang_rt-builtins.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1e4c823e03d5b6ecc54288027e9b1e54f9a301e0e8510cb15365d65c01f46966"
+    },
+    "lib/linux_x86_64_cjnative/libclang_rt-profile.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f4b93fb4d7a7898f5e57f84429441f7261429f4cf99df7283f293ab3a8591243"
+    },
+    "lib/linux_x86_64_cjnative/libclang_rt.fuzzer_no_main.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb06b95999377e8ce8aa8cbf7db893140776412583de45fbb371ed7d548b0767"
+    },
+    "lib/windows_x86_64_cjnative/libboundscheck-static.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "98be4c25ac33b1ef34682fe8d02c6ef828e7c7044d01b298684b68910c48c8ce"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-aio.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2a30198b9c6cba748d11fecbb6da3df8413a68152f1f5890d3cc4eecdc26360a"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-ast-support.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0c576a19340008cef408a182d7d936cf78828371dfbbd99981d957681becb75a"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-runtime.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d2ca075569693217750827f4bba4c171cad1b768eb78294694acf1551cba232b"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-argopt.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7278280f229b4f8be6c88c3673ee5a8382597a4612530d810492b3aa8130e78a"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-ast.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fb9754f11da25fec9529fc5119194849e371e93b467937743d0eafe697f0bb59"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-astFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "75dabbdf165b9c109345e14741215b8d9d89843b39c33b9e71cc859fceb54ae8"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-binary.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8a5eebfbeb36a0c4634c7f64c85481c4fbb8a028128e8f73d9138b447bf5c47a"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-collection.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a5c01c1baf5bcf547851733d0a0b6aab083f37b33e162e4dbdc3a363e967de31"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-collection.concurrent.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f1550d3d17bd086492033f5b66734318b1821a3f173fc889988d69162c54b24"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-collection.concurrentFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b316fee55221271552551555d81625e3ff5a459eefee81c3aa5f0ca46d177284"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-concurrent.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4663fa5eeafb72bdc8dab759224a48f55af6ad386246d888fc00a4951730929d"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-console.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6d22a36c83926c9d247d64db13d18dd01f15386e51567437b117ecf2fe01ae1"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-convert.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "30d2b61d5877a7c1244a64c939612f33e72f16407ecc4e11c32b9df4d6b442c5"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-convertFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "19a11e9763451bdd13196150cc8e5c5f6c1988eb487e09ba0353839ca5c134d8"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-core.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f747d8efd13f4417b8e7469c9cbb8c46945100b8db8b1c13b539a6a3b759a028"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-coreFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ad7cd5c67d5d806fdb634746626b716b531d56c67d8ae9efffd5096c1ef167ba"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-crypto.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2d083f9a214ce011fa3306cbafb5e9aa9024c445d9e89c769b5ba9db973ef034"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-crypto.cipher.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fa9dfb512b54794cb3b9339ff1329f26c3f7ff0bd034b8599500504e9c4ec214"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-crypto.digest.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "74463adb59224d73a38d98a09c0a8539797f1c2b60481c857d5d361da9069938"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-database.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d759a62ec4b3b42318189b2623d9dc583e4e83156c63d4ab68341440c89b8b85"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-database.sql.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "76bc9f6bcdce66464db75a6d216659889c4cca9130afa48541aba19d3c082444"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-deriving.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b6c529b4e9f4fd022314c651e139f61bcdc7f1fe170a3f106fb76401a6c9b513"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-deriving.api.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9f0e5c20ec6c61a86df526cbc7fe7ccf5905d612b72937951c1fd66f39df0b49"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-deriving.builtins.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "95b94ee8f87c894b6fbb883dfe1b5fe8363bb859e2400e6393a23542eb4f6a82"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-deriving.impl.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e26dbddb16f41927bb168a7d7a89d53d93fd474641db8a5f15d3ec161bddffa7"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-deriving.resolve.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "caf084947f9a5cdd888e27da094c378b3743a2df479ec690fa865803f4534c85"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-env.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "be2f6ffa021fe85c2722a36bd0d43dfbc143fcfa7c90b921c827bafa43787b64"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-envFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8acd683b9b1160454d8285b052475f1874b26278c54a02eda3b6576b64e2e113"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-fs.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d296007a72e3e256fc3a95d2b9845e545d9543ecfe2e05fe31c19159058b25a4"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-fsFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ed1a95b12db9a5902cd3313bd94063544807f52e341684fa5acb8edf157eb51c"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-interop.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d806cf35687755ba7c35f1cf75d8eed5a15e8616d52acd6b67fd4d8ff8190641"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-io.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "50906af0bd700d1bdabeae5296bcc807f923bc5522906ca182261a7e936d4c5d"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-math.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "da4a368c2b43878547c49df52f1228266f643e27e8825a1fed805224c6dd4b81"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-math.numeric.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9c2fffb8c531403f2027c055a899f271dacd7d5fa1de7609146234c81a0bce61"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-mathFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "226e066e1b07665e922b7cd7d0f3c5d7607fcfae7668e9dbcfc4063798080dda"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-net.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "abb7bf7592530260f10ddfbfff7beec34e430235a7b7a58770ec17cf568ebe1f"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-netFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "33056228d9bf74a87433212f0efc11559a7a77b88a3ad3a04aff0f450936e41b"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-objectpool.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c8700f0673f5e1113828ebe977316a82bdc9582809414ba526f08e9dd91a8ff6"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-objectpoolFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8310fead163de571f9513e8bd60b209c4e07fc602433b51733b3dbbd6d8222e4"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-overflow.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3aff4d57c45d92624c2e4c27c504ed7a3e615bb77e29ec0264e27b2d5e55bb21"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-posix.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fadcdef60087118773ad9ffb273ccc2b2c485c9a6b2dd756e2df144e46ffdeaf"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-posixFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6cb279b52a9c5b07d76b2f095b8595dca30fa60bdf879975b0e4cc8005b82616"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-process.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a108807f2b84a591af32dec78a2f503c7e5526dfce272cbd3ea6735ff7807b60"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-processFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "173cf846e5ccf3b3bfb0c7d88fc5c5cee0248a72b0d4f81d42dc84e01726a4b8"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-random.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "323e571ffb1c2a1aaec0dfc68048e3deea4c27559745d40e567f6813eaad482c"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-randomFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "950feec7cc4150931936ddf4a2671837f28a3581cb314ac2b4b4c683f7f5f41f"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-ref.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d2657f5fa86ca79e379598374b5fec70b34311fa06c5775c0d78e65c71d6d292"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-reflect.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "de273550d688196ca939b638a9ba31c8bdfa618513528c26eba71dbcefd116e2"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-regex.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c0485004e6b5f4f7573afcf13b7384732af2550b9c336d583407e90a691614b5"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-regexFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6560bd49652a4ed01352b31e00c950c284324a6f963864694b8cc48ed59ebff9"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-runtime.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "556b417f878f71cda741c02bf8d496805704d473413291331354dbbb5ab018da"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-runtimeFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "319206d36dc359ebbe066709c49553474da0a301c516b3752a5ece02ba5f7d82"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-sort.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c239294d30440c60d671416c468387c6b4c7dbec582bb3ace6f7ee9ba2349d50"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-sync.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "313fb27a37041a36de5ff849e986b6afc4e34be3edc8add291cf331703e52976"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-time.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "209d559af03d99e531844aa9be08fd7f86d38e50d0cef47dc3f41c71e23fccdb"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-timeFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "96d1226f690ec1033a49b38bdae4eee34e7bf7232fdb255e5f0430e48e167f39"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unicode.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7de377c4e2fb09c5a0c05235720bab4692b718cebc114b9661b5bca6ad87d06a"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8cba2d1cc0fa24f6922c239819ce8707c04cdba156c35e7cc5cefbf95ae5e248"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.common.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "592361a6ae61a288e7e6dc4dfe46278d27b591ec6df60d7c14fc445ab3797c4e"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.diff.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f55829a6fb7dbd385f52bd9f7537ae438dc5304ac2c9b8afa87acc586fca77f2"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.mock.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "21b804c1a365a99915748032bc2934912707a041472c58eca76ac8c3becdf52c"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.mock.internal.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "22366aebddc0682653e63ffddf60f17209835f0f46195e97ccba0b0fec3f4e12"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.mock.mockmacro.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4819f4e715101f2e212d4ddc84d48bdc5975cdbe5574842f7670d04d23c51f1b"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.prop_test.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "54af22f9921eefd3bc2de6b50467a108341c1a400dd227aaaff5c9d56ab5373c"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittest.testmacro.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "521f0f7de6de4f2a46277b70997c421eb6f655b187774ad60f4dfe1e23d71fbf"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std-unittestFFI.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f9d474093e35ad11588b4ffcb9a0a646506baa303c3bc5850a1c7acc6904760e"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-std.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "62cda348573e170fa5fee7bda9e964007651803198db18a471ce60657711e713"
+    },
+    "lib/windows_x86_64_cjnative/libcangjie-thread.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "744a185644f0dc081a2c0c2e05e65cbdc626b71c30abe2fc87c860ea73238220"
+    },
+    "lib/windows_x86_64_cjnative/libclang_rt-builtins.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e77fb14732c83dcb3c6b13b643c422eaa8132b892ca8fb70b5a83a006eea256c"
+    },
+    "lib/windows_x86_64_cjnative/libclang_rt-profile.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f60e4ba260dbcb4a2a1883011dbd5d0fd86f743a1b9815c02f5ce91757675b7f"
+    },
+    "modules/linux_x86_64_cjnative/libstd.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b2c312f35f6b8941e8b41f7023ff1b5d0fe17fe9017395e5962b8e38d333b7ac"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.argopt.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1beee97ec0fbff00826a156da3738932f58b7c55d980e8151097c080ffd99cae"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.ast.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b7c56426a29768cb72894969472b03198eea0f8ce5e459dc629c8ff58733752a"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.binary.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "517db743b8b53e24a13ee41523ef7d62d0178bc082c301524e216ae0831b2f75"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.collection.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6d56cd7f3d1f89fdb213f32ecd8b19aecddde5122bd0923dc4e3436195953090"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.collection.concurrent.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c5206d374a1090c429a27c06d181373b5250d769d6666c2e3d84185bf7153b59"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.concurrent.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "670a51ed038e5a64f7149bb3d41c2ab9f31e25f6a3096ed08104749734dbadf8"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.console.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cc0a588e9d079e01bfbb626097842383343f0f414bfa23d271301565fe38fb8c"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.convert.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b2fb60acd8b5771b0f82589e0291739df50a691133e0095257535833c9d38738"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.core.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d4e8fcb6acc8c968b6083d8a46446454befb1fbaed1d35dcc3422110f6e2ce0a"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.crypto.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bc9161f1a016a99cc0f4955ac70f53d473789dea552ddf32964472c03718d202"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.crypto.cipher.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b485820c53bcf79626ba0d107c3fabdc37cacc063b6371b84d97d971700db214"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.crypto.digest.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "59c92d6b3e7b55c12c41e577b0a0bf534bc87991d3a5591ec63a76bd8b606e91"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.database.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1525ac845663c72dc89091876553829b8d25c6bff7ab55ea625ddc5f5905eccb"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.database.sql.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "17c4489b9b5df133214c0431e0c444184b5efc181601a01b077dd0b599f1c1ff"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.deriving.api.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "274ab1aece45cf077077d4eb70d680427c966f14a6c83675487e160790c52c40"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.deriving.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b841292167daafe55d58e47228d148a21bc4da549ffab6eafc0428c9170f9231"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.deriving.builtins.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3d8a3bf03992f516bb2c828a0144b0fab5f81327eaf653d1e09510f7bdf2cd9a"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.deriving.impl.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e224ac330ef8cbb03a27c6bb965f2d85291f5ac94fd7755a3f3f33518044d01e"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.deriving.resolve.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "31956f3d2763186995919d63b2a9e7e0fee9fd49e008d3cd53656d604b5667b0"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.env.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "00a0c94013422941a82072a2e379460bdee173a4e6043b696d3931935ab0e769"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.fs.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c6d1dce0870dc4664e378618ad392806bee24b0c4dbbe1671728c82914ef6f16"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.interop.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f0b67db06573628f77bdbbd77762508f1e13e6279abdf11eb16835243fbe253b"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.io.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cafc13dc6a603737bd552e96d7260a9f9e340bd6356a4fad5d5ce45ad049dcbc"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.math.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1258fc59729d06b4a68680b794e7146e1f8b768c2a113cf7e335d01df12ad5ae"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.math.numeric.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d8b8d55bdc0f0297b29f835a30cb6c8b15909c385edf380e76f42541f8d1aa34"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.net.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3bf983c7a8268c3e606fd5a12d7d43a1ae08e1291a3c3a46f1d8b0a8bcfd62f0"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.objectpool.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e2857a030a1d3bef741365286345cb5c5455632c1604700eeaac2b1f8c9e9875"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.overflow.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4f64125115a231f11a20e0e001a360b8fb50dc33c0ba5037b8fda80698cde840"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.posix.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "34b60a0cc22167446b63f0b0289696662557f6cf174aef2a53eb54efaf288018"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.process.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b3b1aa315923d456485139b043de0e16ca0cd578d8748e1a7eeae7825cc6c1e7"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.random.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3d9bbb7039c815e727bfc4ad1922f98bd27a52d8951e39d935cbe0c5645be26c"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.ref.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2b316b3841b686f319895ac24485f4244bbdf02a2964a4b7bb2afdf7a0dedfd9"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.reflect.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "37a2784bce52f0a68d796445040fc49373f8e9e8768207ce86a38a7f3e5744d4"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.regex.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f10a80b121a6caf6b244772c9c31ebefb7ce6a9aa253ddcccbe7c9248e8ee65"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.runtime.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "255fa01a32e0fd56e4c4818e299ec263058de396490f7637963475b03f2f5056"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.sort.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "efe327d1b2f5c40f124b99e3eb65ad6392a14cf7c02eed15a8e7bd68d9d99a73"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.sync.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c9e036a97d7d83cfecf06128ee4f4b908a515b67114ab11a32a53886f38f7e34"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.time.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8e792cfdd5ec1d9d8d53402e99fba222727e06a5b940217566404cef0d022c18"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unicode.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6ff14a6312c604d4392713953ccaae081bc9e75e9c3fb30093448e8463bc2cd6"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ccd86876235d605bc44ce54090c8728db8f12c44c262bdebf6799b360e1f6c95"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.common.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d8596b9ab633a54fbe6358aeacd896d8e27d44b45f6bca68c817cb1dc21cfb0e"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.diff.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b03f10488c4ebc94fa49d6cefd4dd5efb32bd16410993a673a97cdeca85dbc54"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.mock.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d672416c46d2f07d02361e2ca588e4063fd8f49701ab5ecc0d22e5da4710b546"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.mock.internal.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0f63bb2ce0248da3511814751d55e0279b274d0ecae7f076f8748d4069474738"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.mock.mockmacro.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "25a4ede06f553bccf87f7e37f4f2b0aa8a8f319304ae7d3c2df341ad6c4a3daf"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.prop_test.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4740b3c94a0a2a876d704868314076c66eda96cb0e82713f9105906282088dd9"
+    },
+    "modules/linux_x86_64_cjnative/std/libstd.unittest.testmacro.bc": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "710be784104e45b516ab2649dff81e28eee2a7b16f45652f9015a1716a341102"
+    },
+    "modules/linux_x86_64_cjnative/std/std.argopt.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0db5398146c6f4d18938c96657631f68a80f43a8f6ed7ea4b781e9918b05bf6d"
+    },
+    "modules/linux_x86_64_cjnative/std/std.ast.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f2798d1fadbec901326efc3d7fbee306530b7b5d40a53f8b9e7c4524782ff8c4"
+    },
+    "modules/linux_x86_64_cjnative/std/std.binary.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "262ad24eb00c9d7478a19a75b164cd406de9370395aff88c08bc55f7ea3d3040"
+    },
+    "modules/linux_x86_64_cjnative/std/std.collection.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "95ea08036bd8394e2937f1757b3b2d9108fd7393c9ae725d9c7eaefeef8d60af"
+    },
+    "modules/linux_x86_64_cjnative/std/std.collection.concurrent.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0622e9e74b2d9dee1970de942e7f15657547f7897ffd94ea4dd4618ed39999de"
+    },
+    "modules/linux_x86_64_cjnative/std/std.concurrent.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "05bfc11d06adfd5e916553d0631f3b5d12fef1572555f54706b57d056409c45d"
+    },
+    "modules/linux_x86_64_cjnative/std/std.console.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "aa6271d0ce6f70029981062b9aa9553b8c013b8715be3c4fa881ad2cbd0afbe1"
+    },
+    "modules/linux_x86_64_cjnative/std/std.convert.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c19962e922c173b81ae2229edec5feac71ba7422228578271dc0b8d4b58f8b8a"
+    },
+    "modules/linux_x86_64_cjnative/std/std.core.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8e0db3abaf7d55cfddc8f259394c83de8e95e15809d0d015742d4f836e643e73"
+    },
+    "modules/linux_x86_64_cjnative/std/std.crypto.cipher.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "32a797181d51aa0303fdaafb8f4f2b92e142df078f56e8710e753133b25fb303"
+    },
+    "modules/linux_x86_64_cjnative/std/std.crypto.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "98526535f64c480c2cd1b58c81f50323d3d4ba0a1c7d4b71748bd3d7ac83082b"
+    },
+    "modules/linux_x86_64_cjnative/std/std.crypto.digest.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "eaf97a0d9d455a17771ed43e7340d686d963355a298a5aa0d1ded01ce64105ac"
+    },
+    "modules/linux_x86_64_cjnative/std/std.database.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "89208a89a898d562b49029c0b491365dbae5ebffe06853dd137e1672e5d9466f"
+    },
+    "modules/linux_x86_64_cjnative/std/std.database.sql.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d6dac945288a2d928f7f76630ff83b04e4f210e1c43f6012ee3812239bbde6ad"
+    },
+    "modules/linux_x86_64_cjnative/std/std.deriving.api.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dfcbdb93f53cf6cd4ef7dfd558ea580dc80f52d9b6b8c56d8e81c304dfb33e42"
+    },
+    "modules/linux_x86_64_cjnative/std/std.deriving.builtins.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "33f1ba90d94b42a2b777ae623b0e6a4398e4262dcd936e5cfa97d9d87d687adc"
+    },
+    "modules/linux_x86_64_cjnative/std/std.deriving.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5cc82719e95c844d9d6c26c3e28b78eb7c957eb906ce6cbe5d082201333c2732"
+    },
+    "modules/linux_x86_64_cjnative/std/std.deriving.impl.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ea2e2f59ce0a74c5411b998e144c640e3736e00e49e56c14d2fc2e762376e581"
+    },
+    "modules/linux_x86_64_cjnative/std/std.deriving.resolve.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6f202adf7d915ca163f5b300c960d5fc3891ddb84c7ab9d54c10c7c0104e098a"
+    },
+    "modules/linux_x86_64_cjnative/std/std.env.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ebb52ed87719f1874f6a4b343588cf33a32270af2ff89f25333162ee88e712bd"
+    },
+    "modules/linux_x86_64_cjnative/std/std.fs.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "87a462cf022c9c7a7594f2a412d66bdf09af3a4b3924c2b57901f75ad7ec219f"
+    },
+    "modules/linux_x86_64_cjnative/std/std.interop.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "64cbf68d38926501b21828663f779deb3fa53805f424d15446e1e6e6af6908bf"
+    },
+    "modules/linux_x86_64_cjnative/std/std.io.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6493d25ffeb4550656bc2a254b6527116db4a27c71b00e32ae236d77bf073bf"
+    },
+    "modules/linux_x86_64_cjnative/std/std.math.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1bf9b4c3845a9853df4d285bec198b2ede1d97f48f47ec2cd8b1b7d61472e85a"
+    },
+    "modules/linux_x86_64_cjnative/std/std.math.numeric.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f33cd8980a861b6d850da7c0dbdbf51c0eda1abb17c38b759cb988f9676ca592"
+    },
+    "modules/linux_x86_64_cjnative/std/std.net.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "83cd0d2eb8b1eaf77bedf9e39c94b33dc9900430837443923d9c5b8916013188"
+    },
+    "modules/linux_x86_64_cjnative/std/std.objectpool.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fb4ff870caa8c19ba27ecef45cd8dfa3de6fc4c462b1d1a53e5a1ae1feb1287f"
+    },
+    "modules/linux_x86_64_cjnative/std/std.overflow.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a7a26f25c3e6b97b698ff45cdc4130ec0bd69fae9672000102c858973e62efb5"
+    },
+    "modules/linux_x86_64_cjnative/std/std.posix.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9f680fba7194f04f20285f5369cdd7af17de19e63572df26cf2c06d89245ebe9"
+    },
+    "modules/linux_x86_64_cjnative/std/std.process.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "836c80dd360b9fd71359ee7c825df5b1ae07062113cc30768e162379aa560c82"
+    },
+    "modules/linux_x86_64_cjnative/std/std.random.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "85195e33b6b6ff0b29fb9c0b9ea39a8c00fe9b8cfb89a1b19f2911d12353532c"
+    },
+    "modules/linux_x86_64_cjnative/std/std.ref.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7beb6976154b13d367224eada0a397f5732566c8dbb9f98945091e0a3bacdc1e"
+    },
+    "modules/linux_x86_64_cjnative/std/std.reflect.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b628f7aed549e775d57752e6dc4a4d1aa234c0a1e67a219e695658b863837318"
+    },
+    "modules/linux_x86_64_cjnative/std/std.regex.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6b76144b7cd49ce6e49de94582530bf60d15dfd75a2901ef000f3a0c535e354"
+    },
+    "modules/linux_x86_64_cjnative/std/std.runtime.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "30a133a07efaa61ff9f0e6e8d1c82803277f96006e16886d1a72d5023c100dee"
+    },
+    "modules/linux_x86_64_cjnative/std/std.sort.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3fc7198a12a5841d3aaa5bd786430bba9af884380d4e0a0e8e8f054ec1b0c5fe"
+    },
+    "modules/linux_x86_64_cjnative/std/std.sync.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4c1097eb96bdfb0320b940155e36d621cfbd289dc98bf1cc144f44054fb2a99d"
+    },
+    "modules/linux_x86_64_cjnative/std/std.time.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "308b6e444cd7414bb5ff6391628b3c54698f6303f0b71889a759e88833e8d67f"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unicode.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5a63e00fad4229c3bde8721bf16cd2fa954f51557d1e74839fe6a446219b7308"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3baf978b9198bb767566308aeedc2b6541a3d37239492dc5b7942ce7207a5b45"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.common.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5a831babe93f91c866b323b28ece5d6d814601ccdecd296219d17c90689cd95c"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.diff.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a67c095f38ef6b0c348f542ed7282e759785c365f1134cc4fedb23a3e3457c09"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.mock.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "43fea2dd4d0d136b747b1c7a26f92f64332388d19804b97d8188b49f97e32bd6"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.mock.internal.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "215abb2f2cea4f60ca4d8ddc663ce955a52c6ec6414da6b4b3b47261468d8593"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.mock.mockmacro.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "474b483e4f91c4083e9d5d933906b5cb941b51819813b87688ea6bf52d2be1a5"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.prop_test.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d4dc635e05ab4787697aac7dd026db24936820f6972264db6113a9b872c72616"
+    },
+    "modules/linux_x86_64_cjnative/std/std.unittest.testmacro.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7c9344a91571069fb537c97360373edf8af5410858fa8afbcad71d366cb4c08d"
+    },
+    "modules/linux_x86_64_cjnative/std.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f96d86c13f559fc1c38d5fd262504bc86b10d557ffe4a04cfe42b359ff1274c"
+    },
+    "modules/windows_x86_64_cjnative/std/std.argopt.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0db5398146c6f4d18938c96657631f68a80f43a8f6ed7ea4b781e9918b05bf6d"
+    },
+    "modules/windows_x86_64_cjnative/std/std.ast.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "72afcbeb08449b904a5ecf4055572c3eb96a4754022a1d0202094c38611f572d"
+    },
+    "modules/windows_x86_64_cjnative/std/std.binary.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "262ad24eb00c9d7478a19a75b164cd406de9370395aff88c08bc55f7ea3d3040"
+    },
+    "modules/windows_x86_64_cjnative/std/std.collection.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "95ea08036bd8394e2937f1757b3b2d9108fd7393c9ae725d9c7eaefeef8d60af"
+    },
+    "modules/windows_x86_64_cjnative/std/std.collection.concurrent.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "73d23f42d234c724ea5cadd7ce4147ff7c00301bf8ee4df850a5fd2e4cc79d82"
+    },
+    "modules/windows_x86_64_cjnative/std/std.concurrent.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a81d1e9a1da92893780b9e7a2bc7bbcd98460da420187ba759a9eb41a70f7675"
+    },
+    "modules/windows_x86_64_cjnative/std/std.console.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "44822a13c0387ba81d9a7150156701bd95ac021ba2c97644260458da72f5674b"
+    },
+    "modules/windows_x86_64_cjnative/std/std.convert.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c19962e922c173b81ae2229edec5feac71ba7422228578271dc0b8d4b58f8b8a"
+    },
+    "modules/windows_x86_64_cjnative/std/std.core.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8e0db3abaf7d55cfddc8f259394c83de8e95e15809d0d015742d4f836e643e73"
+    },
+    "modules/windows_x86_64_cjnative/std/std.crypto.cipher.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "32a797181d51aa0303fdaafb8f4f2b92e142df078f56e8710e753133b25fb303"
+    },
+    "modules/windows_x86_64_cjnative/std/std.crypto.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "98526535f64c480c2cd1b58c81f50323d3d4ba0a1c7d4b71748bd3d7ac83082b"
+    },
+    "modules/windows_x86_64_cjnative/std/std.crypto.digest.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "eaf97a0d9d455a17771ed43e7340d686d963355a298a5aa0d1ded01ce64105ac"
+    },
+    "modules/windows_x86_64_cjnative/std/std.database.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "89208a89a898d562b49029c0b491365dbae5ebffe06853dd137e1672e5d9466f"
+    },
+    "modules/windows_x86_64_cjnative/std/std.database.sql.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "92e159935bb56761ee2a91311b36124eade2b1d90e1f0aa3206d92c1c1ee3e20"
+    },
+    "modules/windows_x86_64_cjnative/std/std.deriving.api.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2c20a976e2a707e8d237247891bb06b8155514ce2c464d385e731d31b3ed597f"
+    },
+    "modules/windows_x86_64_cjnative/std/std.deriving.builtins.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8d476942f522f4a9a2da067be863c59441e3758e9bd128c770a58bdebf3a8493"
+    },
+    "modules/windows_x86_64_cjnative/std/std.deriving.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a084f2cf24ba85d8c4729787b871ffc033992c842dcb81d525d58260ee1fc6c9"
+    },
+    "modules/windows_x86_64_cjnative/std/std.deriving.impl.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "edda9bef511b1c81afb1c9e667832c1a67ecbbb3a7a7962a3b45d8281239d76b"
+    },
+    "modules/windows_x86_64_cjnative/std/std.deriving.resolve.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "99b47f750fa89be2264d447df763c16fad0a977d6eb34e07b5c0155208be411e"
+    },
+    "modules/windows_x86_64_cjnative/std/std.env.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f8f0e26583aa6bdc48fec9a9b42be1bb2e9d0728c417e21f49ec28dba901cad"
+    },
+    "modules/windows_x86_64_cjnative/std/std.fs.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d1834883d7a6013f8b91792544519c7313006c0951885a05153ccc62baaaa73"
+    },
+    "modules/windows_x86_64_cjnative/std/std.interop.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "64cbf68d38926501b21828663f779deb3fa53805f424d15446e1e6e6af6908bf"
+    },
+    "modules/windows_x86_64_cjnative/std/std.io.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f6493d25ffeb4550656bc2a254b6527116db4a27c71b00e32ae236d77bf073bf"
+    },
+    "modules/windows_x86_64_cjnative/std/std.math.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1bf9b4c3845a9853df4d285bec198b2ede1d97f48f47ec2cd8b1b7d61472e85a"
+    },
+    "modules/windows_x86_64_cjnative/std/std.math.numeric.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f33cd8980a861b6d850da7c0dbdbf51c0eda1abb17c38b759cb988f9676ca592"
+    },
+    "modules/windows_x86_64_cjnative/std/std.net.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dccb7f8e5851d63406183794f9c9ed5205e872a43a1bda171e9a588660394fa0"
+    },
+    "modules/windows_x86_64_cjnative/std/std.objectpool.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0f506de4b8b8c062a83b4bcdfd02efa0b9b82a4cd53e35157975931dd7fb56b0"
+    },
+    "modules/windows_x86_64_cjnative/std/std.overflow.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a7a26f25c3e6b97b698ff45cdc4130ec0bd69fae9672000102c858973e62efb5"
+    },
+    "modules/windows_x86_64_cjnative/std/std.posix.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8558a12ed0bf16114bad23ec57be185de9edce1299f92558384709fe1e58a125"
+    },
+    "modules/windows_x86_64_cjnative/std/std.process.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e5fc276408555407172ef6c3cf45c0e1c761017ae147f33604497e72c8308361"
+    },
+    "modules/windows_x86_64_cjnative/std/std.random.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "85195e33b6b6ff0b29fb9c0b9ea39a8c00fe9b8cfb89a1b19f2911d12353532c"
+    },
+    "modules/windows_x86_64_cjnative/std/std.ref.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7beb6976154b13d367224eada0a397f5732566c8dbb9f98945091e0a3bacdc1e"
+    },
+    "modules/windows_x86_64_cjnative/std/std.reflect.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "42c11a0640fc7da9872d21c437a337c42d5549e30badab12687cb9966e5c27c4"
+    },
+    "modules/windows_x86_64_cjnative/std/std.regex.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "408d835e0ef74cf5db31117c06c6b36e700f2439d1610e870ff95fc5a46598d0"
+    },
+    "modules/windows_x86_64_cjnative/std/std.runtime.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7275e406be85e3de3867aed22c6b39d709e0b2297e8afb67529d78d7a0b166cd"
+    },
+    "modules/windows_x86_64_cjnative/std/std.sort.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3fc7198a12a5841d3aaa5bd786430bba9af884380d4e0a0e8e8f054ec1b0c5fe"
+    },
+    "modules/windows_x86_64_cjnative/std/std.sync.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d7a90499d326f1034d57c0c1d511eca152c81a3dba0342adee41f72804452334"
+    },
+    "modules/windows_x86_64_cjnative/std/std.time.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f9128af6edb825c6be6a442592c050ddc435e862573ad19819fafe77012f343b"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unicode.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5a63e00fad4229c3bde8721bf16cd2fa954f51557d1e74839fe6a446219b7308"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e9d8c828981b8b0bf82d9045e2e9cd7718ae68ceb89a1d78dad2c35290db0d82"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.common.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "61fcfd7c27966951ab3831b53fadc5ee56029bd21cd0b7fda229df9e408c3d9d"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.diff.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "356119107d843deb7d6f6837fecf9eea6a2562fb0229d7067865a8172337a340"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.mock.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "75b57ef28070f54da9c2b30baea44b6932ff76608f2907fb220e2257a9eb86d7"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.mock.internal.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "215abb2f2cea4f60ca4d8ddc663ce955a52c6ec6414da6b4b3b47261468d8593"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.mock.mockmacro.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "474b483e4f91c4083e9d5d933906b5cb941b51819813b87688ea6bf52d2be1a5"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.prop_test.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bda9c6b15b5d417d0410e0e058aabdbff5235aa80946c26c27925ad28638e8b0"
+    },
+    "modules/windows_x86_64_cjnative/std/std.unittest.testmacro.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1e85cf123c85a51689da7ffcf4b82e5c88bd8e20b9f65e921bf134ecd9ab7157"
+    },
+    "modules/windows_x86_64_cjnative/std.cjo": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f96d86c13f559fc1c38d5fd262504bc86b10d557ffe4a04cfe42b359ff1274c"
+    }
+  },
+  "native_cc_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "8aac907d6fbf40394b424b5fa4a2ad1aa291dac7d3a0315c5b415c1f5ace1287"
+  },
+  "build_options": {
+    "command": [
+      "cjpm",
+      "build"
+    ],
+    "consumer_compile_option": "",
+    "consumer_link_option": "",
+    "cpu_override": "none",
+    "environment": {
+      "CFLAGS": "",
+      "CXXFLAGS": "",
+      "LDFLAGS": "",
+      "CJC_FLAGS": ""
+    }
+  },
+  "prior_installed_qualification": {
+    "path": "docs/evidence/M11-004/installed/report.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e68be98e187ffeaee9c0c8470490ba3c63b74d32af075a3ab5b60376672980d2"
+    },
+    "scope": "compiler matched; runtime and imports newly fingerprinted and exercised here"
+  },
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.3.0-alpha.06",
+    "native_cc": "cc (GCC) 16.2.1 20260810",
+    "openssl_fixture_only": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)"
+  },
+  "production_sources": {
+    "src/byte_span.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+    },
+    "src/cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d17cfd36391c38dcc4a30c2ad532b20039846f870535d46480c0e12267ec7a38"
+    },
+    "src/common.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a9264356fb3508b944f2919255dcf08a30fd3a828a97373fd0af75ea18b98cae"
+    },
+    "src/deadline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+    },
+    "src/gzip/body.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1b18e40d4bc1cd038dfb8e739a0381eeef2ec6effa0c80e488fb12c508e7a9f0"
+    },
+    "src/gzip/client.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7dd5b31b36bb6ea36723573dfea6aabef6c73644ce6e3a74aee35e3cc1e04024"
+    },
+    "src/gzip/decoder.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ecbf181d97f852ba9eb914d1de38ceab498a7c52380ad609b91fa61eef3d4082"
+    },
+    "src/gzip/model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bdbe6f4703a77aacd004a80f7bb709afbd0c122bab597896b717dd651d151f26"
+    },
+    "src/hostname_verifier.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+    },
+    "src/http/cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2e598e224f402937c0e6054b98aa67ffe4db05800bef8ce455348eb126b0296c"
+    },
+    "src/http/client.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0db4199c0144debdc134476c0e2c6cb6c91a9fc32c91959f064ca4049ca4c133"
+    },
+    "src/http/client_rotation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "492de359076836ee509543950872d4a3ee9ae55a97cf86f06f7cf000ce271b71"
+    },
+    "src/http/configuration_rotation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "81338be084b2ab6eb14d49e70d2769984c28e0c3e201e40eb216022a06679816"
+    },
+    "src/http/cookie.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+    },
+    "src/http/duplex.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7cfbf568d873ddf89b11465b6474584550e56546b7e0273cf0100fef95ad51d6"
+    },
+    "src/http/error.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bdbc8b908567971439758c1c9b6bd344f7a6f381d082d45adaa20b3d5cb93cb7"
+    },
+    "src/http/file_handler.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+    },
+    "src/http/hooks.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f3605fab36dc2b91c3a19576372ff11fdd4e39b59efa32fd5bfac158d30f9f6a"
+    },
+    "src/http/multipart.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+    },
+    "src/http/observability.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a36cac65dd05e2edf16c310b6d12d67d32768279ad3e80ae3cb8558924f6ea35"
+    },
+    "src/http/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+    },
+    "src/http/proxy.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+    },
+    "src/http/redirect.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+    },
+    "src/http/resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177"
+    },
+    "src/http/resource_budget.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0126e7e2cdcdef300bd0a8fa4bd219477177383af399f055d52c5345104917d8"
+    },
+    "src/http/retry.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957"
+    },
+    "src/http/server.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9b44d95acef40a700fafdd77d9156cdeacb0fcb9156bbc90405205d8658f7b18"
+    },
+    "src/http/tls.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+    },
+    "src/http/upgrade.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+    },
+    "src/http/websocket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4511bca2f41407997772dc43e61a48d3c9f7d71369a09635c9ca5c3ce5a1e5e0"
+    },
+    "src/http/websocket_handshake.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b1bd6429e8ef9977313f2812575d5663116fe0f122dca7a05bfd87f7fcd9b4d3"
+    },
+    "src/http/websocket_url.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "91f589b93950dcc0a32d7acdd9a185aa840f6af08f9614c64623cb1151363bcb"
+    },
+    "src/http_body.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+    },
+    "src/http_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+    },
+    "src/http_message.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1e324d3d5bc13bfc2d46984bb377fffe90b5370ef8134e0489658cd963d18a0a"
+    },
+    "src/http_model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+    },
+    "src/http_push.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+    },
+    "src/http_url.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0636a1ff272f384c9e6f8775947eb6db9efda9e27de21504ac6c5f138a155b49"
+    },
+    "src/internal/common/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+    },
+    "src/internal/connector/happy_eyeballs.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "46016b2aab6800d72c5637e89aa64533a3aae2ccacd6f7c3a2a17333258deebd"
+    },
+    "src/internal/connector/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+    },
+    "src/internal/connector/route.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+    },
+    "src/internal/http1/chunked.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+    },
+    "src/internal/http1/client_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1b742d3afbebbe204f8a6d2ae79729f504f8cf9c16f3eeb07396137cf4b84da8"
+    },
+    "src/internal/http1/client_pipeline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "57dc5def43110b361eea51b1c99c3b24f93ad5673e1f0a0849a9cef6cd28b4e1"
+    },
+    "src/internal/http1/connection_pool.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5830e140cd22d48385bdd3d20b24a07792997d087229da58f8793bfb86d90c24"
+    },
+    "src/internal/http1/head_parser.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+    },
+    "src/internal/http1/http2_connection_pool.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f9fcd87da1ad6f8740801b2fac39ae29af7454d7e3f6559609504a556e921563"
+    },
+    "src/internal/http1/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+    },
+    "src/internal/http1/pool_admission.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "60faf41eebd2e5e549f1aaf5e35e0cbfd408660d7abdd5bcba412c6653743058"
+    },
+    "src/internal/http1/pool_key.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5e72b0cccb4c59e8f07828b8d9903be4053736fd16cd8de8463c3248a0507dac"
+    },
+    "src/internal/http1/protocol_upgrade.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "07f09eadce829979bd333e07cbf18de62e79af6615553233320f41989acc0f27"
+    },
+    "src/internal/http1/proxy_client_pipeline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6a191e3561973edab201c9af3e2d1cfc6a91e9d91e73abee21654c7315da45fc"
+    },
+    "src/internal/http1/request_writer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f136cf6ef23d024c473576f1c7a071c6dfdfe07c6fe8c3a045d8fe4bc8961650"
+    },
+    "src/internal/http1/response_reader.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "90e14f076570813283a45c4c94d66f415d4a1d84a3d60004fe046c639d062137"
+    },
+    "src/internal/http1/serializer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+    },
+    "src/internal/http1/server.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+    },
+    "src/internal/http1/server_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "9b69b2bd71fb5b19a214c083b75ed4a5c367dc59a9c57ab9c916129ad8942a20"
+    },
+    "src/internal/http1/server_reader.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+    },
+    "src/internal/http1/server_writer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+    },
+    "src/internal/http1/tls_client_pipeline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "509dc54082973f735b0cdbba325d52293d93b2267f5a1b3cf8f9b21998eff35a"
+    },
+    "src/internal/http1/tls_server.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "23407a4258f4c4639df7baf28c40f84b9f0366e9498a5e0c9c68448670cba796"
+    },
+    "src/internal/http2/client_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1730c8c42b9e3f7eccd1c76a3bebe3805a8922f8894274589f8224604857aaab"
+    },
+    "src/internal/http2/client_mapping.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+    },
+    "src/internal/http2/client_push.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "96b45e9483324487dc5eb41f5ec603cd03ad7d74c3d4645cfefa3da7dca197f1"
+    },
+    "src/internal/http2/connection_state.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+    },
+    "src/internal/http2/duplex_stream.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+    },
+    "src/internal/http2/flow_control.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b296e490719597dab558988c621accc17301e235f35a44cc8813233f90591137"
+    },
+    "src/internal/http2/frame_codec.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ff25f15a331f00c21850e9ece84e392cd10ea1f77b76c1fc05964fa5841402d5"
+    },
+    "src/internal/http2/frame_model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+    },
+    "src/internal/http2/goaway.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+    },
+    "src/internal/http2/header_block.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+    },
+    "src/internal/http2/health_close.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+    },
+    "src/internal/http2/hpack_block.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+    },
+    "src/internal/http2/hpack_core.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+    },
+    "src/internal/http2/hpack_dynamic_table.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+    },
+    "src/internal/http2/hpack_huffman.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+    },
+    "src/internal/http2/observability.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "fc4d28b389b73c00f33db648ec2c1d76d57452ed755d8f2007cb61b19d752dce"
+    },
+    "src/internal/http2/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+    },
+    "src/internal/http2/reader_loop.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "3e680b8bd8c005c7c3a067ab3955e33a8359c96220d76ebbee638a5c1da79015"
+    },
+    "src/internal/http2/server_cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8b718950bbe3e7de56e40b63e5d2262f7e6301ea61cb1b56c3530b4308cbe9c9"
+    },
+    "src/internal/http2/server_connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5dd9ae32547c1c8adb779290044c60bdce31546b3b01b86330cfca028c66866e"
+    },
+    "src/internal/http2/server_mapping.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "be1efea8eae10d0bdec1976b69b5c42b2eb8a2b86f8962ad9863765a25304a4b"
+    },
+    "src/internal/http2/settings.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+    },
+    "src/internal/http2/stream_lifecycle.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+    },
+    "src/internal/http2/stream_reset.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c1a838f98f6fa9a8d7873e8986ef5b93b31433d9840e763c04fc59a457b77760"
+    },
+    "src/internal/http2/write_scheduler.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "50ed0bb79d8ac3c4cc9fe93d1f3b43a657d0ccec002e4345414ea8c869c3d2ed"
+    },
+    "src/internal/http_files/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+    },
+    "src/internal/http_model/body.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+    },
+    "src/internal/http_model/message.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+    },
+    "src/internal/http_model/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+    },
+    "src/internal/http_model/public_suffix.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+    },
+    "src/internal/http_model/public_suffix_data.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+    },
+    "src/internal/http_model/url.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+    },
+    "src/internal/http_resource_budget.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2f533291ce0a0b2e25c8560db9fc5f8494caef69d71775be45a5d10225ecf9d3"
+    },
+    "src/internal/http_resource_budget_types.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2d555765cb6ff9ac22f343666831b1e0492118ba5fcb82cb35aebd6c5839623c"
+    },
+    "src/internal/identity/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+    },
+    "src/internal/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+    },
+    "src/internal/platform/linux/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+    },
+    "src/internal/platform/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+    },
+    "src/internal/resolver/bounded_backend.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d536557035988f377c8c8269bfc8854d648f4f2e65d1792b0c8126f4621c56cd"
+    },
+    "src/internal/resolver/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+    },
+    "src/internal/resolver/system_resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "29fe44c8e6568d269452f3d54d0c48929415082fdf36e1afbddd66224f727923"
+    },
+    "src/internal/tls_engine/connection.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+    },
+    "src/internal/tls_engine/context.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+    },
+    "src/internal/tls_engine/engine.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+    },
+    "src/internal/tls_engine/identity.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+    },
+    "src/internal/tls_engine/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+    },
+    "src/internal/tls_engine/server_name.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+    },
+    "src/internal/tls_engine/session.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+    },
+    "src/internal/tls_engine/websocket_crypto.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+    },
+    "src/internal/transport/cancellation.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+    },
+    "src/internal/transport/completion.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+    },
+    "src/internal/transport/deadline.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+    },
+    "src/internal/transport/lifecycle.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+    },
+    "src/internal/transport/memory_transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+    },
+    "src/internal/transport/memory_transport_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+    },
+    "src/internal/transport/network_error.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+    },
+    "src/internal/transport/network_event.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+    },
+    "src/internal/transport/operation_context.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+    },
+    "src/internal/transport/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+    },
+    "src/internal/transport/scripted_transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+    },
+    "src/internal/transport/transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    "src/internal/transport_stdnet/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+    },
+    "src/internal/transport_stdnet/socket_options.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
+    },
+    "src/internal/transport_stdnet/udp_socket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "32f78914fb335bf68dfd2a99ae3d06e823fe855bc7b583bb126b7622f6f364b2"
+    },
+    "src/internal/transport_stdnet/unix_address.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    "src/internal/transport_stdnet/unix_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    "src/internal/trust/hostname.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+    },
+    "src/internal/trust/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+    },
+    "src/net/datagram_socket_core.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "007a873cf52ccc3587db5c1c58d8b69cbb991585b09085c0abc861ca647709ce"
+    },
+    "src/net/dns_client.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "60496e50a26db7af557c3497e0299b0c9afc47f013a5dc7c814c317b5f185550"
+    },
+    "src/net/dns_resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7f9054340e354204b8571c6ff83f85b17025375a2ebc67d04b860e3e308e1eb1"
+    },
+    "src/net/dns_wire.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+    },
+    "src/net/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+    },
+    "src/net/socket_options.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+    },
+    "src/net/tcp_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+    },
+    "src/net/udp_socket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
+    },
+    "src/net/unix_datagram_socket.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    "src/net/unix_listener.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    "src/net/unix_stream.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    "src/network_error.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+    },
+    "src/network_event.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8b356f7f4ea634313f745a244cf1288dd9d4d960fb573870a8e0558b78e77956"
+    },
+    "src/network_event_buffer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b445222f06db9333f9c7660e9bafbd4c5e6e4b125238b4120b8dc95379a3eb33"
+    },
+    "src/network_pool_snapshot.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f19d0fc1cfdb8e952b3550153540afc342a9627bb3a862be4e559caa8aa7859c"
+    },
+    "src/observability/bounded_network_event_sink.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "d11390cfc372f11c6d5d567ea58c88f633e0e147a213be34b0d072ad58cd7aa4"
+    },
+    "src/operation_context.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "98c98f6d7e325e61cdd239bf8c2e7abfa586ae662e11c892df2aa8428245eb43"
+    },
+    "src/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+    },
+    "src/private_key_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+    },
+    "src/resolver.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+    },
+    "src/resolver_snapshot.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "b1f82e6f120e77391595abda5289c0376c9013ce8a3d692721ac05669cfb0094"
+    },
+    "src/sse/decoder.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "0b89572bab2a9674d4b786ff3352ff0d1456664e83ba9ca9dbdf3bdf2cc5a99c"
+    },
+    "src/sse/encoder.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "099f94ce9d9363aff48611789fa31a84e048a386ceabf6d84806bc52c844ea7d"
+    },
+    "src/sse/model.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6c018731253fb95b3ae59a29ae54d80cb7780302ed7151c8ace792c46c91bdee"
+    },
+    "src/sse/session.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "662381ad817543c851af746edaae780a00b4e7e0fb14aeccbfd3d88a70dc0f74"
+    },
+    "src/sse/session_policy.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "ca2b6ec5d9d7a006b05ea3c72cb49d4461974cc572bfb34598a74dcbaa903bf4"
+    },
+    "src/sse/writer.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "77520d6b36a837f2230cb3d5363f703a40c4b4710018f1553d20c3eafec722a4"
+    },
+    "src/tls/facade.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+    },
+    "src/tls/identity.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+    },
+    "src/tls/package.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+    },
+    "src/tls_contract.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+    },
+    "src/transport.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+    },
+    "src/trust.cj": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+    }
+  },
+  "native_archives": {
+    "target/native/current/lib/libwirestack_tls_provider.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a3ae2da76b1e432adde3cce3c1db581d8b3bf9ae4f83917d4fa185f2906e737d"
+    },
+    "target/native/resolver/current/lib/libwirestack_resolver.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "dcef4fbe2f69e05fc7a52a427aa0ae91e6ce2e8fba94fd68e1f642e3e81e8faa"
+    },
+    "target/native/http_files/current/lib/libwirestack_http_files.a": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "8524cf328f0b088b6f429dbed5827cc9429ba4ce32fd4e3e2ac82051aaba155a"
+    }
+  },
+  "payload_sha256": "6f7e9d20f021ffb84fa91a8cf28f7a17488b8e3fa17e607975ed2af6d568ac3e",
+  "installed_manifest": {
+    "artifactBuildFingerprint": "6f7e9d20f021ffb84fa91a8cf28f7a17488b8e3fa17e607975ed2af6d568ac3e",
+    "externalOpenSslDependency": false,
+    "format": "cjpm-source-with-pinned-static-native-dependencies",
+    "httpFiles": {
+      "abi_version": 1,
+      "archive_sha256": "8524cf328f0b088b6f429dbed5827cc9429ba4ce32fd4e3e2ac82051aaba155a",
+      "build_fingerprint": "86aff326db75ffe95cfbfb6a8f6d837cfd36d10b35d6cb4d0f0008db01cd7bb2",
+      "component": "wirestack-http-files",
+      "manifest_sha256": "dde6c2e1e5fb16a7df4c87d4a403b22062ec7999d74b9227a0357fcb3bddfb0a"
+    },
+    "license": {
+      "expression": "Apache-2.0",
+      "file": "LICENSE",
+      "sha256": "ff2bfac16f9884d002e66b1b2c75c20c626bc41ff31cdf411c5acdf224288295"
+    },
+    "optionalModules": [
+      {
+        "implementation": "wirestack-cangjie-rfc1951-rfc1952",
+        "license": "Apache-2.0",
+        "nativeDependencies": [],
+        "package": "wirestack.gzip",
+        "selection": "explicit-package-import",
+        "sources": [
+          {
+            "path": "src/gzip/body.cj",
+            "sha256": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "1b18e40d4bc1cd038dfb8e739a0381eeef2ec6effa0c80e488fb12c508e7a9f0"
+            }
+          },
+          {
+            "path": "src/gzip/client.cj",
+            "sha256": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "7dd5b31b36bb6ea36723573dfea6aabef6c73644ce6e3a74aee35e3cc1e04024"
+            }
+          },
+          {
+            "path": "src/gzip/decoder.cj",
+            "sha256": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "ecbf181d97f852ba9eb914d1de38ceab498a7c52380ad609b91fa61eef3d4082"
+            }
+          },
+          {
+            "path": "src/gzip/model.cj",
+            "sha256": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "bdbe6f4703a77aacd004a80f7bb709afbd0c122bab597896b717dd651d151f26"
+            }
+          }
+        ]
+      }
+    ],
+    "package": "wirestack",
+    "payload": [
+      {
+        "bytes": 10254,
+        "path": "LICENSE",
+        "sha256": "ff2bfac16f9884d002e66b1b2c75c20c626bc41ff31cdf411c5acdf224288295"
+      },
+      {
+        "bytes": 7074,
+        "path": "README.md",
+        "sha256": "9b3f0ed2d451b061e56352ab7b9d7305c2096ec79be8b02fccb0c0e2d19ddcef"
+      },
+      {
+        "bytes": 1482,
+        "path": "THIRD_PARTY_NOTICES.md",
+        "sha256": "adbf4b77767261c093f2ee9e0c5cc1502fa997758087b5fe9391355d78945f00"
+      },
+      {
+        "bytes": 24,
+        "path": "cjpm.lock",
+        "sha256": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0"
+      },
+      {
+        "bytes": 1521,
+        "path": "cjpm.toml",
+        "sha256": "1cdbca893f8cc158b618281cb4bbd9d3479f4d297194a73df0e2bffcb5fc9378"
+      },
+      {
+        "bytes": 4048,
+        "path": "src/byte_span.cj",
+        "sha256": "4b38c6d184e172a56f0c39308294cbd2485ff683aba4f27028abe07c2b4661c4"
+      },
+      {
+        "bytes": 4666,
+        "path": "src/cancellation.cj",
+        "sha256": "d17cfd36391c38dcc4a30c2ad532b20039846f870535d46480c0e12267ec7a38"
+      },
+      {
+        "bytes": 11609,
+        "path": "src/common.cj",
+        "sha256": "a9264356fb3508b944f2919255dcf08a30fd3a828a97373fd0af75ea18b98cae"
+      },
+      {
+        "bytes": 2949,
+        "path": "src/deadline.cj",
+        "sha256": "15c5fd0c7f2dcfb4be7150359990c7c35cde11aa3332f80a9efe9f79e431a7c4"
+      },
+      {
+        "bytes": 7293,
+        "path": "src/gzip/body.cj",
+        "sha256": "1b18e40d4bc1cd038dfb8e739a0381eeef2ec6effa0c80e488fb12c508e7a9f0"
+      },
+      {
+        "bytes": 8698,
+        "path": "src/gzip/client.cj",
+        "sha256": "7dd5b31b36bb6ea36723573dfea6aabef6c73644ce6e3a74aee35e3cc1e04024"
+      },
+      {
+        "bytes": 13816,
+        "path": "src/gzip/decoder.cj",
+        "sha256": "ecbf181d97f852ba9eb914d1de38ceab498a7c52380ad609b91fa61eef3d4082"
+      },
+      {
+        "bytes": 7638,
+        "path": "src/gzip/model.cj",
+        "sha256": "bdbe6f4703a77aacd004a80f7bb709afbd0c122bab597896b717dd651d151f26"
+      },
+      {
+        "bytes": 12074,
+        "path": "src/hostname_verifier.cj",
+        "sha256": "a0d06b89cf163b91339e5690bf1d15d8e94bd4912c2792b35e0cdd09d4e34989"
+      },
+      {
+        "bytes": 19585,
+        "path": "src/http/cancellation.cj",
+        "sha256": "2e598e224f402937c0e6054b98aa67ffe4db05800bef8ce455348eb126b0296c"
+      },
+      {
+        "bytes": 54305,
+        "path": "src/http/client.cj",
+        "sha256": "0db4199c0144debdc134476c0e2c6cb6c91a9fc32c91959f064ca4049ca4c133"
+      },
+      {
+        "bytes": 11060,
+        "path": "src/http/client_rotation.cj",
+        "sha256": "492de359076836ee509543950872d4a3ee9ae55a97cf86f06f7cf000ce271b71"
+      },
+      {
+        "bytes": 411,
+        "path": "src/http/configuration_rotation.cj",
+        "sha256": "81338be084b2ab6eb14d49e70d2769984c28e0c3e201e40eb216022a06679816"
+      },
+      {
+        "bytes": 32888,
+        "path": "src/http/cookie.cj",
+        "sha256": "5326d61b5121e75e56750a29c960dc97e9b7fc34ba10f62236e3b19adbaee1d8"
+      },
+      {
+        "bytes": 4151,
+        "path": "src/http/duplex.cj",
+        "sha256": "7cfbf568d873ddf89b11465b6474584550e56546b7e0273cf0100fef95ad51d6"
+      },
+      {
+        "bytes": 7764,
+        "path": "src/http/error.cj",
+        "sha256": "bdbc8b908567971439758c1c9b6bd344f7a6f381d082d45adaa20b3d5cb93cb7"
+      },
+      {
+        "bytes": 19163,
+        "path": "src/http/file_handler.cj",
+        "sha256": "2706ddeadba5c448a9bdf9ed1b604d5fe56c527b001d28ecb3b558b93728df74"
+      },
+      {
+        "bytes": 4800,
+        "path": "src/http/hooks.cj",
+        "sha256": "f3605fab36dc2b91c3a19576372ff11fdd4e39b59efa32fd5bfac158d30f9f6a"
+      },
+      {
+        "bytes": 54204,
+        "path": "src/http/multipart.cj",
+        "sha256": "506c82b691fa280fc147fa7d6f73aa5ed7b1045f5fa1122bd7c667a62aead36e"
+      },
+      {
+        "bytes": 5974,
+        "path": "src/http/observability.cj",
+        "sha256": "a36cac65dd05e2edf16c310b6d12d67d32768279ad3e80ae3cb8558924f6ea35"
+      },
+      {
+        "bytes": 7794,
+        "path": "src/http/package.cj",
+        "sha256": "edae278034e8047e77649badec506b86ff2e6f3fc530d3eaf68394f77ff43ca0"
+      },
+      {
+        "bytes": 9171,
+        "path": "src/http/proxy.cj",
+        "sha256": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d"
+      },
+      {
+        "bytes": 9929,
+        "path": "src/http/redirect.cj",
+        "sha256": "bb7e2d00e2373436d05b8d4d7a19650768b943afd4ecbe737a49c352ca57be1f"
+      },
+      {
+        "bytes": 2413,
+        "path": "src/http/resolver.cj",
+        "sha256": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177"
+      },
+      {
+        "bytes": 19553,
+        "path": "src/http/resource_budget.cj",
+        "sha256": "0126e7e2cdcdef300bd0a8fa4bd219477177383af399f055d52c5345104917d8"
+      },
+      {
+        "bytes": 4263,
+        "path": "src/http/retry.cj",
+        "sha256": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957"
+      },
+      {
+        "bytes": 40617,
+        "path": "src/http/server.cj",
+        "sha256": "9b44d95acef40a700fafdd77d9156cdeacb0fcb9156bbc90405205d8658f7b18"
+      },
+      {
+        "bytes": 4266,
+        "path": "src/http/tls.cj",
+        "sha256": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62"
+      },
+      {
+        "bytes": 1827,
+        "path": "src/http/upgrade.cj",
+        "sha256": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73"
+      },
+      {
+        "bytes": 51096,
+        "path": "src/http/websocket.cj",
+        "sha256": "4511bca2f41407997772dc43e61a48d3c9f7d71369a09635c9ca5c3ce5a1e5e0"
+      },
+      {
+        "bytes": 4579,
+        "path": "src/http/websocket_handshake.cj",
+        "sha256": "b1bd6429e8ef9977313f2812575d5663116fe0f122dca7a05bfd87f7fcd9b4d3"
+      },
+      {
+        "bytes": 2078,
+        "path": "src/http/websocket_url.cj",
+        "sha256": "91f589b93950dcc0a32d7acdd9a185aa840f6af08f9614c64623cb1151363bcb"
+      },
+      {
+        "bytes": 12494,
+        "path": "src/http_body.cj",
+        "sha256": "49b72ad2517213133eb693a190061050b655edb02df01eaa414db216c60fc4fe"
+      },
+      {
+        "bytes": 2074,
+        "path": "src/http_contract.cj",
+        "sha256": "39d7fe3885f50211393d9e03dc478b7370566bf7b7b3d3f20d0a5d3de3dc9259"
+      },
+      {
+        "bytes": 13838,
+        "path": "src/http_message.cj",
+        "sha256": "1e324d3d5bc13bfc2d46984bb377fffe90b5370ef8134e0489658cd963d18a0a"
+      },
+      {
+        "bytes": 13742,
+        "path": "src/http_model.cj",
+        "sha256": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c"
+      },
+      {
+        "bytes": 5048,
+        "path": "src/http_push.cj",
+        "sha256": "5dde5a1ff4cee87c947c1867e56fe0e7b9d2a38e2ca91a597f5a8deb4c2fc20f"
+      },
+      {
+        "bytes": 12867,
+        "path": "src/http_url.cj",
+        "sha256": "0636a1ff272f384c9e6f8775947eb6db9efda9e27de21504ac6c5f138a155b49"
+      },
+      {
+        "bytes": 232,
+        "path": "src/internal/common/package.cj",
+        "sha256": "529b72e1a44e0737eb5f8da6c954cc6e57a22f9246d7cbaeb385205f5016f008"
+      },
+      {
+        "bytes": 18684,
+        "path": "src/internal/connector/happy_eyeballs.cj",
+        "sha256": "46016b2aab6800d72c5637e89aa64533a3aae2ccacd6f7c3a2a17333258deebd"
+      },
+      {
+        "bytes": 3460,
+        "path": "src/internal/connector/package.cj",
+        "sha256": "bdbc2d516e1a08955798d6d8761760a081bfa358573e3ea209c7af35b4d8d579"
+      },
+      {
+        "bytes": 6218,
+        "path": "src/internal/connector/route.cj",
+        "sha256": "e0e4b7681fc07227770506d4a494b5a2e6f7bf6f2b4aa76fee1849855d57dd94"
+      },
+      {
+        "bytes": 16519,
+        "path": "src/internal/http1/chunked.cj",
+        "sha256": "1615715b17b802fcc3499a738f0a91deea5738a4ab73c91c8a9f2fa2192bb574"
+      },
+      {
+        "bytes": 17819,
+        "path": "src/internal/http1/client_connection.cj",
+        "sha256": "1b742d3afbebbe204f8a6d2ae79729f504f8cf9c16f3eeb07396137cf4b84da8"
+      },
+      {
+        "bytes": 5938,
+        "path": "src/internal/http1/client_pipeline.cj",
+        "sha256": "57dc5def43110b361eea51b1c99c3b24f93ad5673e1f0a0849a9cef6cd28b4e1"
+      },
+      {
+        "bytes": 29266,
+        "path": "src/internal/http1/connection_pool.cj",
+        "sha256": "5830e140cd22d48385bdd3d20b24a07792997d087229da58f8793bfb86d90c24"
+      },
+      {
+        "bytes": 15470,
+        "path": "src/internal/http1/head_parser.cj",
+        "sha256": "7d19557be039d8f5d473020fc9ebaac6df3775f5621a84be42f99a3c2ce81701"
+      },
+      {
+        "bytes": 37536,
+        "path": "src/internal/http1/http2_connection_pool.cj",
+        "sha256": "f9fcd87da1ad6f8740801b2fac39ae29af7454d7e3f6559609504a556e921563"
+      },
+      {
+        "bytes": 6901,
+        "path": "src/internal/http1/package.cj",
+        "sha256": "6a9b999c912b7e0a78ccc798e57ccf6323c05a8f387af37cee275bd1e15260ee"
+      },
+      {
+        "bytes": 3375,
+        "path": "src/internal/http1/pool_admission.cj",
+        "sha256": "60faf41eebd2e5e549f1aaf5e35e0cbfd408660d7abdd5bcba412c6653743058"
+      },
+      {
+        "bytes": 3708,
+        "path": "src/internal/http1/pool_key.cj",
+        "sha256": "5e72b0cccb4c59e8f07828b8d9903be4053736fd16cd8de8463c3248a0507dac"
+      },
+      {
+        "bytes": 1990,
+        "path": "src/internal/http1/protocol_upgrade.cj",
+        "sha256": "07f09eadce829979bd333e07cbf18de62e79af6615553233320f41989acc0f27"
+      },
+      {
+        "bytes": 17386,
+        "path": "src/internal/http1/proxy_client_pipeline.cj",
+        "sha256": "6a191e3561973edab201c9af3e2d1cfc6a91e9d91e73abee21654c7315da45fc"
+      },
+      {
+        "bytes": 11967,
+        "path": "src/internal/http1/request_writer.cj",
+        "sha256": "f136cf6ef23d024c473576f1c7a071c6dfdfe07c6fe8c3a045d8fe4bc8961650"
+      },
+      {
+        "bytes": 41790,
+        "path": "src/internal/http1/response_reader.cj",
+        "sha256": "90e14f076570813283a45c4c94d66f415d4a1d84a3d60004fe046c639d062137"
+      },
+      {
+        "bytes": 5854,
+        "path": "src/internal/http1/serializer.cj",
+        "sha256": "3f8eb08e73598aab2f6b59da87f61ebd47477670197fde76f1c4ea251c005637"
+      },
+      {
+        "bytes": 10237,
+        "path": "src/internal/http1/server.cj",
+        "sha256": "e1d8e4d57f65a51fb4544f90856ddfebb57daac90ccdd969d6751cd8196482aa"
+      },
+      {
+        "bytes": 11526,
+        "path": "src/internal/http1/server_connection.cj",
+        "sha256": "9b69b2bd71fb5b19a214c083b75ed4a5c367dc59a9c57ab9c916129ad8942a20"
+      },
+      {
+        "bytes": 6896,
+        "path": "src/internal/http1/server_reader.cj",
+        "sha256": "47e56dd71ecdbc30508b4287b4367b63c9c165aeabce0018b2c12c178c46e6ae"
+      },
+      {
+        "bytes": 9149,
+        "path": "src/internal/http1/server_writer.cj",
+        "sha256": "042809fd1b4f4d69473e9b70201a80e136b6a41d6db7679cd846e22ab2b03b12"
+      },
+      {
+        "bytes": 39852,
+        "path": "src/internal/http1/tls_client_pipeline.cj",
+        "sha256": "509dc54082973f735b0cdbba325d52293d93b2267f5a1b3cf8f9b21998eff35a"
+      },
+      {
+        "bytes": 8939,
+        "path": "src/internal/http1/tls_server.cj",
+        "sha256": "23407a4258f4c4639df7baf28c40f84b9f0366e9498a5e0c9c68448670cba796"
+      },
+      {
+        "bytes": 75653,
+        "path": "src/internal/http2/client_connection.cj",
+        "sha256": "1730c8c42b9e3f7eccd1c76a3bebe3805a8922f8894274589f8224604857aaab"
+      },
+      {
+        "bytes": 31075,
+        "path": "src/internal/http2/client_mapping.cj",
+        "sha256": "4c62b53bbfbb86099aee995e02bcb304f4e3c13cf61216f3cddd544368152249"
+      },
+      {
+        "bytes": 24502,
+        "path": "src/internal/http2/client_push.cj",
+        "sha256": "96b45e9483324487dc5eb41f5ec603cd03ad7d74c3d4645cfefa3da7dca197f1"
+      },
+      {
+        "bytes": 18389,
+        "path": "src/internal/http2/connection_state.cj",
+        "sha256": "f7e441db314c1e6d082d73526ada8f8031e7bfc9870dd181b60d92a7a87f1aa2"
+      },
+      {
+        "bytes": 11689,
+        "path": "src/internal/http2/duplex_stream.cj",
+        "sha256": "b075df16c036aff2c3bb61cc6a8ea190878cb8fa4fc2fe684ebe855dc91ececb"
+      },
+      {
+        "bytes": 32943,
+        "path": "src/internal/http2/flow_control.cj",
+        "sha256": "b296e490719597dab558988c621accc17301e235f35a44cc8813233f90591137"
+      },
+      {
+        "bytes": 10492,
+        "path": "src/internal/http2/frame_codec.cj",
+        "sha256": "ff25f15a331f00c21850e9ece84e392cd10ea1f77b76c1fc05964fa5841402d5"
+      },
+      {
+        "bytes": 14673,
+        "path": "src/internal/http2/frame_model.cj",
+        "sha256": "0e829604c099eda57c6cb20a49f01c2772e84c05634211597a51c2b0a3c18b41"
+      },
+      {
+        "bytes": 11760,
+        "path": "src/internal/http2/goaway.cj",
+        "sha256": "77eff9ad5e4b8316704e71e4e867be524e54074b6111798862dd9b903cf28451"
+      },
+      {
+        "bytes": 8100,
+        "path": "src/internal/http2/header_block.cj",
+        "sha256": "5bcbc29c2ba2ec9957c1a7d4f34b4c719a0d81a8315ae13d0bac999e3b93e3ae"
+      },
+      {
+        "bytes": 15626,
+        "path": "src/internal/http2/health_close.cj",
+        "sha256": "7d0f96c30944a6d618b82d2c128d67c8ae93f254c590ce5a97230ee21003dfcd"
+      },
+      {
+        "bytes": 9390,
+        "path": "src/internal/http2/hpack_block.cj",
+        "sha256": "db5e1659f01eb1a0fa2680a40949165a4ebf2bc68deb1f892ac8c4cc62888535"
+      },
+      {
+        "bytes": 9569,
+        "path": "src/internal/http2/hpack_core.cj",
+        "sha256": "6a5737e66a587dce3af4ea78ebe1b9b40f3f30a9c15ef2e1740d10912abc45b3"
+      },
+      {
+        "bytes": 4768,
+        "path": "src/internal/http2/hpack_dynamic_table.cj",
+        "sha256": "233b97599a8b4b65fd7a24c234397094d2cfa244bdabe89f287b897732fc5104"
+      },
+      {
+        "bytes": 7854,
+        "path": "src/internal/http2/hpack_huffman.cj",
+        "sha256": "81fd596fa71d5ee90cf7f348f33c4087cc991fc85efa33d8dedc2c3772c475fe"
+      },
+      {
+        "bytes": 2119,
+        "path": "src/internal/http2/observability.cj",
+        "sha256": "fc4d28b389b73c00f33db648ec2c1d76d57452ed755d8f2007cb61b19d752dce"
+      },
+      {
+        "bytes": 186,
+        "path": "src/internal/http2/package.cj",
+        "sha256": "ce901b36c47b40c6100e7bc3bb6b3795185eb3e2269b5f5b50a1fd42d676abab"
+      },
+      {
+        "bytes": 10481,
+        "path": "src/internal/http2/reader_loop.cj",
+        "sha256": "3e680b8bd8c005c7c3a067ab3955e33a8359c96220d76ebbee638a5c1da79015"
+      },
+      {
+        "bytes": 1711,
+        "path": "src/internal/http2/server_cancellation.cj",
+        "sha256": "8b718950bbe3e7de56e40b63e5d2262f7e6301ea61cb1b56c3530b4308cbe9c9"
+      },
+      {
+        "bytes": 45950,
+        "path": "src/internal/http2/server_connection.cj",
+        "sha256": "5dd9ae32547c1c8adb779290044c60bdce31546b3b01b86330cfca028c66866e"
+      },
+      {
+        "bytes": 55350,
+        "path": "src/internal/http2/server_mapping.cj",
+        "sha256": "be1efea8eae10d0bdec1976b69b5c42b2eb8a2b86f8962ad9863765a25304a4b"
+      },
+      {
+        "bytes": 12870,
+        "path": "src/internal/http2/settings.cj",
+        "sha256": "064c8e3d02a9279e0ebcdc57d1d0f9c64bbb8ceb1af3d39cbaf907e4d990af60"
+      },
+      {
+        "bytes": 22008,
+        "path": "src/internal/http2/stream_lifecycle.cj",
+        "sha256": "897331d24b8b9e62f62c607468f3c3d2f5213f257468868d43f2f3674531613b"
+      },
+      {
+        "bytes": 10308,
+        "path": "src/internal/http2/stream_reset.cj",
+        "sha256": "c1a838f98f6fa9a8d7873e8986ef5b93b31433d9840e763c04fc59a457b77760"
+      },
+      {
+        "bytes": 40454,
+        "path": "src/internal/http2/write_scheduler.cj",
+        "sha256": "50ed0bb79d8ac3c4cc9fe93d1f3b43a657d0ccec002e4345414ea8c869c3d2ed"
+      },
+      {
+        "bytes": 19854,
+        "path": "src/internal/http_files/package.cj",
+        "sha256": "b512ca87bae9772e0d33cd9d3f06d197f23892a669db99abe773d499f7051f28"
+      },
+      {
+        "bytes": 316,
+        "path": "src/internal/http_model/body.cj",
+        "sha256": "a73d77fe17f8449e2e00b091572d1b05b8ba143038546f5423088d53630a794e"
+      },
+      {
+        "bytes": 508,
+        "path": "src/internal/http_model/message.cj",
+        "sha256": "6d6f71983caef98a85d28c58922a958ae3908d0cfa934dad645c2f790756ef17"
+      },
+      {
+        "bytes": 366,
+        "path": "src/internal/http_model/package.cj",
+        "sha256": "7d3f3c8e4d74793395902b43eb3defedcd783a8b3c0bbc8482b98b412b93eba6"
+      },
+      {
+        "bytes": 2692,
+        "path": "src/internal/http_model/public_suffix.cj",
+        "sha256": "6fc322ab28e6d9765a2c5ff0f1ee01ea77e17bd06e5bddec4e2aa388253e3a81"
+      },
+      {
+        "bytes": 214672,
+        "path": "src/internal/http_model/public_suffix_data.cj",
+        "sha256": "5be441c5e20eadc233dfa27db5707793f64398759643ded61e968c5009d969b9"
+      },
+      {
+        "bytes": 98,
+        "path": "src/internal/http_model/url.cj",
+        "sha256": "e53b25679343b150bd3cb08bb8072b1dcba8c013337f7cbf92a39bab25f8f51a"
+      },
+      {
+        "bytes": 34609,
+        "path": "src/internal/http_resource_budget.cj",
+        "sha256": "2f533291ce0a0b2e25c8560db9fc5f8494caef69d71775be45a5d10225ecf9d3"
+      },
+      {
+        "bytes": 6006,
+        "path": "src/internal/http_resource_budget_types.cj",
+        "sha256": "2d555765cb6ff9ac22f343666831b1e0492118ba5fcb82cb35aebd6c5839623c"
+      },
+      {
+        "bytes": 104,
+        "path": "src/internal/identity/package.cj",
+        "sha256": "48a74c796ab14cd9389cda5511b1c543a12eb6376f20a5db602b2a1be485e68e"
+      },
+      {
+        "bytes": 109,
+        "path": "src/internal/package.cj",
+        "sha256": "40f6cb97cdcd4adbce629e5efcd1e50b59b189e909685daa6ab2fe97edfa7c68"
+      },
+      {
+        "bytes": 7629,
+        "path": "src/internal/platform/linux/package.cj",
+        "sha256": "e8fb894453302d503a141e623c299d99de4ac133dc9b685a9519d604797a99d4"
+      },
+      {
+        "bytes": 124,
+        "path": "src/internal/platform/package.cj",
+        "sha256": "238e6352ebc303399edb319674e1d184e95e74c5ba09868e6dffc4e1b07a18db"
+      },
+      {
+        "bytes": 16556,
+        "path": "src/internal/resolver/bounded_backend.cj",
+        "sha256": "d536557035988f377c8c8269bfc8854d648f4f2e65d1792b0c8126f4621c56cd"
+      },
+      {
+        "bytes": 869,
+        "path": "src/internal/resolver/package.cj",
+        "sha256": "32923dd89347cc9b3ddeec6aa79f34d9943cb0f7028de783f9aa52db6bff0895"
+      },
+      {
+        "bytes": 2165,
+        "path": "src/internal/resolver/system_resolver.cj",
+        "sha256": "29fe44c8e6568d269452f3d54d0c48929415082fdf36e1afbddd66224f727923"
+      },
+      {
+        "bytes": 14310,
+        "path": "src/internal/tls_engine/connection.cj",
+        "sha256": "8640dff32ec6a8471eeb81dba41a12f33fa55965ae4e11ce6765bbbd28bfb6c8"
+      },
+      {
+        "bytes": 22355,
+        "path": "src/internal/tls_engine/context.cj",
+        "sha256": "6948fd27b640ec2816b64c8db2689a1228da824630f111b45e84a6328dc0e3c1"
+      },
+      {
+        "bytes": 91618,
+        "path": "src/internal/tls_engine/engine.cj",
+        "sha256": "84401dd32bd6b62bf88c366223980a4b6fc33a9dd72cd78312a3d28cae3169aa"
+      },
+      {
+        "bytes": 20622,
+        "path": "src/internal/tls_engine/identity.cj",
+        "sha256": "89a408307cc6e2a45976dfea91bd8929125b718b517629c7b95e0210f92cc2c9"
+      },
+      {
+        "bytes": 21748,
+        "path": "src/internal/tls_engine/package.cj",
+        "sha256": "1a6b95443fd636717210da31b45061d7dc74b5acd624d11094844b3c51402160"
+      },
+      {
+        "bytes": 4844,
+        "path": "src/internal/tls_engine/server_name.cj",
+        "sha256": "4942a768358202e37e03deaedf3e7897a03beab42b063123df33bc2dee48906f"
+      },
+      {
+        "bytes": 11008,
+        "path": "src/internal/tls_engine/session.cj",
+        "sha256": "5d2ce177870b73dab65210fc821a07b1fd5e85958bcaf51d4fc1f4a7cb5d891d"
+      },
+      {
+        "bytes": 4056,
+        "path": "src/internal/tls_engine/websocket_crypto.cj",
+        "sha256": "23084e793eefa81038f9dbec4c10d6a26a5bb0a0feee92b2d32d3d3766af2f0d"
+      },
+      {
+        "bytes": 241,
+        "path": "src/internal/transport/cancellation.cj",
+        "sha256": "b82550e7264b68cc57287d101992b3acb85991400f5807321655ecd5da3f8003"
+      },
+      {
+        "bytes": 3435,
+        "path": "src/internal/transport/completion.cj",
+        "sha256": "05c64354cb8acad80d8dc84dff126cd4ae58556b0f54ab0a685a1716b9ac5f04"
+      },
+      {
+        "bytes": 207,
+        "path": "src/internal/transport/deadline.cj",
+        "sha256": "94292b53dddc78d9072f8f87fa232d67cfbf6c4e5c8916172dc1e28ea940e794"
+      },
+      {
+        "bytes": 9178,
+        "path": "src/internal/transport/lifecycle.cj",
+        "sha256": "066578f90473df1c8da70d0dc7c880bfa37f2ef0701e4f27e0ea22da33420cc7"
+      },
+      {
+        "bytes": 9746,
+        "path": "src/internal/transport/memory_transport.cj",
+        "sha256": "b47b90bb00ff5d1d4aa1abdb73d3b755441ff26cdffe6f729a2bf1ab5ec27c0b"
+      },
+      {
+        "bytes": 12558,
+        "path": "src/internal/transport/memory_transport_listener.cj",
+        "sha256": "4cbd3076897aba19db0067cb5b53987176e42c33792336c748abaf5ede0c0e73"
+      },
+      {
+        "bytes": 315,
+        "path": "src/internal/transport/network_error.cj",
+        "sha256": "197a5262d2efe513c57347d4978ae9141eebb137b60904bd5e6925f0dde12fb6"
+      },
+      {
+        "bytes": 398,
+        "path": "src/internal/transport/network_event.cj",
+        "sha256": "5c725175042775e6fb7a1889419936008b6f288e43bb0451d783a490ab89ed45"
+      },
+      {
+        "bytes": 299,
+        "path": "src/internal/transport/operation_context.cj",
+        "sha256": "45eed18ce1b92235cdf19d310358b51111c6f913cce9d75cec8a9cdc1a004542"
+      },
+      {
+        "bytes": 149,
+        "path": "src/internal/transport/package.cj",
+        "sha256": "0126c75397262d26843491f0bd5deb2a94fb77cde4cfff43b32345894cb42734"
+      },
+      {
+        "bytes": 13183,
+        "path": "src/internal/transport/scripted_transport.cj",
+        "sha256": "10f464259a5b8d5b8b286257c6ad87a10b1ad3c4b91b190533eff28ff7b8b2d7"
+      },
+      {
+        "bytes": 1018,
+        "path": "src/internal/transport/transport.cj",
+        "sha256": "2ff38a85ed19739df538475d66878b8eb97f016d8d164052a6b50edf84169bc8"
+      },
+      {
+        "bytes": 1334,
+        "path": "src/internal/transport_stdnet/net_contract.cj",
+        "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+      },
+      {
+        "bytes": 51276,
+        "path": "src/internal/transport_stdnet/package.cj",
+        "sha256": "ab83a7224b905ac4edefd4f9f6af1d1a11d7e2bebb381b1e4decc5c4e48fc2cf"
+      },
+      {
+        "bytes": 15721,
+        "path": "src/internal/transport_stdnet/socket_options.cj",
+        "sha256": "8a0a242f3921e82038189ccce7ab8f838950721265444c179ba3f9e8cc11035a"
+      },
+      {
+        "bytes": 46078,
+        "path": "src/internal/transport_stdnet/udp_socket.cj",
+        "sha256": "32f78914fb335bf68dfd2a99ae3d06e823fe855bc7b583bb126b7622f6f364b2"
+      },
+      {
+        "bytes": 3664,
+        "path": "src/internal/transport_stdnet/unix_address.cj",
+        "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+      },
+      {
+        "bytes": 11785,
+        "path": "src/internal/transport_stdnet/unix_listener.cj",
+        "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+      },
+      {
+        "bytes": 485,
+        "path": "src/internal/trust/hostname.cj",
+        "sha256": "7ea0a261faef3e55da8183da41149e6d01741b15b92ff9ffe74d047053528cac"
+      },
+      {
+        "bytes": 727,
+        "path": "src/internal/trust/package.cj",
+        "sha256": "571e348d07cfdf403cfea794afbbb1b2401263e1901bc91b8461ba391fa161b2"
+      },
+      {
+        "bytes": 19310,
+        "path": "src/net/datagram_socket_core.cj",
+        "sha256": "007a873cf52ccc3587db5c1c58d8b69cbb991585b09085c0abc861ca647709ce"
+      },
+      {
+        "bytes": 46092,
+        "path": "src/net/dns_client.cj",
+        "sha256": "60496e50a26db7af557c3497e0299b0c9afc47f013a5dc7c814c317b5f185550"
+      },
+      {
+        "bytes": 20344,
+        "path": "src/net/dns_resolver.cj",
+        "sha256": "7f9054340e354204b8571c6ff83f85b17025375a2ebc67d04b860e3e308e1eb1"
+      },
+      {
+        "bytes": 31895,
+        "path": "src/net/dns_wire.cj",
+        "sha256": "08b6bfb5fb7b46502a2a897f44a251765947359408398bcb93442504de28bde0"
+      },
+      {
+        "bytes": 43404,
+        "path": "src/net/package.cj",
+        "sha256": "0d3e24838561ca302dea58edb365b6ee691db069878e1a22b4ec4c8b64627b77"
+      },
+      {
+        "bytes": 6650,
+        "path": "src/net/socket_options.cj",
+        "sha256": "a268a95b1ce57dd3c0c67f79f82e450f117d12b98a76848fd2e775e983b47dd4"
+      },
+      {
+        "bytes": 15488,
+        "path": "src/net/tcp_listener.cj",
+        "sha256": "77559ccaa15ff2b38d3cf4bd0e0ebb91b885844104287b06fadc331f36d363f8"
+      },
+      {
+        "bytes": 9612,
+        "path": "src/net/udp_socket.cj",
+        "sha256": "c3e928c9c5de18102bdb413eb7829b2f6de06cb2ab86511278e42812835f47a2"
+      },
+      {
+        "bytes": 9001,
+        "path": "src/net/unix_datagram_socket.cj",
+        "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+      },
+      {
+        "bytes": 13435,
+        "path": "src/net/unix_listener.cj",
+        "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+      },
+      {
+        "bytes": 5813,
+        "path": "src/net/unix_stream.cj",
+        "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+      },
+      {
+        "bytes": 8826,
+        "path": "src/network_error.cj",
+        "sha256": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5"
+      },
+      {
+        "bytes": 11942,
+        "path": "src/network_event.cj",
+        "sha256": "8b356f7f4ea634313f745a244cf1288dd9d4d960fb573870a8e0558b78e77956"
+      },
+      {
+        "bytes": 3276,
+        "path": "src/network_event_buffer.cj",
+        "sha256": "b445222f06db9333f9c7660e9bafbd4c5e6e4b125238b4120b8dc95379a3eb33"
+      },
+      {
+        "bytes": 3436,
+        "path": "src/network_pool_snapshot.cj",
+        "sha256": "f19d0fc1cfdb8e952b3550153540afc342a9627bb3a862be4e559caa8aa7859c"
+      },
+      {
+        "bytes": 12087,
+        "path": "src/observability/bounded_network_event_sink.cj",
+        "sha256": "d11390cfc372f11c6d5d567ea58c88f633e0e147a213be34b0d072ad58cd7aa4"
+      },
+      {
+        "bytes": 16605,
+        "path": "src/operation_context.cj",
+        "sha256": "98c98f6d7e325e61cdd239bf8c2e7abfa586ae662e11c892df2aa8428245eb43"
+      },
+      {
+        "bytes": 104,
+        "path": "src/package.cj",
+        "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+      },
+      {
+        "bytes": 5246,
+        "path": "src/private_key_contract.cj",
+        "sha256": "cb03bb9badc0552c2ac66dbb6bf4842559b5ea17b2aa77284e817a78d63c6e84"
+      },
+      {
+        "bytes": 14506,
+        "path": "src/resolver.cj",
+        "sha256": "7b2129a0e3fd4be72ad2dd6adaf0053d5de23a08214157c931d38d7627154b23"
+      },
+      {
+        "bytes": 2665,
+        "path": "src/resolver_snapshot.cj",
+        "sha256": "b1f82e6f120e77391595abda5289c0376c9013ce8a3d692721ac05669cfb0094"
+      },
+      {
+        "bytes": 10965,
+        "path": "src/sse/decoder.cj",
+        "sha256": "0b89572bab2a9674d4b786ff3352ff0d1456664e83ba9ca9dbdf3bdf2cc5a99c"
+      },
+      {
+        "bytes": 5534,
+        "path": "src/sse/encoder.cj",
+        "sha256": "099f94ce9d9363aff48611789fa31a84e048a386ceabf6d84806bc52c844ea7d"
+      },
+      {
+        "bytes": 7480,
+        "path": "src/sse/model.cj",
+        "sha256": "6c018731253fb95b3ae59a29ae54d80cb7780302ed7151c8ace792c46c91bdee"
+      },
+      {
+        "bytes": 16302,
+        "path": "src/sse/session.cj",
+        "sha256": "662381ad817543c851af746edaae780a00b4e7e0fb14aeccbfd3d88a70dc0f74"
+      },
+      {
+        "bytes": 3785,
+        "path": "src/sse/session_policy.cj",
+        "sha256": "ca2b6ec5d9d7a006b05ea3c72cb49d4461974cc572bfb34598a74dcbaa903bf4"
+      },
+      {
+        "bytes": 10202,
+        "path": "src/sse/writer.cj",
+        "sha256": "77520d6b36a837f2230cb3d5363f703a40c4b4710018f1553d20c3eafec722a4"
+      },
+      {
+        "bytes": 22882,
+        "path": "src/tls/facade.cj",
+        "sha256": "e7d4d1be6695abeb50c9ca8490817f2ef56b9a812f5be58cf9717ec4d3992077"
+      },
+      {
+        "bytes": 4527,
+        "path": "src/tls/identity.cj",
+        "sha256": "055c4232b9e44ff3cc768a09f023cd7a19174f5ce0d4dc263ca675af90660d19"
+      },
+      {
+        "bytes": 9241,
+        "path": "src/tls/package.cj",
+        "sha256": "5afa752de915ccff3866a81b9dbd0e6d3da1df01e1ecfa7180eb42709694d2b9"
+      },
+      {
+        "bytes": 14731,
+        "path": "src/tls_contract.cj",
+        "sha256": "1cbeb94013b9a2b946dd731b335554340862388feadf354162a2f2320bb6dac1"
+      },
+      {
+        "bytes": 8491,
+        "path": "src/transport.cj",
+        "sha256": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033"
+      },
+      {
+        "bytes": 21213,
+        "path": "src/trust.cj",
+        "sha256": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
+      },
+      {
+        "bytes": 11359,
+        "path": "target/native/current/include/wirestack_tls_provider.h",
+        "sha256": "89bfa537e931d670712aeaeef65a484c9060f25dff9468164cd0c21d04310c68"
+      },
+      {
+        "bytes": 8082822,
+        "path": "target/native/current/lib/libwirestack_tls_provider.a",
+        "sha256": "a3ae2da76b1e432adde3cce3c1db581d8b3bf9ae4f83917d4fa185f2906e737d"
+      },
+      {
+        "bytes": 2857,
+        "path": "target/native/current/provider-manifest.json",
+        "sha256": "9b9d0d13b137a3c300f3fc0fd3ea5eaa84380c48885ccfbcbaf62c7335a2e381"
+      },
+      {
+        "bytes": 1868,
+        "path": "target/native/http_files/current/http-files-manifest.json",
+        "sha256": "dde6c2e1e5fb16a7df4c87d4a403b22062ec7999d74b9227a0357fcb3bddfb0a"
+      },
+      {
+        "bytes": 2137,
+        "path": "target/native/http_files/current/include/wirestack_http_files.h",
+        "sha256": "2b2580c2d124cf4a1ffdbc178262745d94e7d99f6b03042220b8cee6e6035b6e"
+      },
+      {
+        "bytes": 20156,
+        "path": "target/native/http_files/current/lib/libwirestack_http_files.a",
+        "sha256": "8524cf328f0b088b6f429dbed5827cc9429ba4ce32fd4e3e2ac82051aaba155a"
+      },
+      {
+        "bytes": 2429,
+        "path": "target/native/resolver/current/include/wirestack_resolver.h",
+        "sha256": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe"
+      },
+      {
+        "bytes": 10390,
+        "path": "target/native/resolver/current/lib/libwirestack_resolver.a",
+        "sha256": "dcef4fbe2f69e05fc7a52a427aa0ae91e6ce2e8fba94fd68e1f642e3e81e8faa"
+      },
+      {
+        "bytes": 1082,
+        "path": "target/native/resolver/current/resolver-manifest.json",
+        "sha256": "5adfa39283663e36ce8fc9a43dbe26051462fbfeb1c37da9f8308f9b89d8e91f"
+      },
+      {
+        "bytes": 20338,
+        "path": "third_party/aws-lc/LICENSE",
+        "sha256": "977c541bd25ffe36975dde25c028c0cd15ddf3d08243983b58e8a6a3d9447523"
+      },
+      {
+        "bytes": 75,
+        "path": "third_party/aws-lc/NOTICE",
+        "sha256": "f97c469fa666b51b3dae2e1530504a5ee73bbf47b980aa76746d26c271dd591d"
+      },
+      {
+        "bytes": 16726,
+        "path": "third_party/public_suffix/LICENSE.MPL-2.0",
+        "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+      },
+      {
+        "bytes": 6144,
+        "path": "third_party/public_suffix/generate.py",
+        "sha256": "958e63597111ce351798ebc14865802a1a00cb8ec2cc3e19d7188bfa62947cee"
+      },
+      {
+        "bytes": 334129,
+        "path": "third_party/public_suffix/public_suffix_list.dat",
+        "sha256": "4b673689999dbaca60b93fa3e1da5752505ef9717b1c4dc44acbfdafd35679ea"
+      },
+      {
+        "bytes": 668,
+        "path": "third_party/public_suffix/source.json",
+        "sha256": "0a46867d31592e1b40868c3277417fd5d46480c7b6bb23cfbbf8e5587bfd475e"
+      }
+    ],
+    "payload_sha256": "6f7e9d20f021ffb84fa91a8cf28f7a17488b8e3fa17e607975ed2af6d568ac3e",
+    "production_source_files": 164,
+    "provider": {
+      "abi_version": 1,
+      "adapter": "linux-aws-lc",
+      "archive_sha256": "a3ae2da76b1e432adde3cce3c1db581d8b3bf9ae4f83917d4fa185f2906e737d",
+      "build_fingerprint": "9aea8d425627de82b9f225632d31af15262435636b1243955e6079611372aaef",
+      "id": "aws-lc",
+      "manifest_sha256": "9b9d0d13b137a3c300f3fc0fd3ea5eaa84380c48885ccfbcbaf62c7335a2e381",
+      "platform": "linux-x86_64-glibc",
+      "version": "5.5.0"
+    },
+    "resolver": {
+      "archive_sha256": "dcef4fbe2f69e05fc7a52a427aa0ae91e6ce2e8fba94fd68e1f642e3e81e8faa",
+      "manifest_sha256": "5adfa39283663e36ce8fc9a43dbe26051462fbfeb1c37da9f8308f9b89d8e91f"
+    },
+    "schema_version": 2,
+    "target": {
+      "architecture": "x86_64",
+      "libc": "glibc",
+      "libc_version": "2.44",
+      "os": "linux"
+    },
+    "thirdPartyNotices": {
+      "files": [
+        {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "sha256": "adbf4b77767261c093f2ee9e0c5cc1502fa997758087b5fe9391355d78945f00"
+        },
+        {
+          "path": "third_party/aws-lc/LICENSE",
+          "sha256": "977c541bd25ffe36975dde25c028c0cd15ddf3d08243983b58e8a6a3d9447523"
+        },
+        {
+          "path": "third_party/aws-lc/NOTICE",
+          "sha256": "f97c469fa666b51b3dae2e1530504a5ee73bbf47b980aa76746d26c271dd591d"
+        },
+        {
+          "path": "third_party/public_suffix/LICENSE.MPL-2.0",
+          "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+        }
+      ],
+      "index": "THIRD_PARTY_NOTICES.md"
+    },
+    "version": "0.1.0"
+  },
+  "relocation": {
+    "status": "PASS",
+    "old_tree_hidden": true,
+    "whole_tree_moved": true,
+    "relative_dependency": "../../install/wirestack",
+    "build_checkout_hidden": true
+  },
+  "proxy_observations": [
+    {
+      "method": "CONNECT",
+      "identity_kind": "dns",
+      "sni": "example.test",
+      "authorization_present": true,
+      "terminal": "reset",
+      "native_code": 104,
+      "terminal_side": "consumer"
+    }
+  ],
+  "ca_checks": {
+    "explicit-ca": {
+      "status": "PASS",
+      "expected_exit": 0,
+      "diagnostic": "TRUST_DOWNLOAD_PASS bytes=8"
+    },
+    "missing-explicit-ca": {
+      "status": "PASS",
+      "expected_exit": 1,
+      "diagnostic": "ERROR ca_file_missing"
+    },
+    "incorrect-explicit-ca": {
+      "status": "PASS",
+      "expected_exit": 1,
+      "diagnostic": "ERROR certificate_untrusted phase=tls_handshake"
+    },
+    "system-ca-installed": {
+      "status": "PASS",
+      "expected_exit": 0,
+      "diagnostic": "TRUST_DOWNLOAD_PASS bytes=8"
+    },
+    "system-ca-missing": {
+      "status": "PASS",
+      "expected_exit": 1,
+      "diagnostic": "ERROR trust_unavailable"
+    },
+    "system-ca-incorrect": {
+      "status": "PASS",
+      "expected_exit": 1,
+      "diagnostic": "ERROR certificate_untrusted phase=tls_handshake"
+    }
+  },
+  "semantic_outcome": "same complete M11-004 checks and public operational outputs; no observed semantic difference",
+  "ca_installation": {
+    "path": "/etc/ssl/certs/ca-certificates.crt",
+    "format": "PEM",
+    "mechanism": "read-only bind in private mount namespace; host CA unchanged"
+  },
+  "pass_check_count": 47,
+  "relocated_binaries": {
+    "cli": "relocated/consumers/cli/target/release/bin/main",
+    "decoded": "relocated/consumers/decoded/target/release/bin/main",
+    "streams": "relocated/consumers/streams/target/release/bin/main",
+    "service": "relocated/consumers/service/target/release/bin/main",
+    "trust": "relocated/consumers/trust/target/release/bin/main"
+  }
+}

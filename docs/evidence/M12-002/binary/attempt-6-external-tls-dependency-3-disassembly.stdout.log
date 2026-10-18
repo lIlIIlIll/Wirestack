@@ -1,0 +1,21 @@
+
+/usr/lib/libbrotlienc.so.1.2.0:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000001000 <_init>:
+    1000:	endbr64
+    1004:	sub    $0x8,%rsp
+    1008:	mov    0xbdf81(%rip),%rax        # bef90 <__gmon_start__@Base>
+    100f:	test   %rax,%rax
+    1012:	je     1016 <_init+0x16>
+    1014:	call   *%rax
+    1016:	add    $0x8,%rsp
+    101a:	ret
+
+Disassembly of section .text:
+
+0000000000001040 <AttachPreparedDictionary>:
+    1040:	endbr64
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "c99353d66caf817d318d225c02b3882be029efe0988f045beaca67d70187ecc1"}

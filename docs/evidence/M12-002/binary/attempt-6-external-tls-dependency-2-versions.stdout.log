@@ -1,0 +1,81 @@
+
+Version symbols section '.gnu.version' contains 134 entries:
+ Addr: 0x0000000000001b06  Offset: 0x00001b06  Link: 3 (.dynsym)
+  000:   0 (*local*)      12 (GLIBC_2.3.4)  13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)
+  004:   0 (*local*)      13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)
+  008:  14 (GLIBC_2.4)    13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)
+  00c:  13 (GLIBC_2.2.5)   0 (*local*)      15 (GLIBC_2.14)   13 (GLIBC_2.2.5)
+  010:  12 (GLIBC_2.3.4)  13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)
+  014:   0 (*local*)      13 (GLIBC_2.2.5)  13 (GLIBC_2.2.5)   a (ZLIB_1.2.3.5)
+  018:   1 (*global*)      1 (*global*)      8 (ZLIB_1.2.3.3)   1 (*global*)   
+  01c:   9 (ZLIB_1.2.3.4)   a (ZLIB_1.2.3.5)   6 (ZLIB_1.2.2.3)   a (ZLIB_1.2.3.5)
+  020:   b (ZLIB_1.2.5.1)   c (ZLIB_1.2.5.2)   1 (*global*)      4 (ZLIB_1.2.0.8)
+  024:   d (ZLIB_1.2.7.1)  11 (ZLIB_1.3.2)    1 (*global*)     11 (ZLIB_1.3.2) 
+  028:   e (ZLIB_1.2.9)    2 (ZLIB_1.2.0)    1 (*global*)      1 (*global*)   
+  02c:   e (ZLIB_1.2.9)    3 (ZLIB_1.2.0.2)   e (ZLIB_1.2.9)    f (ZLIB_1.2.12)
+  030:   a (ZLIB_1.2.3.5)   1 (*global*)      2 (ZLIB_1.2.0)   11 (ZLIB_1.3.2) 
+  034:   1 (*global*)      b (ZLIB_1.2.5.1)   3 (ZLIB_1.2.0.2)   1 (*global*)   
+  038:   7 (ZLIB_1.2.2.4)   c (ZLIB_1.2.5.2)   1 (*global*)      1 (*global*)   
+  03c:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  040:   d (ZLIB_1.2.7.1)   1 (*global*)      1 (*global*)      c (ZLIB_1.2.5.2)
+  044:   1 (*global*)     11 (ZLIB_1.3.2)    1 (*global*)      8 (ZLIB_1.2.3.3)
+  048:   1 (*global*)     11 (ZLIB_1.3.2)    3 (ZLIB_1.2.0.2)   1 (*global*)   
+  04c:   1 (*global*)     11 (ZLIB_1.3.2)    1 (*global*)      4 (ZLIB_1.2.0.8)
+  050:   1 (*global*)      5 (ZLIB_1.2.2)    5 (ZLIB_1.2.2)    6 (ZLIB_1.2.2.3)
+  054:   7 (ZLIB_1.2.2.4)   2 (ZLIB_1.2.0)    8 (ZLIB_1.2.3.3)   1 (*global*)   
+  058:   1 (*global*)      1 (*global*)      1 (*global*)      3 (ZLIB_1.2.0.2)
+  05c:   1 (*global*)      9 (ZLIB_1.2.3.4)   f (ZLIB_1.2.12)   1 (*global*)   
+  060:   e (ZLIB_1.2.9)    1 (*global*)      1 (*global*)      e (ZLIB_1.2.9) 
+  064:   1 (*global*)      5 (ZLIB_1.2.2)    2 (ZLIB_1.2.0)    c (ZLIB_1.2.5.2)
+  068:   e (ZLIB_1.2.9)    a (ZLIB_1.2.3.5)   1 (*global*)      8 (ZLIB_1.2.3.3)
+  06c:   1 (*global*)      a (ZLIB_1.2.3.5)   f (ZLIB_1.2.12)   8 (ZLIB_1.2.3.3)
+  070:  10 (ZLIB_1.3.1.2)   8 (ZLIB_1.2.3.3)   1 (*global*)      e (ZLIB_1.2.9) 
+  074:   2 (ZLIB_1.2.0)    8 (ZLIB_1.2.3.3)   f (ZLIB_1.2.12)   1 (*global*)   
+  078:  10 (ZLIB_1.3.1.2)   2 (ZLIB_1.2.0)    d (ZLIB_1.2.7.1)   5 (ZLIB_1.2.2) 
+  07c:   6 (ZLIB_1.2.2.3)   2 (ZLIB_1.2.0)    5 (ZLIB_1.2.2)   11 (ZLIB_1.3.2) 
+  080:   1 (*global*)      e (ZLIB_1.2.9)    9 (ZLIB_1.2.3.4)   e (ZLIB_1.2.9) 
+  084:   1 (*global*)      1 (*global*)   
+
+Version definition section '.gnu.version_d' contains 17 entries:
+ Addr: 0x0000000000001c18  Offset: 0x00001c18  Link: 4 (.dynstr)
+  000000: Rev: 1  Flags: BASE  Index: 1  Cnt: 1  Name: libz.so.1
+  0x001c: Rev: 1  Flags: none  Index: 2  Cnt: 1  Name: ZLIB_1.2.0
+  0x0038: Rev: 1  Flags: none  Index: 3  Cnt: 2  Name: ZLIB_1.2.0.2
+  0x0054: Parent 1: ZLIB_1.2.0
+  0x005c: Rev: 1  Flags: none  Index: 4  Cnt: 2  Name: ZLIB_1.2.0.8
+  0x0078: Parent 1: ZLIB_1.2.0.2
+  0x0080: Rev: 1  Flags: none  Index: 5  Cnt: 2  Name: ZLIB_1.2.2
+  0x009c: Parent 1: ZLIB_1.2.0.8
+  0x00a4: Rev: 1  Flags: none  Index: 6  Cnt: 2  Name: ZLIB_1.2.2.3
+  0x00c0: Parent 1: ZLIB_1.2.2
+  0x00c8: Rev: 1  Flags: none  Index: 7  Cnt: 2  Name: ZLIB_1.2.2.4
+  0x00e4: Parent 1: ZLIB_1.2.2.3
+  0x00ec: Rev: 1  Flags: none  Index: 8  Cnt: 2  Name: ZLIB_1.2.3.3
+  0x0108: Parent 1: ZLIB_1.2.2.4
+  0x0110: Rev: 1  Flags: none  Index: 9  Cnt: 2  Name: ZLIB_1.2.3.4
+  0x012c: Parent 1: ZLIB_1.2.3.3
+  0x0134: Rev: 1  Flags: none  Index: 10  Cnt: 2  Name: ZLIB_1.2.3.5
+  0x0150: Parent 1: ZLIB_1.2.3.4
+  0x0158: Rev: 1  Flags: none  Index: 11  Cnt: 2  Name: ZLIB_1.2.5.1
+  0x0174: Parent 1: ZLIB_1.2.3.5
+  0x017c: Rev: 1  Flags: none  Index: 12  Cnt: 2  Name: ZLIB_1.2.5.2
+  0x0198: Parent 1: ZLIB_1.2.5.1
+  0x01a0: Rev: 1  Flags: none  Index: 13  Cnt: 2  Name: ZLIB_1.2.7.1
+  0x01bc: Parent 1: ZLIB_1.2.5.2
+  0x01c4: Rev: 1  Flags: none  Index: 14  Cnt: 2  Name: ZLIB_1.2.9
+  0x01e0: Parent 1: ZLIB_1.2.7.1
+  0x01e8: Rev: 1  Flags: none  Index: 15  Cnt: 2  Name: ZLIB_1.2.12
+  0x0204: Parent 1: ZLIB_1.2.9
+  0x020c: Rev: 1  Flags: none  Index: 16  Cnt: 2  Name: ZLIB_1.3.1.2
+  0x0228: Parent 1: ZLIB_1.2.12
+  0x0230: Rev: 1  Flags: none  Index: 17  Cnt: 2  Name: ZLIB_1.3.2
+  0x024c: Parent 1: ZLIB_1.3.1.2
+
+Version needs section '.gnu.version_r' contains 1 entry:
+ Addr: 0x0000000000001e70  Offset: 0x00001e70  Link: 4 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 5
+  0x0010:   Name: GLIBC_ABI_DT_RELR  Flags: none  Version: 22
+  0x0020:   Name: GLIBC_2.14  Flags: none  Version: 21
+  0x0030:   Name: GLIBC_2.4  Flags: none  Version: 20
+  0x0040:   Name: GLIBC_2.2.5  Flags: none  Version: 19
+  0x0050:   Name: GLIBC_2.3.4  Flags: none  Version: 18

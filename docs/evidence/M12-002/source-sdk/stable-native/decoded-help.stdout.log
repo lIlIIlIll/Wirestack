@@ -1,0 +1,3 @@
+download --url HTTPS_URL --output FILE --trust DER [--proxy HOST:PORT] [--proxy-authorization VALUE] [--budget-ms 1..60000] [--max-bytes 1..1048576] [--pre-cancel] [--cancel-after-bytes N] [--raw | --decoded]
+self-check CERT_DER KEY_PKCS8_DER UNTRUSTED_DER 
+fixture CERT_DER KEY_PKCS8_DER

@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-random.a:
+
+random.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_RANDOM_NanoNow>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x20,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	xorps  %xmm0,%xmm0
+  18:	movaps %xmm0,-0x20(%rbp)
+  1c:	lea    -0x20(%rbp),%rsi
+  20:	xor    %edi,%edi
+  22:	call   27 <CJ_RANDOM_NanoNow+0x27>
+  27:	imul   $0x3b9aca00,-0x20(%rbp),%rax
+  2f:	add    -0x18(%rbp),%rax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "ac109e0f9b5f184306cfe290594954d70f0207dd69fef81a0824709865e69606"}

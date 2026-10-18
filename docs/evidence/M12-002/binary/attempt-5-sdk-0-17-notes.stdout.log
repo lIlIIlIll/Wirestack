@@ -1,0 +1,22 @@
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(SIMD_support.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(atexit.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(endian.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(string_utf8.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(console_read.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(math.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(print.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(string.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(string_SIMD.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(string_strstr.c.o)
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-coreFFI.a(typetemplate.c.o)

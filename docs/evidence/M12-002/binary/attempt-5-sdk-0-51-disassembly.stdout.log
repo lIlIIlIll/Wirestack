@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-regexFFI.a:
+
+regex_match.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_REGEX_Compile>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	push   %r15
+   6:	push   %r14
+   8:	push   %rbx
+   9:	sub    $0x18,%rsp
+   d:	mov    %esi,%r14d
+  10:	mov    %rdi,%r15
+  13:	mov    %fs:0x28,%rax
+  1c:	mov    %rax,-0x20(%rbp)
+  20:	mov    $0x18,%edi
+  25:	call   2a <CJ_REGEX_Compile+0x2a>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "f4f77ef41e500f13351e1515b07b378d65cfeb8a4d07a4ce08181bd5fea453a3"}

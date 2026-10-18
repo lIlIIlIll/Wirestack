@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-regex.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000009e10 <_init@@Base>:
+    9e10:	sub    $0x8,%rsp
+    9e14:	mov    0x210095(%rip),%rax        # 219eb0 <__gmon_start__>
+    9e1b:	test   %rax,%rax
+    9e1e:	je     9e22 <_init@@Base+0x12>
+    9e20:	call   *%rax
+    9e22:	add    $0x8,%rsp
+    9e26:	ret
+
+Disassembly of section .plt:
+
+0000000000009e30 <_CNab15AtomicReferenceIG_E6<init>HG_@plt-0x10>:
+    9e30:	push   0x2101d2(%rip)        # 21a008 <_CNbc13REGEX_UNICODEE@@Base+0x202790>
+    9e36:	jmp    *0x2101d4(%rip)        # 21a010 <_CNbc13REGEX_UNICODEE@@Base+0x202798>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "c51ffcb46367b8922347b1e0dd8f2fd07c286c258963708d6110c3922705f44f"}

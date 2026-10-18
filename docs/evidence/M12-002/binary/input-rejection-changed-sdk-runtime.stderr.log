@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<repo>/tools/m12_002_binary.py", line 417, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo>/tools/m12_002_binary.py", line 224, in main
+    verify(selected_report, args.archive, sdks, fixture, work)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_binary.py", line 179, in verify
+    raise ValueError('SDK compiler/runtime/library changed; recapture required')
+ValueError: SDK compiler/runtime/library changed; recapture required

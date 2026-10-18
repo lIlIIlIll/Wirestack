@@ -1,0 +1,158 @@
+
+GCDAProfiling.c.o:
+0000000000000000 T __gcov_dump
+0000000000000000 T __gcov_fork
+0000000000000000 T __gcov_reset
+0000000000000000 T llvm_delete_reset_function_list
+0000000000000000 T llvm_gcda_emit_arcs
+0000000000000000 T llvm_gcda_emit_function
+0000000000000000 T llvm_gcda_end_file
+0000000000000000 T llvm_gcda_start_file
+0000000000000000 T llvm_gcda_summary_info
+0000000000000000 T llvm_gcov_init
+0000000000000000 T llvm_register_reset_function
+0000000000000000 T llvm_register_writeout_function
+0000000000000000 T llvm_reset_counters
+0000000000000000 T llvm_writeout_files
+0000000000000000 B reset_fn_list
+0000000000000000 B writeout_fn_list
+
+InstrProfiling.c.o:
+0000000000000000 T __llvm_profile_get_magic
+0000000000000000 T __llvm_profile_get_num_padding_bytes
+0000000000000000 T __llvm_profile_get_version
+0000000000000000 T __llvm_profile_reset_counters
+0000000000000000 T __llvm_profile_set_dumped
+
+InstrProfilingInternal.c.o:
+0000000000000000 T lprofProfileDumped
+0000000000000000 T lprofSetProfileDumped
+
+InstrProfilingValue.c.o:
+0000000000000000 T getFirstValueProfRecord
+0000000000000000 T getValueProfDataSize
+0000000000000000 T getValueProfRecordHeaderSize
+0000000000000000 T getValueProfRecordNext
+0000000000000000 T getValueProfRecordNumValueData
+0000000000000000 T getValueProfRecordSize
+0000000000000000 T getValueProfRecordValueData
+0000000000000000 T InstProfClzll
+0000000000000000 T InstProfPopcountll
+0000000000000000 T InstrProfGetRangeRepValue
+0000000000000000 T InstrProfIsSingleValRange
+0000000000000000 T __llvm_get_function_addr
+0000000000000000 T __llvm_profile_instrument_memop
+0000000000000000 T __llvm_profile_instrument_target
+0000000000000000 T __llvm_profile_instrument_target_value
+0000000000000000 T __llvm_profile_iterate_data
+0000000000000000 T __llvm_profile_set_num_value_sites
+0000000000000000 T lprofGetVPDataReader
+0000000000000000 T lprofSetMaxValsPerSite
+0000000000000000 T lprofSetupValueProfiler
+0000000000000000 D lprofValueProfNodes
+0000000000000000 T serializeValueProfDataFrom
+0000000000000000 T serializeValueProfRecordFrom
+0000000000000000 D VPMaxNumValsPerSite
+
+InstrProfilingBuffer.c.o:
+0000000000000000 T initBufferWriter
+0000000000000000 T __llvm_profile_counter_entry_size
+0000000000000000 T __llvm_profile_enable_continuous_mode
+0000000000000000 T __llvm_profile_get_counters_size
+0000000000000000 T __llvm_profile_get_data_size
+0000000000000000 T __llvm_profile_get_num_counters
+0000000000000000 T __llvm_profile_get_num_data
+0000000000000000 T __llvm_profile_get_padding_sizes_for_counters
+0000000000000000 T __llvm_profile_get_size_for_buffer
+0000000000000000 T __llvm_profile_get_size_for_buffer_internal
+0000000000000000 T __llvm_profile_is_continuous_mode_enabled
+0000000000000000 T __llvm_profile_set_page_size
+0000000000000000 T __llvm_profile_write_buffer
+0000000000000000 T __llvm_profile_write_buffer_internal
+
+InstrProfilingFile.c.o:
+0000000000000000 T __llvm_orderfile_dump
+0000000000000000 T __llvm_orderfile_write_file
+0000000000000000 V __llvm_profile_counter_bias
+0000000000000000 B __llvm_profile_counter_bias_default
+0000000000000000 T __llvm_profile_dump
+0000000000000000 T __llvm_profile_get_filename
+0000000000000000 T __llvm_profile_get_path_prefix
+0000000000000000 T __llvm_profile_initialize
+0000000000000000 T __llvm_profile_initialize_file
+0000000000000000 T __llvm_profile_register_write_file_atexit
+0000000000000000 T __llvm_profile_set_filename
+0000000000000000 T __llvm_profile_set_file_object
+0000000000000000 T __llvm_profile_write_file
+0000000000000000 T lprofCreateBufferIOInternal
+
+InstrProfilingMerge.c.o:
+0000000000000000 T __llvm_profile_check_compatibility
+0000000000000000 T __llvm_profile_merge_from_buffer
+0000000000000000 T lprofGetLoadModuleSignature
+0000000000000000 B VPMergeHook
+
+InstrProfilingMergeFile.c.o:
+0000000000000000 T lprofMergeValueProfData
+
+InstrProfilingNameVar.c.o:
+0000000000000000 V __llvm_profile_filename
+
+InstrProfilingVersionVar.c.o:
+0000000000000000 V __llvm_profile_raw_version
+
+InstrProfilingWriter.c.o:
+0000000000000000 B DynamicBufferIOBuffer
+0000000000000000 B FreeHook
+0000000000000000 T lprofBufferIOFlush
+0000000000000000 T lprofBufferIOWrite
+0000000000000000 T lprofBufferWriter
+0000000000000000 T lprofCreateBufferIO
+0000000000000000 T lprofDeleteBufferIO
+0000000000000000 T lprofWriteData
+0000000000000000 T lprofWriteDataImpl
+0000000000000000 B VPBufferSize
+
+InstrProfilingPlatformDarwin.c.o:
+
+InstrProfilingPlatformFuchsia.c.o:
+
+InstrProfilingPlatformLinux.c.o:
+0000000000000000 D CurrentVNode
+0000000000000000 D EndVNode
+0000000000000000 T __llvm_profile_begin_counters
+0000000000000000 T __llvm_profile_begin_data
+0000000000000000 T __llvm_profile_begin_names
+0000000000000000 T __llvm_profile_begin_orderfile
+0000000000000000 T __llvm_profile_begin_vnodes
+0000000000000000 T __llvm_profile_end_counters
+0000000000000000 T __llvm_profile_end_data
+0000000000000000 T __llvm_profile_end_names
+0000000000000000 T __llvm_profile_end_vnodes
+0000000000000000 T __llvm_write_binary_ids
+
+InstrProfilingPlatformOther.c.o:
+
+InstrProfilingPlatformWindows.c.o:
+
+InstrProfilingRuntime.cpp.o:
+0000000000000000 B __llvm_profile_runtime
+
+InstrProfilingUtil.c.o:
+0000000000000000 T __llvm_profile_get_dir_mode
+0000000000000000 T __llvm_profile_recursive_mkdir
+0000000000000000 T __llvm_profile_set_dir_mode
+0000000000000000 T lprofApplyPathPrefix
+0000000000000000 D lprofDirMode
+0000000000000000 T lprofFindFirstDirSeparator
+0000000000000000 T lprofFindLastDirSeparator
+0000000000000000 T lprofGetHostName
+0000000000000000 T lprofGetPathPrefix
+0000000000000000 T lprofLockFd
+0000000000000000 T lprofLockFileHandle
+0000000000000000 T lprofOpenFileEx
+0000000000000000 T lprofReleaseMemoryPagesToOS
+0000000000000000 T lprofRestoreSigKill
+0000000000000000 T lprofSuspendSigKill
+0000000000000000 T lprofUnlockFd
+0000000000000000 T lprofUnlockFileHandle

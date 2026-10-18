@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libboundscheck-static.a:
+
+fscanf_s.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <fscanf_s>:
+   0:	sub    $0xd8,%rsp
+   7:	mov    %rdx,0x10(%rsp)
+   c:	mov    %rcx,0x18(%rsp)
+  11:	mov    %r8,0x20(%rsp)
+  16:	mov    %r9,0x28(%rsp)
+  1b:	test   %al,%al
+  1d:	je     50 <fscanf_s+0x50>
+  1f:	movaps %xmm0,0x30(%rsp)
+  24:	movaps %xmm1,0x40(%rsp)
+  29:	movaps %xmm2,0x50(%rsp)
+  2e:	movaps %xmm3,0x60(%rsp)
+  33:	movaps %xmm4,0x70(%rsp)
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "d15933a641514d6ff3c061544a1a2de0d1256f5602a71965ee0e378548734603"}

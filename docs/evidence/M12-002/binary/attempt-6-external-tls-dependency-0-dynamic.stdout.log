@@ -1,0 +1,35 @@
+
+Dynamic section at offset 0x5a3640 contains 32 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libz.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libbrotlienc.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libbrotlidec.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libzstd.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000e (SONAME)             Library soname: [libcrypto.so.3]
+ 0x0000000000000010 (SYMBOLIC)           0x0
+ 0x000000000000000c (INIT)               0x53000
+ 0x000000000000000d (FINI)               0x3ff744
+ 0x0000000000000019 (INIT_ARRAY)         0x526030
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x526038
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x308
+ 0x0000000000000005 (STRTAB)             0x2cbc0
+ 0x0000000000000006 (SYMTAB)             0x8f08
+ 0x000000000000000a (STRSZ)              127206 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000007 (RELA)               0x4eee0
+ 0x0000000000000008 (RELASZ)             4776 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffc (VERDEF)             0x4ec60
+ 0x000000006ffffffd (VERDEFNUM)          11
+ 0x000000000000001e (FLAGS)              SYMBOLIC BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW NODELETE
+ 0x000000006ffffffe (VERNEED)            0x4ede0
+ 0x000000006fffffff (VERNEEDNUM)         1
+ 0x000000006ffffff0 (VERSYM)             0x4bca6
+ 0x0000000000000024 (RELR)               0x50188
+ 0x0000000000000023 (RELRSZ)             8352 (bytes)
+ 0x0000000000000025 (RELRENT)            8 (bytes)
+ 0x0000000000000000 (NULL)               0x0

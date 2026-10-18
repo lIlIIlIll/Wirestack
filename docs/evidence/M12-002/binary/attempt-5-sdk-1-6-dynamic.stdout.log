@@ -1,0 +1,420 @@
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CompilerCalls.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ExceptionManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(StackManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(HeapManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(LoaderManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(SignalManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(TypeInfoManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(LogManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CangjieRuntime.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CjScheduler.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CjTimer.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CangjieRuntimeApi.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(N2CStub.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(C2NStub.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ExclusiveScope.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CalleeSavedStub.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(StackGrowStub.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(I2NStub.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(HandleSafepointStub.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Loader.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Path.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Log.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(SysCall.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CString.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(FixedCString.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(TimeUtils.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(LogFile.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MemUtils.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CjFile.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Concurrency.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(BaseObject.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(RunType.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(PageCache.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ThreadCache.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CentralCache.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(NativeAllocator.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Exception.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(EhTable.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ExceptionCApi.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(RestoreContextForEH.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Heap.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(GcThreadPool.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Allocator.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MemMap.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(RegionSpace.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(RegionManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CartesianTree.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Barrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(GcRequest.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(GcStats.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Collector.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CollectorProxy.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CollectorResources.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(TracingCollector.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(TaskQueue.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(FinalizerProcessor.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CopyCollector.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(LiveInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ForwardDataManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ILoader.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CjHeapData.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Mutator.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(SatbBuffer.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MutatorManager.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ThreadLocal.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MObject.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MClass.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MArray.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MFunc.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(PackageInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(FieldInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MethodInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(SignalStack.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(SignalUtils.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(BaseFile.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CjFileLoader.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(StackInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(EhStackInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(GcStackInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(StackGrowStackInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(PrintStackInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(PrintSignalStackInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MachineFrame.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(UnwindContext.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(UnwindCApi.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(FrameInfo.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(MangleNameHelper.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(StackMetadataHelper.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Demangler.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(DeCompression.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Sync.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(IdleBarrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(EnumBarrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(TraceBarrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(PostTraceBarrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(PreforwardBarrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(ForwardBarrier.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(WCollector.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(Cki.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CJThreadModel.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CjSemanticVersion.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(CpuProfiler.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(SamplesRecord.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(InterpreterSpecific.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a(GwpAsanInterface.cpp.o)
+
+There is no dynamic section in this file.

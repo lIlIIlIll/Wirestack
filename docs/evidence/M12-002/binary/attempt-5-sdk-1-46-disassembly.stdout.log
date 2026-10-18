@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-process.a:
+
+process_ffi_unix.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_OS_CreateProcessStartInfo>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	mov    $0x48,%edi
+  1a:	call   1f <CJ_OS_CreateProcessStartInfo+0x1f>
+  1f:	mov    %fs:0x28,%rcx
+  28:	cmp    -0x8(%rbp),%rcx
+  2c:	jne    34 <CJ_OS_CreateProcessStartInfo+0x34>
+  2e:	add    $0x10,%rsp
+  32:	pop    %rbp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "4759cdb49688ea0aa4780a279049e636394ee65fa91362e52f155d88fc041005"}
