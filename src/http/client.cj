@@ -372,6 +372,23 @@ public class HttpClient <: Resource {
     }
 
     /**
+     * Sends a request without retry or redirect replay, including replayable POST bodies.
+     * Pool selection, cancellation, resource admission and event correlation are unchanged.
+     * @param request The request submitted at most once.
+     * @param context Shared absolute deadline and cancellation for the response lifetime.
+     * @param trailer Request trailers.
+     * @return An owned response; redirects are returned to the caller unchanged.
+     */
+    public func sendOnce(request: HttpRequest,
+        context!: OperationContext = OperationContext.background(),
+        trailer!: HttpTrailer = HttpTrailer()
+    ): HttpResponse {
+        sendInternal(request.withRetrySafety(HttpRetrySafety.Disabled), context, trailer,
+            None<HttpRequestCancellationHandle>, None<HttpConnectionCancellationHandle>,
+            None<HttpStreamCancellationHandle>, followRedirects: false)
+    }
+
+    /**
      * Establishes an uncompressed WebSocket over HTTP/1.1 or negotiated HTTP/2.
      * Rejected handshakes return an owned response. No redirects or retries replay the handshake.
      * @param url Absolute HTTP or HTTPS URL of the WebSocket resource.
@@ -455,16 +472,16 @@ public class HttpClient <: Resource {
         try {
             let result = match (slot.client) {
                 case value: http1.Http1CleartextClient =>
-                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>), context: context))
+                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>, limits), context: context))
                 case value: http1.Http1ForwardProxyClient =>
                     let authorization = proxy.getOrThrow().authorization(h1Request.url, context)
-                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, authorization), context: context))
+                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, authorization, limits), context: context))
                 case value: http1.HttpAutomaticHttpsClient =>
-                    value.upgrade(withProxyAuthorization(h1Request, None<String>),
-                        withProxyAuthorization(h2Request, None<String>), protocol: protocol, context: context)
+                    value.upgrade(withProxyAuthorization(h1Request, None<String>, limits),
+                        withProxyAuthorization(h2Request, None<String>, limits), protocol: protocol, context: context)
                 case value: http1.Http1HttpsProxyClient =>
                     let authorization = proxy.getOrThrow().authorization(h1Request.url, context)
-                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>),
+                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>, limits),
                         proxyAuthorization: authorization, context: context))
                 case _ => throw IllegalStateException("invalid HTTP duplex route generation")
             }
@@ -510,13 +527,34 @@ public class HttpClient <: Resource {
         )
     }
 
+    /**
+     * Reserves bounded response-consumer storage in this client's real managed-buffer ledger.
+     * This DATA-class reservation cannot consume control-frame or HTTP/2 receive-window reserves.
+     * @param url Origin and configured route owning the storage.
+     * @param bytes Maximum retained bytes; must be positive and fit the configured ledger.
+     * @param context Original deadline and cancellation bounding admission.
+     * @return An idempotent lease; the consumer closes it when its storage is released.
+     */
+    public func reserveResponseBuffer(url: HttpUrl, bytes: UInt64,
+        context!: OperationContext = OperationContext.background()): Resource {
+        if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
+        let dataCapacity = resourceLimits.maximumManagedBufferBytes -
+            resourceLimits.reservedControlBufferBytes - UInt64(resourceLimits.maximumConnections) * 65535u64
+        if (bytes == 0u64 || bytes > min(dataCapacity,
+            min(resourceLimits.maximumManagedBufferBytesPerRoute, resourceLimits.maximumManagedBufferBytesPerOrigin))) {
+            throw IllegalArgumentException("response buffer reservation cannot fit the configured DATA capacity")
+        }
+        resourceBudget.acquireManagedBuffer(resourceOwner(url), bytes, false, context)
+    }
+
     private func sendInternal(
         request: HttpRequest,
         context: OperationContext,
         trailer: HttpTrailer,
         requestCancellation: ?HttpRequestCancellationHandle,
         connectionCancellation: ?HttpConnectionCancellationHandle,
-        streamCancellation: ?HttpStreamCancellationHandle
+        streamCancellation: ?HttpStreamCancellationHandle,
+        followRedirects!: Bool = true
     ): HttpResponse {
         let bounded = match (requestTimeout) {
             case Some(value) => context.shortenDeadline(value)
@@ -550,9 +588,10 @@ public class HttpClient <: Resource {
                     current, operation, trailer, cancellation.connectionCancellation
                 )
                 let next = try {
-                    redirectPolicy.nextRequest(
-                        current, response, redirectsFollowed: redirectCount, limits: limits
-                    )
+                    if (followRedirects) {
+                        redirectPolicy.nextRequest(
+                            current, response, redirectsFollowed: redirectCount, limits: limits)
+                    } else { None<HttpRequest> }
                 } catch (error: Exception) {
                     response.close()
                     throw error
@@ -602,16 +641,16 @@ public class HttpClient <: Resource {
         try {
             let response = match (slot.client) {
                 case value: http1.Http1CleartextClient =>
-                    value.execute(withProxyAuthorization(request, None<String>), context: context, trailer: trailer)
+                    value.execute(withProxyAuthorization(request, None<String>, limits), context: context, trailer: trailer)
                 case value: http1.Http1ForwardProxyClient =>
                     let authorization = proxy.getOrThrow().authorization(request.url, context)
-                    value.execute(withProxyAuthorization(request, authorization), context: context, trailer: trailer)
+                    value.execute(withProxyAuthorization(request, authorization, limits), context: context, trailer: trailer)
                 case value: http1.HttpAutomaticHttpsClient =>
-                    value.execute(withProxyAuthorization(request, None<String>), context: context,
+                    value.execute(withProxyAuthorization(request, None<String>, limits), context: context,
                         trailer: trailer, connectionCancellation: connectionCancellation)
                 case value: http1.Http1HttpsProxyClient =>
                     let authorization = proxy.getOrThrow().authorization(request.url, context)
-                    value.execute(withProxyAuthorization(request, None<String>), proxyAuthorization: authorization,
+                    value.execute(withProxyAuthorization(request, None<String>, limits), proxyAuthorization: authorization,
                         context: context, trailer: trailer)
                 case _ => throw IllegalStateException("invalid HTTP route generation")
             }
@@ -692,6 +731,8 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
+    /** Returns the immutable parser and body limits shared by every configured route. */
+    public func configuredLimits(): HttpLimits { limits }
     /** Returns a read-only snapshot of live aggregate resource counters. */
     public func resourceSnapshot(): HttpResourceSnapshot {
         resourceSnapshotFromLedger(resourceBudget.snapshot())
@@ -1034,8 +1075,8 @@ private func toInternalProxyEndpoint(value: HttpProxyEndpoint): http1.Http1Proxy
 }
 
 /** Removes caller-supplied proxy credentials and adds only the route hook's validated value. */
-private func withProxyAuthorization(request: HttpRequest, value: ?String): HttpRequest {
-    let builder = HttpHeaders.builder()
+private func withProxyAuthorization(request: HttpRequest, value: ?String, limits: HttpLimits): HttpRequest {
+    let builder = HttpHeaders.builder(limits: limits)
     for (entry in request.headers.entries) {
         if (entry.name.toAsciiLower() != "proxy-authorization") {
             builder.add(entry.name, entry.value)
