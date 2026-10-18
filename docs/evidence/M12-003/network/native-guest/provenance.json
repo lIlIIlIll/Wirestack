@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-003",
+  "status": "PASS_NATIVE_GUEST",
+  "sdk_policy": "STS_ONLY",
+  "sdk_selection": "$HOME/cangjie_sdk/sts1.1.3",
+  "image": {
+    "url": "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img",
+    "bytes": 730497536,
+    "sha256": "012d81fade7e8ff4428fc35dfeee711d66d1f47d5ea9c5c8ced96a85b959835c",
+    "verification": "Matched SHA256SUMS downloaded from the same public HTTPS origin; no independent image signature claim"
+  },
+  "virtualization": "kvm",
+  "architecture": "x86_64",
+  "kernel": "5.15.0-198-generic",
+  "vcpus": 4,
+  "memory_mib": 2048,
+  "overlay_virtual_bytes": 17179869184,
+  "guest_base_libc": "glibc 2.35",
+  "selected_consumer_libc": "glibc 2.44",
+  "libc_provenance": "glibc-runtime.json",
+  "guest_base_libc_qualified": false,
+  "namespace_launcher": "tools/m12_002_glibc_namespace.py",
+  "sdk_launcher_source_sha256": "d581118b9341f7a03962e7be96dc008a7a253f626dd9b99f3bfb5616fc11bfaf",
+  "loaded_guest_modules": ["sch_netem", "sch_ingress", "cls_flower", "act_gact"],
+  "guest_only_build_prerequisites": ["python3-tomli", "bubblewrap", "iproute2", "build-essential"],
+  "host_kernel_modules_modified": false,
+  "shared_host_network_modified": false,
+  "sdk_or_provider_source_modified": false,
+  "isolation": "Owned QEMU process group; guest-only modules; readonly bound libc in private mount namespaces; task-owned network namespaces; loopback-only ephemeral SSH forward",
+  "current_native_rounds": [
+    {"seed": 12003, "profiles": 12, "status": "PASS", "report": "current/report.json", "fresh_consumer_build": true},
+    {"seed": 12004, "profiles": 12, "status": "PASS", "report": "stress-12004/report.json", "exact_source_sdk_binary_reuse": true},
+    {"seed": 12005, "profiles": 12, "status": "PASS", "report": "stress-12005/report.json", "exact_source_sdk_binary_reuse": true}
+  ],
+  "native_regressions": {"run": 4, "passed": 4, "skipped": 0, "exit_code": 0, "log": "unit-tests.log"},
+  "supervision": {"timeout_seconds": 3600, "maximum_log_bytes_per_stream": 67108864, "final_completion": "CANCELLED", "remaining_live_owned_processes": 0, "launcher_exit_code": 0, "cleanup": "cleanup.json"},
+  "qualification": "NOT_QUALIFIED",
+  "formal_86400": "NOT_EXECUTED_BY_M12-003"
+}

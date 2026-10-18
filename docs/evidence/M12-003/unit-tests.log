@@ -1,0 +1,49 @@
+test_deadline_overshoot_is_enforced (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_deadline_overshoot_is_enforced) ... ok
+test_duplicate_native_completion_fails (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_duplicate_native_completion_fails) ... ok
+test_kernel_oom_cannot_be_supported_even_with_success_marker (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_kernel_oom_cannot_be_supported_even_with_success_marker) ... ok
+test_marker_cannot_replace_missing_public_ledger (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_marker_cannot_replace_missing_public_ledger) ... ok
+test_pressure_requires_ceiling_proof_and_real_allocation (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_pressure_requires_ceiling_proof_and_real_allocation) ... ok
+test_quota_without_throttling_does_not_prove_cpu_fault (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_quota_without_throttling_does_not_prove_cpu_fault) ... ok
+test_refusal_label_without_structured_refusal_is_not_trusted (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_refusal_label_without_structured_refusal_is_not_trusted) ... ok
+test_residue_missing_samples_and_incomplete_cleanup_fail_closed (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_residue_missing_samples_and_incomplete_cleanup_fail_closed) ... ok
+test_runtime_oom_requires_dedicated_exit_and_typed_consumer_marker (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_runtime_oom_requires_dedicated_exit_and_typed_consumer_marker) ... ok
+test_signal_alone_is_not_kernel_oom (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_signal_alone_is_not_kernel_oom) ... ok
+test_supported_profile_retains_distinct_logical_counters (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_supported_profile_retains_distinct_logical_counters) ... ok
+test_unknown_process_failure_is_not_library_refusal_or_oom (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_unknown_process_failure_is_not_library_refusal_or_oom) ... ok
+test_unlimited_or_wrong_cgroup_is_not_fault_application (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_unlimited_or_wrong_cgroup_is_not_fault_application) ... ok
+test_answer_preserves_transaction_and_question (tools.gates.tests.test_m12_003_network.DnsAnswerTests.test_answer_preserves_transaction_and_question) ... ok
+test_invalid_label_and_question_tail_fail_closed (tools.gates.tests.test_m12_003_network.DnsAnswerTests.test_invalid_label_and_question_tail_fail_closed) ... ok
+test_native_peer_modes (tools.gates.tests.test_m12_003_network.IsolatedFixtureTests.test_native_peer_modes) ... ok
+test_original_response_recovers_after_real_packet_loss (tools.gates.tests.test_m12_003_network.IsolatedFixtureTests.test_original_response_recovers_after_real_packet_loss) ... skipped 'requires authorized netem-capable environment'
+test_goaway_requires_emitted_frame (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_goaway_requires_emitted_frame) ... ok
+test_goaway_requires_new_connection (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_goaway_requires_new_connection) ... ok
+test_non_sts_sdk_rejected_before_any_execution (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_non_sts_sdk_rejected_before_any_execution) ... usage: python3 -m unittest [-h] --sdk-root SDK_ROOT --archive ARCHIVE
+                           --scratch SCRATCH --output OUTPUT [--seed SEED]
+                           [--mode {smoke,stress}]
+                           [--layer {all,protocol,race,streams,gzip}]
+                           [--profile {cancel_storm,gzip_faults,h2_goaway,h2_slowconsumer,h2_streamscope,rotation_shutdown,sse_cancel,sse_cancel_h1,sse_h1,websocket_disconnect,websocket_disconnect_h1,websocket_fragmented,websocket_h1}]
+                           [--rounds ROUNDS]
+python3 -m unittest: error: this source-bound gate requires the explicitly selected STS 1.1.3
+ok
+test_slow_consumer_needs_flow_and_exact_bytes (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_slow_consumer_needs_flow_and_exact_bytes) ... ok
+test_stream_fault_must_preserve_connection (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_stream_fault_must_preserve_connection) ... ok
+test_stream_fault_requires_concurrent_sibling (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_stream_fault_requires_concurrent_sibling) ... ok
+test_stream_fault_requires_reset (tools.gates.tests.test_m12_003_lifecycle.WireAcceptanceTests.test_stream_fault_requires_reset) ... ok
+test_cancellation_kills_real_parent_and_child (tools.gates.tests.test_m12_003_supervision.OwnedProcessTests.test_cancellation_kills_real_parent_and_child) ... ok
+test_failed_parent_exit_still_cleans_child (tools.gates.tests.test_m12_003_supervision.OwnedProcessTests.test_failed_parent_exit_still_cleans_child) ... ok
+test_runaway_output_is_failure_not_success (tools.gates.tests.test_m12_003_supervision.OwnedProcessTests.test_runaway_output_is_failure_not_success) ... ok
+test_sampler_exception_still_cleans_native_child (tools.gates.tests.test_m12_003_supervision.OwnedProcessTests.test_sampler_exception_still_cleans_native_child) ... ok
+test_timeout_kills_term_ignoring_descendant (tools.gates.tests.test_m12_003_supervision.OwnedProcessTests.test_timeout_kills_term_ignoring_descendant) ... ok
+test_changed_source_and_sdk_bytes_are_rejected (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_changed_source_and_sdk_bytes_are_rejected) ... ok
+test_cleanup_and_fault_observations_are_required (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_cleanup_and_fault_observations_are_required) ... ok
+test_contradictory_semantics_cannot_pass (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_contradictory_semantics_cannot_pass) ... ok
+test_duplicate_execution_identity_is_rejected (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_duplicate_execution_identity_is_rejected) ... ok
+test_partial_coverage_cannot_complete_family (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_partial_coverage_cannot_complete_family) ... ok
+test_passing_round_does_not_hide_failed_round (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_passing_round_does_not_hide_failed_round) ... ok
+test_source_symlink_cannot_escape_repository (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_source_symlink_cannot_escape_repository) ... ok
+test_unknown_coverage_and_wrong_task_cannot_supply_acceptance (tools.gates.tests.test_m12_003_campaign.CampaignContracts.test_unknown_coverage_and_wrong_task_cannot_supply_acceptance) ... ok
+
+----------------------------------------------------------------------
+Ran 37 tests in 1.210s
+
+OK (skipped=1)

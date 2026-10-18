@@ -1,0 +1,3857 @@
+{
+  "profiles": [
+    {
+      "id": "dns_no_response",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "dns_no_response"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nFAULT_COMPLETE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":307,\"recovery\":true}\nCLEANUP {\"dns_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 307,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "dns_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9356,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 30,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 60,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 91,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 128,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 166,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 203,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 239,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 271,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 303,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19312,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19876,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "query_received",
+            "bytes": 36,
+            "id": 51500
+          },
+          {
+            "event": "query_received",
+            "bytes": 39,
+            "id": 19839
+          },
+          {
+            "event": "recovery_answer_sent",
+            "bytes": 55
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":3,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 3,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9352,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19308,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19308,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "actual_dns_traffic": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "dns_late_result",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "dns_late"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nFAULT_COMPLETE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":305,\"recovery\":true}\nCLEANUP {\"dns_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 305,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "dns_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 10560,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 48,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 80,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 112,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 145,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 186,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 225,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 259,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 291,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 326,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19712,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "query_received",
+            "bytes": 36,
+            "id": 12850
+          },
+          {
+            "event": "late_answer_sent_after_caller_deadline",
+            "bytes": 52,
+            "stale_address": "192.0.2.99"
+          },
+          {
+            "event": "query_received",
+            "bytes": 39,
+            "id": 755
+          },
+          {
+            "event": "recovery_answer_sent",
+            "bytes": 55
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9268,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 36,
+            "process_count": 1,
+            "rss_kib": 19224,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19224,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19224,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "actual_dns_traffic": true,
+        "late_result_after_deadline": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "ipv6_blackhole",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "ipv6_blackhole_ipv4_reachable"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nATTEMPT 1\nATTEMPT 2\nRESULT {\"outcome\":\"success\",\"duration_ms\":260,\"cancel_overshoot_ms\":0,\"attempts\":2,\"recovery\":true}\nCLEANUP {\"connections\":0,\"requests\":0,\"streams\":0,\"buffers\":0,\"owners\":0,\"waiters\":0}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 260,
+          "cancel_overshoot_ms": 0,
+          "attempts": 2,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "connections": 0,
+          "requests": 0,
+          "streams": 0,
+          "buffers": 0,
+          "owners": 0,
+          "waiters": 0
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9752,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 33,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 63,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 93,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 122,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 152,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 182,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 212,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 241,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 271,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 301,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 7
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 7,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "actual isolated packet/netem",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "filter protocol ipv6 pref 49152 flower chain 0 \nfilter protocol ipv6 pref 49152 flower chain 0 handle 0x1 \n  eth_type ipv6\n  ip_proto tcp\n  dst_ip 2001:db8::2\n  tcp_flags 0x2/2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 1 ref 1 bind 1 installed 0 sec used 0 sec firstused 0 sec\n\tAction statistics:\n\tSent 94 bytes 1 pkt (dropped 1, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\n",
+          "bytes": 94,
+          "packets": 1,
+          "dropped": 1
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 1
+          },
+          {
+            "event": "reply_sent",
+            "connection": 1
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 11372,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 40,
+            "process_count": 1,
+            "rss_kib": 19276,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19276,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19276,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "filter_dropped_real_packets": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "multicandidate_cancel",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "multi_candidate_cancel"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nATTEMPT 1\nATTEMPT 2\nRESULT {\"outcome\":\"cancelled\",\"duration_ms\":261,\"cancel_overshoot_ms\":2,\"attempts\":2,\"recovery\":true}\nCLEANUP {\"connections\":0,\"requests\":0,\"streams\":0,\"buffers\":0,\"owners\":0,\"waiters\":0}\nRECLAIMED\n",
+        "result": {
+          "outcome": "cancelled",
+          "duration_ms": 261,
+          "cancel_overshoot_ms": 2,
+          "attempts": 2,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "connections": 0,
+          "requests": 0,
+          "streams": 0,
+          "buffers": 0,
+          "owners": 0,
+          "waiters": 0
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9316,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 33,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 63,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 93,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 124,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 164,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 206,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 247,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 288,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 7,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "actual isolated packet/netem",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "filter protocol ipv6 pref 49151 flower chain 0 \nfilter protocol ipv6 pref 49151 flower chain 0 handle 0x1 \n  eth_type ipv6\n  ip_proto tcp\n  dst_ip 2001:db8::2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 2 ref 1 bind 1 installed 0 sec used 0 sec\n\tAction statistics:\n\tSent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\nfilter protocol ip pref 49152 flower chain 0 \nfilter protocol ip pref 49152 flower chain 0 handle 0x1 \n  eth_type ipv4\n  ip_proto tcp\n  dst_ip 192.0.2.2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 1 ref 1 bind 1 installed 0 sec used 0 sec firstused 0 sec\n\tAction statistics:\n\tSent 74 bytes 1 pkt (dropped 1, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\n",
+          "bytes": 74,
+          "packets": 1,
+          "dropped": 1
+        },
+        "fixture_events": [],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9404,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 37,
+            "process_count": 1,
+            "rss_kib": 19300,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19300,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19300,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "filter_dropped_real_packets": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "delay_loss",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "delay",
+        "packet_loss",
+        "transient_recovery"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":943,\"transferred\":16}\nCLEANUP {\"operation_complete\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 943,
+          "transferred": 16
+        },
+        "native_cleanup": {
+          "operation_complete": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9320,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 38,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 69,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 101,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 144,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 184,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 214,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 243,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 274,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 311,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 358,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 407,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 447,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 487,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 527,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 567,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 607,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 647,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 687,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 727,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 767,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 807,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 847,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 888,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 929,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 969,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19216,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "actual isolated packet/netem",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "qdisc",
+            "show",
+            "dev",
+            "lo"
+          ],
+          "raw": "qdisc netem 8008: root refcnt 2 limit 1000 delay 20ms\n Sent 2556 bytes 38 pkt (dropped 1, overlimits 0 requeues 0) \n backlog 66b 1p requeues 0\n",
+          "bytes": 2556,
+          "packets": 38,
+          "dropped": 1
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "original_response_dropped",
+            "tc": {
+              "command": [
+                "tc",
+                "-s",
+                "qdisc",
+                "show",
+                "dev",
+                "lo"
+              ],
+              "raw": "qdisc netem 8008: root refcnt 2 limit 1000 delay 20ms loss 100%\n Sent 281 bytes 4 pkt (dropped 1, overlimits 0 requeues 0) \n backlog 66b 1p requeues 0\n",
+              "bytes": 281,
+              "packets": 4,
+              "dropped": 1
+            },
+            "automatic_retry": false
+          },
+          {
+            "event": "packet_fault_removed_before_kernel_retransmit"
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          },
+          {
+            "event": "echo_request",
+            "bytes": 1
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 4388,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 1
+          },
+          {
+            "elapsed_ms": 29,
+            "process_count": 1,
+            "rss_kib": 19208,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19208,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19208,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "netem_delay_effective": true,
+        "packets_affected": true,
+        "event_controlled_removal": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "rst",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "rst"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"system_failure\",\"duration_ms\":3,\"transferred\":0}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "system_failure",
+          "duration_ms": 3,
+          "transferred": 0
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9296,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 1,
+            "connection": 1
+          },
+          {
+            "event": "abortive_close",
+            "linger_seconds": 0
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9448,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19164,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19164,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "rst_applied": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "silent_disconnect",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "silent_disconnect",
+        "transient_recovery"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":504,\"transferred\":0}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 504,
+          "transferred": 0
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 8912,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 2
+          },
+          {
+            "elapsed_ms": 29,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 59,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 89,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 119,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 148,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 178,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 208,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 238,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 267,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 297,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 326,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 356,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 386,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 416,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 445,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 475,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 505,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "actual isolated packet/netem",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "filter protocol ip pref 49152 flower chain 0 \nfilter protocol ip pref 49152 flower chain 0 handle 0x1 \n  eth_type ipv4\n  ip_proto tcp\n  dst_ip 192.0.2.2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 1 ref 1 bind 1 installed 0 sec used 0 sec firstused 0 sec\n\tAction statistics:\n\tSent 200 bytes 3 pkt (dropped 3, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\n",
+          "bytes": 200,
+          "packets": 3,
+          "dropped": 3
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 1,
+            "connection": 1
+          },
+          {
+            "event": "packet_drop_installed_after_request"
+          },
+          {
+            "event": "response_submitted_into_packet_drop",
+            "bytes": 1
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9396,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19292,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19292,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "filter_dropped_real_packets": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "peer_no_read",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "peer_not_reading"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":508,\"transferred\":32768}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 508,
+          "transferred": 32768
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9288,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 30,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 59,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 89,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 119,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 148,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 178,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 208,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 238,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 268,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 298,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 329,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 361,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 392,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 425,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 456,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 486,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 518,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19012,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 20644,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "receive_disabled",
+            "effective_receive_buffer": 8192
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":2,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 2,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9128,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19148,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "backpressure_applied": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "peer_no_write",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "peer_not_writing"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":504,\"transferred\":0}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 504,
+          "transferred": 0
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 10000,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 31,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 61,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 91,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 121,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 150,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 180,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 210,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 240,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 269,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 299,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 329,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 358,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 388,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 417,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 447,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 480,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 511,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19392,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 1,
+            "connection": 1
+          },
+          {
+            "event": "response_disabled"
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9132,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 18968,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "peer_response_disabled": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "http_rst",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "rst",
+        "transient_recovery"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nATTEMPT 1\nFAULT_COMPLETE\nATTEMPT 2\nRESULT {\"outcome\":\"system_failure\",\"duration_ms\":1,\"cancel_overshoot_ms\":0,\"attempts\":2,\"recovery\":true}\nCLEANUP {\"connections\":0,\"requests\":0,\"streams\":0,\"buffers\":0,\"owners\":0,\"waiters\":0}\nRECLAIMED\n",
+        "result": {
+          "outcome": "system_failure",
+          "duration_ms": 1,
+          "cancel_overshoot_ms": 0,
+          "attempts": 2,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "connections": 0,
+          "requests": 0,
+          "streams": 0,
+          "buffers": 0,
+          "owners": 0,
+          "waiters": 0
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 10804,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19272,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 20376,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 7,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 1
+          },
+          {
+            "event": "abortive_close",
+            "linger_seconds": 0
+          },
+          {
+            "event": "accepted",
+            "connection": 2
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 2
+          },
+          {
+            "event": "reply_sent",
+            "connection": 2
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":3,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 3,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9032,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 2
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19204,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19204,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "rst_applied": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "http_no_write",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [
+        "peer_not_writing",
+        "transient_recovery"
+      ],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nATTEMPT 1\nFAULT_COMPLETE\nATTEMPT 2\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":1507,\"cancel_overshoot_ms\":0,\"attempts\":2,\"recovery\":true}\nCLEANUP {\"connections\":0,\"requests\":0,\"streams\":0,\"buffers\":0,\"owners\":0,\"waiters\":0}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 1507,
+          "cancel_overshoot_ms": 0,
+          "attempts": 2,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "connections": 0,
+          "requests": 0,
+          "streams": 0,
+          "buffers": 0,
+          "owners": 0,
+          "waiters": 0
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9136,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 29,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 59,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 89,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 119,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 148,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 178,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 208,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 237,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 267,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 297,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 326,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 357,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 388,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 418,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 447,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 477,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 507,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 536,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 566,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 596,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 626,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 656,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 686,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 717,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 746,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 776,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 806,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 838,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 867,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 898,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 928,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 958,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 988,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1018,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1048,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1078,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1107,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1138,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1170,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1199,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1230,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1260,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1290,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1320,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1349,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1379,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1409,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1439,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1468,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1498,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 1528,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 7
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 18972,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 20132,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 7,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 1
+          },
+          {
+            "event": "response_disabled"
+          },
+          {
+            "event": "accepted",
+            "connection": 2
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 2
+          },
+          {
+            "event": "reply_sent",
+            "connection": 2
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":2,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 2,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9264,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19220,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19220,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "peer_response_disabled": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "system_resolver_boundary",
+      "seed": 12005,
+      "status": "PASS",
+      "coverage_keys": [],
+      "consumer": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":306,\"abandoned_running_work\":1,\"rejected_queries\":7,\"recovery\":true}\nCLEANUP {\"active_queries\":0,\"running_work\":0,\"queued_queries\":0,\"resolver_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 306,
+          "abandoned_running_work": 1,
+          "rejected_queries": 7,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "active_queries": 0,
+          "running_work": 0,
+          "queued_queries": 0,
+          "resolver_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9276,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          },
+          {
+            "elapsed_ms": 29,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 59,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 89,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 120,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 150,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 179,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 209,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 238,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 268,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 298,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 328,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 358,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 388,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 417,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 447,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 476,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 506,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 535,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 565,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 595,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 624,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 654,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 684,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 714,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 743,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 773,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 802,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 10
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19172,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19404,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 8,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "TEST ONLY getaddrinfo operation delay; not a packet fault or production hook",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [],
+        "fixture_errors": [],
+        "system_operation_log": "GAI phase=enter seq=0 pid=8002 tid=8010 ns=2251740572300 result=0 node=localhost\nGAI phase=exit seq=0 pid=8002 tid=8010 ns=2252540910995 result=0 node=localhost\nGAI phase=enter seq=0 pid=8434 tid=8442 ns=2390772271757 result=0 node=localhost\nGAI phase=exit seq=0 pid=8434 tid=8442 ns=2391572774067 result=0 node=localhost\nGAI phase=enter seq=0 pid=8798 tid=8806 ns=2402237358966 result=0 node=localhost\nGAI phase=exit seq=0 pid=8798 tid=8806 ns=2403037662628 result=0 node=localhost\n"
+      },
+      "recovery": {
+        "command": [
+          "setpriv",
+          "--pdeathsig",
+          "KILL",
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "<repo>/run-current-final",
+          "<repo>/run-current-final/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "BASELINE\nRESULT {\"outcome\":\"success\",\"duration_ms\":2,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\nRECLAIMED\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 2,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 9264,
+            "fd_count": 3,
+            "socket_count": 0,
+            "thread_count": 4
+          }
+        ],
+        "resource_boundaries": {
+          "BASELINE": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19112,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          },
+          "RECLAIMED": {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 19112,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6,
+            "descriptor_kinds": {
+              "pipe": 3,
+              "anon_inode:[eventpoll]": 1
+            }
+          }
+        },
+        "registrations": "UNAVAILABLE: public socket/resolver API exposes no registration counter",
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "live_reclamation_sample": true,
+        "socket_reclaimed_before_exit": true,
+        "fd_reclaimed_before_exit": true,
+        "native_system_boundary": true,
+        "bounded_admission": true,
+        "new_connection_after_removal": true
+      }
+    }
+  ]
+}

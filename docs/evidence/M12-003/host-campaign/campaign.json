@@ -1,0 +1,64 @@
+{
+  "task_id": "M12-003",
+  "mode": "smoke",
+  "seed": 120003,
+  "auto_retry": false,
+  "status": "FAIL",
+  "families": [
+    {
+      "round": 0,
+      "family": "resources",
+      "supervision": {
+        "status": "PASS",
+        "completion": "EXIT",
+        "exit_code": 0,
+        "elapsed_ms": 36241.645,
+        "timeout_seconds": 1200,
+        "termination_grace_seconds": 10,
+        "deadline_overshoot_ms": 0,
+        "maximum_log_bytes": 67108864,
+        "remaining_live_owned_processes": 0,
+        "stdout_bytes": 0,
+        "stderr_bytes": 0
+      },
+      "report": "docs/evidence/M12-003/host-campaign/0-resources/report.json"
+    },
+    {
+      "round": 0,
+      "family": "network",
+      "supervision": {
+        "status": "FAIL",
+        "completion": "EXIT",
+        "exit_code": 1,
+        "elapsed_ms": 48284.158,
+        "timeout_seconds": 1200,
+        "termination_grace_seconds": 10,
+        "deadline_overshoot_ms": 0,
+        "maximum_log_bytes": 67108864,
+        "remaining_live_owned_processes": 0,
+        "stdout_bytes": 38,
+        "stderr_bytes": 0
+      },
+      "report": "docs/evidence/M12-003/host-campaign/0-network/report.json"
+    },
+    {
+      "round": 0,
+      "family": "lifecycle",
+      "supervision": {
+        "status": "PASS",
+        "completion": "EXIT",
+        "exit_code": 0,
+        "elapsed_ms": 75143.474,
+        "timeout_seconds": 1200,
+        "termination_grace_seconds": 10,
+        "deadline_overshoot_ms": 0,
+        "maximum_log_bytes": 67108864,
+        "remaining_live_owned_processes": 0,
+        "stdout_bytes": 36,
+        "stderr_bytes": 0
+      },
+      "report": "docs/evidence/M12-003/host-campaign/0-lifecycle/report.json"
+    }
+  ],
+  "formal_release_qualification": "NOT_QUALIFIED"
+}

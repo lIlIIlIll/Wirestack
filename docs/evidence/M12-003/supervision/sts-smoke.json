@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "completion": "EXIT",
+  "exit_code": 0,
+  "elapsed_ms": 195.335,
+  "timeout_seconds": 10.0,
+  "termination_grace_seconds": 2.0,
+  "deadline_overshoot_ms": 0,
+  "maximum_log_bytes": 67108864,
+  "remaining_live_owned_processes": 0,
+  "stdout_bytes": 68,
+  "stderr_bytes": 0
+}
