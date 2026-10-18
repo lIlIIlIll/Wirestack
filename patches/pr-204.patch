@@ -1,0 +1,12 @@
+diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
+index 2b69f537..5e19527c 100644
+--- a/src/internal/http2/client_connection.cj
++++ b/src/internal/http2/client_connection.cj
+@@ -1263,6 +1263,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+                         case None => changed.wait()
+                     }
+                 }
++                if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
+                 if (let Some(error) <- failure) { throw error }
+                 if (closed) { return ReadResult.EndOfStream }
+                 if (segments.isEmpty()) { return ReadResult.EndOfStream }
