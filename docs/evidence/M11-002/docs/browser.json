@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-002",
+  "status": "PASS",
+  "actions": [
+    "Opened generated seven-package index",
+    "Navigated wirestack.gzip package",
+    "Searched GzipClient via live search",
+    "Opened public class, constructor and send documentation",
+    "Captured rendered class/constructor surface"
+  ],
+  "public_package": "wirestack.gzip",
+  "class": "GzipClient",
+  "screenshot": "docs/evidence/M11-002/docs/gzip-client.webp",
+  "js_errors": []
+}
