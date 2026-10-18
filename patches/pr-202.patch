@@ -1,25 +1,51 @@
+diff --git a/src/http/client.cj b/src/http/client.cj
+index 5010a984..cc718564 100644
+--- a/src/http/client.cj
++++ b/src/http/client.cj
+@@ -647,7 +647,7 @@ public class HttpClient <: Resource {
+  * Wirestack 公开 API：close。
+  */
+     public func close(): Unit {
+-        resourceBudget.stopRequestAdmission()
++        resourceBudget.closeAdmission()
+         let retiring = synchronized(mutex) {
+             if (closed) { Array<ClientRotationSlot>() } else {
+                 closed = true
 diff --git a/src/http/server.cj b/src/http/server.cj
-index a9260651..619e9ed7 100644
+index 619e9ed7..74ed1cc0 100644
 --- a/src/http/server.cj
 +++ b/src/http/server.cj
-@@ -570,7 +570,7 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
+@@ -569,12 +569,17 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
+     }
  }
  
- /** Derives request and stream budget owners from the validated request authority. */
--private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
-+private func publicServerRequestOwner(authority: String, secured!: Bool = false): internal.HttpResourceOwnerKey {
+-/** Derives request and stream budget owners from the validated request authority. */
+-private func publicServerRequestOwner(authority: String, secured!: Bool = false): internal.HttpResourceOwnerKey {
++
++private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
      let origin = if (authority.isEmpty()) { "server" } else { authority }
      internal.HttpResourceOwnerKey(origin, "listener")
  }
+ 
++private func publicServerRequestOwner(authority: String, secured: Bool): internal.HttpResourceOwnerKey {
++    let _ = secured
++    publicServerRequestOwner(authority)
++}
++
+ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+     private let delegate: HttpServerHandler
+     private let connectionCancellation: HttpConnectionCancellationHandle
 diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
-index f44395bf..ab3d5192 100644
+index ab3d5192..504c1f50 100644
 --- a/src/internal/http2/client_connection.cj
 +++ b/src/internal/http2/client_connection.cj
-@@ -1174,6 +1174,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
-                     }
+@@ -1175,6 +1175,9 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                  }
                  checkClientContext(readContext)
-+                if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
+                 if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
++                if (readContext.isDeadlineExceeded() && writeContext.isDeadlineExceeded()) {
++                    checkClientContext(writeContext)
++                }
                  if (let Some(error) <- failure) { throw error }
                  if (closed) { return ReadResult.EndOfStream }
                  if (segments.isEmpty()) { return ReadResult.EndOfStream }

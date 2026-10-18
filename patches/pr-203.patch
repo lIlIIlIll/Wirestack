@@ -1,25 +1,47 @@
 diff --git a/src/http/server.cj b/src/http/server.cj
-index 3e494eef..f04f8923 100644
+index f04f8923..9d3cf6c2 100644
 --- a/src/http/server.cj
 +++ b/src/http/server.cj
-@@ -570,7 +570,7 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
+@@ -569,12 +569,17 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
+     }
  }
  
- /** Derives request and stream budget owners from the validated request authority. */
--private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
-+private func publicServerRequestOwner(authority: String, secured!: Bool = false): internal.HttpResourceOwnerKey {
+-/** Derives request and stream budget owners from the validated request authority. */
+-private func publicServerRequestOwner(authority: String, secured!: Bool = false): internal.HttpResourceOwnerKey {
++
++private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
      let origin = if (authority.isEmpty()) { "server" } else { authority }
      internal.HttpResourceOwnerKey(origin, "listener")
  }
+ 
++private func publicServerRequestOwner(authority: String, secured: Bool): internal.HttpResourceOwnerKey {
++    let _ = secured
++    publicServerRequestOwner(authority)
++}
++
+ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+     private let delegate: HttpServerHandler
+     private let connectionCancellation: HttpConnectionCancellationHandle
+@@ -820,7 +825,7 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
+         let control = http1.Http1ServerDrainControl(value)
+         entry.installHttp1(control)
+         try {
+-            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(publicHandler, resourceBudget, false,
++            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(publicHandler, resourceBudget,
+                 connectionCancellation: cancellation), context: context, limits: limits,
+                 maximumRequests: maximumHttp1Requests, drainControl: Some(control))
+         } finally { registration.unregister() }
 diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
-index 2b69f537..5e19527c 100644
+index 5e19527c..9c2f49b2 100644
 --- a/src/internal/http2/client_connection.cj
 +++ b/src/internal/http2/client_connection.cj
-@@ -1263,6 +1263,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
-                         case None => changed.wait()
+@@ -1264,6 +1264,9 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                      }
                  }
-+                if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
+                 if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
++                if (readContext.isDeadlineExceeded() && writeContext.isDeadlineExceeded()) {
++                    checkClientContext(writeContext)
++                }
                  if (let Some(error) <- failure) { throw error }
                  if (closed) { return ReadResult.EndOfStream }
                  if (segments.isEmpty()) { return ReadResult.EndOfStream }
