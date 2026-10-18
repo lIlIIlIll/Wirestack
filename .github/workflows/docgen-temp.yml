@@ -203,9 +203,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: r202
-            base_ref: publish/m10-004-generation-rotation
-            patch: patches/pr-202.patch
           - name: r203
             base_ref: publish/m10-005-observability
             patch: patches/pr-203.patch
