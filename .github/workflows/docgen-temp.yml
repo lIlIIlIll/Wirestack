@@ -1,6 +1,9 @@
 name: docgen-temp
 
 on:
+  push:
+    branches:
+      - tmp/docgen
   workflow_dispatch:
 
 permissions:
