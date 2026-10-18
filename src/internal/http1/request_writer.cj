@@ -44,6 +44,22 @@ public class Http1RequestWriteException <: Exception {
 
     protected override func getClassName(): String { "Http1RequestWriteException" }
 }
+public class Http1RequestExecutionException <: NetworkException {
+    public let evidence: Http1RequestCommitEvidence
+
+    public init(evidence: Http1RequestCommitEvidence, cause: NetworkException) {
+        super(
+            cause.category, cause.phase, cause.code,
+            "HTTP/1 response failed after request submission",
+            retryability: cause.retryability, nativeCode: cause.nativeCode,
+            localEndpoint: cause.localEndpoint, remoteEndpoint: cause.remoteEndpoint,
+            cause: Some(cause)
+        )
+        this.evidence = evidence
+    }
+
+    protected override func getClassName(): String { "Http1RequestExecutionException" }
+}
 
 /** Writes one complete request without buffering its body and returns retry/redirect commit evidence. */
 public func writeHttp1Request(

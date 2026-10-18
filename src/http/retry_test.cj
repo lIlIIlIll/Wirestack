@@ -3,6 +3,7 @@ package wirestack.http
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http2 as http2
+import wirestack.internal.http1 as http1
 
 @Test
 class HttpRetryPolicyTest {
@@ -87,6 +88,27 @@ class HttpRetryPolicyTest {
         @Expect(!policy.shouldRetry(
             request, temporary, 1,
             OperationContext(deadline: Some(Deadline.after(Duration.Zero)))
+        ))
+    }
+    @TestCase
+    func retryRequiresPhaseOrSubmissionEvidence(): Unit {
+        let policy = HttpRetryPolicy()
+        let request = HttpRequest.get("https://example.test/")
+        let responseFailure = NetworkException(
+            NetworkErrorCategory.Read, NetworkPhase.HttpHeaders,
+            NetworkErrorCode.UnexpectedEof, "response ended",
+            retryability: Retryability.Temporary
+        )
+        @Expect(!policy.shouldRetry(request, responseFailure, 1, OperationContext.background()))
+
+        let submitted = http1.Http1RequestExecutionException(
+            http1.Http1RequestCommitEvidence(18, 0),
+            responseFailure
+        )
+        @Expect(policy.shouldRetry(request, submitted, 1, OperationContext.background()))
+        @Expect(!policy.shouldRetry(
+            HttpRequest.post("https://example.test/", RequestBody.string("x")),
+            submitted, 1, OperationContext.background()
         ))
     }
 

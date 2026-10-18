@@ -156,6 +156,28 @@ class Http2ClientConnectionTest {
     }
 
     @TestCase
+    func earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(
+            capacity: 64 * 1024, maxChunk: 17
+        )
+        let peer = DelayedEndHttp2Peer(serverTransport)
+        let serving = spawn { peer.serve() }
+        let connection = Http2ClientConnection.connect(clientTransport)
+        let response = connection.execute(HttpRequest.get("https://example.test/abandoned"))
+
+        @Expect(connection.activeStreamCount, 1)
+        response.close()
+        @Expect(connection.activeStreamCount, 0)
+        @Expect(connection.acceptingNewStreams)
+
+        peer.releaseEndStream()
+        @Expect(serving.get(Duration.second * 5), true)
+        @Expect(connection.acceptingNewStreams)
+        connection.abort()
+        serverTransport.abort()
+    }
+
+    @TestCase
     func declaredLengthDoesNotReleaseStreamBeforeWireEndStream(): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024, maxChunk: 17)
         let peer = DelayedEndHttp2Peer(serverTransport)
