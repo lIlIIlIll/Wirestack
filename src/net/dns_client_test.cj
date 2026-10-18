@@ -1340,3 +1340,106 @@ class DnsClientWireTest {
         @Expect(cancellations, 1)
     }
 }
+
+@Test
+class DnsGenerationSnapshotTest {
+    @TestCase
+    func latePositiveAndNegativeResultsStayInTheirOriginalNamespaces(): Unit {
+        for (negative in [false, true]) {
+            let oldServer = UdpSocket.bind(dnsClientTestLoopback(0))
+            let newServer = UdpSocket.bind(dnsClientTestLoopback(0))
+            let gate = DnsClientTestGate()
+            let oldResolver = Resolver(config: dnsClientTestConfig(dnsClientTestEndpoint(oldServer)))
+            let newResolver = Resolver(config: dnsClientTestConfig(dnsClientTestEndpoint(newServer)))
+            let oldServing = spawn {
+                let query = oldServer.receive(512, context: api.OperationContext(
+                    deadline: Some(api.Deadline.after(5 * Duration.second))))
+                gate.arriveAndWait()
+                let answer = if (negative) { dnsClientTestNegative(query.payload, true) }
+                    else { dnsClientTestAResponse(query.payload, [192u8, 0u8, 2u8, 1u8]) }
+                let _ = oldServer.sendTo(query.source.getOrThrow(), api.ByteSpan(answer))
+            }
+            let newServing = spawn {
+                let query = newServer.receive(512, context: api.OperationContext(
+                    deadline: Some(api.Deadline.after(5 * Duration.second))))
+                let _ = newServer.sendTo(query.source.getOrThrow(), api.ByteSpan(
+                    dnsClientTestAResponse(query.payload, [198u8, 51u8, 100u8, 2u8])))
+            }
+            let pending = spawn {
+                try {
+                    let result = oldResolver.resolve("namespace.test.",
+                        options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))
+                    if (negative) { throw Exception("expected old negative DNS answer") }
+                    result.addresses[0].toOctets() == [192u8, 0u8, 2u8, 1u8]
+                } catch (error: api.ResolveException) {
+                    negative && dnsClientTestCodeIs(error.resolveCode, api.ResolveErrorCode.NameNotFound)
+                }
+            }
+            try {
+                gate.waitForArrival()
+                let first = newResolver.resolve("namespace.test.",
+                    options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))
+                @Expect(first.addresses[0].toOctets(), [198u8, 51u8, 100u8, 2u8])
+                newServing.get(5 * Duration.second)
+                newServer.close()
+                gate.release()
+                @Expect(pending.get(5 * Duration.second))
+                oldServing.get(5 * Duration.second)
+                oldServer.close()
+                let cached = newResolver.resolve("namespace.test.",
+                    options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))
+                @Expect(cached.addresses, first.addresses)
+                @Expect(cached.expiration, first.expiration)
+            } finally {
+                gate.release()
+                oldResolver.close(); newResolver.close()
+                oldServer.close(); newServer.close()
+                try { oldServing.get(5 * Duration.second) } catch (_: Exception) {}
+                try { newServing.get(5 * Duration.second) } catch (_: Exception) {}
+                try { let _ = pending.get(5 * Duration.second) } catch (_: Exception) {}
+            }
+        }
+    }
+
+}
+
+@Test
+class DnsSearchGenerationSnapshotTest {
+    @TestCase
+    func searchPolicyUpdatesUseFreshCacheKeysWithoutChangingOldSnapshot(): Unit {
+        let server = UdpSocket.bind(dnsClientTestLoopback(0))
+        let endpoint = dnsClientTestEndpoint(server)
+        let old = Resolver(config: DnsResolverConfig(nameservers: [endpoint], hostsPath: "",
+            searchDomains: [api.HostName("old.test")], queryTimeout: Duration.second, attempts: 1))
+        let next = Resolver(config: DnsResolverConfig(nameservers: [endpoint], hostsPath: "",
+            searchDomains: [api.HostName("new.test")], queryTimeout: Duration.second, attempts: 1))
+        let serving = spawn {
+            let names = ArrayList<String>()
+            for (index in 0..2) {
+                let query = server.receive(512, context: api.OperationContext(
+                    deadline: Some(api.Deadline.after(5 * Duration.second))))
+                names.add(DnsMessageParser().parse(query.payload).questions[0].name)
+                let address = if (index == 0) { [192u8, 0u8, 2u8, 1u8] }
+                    else { [198u8, 51u8, 100u8, 2u8] }
+                let _ = server.sendTo(query.source.getOrThrow(), api.ByteSpan(
+                    dnsClientTestAResponse(query.payload, address)))
+            }
+            names.toArray()
+        }
+        let options = api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4)
+        try {
+            let first = old.resolve("service", options: options)
+            let second = next.resolve("service", options: options)
+            @Expect(first.canonicalHost, api.HostName("service.old.test"))
+            @Expect(second.canonicalHost, api.HostName("service.new.test"))
+            @Expect(serving.get(5 * Duration.second), ["service.old.test", "service.new.test"])
+            server.close()
+            @Expect(old.resolve("service", options: options).addresses[0].toOctets(), [192u8, 0u8, 2u8, 1u8])
+            @Expect(next.resolve("service", options: options).addresses[0].toOctets(), [198u8, 51u8, 100u8, 2u8])
+        } finally {
+            old.close(); next.close(); server.close()
+            try { let _ = serving.get(5 * Duration.second) } catch (_: Exception) {}
+        }
+    }
+}
+

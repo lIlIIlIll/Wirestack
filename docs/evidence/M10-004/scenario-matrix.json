@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-004",
+  "platform": "linux-x86_64-glibc",
+  "release_qualification": "NOT_QUALIFIED",
+  "scenarios": [
+    {
+      "id": "client-normal-and-security-tls",
+      "tests": [
+        "HttpClientRotationTest.nativeH2TlsRotationDrainsOldBodyRollsBackInvalidAndRejectsRemovedTrust",
+        "HttpClientRotationTest.nativeTlsAttemptRetainsSnapshotAndSecurityReplacementRejectsLateFactory",
+        "HttpClientRotationTest.nativeMtlsIdentityRemovalCancelsOldH2AndRequiresFreshAuthenticatedHandshake"
+      ],
+      "observed": "PASS",
+      "criteria": [
+        "graceful bodies complete on captured context",
+        "strict trust/identity replacement rejects obsolete H2 admission",
+        "native TLS material failure leaves publication unchanged",
+        "late factory keeps captured context; security prevents late reuse"
+      ]
+    },
+    {
+      "id": "client-route-dns-and-capacity",
+      "tests": [
+        "HttpClientRotationTest.nativeGracefulDnsLateResultFinishesOnlyOldAttempt",
+        "HttpClientRotationTest.nativeSecurityDnsCancelsLateResolverAndEveryPreviouslyDrainingBody",
+        "HttpClientRotationTest.nativeProxyDnsRotationKeepsDirectDnsAndNoProxyPolicy",
+        "HttpClientRotationTest.nativeRetainedGenerationCeilingRejectsAtomicallyAndReclaimsAfterBodyClose",
+        "HttpClientRotationTest.nativeH1IdleRotationReleasesSingleConnectionBudgetAndPreservesCookiesHooks"
+      ],
+      "observed": "PASS",
+      "criteria": [
+        "direct and proxy DNS independent",
+        "old admitted query stays old resolver; strict cancellation stops it",
+        "same identity labels do not alias pool generations",
+        "bounded retained owners with atomic rejection/recovery",
+        "cookies/hooks and aggregate resource budgets survive rotation"
+      ]
+    },
+    {
+      "id": "caller-owned-h1-handoff",
+      "tests": [
+        "HttpClientRotationTest.nativeTransferredH1SessionRetainsGenerationAcrossRotationAndClientClose"
+      ],
+      "observed": "PASS",
+      "criteria": [
+        "transferred H1 session remains caller-owned",
+        "generation/resource lifetime ends only at real session close"
+      ]
+    },
+    {
+      "id": "immutable-dns-cache-namespaces",
+      "tests": [
+        "DnsGenerationSnapshotTest.latePositiveAndNegativeResultsStayInTheirOriginalNamespaces",
+        "DnsSearchGenerationSnapshotTest.searchPolicyUpdatesUseFreshCacheKeysWithoutChangingOldSnapshot",
+        "DnsHostsGenerationSnapshotTest.hostsUpdatesRequireFreshSnapshotsAndValidationDoesNotMutateOldPolicy"
+      ],
+      "observed": "PASS",
+      "criteria": [
+        "late positive and negative old results cannot poison fresh resolver cache",
+        "new nameserver and search policies use distinct namespaces",
+        "hosts snapshots immutable",
+        "invalid policy does not mutate old snapshot",
+        "cache TTL not connected to pool generation publication"
+      ]
+    },
+    {
+      "id": "server-normal-and-security",
+      "tests": [
+        "HttpServerRotationTest"
+      ],
+      "observed": "PASS",
+      "criteria": [
+        "H1 active response finishes; idle keepalive drains",
+        "H2 GOAWAY drains admitted streams",
+        "Required mTLS replaces authenticated connection on new handshake",
+        "strict cancels old handler context and pending handshake",
+        "graceful pending handshake uses captured old material",
+        "closed/invalid/capacity publication rolls back",
+        "64 referenced generation cap and eventual cleanup",
+        "shutdown/security races remain exactly once"
+      ]
+    },
+    {
+      "id": "completed-h2-response-at-graceful-eof",
+      "tests": [
+        "Http2ClientConnectionTest.completedResponseRetainsBufferedBodyAfterGracefulPeerEof",
+        "Http2ClientConnectionTest.peerEofBeforeEndStreamStillFailsTheAdmittedResponse"
+      ],
+      "observed": "PASS",
+      "criteria": [
+        "validated END_STREAM response and buffered body survive later reader EOF",
+        "retained buffers stay bounded and caller-owned until body close",
+        "incomplete END_STREAM still fails rather than becoming successful EOF",
+        "explicit stream/connection cancellation still aborts the body"
+      ],
+      "failed_before_log": "docs/evidence/M10-004/h2-eof-before.log"
+    }
+  ],
+  "notes": [
+    "Caller-supplied Resolver instances remain caller-owned; no file watcher or shared cache-transfer manager is added.",
+    "Core contextVersion and bounded TLS session-key partitioning remain unchanged; existing regression execution is recorded in verification.json.",
+    "Native installed consumer report is source-bound to the extracted current payload, not the frozen M7-021 archive."
+  ],
+  "status": "PASS"
+}

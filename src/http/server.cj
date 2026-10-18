@@ -446,7 +446,7 @@ public class HttpServerBuilder {
             )
             let core = http1.Http1Server(
                 bound,
-                PublicHttp1Handler(selectedHandler, resourceBudget, tlsConfig.isSome()),
+                PublicHttp1Handler(selectedHandler, resourceBudget),
                 config: http1.Http1ServerConfig(
                     maximumConnections: effectiveResourceLimits.maximumConnections,
                     maximumRequestsPerConnection: maximumRequestsPerConnection,
@@ -454,7 +454,7 @@ public class HttpServerBuilder {
                 ),
                 connectionHandler: Some<http1.HttpServerConnectionHandler>(dispatcher)
             )
-            HttpServer(core, bound.localEndpoint, resourceBudget)
+            HttpServer(core, bound.localEndpoint, resourceBudget, dispatcher)
         } catch (error: Exception) {
             match (listener) { case Some(value) => value.close(); case None => () }
             match (handshaker) { case Some(value) => value.close(); case None => () }
@@ -498,22 +498,41 @@ private func toInternalSecurityProfile(
 public class HttpServer <: Resource {
     private let core: http1.Http1Server
     private let resourceBudget: internal.HttpResourceBudget
+    private let dispatcher: PublicServerConnectionDispatcher
 /**
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let localEndpoint: SocketEndpoint
 
     init(core: http1.Http1Server, localEndpoint: SocketEndpoint,
-        resourceBudget: internal.HttpResourceBudget) {
+        resourceBudget: internal.HttpResourceBudget, dispatcher: PublicServerConnectionDispatcher) {
         this.core = core
         this.localEndpoint = localEndpoint
         this.resourceBudget = resourceBudget
+        this.dispatcher = dispatcher
     }
 
 /**
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func builder(): HttpServerBuilder { HttpServerBuilder() }
+
+    /**
+     * Replaces validated TLS material atomically. Graceful rotation drains old
+     * connections; security replacement cancels and aborts them. At most 64
+     * referenced TLS generations may coexist. Cleartext servers cannot rotate.
+     * The listener remains bound. In-progress handshakes retain their snapshot.
+     * @param value New certificate, key, authentication and TLS policy material.
+     * @param policy Explicit disposition of obsolete handshakes and connections.
+     * @return The monotonically increasing listener-local TLS generation.
+     */
+    public func rotateTls(value: HttpServerTlsConfig,
+        policy!: HttpConfigurationRotation = HttpConfigurationRotation.Graceful): UInt64 {
+        dispatcher.rotateTls(value, policy)
+    }
+
+    /** Last published TLS generation, starting at one, or zero for cleartext. */
+    public func tlsGeneration(): UInt64 { dispatcher.tlsGeneration() }
 /**
  * Wirestack 公开 API：在给定上下文中运行服务循环。
  * @param context 控制本次操作的截止时间、取消和追踪范围。
@@ -550,29 +569,9 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
     }
 }
 
-/**
- * Reconstructs one canonical request authority for aggregate quota owners.
- * The parser has already validated the spelling; normalization lower-cases the
- * host, omits the scheme's default port, and keeps IPv6 brackets.
- * @param authority Parser-validated Host or :authority text.
- * @param secured Whether the request arrived over TLS.
- */
-internal func canonicalServerAuthority(authority: String, secured: Bool): String {
-    if (authority.isEmpty()) { return "" }
-    let scheme = if (secured) { "https" } else { "http" }
-    let defaultPort: UInt16 = if (secured) { 443u16 } else { 80u16 }
-    let parsed = HttpUrl.parse("${scheme}://${authority}/")
-    let host = if (parsed.host.contains(":")) { "[${parsed.host}]" } else { parsed.host }
-    if (parsed.explicitPort && parsed.port != defaultPort) { "${host}:${parsed.port}" } else { host }
-}
-
 /** Derives request and stream budget owners from the validated request authority. */
-private func publicServerRequestOwner(
-    authority: String,
-    secured: Bool
-): internal.HttpResourceOwnerKey {
-    let canonical = canonicalServerAuthority(authority, secured)
-    let origin = if (canonical.isEmpty()) { "server" } else { canonical }
+private func publicServerRequestOwner(authority: String, secured!: Bool = false): internal.HttpResourceOwnerKey {
+    let origin = if (authority.isEmpty()) { "server" } else { authority }
     internal.HttpResourceOwnerKey(origin, "listener")
 }
 
@@ -580,16 +579,14 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
     private let delegate: HttpServerHandler
     private let connectionCancellation: HttpConnectionCancellationHandle
     private let resourceBudget: internal.HttpResourceBudget
-    private let secured: Bool
+    private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
     init(
         delegate: HttpServerHandler,
         resourceBudget: internal.HttpResourceBudget,
-        secured: Bool,
         connectionCancellation!: HttpConnectionCancellationHandle = HttpConnectionCancellationHandle()
     ) {
         this.delegate = delegate
         this.resourceBudget = resourceBudget
-        this.secured = secured
         this.connectionCancellation = connectionCancellation
     }
 
@@ -600,8 +597,7 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
  */
     public func handle(request: http1.Http1ServerRequest,
         context: transport.OperationContext): http1.Http1ServerResponse {
-        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request), secured)
-        let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
+        let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
             case Some(value) => value
             case None =>
                 let headers = HttpHeaders.builder()
@@ -683,160 +679,221 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
 }
 
 /** Owns TLS negotiation and keeps every live H2 connection available to graceful shutdown. */
-private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHandler {
+internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHandler {
     private let publicHandler: HttpServerHandler
-    private let tlsHandshaker: ?http1.HttpServerAlpnHandshaker
+    private var generation: ?PublicServerTlsGeneration
+    private let retained = ArrayList<PublicServerTlsGeneration>()
     private let limits: HttpLimits
     private let http2Limits: http2.Http2Limits
     private let maximumHttp1Requests: Int64
     private let resourceBudget: internal.HttpResourceBudget
     private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
     private let mutex = Mutex()
-    private let h2Connections = ArrayList<PublicHttp2ConnectionEntry>()
+    private let connections = ArrayList<PublicServerConnectionEntry>()
     private var nextConnectionId: Int64 = 1
     private var stopping = false
     private var closed = false
+    private var generationId: UInt64 = 0u64
 
-    init(
-        handler: HttpServerHandler,
-        tlsHandshaker: ?http1.HttpServerAlpnHandshaker,
-        limits: HttpLimits,
-        http2Limits: http2.Http2Limits,
-        maximumHttp1Requests: Int64,
-        resourceBudget: internal.HttpResourceBudget
-    ) {
+    init(handler: HttpServerHandler, tlsHandshaker: ?http1.HttpServerAlpnHandshaker,
+        limits: HttpLimits, http2Limits: http2.Http2Limits, maximumHttp1Requests: Int64,
+        resourceBudget: internal.HttpResourceBudget) {
         publicHandler = handler
-        this.tlsHandshaker = tlsHandshaker
+        generation = match (tlsHandshaker) {
+            case Some(value) => Some(PublicServerTlsGeneration(1u64, value))
+            case None => None<PublicServerTlsGeneration>
+        }
+        generationId = match (generation) { case Some(value) => value.id; case None => 0u64 }
         this.limits = limits
         this.http2Limits = http2Limits
         this.maximumHttp1Requests = maximumHttp1Requests
         this.resourceBudget = resourceBudget
     }
 
-/**
- * Wirestack 公开 API：serve。
- * @param context 参数 context。
- * @param value 参数 value。
- */
+    func tlsGeneration(): UInt64 {
+        synchronized(mutex) { generationId }
+    }
+
+    func rotateTls(value: HttpServerTlsConfig, policy: HttpConfigurationRotation): UInt64 {
+        let obsolete = ArrayList<PublicServerConnectionEntry>()
+        let id = synchronized(mutex) {
+            if (stopping || closed) { throw IllegalStateException("HTTP server is closed") }
+            let old = match (generation) {
+                case Some(current) => current
+                case None => throw IllegalStateException("Cleartext HTTP server cannot rotate TLS")
+            }
+            if (retained.size >= 63 && old.references > 0) {
+                throw IllegalStateException("HTTP server TLS generation capacity exhausted")
+            }
+            if (old.id == UInt64.Max) { throw IllegalStateException("HTTP server TLS generation exhausted") }
+            let candidate = value.createHandshaker()
+            generation = Some(PublicServerTlsGeneration(old.id + 1u64, candidate))
+            generationId = old.id + 1u64
+            if (old.references == 0) { old.handshaker.close() } else { retained.add(old) }
+            for (entry in connections) { obsolete.add(entry) }
+            old.id + 1u64
+        }
+        for (entry in obsolete) { entry.retire(policy) }
+        id
+    }
+
+    /** Admits one connection with a retained handshake snapshot.
+     * @param value Accepted transport.
+     * @param context Original accept operation budget and cancellation.
+     */
     public func serve(value: transport.DuplexTransport, context: transport.OperationContext): Unit {
-        let connectionLease = resourceBudget.acquireConnection(resourceOwner, context)
-        connectionLease.activate()
+        let entry = synchronized(mutex) {
+            if (stopping || closed) { None<PublicServerConnectionEntry> } else {
+                let selected = generation
+                if (let Some(current) <- selected) { current.references++ }
+                let admitted = PublicServerConnectionEntry(nextConnectionId, value, selected)
+                nextConnectionId++
+                connections.add(admitted)
+                Some(admitted)
+            }
+        }
+        if (entry.isNone()) { value.close(); return }
+        let admitted = entry.getOrThrow()
+        let operation = context.withCancellation(admitted.cancellation.token)
+        let parentRegistration = context.cancellation.register { => admitted.cancellation.cancel() }
+        var lease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         try {
-            match (tlsHandshaker) {
-                case None => serveHttp1(value, context, false)
-                case Some(handshaker) =>
-                    let negotiated = handshaker.handshakeNegotiated(value, context)
+            let acquired = resourceBudget.acquireConnection(resourceOwner, operation)
+            lease = Some(acquired)
+            acquired.activate()
+            match (admitted.generation) {
+                case None => serveHttp1(value, operation, admitted)
+                case Some(current) =>
+                    let negotiated = current.handshaker.handshakeNegotiated(value, operation)
+                    if (!admitted.promote(negotiated.transport)) { return }
                     match (negotiated.protocol) {
-                        case http1.HttpServerNegotiatedProtocol.Http11 =>
-                            serveHttp1(negotiated.transport, context, true)
-                        case http1.HttpServerNegotiatedProtocol.Http2 =>
-                            serveHttp2(negotiated.transport, context, true)
+                        case http1.HttpServerNegotiatedProtocol.Http11 => serveHttp1(negotiated.transport, operation, admitted)
+                        case http1.HttpServerNegotiatedProtocol.Http2 => serveHttp2(negotiated.transport, operation, admitted)
                     }
             }
-        } finally { connectionLease.close() }
+        } finally {
+            parentRegistration.unregister()
+            if (let Some(current) <- lease) { current.close() }
+            synchronized(mutex) {
+                for (index in 0..connections.size) {
+                    if (connections[index].id == admitted.id) { let _ = connections.remove(at: index); break }
+                }
+                if (let Some(current) <- admitted.generation) { current.references-- }
+                releaseRetired()
+            }
+        }
     }
 
-/**
- * Wirestack 公开 API：请求服务有序停止并返回停止状态。
- */
+    private func releaseRetired(): Unit {
+        var index = retained.size
+        while (index > 0) {
+            index--
+            if (retained[index].references == 0) {
+                retained[index].handshaker.close()
+                let _ = retained.remove(at: index)
+            }
+        }
+        if (closed) {
+            if (let Some(current) <- generation) {
+                if (current.references == 0) { current.handshaker.close(); generation = None<PublicServerTlsGeneration> }
+            }
+        }
+    }
+
+    /** Stops connection admission and begins protocol-specific drainage. */
     public func beginShutdown(): Unit {
-        let current = synchronized(mutex) {
-            stopping = true
-            let result = ArrayList<http2.Http2ServerConnection>()
-            for (entry in h2Connections) { result.add(entry.connection) }
-            result.toArray()
-        }
-        for (connection in current) { connection.beginDrain() }
+        let current = synchronized(mutex) { stopping = true; connections.toArray() }
+        for (entry in current) { entry.retire(HttpConfigurationRotation.Graceful) }
     }
-
-/**
- * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
- */
+    /** Stops admission and releases unreferenced handshake generations. */
     public func close(): Unit {
-        let shouldClose = synchronized(mutex) {
-            if (closed) { false } else { closed = true; true }
-        }
-        if (shouldClose) {
-            beginShutdown()
-            match (tlsHandshaker) { case Some(value) => value.close(); case None => () }
-        }
+        beginShutdown()
+        synchronized(mutex) { closed = true; releaseRetired() }
     }
-
-/**
- * Wirestack 公开 API：报告资源是否已经关闭。
- */
+    /** Reports whether dispatcher ownership ended. */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
-    private func serveHttp1(
-        transportValue: transport.DuplexTransport,
-        context: transport.OperationContext,
-        secured: Bool
-    ): Unit {
-        let cancellation = HttpConnectionCancellationHandle()
-        let registration = cancellation.cancellationToken.register { =>
-            try { transportValue.abort(reason: Some(transport.AbortReason.Cancelled)) }
-            catch (_: Exception) {}
-        }
+    private func serveHttp1(value: transport.DuplexTransport, context: transport.OperationContext,
+        entry: PublicServerConnectionEntry): Unit {
+        let cancellation = entry.connectionCancellation
+        let registration = cancellation.cancellationToken.register { => value.abort(reason: Some(transport.AbortReason.Cancelled)) }
+        let control = http1.Http1ServerDrainControl(value)
+        entry.installHttp1(control)
         try {
-            let _ = http1.serveHttp1Connection(
-                transportValue, PublicHttp1Handler(
-                    publicHandler, resourceBudget, secured,
-                    connectionCancellation: cancellation
-                ),
-                context: context, limits: limits,
-                maximumRequests: maximumHttp1Requests
-            )
+            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(publicHandler, resourceBudget,
+                connectionCancellation: cancellation), context: context, limits: limits,
+                maximumRequests: maximumHttp1Requests, drainControl: Some(control))
         } finally { registration.unregister() }
     }
 
-    private func serveHttp2(
-        transportValue: transport.DuplexTransport,
-        context: transport.OperationContext,
-        secured: Bool
-    ): Unit {
-        let cancellation = HttpConnectionCancellationHandle()
+    private func serveHttp2(value: transport.DuplexTransport, context: transport.OperationContext,
+        entry: PublicServerConnectionEntry): Unit {
+        let cancellation = entry.connectionCancellation
         let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-            publicServerRequestOwner(authority, secured)
+            publicServerRequestOwner(authority)
         }
-        let created = http2.Http2ServerConnection(
-            transportValue, PublicHttp2Handler(publicHandler, cancellation),
-            limits: limits, http2Limits: http2Limits,
-            resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
-            requestOwnerFactory: Some(requestOwnerFactory)
-        )
-        let cancellationRegistration = cancellation.cancellationToken.register { =>
-            created.abort()
-        }
-        var connectionId: Int64 = 0
-        let admitted = synchronized(mutex) {
-            if (stopping) { false } else {
-                connectionId = nextConnectionId
-                nextConnectionId++
-                h2Connections.add(PublicHttp2ConnectionEntry(connectionId, created))
-                true
-            }
-        }
-        if (!admitted) { cancellationRegistration.unregister(); created.abort(); return }
+        let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
+            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
+                requestOwnerFactory: Some(requestOwnerFactory))
+        let registration = cancellation.cancellationToken.register { => created.abort() }
+        entry.installHttp2(created)
         try { created.serve(context: context) }
-        finally {
-            cancellationRegistration.unregister()
-            synchronized(mutex) {
-                for (index in 0..h2Connections.size) {
-                    if (h2Connections[index].id == connectionId) {
-                        let _ = h2Connections.remove(at: index)
-                        break
-                    }
-                }
-            }
-        }
+        finally { registration.unregister() }
     }
 }
 
-private class PublicHttp2ConnectionEntry {
+private class PublicServerTlsGeneration {
+    let id: UInt64
+    let handshaker: http1.HttpServerAlpnHandshaker
+    var references: Int64 = 0
+    init(id: UInt64, handshaker: http1.HttpServerAlpnHandshaker) { this.id = id; this.handshaker = handshaker }
+}
+
+/** Holds handshake material until the entire connection has actually finished. */
+private class PublicServerConnectionEntry {
     let id: Int64
-    let connection: http2.Http2ServerConnection
-    init(id: Int64, connection: http2.Http2ServerConnection) {
-        this.id = id
-        this.connection = connection
+    let generation: ?PublicServerTlsGeneration
+    let cancellation = transport.CancellationSource()
+    let connectionCancellation = HttpConnectionCancellationHandle()
+    private let mutex = Mutex()
+    private var current: transport.DuplexTransport
+    private var retired = false
+    private var forced = false
+    private var h1: ?http1.Http1ServerDrainControl = None<http1.Http1ServerDrainControl>
+    private var h2: ?http2.Http2ServerConnection = None<http2.Http2ServerConnection>
+    init(id: Int64, value: transport.DuplexTransport, generation: ?PublicServerTlsGeneration) {
+        this.id = id; current = value; this.generation = generation
+    }
+    func promote(value: transport.DuplexTransport): Bool {
+        let accepted = synchronized(mutex) { current = value; !forced }
+        if (!accepted) { value.abort(reason: Some(transport.AbortReason.Cancelled)) }
+        accepted
+    }
+    func installHttp1(value: http1.Http1ServerDrainControl): Unit {
+        let drain = synchronized(mutex) { h1 = Some(value); retired }
+        if (drain) { value.beginDrain() }
+    }
+    func installHttp2(value: http2.Http2ServerConnection): Unit {
+        let drain = synchronized(mutex) { h2 = Some(value); retired }
+        if (drain) { value.beginDrain() }
+    }
+    func retire(policy: HttpConfigurationRotation): Unit {
+        let (value, first, second, abort) = synchronized(mutex) {
+            retired = true
+            match (policy) {
+                case HttpConfigurationRotation.SecurityReplacement => forced = true
+                case HttpConfigurationRotation.Graceful => ()
+            }
+            (current, h1, h2, forced)
+        }
+        if (abort) {
+            cancellation.cancel()
+            let _ = connectionCancellation.cancel()
+            if (let Some(connection) <- second) { connection.abort() }
+            value.abort(reason: Some(transport.AbortReason.Cancelled))
+        } else {
+            if (let Some(control) <- first) { control.beginDrain() }
+            if (let Some(connection) <- second) { connection.beginDrain() }
+        }
     }
 }
