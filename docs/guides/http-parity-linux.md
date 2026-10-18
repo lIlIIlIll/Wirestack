@@ -167,11 +167,11 @@ For an HTTP/2 CONNECT transport, `shutdown(ShutdownDirection.Write)` stops new w
 
 ## Connect an uncompressed WebSocket
 
-Pass an absolute `HttpUrl` to `connectWebSocket`. The accepted schemes are `http` and `https`. The API does not parse `ws` or `wss` URLs.
+Pass an absolute `WebSocketUrl` to `connectWebSocket`. The accepted schemes are `ws` and `wss`; ordinary `HttpUrl` remains HTTP(S)-only. See the [WebSocket lifecycle guide](websocket.md) for the URI profile and clean migration.
 
 ```cj
 let result = client.connectWebSocket(
-    HttpUrl.parse("https://example.test/socket"),
+    WebSocketUrl.parse("wss://example.test/socket"),
     protocols: ["events"],
     headers: HttpHeaders(entries: [HttpHeader("Authorization", "Bearer token")]),
     webSocketLimits: WebSocketLimits(
@@ -200,7 +200,7 @@ let connection = match (result) {
 
 On the server, validate the incoming handshake and transfer the session with `HttpServerResponse.webSocket(request, handler, subProtocol: ..., limits: ...)`. `WebSocketHandler.serve` receives the request's `OperationContext`.
 
-`WebSocketConnection` permits one reader and one writer at a time. `send` and `receive` keep the caller's absolute deadline and cancellation. A pre-cancelled operation performs no I/O and leaves an untouched session usable. A failure after frame I/O starts fails the session closed. Ping receives trigger a bounded automatic Pong, and `close(code, reason, context: ...)` uses the shorter of the caller deadline and `WebSocketLimits.closeTimeout`.
+`WebSocketConnection` permits one active reader and writer, with one pending caller per direction; further callers receive `CapacityExceeded` without frame I/O. The session retains the handshake context; `send`, `receive`, and graceful `close` can shorten, but cannot extend, its absolute deadline and read-idle policy. Parent cancellation stops active and queued operations. A pre-cancelled frame call leaves an untouched session usable; a failure after frame I/O starts terminates it. Received Ping triggers a bounded matching Pong. Graceful close uses the shortest of the session/caller deadline and `WebSocketLimits.closeTimeout`; parameterless close aborts without a new protocol exchange and joins cleanup already in progress.
 
 Wirestack enforces client-to-server masking, server-to-client non-masking, canonical lengths, control-frame bounds, continuation order, message size, UTF-8 text, and close payload rules. `WebSocketFrame.payload` returns a defensive copy. WebSocket compression and all other extensions are excluded.
 

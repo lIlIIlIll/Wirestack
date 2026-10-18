@@ -404,14 +404,14 @@ public class HttpClient <: Resource {
     /**
      * Establishes an uncompressed WebSocket over HTTP/1.1 or negotiated HTTP/2.
      * Rejected handshakes return an owned response. No redirects or retries replay the handshake.
-     * @param url Absolute HTTP or HTTPS URL of the WebSocket resource.
+     * @param url Absolute ws or wss URL; ws uses plaintext and wss uses validated TLS.
      * @param protocols Ordered acceptable subprotocols.
      * @param headers Additional headers excluding protocol-managed fields.
      * @param webSocketLimits Session frame, message and close bounds.
-     * @param context Shared handshake deadline and cancellation.
+     * @param context Canonical handshake and session lifetime deadline and cancellation.
      */
     public func connectWebSocket(
-        url: HttpUrl,
+        url: WebSocketUrl,
         protocols!: Array<String> = [],
         headers!: HttpHeaders = HttpHeaders(),
         webSocketLimits!: WebSocketLimits = WebSocketLimits(),
@@ -420,11 +420,32 @@ public class HttpClient <: Resource {
         if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
         let bounded = contextForRequest(context: context)
         let operation = withHttpPoolHook(bounded, poolHook)
-        let handshake = WebSocketHandshake(url, protocols, headers, limits)
+        let handshake = WebSocketHandshake(url.httpUrl, protocols, headers, limits)
         let h1Request = requestWithCookies(handshake.http1Request, operation)
         let h2Request = requestWithCookies(handshake.http2Request, operation)
-        let result = executeAdmittedDuplex(h1Request, h2Request, Some("websocket"), operation)
-        handshake.accept(result, webSocketLimits)
+        let (exchange, exchangeContext) = executeDuplex(h1Request, h2Request, Some("websocket"),
+            operation, deferRequestCompletion: true)
+        let accepted = try {
+            handshake.accept(exchange, webSocketLimits, operation)
+        } catch (error: Exception) {
+            emitHttpFailure(exchangeContext, NetworkEventKind.RequestCompleted, error)
+            throw error
+        }
+        // The handshake can finish while caller cancellation or the session deadline wins. The
+        // WebSocketConnection constructor then closes the new session without throwing, so never
+        // publish that stopped session as a successful logical request.
+        if (operation.isCancellationRequested() || operation.isDeadlineExceeded()) {
+            match (accepted) {
+                case WebSocketConnectResult.Connected(value) => value.close()
+                case WebSocketConnectResult.Rejected(value) => value.close()
+            }
+            let stopped = WebSocketException(WebSocketErrorCode.ContextStopped,
+                "WebSocket handshake completed after the operation stopped")
+            emitHttpFailure(exchangeContext, NetworkEventKind.RequestCompleted, stopped)
+            throw stopped
+        }
+        emitHttpObservation(exchangeContext, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
+        accepted
     }
 
     /**
@@ -465,18 +486,36 @@ public class HttpClient <: Resource {
         }
         let h2Request = HttpRequest(HttpMethod("CONNECT"), request.url,
             headers: headers.build(), body: request.body, retrySafety: request.retrySafety)
-        let result = executeAdmittedDuplex(outgoing, h2Request, protocol, operation)
+        let (result, _) = executeDuplex(outgoing, h2Request, protocol, operation)
         publicHttpUpgradeResult(result)
     }
 
     private func executeDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
-        protocol: ?String, parent: OperationContext): http1.HttpDuplexExchangeResult {
+        protocol: ?String, parent: OperationContext,
+        deferRequestCompletion!: Bool = false): (http1.HttpDuplexExchangeResult, OperationContext) {
         let (slot, invocation, lifetime) = selectGeneration(h1Request.url)
-        let cancellation = HttpRequestCancellationOperation(parent, Some(slot.cancellation),
-            None<HttpConnectionCancellationHandle>, None<HttpStreamCancellationHandle>)
-        let context = cancellation.context
+        let observed = observedRequestContext(parent, poolHook.isSome())
+        let cancellation = HttpRequestCancellationOperation(observed, Some(slot.cancellation),
+            None<HttpConnectionCancellationHandle>, None<HttpStreamCancellationHandle>, metrics: Some(resourceBudget))
+        let context = observedAttemptContext(cancellation.context)
+        emitHttpObservation(context, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
         var transferred = false
-        try {
+        var attemptStarted = false
+        var attemptFinished = false
+        let exchange = try {
+            let admission = context.forStage(transport.OperationTimeoutStage.RequestAdmission)
+            emitHttpObservation(admission, NetworkEventKind.StageStarted, NetworkEventOutcome.Started)
+            let requestLease = try {
+                let value = resourceBudget.acquireRequest(resourceOwner(h1Request.url), admission)
+                emitHttpObservation(admission, NetworkEventKind.StageCompleted, NetworkEventOutcome.Succeeded)
+                value
+            } catch (error: Exception) {
+                emitHttpFailure(admission, NetworkEventKind.StageCompleted, error)
+                throw error
+            }
+            cancellation.retainResource(requestLease)
+            emitHttpObservation(context, NetworkEventKind.AttemptStarted, NetworkEventOutcome.Started)
+            attemptStarted = true
             let result = match (slot.client) {
                 case value: http1.Http1CleartextClient =>
                     http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>, limits), context: context))
@@ -492,27 +531,42 @@ public class HttpClient <: Resource {
                         proxyAuthorization: authorization, context: context))
                 case _ => throw IllegalStateException("invalid HTTP duplex route generation")
             }
+            emitHttpObservation(context, NetworkEventKind.AttemptCompleted, NetworkEventOutcome.Succeeded)
+            attemptFinished = true
             match (result) {
                 case http1.HttpDuplexExchangeResult.Response(response) =>
                     try { captureCookies(response.headers, h1Request.url, context) }
                     catch (error: Exception) { response.close(); throw error }
+                    if (!deferRequestCompletion) {
+                        emitHttpObservation(context, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
+                    }
                     cancellation.retainResource(lifetime)
                     transferred = true
                     http1.HttpDuplexExchangeResult.Response(cancellation.wrap(response))
                 case http1.HttpDuplexExchangeResult.Connected(connection) =>
                     try { captureCookies(connection.headers, h1Request.url, context) }
                     catch (error: Exception) { connection.transport.close(); throw error }
-                    cancellation.fail()
+                    if (!deferRequestCompletion) {
+                        emitHttpObservation(context, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
+                    }
+                    cancellation.detachCancellation()
                     transferred = true
                     http1.HttpDuplexExchangeResult.Connected(http1.HttpDuplexConnection(
                         connection.status, connection.headers, connection.version,
-                        ClientRotationTransport(connection.transport, lifetime)))
+                        ClientRotationTransport(connection.transport, lifetime, cancellation),
+                        context: connection.operationContext.withCancellation(parent.cancellation)))
             }
-        } catch (error: Exception) { cancellation.fail(); throw error }
+        } catch (error: Exception) {
+            cancellation.fail()
+            emitHttpFailure(context, NetworkEventKind.RequestCompleted, error)
+            if (attemptStarted && !attemptFinished) { emitHttpFailure(context, NetworkEventKind.AttemptCompleted, error) }
+            throw error
+        }
         finally {
             if (!transferred) { lifetime.close() }
             invocation.close()
         }
+        (exchange, context)
     }
 
 /**
@@ -1048,40 +1102,6 @@ public class HttpClient <: Resource {
         }
     }
 
-    /**
-     * Runs one duplex handshake under the caller's aggregate request admission.
-     * The owner-scoped request lease is released with the rejected response body or,
-     * after a successful handshake, only when the transferred transport terminates.
-     */
-    private func executeAdmittedDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
-        protocol: ?String, context: OperationContext): http1.HttpDuplexExchangeResult {
-        let requestLease = resourceBudget.acquireRequest(
-            resourceOwner(h1Request.url),
-            context.forStage(transport.OperationTimeoutStage.RequestAdmission)
-        )
-        let cancellation = HttpRequestCancellationOperation(
-            context,
-            None<HttpRequestCancellationHandle>,
-            None<HttpConnectionCancellationHandle>,
-            None<HttpStreamCancellationHandle>
-        )
-        cancellation.retainResource(requestLease)
-        let result = try {
-            executeDuplex(h1Request, h2Request, protocol, context)
-        } catch (error: Exception) {
-            cancellation.fail()
-            throw error
-        }
-        match (result) {
-            case http1.HttpDuplexExchangeResult.Response(response) =>
-                http1.HttpDuplexExchangeResult.Response(cancellation.wrap(response))
-            case http1.HttpDuplexExchangeResult.Connected(connection) =>
-                http1.HttpDuplexExchangeResult.Connected(http1.HttpDuplexConnection(
-                    connection.status, connection.headers, connection.version,
-                    HttpAdmissionRetainedTransport(connection.transport, cancellation)
-                ))
-        }
-    }
 }
 
 private func toInternalProxyEndpoint(value: HttpProxyEndpoint): http1.Http1ProxyEndpoint {
@@ -1106,94 +1126,3 @@ private func withProxyAuthorization(request: HttpRequest, value: ?String, limits
     request.withHeaders(builder.build())
 }
 
-/** Retains one admitted request lease until the transferred duplex transport terminates. */
-private class HttpAdmissionRetainedTransport <: transport.DuplexTransport {
-    private let delegate: transport.DuplexTransport
-    private let cancellation: HttpRequestCancellationOperation
-    private let mutex = Mutex()
-    private var terminal = false
-
-    /**
-     * Wraps one exclusively transferred duplex transport.
-     * @param delegate Underlying transferred duplex transport.
-     * @param cancellation Request-cancellation owner that holds the admitted request lease.
-     */
-    init(delegate: transport.DuplexTransport, cancellation: HttpRequestCancellationOperation) {
-        this.delegate = delegate
-        this.cancellation = cancellation
-    }
-
-    /** Reports the delegated provider-neutral transport diagnostics. */
-    public prop info: transport.TransportInfo { get() { delegate.info } }
-
-    /**
-     * Reads at most destination.length bytes from the delegated transport.
-     * @param destination Caller-provided destination buffer.
-     * @param context Operation deadline and cancellation passed through unchanged.
-     */
-    public func readSome(
-        destination: transport.MutableByteSpan,
-        context!: OperationContext = OperationContext.background()
-    ): transport.ReadResult {
-        delegate.readSome(destination, context: context)
-    }
-
-    /**
-     * Writes at most source.length bytes to the delegated transport.
-     * @param source Caller-provided source bytes.
-     * @param context Operation deadline and cancellation passed through unchanged.
-     */
-    public func writeSome(
-        source: transport.ByteSpan,
-        context!: OperationContext = OperationContext.background()
-    ): Int64 {
-        delegate.writeSome(source, context: context)
-    }
-
-    /**
-     * Closes only the selected direction on the delegated transport.
-     * @param direction Direction to close.
-     */
-    public func shutdown(direction: transport.ShutdownDirection): Unit {
-        delegate.shutdown(direction)
-    }
-
-    /**
-     * Gracefully closes the delegated transport, then releases the admitted request lease.
-     * @param context Operation deadline and cancellation for the delegated close.
-     */
-    public func close(context: OperationContext): Unit {
-        if (!claimTerminal()) { return }
-        try { delegate.close(context) }
-        finally { cancellation.fail() }
-    }
-
-    /** Gracefully closes the delegated transport with the background context. */
-    public func close(): Unit { close(OperationContext.background()) }
-
-    /** Reports whether this transport or its delegate has terminated. */
-    public func isClosed(): Bool {
-        if (synchronized(mutex) { terminal }) { return true }
-        if (!delegate.isClosed()) { return false }
-        // Delegate termination is terminal for this wrapper: release the retained
-        // request admission even when the caller only observes isClosed().
-        if (claimTerminal()) { cancellation.fail() }
-        true
-    }
-
-    /**
-     * Immediately terminates the delegated transport, then releases the admitted request lease.
-     * @param reason Stable abort reason forwarded to the delegate.
-     */
-    public func abort(reason!: ?transport.AbortReason = None<transport.AbortReason>): Unit {
-        if (!claimTerminal()) { return }
-        try { delegate.abort(reason: reason) }
-        finally { cancellation.fail() }
-    }
-
-    private func claimTerminal(): Bool {
-        synchronized(mutex) {
-            if (terminal) { false } else { terminal = true; true }
-        }
-    }
-}

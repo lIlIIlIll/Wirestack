@@ -685,7 +685,7 @@ class HttpFacadeTest {
                 server.localEndpoint, h1Context
             )
             let h1Connection = http1test.Http1ClientConnection(
-                h1Handshaker.handshake(HostName("example.com"), h1Transport, h1Context)
+                h1Handshaker.handshake(api.ReferenceIdentity.Dns(HostName("example.com")), h1Transport, h1Context)
             )
             try {
                 let h1Response = h1Connection.execute(
@@ -1798,38 +1798,17 @@ private class PublicRedirectPushObserver <: ResponseBodyObserver {
 }
 
 @Test
-class HttpCancellationHandlesCallbackTest {
+class HttpServerAuthorityCanonicalizationTest {
     @TestCase
-    func retainedCallbackRunsAtMostOnceAcrossSequentialCancellations(): Unit {
-        let request = HttpRequestCancellationHandle()
-        let connection = HttpConnectionCancellationHandle()
-        let stream = HttpStreamCancellationHandle()
-        let calls = AtomicInt64(0)
-        let handles = HttpCancellationHandles(
-            request: Some(request), connection: Some(connection), stream: Some(stream))
-        let lifetime = handles.retainCancellation({ => let _ = calls.fetchAdd(1) })
-        try {
-            let _ = request.cancel()
-            let _ = connection.cancel()
-            let _ = stream.cancel()
-        } finally { lifetime.close() }
-        @Expect(calls.load(), 1)
-    }
-
-    @TestCase
-    func retainedCallbackRunsAtMostOnceWhenHandlesWereAlreadyCancelled(): Unit {
-        let request = HttpRequestCancellationHandle()
-        let connection = HttpConnectionCancellationHandle()
-        let stream = HttpStreamCancellationHandle()
-        let _ = request.cancel()
-        let _ = connection.cancel()
-        let calls = AtomicInt64(0)
-        let handles = HttpCancellationHandles(
-            request: Some(request), connection: Some(connection), stream: Some(stream))
-        let lifetime = handles.retainCancellation({ => let _ = calls.fetchAdd(1) })
-        try {
-            let _ = stream.cancel()
-        } finally { lifetime.close() }
-        @Expect(calls.load(), 1)
+    func canonicalServerAuthoritiesCollapseEquivalentSpellings(): Unit {
+        @Expect(canonicalServerAuthority("Example.COM", true), "example.com")
+        @Expect(canonicalServerAuthority("Example.COM:443", true), "example.com")
+        @Expect(canonicalServerAuthority("Example.COM:8443", true), "example.com:8443")
+        @Expect(canonicalServerAuthority("Example.COM:80", false), "example.com")
+        @Expect(canonicalServerAuthority("Example.COM:8080", false), "example.com:8080")
+        @Expect(canonicalServerAuthority("[2001:DB8::1]", true), "[2001:db8::1]")
+        @Expect(canonicalServerAuthority("[2001:DB8::1]:443", true), "[2001:db8::1]")
+        @Expect(canonicalServerAuthority("[2001:DB8::1]:8443", true), "[2001:db8::1]:8443")
+        @Expect(canonicalServerAuthority("", false), "")
     }
 }

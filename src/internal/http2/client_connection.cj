@@ -45,11 +45,14 @@ public class Http2ConnectedStream <: Resource {
     public let transport: DuplexTransport
     public let status: Int64
     public let headers: HttpHeaders
+    public let operationContext: OperationContext
 
-    internal init(transport: DuplexTransport, status: Int64, headers: HttpHeaders) {
+    internal init(transport: DuplexTransport, status: Int64, headers: HttpHeaders,
+        context!: OperationContext = OperationContext.background()) {
         this.transport = transport
         this.status = status
         this.headers = headers
+        this.operationContext = context
     }
 
     public func close(): Unit { transport.close() }
@@ -818,7 +821,7 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
                         { => finish() }
                     )
                     let connected = Http2ConnectResult.Connected(
-                        Http2ConnectedStream(transport, head.status, head.headers)
+                        Http2ConnectedStream(transport, head.status, head.headers, context: context)
                     )
                     synchronized(mutex) {
                         if (connectResult.isSome()) {
@@ -940,7 +943,7 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         }
     }
 
-    /** A connected stream no longer inherits the handshake operation budget. */
+    /** Transfers cancellation ownership to the connected stream's session owner. */
     func releaseHandshakeCancellation(): Unit {
         let registration = synchronized(mutex) {
             let value = streamCancellation

@@ -249,6 +249,7 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     }
 
     internal func fail(): Unit { release() }
+    internal func detachCancellation(): Unit { releaseRegistrations() }
     internal func retain(registration: transport.CancellationRegistration): Unit {
         let discard = synchronized(mutex) {
             if (released) { true } else { registrations.add(registration); false }

@@ -1,0 +1,2 @@
+M7-033 docs: FAIL
+- CJDOC_CHECK: wirestack.http strict check returned 1
