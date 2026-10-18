@@ -5,7 +5,7 @@ on:
     branches:
       - tmp/docgen
     paths:
-      - 'docs-harness-trigger/**'
+      - 'patches/**'
   workflow_dispatch:
 
 permissions:
@@ -203,12 +203,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: r202
-            base_ref: publish/m10-004-generation-rotation
-            patch: patches/pr-202.patch
-          - name: r203
-            base_ref: publish/m10-005-observability
-            patch: patches/pr-203.patch
           - name: r204
             base_ref: publish/m11-001-sse
             patch: patches/pr-204.patch
