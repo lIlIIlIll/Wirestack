@@ -1,0 +1,9 @@
+[package]
+name = "wirestack_m11_004_service"
+version = "1.0.0"
+cjc-version = "1.1.0"
+output-type = "executable"
+description = "Bounded HTTP service with explicit TLS rotation and shutdown"
+
+[dependencies]
+wirestack = { path = "../../install/wirestack" }
