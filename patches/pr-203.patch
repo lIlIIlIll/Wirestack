@@ -1,40 +1,12 @@
-diff --git a/src/http/server.cj b/src/http/server.cj
-index 07e5b7e3..7cd06e1e 100644
---- a/src/http/server.cj
-+++ b/src/http/server.cj
-@@ -572,11 +572,24 @@ public class HttpServer <: Resource {
-     }
- }
- 
-+/** Extracts the parser-validated authority from one HTTP/1 request head. */
-+private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): String {
-+    match (request.head.headers.getFirst("host")) {
-+        case Some(value) => value
-+        case None => ""
-+    }
-+}
-+
-+/** Derives request and stream budget owners from the validated request authority. */
-+private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
-+    let origin = if (authority.isEmpty()) { "server" } else { authority }
-+    internal.HttpResourceOwnerKey(origin, "listener")
-+}
-+
- private class PublicHttp1Handler <: http1.Http1ServerHandler {
-     private let delegate: HttpServerHandler
-     private let connectionCancellation: HttpConnectionCancellationHandle
-     private let resourceBudget: internal.HttpResourceBudget
--    private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
-     init(
-         delegate: HttpServerHandler,
-         resourceBudget: internal.HttpResourceBudget,
-@@ -596,7 +609,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
-         context: transport.OperationContext): http1.Http1ServerResponse {
-         let operation = observedRequestContext(context, delegate is ServiceHookHandler)
-         emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
--        let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
-+        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request))
-+        let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
-             case Some(value) => value
-             case None =>
-                 resourceBudget.recordAdmissionRejection()
+diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
+index 2510163f..a66dc911 100644
+--- a/src/internal/http2/client_connection.cj
++++ b/src/internal/http2/client_connection.cj
+@@ -1256,7 +1256,6 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+                         case None => changed.wait()
+                     }
+                 }
+-                checkClientContext(readContext)
+                 if (let Some(error) <- failure) { throw error }
+                 if (closed) { return ReadResult.EndOfStream }
+                 if (segments.isEmpty()) { return ReadResult.EndOfStream }

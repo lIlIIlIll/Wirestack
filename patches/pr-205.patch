@@ -1,40 +1,70 @@
-diff --git a/src/http/server.cj b/src/http/server.cj
-index 07e5b7e3..7cd06e1e 100644
---- a/src/http/server.cj
-+++ b/src/http/server.cj
-@@ -572,11 +572,24 @@ public class HttpServer <: Resource {
-     }
+diff --git a/src/http/client.cj b/src/http/client.cj
+index 838451ac..8cd9e9a7 100644
+--- a/src/http/client.cj
++++ b/src/http/client.cj
+@@ -479,16 +479,16 @@ public class HttpClient <: Resource {
+         try {
+             let result = match (slot.client) {
+                 case value: http1.Http1CleartextClient =>
+-                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>), context: context))
++                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>, limits), context: context))
+                 case value: http1.Http1ForwardProxyClient =>
+                     let authorization = proxy.getOrThrow().authorization(h1Request.url, context)
+-                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, authorization), context: context))
++                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, authorization, limits), context: context))
+                 case value: http1.HttpAutomaticHttpsClient =>
+-                    value.upgrade(withProxyAuthorization(h1Request, None<String>),
+-                        withProxyAuthorization(h2Request, None<String>), protocol: protocol, context: context)
++                    value.upgrade(withProxyAuthorization(h1Request, None<String>, limits),
++                        withProxyAuthorization(h2Request, None<String>, limits), protocol: protocol, context: context)
+                 case value: http1.Http1HttpsProxyClient =>
+                     let authorization = proxy.getOrThrow().authorization(h1Request.url, context)
+-                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>),
++                    http1.mapHttp1Upgrade(value.upgrade(withProxyAuthorization(h1Request, None<String>, limits),
+                         proxyAuthorization: authorization, context: context))
+                 case _ => throw IllegalStateException("invalid HTTP duplex route generation")
+             }
+@@ -648,16 +648,16 @@ public class HttpClient <: Resource {
+         try {
+             let response = match (slot.client) {
+                 case value: http1.Http1CleartextClient =>
+-                    value.execute(withProxyAuthorization(request, None<String>), context: context, trailer: trailer)
++                    value.execute(withProxyAuthorization(request, None<String>, limits), context: context, trailer: trailer)
+                 case value: http1.Http1ForwardProxyClient =>
+                     let authorization = proxy.getOrThrow().authorization(request.url, context)
+-                    value.execute(withProxyAuthorization(request, authorization), context: context, trailer: trailer)
++                    value.execute(withProxyAuthorization(request, authorization, limits), context: context, trailer: trailer)
+                 case value: http1.HttpAutomaticHttpsClient =>
+-                    value.execute(withProxyAuthorization(request, None<String>), context: context,
++                    value.execute(withProxyAuthorization(request, None<String>, limits), context: context,
+                         trailer: trailer, connectionCancellation: connectionCancellation)
+                 case value: http1.Http1HttpsProxyClient =>
+                     let authorization = proxy.getOrThrow().authorization(request.url, context)
+-                    value.execute(withProxyAuthorization(request, None<String>), proxyAuthorization: authorization,
++                    value.execute(withProxyAuthorization(request, None<String>, limits), proxyAuthorization: authorization,
+                         context: context, trailer: trailer)
+                 case _ => throw IllegalStateException("invalid HTTP route generation")
+             }
+@@ -1073,8 +1073,8 @@ private func toInternalProxyEndpoint(value: HttpProxyEndpoint): http1.Http1Proxy
  }
  
-+/** Extracts the parser-validated authority from one HTTP/1 request head. */
-+private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): String {
-+    match (request.head.headers.getFirst("host")) {
-+        case Some(value) => value
-+        case None => ""
-+    }
-+}
-+
-+/** Derives request and stream budget owners from the validated request authority. */
-+private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
-+    let origin = if (authority.isEmpty()) { "server" } else { authority }
-+    internal.HttpResourceOwnerKey(origin, "listener")
-+}
-+
- private class PublicHttp1Handler <: http1.Http1ServerHandler {
-     private let delegate: HttpServerHandler
-     private let connectionCancellation: HttpConnectionCancellationHandle
-     private let resourceBudget: internal.HttpResourceBudget
--    private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
-     init(
-         delegate: HttpServerHandler,
-         resourceBudget: internal.HttpResourceBudget,
-@@ -596,7 +609,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
-         context: transport.OperationContext): http1.Http1ServerResponse {
-         let operation = observedRequestContext(context, delegate is ServiceHookHandler)
-         emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
--        let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
-+        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request))
-+        let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
-             case Some(value) => value
-             case None =>
-                 resourceBudget.recordAdmissionRejection()
+ /** Removes caller-supplied proxy credentials and adds only the route hook's validated value. */
+-private func withProxyAuthorization(request: HttpRequest, value: ?String): HttpRequest {
+-    let builder = HttpHeaders.builder()
++private func withProxyAuthorization(request: HttpRequest, value: ?String, limits: HttpLimits): HttpRequest {
++    let builder = HttpHeaders.builder(limits: limits)
+     for (entry in request.headers.entries) {
+         if (entry.name.toAsciiLower() != "proxy-authorization") {
+             builder.add(entry.name, entry.value)
+diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
+index 882779b7..b1102504 100644
+--- a/src/internal/http2/client_connection.cj
++++ b/src/internal/http2/client_connection.cj
+@@ -1256,7 +1256,6 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+                         case None => changed.wait()
+                     }
+                 }
+-                checkClientContext(readContext)
+                 if (let Some(error) <- failure) { throw error }
+                 if (closed) { return ReadResult.EndOfStream }
+                 if (segments.isEmpty()) { return ReadResult.EndOfStream }
