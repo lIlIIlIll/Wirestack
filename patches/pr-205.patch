@@ -502,7 +502,7 @@ index 1f857d81..526ff31f 100644
                      case Http1ConnectExchangeResult.Tunnel(value) =>
                          Http1UpgradeExchangeResult.Upgraded(Http1Upgrade(value.responseHead, "CONNECT", value.transport))
 diff --git a/src/internal/http1/connection_pool.cj b/src/internal/http1/connection_pool.cj
-index e53b2b7a..e396a219 100644
+index e53b2b7a..0a680f43 100644
 --- a/src/internal/http1/connection_pool.cj
 +++ b/src/internal/http1/connection_pool.cj
 @@ -457,6 +457,21 @@ public class Http1ConnectionPool <: Resource {
@@ -520,7 +520,7 @@ index e53b2b7a..e396a219 100644
 +                        if (idleOther >= 0) {
 +                            let removed = entries.remove(at: idleOther)
 +                            changed.notifyAll()
-+                            return Http1PoolDecision.Discard(removed.connection, removed.resourceLease)
++                            return Http1PoolDecision.Discard(removed)
 +                        }
 +                    }
 +
@@ -665,7 +665,7 @@ index 1d0d7387..667aa155 100644
 -    true
 -}
 diff --git a/src/internal/http1/http2_connection_pool.cj b/src/internal/http1/http2_connection_pool.cj
-index b77d591f..b835260e 100644
+index b77d591f..f862540f 100644
 --- a/src/internal/http1/http2_connection_pool.cj
 +++ b/src/internal/http1/http2_connection_pool.cj
 @@ -575,11 +575,16 @@ public class Http2ConnectionPool <: Resource {
@@ -686,7 +686,7 @@ index b77d591f..b835260e 100644
                      available += max(0, Int64(entry.connection.streamCapacity) - current)
                  }
              }
-@@ -707,6 +712,22 @@ public class Http2ConnectionPool <: Resource {
+@@ -707,6 +712,20 @@ public class Http2ConnectionPool <: Resource {
                              reservations.add(key)
                              return Http2PoolDecision.Reserve(id)
                          }
@@ -701,15 +701,13 @@ index b77d591f..b835260e 100644
 +                            if (idle >= 0) {
 +                                let removed = entries.remove(at: idle)
 +                                changed.notifyAll()
-+                                return Http2PoolDecision.Discard(
-+                                    removed.connection, removed.resourceLease
-+                                )
++                                return Http2PoolDecision.Discard(removed)
 +                            }
 +                        }
                      }
                      if (waiterId == 0) {
                          match (admissionQueue.enqueue(key)) {
-@@ -730,10 +751,40 @@ public class Http2ConnectionPool <: Resource {
+@@ -730,10 +749,40 @@ public class Http2ConnectionPool <: Resource {
      private func removeHttp2WaiterLocked(id: Int64, granted: Bool): Unit {
          if (admissionQueue.remove(id, granted)) {
              waiters--
@@ -750,7 +748,7 @@ index b77d591f..b835260e 100644
      private func findUnusableEmptyConnection(now: MonoTime): Int64 {
          for (index in 0..entries.size) {
              let entry = entries[index]
-@@ -744,6 +795,15 @@ public class Http2ConnectionPool <: Resource {
+@@ -744,6 +793,15 @@ public class Http2ConnectionPool <: Resource {
          -1
      }
  
@@ -766,7 +764,7 @@ index b77d591f..b835260e 100644
      private func findHttp2Entry(id: Int64): Int64 {
          for (index in 0..entries.size) {
              if (entries[index].id == id) { return index }
-@@ -772,8 +832,9 @@ public class Http2ConnectionPool <: Resource {
+@@ -772,8 +830,9 @@ public class Http2ConnectionPool <: Resource {
      private func canAcquireHttp2(key: HttpConnectionPoolKey, now: MonoTime): Bool {
          hasAvailableHttp2(key, now) ||
              (!hasHttp2Reservation(key) &&
