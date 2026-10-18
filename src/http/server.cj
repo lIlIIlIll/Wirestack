@@ -570,6 +570,15 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
 }
 
 
+internal func canonicalServerAuthority(authority: String, secured: Bool): String {
+    if (authority.isEmpty()) { return "" }
+    let scheme = if (secured) { "https" } else { "http" }
+    let defaultPort: UInt16 = if (secured) { 443u16 } else { 80u16 }
+    let parsed = HttpUrl.parse("${scheme}://${authority}/")
+    let host = if (parsed.host.contains(":")) { "[${parsed.host}]" } else { parsed.host }
+    if (parsed.explicitPort && parsed.port != defaultPort) { "${host}:${parsed.port}" } else { host }
+}
+
 private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
     let origin = if (authority.isEmpty()) { "server" } else { authority }
     internal.HttpResourceOwnerKey(origin, "listener")
