@@ -153,3 +153,4 @@ coverage/
 !docs/evidence/M12-004/**
 !docs/references/m12-004-aws-lc-upgrade.json
 !docs/gates/M12-004-task.json
+!docs/gates/M12-003-task.json
