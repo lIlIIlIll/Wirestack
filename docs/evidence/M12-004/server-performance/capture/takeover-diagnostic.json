@@ -1,0 +1,411 @@
+{
+  "scope": "One-shot stalled-campaign diagnostic, no measurement or restart",
+  "reports_present": {
+    "report.json": false,
+    "launch.json": false,
+    "performance-progress.json": true
+  },
+  "progress": {
+    "status": "INCOMPLETE",
+    "samples": {
+      "baseline": 172,
+      "candidate": 228
+    },
+    "sample_failures": [
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": -1,
+        "error": "0032-http_unobserved-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": -1,
+        "error": "0034-http_observed-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": -1,
+        "error": "0046-h2_streams_1-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": -1,
+        "error": "0048-h1_early_close-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": -1,
+        "error": "0052-h1_bulk_32768-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": -1,
+        "error": "0054-h1_bulk_4096-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": -1,
+        "error": "0056-h1_new_connection-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": -1,
+        "error": "0058-h1_short_reuse-warmup-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": 0,
+        "error": "0099-h1_short_reuse-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": 0,
+        "error": "0101-h1_new_connection-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": 0,
+        "error": "0103-h1_bulk_4096-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": 0,
+        "error": "0105-h1_bulk_32768-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": 0,
+        "error": "0109-h1_early_close-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": 0,
+        "error": "0111-h2_streams_1-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": 0,
+        "error": "0123-http_observed-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": 0,
+        "error": "0125-http_unobserved-round-0 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": 1,
+        "error": "0164-http_unobserved-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": 1,
+        "error": "0166-http_observed-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": 1,
+        "error": "0178-h2_streams_1-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": 1,
+        "error": "0180-h1_early_close-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": 1,
+        "error": "0184-h1_bulk_32768-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": 1,
+        "error": "0186-h1_bulk_4096-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": 1,
+        "error": "0188-h1_new_connection-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": 1,
+        "error": "0190-h1_short_reuse-round-1 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": 2,
+        "error": "0231-h1_short_reuse-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": 2,
+        "error": "0233-h1_new_connection-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": 2,
+        "error": "0235-h1_bulk_4096-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": 2,
+        "error": "0237-h1_bulk_32768-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": 2,
+        "error": "0241-h1_early_close-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": 2,
+        "error": "0243-h2_streams_1-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": 2,
+        "error": "0255-http_observed-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": 2,
+        "error": "0257-http_unobserved-round-2 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": 3,
+        "error": "0296-http_unobserved-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": 3,
+        "error": "0298-http_observed-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": 3,
+        "error": "0310-h2_streams_1-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": 3,
+        "error": "0312-h1_early_close-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": 3,
+        "error": "0316-h1_bulk_32768-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": 3,
+        "error": "0318-h1_bulk_4096-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": 3,
+        "error": "0320-h1_new_connection-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": 3,
+        "error": "0322-h1_short_reuse-round-3 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": 4,
+        "error": "0363-h1_short_reuse-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": 4,
+        "error": "0365-h1_new_connection-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": 4,
+        "error": "0367-h1_bulk_4096-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": 4,
+        "error": "0369-h1_bulk_32768-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": 4,
+        "error": "0373-h1_early_close-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": 4,
+        "error": "0375-h2_streams_1-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": 4,
+        "error": "0387-http_observed-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": 4,
+        "error": "0389-http_unobserved-round-4 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_unobserved",
+        "round": 5,
+        "error": "0428-http_unobserved-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "http_observed",
+        "round": 5,
+        "error": "0430-http_observed-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h2_streams_1",
+        "round": 5,
+        "error": "0442-h2_streams_1-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_early_close",
+        "round": 5,
+        "error": "0444-h1_early_close-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_32768",
+        "round": 5,
+        "error": "0448-h1_bulk_32768-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_bulk_4096",
+        "round": 5,
+        "error": "0450-h1_bulk_4096-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_new_connection",
+        "round": 5,
+        "error": "0452-h1_new_connection-round-5 failed (1, timeout=False); complete logs retained"
+      },
+      {
+        "artifact": "baseline",
+        "case": "h1_short_reuse",
+        "round": 5,
+        "error": "0454-h1_short_reuse-round-5 failed (1, timeout=False); complete logs retained"
+      }
+    ],
+    "last_recorded_sample": {
+      "baseline": {
+        "scenario": "udp_packets",
+        "round": 5,
+        "warmup": false,
+        "command_id": "0468-udp_packets-round-5"
+      },
+      "candidate": {
+        "scenario": "udp_packets",
+        "round": 5,
+        "warmup": false,
+        "command_id": "0467-udp_packets-round-5"
+      }
+    }
+  },
+  "processes": [
+    {
+      "pid": 1269639,
+      "command": "python3 <task>/capture/launch.py ",
+      "stat": "1269639 (python3) S 1 1269639 1269639 0 -1 4194304 123084 0 0 0 159 35 0 0 20 0 1 0 16809505 52916224 10707 18446744073709551615 94571439648768 94571442488845 140737096203296 0 0 0 0 16781312 2 1 0 0 17 18 0 0 0 0 0 94571444860976 94571445145048 94571489374208 140737096211834 140737096211924 140737096211924 140737096212455 0\n",
+      "wchan": "do_wait",
+      "syscall": "PermissionError"
+    },
+    {
+      "pid": 1269640,
+      "command": "/usr/bin/python3 <task>/capture/driver.py ",
+      "stat": "1269640 (python3) R 1269639 1269639 1269639 0 -1 4194560 389869 64882448 3 21664 5088 1098 126941 22208 20 0 1 0 16809701 204152832 29808 18446744073709551615 94806874701824 94806877541901 140728411278016 0 0 0 0 16781312 2 0 0 0 17 6 0 0 0 0 0 94806879914032 94806880198104 94807886024704 140728411282295 140728411282394 140728411282394 140728411283431 0\n",
+      "wchan": "0",
+      "syscall": "running\n"
+    },
+    {
+      "pid": 1459714,
+      "command": "python3 <task>/capture/supervise.py ",
+      "stat": "1459714 (python3) S 1 1459714 1459714 0 -1 4194304 1550 0 0 0 2 0 0 0 20 0 1 0 16824642 18173952 2650 18446744073709551615 93907565023232 93907567863309 140729072742944 0 0 0 0 16781312 2 1 0 0 17 78 0 0 0 0 0 93907570235440 93907570519512 93908034637824 140729072745847 140729072745940 140729072745940 140729072746471 0\n",
+      "wchan": "do_select",
+      "syscall": "PermissionError"
+    },
+    {
+      "pid": 1460672,
+      "command": "python3 <task>/capture/supervise.py ",
+      "stat": "1460672 (python3) S 1 1460672 1460672 0 -1 4194304 1547 0 0 0 3 0 0 0 20 0 1 0 16833184 18173952 2675 18446744073709551615 94024017244160 94024020084237 140726703733296 0 0 0 0 16781312 2 1 0 0 17 47 0 0 0 0 0 94024022456368 94024022740440 94024157716480 140726703734135 140726703734228 140726703734228 140726703734759 0\n",
+      "wchan": "do_select",
+      "syscall": "PermissionError"
+    },
+    {
+      "pid": 1461468,
+      "command": "python3 <task>/capture/supervise.py ",
+      "stat": "1461468 (python3) S 1461467 1461467 1461467 0 -1 4194304 1279 0 0 0 2 1 0 0 20 0 1 0 16843794 18173952 2676 18446744073709551615 94339907866624 94339910706701 140728358283856 0 0 0 0 16781312 2 1 0 0 17 44 0 0 0 0 0 94339913078832 94339913362904 94340839870464 140728358288759 140728358288852 140728358288852 140728358289383 0\n",
+      "wchan": "do_select",
+      "syscall": "PermissionError"
+    },
+    {
+      "pid": 1466188,
+      "command": "python3 <task>/capture/supervise.py ",
+      "stat": "1466188 (python3) S 1466187 1466188 1466188 0 -1 4194304 1551 0 0 0 2 0 0 0 20 0 1 0 17025992 18173952 2660 18446744073709551615 94200321642496 94200324482573 140727193205024 0 0 0 0 16781312 2 1 0 0 17 0 0 0 0 0 0 94200326854704 94200327138776 94201205735424 140727193206135 140727193206228 140727193206228 140727193206759 0\n",
+      "wchan": "do_select",
+      "syscall": "PermissionError"
+    }
+  ]
+}

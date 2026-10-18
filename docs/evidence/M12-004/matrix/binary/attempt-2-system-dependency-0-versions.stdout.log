@@ -1,0 +1,45 @@
+
+Version symbols section '.gnu.version' contains 29 entries:
+ Addr: 0x0000000000000822  Offset: 0x00000822  Link: 3 (.dynsym)
+  000:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  004:   e (GLIBC_2.2.5)   b (GLIBC_2.28)    8 (GLIBC_2.11)    9 (GLIBC_2.12) 
+  008:   c (GLIBC_2.30)    d (GLIBC_2.31)    4 (GLIBC_2.3.2)   5 (GLIBC_2.3.3)
+  00c:   6 (GLIBC_2.3.4)   a (GLIBC_2.18)    bh(GLIBC_2.28)    8h(GLIBC_2.11) 
+  010:   7h(GLIBC_2.4)     2h(GLIBC_2.2.5)   ch(GLIBC_2.30)    5h(GLIBC_2.3.3)
+  014:   9h(GLIBC_2.12)    ah(GLIBC_2.18)    dh(GLIBC_2.31)    3h(GLIBC_2.2.6)
+  018:   6h(GLIBC_2.3.4)   4h(GLIBC_2.3.2)   2 (GLIBC_2.2.5)   3 (GLIBC_2.2.6)
+  01c:   7 (GLIBC_2.4)  
+
+Version definition section '.gnu.version_d' contains 13 entries:
+ Addr: 0x0000000000000860  Offset: 0x00000860  Link: 4 (.dynstr)
+  000000: Rev: 1  Flags: BASE  Index: 1  Cnt: 1  Name: libpthread.so.0
+  0x001c: Rev: 1  Flags: none  Index: 2  Cnt: 1  Name: GLIBC_2.2.5
+  0x0038: Rev: 1  Flags: none  Index: 3  Cnt: 2  Name: GLIBC_2.2.6
+  0x0054: Parent 1: GLIBC_2.2.5
+  0x005c: Rev: 1  Flags: none  Index: 4  Cnt: 2  Name: GLIBC_2.3.2
+  0x0078: Parent 1: GLIBC_2.2.6
+  0x0080: Rev: 1  Flags: none  Index: 5  Cnt: 2  Name: GLIBC_2.3.3
+  0x009c: Parent 1: GLIBC_2.3.2
+  0x00a4: Rev: 1  Flags: none  Index: 6  Cnt: 2  Name: GLIBC_2.3.4
+  0x00c0: Parent 1: GLIBC_2.3.3
+  0x00c8: Rev: 1  Flags: none  Index: 7  Cnt: 2  Name: GLIBC_2.4
+  0x00e4: Parent 1: GLIBC_2.3.4
+  0x00ec: Rev: 1  Flags: none  Index: 8  Cnt: 2  Name: GLIBC_2.11
+  0x0108: Parent 1: GLIBC_2.4
+  0x0110: Rev: 1  Flags: none  Index: 9  Cnt: 2  Name: GLIBC_2.12
+  0x012c: Parent 1: GLIBC_2.11
+  0x0134: Rev: 1  Flags: none  Index: 10  Cnt: 2  Name: GLIBC_2.18
+  0x0150: Parent 1: GLIBC_2.12
+  0x0158: Rev: 1  Flags: none  Index: 11  Cnt: 2  Name: GLIBC_2.28
+  0x0174: Parent 1: GLIBC_2.18
+  0x017c: Rev: 1  Flags: none  Index: 12  Cnt: 2  Name: GLIBC_2.30
+  0x0198: Parent 1: GLIBC_2.28
+  0x01a0: Rev: 1  Flags: none  Index: 13  Cnt: 2  Name: GLIBC_2.31
+  0x01bc: Parent 1: GLIBC_2.30
+
+Version needs section '.gnu.version_r' contains 1 entry:
+ Addr: 0x0000000000000a28  Offset: 0x00000a28  Link: 4 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 3
+  0x0010:   Name: GLIBC_ABI_DT_X86_64_PLT  Flags: none  Version: 16
+  0x0020:   Name: GLIBC_ABI_DT_RELR  Flags: none  Version: 15
+  0x0030:   Name: GLIBC_2.2.5  Flags: none  Version: 14

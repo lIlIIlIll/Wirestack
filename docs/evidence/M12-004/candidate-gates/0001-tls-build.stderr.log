@@ -1,0 +1,2 @@
+Error: the package name in <scratch>/tls-consumer/src is wrong, the right name should be 'wirestack_release_smoke'
+Error: cjpm build failed

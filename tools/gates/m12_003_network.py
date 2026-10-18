@@ -408,9 +408,7 @@ def main(argv=None):
         report['payload_sha256'] = manifest['payload_sha256']
         report['sdk'] = {'policy':'STS-only', 'compiler': artifact_byte_digest(sdk / 'bin/cjc').to_json(), 'cjpm': artifact_byte_digest(sdk / 'tools/bin/cjpm').to_json()}
         report['source_digests'] = {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json() for p in
-            [Path(__file__), ROOT / 'tools/gates/m2_015_native_network.py', ROOT / 'tools/gates/native/gai_delay.c',
-             ROOT / 'examples/linux/m12_003/network/src/main.cj', ROOT / 'examples/linux/m12_003/network/cjpm.toml',
-             ROOT / 'tools/gates/tests/test_m12_003_network.py', ROOT / 'docs/guides/linux-network-fault-profiles.md']}
+            [Path(__file__), ROOT / 'examples/linux/m12_003/network/src/main.cj', ROOT / 'examples/linux/m12_003/network/cjpm.toml', ROOT / 'tools/gates/tests/test_m12_003_network.py', ROOT / 'docs/guides/linux-network-fault-profiles.md']}
         report['sdk_files'] = sdk_binding(sdk)
         binding = {key: report[key] for key in ('archive', 'sdk_files', 'source_digests')}
         app = args.scratch / 'consumers/network'

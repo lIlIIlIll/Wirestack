@@ -1,0 +1,72 @@
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(GCDAProfiling.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfiling.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingInternal.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingValue.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingBuffer.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingFile.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingMerge.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingMergeFile.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingNameVar.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingVersionVar.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingWriter.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformDarwin.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformFuchsia.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformLinux.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformOther.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformWindows.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingRuntime.cpp.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingUtil.c.o)
+
+There is no dynamic section in this file.

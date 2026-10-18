@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-console.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000005590 <_init@@Base>:
+    5590:	sub    $0x8,%rsp
+    5594:	mov    0x206995(%rip),%rax        # 20bf30 <__gmon_start__>
+    559b:	test   %rax,%rax
+    559e:	je     55a2 <_init@@Base+0x12>
+    55a0:	call   *%rax
+    55a2:	add    $0x8,%rsp
+    55a6:	ret
+
+Disassembly of section .plt:
+
+00000000000055b0 <_CNatXPG_6isNullHv@plt-0x10>:
+    55b0:	push   0x206a52(%rip)        # 20c008 <_CNau15defaultCapacityE@@Base+0x201b08>
+    55b6:	jmp    *0x206a54(%rip)        # 20c010 <_CNau15defaultCapacityE@@Base+0x201b10>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "b3fbce5551564e2053edfc60add04c72357daa24bc3f917ac794cd7fc006f6c3"}

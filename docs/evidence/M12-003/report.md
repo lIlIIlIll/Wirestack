@@ -1,7 +1,7 @@
 # M12-003: STS native fault and resilience evidence
 ## Current source status
 
-BLOCKED. Current source-bound campaign verification exits 1 because review fixes changed campaign-bound gate inputs ([verifier log](current-source-verification.log)); the first recorded mismatch is `tools/gates/m12_003_network.py`, and later follow-ups changed the campaign validator, family producers, network helper/interposer binding, lifecycle SDK closure, observation/cleanup contracts, the task source inventory and their regression contracts. The recorded Python contract run was 42 tests, 41 passed and one was skipped ([final log](review-contract-tests-final.log)); later follow-ups add regression tests on top of that record. No native campaign has been rerun against any updated gate. Results below remain historical.
+BLOCKED. Current source-bound campaign verification exits 1 because review fixes changed tools/gates/m12_003_network.py ([verifier log](current-source-verification.log)). The current Python contract suite ran 42 tests, 41 passed and one was skipped ([final log](review-contract-tests-final.log)). No native campaign has been rerun against the updated gates. Results below remain historical.
 
 ## Workspace and scope
 
@@ -30,7 +30,7 @@ Future SDK execution is STS-only. This task executed only the qualified STS 1.1.
 | Native network regressions | Actual packet loss and original-response retransmission, DNS and native peer modes | 4/4 PASS, 0 skipped | `network/native-guest/unit-tests.log` |
 | Host behavioral suite | 37 discovered; packet regression unavailable on host | 36 PASS, 1 explicitly skipped | `unit-tests.log` |
 
-Historical record: the task gate reported PASS for the original source inputs. That receipt does not validate the updated gates. The current [task-gate disposition](verification.json) is BLOCKED because campaign-bound gate inputs changed (first recorded mismatch: `tools/gates/m12_003_network.py`; later follow-ups also changed `tools/gates/m12_003_campaign.py`, the resource/lifecycle producers, the network helper/interposer binding, the M12-003 source inventory, and the imported M12-002 consumer-source/resume verifier); no fresh native campaign validates the updated sources.
+Historical record: the task gate reported PASS for the original source inputs. That receipt does not validate the updated gates. The current [task-gate disposition](verification.json) is BLOCKED because `tools/gates/m12_003_network.py` changed; no fresh native campaign validates the updated sources.
 
 Native semantics cover distinct DNS deadline/late response, IPv6 blackhole with reachable IPv4, multi-candidate cancellation, real delay/loss, RST, silent disconnect, peer backpressure, new connections after fault removal, bounded resolver admission, HTTP/2 slow consumers/GOAWAY/per-stream isolation, SSE/WebSocket cancellation/disconnect, gzip rejection/recovery, cancellation storms and rotation/shutdown races. Public ledgers and observable resolver work return to zero. Native FD/tasks/RSS are sampled separately; RSS is not a logical ownership counter. Unobservable cancellation-registration, reserved-request and local H2-window counters remain UNAVAILABLE.
 

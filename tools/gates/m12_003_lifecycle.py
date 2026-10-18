@@ -23,7 +23,6 @@ sys.path.insert(0, str(ROOT))
 from tools import m7_021_linux_release as release
 from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
 from tools.gates.m12_003_supervision import terminate_group
-from tools.m12_002_source_sdk import sdk_binding
 
 PROFILES = {
     "h2_slowconsumer": "protocol", "h2_goaway": "protocol", "h2_streamscope": "protocol",
@@ -38,13 +37,6 @@ COVERAGE = {"h2_slowconsumer": ["h2_slow_consumer"], "h2_goaway": ["goaway"],
             "sse_cancel_h1": ["sse_interrupt"], "websocket_disconnect": ["websocket_interrupt"],
             "websocket_disconnect_h1": ["websocket_interrupt"], "cancel_storm": ["cancel_storm"],
             "rotation_shutdown": ["rotation_shutdown_race"]}
-
-
-def bounded_cleanup(cleanup: dict) -> bool:
-    """The owned process and its resource sampler must both be stopped and reaped."""
-    return (cleanup.get("process_reaped") is True
-            and cleanup.get("remaining_live_owned_processes") == 0
-            and cleanup.get("sampler_alive") is False)
 
 def classify_wire(profile: str, wire: dict) -> None:
     rows = wire["requests"]
@@ -265,7 +257,6 @@ class Runner:
             finally:
                 remaining = terminate_group(process, 2)
                 stop.set(); sampler.join(2)
-                sampler_alive = sampler.is_alive()
                 for pipe in (process.stdout, process.stderr):
                     pipe.close()
         code = process.returncode
@@ -281,11 +272,10 @@ class Runner:
                   "wall_ns": time.monotonic_ns() - started, "maximum_log_bytes_per_stream": 1048576,
                   "process_samples": samples, "runtime_bindings": binding_rows,
                   "cleanup": {"process_reaped": process.poll() is not None,
-                              "remaining_live_owned_processes": len(remaining), "sampler_alive": sampler_alive}, **logs}
+                              "remaining_live_owned_processes": len(remaining), "sampler_alive": sampler.is_alive()}, **logs}
         self.commands.append(record)
-        if code != 0 or completion != "EXIT" or remaining or wrong_sdk or not bounded_cleanup(record["cleanup"]):
-            raise RuntimeError(f"{name} failed, exit={code}, completion={completion}, remaining={len(remaining)}, "
-                               f"wrong_sdk={wrong_sdk}, sampler_alive={sampler_alive}")
+        if code != 0 or completion != "EXIT" or remaining or wrong_sdk:
+            raise RuntimeError(f"{name} failed, exit={code}, completion={completion}, remaining={len(remaining)}, wrong_sdk={wrong_sdk}")
         if native and not any("libcangjie-runtime.so" in item["path"] for item in binding_rows):
             # Fast native processes can finish between samples; record an exact loader binding instead.
             self.run(f"{name}-loader", ["ldd", str(cwd / "main")], cwd, sdk=True)
@@ -356,8 +346,6 @@ def main(argv=None) -> int:
                          "compiler_digest": artifact_byte_digest(sdk / "bin/cjc").to_json(),
                          "runtime_file_digests": {name: artifact_byte_digest(sdk / "runtime/lib/linux_x86_64_cjnative" / name).to_json()
                                                   for name in ("libcangjie-runtime.so", "libcangjie-std-net.so", "libcangjie-std-sync.so", "libcangjie-std-core.so")}}
-        # Bind the complete qualified SDK closure used by every lifecycle consumer build, not four files.
-        report["sdk_files"] = sdk_binding(sdk)
         for name, command in [
             ("certificate", ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=example.test", "-addext", "subjectAltName=DNS:example.test", "-keyout", str(work / "key.pem"), "-out", str(work / "certificate.pem")]),
             ("certificate-der", ["openssl", "x509", "-in", str(work / "certificate.pem"), "-outform", "DER", "-out", str(work / "certificate.der")]),

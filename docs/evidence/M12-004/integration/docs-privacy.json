@@ -1,0 +1,18 @@
+{
+  "checked_evidence_text_files": 5947,
+  "command": "python3 <scratch>/check-task-docs.py <repo>",
+  "docs": [
+    "docs/evidence/M12-004/README.md",
+    "docs/guides/dependency-upgrade-runbook.md",
+    "docs/guides/native-dependency-inventory.md",
+    "docs/guides/release-verifier-rejection-controls.md",
+    "docs/guides/nonproduction-rollback.md",
+    "docs/guides/candidate-dependency-gates.md"
+  ],
+  "existing_relative_links": 39,
+  "privacy_scope": "Selected task evidence: no literal current HOME/repo path or NUL; not a whole-repository or pre-push privacy clearance.",
+  "qualification": "NOT_QUALIFIED",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M12-004"
+}

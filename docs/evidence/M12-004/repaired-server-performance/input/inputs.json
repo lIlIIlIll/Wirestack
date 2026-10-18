@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "scope": "SERVER_REPAIRED_SOURCE_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "qualification": "NOT_QUALIFIED",
+  "repo_head_at_capture": "5c6f238d1824039150832ebbeaa624f96114e29d",
+  "source_inputs": {
+    "tools/evidence_digest.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44f03ada4f369f4b1d74f48312c71b32696094f4d9e3f6adb1a9f879b8b1db84"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"
+    },
+    "tools/benchmarks/m12_001_end_to_end.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "876a584cc146eafbce63c5c836f805aa05d1f456691c3a11c720452e401c26f6"
+    },
+    "tools/gates/m7_024_linux_performance.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47953663b686b99ec87fa48698550f09ac7e67ea6884dbc1e36e9e909bbcefad"
+    },
+    "tools/m12_004_candidate_gates.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "71d6e4d2458eb585cc05fa7e349d1e7b4140e03fee28a445ae51f4d55c59af57"
+    },
+    "tools/gates/campaigns/m7-024-linux-performance.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e5d3425fd2b31794b44d72d75c245f40bc96ed318ca8aba2eaf373ee46eab0d"
+    },
+    "examples/linux/m12_001/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "877b4f985d16c990c43ebfca9627d85aa94460ccfcc043c228448e0703153129"
+    },
+    "examples/linux/m12_001/http.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7"
+    },
+    "examples/linux/m12_001/streams.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3701649e791d4551e7cc35f4fe38107c744521c19b736f81e5ce05ff61e99102"
+    },
+    "examples/linux/m12_001/transport_tls.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49f45578676208727f773128bd907320079500d11f099eb138218a20de8891e6"
+    }
+  },
+  "artifacts": {
+    "baseline.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+    },
+    "candidate.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+    }
+  },
+  "sdk_oracle": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "0ebe58faced22d69bc1c0138ef8d4a2a7a77bab1482b7647f55992facccc1ec1"
+  },
+  "measurement_policy": {
+    "cases": 33,
+    "warmups_per_artifact": 1,
+    "measured_rounds_per_artifact": 7,
+    "order": "unchanged alternating artifact and forward/reverse case order",
+    "thresholds": "unchanged tools/gates/campaigns/m7-024-linux-performance.json"
+  },
+  "previous_scope": "SERVER_PAIRED_PERFORMANCE_FOLLOWUP_ONLY",
+  "source_changes": {
+    "examples/linux/m12_001/http.cj": {
+      "before": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9b1ad91a850538af9a07c46571a561e2570873c8102a7d059947813f103ffb68"
+      },
+      "after": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1c6a4942dfc97ff6b7b5a765ff19501b6239e73fe4e310c91da107feb6441ba7"
+      }
+    }
+  },
+  "policy": {
+    "capture_attempts": 1,
+    "retry_for_green": false,
+    "native_commands": 528,
+    "archives": 2,
+    "cases": 33,
+    "warmups_per_archive": 1,
+    "measured_rounds_per_archive": 7,
+    "source_repair": "http-round-release",
+    "sdk_scope": "STS1.1.3_ONLY",
+    "formal_m7_024": "NOT_RUN",
+    "soak86400": "NOT_RUN"
+  },
+  "prerequisite_environment_metadata": {
+    "glibc_file_modes": {
+      "ld-linux-x86-64.so.2": 493,
+      "libBrokenLocale.so.1": 420,
+      "libanl.so.1": 420,
+      "libc.so.6": 420,
+      "libdl.so.2": 420,
+      "libm.so.6": 420,
+      "libmvec.so.1": 420,
+      "libnss_compat.so.2": 420,
+      "libnss_dns.so.2": 420,
+      "libnss_files.so.2": 420,
+      "libpthread.so.0": 420,
+      "libresolv.so.2": 420,
+      "librt.so.1": 420,
+      "libutil.so.1": 420
+    },
+    "mode_source": "Original qualified closure input metadata, not chmod-guessed modes"
+  }
+}

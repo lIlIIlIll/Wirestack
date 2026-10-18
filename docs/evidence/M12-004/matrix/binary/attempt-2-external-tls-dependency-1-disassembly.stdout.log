@@ -1,0 +1,21 @@
+
+/usr/lib/libc.so.6:     file format elf64-x86-64
+
+
+Disassembly of section .plt:
+
+0000000000024000 <.plt>:
+   24000:	push   0x1f4b72(%rip)        # 218b78 <_IO_wfile_jumps@@GLIBC_2.2.5+0x950>
+   24006:	jmp    *0x1f4b74(%rip)        # 218b80 <_IO_wfile_jumps@@GLIBC_2.2.5+0x958>
+   2400c:	nopl   0x0(%rax)
+   24010:	endbr64
+   24014:	push   $0x1c
+   24019:	jmp    24000 <__h_errno@@GLIBC_PRIVATE+0x23fa8>
+   2401e:	xchg   %ax,%ax
+   24020:	endbr64
+   24024:	push   $0x1b
+   24029:	jmp    24000 <__h_errno@@GLIBC_PRIVATE+0x23fa8>
+   2402e:	xchg   %ax,%ax
+   24030:	endbr64
+   24034:	push   $0x1a
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "12d39c71d6f7665af7b868235570f661c986b4a4672aec2987bcd4ab351b0ead"}

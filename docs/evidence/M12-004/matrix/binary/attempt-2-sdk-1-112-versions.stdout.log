@@ -1,0 +1,50 @@
+
+Version symbols section '.gnu.version' contains 156 entries:
+ Addr: 0x0000000000002fd4  Offset: 0x00002fd4  Link: 3 (.dynsym)
+  000:   0 (*local*)       2 (CANGJIE)       0 (*local*)       0 (*local*)    
+  004:   0 (*local*)       2 (CANGJIE)       0 (*local*)       0 (*local*)    
+  008:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  00c:   0 (*local*)       2 (CANGJIE)       0 (*local*)       0 (*local*)    
+  010:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  014:   2 (CANGJIE)       2 (CANGJIE)       0 (*local*)       2 (CANGJIE)    
+  018:   0 (*local*)       2 (CANGJIE)       0 (*local*)       2 (CANGJIE)    
+  01c:   0 (*local*)       3 (GLIBC_2.2.5)   0 (*local*)       0 (*local*)    
+  020:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  024:   0 (*local*)       2 (CANGJIE)       0 (*local*)       0 (*local*)    
+  028:   3 (GLIBC_2.2.5)   0 (*local*)       0 (*local*)       0 (*local*)    
+  02c:   2 (CANGJIE)       2 (CANGJIE)       2 (CANGJIE)       0 (*local*)    
+  030:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  034:   0 (*local*)       2 (CANGJIE)       0 (*local*)       0 (*local*)    
+  038:   0 (*local*)       0 (*local*)       0 (*local*)       0 (*local*)    
+  03c:   2 (CANGJIE)       2 (CANGJIE)       4 (GLIBC_2.14)    2 (CANGJIE)    
+  040:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  044:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  048:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  04c:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  050:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  054:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  058:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  05c:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  060:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  064:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  068:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  06c:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  070:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  074:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  078:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  07c:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  080:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  084:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  088:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  08c:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  090:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  094:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+  098:   1 (*global*)      1 (*global*)      1 (*global*)      1 (*global*)   
+
+Version needs section '.gnu.version_r' contains 2 entries:
+ Addr: 0x0000000000003110  Offset: 0x00003110  Link: 4 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 2
+  0x0010:   Name: GLIBC_2.14  Flags: none  Version: 4
+  0x0020:   Name: GLIBC_2.2.5  Flags: none  Version: 3
+  0x0030: Version: 1  File: libcangjie-runtime.so  Cnt: 1
+  0x0040:   Name: CANGJIE  Flags: none  Version: 2

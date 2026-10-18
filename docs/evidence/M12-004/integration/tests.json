@@ -1,0 +1,60 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.tests.test_m12_004_upgrade",
+    "tools.tests.test_m12_004_inventory",
+    "tools.tests.test_m12_004_verifier_controls",
+    "tools.tests.test_m12_004_rollback",
+    "tools.tests.test_m12_004_candidate_gates",
+    "tools.tests.test_m7_021_linux_release",
+    "tools.tests.test_m7_025_linux_supply_chain"
+  ],
+  "exit_code": 0,
+  "failed": 0,
+  "log": {
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9311710b1ac08cc52442e3f000d51c182a57da893639083e978e48ad5e9c61eb"
+    },
+    "path": "docs/evidence/M12-004/integration/unit-tests.log"
+  },
+  "passed": 80,
+  "qualification": "NOT_QUALIFIED",
+  "schema_version": 1,
+  "skipped": 0,
+  "source_digests": {
+    "tools/tests/test_m12_004_candidate_gates.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ff4768ea47dc4eb49d8c091f2866fa83cc72e9deb9643a86f29b99d73c096763"
+    },
+    "tools/tests/test_m12_004_inventory.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "66e5d034d55b6ef7465045a5e524068e5fc5393acf6804d5665d54548c7533c0"
+    },
+    "tools/tests/test_m12_004_rollback.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a8400fdaf5a960080214f574160d8ea0d824ba52ac68689e0a60eb78c4d0f96d"
+    },
+    "tools/tests/test_m12_004_upgrade.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ee8ef42aab4548eeb0fec0fe48eff698b511a26e97e39bb19e28775ba8158671"
+    },
+    "tools/tests/test_m12_004_verifier_controls.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fac883b488eca72fe67cac1093da6b66b283ff39ab9ec2ded13627877e818fb6"
+    },
+    "tools/tests/test_m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ed4b9c4b7eefecaca1a086783af6d0c8b4f0185e5145219067cd35ecbcae8092"
+    },
+    "tools/tests/test_m7_025_linux_supply_chain.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9166520db2f428ded6e852c4abbbb45d1ba54f425ca5973dac95f03d5c68b3ac"
+    }
+  },
+  "status": "PASS",
+  "task_id": "M12-004"
+}

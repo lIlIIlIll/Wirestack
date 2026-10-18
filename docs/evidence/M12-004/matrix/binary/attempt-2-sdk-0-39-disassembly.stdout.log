@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-objectpool.a:
+
+objectpool_ffi.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_Gettid>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	mov    $0xba,%edi
+  1a:	xor    %eax,%eax
+  1c:	call   21 <CJ_Gettid+0x21>
+  21:	mov    %fs:0x28,%rcx
+  2a:	cmp    -0x8(%rbp),%rcx
+  2e:	jne    36 <CJ_Gettid+0x36>
+  30:	add    $0x10,%rsp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "dbd77a6c8f29a1fabf84010203e83fbbb87b290ad4000f2cf066a76b9e49cd9f"}
