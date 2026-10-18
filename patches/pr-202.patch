@@ -1,15 +1,20 @@
-diff --git a/src/internal/http2/client_connection.cj b/src/internal/http2/client_connection.cj
-index 504c1f50..ebcfcf25 100644
---- a/src/internal/http2/client_connection.cj
-+++ b/src/internal/http2/client_connection.cj
-@@ -1175,9 +1175,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
-                 }
-                 checkClientContext(readContext)
-                 if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
--                if (readContext.isDeadlineExceeded() && writeContext.isDeadlineExceeded()) {
--                    checkClientContext(writeContext)
--                }
-+                if (readContext.isDeadlineExceeded()) { checkClientContext(readContext) }
-                 if (let Some(error) <- failure) { throw error }
-                 if (closed) { return ReadResult.EndOfStream }
-                 if (segments.isEmpty()) { return ReadResult.EndOfStream }
+diff --git a/src/http/server.cj b/src/http/server.cj
+index 74ed1cc0..1843f51a 100644
+--- a/src/http/server.cj
++++ b/src/http/server.cj
+@@ -570,6 +570,15 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
+ }
+ 
+ 
++internal func canonicalServerAuthority(authority: String, secured: Bool): String {
++    if (authority.isEmpty()) { return "" }
++    let scheme = if (secured) { "https" } else { "http" }
++    let defaultPort: UInt16 = if (secured) { 443u16 } else { 80u16 }
++    let parsed = HttpUrl.parse("${scheme}://${authority}/")
++    let host = if (parsed.host.contains(":")) { "[${parsed.host}]" } else { parsed.host }
++    if (parsed.explicitPort && parsed.port != defaultPort) { "${host}:${parsed.port}" } else { host }
++}
++
+ private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
+     let origin = if (authority.isEmpty()) { "server" } else { authority }
+     internal.HttpResourceOwnerKey(origin, "listener")
