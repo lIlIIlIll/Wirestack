@@ -1,5 +1,6 @@
 package wirestack.internal.http1
 
+import std.sync.*
 import std.collection.ArrayList
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -116,6 +117,78 @@ class Http1ResponseReaderTest {
         @Expect(readReaderBody(result.response.body), "hello")
         @Expect(observer.completedCount, 1)
         @Expect(observer.abandonedCount, 0)
+    }
+
+    @TestCase
+    func bodyReadIdleStartsWhenTheCallerBeginsReading(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048)
+        writeAll(server, ByteSpan(
+            "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok".toArray()
+        ))
+        let context = OperationContext(timeoutPolicy: OperationTimeoutPolicy(
+            bodyReadIdle: Some(20 * Duration.millisecond)
+        ))
+        let response = readHttp1Response(
+            client, HttpMethod("GET"), context: context
+        ).response
+        try {
+            sleep(60 * Duration.millisecond)
+            @Expect(readReaderBody(response.body), "ok")
+        } finally {
+            response.close()
+            client.close()
+            server.close()
+        }
+    }
+
+    @TestCase
+    func timeoutAndCancellationRaceAbandonsBodyExactlyOnce(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048)
+        writeAll(server, ByteSpan(
+            "HTTP/1.1 200 OK\r\nContent-Length: 1\r\n\r\n".toArray()
+        ))
+        let cancellation = CancellationSource()
+        let observer = ReaderBodyObserver()
+        let context = OperationContext(
+            cancellation: cancellation.token,
+            timeoutPolicy: OperationTimeoutPolicy(
+                bodyReadIdle: Some(40 * Duration.millisecond)
+            )
+        )
+        let response = readHttp1Response(
+            client, HttpMethod("GET"), context: context, observer: observer
+        ).response
+        let readStarted = AtomicInt64(0)
+        let read = spawn {
+            readStarted.store(1)
+            try {
+                let _ = response.body.read(Array<Byte>(1, repeat: 0u8))
+                0
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Cancelled => 2
+                    case NetworkErrorCode.TimedOut => 1
+                    case _ => 3
+                }
+            }
+        }
+        let startupDeadline = Deadline.after(Duration.second)
+        while (readStarted.load() == 0 && !startupDeadline.isExpired()) {
+            sleep(Duration.millisecond)
+        }
+        @Expect(readStarted.load(), 1)
+        let cancel = spawn {
+            sleep(40 * Duration.millisecond)
+            cancellation.cancel()
+        }
+        let winner = read.get(Duration.second)
+        cancel.get(Duration.second)
+        @Expect(winner == 1 || winner == 2)
+        @Expect(observer.abandonedCount, 1)
+        response.close()
+        @Expect(observer.abandonedCount, 1)
+        client.close()
+        server.close()
     }
 
     @TestCase

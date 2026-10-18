@@ -311,17 +311,18 @@ public class Http2ClientConnection <: Resource {
             opened.bindReset(reset.register(opened.streamId, opened))
             dispatcher.add(opened)
             signal.attachInitialHeadersWakeup({ => wakeInitialHeaders() })
+            let requestWriteContext = context.forStage(OperationTimeoutStage.RequestWrite)
             let initialTickets = enqueueInitialHeaderFields(
-                opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, signal, context
+                opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, signal, requestWriteContext
             )
             initialHeadersQueued = true
             opened.bindCancellation(context.cancellation, connectionCancellation)
-            waitClientWrites(initialTickets, context)
+            waitClientWrites(initialTickets, requestWriteContext)
             health.observeOutboundActivity()
             if (!plan.endStreamOnHeaders) {
-                sendRequestBody(opened, plan.openBody(), context)
+                sendRequestBody(opened, plan.openBody(), requestWriteContext)
             }
-            opened.awaitResponse(context)
+            opened.awaitResponse(context.forStage(OperationTimeoutStage.ResponseHeaders))
         } catch (error: Exception) {
             if (!initialHeadersQueued) { abandonInitialHeaders(stream.id) }
             match (exchange) {
@@ -372,14 +373,15 @@ public class Http2ClientConnection <: Resource {
             opened.bindReset(reset.register(opened.streamId, opened))
             dispatcher.add(opened)
             signal.attachInitialHeadersWakeup({ => wakeInitialHeaders() })
+            let requestWriteContext = context.forStage(OperationTimeoutStage.RequestWrite)
             let initialTickets = enqueueInitialHeaderFields(
-                opened.streamId, plan.initialHeaders, false, signal, context
+                opened.streamId, plan.initialHeaders, false, signal, requestWriteContext
             )
             initialHeadersQueued = true
             opened.bindCancellation(context.cancellation, connectionCancellation)
-            waitClientWrites(initialTickets, context)
+            waitClientWrites(initialTickets, requestWriteContext)
             health.observeOutboundActivity()
-            let result = opened.awaitConnect(context)
+            let result = opened.awaitConnect(context.forStage(OperationTimeoutStage.ResponseHeaders))
             match (result) {
                 case Http2ConnectResult.Connected(_) => opened.releaseHandshakeCancellation()
                 case Http2ConnectResult.Rejected(_) => ()
@@ -496,14 +498,14 @@ public class Http2ClientConnection <: Resource {
                         )
                     }
                     if (let Some(error) <- signal.retainedFailure()) { throw error }
-                    checkClientContext(context)
+                    checkClientContext(context, phase: NetworkPhase.HttpHeaders)
                     match (context.deadline) {
                         case Some(deadline) => initialHeadersChanged.wait(timeout: deadline.remaining())
                         case None => initialHeadersChanged.wait()
                     }
                 }
                 if (let Some(error) <- signal.retainedFailure()) { throw error }
-                checkClientContext(context)
+                checkClientContext(context, phase: NetworkPhase.HttpHeaders)
                 let tickets = synchronized(encoderMutex) {
                     encodingStarted = true
                     let block = encoder.encode(fields)
@@ -735,7 +737,14 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         this.pushSource = pushSource
         this.connectMode = connectMode
         this.onTerminated = onTerminated
-        channel = Http2ClientBodyChannel(streamId, flow, writer, context, http2Limits)
+        channel = Http2ClientBodyChannel(
+            streamId, flow, writer, context, http2Limits,
+            readTimeoutStage: if (connectMode) {
+                OperationTimeoutStage.StreamReadIdle
+            } else {
+                OperationTimeoutStage.BodyReadIdle
+            }
+        )
     }
 
     func bind(connection: Http2ClientConnection): Unit { this.connection = Some(connection) }
@@ -850,12 +859,16 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         try {
             synchronized(mutex) {
                 while (response.isNone() && failure.isNone()) {
-                    checkClientContext(waitContext)
+                    checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
                     match (waitContext.deadline) {
                         case Some(deadline) => changed.wait(timeout: deadline.remaining())
                         case None => changed.wait()
                     }
                 }
+                // A final HEADERS frame published between the deadline expiring and
+                // this waiter reacquiring the mutex skips the loop check above; keep
+                // the response-header stage cap authoritative for that wakeup race.
+                checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
                 if (let Some(error) <- failure) { throw error }
                 response.getOrThrow()
             }
@@ -869,12 +882,15 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         try {
             synchronized(mutex) {
                 while (connectResult.isNone() && failure.isNone()) {
-                    checkClientContext(waitContext)
+                    checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
                     match (waitContext.deadline) {
                         case Some(deadline) => changed.wait(timeout: deadline.remaining())
                         case None => changed.wait()
                     }
                 }
+                // CONNECT result publication after the header budget expires must not
+                // bypass the stage cap when this waiter wakes from the mutex wait.
+                checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
                 if (let Some(error) <- failure) { throw error }
                 connectResult.getOrThrow()
             }
@@ -1005,6 +1021,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     private let flow: Http2FlowController
     private let writer: Http2WriteScheduler
     private let defaultContext: OperationContext
+    private let readTimeoutStage: OperationTimeoutStage
     private let maxSegments: Int64
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
@@ -1023,12 +1040,14 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         flow: Http2FlowController,
         writer: Http2WriteScheduler,
         context: OperationContext,
-        limits: Http2Limits
+        limits: Http2Limits,
+        readTimeoutStage!: OperationTimeoutStage
     ) {
         this.streamId = streamId
         this.flow = flow
         this.writer = writer
         defaultContext = context
+        this.readTimeoutStage = readTimeoutStage
         maxSegments = Int64(limits.maxPendingWrites)
     }
 
@@ -1125,21 +1144,22 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         context: OperationContext
     ): ReadResult {
         if (destination.isEmpty()) { return ReadResult.Data(0) }
-        submitClientUpdates(
-            writer, flow.flushStalledConnectionReceiveCredit(), context
+        submitClientUpdatesAndRetainFailure(
+            flow.flushStalledConnectionReceiveCredit(), context
         )
-        let registration = context.cancellation.register { => wake() }
+        let readContext = context.forStage(readTimeoutStage)
+        let registration = readContext.cancellation.register { => wake() }
         var updates = Array<Http2Frame>()
         try {
             let result = synchronized(mutex) {
                 while (segments.isEmpty() && !eof && !closed && failure.isNone()) {
-                    checkClientContext(context)
-                    match (context.deadline) {
+                    checkClientContext(readContext)
+                    match (readContext.deadline) {
                         case Some(deadline) => changed.wait(timeout: deadline.remaining())
                         case None => changed.wait()
                     }
                 }
-                checkClientContext(context)
+                checkClientContext(readContext)
                 if (let Some(error) <- failure) { throw error }
                 if (closed) { return ReadResult.EndOfStream }
                 if (segments.isEmpty()) { return ReadResult.EndOfStream }
@@ -1161,25 +1181,36 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 }
                 ReadResult.Data(count)
             }
-            submitClientUpdates(writer, updates, context)
+            submitClientUpdatesAndRetainFailure(updates, context)
             result
         } finally {
             registration.unregister()
         }
     }
 
+    private func submitClientUpdatesAndRetainFailure(
+        frames: Array<Http2Frame>, context: OperationContext
+    ): Unit {
+        try {
+            submitClientUpdates(writer, frames, context)
+        } catch (error: Exception) {
+            fail(error)
+            throw error
+        }
+    }
     public func awaitEnd(context: OperationContext): Unit {
-        let registration = context.cancellation.register { => wake() }
+        let endContext = context.forStage(readTimeoutStage)
+        let registration = endContext.cancellation.register { => wake() }
         try {
             synchronized(mutex) {
                 while (!eof && !closed && failure.isNone()) {
-                    checkClientContext(context)
-                    match (context.deadline) {
+                    checkClientContext(endContext)
+                    match (endContext.deadline) {
                         case Some(deadline) => changed.wait(timeout: deadline.remaining())
                         case None => changed.wait()
                     }
                 }
-                checkClientContext(context)
+                checkClientContext(endContext)
                 if (let Some(error) <- failure) { throw error }
             }
         } finally {
@@ -1652,21 +1683,23 @@ private func submitClientUpdates(
     )
 }
 
-private func checkClientContext(context: OperationContext): Unit {
+private func checkClientContext(
+    context: OperationContext,
+    phase!: NetworkPhase = NetworkPhase.HttpBody
+): Unit {
     if (context.isCancellationRequested()) {
         throw NetworkException(
-            NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody, NetworkErrorCode.Cancelled,
+            NetworkErrorCategory.Cancelled, phase, NetworkErrorCode.Cancelled,
             "HTTP/2 operation cancelled", retryability: Retryability.Never
         )
     }
     if (context.isDeadlineExceeded()) {
         throw NetworkException(
-            NetworkErrorCategory.DeadlineExceeded, NetworkPhase.HttpBody, NetworkErrorCode.TimedOut,
+            NetworkErrorCategory.DeadlineExceeded, phase, NetworkErrorCode.TimedOut,
             "HTTP/2 operation deadline exceeded", retryability: Retryability.Temporary
         )
     }
 }
-
 private func clientAbortReason(context: OperationContext): AbortReason {
     if (context.isCancellationRequested()) { AbortReason.Cancelled }
     else if (context.isDeadlineExceeded()) { AbortReason.DeadlineExceeded }

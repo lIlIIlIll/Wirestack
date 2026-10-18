@@ -518,7 +518,10 @@ private class AutomaticTlsNegotiator {
         if (key.scheme != "https") { throw IllegalArgumentException("automatic TLS factory requires https") }
         let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
         try {
-            handshaker.handshakeNegotiated(HostName(key.originHost), connected.transport, context)
+            handshaker.handshakeNegotiated(
+                HostName(key.originHost), connected.transport,
+                context.forStage(OperationTimeoutStage.TlsHandshake)
+            )
         } catch (error: Exception) {
             connected.transport.abort(reason: Some(AbortReason.ProtocolFailure))
             throw error
@@ -831,7 +834,10 @@ private class Http1TlsConnectionFactory <: Http1ConnectionFactory {
         if (key.scheme != "https") { throw IllegalArgumentException("TLS factory requires https pool key") }
         let connected = connector.connect(HostName(key.originHost), key.originPort, context: context)
         try {
-            let tls = handshaker.handshake(HostName(key.originHost), connected.transport, context)
+            let tls = handshaker.handshake(
+                HostName(key.originHost), connected.transport,
+                context.forStage(OperationTimeoutStage.TlsHandshake)
+            )
             Http1ClientConnection(tls, limits: limits, continueTimeout: continueTimeout)
         } catch (error: Exception) {
             connected.transport.abort(reason: Some(AbortReason.ProtocolFailure))
