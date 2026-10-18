@@ -412,7 +412,7 @@ class HttpResourceBudgetTest {
         }
 
         @Expect(waitForBudgetWaiters(budget, 1, Duration.second))
-        budget.stopRequestAdmission()
+        budget.closeAdmission()
         waiter.get(Duration.second)
 
         @Expect(closed.load())
