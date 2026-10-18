@@ -1,0 +1,306 @@
+name: docgen-temp
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANGJIE_CHANNEL: sts
+  CANGJIE_VERSION: "1.1.3"
+  CJV_VERSION: "v0.2.21"
+
+jobs:
+  build-cjdoc:
+    name: Build pinned cjdoc 0.7.2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the cjdoc build source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Install the pinned Cangjie toolchain
+        uses: Zxilly/setup-cangjie@91463316b1c359f216c2ac49e35900f9341c1571 # v3.2.0
+        with:
+          channel: ${{ env.CANGJIE_CHANNEL }}
+          version: ${{ env.CANGJIE_VERSION }}
+          cjv-version: ${{ env.CJV_VERSION }}
+
+      - name: Install native prerequisites for cjdoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Build the pinned cjdoc 0.7.2 source
+        env:
+          CJDOC_VERSION: 0.7.2
+          CJDOC_REPOSITORY: lIlIIlIll/cjdoc
+          CJDOC_SOURCE_SHA: 582a95278c95024dc2cf3dfe9f011259c1002fc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/cjdoc-source"
+          install_dir="$RUNNER_TEMP/cjdoc"
+          archive="$RUNNER_TEMP/cjdoc-source.tar.gz"
+          curl --fail --silent --show-error --location --max-time 60 \
+            "https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}" \
+            --output "$archive"
+          mkdir -p "$source_dir"
+          tar --extract --gzip --file "$archive" --directory "$source_dir" --strip-components=1
+          test -f "$source_dir/cjpm.toml"
+          python3 - "$source_dir/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import sys
+
+          config = Path(sys.argv[1])
+          text = config.read_text(encoding="utf-8")
+          lines = text.splitlines(keepends=True)
+          matches = [index for index, line in enumerate(lines) if line.strip() == 'compile-option = ""']
+          if len(matches) != 1:
+              raise SystemExit("unexpected cjdoc compile-option schema")
+          index = matches[0]
+          lines[index] = lines[index].replace('compile-option = ""', 'compile-option = "-O0"', 1)
+          config.write_text("".join(lines), encoding="utf-8")
+          PY
+          python3 - "$source_dir/cjpm.toml" "$source_dir/vendor/yjson_algorithms/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          for raw_path in sys.argv[1:]:
+              config = Path(raw_path)
+              text = config.read_text(encoding="utf-8")
+              lines = text.splitlines(keepends=True)
+              matches = [index for index, line in enumerate(lines) if line.strip().startswith('"yjson" = { git =') or line.strip().startswith('yjson = { git =')]
+              if len(matches) != 1 or 'commitId = ' not in lines[matches[0]]:
+                  raise SystemExit(f"unexpected yjson dependency schema: {config}")
+              index = matches[0]
+              lines[index] = re.sub(r'commitId = "[^"]+"', 'tag = "0.1.0"', lines[index], count=1)
+              config.write_text("".join(lines), encoding="utf-8")
+          PY
+          yjson_source_sha="54b4965dee0f0b96710cbc678ec5ec9a126b055c"
+          yjson_archive="$RUNNER_TEMP/yjson-release-0.1.0.tar.gz"
+          yjson_dir="$RUNNER_TEMP/yjson-release-0.1.0"
+          curl --fail --silent --show-error --location --max-time 180 \
+            "https://codeload.github.com/lIlIIlIll/yjson/tar.gz/$yjson_source_sha" \
+            --output "$yjson_archive"
+          mkdir -p "$yjson_dir"
+          tar --extract --gzip --file "$yjson_archive" --directory "$yjson_dir" --strip-components=1
+          for file in lib_json_patch.cj lib_json_path.cj lib_json_pointer.cj lib_json_schema.cj linear_regex.cj work_limits.cj; do
+            test -f "$yjson_dir/packages/yjson_algorithms/src/$file"
+            cp "$yjson_dir/packages/yjson_algorithms/src/$file" "$source_dir/vendor/yjson_algorithms/src/$file"
+          done
+          python3 - "$source_dir/src/output_manifest.cj" "$source_dir/src/schema_data/schema_v8.cj" "$source_dir/src/render/json_decode_primitives.cj" <<'PY'
+          from pathlib import Path
+          import sys
+
+          output_manifest, schema_v8, decoder = map(Path, sys.argv[1:])
+          text = output_manifest.read_text(encoding="utf-8")
+          anchor = "import yjson.*\n\n"
+          helper = """private func jsonArrayValues(value: JsonArray): Array<JsonNode> {
+              let result = ArrayList<JsonNode>()
+              for (index in 0..value.size()) {
+                  result.add(value.get(index).getOrThrow())
+              }
+              result.toArray()
+          }
+
+          """
+          if text.count(anchor) != 1 or "private func jsonArrayValues" in text:
+              raise SystemExit("unexpected output manifest schema")
+          output_manifest.write_text(text.replace(anchor, anchor + helper, 1), encoding="utf-8")
+
+          lines = schema_v8.read_text(encoding="utf-8").splitlines(keepends=True)
+          starts = [index for index, line in enumerate(lines)
+                    if ".replace(" in line and "portablePath" in line
+                    and index + 1 < len(lines) and "^(?!/)" in lines[index + 1]]
+          if len(starts) != 1:
+              raise SystemExit(f"unexpected schema v8 portable path patch count: {starts}")
+          index = starts[0]
+          if index + 4 >= len(lines) or "^(?![A-Za-z]:)" not in lines[index + 3] or "(?!.*/" not in lines[index + 4]:
+              raise SystemExit("unexpected schema v8 portable path pattern")
+          replacement = '            "\\"pattern\\": \\"^[^/]+(?:/[^/]+)*$\\"}")\n'
+          lines[index + 3:index + 5] = [replacement]
+          schema_v8.write_text("".join(lines), encoding="utf-8")
+
+          lines = decoder.read_text(encoding="utf-8").splitlines(keepends=True)
+          matches = [index for index, line in enumerate(lines)
+                     if "maxRefResolutions: DOC_IR_SCHEMA_MAX_WORK," in line]
+          if len(matches) != 1 or "maxRegexSteps" in lines[matches[0]]:
+              raise SystemExit("unexpected decoder schema budget")
+          index = matches[0]
+          lines[index] = lines[index].replace(
+              "maxRefResolutions: DOC_IR_SCHEMA_MAX_WORK,",
+              "maxRefResolutions: DOC_IR_SCHEMA_MAX_WORK, maxRegexSteps: DOC_IR_SCHEMA_MAX_WORK,",
+              1)
+          decoder.write_text("".join(lines), encoding="utf-8")
+          PY
+          (
+            cd "$source_dir"
+            sha256sum --check <<'SHA256' # wirestack-digest-domain: artifact-bytes-v1
+          e390acd9608ce88e1646b345d7540d12b2d1cbab37f4175086b113a14b092b42  src/render/json_encode.cj
+          26c4190c8cc9c5b7668972609865eaff259f0e4cdc2593f9cd6f4ea982c318c2  src/render/doc_ir_encoding_budget.cj
+          d2b301b266b3358e033347ea2da88c5f2431feffe5af5b64f2bcc3cc70c723a3  vendor/yjson_algorithms/src/lib_json_schema.cj
+          SHA256
+            git apply "$GITHUB_WORKSPACE/tools/docs/cjdoc-0.7.2-bounded-doc-ir.patch"
+            sha256sum --check <<'SHA256' # wirestack-digest-domain: artifact-bytes-v1
+          aa7051b4d6145f268ca284a1cf221647a3408413616de567668e9d80fbe1139a  src/render/json_encode.cj
+          856e6b3fb08f89923eaf15ea4dbb60c7477e5d2abe7aa76b52be9f3e0b78a2cd  src/render/doc_ir_encoding_budget.cj
+          c4d6dc1f63f5bd5add96875d5557ca4c530b00b0937b09cfcdde7b2481e26c51  vendor/yjson_algorithms/src/lib_json_schema.cj
+          SHA256
+          )
+          (cd "$source_dir" && cjpm update --skip-script)
+          python3 - "$HOME/.cjpm/git/markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml" \
+            "$HOME/.cjpm/git/yjson/c91859feb77aeba392a1fad0f99d731df66be831/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import sys
+
+          for raw_path in sys.argv[1:]:
+              path = Path(raw_path)
+              if not path.is_file():
+                  raise SystemExit(f"missing pinned dependency manifest: {path}")
+              text = path.read_text(encoding="utf-8")
+              if path.parts[-2] == "c91859feb77aeba392a1fad0f99d731df66be831" and 'version = "0.1.0"' not in text:
+                  raise SystemExit(f"resolved yjson dependency is not release 0.1.0: {path}")
+              count = text.count('compile-option = "-O2"')
+              if count == 0:
+                  raise SystemExit(f"pinned dependency has no expected optimizer keys: {path}")
+              path.write_text(text.replace('compile-option = "-O2"', 'compile-option = "-O0"'), encoding="utf-8")
+          PY
+          (cd "$source_dir" && cjpm build)
+          mkdir -p "$install_dir/bin"
+          binary="$install_dir/bin/cjdoc"
+          cp "$source_dir/target/release/bin/main" "$binary"
+          test -x "$binary"
+          "$binary" --version
+          tar --create --gzip --file "$RUNNER_TEMP/cjdoc.tar.gz" \
+            --directory "$install_dir" bin/cjdoc
+
+      - name: Upload the pinned cjdoc binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docgen-cjdoc
+          if-no-files-found: error
+          path: ${{ runner.temp }}/cjdoc.tar.gz
+
+  docgen:
+    name: docgen ${{ matrix.name }}
+    needs: build-cjdoc
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: r198
+            base_ref: publish/m10-002-resource-budgets
+            patch: patches/pr-198.patch
+          - name: r199
+            base_ref: publish/m10-001-deadlines
+            patch: patches/pr-199.patch
+          - name: r201
+            base_ref: publish/m10-003-safe-retry
+            patch: patches/pr-201.patch
+          - name: r202
+            base_ref: publish/m10-004-generation-rotation
+            patch: patches/pr-202.patch
+          - name: r203
+            base_ref: publish/m10-005-observability
+            patch: patches/pr-203.patch
+          - name: r204
+            base_ref: publish/m11-001-sse
+            patch: patches/pr-204.patch
+          - name: r205
+            base_ref: publish/m11-002-gzip
+            patch: patches/pr-205.patch
+          - name: r206
+            base_ref: publish/m11-003-websocket
+            patch: patches/pr-206.patch
+          - name: r207
+            base_ref: publish/m11-004-installed-consumers
+            patch: patches/pr-207.patch
+          - name: r208
+            base_ref: publish/m12-001-baselines
+            patch: patches/pr-208.patch
+          - name: r209
+            base_ref: publish/m12-002-deployment
+            patch: patches/pr-209.patch
+          - name: r210
+            base_ref: publish/m12-003-resilience
+            patch: patches/pr-210.patch
+          - name: r211
+            base_ref: publish/m12-004-upgrade-repaired-server
+            patch: patches/pr-211.patch
+          - name: r212
+            base_ref: publish/m12-003-gate-receipt
+            patch: patches/pr-212.patch
+    steps:
+      - name: Check out the target branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true
+          fetch-depth: 1
+          ref: ${{ matrix.base_ref }}
+
+      - name: Check out the patch harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: false
+          fetch-depth: 1
+          ref: ${{ github.head_ref || github.ref_name }}
+          path: harness
+
+      - name: Apply the rebuilt-content patch
+        run: |
+          set -euo pipefail
+          if [ -s "harness/${{ matrix.patch }}" ]; then
+            git apply --binary "harness/${{ matrix.patch }}"
+          fi
+          git status --porcelain -uall | head -50
+
+      - name: Install the pinned Cangjie toolchain
+        uses: Zxilly/setup-cangjie@91463316b1c359f216c2ac49e35900f9341c1571 # v3.2.0
+        with:
+          channel: ${{ env.CANGJIE_CHANNEL }}
+          version: ${{ env.CANGJIE_VERSION }}
+          cjv-version: ${{ env.CJV_VERSION }}
+
+      - name: Download the pinned cjdoc binary
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docgen-cjdoc
+          path: ${{ runner.temp }}/cjdoc-archive
+
+      - name: Generate documentation
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          mkdir -p "$install_dir"
+          tar --extract --gzip --file "$RUNNER_TEMP/cjdoc-archive/cjdoc.tar.gz" --directory "$install_dir"
+          binary="$install_dir/bin/cjdoc"
+          chmod +x "$binary"
+          "$binary" --version
+          export CJDOC_BIN="$binary"
+          mkdir -p build
+          set +e
+          python3 tools/docs/m7_033_docs.py --root . --json --output build/check-docs.json
+          echo "docgen_exit=$?" > build/docs-status.txt
+          set -e
+          git status --porcelain -uall > build/docs-git-status.txt || true
+          ls -la docs/api/generated | head -20
+
+      - name: Upload generated documentation
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docs-${{ matrix.name }}
+          if-no-files-found: error
+          path: |
+            docs/api/generated
+            build/docs-status.txt
+            build/docs-git-status.txt

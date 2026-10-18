@@ -1,0 +1,173 @@
+diff --git a/src/http/client.cj b/src/http/client.cj
+index d2c0b810..85d9b435 100644
+--- a/src/http/client.cj
++++ b/src/http/client.cj
+@@ -368,7 +368,7 @@ public class HttpClient <: Resource {
+         let handshake = WebSocketHandshake(url, protocols, headers, limits)
+         let h1Request = requestWithCookies(handshake.http1Request, operation)
+         let h2Request = requestWithCookies(handshake.http2Request, operation)
+-        let result = executeDuplex(h1Request, h2Request, Some("websocket"), operation)
++        let result = executeAdmittedDuplex(h1Request, h2Request, Some("websocket"), operation)
+         handshake.accept(result, webSocketLimits)
+     }
+ 
+@@ -413,7 +413,7 @@ public class HttpClient <: Resource {
+         }
+         let h2Request = HttpRequest(HttpMethod("CONNECT"), request.url,
+             headers: headers.build(), body: request.body, retrySafety: request.retrySafety)
+-        let result = executeDuplex(outgoing, h2Request, protocol, operation)
++        let result = executeAdmittedDuplex(outgoing, h2Request, protocol, operation)
+         publicHttpUpgradeResult(result)
+     }
+ 
+@@ -682,6 +682,38 @@ public class HttpClient <: Resource {
+             }
+         }
+     }
++
++    /**
++     * Runs one duplex handshake under the caller's aggregate request admission.
++     * The owner-scoped request lease is released with the rejected response body or,
++     * after a successful handshake, only when the transferred transport terminates.
++     */
++    private func executeAdmittedDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
++        protocol: ?String, context: OperationContext): http1.HttpDuplexExchangeResult {
++        let requestLease = resourceBudget.acquireRequest(resourceOwner(h1Request.url), context)
++        let cancellation = HttpRequestCancellationOperation(
++            context,
++            None<HttpRequestCancellationHandle>,
++            None<HttpConnectionCancellationHandle>,
++            None<HttpStreamCancellationHandle>
++        )
++        cancellation.retainResource(requestLease)
++        let result = try {
++            executeDuplex(h1Request, h2Request, protocol, context)
++        } catch (error: Exception) {
++            cancellation.fail()
++            throw error
++        }
++        match (result) {
++            case http1.HttpDuplexExchangeResult.Response(response) =>
++                http1.HttpDuplexExchangeResult.Response(cancellation.wrap(response))
++            case http1.HttpDuplexExchangeResult.Connected(connection) =>
++                http1.HttpDuplexExchangeResult.Connected(http1.HttpDuplexConnection(
++                    connection.status, connection.headers, connection.version,
++                    HttpAdmissionRetainedTransport(connection.transport, cancellation)
++                ))
++        }
++    }
+ }
+ 
+ private func toInternalProxyEndpoint(value: HttpProxyEndpoint): http1.Http1ProxyEndpoint {
+@@ -705,3 +737,91 @@ private func withProxyAuthorization(request: HttpRequest, value: ?String): HttpR
+     }
+     request.withHeaders(builder.build())
+ }
++
++/** Retains one admitted request lease until the transferred duplex transport terminates. */
++private class HttpAdmissionRetainedTransport <: transport.DuplexTransport {
++    private let delegate: transport.DuplexTransport
++    private let cancellation: HttpRequestCancellationOperation
++    private let mutex = Mutex()
++    private var terminal = false
++
++    /**
++     * Wraps one exclusively transferred duplex transport.
++     * @param delegate Underlying transferred duplex transport.
++     * @param cancellation Request-cancellation owner that holds the admitted request lease.
++     */
++    init(delegate: transport.DuplexTransport, cancellation: HttpRequestCancellationOperation) {
++        this.delegate = delegate
++        this.cancellation = cancellation
++    }
++
++    /** Reports the delegated provider-neutral transport diagnostics. */
++    public prop info: transport.TransportInfo { get() { delegate.info } }
++
++    /**
++     * Reads at most destination.length bytes from the delegated transport.
++     * @param destination Caller-provided destination buffer.
++     * @param context Operation deadline and cancellation passed through unchanged.
++     */
++    public func readSome(
++        destination: transport.MutableByteSpan,
++        context!: OperationContext = OperationContext.background()
++    ): transport.ReadResult {
++        delegate.readSome(destination, context: context)
++    }
++
++    /**
++     * Writes at most source.length bytes to the delegated transport.
++     * @param source Caller-provided source bytes.
++     * @param context Operation deadline and cancellation passed through unchanged.
++     */
++    public func writeSome(
++        source: transport.ByteSpan,
++        context!: OperationContext = OperationContext.background()
++    ): Int64 {
++        delegate.writeSome(source, context: context)
++    }
++
++    /**
++     * Closes only the selected direction on the delegated transport.
++     * @param direction Direction to close.
++     */
++    public func shutdown(direction: transport.ShutdownDirection): Unit {
++        delegate.shutdown(direction)
++    }
++
++    /**
++     * Gracefully closes the delegated transport, then releases the admitted request lease.
++     * @param context Operation deadline and cancellation for the delegated close.
++     */
++    public func close(context: OperationContext): Unit {
++        if (!claimTerminal()) { return }
++        try { delegate.close(context) }
++        finally { cancellation.fail() }
++    }
++
++    /** Gracefully closes the delegated transport with the background context. */
++    public func close(): Unit { close(OperationContext.background()) }
++
++    /** Reports whether this transport or its delegate has terminated. */
++    public func isClosed(): Bool {
++        if (synchronized(mutex) { terminal }) { return true }
++        delegate.isClosed()
++    }
++
++    /**
++     * Immediately terminates the delegated transport, then releases the admitted request lease.
++     * @param reason Stable abort reason forwarded to the delegate.
++     */
++    public func abort(reason!: ?transport.AbortReason = None<transport.AbortReason>): Unit {
++        if (!claimTerminal()) { return }
++        try { delegate.abort(reason: reason) }
++        finally { cancellation.fail() }
++    }
++
++    private func claimTerminal(): Bool {
++        synchronized(mutex) {
++            if (terminal) { false } else { terminal = true; true }
++        }
++    }
++}
+diff --git a/src/http/websocket_handshake_test.cj b/src/http/websocket_handshake_test.cj
+index f3ca8aa6..827210f2 100644
+--- a/src/http/websocket_handshake_test.cj
++++ b/src/http/websocket_handshake_test.cj
+@@ -45,6 +45,7 @@ private func exerciseNativeWebSocket(secure: Bool): Unit {
+                 response.close()
+                 throw Exception("WebSocket handshake rejected with ${status}")
+         }
++        @Expect(client.resourceSnapshot().activeRequests, 1)
+         try {
+             session.send(WebSocketFrame(WebSocketOpcode.Binary, payload: [0u8, 255u8, 17u8]))
+             @Expect(session.receive().payload, [0u8, 255u8, 17u8])
+@@ -70,6 +71,7 @@ private func exerciseNativeWebSocket(secure: Bool): Unit {
+                 deadline: Some(Deadline.after(Duration.second))))
+             @Expect(session.isClosed())
+         } finally { session.close() }
++        @Expect(client.resourceSnapshot().activeRequests, 0)
+     } finally {
+         client.close()
+         let _ = server.shutdown(context: OperationContext(
