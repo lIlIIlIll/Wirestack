@@ -1,0 +1,109 @@
+name: finalize-temp
+
+on:
+  push:
+    branches:
+      - tmp/docgen
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    name: finalize ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: r198
+            base_ref: publish/m10-002-resource-budgets
+            patch: patches/pr-198.patch
+          - name: r199
+            base_ref: publish/m10-001-deadlines
+            patch: patches/pr-199.patch
+          - name: r201
+            base_ref: publish/m10-003-safe-retry
+            patch: patches/pr-201.patch
+          - name: r202
+            base_ref: publish/m10-004-generation-rotation
+            patch: patches/pr-202.patch
+          - name: r203
+            base_ref: publish/m10-005-observability
+            patch: patches/pr-203.patch
+          - name: r204
+            base_ref: publish/m11-001-sse
+            patch: patches/pr-204.patch
+          - name: r205
+            base_ref: publish/m11-002-gzip
+            patch: patches/pr-205.patch
+          - name: r206
+            base_ref: publish/m11-003-websocket
+            patch: patches/pr-206.patch
+          - name: r207
+            base_ref: publish/m11-004-installed-consumers
+            patch: patches/pr-207.patch
+          - name: r208
+            base_ref: publish/m12-001-baselines
+            patch: patches/pr-208.patch
+          - name: r209
+            base_ref: publish/m12-002-deployment
+            patch: patches/pr-209.patch
+          - name: r210
+            base_ref: publish/m12-003-resilience
+            patch: patches/pr-210.patch
+          - name: r211
+            base_ref: publish/m12-004-upgrade-repaired-server
+            patch: patches/pr-211.patch
+          - name: r212
+            base_ref: publish/m12-003-gate-receipt
+            patch: patches/pr-212.patch
+    steps:
+      - name: Check out the target branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true
+          fetch-depth: 1
+          ref: ${{ matrix.base_ref }}
+
+      - name: Check out the patch harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: false
+          fetch-depth: 1
+          ref: tmp/docgen
+          path: harness
+
+      - name: Apply the rebuilt-content patch
+        run: |
+          set -euo pipefail
+          if [ -s "harness/${{ matrix.patch }}" ]; then
+            git apply --binary "harness/${{ matrix.patch }}"
+          fi
+
+      - name: Download the generated documentation artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docs-${{ matrix.name }}
+          run-id: 39137185431
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/docs-artifact
+
+      - name: Install the generated documentation
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/docs-artifact/docs/api/generated/docs.json"
+          rm -rf docs/api/generated harness
+          mkdir -p docs/api/generated
+          cp -R "$RUNNER_TEMP/docs-artifact/docs/api/generated/." docs/api/generated/
+          test -f docs/api/generated/docs.json
+
+      - name: Commit and push the finalized branch
+        run: |
+          set -euo pipefail
+          git config user.name "lIlIIlIll"
+          git config user.email "180488944+lIlIIlIll@users.noreply.github.com"
+          git add -A
+          git commit -m "finalize ${{ matrix.name }}: replayed stack with review fixes and regenerated docs"
+          git push --force origin "HEAD:refs/heads/tmp/final/${{ matrix.name }}"
