@@ -137,11 +137,12 @@ public class DefaultHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpS
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP TLS server handshaker is closed") }
         }
-        emitServerTlsEvent(context, NetworkEventOutcome.Started, None<NetworkErrorCode>)
+        let handshakeContext = context.forStage(OperationTimeoutStage.TlsHandshake)
+        emitServerTlsEvent(handshakeContext, NetworkEventOutcome.Started, None<NetworkErrorCode>)
         try {
             let connection = TlsConnection.handshake(
                 provider.createServerEngine(serverContext), transport,
-                context: context, pump: TlsEnginePump()
+                context: handshakeContext, pump: TlsEnginePump()
             )
             let protocol = match (connection.handshakeInfo) {
                 case Some(info) => match (info.negotiatedAlpn) {
@@ -169,14 +170,14 @@ public class DefaultHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpS
                         "TLS HTTP/1 server handshake returned no negotiated evidence"
                     )
             }
-            emitServerTlsEvent(context, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
+            emitServerTlsEvent(handshakeContext, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
             HttpServerNegotiatedTransport(protocol, connection)
         } catch (error: Exception) {
             let code = match (error) {
                 case value: NetworkException => Some(value.code)
                 case _ => Some(NetworkErrorCode.SystemFailure)
             }
-            emitServerTlsEvent(context, NetworkEventOutcome.Failed, code)
+            emitServerTlsEvent(handshakeContext, NetworkEventOutcome.Failed, code)
             throw error
         }
     }

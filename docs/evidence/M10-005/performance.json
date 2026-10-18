@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "task": "M10-005",
+  "status": "PASS",
+  "decision": "Disabled/enabled measurement and resource rollback were executed. No overhead threshold or throughput SLA was specified; PASS is measurement validity and boundedness, not a performance qualification.",
+  "platform": {
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "os": "linux"
+  },
+  "kernel": "7.2.7-arch1-1",
+  "runs": [
+    {
+      "sdk": "1.3.0-alpha.06",
+      "receipt": "installed/report.json",
+      "measurement": {
+        "drop_counter_scope": "cumulative_per_mode_sink_and_collector",
+        "identical_workload_warmed_before_baseline": true,
+        "measured_mean_overhead_ratio": {
+          "async_exporter": 0.2939138768094578,
+          "root_buffer": -0.13552129480153208
+        },
+        "request_count_per_sample": 30,
+        "samples": [
+          {
+            "drops": 0,
+            "duration_ns": 20404287,
+            "events": 0,
+            "index": 0,
+            "mode": "disabled",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 22709990,
+            "events": 0,
+            "index": 1,
+            "mode": "disabled",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 19340144,
+            "events": 0,
+            "index": 2,
+            "mode": "disabled",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 18198589,
+            "events": 690,
+            "index": 0,
+            "mode": "root_buffer",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 18465714,
+            "events": 690,
+            "index": 1,
+            "mode": "root_buffer",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 17326214,
+            "events": 690,
+            "index": 2,
+            "mode": "root_buffer",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 26537225,
+            "events": 690,
+            "index": 0,
+            "mode": "async_exporter",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 26665030,
+            "events": 690,
+            "index": 1,
+            "mode": "async_exporter",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 27608387,
+            "events": 690,
+            "index": 2,
+            "mode": "async_exporter",
+            "requests": 30
+          }
+        ],
+        "sla_claim": false,
+        "warmup_requests_per_mode": 12
+      },
+      "native_resources": {
+        "after_load": {
+          "fds": 10,
+          "rss_kib": 62908,
+          "tasks": 15
+        },
+        "baseline": {
+          "fds": 10,
+          "rss_kib": 75964,
+          "tasks": 15
+        }
+      }
+    },
+    {
+      "sdk": "1.1.3",
+      "receipt": "sdk113/installed.json",
+      "measurement": {
+        "measured_mean_overhead_ratio": {
+          "async_exporter": 0.25633038520060825,
+          "root_buffer": -0.13852029175283254
+        },
+        "request_count_per_sample": 30,
+        "samples": [
+          {
+            "drops": 0,
+            "duration_ns": 25849811,
+            "events": 0,
+            "index": 0,
+            "mode": "disabled",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 16393030,
+            "events": 0,
+            "index": 1,
+            "mode": "disabled",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 16212804,
+            "events": 0,
+            "index": 2,
+            "mode": "disabled",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 15888188,
+            "events": 690,
+            "index": 0,
+            "mode": "root_buffer",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 19474332,
+            "events": 690,
+            "index": 1,
+            "mode": "root_buffer",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 14995832,
+            "events": 690,
+            "index": 2,
+            "mode": "root_buffer",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 24886396,
+            "events": 690,
+            "index": 0,
+            "mode": "async_exporter",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 24310830,
+            "events": 690,
+            "index": 1,
+            "mode": "async_exporter",
+            "requests": 30
+          },
+          {
+            "drops": 0,
+            "duration_ns": 24242377,
+            "events": 690,
+            "index": 2,
+            "mode": "async_exporter",
+            "requests": 30
+          }
+        ],
+        "sla_claim": false,
+        "warmup_requests_per_mode": 12
+      },
+      "native_resources": {
+        "after_load": {
+          "fds": 10,
+          "rss_kib": 36388,
+          "tasks": 15
+        },
+        "baseline": {
+          "fds": 10,
+          "rss_kib": 55264,
+          "tasks": 15
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Three short samples per mode on one native machine; scheduler and allocator variance is substantial. Negative measured overhead on SDK1.1.3 is not an optimization claim.",
+    "The same exporter and collector workload is warmed before the /proc baseline. FD/task stability is checked; RSS is recorded, not required to return exactly to its initial value.",
+    "Default-off creates no observation exporter service. Enabling the async adapter is an explicit application choice; slow exporters require application-owned lifetime management."
+  ],
+  "independent_alpha_run": {
+    "receipt": "logs/installed-alpha-independent.json",
+    "measurement": {
+      "drop_counter_scope": "cumulative_per_mode_sink_and_collector",
+      "identical_workload_warmed_before_baseline": true,
+      "measured_mean_overhead_ratio": {
+        "async_exporter": 0.331588400215413,
+        "root_buffer": 0.19755075000249311
+      },
+      "request_count_per_sample": 30,
+      "samples": [
+        {
+          "drops": 0,
+          "duration_ns": 16879985,
+          "events": 0,
+          "index": 0,
+          "mode": "disabled",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 14843011,
+          "events": 0,
+          "index": 1,
+          "mode": "disabled",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 15106115,
+          "events": 0,
+          "index": 2,
+          "mode": "disabled",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 18852120,
+          "events": 690,
+          "index": 0,
+          "mode": "root_buffer",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 18631790,
+          "events": 690,
+          "index": 1,
+          "mode": "root_buffer",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 18596327,
+          "events": 690,
+          "index": 2,
+          "mode": "root_buffer",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 20884955,
+          "events": 690,
+          "index": 0,
+          "mode": "async_exporter",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 20621168,
+          "events": 690,
+          "index": 1,
+          "mode": "async_exporter",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 20850978,
+          "events": 690,
+          "index": 2,
+          "mode": "async_exporter",
+          "requests": 30
+        }
+      ],
+      "sla_claim": false,
+      "warmup_requests_per_mode": 12
+    },
+    "native_resources": {
+      "after_load": {
+        "fds": 10,
+        "rss_kib": 78144,
+        "tasks": 15
+      },
+      "baseline": {
+        "fds": 10,
+        "rss_kib": 79704,
+        "tasks": 15
+      }
+    },
+    "note": "Earlier independent installation with the same production digests. Variation across runs is evidence against a reliable optimization claim."
+  }
+}

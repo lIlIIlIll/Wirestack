@@ -1,0 +1,351 @@
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/client_pipeline.cj:91:9:
+   [36m| [0m
+[36m91[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/tls_client_pipeline.cj:861:9:
+    [36m| [0m
+[36m861[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'expectResetQueueFull'
+   [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:219:1:
+    [36m| [0m
+[36m219[0m [36m| [0m  private func expectResetQueueFull(action: () -> Unit): Unit {[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m220[0m [36m| [0m[33m|[0m     var matched = false[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m223[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http2/client_connection_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class Http2ClientConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m560[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http2/client_connection_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class Http2ClientConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m560[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http2/client_connection_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class Http2ClientConnectionTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m560[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m              if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________^[0m
+    [36m| [0m[34m|[0m                 throw e[0m
+    [36m| [0m[34m|[0m             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+5 warnings generated, 5 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.http2[0m, time elapsed: 6110743839 ns, RESULT:
+    TCS: [33mHttp2ClientConnectionTest[0m, time elapsed: 167746197 ns, RESULT:
+    [[32m PASSED [0m] CASE: encodedHeaderFailureClosesTheConnection (947072 ns)
+    [[32m PASSED [0m] CASE: tenConcurrentRequestsShareOneConnectionAndMapOutOfOrderResponses (2694715 ns)
+    [[32m PASSED [0m] CASE: claimedStreamsPublishInitialHeadersInStreamIdOrder (1300036 ns)
+    [[32m PASSED [0m] CASE: cancelledUnpublishedStreamDoesNotBlockNextClaim (985497 ns)
+    [[32m PASSED [0m] CASE: completedResponseRetainsBufferedBodyAfterGracefulPeerEof (1405419 ns)
+    [[32m PASSED [0m] CASE: peerEofBeforeEndStreamStillFailsTheAdmittedResponse (800739 ns)
+    [[32m PASSED [0m] CASE: earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof (1733897 ns)
+    [[32m PASSED [0m] CASE: declaredLengthDoesNotReleaseStreamBeforeWireEndStream (1587945 ns)
+    [[32m PASSED [0m] CASE: streamsRequestBodyThroughFlowControlledDataAndEndsLocallyOnce (1078611 ns)
+    [[32m PASSED [0m] CASE: peerResetFailsOnlyItsStreamAndConnectionRemainsUsable (1074271 ns)
+    [[32m PASSED [0m] CASE: peerGoAwayDrainsConnectionWithoutFailingAcceptedStream (955046 ns)
+    [[32m PASSED [0m] CASE: connectedStreamOutlivesHandshakeCancellationAndUsesOperationContexts (847475 ns)
+    [[32m PASSED [0m] CASE: contextlessHalfCloseDoesNotWaitForBlockedConnectionWriter (1479260 ns)
+    [[32m PASSED [0m] CASE: halfCloseOrdersEndAfterAdmittedFlowControlledWrite (9773059 ns)
+    [[32m PASSED [0m] CASE: gracefulCloseOrdersEndAfterAdmittedFlowControlledWrite (9522204 ns)
+    [[32m PASSED [0m] CASE: gracefulCloseDeadlineStopsAdmittedFlowControlledWrite (110515647 ns)
+    [[32m PASSED [0m] CASE: queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (9745748 ns)
+    [[32m PASSED [0m] CASE: rejectedConnectReturnsFullResponseAndClosesRequestDirection (2300397 ns)
+    [[32m PASSED [0m] CASE: enabledPushAttachesBoundedCallerDrivenResponses (2573633 ns)
+    TCS: [33mHttp2ClientMappingTest[0m, time elapsed: 8828390 ns, RESULT:
+    [[32m PASSED [0m] CASE: requestMapsOrderedPseudoFieldsAuthorityAndSensitiveHeaders (253150 ns)
+    [[32m PASSED [0m] CASE: connectUsesOnlyMethodAndAuthorityPseudoFields (164273 ns)
+    [[32m PASSED [0m] CASE: connectStreamMappingKeepsBothDataDirectionsOpen (306410 ns)
+    [[32m PASSED [0m] CASE: requestRejectsAuthorityFramingAndConnectionAmbiguity (671962 ns)
+    [[32m PASSED [0m] CASE: requestHeaderListHonorsHttp2BoundsBeforeHpackMutation (153792 ns)
+    [[32m PASSED [0m] CASE: requestBodyProvesEofBeforeOneTerminalTrailerBlock (315719 ns)
+    [[32m PASSED [0m] CASE: requestBodyRejectsPrematureEofAndConfiguredOverflow (295963 ns)
+    [[32m PASSED [0m] CASE: responseMapsInformationalFinalDataAndTrailersInOrder (251059 ns)
+    [[32m PASSED [0m] CASE: responseRejectsPseudoOrderCaseAndConnectionFieldsAsStreamErrors (175461 ns)
+    [[32m PASSED [0m] CASE: responseRejectsInvalidStatusAndTooManyInformationalHeads (440978 ns)
+    [[32m PASSED [0m] CASE: responseContentLengthMustMatchExactlyAtEndStream (347249 ns)
+    [[32m PASSED [0m] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (52028 ns)
+    [[32m PASSED [0m] CASE: bodylessAndConnectResponseRulesAreExplicit (339857 ns)
+    [[32m PASSED [0m] CASE: responseTrailersRequireFinalEndStreamAndRegularAllowedFields (331946 ns)
+    [[32m PASSED [0m] CASE: promisedRequestValidationPrecedesApplicationPolicy (444022 ns)
+    TCS: [33mHttp2ClientPushOwnershipTest[0m, time elapsed: 3056174 ns, RESULT:
+    [[32m PASSED [0m] CASE: resetLostOfferIsClosedAndNextOfferRemainsDeliverable (485319 ns)
+    [[32m PASSED [0m] CASE: parentCancellationStopsTransferredStalledBodyWithoutCancellingIndependentSibling (925941 ns)
+    [[32m PASSED [0m] CASE: expiredParentAbsoluteDeadlineStillGovernsTransferredBodyAfterHeaders (305325 ns)
+    TCS: [33mHttp2ConformanceTest[0m, time elapsed: 9583663 ns, RESULT:
+    [[32m PASSED [0m] CASE: invalidFrameOrderMatrixFailsAtConnectionScope (422506 ns)
+    [[32m PASSED [0m] CASE: continuationSequenceCompletesOnlyOnEndHeaders (221371 ns)
+    [[32m PASSED [0m] CASE: rstStreamAndGoAwayRaceCompletesOwnerOnceAndCleansRegistrations (8126761 ns)
+    TCS: [33mHttp2ConnectionStateMachineTest[0m, time elapsed: 9916181 ns, RESULT:
+    [[32m PASSED [0m] CASE: clientStartEmitsMagicAndSettingsThenPeerSettingsOpens (54148 ns)
+    [[32m PASSED [0m] CASE: serverConsumesIncrementalMagicBeforeItsFirstSettings (64289 ns)
+    [[32m PASSED [0m] CASE: invalidOrIncompletePrefaceFailsOnceWithProtocolEvidence (88973 ns)
+    [[32m PASSED [0m] CASE: firstPeerFrameMustBeNonAcknowledgementSettings (73886 ns)
+    [[32m PASSED [0m] CASE: openConnectionAppliesSettingsAndCompletesHeaderBlocks (64960 ns)
+    [[32m PASSED [0m] CASE: peerGoAwayDrainsAndMayOnlyNarrowItsBoundary (83820 ns)
+    [[32m PASSED [0m] CASE: localDrainUsesProcessedPeerBoundaryAndNeverIncreases (129195 ns)
+    [[32m PASSED [0m] CASE: racingFinishTransitionsAndPublishesCompletionExactlyOnce (7620517 ns)
+    TCS: [33mHttp2DeterministicFuzzTest[0m, time elapsed: 15570457 ns, RESULT:
+    [[32m PASSED [0m] CASE: frameParserDeterministicMutationCorpusStaysBounded (9114966 ns)
+    [[32m PASSED [0m] CASE: hpackDecoderDeterministicMutationCorpusFailsClosed (5432016 ns)
+    [[32m PASSED [0m] CASE: protocolLimitBoundaryMutationsRejectOversizedInputs (92120 ns)
+    TCS: [33mHttp2FlowControllerTest[0m, time elapsed: 5602622537 ns, RESULT:
+    [[32m PASSED [0m] CASE: windowUpdateCodecIgnoresReservedBitAndRejectsZeroByScope (51526 ns)
+    [[32m PASSED [0m] CASE: reservationsRespectConnectionStreamAndPeerFrameCredit (79796 ns)
+    [[32m PASSED [0m] CASE: settingsShrinkPausesReservedDataAndCancellationReleasesIt (85420 ns)
+    [[32m PASSED [0m] CASE: streamWindowUpdateWakesAReservedPermitAfterSettingsShrink (64721 ns)
+    [[32m PASSED [0m] CASE: concurrentTryReserveNeverOvercommitsOneStream (205426 ns)
+    [[32m PASSED [0m] CASE: receiveCreditReturnsOnlyAfterApplicationConsumption (78650 ns)
+    [[32m PASSED [0m] CASE: smallReceiveReadsCoalesceWindowUpdates (195711 ns)
+    [[32m PASSED [0m] CASE: stalledConnectionCreditFlushesOnceWithoutChangingSmallReadCoalescing (37338 ns)
+    [[32m PASSED [0m] CASE: leastRecentlyServedStreamsReceiveCreditBeforeThePreviousOwner (5598618914 ns)
+    [[32m PASSED [0m] CASE: connectionSendWindowIsSharedAcrossStreams (109317 ns)
+    [[32m PASSED [0m] CASE: connectionAndStreamWindowViolationsHaveCorrectScope (81823 ns)
+    [[32m PASSED [0m] CASE: settingsAndWindowOverflowFailAtomically (70749 ns)
+    [[32m PASSED [0m] CASE: streamCleanupCancelsPermitsAndRestoresOnlyConnectionReceiveCredit (63417 ns)
+    [[32m PASSED [0m] CASE: dataAccountingUsesTheEntireFramePayload (38835 ns)
+    TCS: [33mHttp2FrameCodecTest[0m, time elapsed: 1601211 ns, RESULT:
+    [[32m PASSED [0m] CASE: everyRequiredFrameEnvelopeRoundTrips (138406 ns)
+    [[32m PASSED [0m] CASE: parserAcceptsEverySingleByteBoundaryAndMultipleFrames (104218 ns)
+    [[32m PASSED [0m] CASE: incompleteInputStaysBoundedUntilCompletion (25224 ns)
+    [[32m PASSED [0m] CASE: oversizedFrameFailsBeforePayloadBufferingAndParserBecomesTerminal (39583 ns)
+    [[32m PASSED [0m] CASE: reservedBitIsIgnoredOnReadAndClearedOnWrite (21567 ns)
+    [[32m PASSED [0m] CASE: unknownFramesAndFlagsRoundTripWithoutInterpretation (29245 ns)
+    [[32m PASSED [0m] CASE: transportWriterHandlesRepeatedPartialWrites (41102 ns)
+    [[32m PASSED [0m] CASE: parserRefusesUnbudgetedDataBeforeRetainingItsPayload (104242 ns)
+    TCS: [33mHttp2FrameModelTest[0m, time elapsed: 880380 ns, RESULT:
+    [[32m PASSED [0m] CASE: frameAndErrorCodesRoundTripIncludingExtensions (25872 ns)
+    [[32m PASSED [0m] CASE: streamIdentifierIgnoresReservedBitAndKeepsThirtyOneBits (10631 ns)
+    [[32m PASSED [0m] CASE: limitsAreExplicitAndFrameSizeIsBounded (35583 ns)
+    [[32m PASSED [0m] CASE: fixedFrameShapesAndStreamScopesAreValidated (46810 ns)
+    [[32m PASSED [0m] CASE: settingsRejectInvalidProtocolValuesButRetainExtensions (22664 ns)
+    [[32m PASSED [0m] CASE: unknownFlagsAndFramesRemainForwardCompatible (12694 ns)
+    TCS: [33mHttp2GoAwayManagerTest[0m, time elapsed: 4167260 ns, RESULT:
+    [[32m PASSED [0m] CASE: peerBoundaryRetiresOnlyDefinitelyUnprocessedStreams (128313 ns)
+    [[32m PASSED [0m] CASE: narrowingBoundaryWakesEachNewlyExcludedOwnerExactlyOnce (62464 ns)
+    [[32m PASSED [0m] CASE: localDrainQueuesGoAwayAndStopsAdmissionBeforeWriterRuns (51417 ns)
+    [[32m PASSED [0m] CASE: fabricatedReceiveResultCannotDrainAnOpenCoordinator (43983 ns)
+    [[32m PASSED [0m] CASE: racingAdmissionAndGoAwayNeverLeavesAnExcludedStreamActive (3241865 ns)
+    TCS: [33mHttp2HeaderBlockAssemblerTest[0m, time elapsed: 1072610 ns, RESULT:
+    [[32m PASSED [0m] CASE: sameStreamContinuationsAssembleInExactOrder (31844 ns)
+    [[32m PASSED [0m] CASE: continuationWithoutStartWrongStreamAndInterleavingFailConnection (49061 ns)
+    [[32m PASSED [0m] CASE: paddingAndPriorityOverheadAreExcludedFromHeaderBytes (28862 ns)
+    [[32m PASSED [0m] CASE: pushPromiseRetainsPromisedStreamAndFragmentOnly (28894 ns)
+    [[32m PASSED [0m] CASE: invalidPaddingPriorityAndSelfDependencyFailClosed (51723 ns)
+    [[32m PASSED [0m] CASE: accumulatedCompressedBytesHaveOneHardLimit (24258 ns)
+    TCS: [33mHttp2ConnectionHealthTest[0m, time elapsed: 497450 ns, RESULT:
+    [[32m PASSED [0m] CASE: pingCodecAndConnectionAckPreserveOpaqueBytes (27541 ns)
+    [[32m PASSED [0m] CASE: idleProbeIsSingleOutstandingAndMatchingAckRestoresHealth (111677 ns)
+    [[32m PASSED [0m] CASE: ordinaryActivityDefersIdleProbeWithoutAllocatingATimer (22349 ns)
+    TCS: [33mHttp2ConnectionCloserTest[0m, time elapsed: 1112940 ns, RESULT:
+    [[32m PASSED [0m] CASE: gracefulCloseSendsGoAwayWaitsForStreamAndClosesTransportOnce (92498 ns)
+    [[32m PASSED [0m] CASE: expiredCloseAbortsActiveStreamsWithoutStartingGracefulIo (48590 ns)
+    [[32m PASSED [0m] CASE: racingShorterDeadlineUpgradesInFlightGracefulCloseToOneAbort (72129 ns)
+    [[32m PASSED [0m] CASE: concurrentGracefulCallersShareOneTerminalResultAndTransportClose (178690 ns)
+    [[32m PASSED [0m] CASE: failedGracefulTransportCloseFallsBackToOneAbort (94463 ns)
+    TCS: [33mHpackBlockTest[0m, time elapsed: 1925107 ns, RESULT:
+    [[32m PASSED [0m] CASE: rfcRequestBlocksDecodeWithSharedDynamicState (47558 ns)
+    [[32m PASSED [0m] CASE: encoderMatchesFirstRfcHuffmanRequestExample (63834 ns)
+    [[32m PASSED [0m] CASE: literalModesPreserveNeverIndexedAndOnlyIncrementalMutatesTable (290596 ns)
+    [[32m PASSED [0m] CASE: tableSizeUpdateMustLeadBlockAndRespectAllowedMaximum (56142 ns)
+    [[32m PASSED [0m] CASE: headerCountListAndCompressedLimitsFailClosed (505635 ns)
+    [[32m PASSED [0m] CASE: peerCapacityUpdateIsEmittedBeforeHeaders (52659 ns)
+    TCS: [33mHpackCoreTest[0m, time elapsed: 1026800 ns, RESULT:
+    [[32m PASSED [0m] CASE: rfcIntegerVectorsEncodeAndDecodeExactly (19937 ns)
+    [[32m PASSED [0m] CASE: integerRejectsTruncationOverflowAndInvalidPrefix (33501 ns)
+    [[32m PASSED [0m] CASE: rawStringRoundTripsAndOwnsItsBytes (26418 ns)
+    [[32m PASSED [0m] CASE: stringLengthLimitAndTruncationFailBeforeCopy (36051 ns)
+    [[32m PASSED [0m] CASE: staticTableMatchesRfcBoundariesAndRepresentativeEntries (28918 ns)
+    [[32m PASSED [0m] CASE: everyStaticEntryHasBoundedRfcAccounting (83772 ns)
+    TCS: [33mHpackDynamicTableTest[0m, time elapsed: 1190324 ns, RESULT:
+    [[32m PASSED [0m] CASE: newestEntryUsesIndexSixtyTwoAndOlderEntriesShift (14957 ns)
+    [[32m PASSED [0m] CASE: exactRfcAccountingEvictsOldestEntriesFirst (23555 ns)
+    [[32m PASSED [0m] CASE: oversizedEntryClearsTheEntireTableWithoutInsertion (13571 ns)
+    [[32m PASSED [0m] CASE: capacityShrinkEvictsImmediatelyAndPeerLimitIsHard (24545 ns)
+    [[32m PASSED [0m] CASE: withoutIndexingNeverIndexedAndSensitiveNeverEnterState (24108 ns)
+    [[32m PASSED [0m] CASE: staticAndDynamicSearchReturnCanonicalLowestIndexes (150445 ns)
+    [[32m PASSED [0m] CASE: zeroCapacityRetainsNoEntries (12152 ns)
+    TCS: [33mHpackHuffmanTest[0m, time elapsed: 1051486 ns, RESULT:
+    [[32m PASSED [0m] CASE: rfcRequestExamplesEncodeAndDecodeExactly (45990 ns)
+    [[32m PASSED [0m] CASE: everyOctetRoundTripsWithinAnExplicitBound (276414 ns)
+    [[32m PASSED [0m] CASE: huffmanStringLiteralUsesFlagAndSharedBounds (42812 ns)
+    [[32m PASSED [0m] CASE: eosInvalidPaddingAndTruncatedPrefixFailClosed (48119 ns)
+    [[32m PASSED [0m] CASE: decodedAndEncodedOutputLimitsApplyBeforeGrowth (43468 ns)
+    TCS: [33mHttp2ObservabilityTest[0m, time elapsed: 103339657 ns, RESULT:
+    [[32m PASSED [0m] CASE: independentStreamsRetainCorrelationAndThrowingReentrantHookCannotChangeBodies (2119198 ns)
+    [[32m PASSED [0m] CASE: actualActiveBodyWaitReportsTimeoutAndCancellation (42376002 ns)
+    [[32m PASSED [0m] CASE: realZeroWindowWaitHasDistinctLocalBackpressureEvidence (27739408 ns)
+    [[32m PASSED [0m] CASE: settingsShrinkReportsBlockedAdmittedPermitAndReleasesCreditOnTimeout (29790414 ns)
+    TCS: [33mHttp2ConnectionReaderTest[0m, time elapsed: 5835772 ns, RESULT:
+    [[32m PASSED [0m] CASE: oneReaderDecodesEveryByteBoundaryAndDispatchesInWireOrder (909392 ns)
+    [[32m PASSED [0m] CASE: serverConsumesMagicAndFirstFrameFromTheSameRead (665037 ns)
+    [[32m PASSED [0m] CASE: eofDuringPrefaceOrFrameFailsAndWakesEveryStream (1522005 ns)
+    [[32m PASSED [0m] CASE: invalidTransportProgressAndHandlerFailureBecomeTerminal (920659 ns)
+    [[32m PASSED [0m] CASE: readerLoopCanOnlyBeClaimedOnce (291003 ns)
+    [[32m PASSED [0m] CASE: terminationRegistryIsBoundedRemovableAndExactlyOnce (262097 ns)
+    [[32m PASSED [0m] CASE: readerRegistryReservesOneListenerBeyondTheStreamLimit (29750 ns)
+    TCS: [33mHttp2ServerCancellationTest[0m, time elapsed: 45249278 ns, RESULT:
+    [[32m PASSED [0m] CASE: cancellationCompletionWaitsForActualExchangeReclamation (13868702 ns)
+    [[32m PASSED [0m] CASE: productionServerMeasuresPublicLinkedAndPeerCancellationButNotOrdinaryCompletion (30544503 ns)
+    TCS: [33mHttp2ServerMappingTest[0m, time elapsed: 6955725 ns, RESULT:
+    [[32m PASSED [0m] CASE: requestHeadMapsPseudoFieldsHostAndContentLength (152584 ns)
+    [[32m PASSED [0m] CASE: connectAndOptionsTargetsAreMappedStrictly (130313 ns)
+    [[32m PASSED [0m] CASE: requestRejectsPseudoOrderCaseConnectionAndAuthorityAmbiguity (174630 ns)
+    [[32m PASSED [0m] CASE: paddedDataReturnsAllFlowCreditAndPublishesTrailers (218996 ns)
+    [[32m PASSED [0m] CASE: requestQueueIsBoundedBeforeFlowAccountingMutates (130010 ns)
+    [[32m PASSED [0m] CASE: receiveBuffersAreSharedAcrossHttp2ConnectionsAndReleaseOnBodyClose (295460 ns)
+    [[32m PASSED [0m] CASE: parserBufferLeaseMovesToBodyAndReleasesAfterLastByteIsConsumed (144772 ns)
+    [[32m PASSED [0m] CASE: terminalLengthMismatchDoesNotConsumeFlowWindow (106553 ns)
+    [[32m PASSED [0m] CASE: responseHeadersBodyFlowAndTrailersMapInOrder (960390 ns)
+    [[32m PASSED [0m] CASE: streamingResponseMayExceedTheConfiguredRequestBodyBound (1231086 ns)
+    [[32m PASSED [0m] CASE: responseRulesCloseBodiesOnEveryTerminalOrFailurePath (105903 ns)
+    [[32m PASSED [0m] CASE: handlerRunsOnceAndReleasesRequestOwnership (153975 ns)
+    [[32m PASSED [0m] CASE: invalidDuplexResponseReleasesPreServeHandoffExactlyOnce (694997 ns)
+    TCS: [33mHttp2ServerPushLifecycleTest[0m, time elapsed: 100528473 ns, RESULT:
+    [[32m PASSED [0m] CASE: largePushDoesNotDelayParentHeadersUntilPushCreditReturns (57335225 ns)
+    [[32m PASSED [0m] CASE: cancelledPushReleasesItsWorkerSlotForTheNextParent (29367368 ns)
+    [[32m PASSED [0m] CASE: crossOriginPushIsRejectedAndItsResponseIsClosedBeforeAnyOffer (1678918 ns)
+    [[32m PASSED [0m] CASE: parentResetWhileWaitingForPushSlotIsRevalidatedBeforeReservation (3949212 ns)
+    [[32m PASSED [0m] CASE: resetOfBlockedPushDoesNotBlockReaderOrReleaseWorkerSlotEarly (3513857 ns)
+    [[32m PASSED [0m] CASE: blockingHeaderOnlyBodyCloseDoesNotDelayInboundReset (1704330 ns)
+    [[32m PASSED [0m] CASE: duplexHandlerReturnAbortsBothStreamDirections (852723 ns)
+    TCS: [33mHttp2SettingsTest[0m, time elapsed: 1882958 ns, RESULT:
+    [[32m PASSED [0m] CASE: codecPreservesKnownUnknownAndRepeatedSettingsInOrder (21562 ns)
+    [[32m PASSED [0m] CASE: peerBatchAppliesAtomicallyAndReturnsAckAndWindowDelta (38502 ns)
+    [[32m PASSED [0m] CASE: invalidPeerBatchLeavesEffectiveStateUnchanged (53548 ns)
+    [[32m PASSED [0m] CASE: localBatchesAreAcknowledgedInFifoOrder (22819 ns)
+    [[32m PASSED [0m] CASE: unexpectedAckAndPendingBatchOverflowFailClosed (34092 ns)
+    [[32m PASSED [0m] CASE: advertisedResourceValuesAreCappedByLocalPolicy (32341 ns)
+    [[32m PASSED [0m] CASE: settingsFrameLengthAndAckPayloadAreRejectedByFrameLayer (58974 ns)
+    [[32m PASSED [0m] CASE: peerDefaultsAreRfcValuesCappedSeparatelyFromLocalAdvertisement (66745 ns)
+    [[32m PASSED [0m] CASE: clientPushAdvertisementUsesItsOwnFiniteAdmissionBound (28913 ns)
+    [[32m PASSED [0m] CASE: serverEnablePushSettingIsRejectedInBothDirections (35026 ns)
+    TCS: [33mHttp2StreamLifecycleTest[0m, time elapsed: 3993101 ns, RESULT:
+    [[32m PASSED [0m] CASE: bothEndStreamOrdersReachClosedExactlyOnce (37265 ns)
+    [[32m PASSED [0m] CASE: initialEndStreamHalfClosesTheInitiatingSide (25893 ns)
+    [[32m PASSED [0m] CASE: clientAndServerAllocateCorrectMonotonicParity (21643 ns)
+    [[32m PASSED [0m] CASE: peerParityReuseAndDecreasingIdsFailConnection (41016 ns)
+    [[32m PASSED [0m] CASE: localAndPeerConcurrencyLimitsAreIndependentAndCapacityReturns (68551 ns)
+    [[32m PASSED [0m] CASE: invalidHalfClosedDirectionsAndUnknownStreamsFailClosed (100525 ns)
+    [[32m PASSED [0m] CASE: readerTerminationClosesAndUnregistersEveryActiveStream (177499 ns)
+    [[32m PASSED [0m] CASE: racingAdmissionNeverExceedsConfiguredBoundOrDuplicatesIds (890852 ns)
+    [[32m PASSED [0m] CASE: racingEndDirectionsCompleteAndCleanupExactlyOnce (1142373 ns)
+    TCS: [33mHttp2StreamResetManagerTest[0m, time elapsed: 2579027 ns, RESULT:
+    [[32m PASSED [0m] CASE: rstCodecPreservesKnownAndExtensionCodes (49392 ns)
+    [[32m PASSED [0m] CASE: localCancelQueuesResetAndReleasesOnlyItsStream (110938 ns)
+    [[32m PASSED [0m] CASE: peerResetCancelsQueuedDataPermitsAndWakesOwnerOnce (135980 ns)
+    [[32m PASSED [0m] CASE: resetWakesBlockedServerBodyWithoutClosingConnection (101236 ns)
+    [[32m PASSED [0m] CASE: racingLocalAndPeerResetCompletesEveryStreamExactlyOnce (1289860 ns)
+    [[32m PASSED [0m] CASE: cleanupResetUsesReservedQueueSlotAndRetriesDeferredCredit (75720 ns)
+    TCS: [33mHttp2WriteSchedulerTest[0m, time elapsed: 5386342 ns, RESULT:
+    [[32m PASSED [0m] CASE: controlPrecedesDataAndPartialWritesDrainGracefully (83997 ns)
+    [[32m PASSED [0m] CASE: controlBurstIsBoundedAndDataStreamsRotateFairly (248026 ns)
+    [[32m PASSED [0m] CASE: queueCountAndBytesAreHardAndCancellationReleasesCapacity (85683 ns)
+    [[32m PASSED [0m] CASE: concurrentProducersStillUseExactlyOneWriter (1227651 ns)
+    [[32m PASSED [0m] CASE: abortInterruptsActiveWriteAndFailsEveryTicket (154742 ns)
+    [[32m PASSED [0m] CASE: transportFailureFansOutAndTicketWaitHonorsCancellation (101231 ns)
+    [[32m PASSED [0m] CASE: reservedDataConsumesFlowOnlyWhenTheWriterClaimsIt (51423 ns)
+    [[32m PASSED [0m] CASE: serverDataEventTransfersItsPermitBeforeWriterClaim (46540 ns)
+    [[32m PASSED [0m] CASE: cancellingQueuedReservedDataReturnsAllFlowCapacity (43699 ns)
+    [[32m PASSED [0m] CASE: admittedHeaderBatchSurvivesResetDuringPartialFirstWrite (93436 ns)
+    [[32m PASSED [0m] CASE: unstartedEncodedHeaderBatchIsIrrevocableAfterAdmission (46272 ns)
+    [[32m PASSED [0m] CASE: largeHeaderBatchRemainsContiguousPastControlBurstLimit (128414 ns)
+    [[32m PASSED [0m] CASE: failedHeaderBatchAdmissionTerminatesScheduler (41006 ns)
+    [[32m PASSED [0m] CASE: concurrentHeaderBatchesStayContiguousOnTheWire (799123 ns)
+    [[32m PASSED [0m] CASE: aggregateManagedBytesIncludeControlReserveAndSlowWrites (157336 ns)
+    [[32m PASSED [0m] CASE: cleanupFrameUsesProtectedBytesAfterOrdinaryControlIsFull (70674 ns)
+Summary: TOTAL: 196
+    [32mPASSED[0m: 196, [32mSKIPPED[0m: 0, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 6115907414 ns, RESULT:
+TP: [33mwirestack[0m.*, time elapsed: 6115687293 ns, RESULT:
+    PASSED:
+    TP: [33mwirestack.internal.http2[0m, time elapsed: 6110743839 ns
+Summary: TOTAL: 196
+    [32mPASSED[0m: 196, [32mSKIPPED[0m: 0, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

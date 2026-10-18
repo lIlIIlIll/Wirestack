@@ -1,9 +1,10 @@
 package wirestack.http
 
 import wirestack.internal.resolver as resolver
+import wirestack as api
 
 /** Platform system resolver with explicit worker and queue bounds. */
-public class SystemResolver <: Resolver & Resource {
+public class SystemResolver <: Resolver & Resource & api.ResolverResourceOwner {
     private let delegate: resolver.SystemResolver
 
 /**
@@ -46,6 +47,13 @@ public class SystemResolver <: Resolver & Resource {
         context!: OperationContext = OperationContext.background()
     ): ResolveResult {
         delegate.resolve(host, options: options, context: context)
+    }
+
+    /** Returns live native resolver work counters, or a closed owner's last actual sample.
+     * Closed samples keep their original timestamp and have isLive false.
+     */
+    public func resolverResourceSnapshot(): api.ResolverResourceSnapshot {
+        delegate.resolverResourceSnapshot()
     }
 
 /**

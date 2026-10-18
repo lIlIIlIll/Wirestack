@@ -251,6 +251,12 @@ public struct HttpResourceSnapshot {
     public let managedBufferBytes: UInt64
     /** Monotonic instant of the ledger's single-lock snapshot. */
     public let sampledAt: MonoTime
+    /** Lifetime ResourceExhausted ledger rejections, sampled under the ledger lock and saturated. */
+    public let rejectedOperations: Int64
+    /** Measured cancellations whose owned cleanup completed, sampled under the ledger lock. */
+    public let completedCancellations: Int64
+    /** Most recent measured cleanup latency; absent until a cancellation completes. */
+    public let lastCancellationCompletionLatency: ?Duration
     /** Current count of waiters on aggregate resource admission. */
     public let admissionWaiters: Int64
     /** Lifetime maximum of active plus reserved physical connections. */
@@ -283,6 +289,9 @@ public struct HttpResourceSnapshot {
      * @param sampledAt Monotonic sample instant captured with the ledger counters.
      * @param reservedConnections Current admitted connections not yet activated.
      * @param reservedStreams Current admitted streams not yet activated.
+     * @param rejectedOperations Saturating lifetime rejections sampled under the ledger lock.
+     * @param completedCancellations Saturating completed-cleanup count sampled under the ledger lock.
+     * @param lastCancellationCompletionLatency Last measured cleanup latency, or none before any measurement.
      */
     public init(
         limits: HttpResourceLimits,
@@ -299,7 +308,10 @@ public struct HttpResourceSnapshot {
         owners: Array<HttpResourceOwnerSnapshot>,
         sampledAt!: MonoTime = MonoTime.now(),
         reservedConnections!: Int64 = 0,
-        reservedStreams!: Int64 = 0
+        reservedStreams!: Int64 = 0,
+        rejectedOperations!: Int64 = 0,
+        completedCancellations!: Int64 = 0,
+        lastCancellationCompletionLatency!: ?Duration = None<Duration>
     ) {
         this.limits = limits
         this.activeConnections = activeConnections
@@ -309,6 +321,9 @@ public struct HttpResourceSnapshot {
         this.reservedStreams = reservedStreams
         this.managedBufferBytes = managedBufferBytes
         this.sampledAt = sampledAt
+        this.rejectedOperations = rejectedOperations
+        this.completedCancellations = completedCancellations
+        this.lastCancellationCompletionLatency = lastCancellationCompletionLatency
         this.admissionWaiters = admissionWaiters
         this.highWaterConnections = highWaterConnections
         this.highWaterRequests = highWaterRequests
@@ -352,6 +367,8 @@ internal func resourceSnapshotFromLedger(ledger: internal.HttpResourceBudgetSnap
         ledger.highWaterConnections, ledger.highWaterRequests, ledger.highWaterStreams,
         ledger.highWaterManagedBufferBytes, ledger.highWaterAdmissionWaiters, owners.toArray(),
         sampledAt: ledger.sampledAt, reservedConnections: ledger.reservedConnections,
-        reservedStreams: ledger.reservedStreams
+        reservedStreams: ledger.reservedStreams, rejectedOperations: ledger.rejectedOperations,
+        completedCancellations: ledger.completedCancellations,
+        lastCancellationCompletionLatency: ledger.lastCancellationCompletionLatency
     )
 }
