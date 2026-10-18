@@ -446,7 +446,7 @@ public class HttpServerBuilder {
             )
             let core = http1.Http1Server(
                 bound,
-                PublicHttp1Handler(selectedHandler, resourceBudget),
+                PublicHttp1Handler(selectedHandler, resourceBudget, tlsConfig.isSome()),
                 config: http1.Http1ServerConfig(
                     maximumConnections: effectiveResourceLimits.maximumConnections,
                     maximumRequestsPerConnection: maximumRequestsPerConnection,
