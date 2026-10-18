@@ -606,6 +606,11 @@ private func publicServerRequestOwner(
     internal.HttpResourceOwnerKey(origin, "listener")
 }
 
+
+private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
+    publicServerRequestOwner(authority, false)
+}
+
 private class PublicHttp1Handler <: http1.Http1ServerHandler {
     private let delegate: HttpServerHandler
     private let connectionCancellation: HttpConnectionCancellationHandle

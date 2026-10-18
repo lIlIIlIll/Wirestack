@@ -1264,6 +1264,9 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                     }
                 }
                 if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
+                if (readContext.isDeadlineExceeded() && writeContext.isDeadlineExceeded()) {
+                    checkClientContext(writeContext)
+                }
                 if (let Some(error) <- failure) { throw error }
                 if (closed) { return ReadResult.EndOfStream }
                 if (segments.isEmpty()) { return ReadResult.EndOfStream }
