@@ -48,76 +48,120 @@ index 09eab203..ea5abde2 100644
              context,
              None<HttpRequestCancellationHandle>,
 diff --git a/src/http/client_extensions_test.cj b/src/http/client_extensions_test.cj
-index df94b648..a0d6663d 100644
+index df94b648..bc16bf76 100644
 --- a/src/http/client_extensions_test.cj
 +++ b/src/http/client_extensions_test.cj
-@@ -147,6 +147,66 @@ class HttpClientExtensionsTest {
+@@ -1,7 +1,7 @@
+ package wirestack.http
+ 
+ import std.collection.ArrayList
+-import std.sync.AtomicInt64
++import std.sync.*
+ import std.time.*
+ import std.unittest.*
+ import std.unittest.testmacro.*
+@@ -147,6 +147,61 @@ class HttpClientExtensionsTest {
          }
      }
  
 +    @TestCase
-+    func duplexHandshakeAdmissionHonorsRequestAdmissionStageCap(): Unit {
-+        let fixture = NativeHttpExtensionFixture()
-+        let server = HttpServer.builder().listen(SocketEndpoint(
-+            IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 0u16)).handler(fixture).build()
-+        let serving = spawn { server.serve() }
++    func closingClientWakesStalledConnectorConnectionAdmission(): Unit {
++        let connector = StallingHttpConnector()
 +        let resourceLimits = HttpResourceLimits(
 +            maximumConnections: 1,
 +            maximumConnectionsPerRoute: 1,
 +            maximumConnectionsPerOrigin: 1,
-+            maximumRequests: 1,
-+            maximumRequestsPerRoute: 1,
-+            maximumRequestsPerOrigin: 1,
++            maximumRequests: 2,
++            maximumRequestsPerRoute: 2,
++            maximumRequestsPerOrigin: 2,
 +            maximumStreams: 1,
 +            maximumStreamsPerRoute: 1,
 +            maximumStreamsPerOrigin: 1
 +        )
-+        // No total request timeout: the requestAdmission stage cap is the only bound.
-+        let client = HttpClient.builder().connector(fixture).resourceLimits(resourceLimits).build()
-+        let base = "http://127.0.0.1:${server.localEndpoint.port}"
-+        try {
-+            let held = client.get("${base}/held")
++        let client = HttpClient.builder().connector(connector).resourceLimits(resourceLimits).build()
++        let url = "http://127.0.0.1:9/stalled"
++        let first: Future<Bool> = spawn {
 +            try {
-+                @Expect(client.resourceSnapshot().activeRequests, 1)
-+                let handshake = spawn {
-+                    try {
-+                        let _ = client.upgrade(
-+                            HttpRequest(HttpMethod("CONNECT"), HttpUrl.parse("${base}/upgrade")),
-+                            context: OperationContext(timeoutPolicy: api.OperationTimeoutPolicy(
-+                                requestAdmission: Some(250 * Duration.millisecond)
-+                            ))
-+                        )
-+                        false
-+                    } catch (error: api.NetworkException) {
-+                        match (error.category) {
-+                            case api.NetworkErrorCategory.DeadlineExceeded =>
-+                                match (error.phase) {
-+                                    case api.NetworkPhase.PoolAcquire =>
-+                                        match (error.code) {
-+                                            case api.NetworkErrorCode.TimedOut => true
-+                                            case _ => false
-+                                        }
-+                                    case _ => false
-+                                }
-+                            case _ => false
-+                        }
++                let response = client.get(url)
++                response.close()
++                false
++            } catch (_: Exception) { true }
++        }
++        var second: ?Future<Bool> = None<Future<Bool>>
++        try {
++            @Expect(waitForHttpConnectionReservation(client, 1, Duration.second))
++            second = Some(spawn {
++                try {
++                    let response = client.get(url)
++                    response.close()
++                    false
++                } catch (error: api.NetworkException) {
++                    match (error.code) {
++                        case api.NetworkErrorCode.Closed => true
++                        case _ => false
 +                    }
 +                }
-+                @Expect(handshake.get(2 * Duration.second))
-+            } finally {
-+                held.close()
-+            }
-+        } finally {
++            })
++            @Expect(waitForHttpAdmissionWaiter(client, 1, Duration.second))
 +            client.close()
-+            let _ = server.shutdown(context: OperationContext(
-+                deadline: Some(Deadline.after(5 * Duration.second))))
-+            serving.get(5 * Duration.second)
++            client.close()
++            var secondRejected = false
++            try { secondRejected = second.getOrThrow().get(Duration.second) } catch (_: Exception) { }
++            @Expect(secondRejected)
++            @Expect(client.resourceSnapshot().admissionWaiters, 0)
++        } finally {
++            connector.release()
++            client.close()
++            try { let _ = first.get(5 * Duration.second) } catch (_: Exception) { }
++            if (let Some(value) <- second) {
++                try { let _ = value.get(5 * Duration.second) } catch (_: Exception) { }
++            }
 +        }
 +    }
 +
      @TestCase
      func unavailableServerPushClosesTheOwnedResponse(): Unit {
          let fixture = NativeHttpExtensionFixture()
+@@ -242,3 +297,39 @@ private func waitForHttpAdmissionWaiter(
+     }
+     false
+ }
++
++private func waitForHttpConnectionReservation(
++    client: HttpClient,
++    expected: Int64,
++    timeout: Duration
++): Bool {
++    let expiresAt = MonoTime.now() + timeout
++    while (true) {
++        if (client.resourceSnapshot().reservedConnections >= expected) { return true }
++        if (expiresAt - MonoTime.now() <= Duration.Zero) { return false }
++        sleep(Duration.millisecond)
++    }
++    false
++}
++
++private class StallingHttpConnector <: HttpConnector {
++    private let mutex = Mutex()
++    private let changed = synchronized(mutex) { mutex.condition() }
++    private var released = false
++
++    public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
++        let _ = endpoint
++        let _ = context
++        synchronized(mutex) {
++            while (!released) { changed.wait() }
++        }
++        throw Exception("stalled connector released without a transport")
++    }
++
++    func release(): Unit {
++        synchronized(mutex) {
++            released = true
++            changed.notifyAll()
++        }
++    }
++}
 diff --git a/src/http/client_rotation_test.cj b/src/http/client_rotation_test.cj
 index 0f0522d5..ca284f69 100644
 --- a/src/http/client_rotation_test.cj
@@ -147,6 +191,30 @@ index 0f0522d5..ca284f69 100644
          } finally {
              match (transferred) { case Some(value) => value.close(); case None => () }
              client.close(); rotationStop(server, serving)
+diff --git a/src/http/facade_test.cj b/src/http/facade_test.cj
+index ba8f9ee1..bf5bbf8b 100644
+--- a/src/http/facade_test.cj
++++ b/src/http/facade_test.cj
+@@ -1796,3 +1796,19 @@ private class PublicRedirectPushObserver <: ResponseBodyObserver {
+         }
+     }
+ }
++
++@Test
++class HttpServerAuthorityCanonicalizationTest {
++    @TestCase
++    func canonicalServerAuthoritiesCollapseEquivalentSpellings(): Unit {
++        @Expect(canonicalServerAuthority("Example.COM", true), "example.com")
++        @Expect(canonicalServerAuthority("Example.COM:443", true), "example.com")
++        @Expect(canonicalServerAuthority("Example.COM:8443", true), "example.com:8443")
++        @Expect(canonicalServerAuthority("Example.COM:80", false), "example.com")
++        @Expect(canonicalServerAuthority("Example.COM:8080", false), "example.com:8080")
++        @Expect(canonicalServerAuthority("[2001:DB8::1]", true), "[2001:db8::1]")
++        @Expect(canonicalServerAuthority("[2001:DB8::1]:443", true), "[2001:db8::1]")
++        @Expect(canonicalServerAuthority("[2001:DB8::1]:8443", true), "[2001:db8::1]:8443")
++        @Expect(canonicalServerAuthority("", false), "")
++    }
++}
 diff --git a/src/http/observability.cj b/src/http/observability.cj
 index 82f48230..995304f3 100644
 --- a/src/http/observability.cj
@@ -165,7 +233,7 @@ index 82f48230..995304f3 100644
      let rows = ArrayList<api.ResolverResourceSnapshot>()
      var unavailable: Int64 = 0
 diff --git a/src/http/server.cj b/src/http/server.cj
-index 7cd06e1e..87de61c7 100644
+index 7cd06e1e..a9260651 100644
 --- a/src/http/server.cj
 +++ b/src/http/server.cj
 @@ -372,8 +372,8 @@ public class HttpServerBuilder {
@@ -197,7 +265,7 @@ index 7cd06e1e..87de61c7 100644
      }
  
      /** Last published TLS generation, starting at one, or zero for cleartext. */
-@@ -563,33 +559,13 @@ public class HttpServer <: Resource {
+@@ -563,13 +559,6 @@ public class HttpServer <: Resource {
      public func resourceSnapshot(): HttpResourceSnapshot {
          resourceSnapshotFromLedger(resourceBudget.snapshot())
      }
@@ -208,23 +276,10 @@ index 7cd06e1e..87de61c7 100644
 -        let (generation, retained, draining) = dispatcher.observationCounters()
 -        HttpServerObservationSnapshot(resourceSnapshot(), generation, retained, draining, sampleHttpObservations(observations))
 -    }
--}
--
--/** Extracts the parser-validated authority from one HTTP/1 request head. */
--private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): String {
--    match (request.head.headers.getFirst("host")) {
--        case Some(value) => value
--        case None => ""
--    }
--}
--
--/** Derives request and stream budget owners from the validated request authority. */
--private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
--    let origin = if (authority.isEmpty()) { "server" } else { authority }
--    internal.HttpResourceOwnerKey(origin, "listener")
  }
  
- private class PublicHttp1Handler <: http1.Http1ServerHandler {
+ /** Extracts the parser-validated authority from one HTTP/1 request head. */
+@@ -590,6 +579,7 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
      private let delegate: HttpServerHandler
      private let connectionCancellation: HttpConnectionCancellationHandle
      private let resourceBudget: internal.HttpResourceBudget
@@ -232,7 +287,7 @@ index 7cd06e1e..87de61c7 100644
      init(
          delegate: HttpServerHandler,
          resourceBudget: internal.HttpResourceBudget,
-@@ -607,16 +583,9 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+@@ -607,16 +597,9 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
   */
      public func handle(request: http1.Http1ServerRequest,
          context: transport.OperationContext): http1.Http1ServerResponse {
@@ -250,7 +305,7 @@ index 7cd06e1e..87de61c7 100644
                  let headers = HttpHeaders.builder()
                  headers.add("Connection", "close")
                  return http1.Http1ServerResponse(HttpResponse(
-@@ -625,8 +594,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+@@ -625,8 +608,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
          }
          let requestCancellation = HttpRequestCancellationHandle()
          let cancellation = HttpRequestCancellationOperation(
@@ -261,7 +316,7 @@ index 7cd06e1e..87de61c7 100644
          )
          cancellation.retainResource(requestLease)
          cancellation.retain(requestCancellation.cancellationToken.register { =>
-@@ -640,7 +609,6 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+@@ -640,7 +623,6 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
                  ),
                  cancellation.context
              )
@@ -269,7 +324,7 @@ index 7cd06e1e..87de61c7 100644
              http1.Http1ServerResponse(
                  if (response.duplexHandler.isSome()) { response.response }
                  else { cancellation.wrap(response.response) }, trailer: response.trailer,
-@@ -648,7 +616,6 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
+@@ -648,7 +630,6 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
              )
          } catch (error: Exception) {
              cancellation.fail()
@@ -277,7 +332,7 @@ index 7cd06e1e..87de61c7 100644
              throw error
          }
      }
-@@ -669,12 +636,10 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
+@@ -669,12 +650,10 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
   */
      public func handle(request: http2.Http2ServerRequest,
          context: transport.OperationContext): http2.Http2ServerResponse {
@@ -291,7 +346,7 @@ index 7cd06e1e..87de61c7 100644
              Some(streamCancellation)
          )
          cancellation.retain(requestCancellation.cancellationToken.register { => request.cancelStream() })
-@@ -687,7 +652,6 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
+@@ -687,7 +666,6 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
                  ),
                  cancellation.context
              )
@@ -299,7 +354,7 @@ index 7cd06e1e..87de61c7 100644
              http2.Http2ServerResponse(
                  if (response.duplexHandler.isSome()) { response.response }
                  else { cancellation.wrap(response.response) }, trailer: response.trailer,
-@@ -695,7 +659,6 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
+@@ -695,7 +673,6 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
              )
          } catch (error: Exception) {
              cancellation.fail()
@@ -307,7 +362,7 @@ index 7cd06e1e..87de61c7 100644
              throw error
          }
      }
-@@ -736,14 +699,6 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
+@@ -736,14 +713,6 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
      func tlsGeneration(): UInt64 {
          synchronized(mutex) { generationId }
      }
@@ -322,7 +377,7 @@ index 7cd06e1e..87de61c7 100644
  
      func rotateTls(value: HttpServerTlsConfig, policy: HttpConfigurationRotation): UInt64 {
          let obsolete = ArrayList<PublicServerConnectionEntry>()
-@@ -773,15 +728,11 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
+@@ -773,15 +742,11 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
       * @param context Original accept operation budget and cancellation.
       */
      public func serve(value: transport.DuplexTransport, context: transport.OperationContext): Unit {
@@ -339,7 +394,7 @@ index 7cd06e1e..87de61c7 100644
                  nextConnectionId++
                  connections.add(admitted)
                  Some(admitted)
-@@ -789,7 +740,7 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
+@@ -789,7 +754,7 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
          }
          if (entry.isNone()) { value.close(); return }
          let admitted = entry.getOrThrow()
@@ -348,7 +403,7 @@ index 7cd06e1e..87de61c7 100644
          let parentRegistration = context.cancellation.register { => admitted.cancellation.cancel() }
          var lease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
          try {
-@@ -888,7 +839,6 @@ private class PublicServerTlsGeneration {
+@@ -888,7 +853,6 @@ private class PublicServerTlsGeneration {
  private class PublicServerConnectionEntry {
      let id: Int64
      let generation: ?PublicServerTlsGeneration
@@ -356,7 +411,7 @@ index 7cd06e1e..87de61c7 100644
      let cancellation = transport.CancellationSource()
      let connectionCancellation = HttpConnectionCancellationHandle()
      private let mutex = Mutex()
-@@ -897,10 +847,9 @@ private class PublicServerConnectionEntry {
+@@ -897,10 +861,9 @@ private class PublicServerConnectionEntry {
      private var forced = false
      private var h1: ?http1.Http1ServerDrainControl = None<http1.Http1ServerDrainControl>
      private var h2: ?http2.Http2ServerConnection = None<http2.Http2ServerConnection>
@@ -369,7 +424,7 @@ index 7cd06e1e..87de61c7 100644
      func promote(value: transport.DuplexTransport): Bool {
          let accepted = synchronized(mutex) { current = value; !forced }
          if (!accepted) { value.abort(reason: Some(transport.AbortReason.Cancelled)) }
-@@ -915,14 +864,13 @@ private class PublicServerConnectionEntry {
+@@ -915,14 +878,13 @@ private class PublicServerConnectionEntry {
          if (drain) { value.beginDrain() }
      }
      func retire(policy: HttpConfigurationRotation): Unit {
@@ -386,7 +441,7 @@ index 7cd06e1e..87de61c7 100644
          }
          if (abort) {
              cancellation.cancel()
-@@ -933,6 +881,5 @@ private class PublicServerConnectionEntry {
+@@ -933,6 +895,5 @@ private class PublicServerConnectionEntry {
              if (let Some(control) <- first) { control.beginDrain() }
              if (let Some(connection) <- second) { connection.beginDrain() }
          }
@@ -786,7 +841,7 @@ index b77d591f..f862540f 100644
  
      private func hasHttp2Reservation(key: HttpConnectionPoolKey): Bool {
 diff --git a/src/internal/http1/http2_connection_pool_test.cj b/src/internal/http1/http2_connection_pool_test.cj
-index 1981210f..0d48d6ea 100644
+index 1981210f..74079cf9 100644
 --- a/src/internal/http1/http2_connection_pool_test.cj
 +++ b/src/internal/http1/http2_connection_pool_test.cj
 @@ -467,6 +467,122 @@ class Http2ConnectionPoolTest {
@@ -883,7 +938,7 @@ index 1981210f..0d48d6ea 100644
 +        // saturated connection yielding even though a long-lived stream remains.
 +        factory.finish(first)
 +        pool.release(first)
-+        @Expect(cancellation.cancel())
++        let _ = cancellation.cancel()
 +        @Expect(otherOrigin.get(Duration.second))
 +        // Cross-key demand is gone: same-key capacity must be reusable immediately
 +        // instead of waiting for the unrelated long-lived stream to finish.
@@ -1328,6 +1383,157 @@ index ee7a41be..6c64554f 100644
 +        false
 +    }
 +}
+diff --git a/src/internal/http2/flow_control.cj b/src/internal/http2/flow_control.cj
+index bc74b5b6..b49a3e79 100644
+--- a/src/internal/http2/flow_control.cj
++++ b/src/internal/http2/flow_control.cj
+@@ -143,6 +143,36 @@ public class Http2FlowController {
+             budget.releaseReceivedBuffer(resourceOwner.getOrThrow(), bytes)
+         }
+     }
++
++    /** Reserves retained payload bytes against the validated stream authority owner. */
++    internal func tryReserveReceivedBufferFor(
++        owner: ?internal.HttpResourceOwnerKey,
++        bytes: UInt64
++    ): Bool {
++        if (bytes == 0u64) { return true }
++        match (resourceBudget) {
++            case Some(budget) => budget.tryReserveReceivedBuffer(bufferOwner(owner), bytes)
++            case None => true
++        }
++    }
++
++    /** Releases retained payload bytes from the validated stream authority owner. */
++    internal func releaseReceivedBufferFor(
++        owner: ?internal.HttpResourceOwnerKey,
++        bytes: UInt64
++    ): Unit {
++        if (bytes == 0u64) { return }
++        if (let Some(budget) <- resourceBudget) {
++            budget.releaseReceivedBuffer(bufferOwner(owner), bytes)
++        }
++    }
++
++    private func bufferOwner(owner: ?internal.HttpResourceOwnerKey): internal.HttpResourceOwnerKey {
++        match (owner) {
++            case Some(value) => value
++            case None => resourceOwner.getOrThrow()
++        }
++    }
+     public func openStream(streamId: Http2StreamId): Unit {
+         if (!streamId.isStream()) { throw IllegalArgumentException("HTTP/2 flow stream id must be non-zero") }
+         synchronized(mutex) {
+diff --git a/src/internal/http2/frame_codec.cj b/src/internal/http2/frame_codec.cj
+index 3eb1ba43..7e17d781 100644
+--- a/src/internal/http2/frame_codec.cj
++++ b/src/internal/http2/frame_codec.cj
+@@ -73,7 +73,7 @@ public class Http2Frame {
+ internal class Http2ReceivedBufferReservation {
+     let bytes: UInt64
+     private let budget: internal.HttpResourceBudget
+-    private let owner: internal.HttpResourceOwnerKey
++    private var owner: internal.HttpResourceOwnerKey
+     private let released = AtomicBool(false)
+ 
+     init(budget: internal.HttpResourceBudget, owner: internal.HttpResourceOwnerKey, bytes: UInt64) {
+@@ -82,6 +82,17 @@ internal class Http2ReceivedBufferReservation {
+         this.bytes = bytes
+     }
+ 
++    /**
++     * Moves this reservation onto the stream authority that validated the DATA frame.
++     * Returns false when the target route or origin allowance is already exhausted.
++     */
++    internal func reattribute(target: internal.HttpResourceOwnerKey): Bool {
++        if (owner == target) { return true }
++        if (!budget.reattributeReceivedBuffer(owner, target, bytes)) { return false }
++        owner = target
++        true
++    }
++
+     func close(): Unit {
+         if (released.compareAndSwap(false, true)) { budget.releaseReceivedBuffer(owner, bytes) }
+     }
+@@ -98,6 +109,7 @@ public class Http2FrameParser {
+     private let limits: Http2Limits
+     private let resourceBudget: ?internal.HttpResourceBudget
+     private let resourceOwner: ?internal.HttpResourceOwnerKey
++    private let streamBufferOwners: ?Http2StreamBufferOwners
+     private let headerBytes = ArrayList<Byte>()
+     private var payloadBytes: Array<Byte> = []
+     private var payloadOffset: Int64 = 0
+@@ -111,12 +123,14 @@ public class Http2FrameParser {
+         this.limits = limits
+         resourceBudget = None<internal.HttpResourceBudget>
+         resourceOwner = None<internal.HttpResourceOwnerKey>
++        streamBufferOwners = None<Http2StreamBufferOwners>
+     }
+ 
+     internal init(
+         limits: Http2Limits,
+         resourceBudget: ?internal.HttpResourceBudget,
+-        resourceOwner: ?internal.HttpResourceOwnerKey
++        resourceOwner: ?internal.HttpResourceOwnerKey,
++        streamBufferOwners!: ?Http2StreamBufferOwners = None<Http2StreamBufferOwners>
+     ) {
+         if (resourceBudget.isSome() != resourceOwner.isSome()) {
+             throw IllegalArgumentException("HTTP/2 parser budget and owner must be supplied together")
+@@ -124,6 +138,15 @@ public class Http2FrameParser {
+         this.limits = limits
+         this.resourceBudget = resourceBudget
+         this.resourceOwner = resourceOwner
++        this.streamBufferOwners = streamBufferOwners
++    }
++
++    /** Uses the already-validated stream authority owner when the reader thread knows it. */
++    private func receivedBufferOwner(streamId: Http2StreamId): internal.HttpResourceOwnerKey {
++        if (let Some(owners) <- streamBufferOwners) {
++            if (let Some(value) <- owners.ownerFor(Int64(streamId.value))) { return value }
++        }
++        resourceOwner.getOrThrow()
+     }
+ 
+     public func feed(input: Array<Byte>): Array<Http2Frame> {
+@@ -140,13 +163,14 @@ public class Http2FrameParser {
+                             headerBytes.clear()
+                             if (isDataFrameType(header.frameType) && header.length > 0u32) {
+                                 if (let Some(budget) <- resourceBudget) {
++                                    let owner = receivedBufferOwner(header.streamId)
+                                     if (!budget.tryReserveReceivedBuffer(
+-                                        resourceOwner.getOrThrow(), UInt64(header.length)
++                                        owner, UInt64(header.length)
+                                     )) {
+                                         rejectingDataPayload = true
+                                     } else {
+                                         currentReservation = Some(Http2ReceivedBufferReservation(
+-                                            budget, resourceOwner.getOrThrow(), UInt64(header.length)
++                                            budget, owner, UInt64(header.length)
+                                         ))
+                                     }
+                                 }
+diff --git a/src/internal/http2/reader_loop.cj b/src/internal/http2/reader_loop.cj
+index 438b25fb..d3e8f0cf 100644
+--- a/src/internal/http2/reader_loop.cj
++++ b/src/internal/http2/reader_loop.cj
+@@ -117,12 +117,15 @@ public class Http2ConnectionReader {
+         limits!: Http2Limits = Http2Limits(),
+         additionalStreamListeners!: UInt32 = 0u32,
+         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+-        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
++        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
++        streamBufferOwners!: ?Http2StreamBufferOwners = None<Http2StreamBufferOwners>
+     ) {
+         this.transport = transport
+         this.machine = machine
+         this.handler = handler
+-        parser = Http2FrameParser(limits, resourceBudget, resourceOwner)
++        parser = Http2FrameParser(
++            limits, resourceBudget, resourceOwner, streamBufferOwners: streamBufferOwners
++        )
+         // The stream registry owns one connection-level listener in addition
+         // to one request listener for every concurrently active stream.
+         terminations = Http2ReaderTerminationRegistry(
 diff --git a/src/internal/http2/server_cancellation_test.cj b/src/internal/http2/server_cancellation_test.cj
 index 98e98a6f..156f0d41 100644
 --- a/src/internal/http2/server_cancellation_test.cj
@@ -1426,10 +1632,86 @@ index 98e98a6f..156f0d41 100644
 +    prop called: Bool { get() { synchronized(mutex) { received } } }
 +}
 diff --git a/src/internal/http2/server_connection.cj b/src/internal/http2/server_connection.cj
-index 13c1607b..35373380 100644
+index 13c1607b..2030a540 100644
 --- a/src/internal/http2/server_connection.cj
 +++ b/src/internal/http2/server_connection.cj
-@@ -336,12 +336,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+@@ -23,6 +23,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+     private let resourceBudget: ?internal.HttpResourceBudget
+     private let resourceOwner: ?internal.HttpResourceOwnerKey
+     private let requestOwnerFactory: Option<(String) -> internal.HttpResourceOwnerKey>
++    private let streamBufferOwners: ?Http2StreamBufferOwners
+     private let mutex = Mutex()
+     private let pushAdmissionMutex = Mutex()
+     private let exchanges = ArrayList<Http2ServerExchange>()
+@@ -58,10 +59,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+         if (resourceBudget.isSome() != resourceOwner.isSome()) {
+             throw IllegalArgumentException("HTTP/2 resource budget and owner must be supplied together")
+         }
++        let createdStreamBufferOwners = if (requestOwnerFactory.isSome()) {
++            Some(Http2StreamBufferOwners())
++        } else {
++            None<Http2StreamBufferOwners>
++        }
++        streamBufferOwners = createdStreamBufferOwners
+         machine = Http2ConnectionStateMachine(Http2ConnectionRole.Server, limits: http2Limits)
+         writer = Http2WriteScheduler(
+             transport, limits: http2Limits,
+-            resourceBudget: resourceBudget, resourceOwner: resourceOwner
++            resourceBudget: resourceBudget, resourceOwner: resourceOwner,
++            streamBufferOwners: createdStreamBufferOwners
+         )
+         flow = Http2FlowController(
+             limits: http2Limits,
+@@ -74,7 +82,8 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+         let createdReader = Http2ConnectionReader(
+             transport, machine, this, limits: http2Limits,
+             additionalStreamListeners: http2Limits.maxConcurrentPushes,
+-            resourceBudget: resourceBudget, resourceOwner: resourceOwner
++            resourceBudget: resourceBudget, resourceOwner: resourceOwner,
++            streamBufferOwners: createdStreamBufferOwners
+         )
+         reader = Some(createdReader)
+         let createdRegistry = Http2StreamRegistry(
+@@ -100,6 +109,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+         }
+     }
+ 
++    /** Resolves the authority-scoped DATA-buffer owner, or None for listener-owned internals. */
++    private func streamBufferOwner(authority: String): ?internal.HttpResourceOwnerKey {
++        match (requestOwnerFactory) {
++            case Some(factory) => Some(factory(authority))
++            case None => None<internal.HttpResourceOwnerKey>
++        }
++    }
++
+     public func serve(context!: OperationContext = OperationContext.background()): Unit {
+         operationContext = context
+         if (synchronized(mutex) { closed }) { return }
+@@ -282,16 +299,23 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+                         )
+                     }
+                 }
++                let exchangeBufferOwner = streamBufferOwner(requestHead.authority)
+                 var requestLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+                 var streamLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+                 if (let Some(budget) <- resourceBudget) {
+                     let owner = requestOwner(requestHead.authority)
++                    if (let Some(owners) <- streamBufferOwners) {
++                        owners.bind(Int64(block.streamId.value), owner)
++                    }
+                     requestLease = budget.tryAcquireRequest(owner)
+                     if (requestLease.isSome()) { streamLease = budget.tryAcquireStream(owner) }
+                     if (requestLease.isNone() || streamLease.isNone()) {
+                         budget.recordAdmissionRejection()
+                         if (let Some(lease) <- requestLease) { lease.close() }
+                         if (let Some(lease) <- streamLease) { lease.close() }
++                        if (let Some(owners) <- streamBufferOwners) {
++                            owners.unbind(Int64(block.streamId.value))
++                        }
+                         machine.markPeerStreamProcessed(block.streamId)
+                         try {
+                             let _ = cancelLocalStream(
+@@ -336,12 +360,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                                  )
                              } catch (_: Exception) {}
                          },
@@ -1437,6 +1719,9 @@ index 13c1607b..35373380 100644
 +                        onOwnerTerminated: { terminal =>
                              if (let Some(lease) <- terminalRequestLease) { lease.close() }
                              if (let Some(lease) <- terminalStreamLease) { lease.close() }
++                            if (let Some(owners) <- streamBufferOwners) {
++                                owners.unbind(Int64(block.streamId.value))
++                            }
                              removeExchange(block.streamId)
                              if (let Some(measurement) <- cancellationMeasurement) { measurement.complete() }
 -                            http2Observe(streamContext, NetworkEventKind.Http2StreamClosed, NetworkEventOutcome.Released)
@@ -1446,7 +1731,17 @@ index 13c1607b..35373380 100644
                          },
                          onCancellationRequested: { =>
                              if (let Some(measurement) <- cancellationMeasurement) { measurement.requested() }
-@@ -363,8 +365,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+@@ -350,6 +379,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+                 } catch (error: Exception) {
+                     if (let Some(lease) <- requestLease) { lease.close() }
+                     if (let Some(lease) <- streamLease) { lease.close() }
++                    if (let Some(owners) <- streamBufferOwners) {
++                        owners.unbind(Int64(block.streamId.value))
++                    }
+                     throw error
+                 }
+                 machine.markPeerStreamProcessed(block.streamId)
+@@ -363,8 +395,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                  let response = exchange.start(handler, context: streamContext)
                  let _ = spawn {
                      var transferred = false
@@ -1457,7 +1752,7 @@ index 13c1607b..35373380 100644
                          try {
                              let _ = cancelLocalStream(
                                  block.streamId, Http2ErrorCode.InternalError,
-@@ -372,7 +376,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+@@ -372,7 +406,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                              )
                          } catch (_: Exception) {}
                      } finally {
@@ -1466,11 +1761,45 @@ index 13c1607b..35373380 100644
                      }
                  }
          }
+@@ -504,6 +538,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+             }
+             let streamId = promised.getOrThrow()
+             flow.openStream(streamId)
++            if (let Some(owners) <- streamBufferOwners) {
++                owners.bind(Int64(streamId.value), requestOwner(parentOrigin.authority))
++            }
+             if (let Some(lease) <- streamLease) { lease.activate() }
+             let responsePlan = mapHttp2ServerResponse(
+                 streamId, request.method, handled, flow,
+@@ -698,6 +735,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+     }
+ 
+     internal func finishPushWorker(streamId: Http2StreamId): Unit {
++        if (let Some(owners) <- streamBufferOwners) { owners.unbind(Int64(streamId.value)) }
+         synchronized(mutex) {
+             for (index in 0..pushWorkers.size) {
+                 if (pushWorkers[index].streamId.value == streamId.value) {
+@@ -729,6 +767,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
+     }
+ 
+     private func releaseUnpromisedStream(streamId: Http2StreamId, error: Exception): Unit {
++        if (let Some(owners) <- streamBufferOwners) { owners.unbind(Int64(streamId.value)) }
+         try {
+             let _ = registry.getOrThrow().reset(
+                 streamId, Http2ErrorCode.InternalError,
 diff --git a/src/internal/http2/server_mapping.cj b/src/internal/http2/server_mapping.cj
-index 777f37c7..bb907ad0 100644
+index 777f37c7..2c63e604 100644
 --- a/src/internal/http2/server_mapping.cj
 +++ b/src/internal/http2/server_mapping.cj
-@@ -122,7 +122,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -4,6 +4,7 @@ import std.collection.ArrayList
+ import std.sync.Mutex
+ import wirestack.internal.http_model.*
+ import wirestack.internal.transport.*
++import wirestack.internal as internal
+ 
+ /** Receives WINDOW_UPDATE frames produced by application body consumption. */
+ public interface Http2ServerControlSink {
+@@ -122,7 +123,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
      private var resetRegistration: ?Http2StreamResetRegistration = None<Http2StreamResetRegistration>
      private var duplexTransport: ?Http2StreamTransport = None<Http2StreamTransport>
      private var ownerComplete = false
@@ -1480,7 +1809,7 @@ index 777f37c7..bb907ad0 100644
      private let onCancellationRequested: () -> Unit
  
      private init(
-@@ -135,7 +136,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -135,7 +137,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
          limits: HttpLimits,
          http2Limits: Http2Limits,
          peerEnded: Bool,
@@ -1489,7 +1818,7 @@ index 777f37c7..bb907ad0 100644
          onCancellationRequested: () -> Unit
      ) {
          this.streamId = streamId
-@@ -166,7 +167,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -166,7 +168,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
              _ => None<Http2ServerPushSender>
          },
          localCancellation!: () -> Unit = { => },
@@ -1498,7 +1827,17 @@ index 777f37c7..bb907ad0 100644
          onCancellationRequested!: () -> Unit = { => }
      ): Http2ServerExchange {
          if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
-@@ -257,10 +258,15 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -177,7 +179,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+             let head = decodeHttp2ServerRequestHead(fields, streamId, limits: limits, http2Limits: http2Limits)
+             if (endStream) { validateServerRequestEnd(head.expectedContentLength, 0, streamId) }
+             let channel = Http2ServerBodyChannel(
+-                streamId, head.expectedContentLength, flow, sink, context, limits, http2Limits
++                streamId, head.expectedContentLength, flow, sink, context, limits, http2Limits,
++                bufferOwner: bufferOwner
+             )
+             if (endStream) { channel.finish(None<HttpTrailer>) }
+             let body = ResponseBody(channel, trailerProvider: { => channel.trailer })
+@@ -257,10 +260,15 @@ public class Http2ServerExchange <: Http2StreamResetListener {
      }
  
      /** Releases registry, reset, flow and connection ownership exactly once. */
@@ -1518,7 +1857,7 @@ index 777f37c7..bb907ad0 100644
          }
          if (!won) { return }
          try { bodyChannel.close() } catch (_: Exception) {}
-@@ -277,7 +283,14 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -277,7 +285,14 @@ public class Http2ServerExchange <: Http2StreamResetListener {
          try {
              if (!updates.isEmpty()) { sink.submit(updates) }
          } finally {
@@ -1534,7 +1873,7 @@ index 777f37c7..bb907ad0 100644
          }
      }
  
-@@ -323,6 +336,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -323,6 +338,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
          if (http2ErrorCodeToWire(event.code) == http2ErrorCodeToWire(Http2ErrorCode.Cancel)) {
              onCancellationRequested()
          }
@@ -1542,7 +1881,7 @@ index 777f37c7..bb907ad0 100644
          bodyChannel.reset(event)
          if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
              transport.peerTerminated(resetStream: true)
-@@ -335,6 +349,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
+@@ -335,6 +351,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
          let event = Http2StreamResetEvent(
              streamId, completion.code, completion.reason, true
          )
@@ -1552,7 +1891,115 @@ index 777f37c7..bb907ad0 100644
          bodyChannel.reset(event)
          if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
              transport.peerTerminated(resetStream: true)
-@@ -1323,3 +1340,14 @@ private func serverLocalContentLengthError(): Nothing {
+@@ -368,6 +387,7 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+     private let context: OperationContext
+     private let limits: HttpLimits
+     private let maxSegments: Int64
++    private let bufferOwner: ?internal.HttpResourceOwnerKey
+     private let mutex = Mutex()
+     private let changed = synchronized(mutex) { mutex.condition() }
+     private let segments = ArrayList<Http2ServerBodySegment>()
+@@ -387,7 +407,8 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+         sink: Http2ServerControlSink,
+         context: OperationContext,
+         limits: HttpLimits,
+-        http2Limits: Http2Limits
++        http2Limits: Http2Limits,
++        bufferOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
+     ) {
+         this.streamId = streamId
+         this.expectedContentLength = expectedContentLength
+@@ -395,6 +416,7 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+         this.sink = sink
+         this.context = context
+         this.limits = limits
++        this.bufferOwner = bufferOwner
+         maxSegments = Int64(http2Limits.maxPendingWrites)
+     }
+ 
+@@ -412,6 +434,17 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+             if (let Some(reservation) <- receivedReservation) { reservation.close() }
+             serverStreamError(streamId, "HTTP/2 DATA accounting or view exceeds its payload")
+         }
++        if (let Some(reservation) <- receivedReservation) {
++            if (let Some(owner) <- bufferOwner) {
++                if (!reservation.reattribute(owner)) {
++                    reservation.close()
++                    throw Http2ProtocolException(
++                        Http2ErrorCode.RefusedStream, Http2ErrorScope.Stream(streamId),
++                        "HTTP/2 aggregate managed receive-buffer budget is exhausted"
++                    )
++                }
++            }
++        }
+         var immediateCredit: Int64 = 0
+         try {
+             synchronized(mutex) {
+@@ -436,7 +469,7 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+                 if (!applicationClosed && dataLength > 0) {
+                     managedBytes = UInt64(data.size)
+                     if (receivedReservation.isNone()) {
+-                        if (!flow.tryReserveReceivedBuffer(managedBytes)) {
++                        if (!flow.tryReserveReceivedBufferFor(bufferOwner, managedBytes)) {
+                             throw Http2ProtocolException(
+                                 Http2ErrorCode.RefusedStream, Http2ErrorScope.Stream(streamId),
+                                 "HTTP/2 aggregate managed receive-buffer budget is exhausted"
+@@ -449,18 +482,19 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
+                     flow.receiveData(streamId, flowBytes)
+                     receivedBytes = nextReceivedBytes
+                     if (applicationClosed || dataLength == 0) {
+-                        if (flowBufferReserved) { flow.releaseReceivedBuffer(managedBytes) }
++                        if (flowBufferReserved) { flow.releaseReceivedBufferFor(bufferOwner, managedBytes) }
+                         if (let Some(reservation) <- receivedReservation) { reservation.close() }
+                         immediateCredit = flowBytes
+                     } else {
+                         segments.add(Http2ServerBodySegment(
+-                            data, dataStart, dataLength, flowBytes, managedBytes, receivedReservation
++                            data, dataStart, dataLength, flowBytes, managedBytes,
++                            receivedReservation, bufferOwner: bufferOwner
+                         ))
+                     }
+                     if (endStream) { eof = true }
+                     changed.notifyAll()
+                 } catch (error: Exception) {
+-                    if (flowBufferReserved) { flow.releaseReceivedBuffer(managedBytes) }
++                    if (flowBufferReserved) { flow.releaseReceivedBufferFor(bufferOwner, managedBytes) }
+                     if (let Some(reservation) <- receivedReservation) { reservation.close() }
+                     throw error
+                 }
+@@ -601,26 +635,29 @@ private class Http2ServerBodySegment {
+     let dataLength: Int64
+     let managedBufferBytes: UInt64
+     private let receivedReservation: ?Http2ReceivedBufferReservation
++    private let bufferOwner: ?internal.HttpResourceOwnerKey
+     var offset: Int64 = 0
+     var remainingFlowBytes: Int64
+     prop remainingData: Int64 { get() { dataLength - offset } }
+ 
+     init(
+         data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,
+-        managedBufferBytes: UInt64, receivedReservation: ?Http2ReceivedBufferReservation
++        managedBufferBytes: UInt64, receivedReservation: ?Http2ReceivedBufferReservation,
++        bufferOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
+     ) {
+         this.data = data
+         this.dataStart = dataStart
+         this.dataLength = dataLength
+         this.managedBufferBytes = managedBufferBytes
+         this.receivedReservation = receivedReservation
++        this.bufferOwner = bufferOwner
+         remainingFlowBytes = flowBytes
+     }
+ 
+     func release(flow: Http2FlowController): Unit {
+         match (receivedReservation) {
+             case Some(reservation) => reservation.close()
+-            case None => flow.releaseReceivedBuffer(managedBufferBytes)
++            case None => flow.releaseReceivedBufferFor(bufferOwner, managedBufferBytes)
+         }
+     }
+ }
+@@ -1323,3 +1360,14 @@ private func serverLocalContentLengthError(): Nothing {
  private func serverStreamError(streamId: Http2StreamId, message: String): Nothing {
      throw Http2ProtocolException(Http2ErrorCode.ProtocolError, Http2ErrorScope.Stream(streamId), message)
  }
@@ -1567,3 +2014,433 @@ index 777f37c7..bb907ad0 100644
 +    }
 +    return Http2ProtocolException(event.code, Http2ErrorScope.Stream(streamId), event.reason)
 +}
+diff --git a/src/internal/http2/write_scheduler.cj b/src/internal/http2/write_scheduler.cj
+index fffd977b..52d85997 100644
+--- a/src/internal/http2/write_scheduler.cj
++++ b/src/internal/http2/write_scheduler.cj
+@@ -110,6 +110,54 @@ public class Http2WriteTicket {
+     private func wake(): Unit { synchronized(mutex) { changed.notifyAll() } }
+ }
+ 
++/** Maps validated stream authorities to the aggregate owner of their DATA buffers. */
++public class Http2StreamBufferOwners {
++    private let mutex = Mutex()
++    private let entries = ArrayList<Http2StreamBufferOwnerEntry>()
++
++    public init() {}
++
++    internal func bind(streamId: Int64, owner: internal.HttpResourceOwnerKey): Unit {
++        synchronized(mutex) {
++            unbindLocked(streamId)
++            entries.add(Http2StreamBufferOwnerEntry(streamId, owner))
++        }
++    }
++
++    internal func unbind(streamId: Int64): Unit {
++        synchronized(mutex) { unbindLocked(streamId) }
++    }
++
++    internal func ownerFor(streamId: Int64): ?internal.HttpResourceOwnerKey {
++        synchronized(mutex) {
++            var found = None<internal.HttpResourceOwnerKey>
++            for (entry in entries) {
++                if (entry.streamId == streamId) { found = Some(entry.owner) }
++            }
++            found
++        }
++    }
++
++    private func unbindLocked(streamId: Int64): Unit {
++        for (index in 0..entries.size) {
++            if (entries[index].streamId == streamId) {
++                let _ = entries.remove(at: index)
++                return
++            }
++        }
++    }
++}
++
++private class Http2StreamBufferOwnerEntry {
++    let streamId: Int64
++    let owner: internal.HttpResourceOwnerKey
++
++    init(streamId: Int64, owner: internal.HttpResourceOwnerKey) {
++        this.streamId = streamId
++        this.owner = owner
++    }
++}
++
+ /**
+  * Bounded multi-producer, single-writer HTTP/2 frame scheduler.
+  *
+@@ -122,6 +170,7 @@ public class Http2WriteScheduler {
+     private let limits: Http2Limits
+     private let resourceBudget: ?internal.HttpResourceBudget
+     private let resourceOwner: ?internal.HttpResourceOwnerKey
++    private let streamBufferOwners: ?Http2StreamBufferOwners
+     private let mutex = Mutex()
+     private let changed = synchronized(mutex) { mutex.condition() }
+     private let controls = ArrayList<Http2QueuedWrite>()
+@@ -158,7 +207,8 @@ public class Http2WriteScheduler {
+         transport: DuplexTransport,
+         limits!: Http2Limits = Http2Limits(),
+         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+-        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
++        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
++        streamBufferOwners!: ?Http2StreamBufferOwners = None<Http2StreamBufferOwners>
+     ) {
+         if (resourceBudget.isSome() != resourceOwner.isSome()) {
+             throw IllegalArgumentException("HTTP/2 writer budget and owner must be supplied together")
+@@ -167,14 +217,25 @@ public class Http2WriteScheduler {
+         this.limits = limits
+         this.resourceBudget = resourceBudget
+         this.resourceOwner = resourceOwner
++        this.streamBufferOwners = streamBufferOwners
+     }
++
++    /** DATA buffers follow the validated stream authority; connection frames stay listener-owned. */
++    private func streamBufferOwner(streamId: Int64): internal.HttpResourceOwnerKey {
++        if (let Some(owners) <- streamBufferOwners) {
++            if (let Some(value) <- owners.ownerFor(streamId)) { return value }
++        }
++        resourceOwner.getOrThrow()
++    }
++
+     private func reserveQueuedBuffer(
+         bytes: UInt64,
+         control: Bool,
++        streamId: Int64,
+         cleanup!: Bool = false
+     ): ?internal.HttpResourceLease {
+         if (let Some(budget) <- resourceBudget) {
+-            let owner = resourceOwner.getOrThrow()
++            let owner = if (control) { resourceOwner.getOrThrow() } else { streamBufferOwner(streamId) }
+             match (budget.tryAcquireManagedBuffer(owner, bytes, control)) {
+                 case Some(lease) => Some(lease)
+                 case None =>
+@@ -376,7 +437,7 @@ public class Http2WriteScheduler {
+         var bufferLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+         var queueReserved = false
+         try {
+-            bufferLease = reserveQueuedBuffer(totalBytes, true)
++            bufferLease = reserveQueuedBuffer(totalBytes, true, 0)
+             let cleanupSlot = reserveQueueCapacityImmediately(frames.size, totalBytes, false)
+             queueReserved = true
+             let encoded = ArrayList<Array<Byte>>()
+@@ -482,7 +543,9 @@ public class Http2WriteScheduler {
+         let size = UInt64(frame.header.length) + 9u64
+         let cleanup = isCleanupFrame(frame)
+         let control = !isDataFrame(frame.header.frameType) || cleanup
+-        let bufferLease = reserveQueuedBuffer(size, control, cleanup: cleanup)
++        let bufferLease = reserveQueuedBuffer(
++            size, control, Int64(frame.header.streamId.value), cleanup: cleanup
++        )
+         var cleanupSlot = false
+         var queueReserved = false
+         var transferred = false
+diff --git a/src/internal/http2/write_scheduler_test.cj b/src/internal/http2/write_scheduler_test.cj
+index 26e68196..aac9b209 100644
+--- a/src/internal/http2/write_scheduler_test.cj
++++ b/src/internal/http2/write_scheduler_test.cj
+@@ -403,6 +403,38 @@ class Http2WriteSchedulerTest {
+         @Expect(slowBudget.snapshot().managedBufferBytes, 0u64)
+     }
+     @TestCase
++    func streamDataBuffersUseTheValidatedAuthorityOwner(): Unit {
++        let connectionOwner = internal.HttpResourceOwnerKey("server", "listener")
++        let authorityOwner = internal.HttpResourceOwnerKey("example.com", "listener")
++        let budget = schedulerResourceBudget(65589u64, 34u64)
++        let owners = Http2StreamBufferOwners()
++        owners.bind(1, authorityOwner)
++        let scheduler = Http2WriteScheduler(
++            RecordingSchedulerTransport(), resourceBudget: Some(budget),
++            resourceOwner: Some(connectionOwner), streamBufferOwners: Some(owners)
++        )
++        let data = scheduler.enqueue(schedulerData(1u32, 1u8))
++        let control = scheduler.enqueue(schedulerPing(2u8))
++        let pending = budget.snapshot()
++        @Expect(pending.managedBufferBytes, 27u64)
++        var authorityBuffers = 0u64
++        var connectionBuffers = 0u64
++        for (owner in pending.owners) {
++            if (owner.origin == "example.com") { authorityBuffers = owner.managedBufferBytes }
++            if (owner.origin == "server") { connectionBuffers = owner.managedBufferBytes }
++        }
++        @Expect(authorityBuffers, 10u64)
++        @Expect(connectionBuffers, 17u64)
++        @Expect(data.cancel())
++        let afterData = budget.snapshot()
++        @Expect(afterData.managedBufferBytes, 17u64)
++        @Expect(afterData.owners.size, 1)
++        @Expect(control.cancel())
++        @Expect(budget.snapshot().managedBufferBytes, 0u64)
++        scheduler.close()
++        @Expect(isSchedulerTestClosed(scheduler.run()))
++    }
++    @TestCase
+     func cleanupFrameUsesProtectedBytesAfterOrdinaryControlIsFull(): Unit {
+         let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+         let budget = schedulerResourceBudget(65589u64, 34u64)
+diff --git a/src/internal/http_resource_budget.cj b/src/internal/http_resource_budget.cj
+index f085eb00..e935d685 100644
+--- a/src/internal/http_resource_budget.cj
++++ b/src/internal/http_resource_budget.cj
+@@ -109,7 +109,7 @@ public class HttpResourceBudget {
+     private var receivedBufferBytes: UInt64 = 0u64
+     private var controlBufferBytes: UInt64 = 0u64
+     private var cleanupBufferBytes: UInt64 = 0u64
+-    private var requestAdmissionClosed = false
++    private var admissionClosed = false
+     private var highWaterConnections: Int64 = 0
+     private var highWaterRequests: Int64 = 0
+     private var highWaterStreams: Int64 = 0
+@@ -157,19 +157,16 @@ public class HttpResourceBudget {
+     ): HttpResourceLease {
+         acquireSlot(HttpResourceKind.Stream, owner, context)
+     }
+-    protected func stopRequestAdmission(): Unit {
++    /** Rejects and wakes every aggregate admission class when the owning instance closes. */
++    protected func closeAdmission(): Unit {
+         synchronized(mutex) {
+-            requestAdmissionClosed = true
++            admissionClosed = true
+             changed.notifyAll()
+         }
+     }
+ 
+-    private func checkRequestAdmissionOpen(kind: HttpResourceKind): Unit {
+-        match (kind) {
+-            case HttpResourceKind.Request =>
+-                if (requestAdmissionClosed) { throw resourceAdmissionClosed() }
+-            case _ => ()
+-        }
++    private func checkAdmissionOpen(): Unit {
++        if (admissionClosed) { throw resourceAdmissionClosed() }
+     }
+ 
+     public func tryAcquireConnection(owner: HttpResourceOwnerKey): ?HttpResourceLease {
+@@ -246,6 +243,62 @@ public class HttpResourceBudget {
+         }
+     }
+ 
++    /**
++     * Moves already-reserved received-buffer bytes onto a late-resolved stream authority.
++     * Instance totals are unchanged; only route and origin attribution moves.
++     */
++    public func reattributeReceivedBuffer(
++        from: HttpResourceOwnerKey,
++        to: HttpResourceOwnerKey,
++        bytes: UInt64
++    ): Bool {
++        if (bytes == 0u64 || from == to) { return true }
++        synchronized(mutex) {
++            let source = findOwnerLocked(from)
++            if (source.isNone()) { return false }
++            let counts = source.getOrThrow()
++            if (counts.managedBufferBytes < bytes || counts.dataBufferBytes < bytes ||
++                counts.receivedBufferBytes < bytes || receivedBufferBytes < bytes) {
++                return false
++            }
++            // Instance totals do not change; only the target route/origin allowance is checked.
++            if (findOwnerLocked(to).isNone() && owners.size >= limits.maximumOwners) { return false }
++            let routeUsed = ownerDataBufferBytesLocked(to)
++            if (bytes > limits.maximumManagedBufferBytesPerRoute -
++                min(routeUsed, limits.maximumManagedBufferBytesPerRoute)) {
++                return false
++            }
++            let originTotal = originDataBufferBytesLocked(to.origin)
++            let sourceOriginBytes = if (from.origin == to.origin) {
++                min(originTotal, counts.dataBufferBytes)
++            } else {
++                0u64
++            }
++            let originUsed = originTotal - sourceOriginBytes
++            if (bytes > limits.maximumManagedBufferBytesPerOrigin -
++                min(originUsed, limits.maximumManagedBufferBytesPerOrigin)) {
++                return false
++            }
++            managedBufferBytes -= bytes
++            dataBufferBytes -= bytes
++            receivedBufferBytes -= bytes
++            counts.managedBufferBytes -= bytes
++            counts.dataBufferBytes -= bytes
++            counts.receivedBufferBytes -= bytes
++            removeEmptyOwnerLocked(from)
++            let target = ensureOwnerLocked(to)
++            managedBufferBytes += bytes
++            dataBufferBytes += bytes
++            receivedBufferBytes += bytes
++            target.managedBufferBytes += bytes
++            target.dataBufferBytes += bytes
++            target.receivedBufferBytes += bytes
++            recordHighWaterLocked()
++            changed.notifyAll()
++            true
++        }
++    }
++
+     public func snapshot(): HttpResourceBudgetSnapshot {
+         synchronized(mutex) {
+             let sampledAt = MonoTime.now()
+@@ -411,6 +464,7 @@ public class HttpResourceBudget {
+         try {
+             synchronized(mutex) {
+                 checkContext(context)
++                checkAdmissionOpen()
+                 if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) {
+                     recordRejectionLocked()
+                     throw resourceOwnersExhausted()
+@@ -431,7 +485,7 @@ public class HttpResourceBudget {
+                 try {
+                     while (true) {
+                         checkContext(context)
+-                        checkRequestAdmissionOpen(kind)
++                        checkAdmissionOpen()
+                         if (isNextWaiterLocked(waiter)) {
+                             removeWaiterLocked(waiter)
+                             let lease = grantLocked(kind, owner, amount, control, false)
+@@ -484,7 +538,7 @@ public class HttpResourceBudget {
+         amount: UInt64,
+         control: Bool
+     ): Bool {
+-        checkRequestAdmissionOpen(kind)
++        checkAdmissionOpen()
+         if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) { return false }
+         match (kind) {
+             case HttpResourceKind.Connection =>
+@@ -857,7 +911,7 @@ private func resourceAdmissionClosed(): NetworkException {
+         NetworkErrorCategory.Closed,
+         NetworkPhase.PoolAcquire,
+         NetworkErrorCode.Closed,
+-        "HTTP client request admission is closed",
++        "HTTP client aggregate admission is closed",
+         retryability: Retryability.Never
+     )
+ }
+diff --git a/src/internal/http_resource_budget_test.cj b/src/internal/http_resource_budget_test.cj
+index 7a73ceae..a9955510 100644
+--- a/src/internal/http_resource_budget_test.cj
++++ b/src/internal/http_resource_budget_test.cj
+@@ -110,6 +110,32 @@ class HttpResourceBudgetTest {
+         @Expect(budget.snapshot().owners.size, 0)
+     }
+ 
++    @TestCase
++    func retainedReceivedBufferCanMoveToTheLateStreamAuthority(): Unit {
++        let budget = HttpResourceBudget(HttpResourceBudgetPolicy(
++            1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 4,
++            maximumManagedBufferBytesPerRoute: 4u64,
++            maximumManagedBufferBytesPerOrigin: 6u64,
++            maximumOwners: 3
++        ))
++        let listener = HttpResourceOwnerKey("server", "listener")
++        let authority = HttpResourceOwnerKey("example.com", "listener")
++        @Expect(budget.tryReserveReceivedBuffer(listener, 4u64))
++        @Expect(budget.reattributeReceivedBuffer(listener, authority, 4u64))
++        let moved = budget.snapshot()
++        @Expect(moved.managedBufferBytes, 4u64)
++        @Expect(moved.owners.size, 1)
++        @Expect(moved.owners[0].origin, "example.com")
++        @Expect(moved.owners[0].managedBufferBytes, 4u64)
++        @Expect(!budget.reattributeReceivedBuffer(listener, authority, 1u64))
++        @Expect(!budget.reattributeReceivedBuffer(
++            authority, HttpResourceOwnerKey("other.example", "listener"), 5u64
++        ))
++        budget.releaseReceivedBuffer(authority, 4u64)
++        @Expect(budget.snapshot().managedBufferBytes, 0u64)
++        @Expect(budget.snapshot().owners.size, 0)
++    }
++
+     @TestCase
+     func ownerRowsStayWithinConfiguredBoundAndRecycleAfterRelease(): Unit {
+         let budget = HttpResourceBudget(HttpResourceBudgetPolicy(
+@@ -319,7 +345,7 @@ class HttpResourceBudgetTest {
+         @Expect(released.owners.size, 0)
+     }
+     @TestCase
+-    func stopRequestAdmissionWakesWaitersAndPreservesHeldLease(): Unit {
++    func closeAdmissionWakesRequestWaitersAndPreservesHeldLease(): Unit {
+         let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 64u64, 8u64, 1)
+         let owner = HttpResourceOwnerKey("https://close.example:443", "direct")
+         let held = budget.tryAcquireRequest(owner).getOrThrow()
+@@ -338,7 +364,7 @@ class HttpResourceBudgetTest {
+         }
+ 
+         @Expect(waitForBudgetWaiters(budget, 1, Duration.second))
+-        budget.stopRequestAdmission()
++        budget.closeAdmission()
+         waiter.get(Duration.second)
+ 
+         @Expect(closed.load())
+@@ -365,6 +391,71 @@ class HttpResourceBudgetTest {
+         @Expect(!unexpected.load())
+     }
+     @TestCase
++    func closeAdmissionWakesConnectionStreamAndBufferWaiters(): Unit {
++        let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 64u64, 8u64, 4)
++        let owner = HttpResourceOwnerKey("https://close.example:443", "direct")
++        let heldConnection = budget.tryAcquireConnection(owner).getOrThrow()
++        let heldStream = budget.tryAcquireStream(owner).getOrThrow()
++        let heldBuffer = budget.tryAcquireManagedBuffer(owner, 8u64, true, cleanup: true).getOrThrow()
++        let closedConnections = AtomicBool(false)
++        let closedStreams = AtomicBool(false)
++        let closedBuffers = AtomicBool(false)
++        let unexpected = AtomicBool(false)
++        let connectionWaiter = spawn {
++            try {
++                let lease = budget.acquireConnection(owner, OperationContext.background())
++                lease.close()
++            } catch (error: NetworkException) {
++                match (error.code) {
++                    case NetworkErrorCode.Closed => closedConnections.store(true)
++                    case _ => unexpected.store(true)
++                }
++            }
++        }
++        let streamWaiter = spawn {
++            try {
++                let lease = budget.acquireStream(owner, OperationContext.background())
++                lease.close()
++            } catch (error: NetworkException) {
++                match (error.code) {
++                    case NetworkErrorCode.Closed => closedStreams.store(true)
++                    case _ => unexpected.store(true)
++                }
++            }
++        }
++        let bufferWaiter = spawn {
++            try {
++                let lease = budget.acquireManagedBuffer(
++                    owner, 8u64, true, OperationContext.background()
++                )
++                lease.close()
++            } catch (error: NetworkException) {
++                match (error.code) {
++                    case NetworkErrorCode.Closed => closedBuffers.store(true)
++                    case _ => unexpected.store(true)
++                }
++            }
++        }
++        @Expect(waitForBudgetWaiters(budget, 3, Duration.second))
++        budget.closeAdmission()
++        connectionWaiter.get(Duration.second)
++        streamWaiter.get(Duration.second)
++        bufferWaiter.get(Duration.second)
++        @Expect(closedConnections.load())
++        @Expect(closedStreams.load())
++        @Expect(closedBuffers.load())
++        @Expect(!unexpected.load())
++        let retained = budget.snapshot()
++        @Expect(retained.admissionWaiters, 0)
++        @Expect(retained.reservedConnections, 1)
++        @Expect(retained.reservedStreams, 1)
++        @Expect(retained.managedBufferBytes, 8u64)
++        heldConnection.close()
++        heldStream.close()
++        heldBuffer.close()
++        @Expect(budget.snapshot().owners.size, 0)
++    }
++    @TestCase
+     func retainedLeaseClosesExactlyOnceAcrossConcurrentOwners(): Unit {
+         let budget = ledgerTestBudget(4, 2, 4, 4, 2, 4, 4, 2, 4, 64u64, 8u64, 4)
+         let owner = HttpResourceOwnerKey("https://lease.example:443", "direct")
