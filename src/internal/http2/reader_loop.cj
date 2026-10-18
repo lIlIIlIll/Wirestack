@@ -117,15 +117,12 @@ public class Http2ConnectionReader {
         limits!: Http2Limits = Http2Limits(),
         additionalStreamListeners!: UInt32 = 0u32,
         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
-        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
-        streamBufferOwners!: ?Http2StreamBufferOwners = None<Http2StreamBufferOwners>
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ) {
         this.transport = transport
         this.machine = machine
         this.handler = handler
-        parser = Http2FrameParser(
-            limits, resourceBudget, resourceOwner, streamBufferOwners: streamBufferOwners
-        )
+        parser = Http2FrameParser(limits, resourceBudget, resourceOwner)
         // The stream registry owns one connection-level listener in addition
         // to one request listener for every concurrently active stream.
         terminations = Http2ReaderTerminationRegistry(

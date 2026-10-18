@@ -403,38 +403,6 @@ class Http2WriteSchedulerTest {
         @Expect(slowBudget.snapshot().managedBufferBytes, 0u64)
     }
     @TestCase
-    func streamDataBuffersUseTheValidatedAuthorityOwner(): Unit {
-        let connectionOwner = internal.HttpResourceOwnerKey("server", "listener")
-        let authorityOwner = internal.HttpResourceOwnerKey("example.com", "listener")
-        let budget = schedulerResourceBudget(65589u64, 34u64)
-        let owners = Http2StreamBufferOwners()
-        owners.bind(1, authorityOwner)
-        let scheduler = Http2WriteScheduler(
-            RecordingSchedulerTransport(), resourceBudget: Some(budget),
-            resourceOwner: Some(connectionOwner), streamBufferOwners: Some(owners)
-        )
-        let data = scheduler.enqueue(schedulerData(1u32, 1u8))
-        let control = scheduler.enqueue(schedulerPing(2u8))
-        let pending = budget.snapshot()
-        @Expect(pending.managedBufferBytes, 27u64)
-        var authorityBuffers = 0u64
-        var connectionBuffers = 0u64
-        for (owner in pending.owners) {
-            if (owner.origin == "example.com") { authorityBuffers = owner.managedBufferBytes }
-            if (owner.origin == "server") { connectionBuffers = owner.managedBufferBytes }
-        }
-        @Expect(authorityBuffers, 10u64)
-        @Expect(connectionBuffers, 17u64)
-        @Expect(data.cancel())
-        let afterData = budget.snapshot()
-        @Expect(afterData.managedBufferBytes, 17u64)
-        @Expect(afterData.owners.size, 1)
-        @Expect(control.cancel())
-        @Expect(budget.snapshot().managedBufferBytes, 0u64)
-        scheduler.close()
-        @Expect(isSchedulerTestClosed(scheduler.run()))
-    }
-    @TestCase
     func cleanupFrameUsesProtectedBytesAfterOrdinaryControlIsFull(): Unit {
         let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
         let budget = schedulerResourceBudget(65589u64, 34u64)

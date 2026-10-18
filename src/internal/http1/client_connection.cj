@@ -88,8 +88,9 @@ public class Http1ClientConnection <: Resource {
                 )
             } else {
                 let _ = writeHttp1Request(
-                    transport, request, context: context, limits: limits, trailer: trailer,
-                    targetForm: targetForm
+                    transport, request,
+                    context: context.forStage(OperationTimeoutStage.RequestWrite),
+                    limits: limits, trailer: trailer, targetForm: targetForm
                 )
                 readHttp1Response(
                     transport, request.method,
@@ -147,7 +148,8 @@ public class Http1ClientConnection <: Resource {
                 }
                 match (performHttp1Connect(
                     transport, request.url, headers: request.headers, context: context, limits: limits,
-                    observer: Some<ResponseBodyObserver>(observer), readBuffer: Some(responseReadBuffer)
+                    observer: Some<ResponseBodyObserver>(observer), readBuffer: Some(responseReadBuffer),
+                    readTimeoutStage: Some(OperationTimeoutStage.StreamReadIdle)
                 )) {
                     case Http1ConnectExchangeResult.Tunnel(value) =>
                         Http1UpgradeExchangeResult.Upgraded(Http1Upgrade(value.responseHead, "CONNECT", value.transport))

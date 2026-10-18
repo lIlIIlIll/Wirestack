@@ -102,6 +102,20 @@ class Http2ClientPushOwnershipTest {
         @Expect(fixture.flow.activeStreamCount, 0)
         @Expect(fixture.terminations.load(), 1)
     }
+
+    @TestCase
+    func responseHeaderBudgetBoundsSilentPromisedStream(): Unit {
+        let fixture = ClientPushOwnershipFixture()
+        let silent = fixture.offer(2u32, "/silent")
+        let outcome = spawn { pushReceiveTimedOut(fixture.source) }
+        @Expect(outcome.get(Duration.second))
+
+        @Expect(silent.isTerminal)
+        @Expect(fixture.registry.activeCount, 0)
+        @Expect(fixture.flow.activeStreamCount, 0)
+        @Expect(fixture.terminations.load(), 1)
+        fixture.source.close()
+    }
 }
 
 private class ClientPushOwnershipFixture {
@@ -211,5 +225,25 @@ private func pushBodyReadExceededDeadline(body: ResponseBody): Bool {
             case NetworkErrorCategory.DeadlineExceeded => true
             case _ => false
         }
+    }
+}
+
+private func pushReceiveTimedOut(source: Http2ClientPushSource): Bool {
+    try {
+        let _ = source.receive(
+            context: OperationContext(
+                timeoutPolicy: OperationTimeoutPolicy(
+                    responseHeaders: Some(20 * Duration.millisecond)
+                )
+            )
+        )
+        false
+    } catch (error: NetworkException) {
+        match (error.code) {
+            case NetworkErrorCode.TimedOut => true
+            case _ => false
+        }
+    } catch (_: Exception) {
+        false
     }
 }

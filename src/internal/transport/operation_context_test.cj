@@ -130,6 +130,51 @@ class OperationContextTest {
         @Expect(traceContextIsRejected("x" * 129, ""))
         @Expect(traceContextIsRejected("trace", "x" * 129))
     }
+    @TestCase
+    func stageDeadlinesAreIndependentAndRemainCappedByTotalDeadline(): Unit {
+        let clock = PolicyFakeMonotonicClock(MonoTime.now())
+        let total = Deadline.after(3 * Duration.second, clock: clock)
+        let policy = OperationTimeoutPolicy(
+            dns: Some(Duration.second), tcpConnect: Some(2 * Duration.second)
+        )
+        let context = OperationContext(deadline: Some(total), timeoutPolicy: policy)
+        let dns = context.forStage(OperationTimeoutStage.Dns)
+        let tcp = context.forStage(OperationTimeoutStage.TcpConnect)
+
+        @Expect(dns.deadline.getOrThrow().expiresAt < tcp.deadline.getOrThrow().expiresAt)
+        @Expect(tcp.deadline.getOrThrow().expiresAt < total.expiresAt)
+        @Expect(dns.timeoutPolicy.dns, Some(Duration.second))
+
+        clock.advance(250 * Duration.millisecond)
+        let retryDns = context.forStage(OperationTimeoutStage.Dns)
+        @Expect(retryDns.deadline.getOrThrow().expiresAt, clock.now() + Duration.second)
+        @Expect(retryDns.deadline.getOrThrow().expiresAt < total.expiresAt)
+
+        let shortTotal = Deadline.after(250 * Duration.millisecond, clock: clock)
+        let capped = OperationContext(
+            deadline: Some(shortTotal),
+            timeoutPolicy: OperationTimeoutPolicy(dns: Some(Duration.second))
+        ).forStage(OperationTimeoutStage.Dns)
+        @Expect(capped.deadline.getOrThrow().expiresAt, shortTotal.expiresAt)
+    }
+
+    @TestCase
+    func timeoutPolicyRejectsZeroAndNegativeBudgets(): Unit {
+        var zeroRejected = false
+        var negativeRejected = false
+        try {
+            let _ = OperationTimeoutPolicy(bodyReadIdle: Some(Duration.Zero))
+        } catch (_: IllegalArgumentException) {
+            zeroRejected = true
+        }
+        try {
+            let _ = OperationTimeoutPolicy(streamReadIdle: Some(Duration.Zero - Duration.second))
+        } catch (_: IllegalArgumentException) {
+            negativeRejected = true
+        }
+        @Expect(zeroRejected)
+        @Expect(negativeRejected)
+    }
 }
 
 private func traceContextIsRejected(traceId: String, spanId: String): Bool {
@@ -150,5 +195,17 @@ private class ThrowingNetworkEventSink <: NetworkEventSink {
     public func emit(event: NetworkEvent): Unit {
         let _ = event
         throw Exception("sink failure")
+    }
+}
+
+private class PolicyFakeMonotonicClock <: MonotonicClock {
+    private var current: MonoTime
+
+    init(start: MonoTime) { current = start }
+
+    public func now(): MonoTime { current }
+
+    func advance(duration: Duration): Unit {
+        current = current + duration
     }
 }

@@ -233,7 +233,8 @@ private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
         }
         let transport = match (endpoint.ipAddress) {
             case Some(address) =>
-                let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+                let connectContext = context.forStage(OperationTimeoutStage.TcpConnect)
+                let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), connectContext)
                 emitProxyTcpConnected(context)
                 connected
             case None =>
@@ -284,7 +285,8 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
         let proxyTransport = connectProxy(endpoint, connector, transportFactory, context)
         let exchanged = try {
             performHttp1Connect(
-                proxyTransport, target, headers: connectHeaders, context: context, limits: limits
+                proxyTransport, target, headers: connectHeaders,
+                context: context.forStage(OperationTimeoutStage.ProxyConnect), limits: limits
             )
         } catch (error: Exception) {
             emitProxyTunnelEvent(context, NetworkEventOutcome.Failed, proxyEventCode(error))
@@ -294,7 +296,10 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
             case Http1ConnectExchangeResult.Tunnel(tunnel) =>
                 emitProxyTunnelEvent(context, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
                 try {
-                    let tls = handshaker.handshake(HostName(key.originHost), tunnel.transport, context)
+                    let tls = handshaker.handshake(
+                        HostName(key.originHost), tunnel.transport,
+                        context.forStage(OperationTimeoutStage.TlsHandshake)
+                    )
                     Http1ClientConnection(tls, limits: limits, continueTimeout: continueTimeout)
                 } catch (error: Exception) {
                     try { tunnel.transport.abort(reason: Some(AbortReason.ProtocolFailure)) }
@@ -335,7 +340,8 @@ private func connectProxy(endpoint: Http1ProxyEndpoint, connector: HappyEyeballs
     transportFactory: TransportFactory, context: OperationContext): DuplexTransport {
     match (endpoint.ipAddress) {
         case Some(address) =>
-            let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+            let connectContext = context.forStage(OperationTimeoutStage.TcpConnect)
+            let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), connectContext)
             emitProxyTcpConnected(context)
             connected
         case None => connector.connect(endpoint.hostName.getOrThrow(), endpoint.port, context: context).transport

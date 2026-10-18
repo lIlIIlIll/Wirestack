@@ -83,8 +83,9 @@ public func readHttp1Response(
         transport, requestMethod, limits, readBuffer: readBuffer
     )
     let interim = ArrayList<Http1InterimResponse>()
+    let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
     while (true) {
-        let parsed = reader.readNext(context)
+        let parsed = reader.readNext(headerContext)
         let head = parsed.head
         if (head.status < 200 && head.status != 101) {
             addInterim(interim, head)
@@ -112,19 +113,33 @@ public func exchangeHttp1ExpectContinue(
     if (continueTimeout <= Duration.Zero) {
         throw IllegalArgumentException("HTTP/1 continue timeout must be positive")
     }
-    writer.writeHead(transport, context: context)
-    let continueContext = context.shortenDeadline(continueTimeout)
+    let requestWriteContext = context.forStage(OperationTimeoutStage.RequestWrite)
+    writer.writeHead(transport, context: requestWriteContext)
+    let continueBudget = context.shortenDeadline(continueTimeout)
+    let responseHeadersBudget = context.forStage(OperationTimeoutStage.ResponseHeaders)
+    let continueContext = responseHeadersBudget.withEarlierDeadline(
+        continueBudget.deadline.getOrThrow()
+    )
     let reader = Http1ResponseSequenceReader(
         transport, request.method, limits, readBuffer: readBuffer
     )
     let interim = ArrayList<Http1InterimResponse>()
     var bodySent = false
     while (true) {
+        let waitContext = if (bodySent) {
+            responseHeadersBudget
+        } else {
+            continueContext
+        }
         let parsed = try {
-            reader.readNext(if (bodySent) { context } else { continueContext })
+            reader.readNext(waitContext)
         } catch (error: NetworkException) {
-            if (!bodySent && !context.isDeadlineExceeded() && isContinueWaitTimeout(error)) {
-                writer.writeBody(transport, context: context)
+            if (!bodySent && !context.isDeadlineExceeded() &&
+                isContinueWaitTimeout(error) && continueBudget.isDeadlineExceeded() &&
+                !responseHeadersBudget.isDeadlineExceeded()) {
+                writer.writeBody(
+                    transport, context: requestWriteContext
+                )
                 bodySent = true
                 continue
             }
@@ -134,7 +149,9 @@ public func exchangeHttp1ExpectContinue(
         if (head.status < 200 && head.status != 101) {
             addInterim(interim, head)
             if (head.status == 100 && !bodySent) {
-                writer.writeBody(transport, context: context)
+                writer.writeBody(
+                    transport, context: requestWriteContext
+                )
                 bodySent = true
             }
             continue
@@ -152,15 +169,20 @@ public func performHttp1Connect(
     context!: OperationContext = OperationContext.background(),
     limits!: HttpLimits = HttpLimits(),
     observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>,
-    readBuffer!: ?Array<Byte> = None<Array<Byte>>
+    readBuffer!: ?Array<Byte> = None<Array<Byte>>,
+    readTimeoutStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>
 ): Http1ConnectExchangeResult {
     let request = HttpRequest(HttpMethod("CONNECT"), target, headers: headers)
     try {
-        let _ = writeHttp1Request(transport, request, context: context, limits: limits)
+        let _ = writeHttp1Request(
+            transport, request, context: context.forStage(OperationTimeoutStage.RequestWrite),
+            limits: limits
+        )
         let reader = Http1ResponseSequenceReader(transport, request.method, limits, readBuffer: readBuffer)
         let interim = ArrayList<Http1InterimResponse>()
+        let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
         while (true) {
-            let parsed = reader.readNext(context)
+            let parsed = reader.readNext(headerContext)
             let head = parsed.head
             if (head.status < 200 && head.status != 101) {
                 addInterim(interim, head)
@@ -171,7 +193,8 @@ public func performHttp1Connect(
                     case Http1BodyFraming.Tunnel =>
                         return Http1ConnectExchangeResult.Tunnel(
                             Http1Tunnel(head, Http1PrefixedTransport(
-                                transport, parsed.remaining, observer: observer
+                                transport, parsed.remaining, observer: observer,
+                                readTimeoutStage: readTimeoutStage
                             ))
                         )
                     case _ => throw Http1ParseException(
@@ -207,11 +230,15 @@ public func performHttp1Upgrade(
 ): Http1UpgradeExchangeResult {
     validateUpgradeRequest(request)
     try {
-        let _ = writeHttp1Request(transport, request, context: context, limits: limits, targetForm: targetForm)
+        let _ = writeHttp1Request(
+            transport, request, context: context.forStage(OperationTimeoutStage.RequestWrite),
+            limits: limits, targetForm: targetForm
+        )
         let reader = Http1ResponseSequenceReader(transport, request.method, limits, readBuffer: readBuffer)
         let interim = ArrayList<Http1InterimResponse>()
+        let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
         while (true) {
-            let parsed = reader.readNext(context)
+            let parsed = reader.readNext(headerContext)
             let head = parsed.head
             if (head.status < 200 && head.status != 101) {
                 addInterim(interim, head)
@@ -222,7 +249,10 @@ public func performHttp1Upgrade(
                 return Http1UpgradeExchangeResult.Upgraded(
                     Http1Upgrade(
                         head, responseProtocol,
-                        Http1PrefixedTransport(transport, parsed.remaining, observer: observer)
+                        Http1PrefixedTransport(
+                            transport, parsed.remaining, observer: observer,
+                            readTimeoutStage: Some(OperationTimeoutStage.StreamReadIdle)
+                        )
                     )
                 )
             }
@@ -319,12 +349,15 @@ internal class Http1PrefixedTransport <: DuplexTransport {
     private var readActive = false
     private var terminal = false
     private let observer: ?ResponseBodyObserver
+    private let readTimeoutStage: ?OperationTimeoutStage
 
     init(delegate: DuplexTransport, prefix: Array<Byte>,
-        observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>) {
+        observer!: ?ResponseBodyObserver = None<ResponseBodyObserver>,
+        readTimeoutStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>) {
         this.delegate = delegate
         this.prefix = prefix
         this.observer = observer
+        this.readTimeoutStage = readTimeoutStage
     }
 
     public prop info: TransportInfo { get() { delegate.info } }
@@ -333,13 +366,17 @@ internal class Http1PrefixedTransport <: DuplexTransport {
         destination: MutableByteSpan,
         context!: OperationContext = OperationContext.background()
     ): ReadResult {
-        if (context.isCancellationRequested()) {
+        let readContext = match (readTimeoutStage) {
+            case Some(stage) => context.forStage(stage)
+            case None => context
+        }
+        if (readContext.isCancellationRequested()) {
             throw NetworkException(
                 NetworkErrorCategory.Cancelled, NetworkPhase.TcpRead, NetworkErrorCode.Cancelled,
                 "CONNECT tunnel read cancelled", retryability: Retryability.Never
             )
         }
-        if (context.isDeadlineExceeded()) {
+        if (readContext.isDeadlineExceeded()) {
             throw NetworkException(
                 NetworkErrorCategory.DeadlineExceeded, NetworkPhase.TcpRead, NetworkErrorCode.TimedOut,
                 "CONNECT tunnel read deadline exceeded", retryability: Retryability.Temporary
@@ -368,7 +405,7 @@ internal class Http1PrefixedTransport <: DuplexTransport {
                 copied
             }
             if (count > 0) { ReadResult.Data(count) }
-            else { delegate.readSome(destination, context: context) }
+            else { delegate.readSome(destination, context: readContext) }
         } finally {
             synchronized(mutex) { readActive = false }
         }
@@ -553,7 +590,9 @@ private class Http1ResponseSequenceReader {
                     return Http1ParsedResponseHead(parsed.head, input)
                 }
             }
-            match (transport.readSome(MutableByteSpan(readBuffer), context: context)) {
+            match (readHttp1Transport(
+                transport, MutableByteSpan(readBuffer), context, NetworkPhase.HttpHeaders
+            )) {
                 case ReadResult.Data(count) =>
                     if (count <= 0 || count > readBuffer.size) {
                         throw Exception("transport returned invalid progress while reading HTTP/1 head")
@@ -635,7 +674,11 @@ internal class Http1FixedBodyStream <: HttpBodyStream {
             return fromInitial
         }
         let wanted = min(destination.size, length - consumed)
-        match (transport.readSome(MutableByteSpan(destination, length: wanted), context: context)) {
+        let readContext = context.forStage(OperationTimeoutStage.BodyReadIdle)
+        checkHttp1BodyContext(readContext)
+        match (readHttp1Transport(
+            transport, MutableByteSpan(destination, length: wanted), readContext, NetworkPhase.HttpBody
+        )) {
             case ReadResult.Data(count) =>
                 if (count <= 0 || count > wanted) { invalidResponseProgress() }
                 consumed += count
@@ -672,7 +715,11 @@ private class Http1CloseBodyStream <: HttpBodyStream {
             initialOffset += fromInitial
             return fromInitial
         }
-        match (transport.readSome(MutableByteSpan(destination), context: context)) {
+        let readContext = context.forStage(OperationTimeoutStage.BodyReadIdle)
+        checkHttp1BodyContext(readContext)
+        match (readHttp1Transport(
+            transport, MutableByteSpan(destination), readContext, NetworkPhase.HttpBody
+        )) {
             case ReadResult.Data(count) =>
                 if (count <= 0 || count > destination.size) { invalidResponseProgress() }
                 count
@@ -718,6 +765,7 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
         ensureResponseStreamOpen(closed)
         if (destination.isEmpty()) { return 0 }
         checkHttp1BodyContext(context)
+        var idleContext = None<OperationContext>
         while (true) {
             let copied = copyResponseBytes(pending, pendingOffset, destination, destination.size)
             if (copied > 0) { pendingOffset += copied; return copied }
@@ -728,7 +776,17 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
                 value
             } else {
                 let buffer = Array<Byte>(HTTP1_READ_BUFFER_SIZE, repeat: 0)
-                match (transport.readSome(MutableByteSpan(buffer), context: context)) {
+                let readContext = match (idleContext) {
+                    case Some(value) => value
+                    case None =>
+                        let value = context.forStage(OperationTimeoutStage.BodyReadIdle)
+                        idleContext = Some(value)
+                        value
+                }
+                checkHttp1BodyContext(readContext)
+                match (readHttp1Transport(
+                    transport, MutableByteSpan(buffer), readContext, NetworkPhase.HttpBody
+                )) {
                     case ReadResult.Data(count) =>
                         if (count <= 0 || count > buffer.size) { invalidResponseProgress() }
                         copyResponsePrefix(buffer, count)
@@ -755,6 +813,31 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
 private class InternalNoopBodyObserver <: ResponseBodyObserver {
     public func completed(): Unit {}
     public func abandoned(): Unit {}
+}
+
+private func readHttp1Transport(
+    transport: DuplexTransport,
+    destination: MutableByteSpan,
+    context: OperationContext,
+    phase: NetworkPhase
+): ReadResult {
+    try {
+        transport.readSome(destination, context: context)
+    } catch (error: NetworkException) {
+        let isTimeout = match (error.code) {
+            case NetworkErrorCode.TimedOut => true
+            case _ => false
+        }
+        if (context.isDeadlineExceeded() && isTimeout) {
+            throw NetworkException(
+                error.category, phase, error.code, "HTTP/1 read exceeded its operation deadline",
+                retryability: error.retryability, nativeCode: error.nativeCode,
+                localEndpoint: error.localEndpoint, remoteEndpoint: error.remoteEndpoint,
+                cause: Some(error)
+            )
+        }
+        throw error
+    }
 }
 
 private func checkHttp1BodyContext(context: OperationContext): Unit {

@@ -975,18 +975,25 @@ private func readWebSocketExact(
 ): Unit {
     var remaining = api.MutableByteSpan(bytes)
     while (!remaining.isEmpty()) {
-        checkWebSocketContext(context)
+        let readContext = context.forStage(api.OperationTimeoutStage.StreamReadIdle)
+        checkWebSocketContext(readContext)
         attemptedIo.started = true
-        match (transport.readSome(remaining, context: context)) {
-            case api.ReadResult.Data(count) =>
-                if (count <= 0 || count > remaining.length) {
+        try {
+            match (transport.readSome(remaining, context: readContext)) {
+                case api.ReadResult.Data(count) =>
+                    if (count <= 0 || count > remaining.length) {
+                        throw WebSocketException(WebSocketErrorCode.TransportFailure,
+                            "WebSocket transport returned invalid read progress")
+                    }
+                    remaining = remaining.advance(count)
+                case api.ReadResult.EndOfStream =>
                     throw WebSocketException(WebSocketErrorCode.TransportFailure,
-                        "WebSocket transport returned invalid read progress")
-                }
-                remaining = remaining.advance(count)
-            case api.ReadResult.EndOfStream =>
-                throw WebSocketException(WebSocketErrorCode.TransportFailure,
-                    "WebSocket transport ended before a close frame")
+                        "WebSocket transport ended before a close frame")
+            }
+        } catch (error: WebSocketException) {
+            throw error
+        } catch (error: Exception) {
+            throw wrapWebSocketOperationFailure(error, readContext)
         }
     }
 }

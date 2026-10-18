@@ -494,7 +494,7 @@ public class HttpClient <: Resource {
             var redirectCount: Int64 = 0
             while (true) {
                 let requestLease = resourceBudget.acquireRequest(
-                    resourceOwner(current.url), operation
+                    resourceOwner(current.url), operation.forStage(transport.OperationTimeoutStage.RequestAdmission)
                 )
                 cancellation.retainResource(requestLease)
                 let response = executeWithRetries(
@@ -620,7 +620,7 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：close。
  */
     public func close(): Unit {
-        resourceBudget.closeAdmission()
+        resourceBudget.stopRequestAdmission()
         let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
                 (None<http1.HttpAutomaticHttpsClient>, None<http1.Http1HttpsProxyClient>)
@@ -690,7 +690,10 @@ public class HttpClient <: Resource {
      */
     private func executeAdmittedDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
         protocol: ?String, context: OperationContext): http1.HttpDuplexExchangeResult {
-        let requestLease = resourceBudget.acquireRequest(resourceOwner(h1Request.url), context)
+        let requestLease = resourceBudget.acquireRequest(
+            resourceOwner(h1Request.url),
+            context.forStage(transport.OperationTimeoutStage.RequestAdmission)
+        )
         let cancellation = HttpRequestCancellationOperation(
             context,
             None<HttpRequestCancellationHandle>,

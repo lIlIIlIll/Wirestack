@@ -110,54 +110,6 @@ public class Http2WriteTicket {
     private func wake(): Unit { synchronized(mutex) { changed.notifyAll() } }
 }
 
-/** Maps validated stream authorities to the aggregate owner of their DATA buffers. */
-public class Http2StreamBufferOwners {
-    private let mutex = Mutex()
-    private let entries = ArrayList<Http2StreamBufferOwnerEntry>()
-
-    public init() {}
-
-    internal func bind(streamId: Int64, owner: internal.HttpResourceOwnerKey): Unit {
-        synchronized(mutex) {
-            unbindLocked(streamId)
-            entries.add(Http2StreamBufferOwnerEntry(streamId, owner))
-        }
-    }
-
-    internal func unbind(streamId: Int64): Unit {
-        synchronized(mutex) { unbindLocked(streamId) }
-    }
-
-    internal func ownerFor(streamId: Int64): ?internal.HttpResourceOwnerKey {
-        synchronized(mutex) {
-            var found = None<internal.HttpResourceOwnerKey>
-            for (entry in entries) {
-                if (entry.streamId == streamId) { found = Some(entry.owner) }
-            }
-            found
-        }
-    }
-
-    private func unbindLocked(streamId: Int64): Unit {
-        for (index in 0..entries.size) {
-            if (entries[index].streamId == streamId) {
-                let _ = entries.remove(at: index)
-                return
-            }
-        }
-    }
-}
-
-private class Http2StreamBufferOwnerEntry {
-    let streamId: Int64
-    let owner: internal.HttpResourceOwnerKey
-
-    init(streamId: Int64, owner: internal.HttpResourceOwnerKey) {
-        this.streamId = streamId
-        this.owner = owner
-    }
-}
-
 /**
  * Bounded multi-producer, single-writer HTTP/2 frame scheduler.
  *
@@ -170,7 +122,6 @@ public class Http2WriteScheduler {
     private let limits: Http2Limits
     private let resourceBudget: ?internal.HttpResourceBudget
     private let resourceOwner: ?internal.HttpResourceOwnerKey
-    private let streamBufferOwners: ?Http2StreamBufferOwners
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let controls = ArrayList<Http2QueuedWrite>()
@@ -207,8 +158,7 @@ public class Http2WriteScheduler {
         transport: DuplexTransport,
         limits!: Http2Limits = Http2Limits(),
         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
-        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
-        streamBufferOwners!: ?Http2StreamBufferOwners = None<Http2StreamBufferOwners>
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ) {
         if (resourceBudget.isSome() != resourceOwner.isSome()) {
             throw IllegalArgumentException("HTTP/2 writer budget and owner must be supplied together")
@@ -217,25 +167,14 @@ public class Http2WriteScheduler {
         this.limits = limits
         this.resourceBudget = resourceBudget
         this.resourceOwner = resourceOwner
-        this.streamBufferOwners = streamBufferOwners
     }
-
-    /** DATA buffers follow the validated stream authority; connection frames stay listener-owned. */
-    private func streamBufferOwner(streamId: Int64): internal.HttpResourceOwnerKey {
-        if (let Some(owners) <- streamBufferOwners) {
-            if (let Some(value) <- owners.ownerFor(streamId)) { return value }
-        }
-        resourceOwner.getOrThrow()
-    }
-
     private func reserveQueuedBuffer(
         bytes: UInt64,
         control: Bool,
-        streamId: Int64,
         cleanup!: Bool = false
     ): ?internal.HttpResourceLease {
         if (let Some(budget) <- resourceBudget) {
-            let owner = if (control) { resourceOwner.getOrThrow() } else { streamBufferOwner(streamId) }
+            let owner = resourceOwner.getOrThrow()
             match (budget.tryAcquireManagedBuffer(owner, bytes, control)) {
                 case Some(lease) => Some(lease)
                 case None =>
@@ -437,7 +376,7 @@ public class Http2WriteScheduler {
         var bufferLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         var queueReserved = false
         try {
-            bufferLease = reserveQueuedBuffer(totalBytes, true, 0)
+            bufferLease = reserveQueuedBuffer(totalBytes, true)
             let cleanupSlot = reserveQueueCapacityImmediately(frames.size, totalBytes, false)
             queueReserved = true
             let encoded = ArrayList<Array<Byte>>()
@@ -543,9 +482,7 @@ public class Http2WriteScheduler {
         let size = UInt64(frame.header.length) + 9u64
         let cleanup = isCleanupFrame(frame)
         let control = !isDataFrame(frame.header.frameType) || cleanup
-        let bufferLease = reserveQueuedBuffer(
-            size, control, Int64(frame.header.streamId.value), cleanup: cleanup
-        )
+        let bufferLease = reserveQueuedBuffer(size, control, cleanup: cleanup)
         var cleanupSlot = false
         var queueReserved = false
         var transferred = false

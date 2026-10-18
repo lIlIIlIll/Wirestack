@@ -46,6 +46,116 @@ try {
 Always consume or close the request body before returning when the connection
 should remain reusable.
 
+## Total and phase-specific deadlines
+
+Existing `HttpClientBuilder.requestTimeout` callers need no migration. It remains a cap for the complete request, including retries, redirects, and response-body reads. Add `OperationTimeoutPolicy` through `OperationContext` when one phase needs a shorter limit. If both `requestTimeout` and `OperationContext.deadline` are set, the earlier absolute deadline wins.
+
+Every configured stage limit must be positive and cannot extend the absolute deadline. An omitted stage limit adds no extra timer. Retries and redirects reuse the request deadline rather than starting a new total budget. For HTTP/1 `Expect: 100-continue`, one `responseHeaders` budget covers both the continue wait and the final response headers. Sending the request body does not restart that budget.
+
+```cj
+let loopback = IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])
+let host = HostName("service.internal")
+let client = HttpClient.builder()
+    .resolver(StaticResolver(ResolveResult([loopback], host, ResolverSource.Static)))
+    .requestTimeout(60 * Duration.second)
+    .build()
+let context = OperationContext(
+    deadline: Some(Deadline.after(45 * Duration.second)),
+    timeoutPolicy: OperationTimeoutPolicy(
+        requestAdmission: Some(Duration.second),
+        connectionPool: Some(2 * Duration.second),
+        dns: Some(3 * Duration.second),
+        tcpConnect: Some(5 * Duration.second),
+        responseHeaders: Some(8 * Duration.second),
+        bodyReadIdle: Some(15 * Duration.second)
+    )
+)
+let response = client.get(
+    "http://service.internal:8080/ready", context: context
+)
+try {
+    let buffer = Array<Byte>(4096, repeat: 0)
+    while (true) {
+        let count = response.body.read(buffer)
+        if (count == 0) { break }
+        // Pass buffer[0..count] to the application parser.
+    }
+} finally {
+    response.close()
+    client.close()
+}
+```
+
+`bodyReadIdle` starts only when the application calls `ResponseBody.read`. It does not count time spent processing a chunk between calls. HTTP/2 keeps the idle wait on the target response stream. A sibling stream or connection PING does not count as body progress. Outbound HTTP/2 `WINDOW_UPDATE` writes retain the caller's total deadline and cancellation token; they do not use the inbound body idle limit.
+
+## Long-lived response and WebSocket streams
+
+Use `bodyReadIdle` for SSE response bodies and `streamReadIdle` for WebSocket or upgraded-stream reads. Pass the same `OperationContext` to the WebSocket handshake and each `receive` call when one total deadline should cover the complete session. A two-hour total deadline below leaves each active read a 45-second idle cap.
+
+`bodyReadIdle` observes HTTP response-body progress, not decoded SSE events. Comment or heartbeat bytes may satisfy body progress without representing a business event. The current API has no SSE event-level watchdog; event and comment semantics belong to an explicit future SSE codec/session policy.
+
+```cj
+let client = HttpClient.builder().build()
+let streamContext = OperationContext(
+    deadline: Some(Deadline.after(2 * 60 * 60 * Duration.second)),
+    timeoutPolicy: OperationTimeoutPolicy(
+        dns: Some(5 * Duration.second),
+        tcpConnect: Some(5 * Duration.second),
+        tlsHandshake: Some(10 * Duration.second),
+        responseHeaders: Some(10 * Duration.second),
+        bodyReadIdle: Some(45 * Duration.second)
+    )
+)
+let events = client.get(
+    "https://events.example.com/events", context: streamContext
+)
+try {
+    let buffer = Array<Byte>(4096, repeat: 0)
+    while (true) {
+        let count = events.body.read(buffer)
+        if (count == 0) { break }
+        // Feed buffer[0..count] to the application SSE parser.
+    }
+} finally {
+    events.close()
+    client.close()
+}
+```
+
+For WebSocket, use the stream idle field and reuse the context for `receive`:
+
+```cj
+let streamContext = OperationContext(
+    deadline: Some(Deadline.after(2 * 60 * 60 * Duration.second)),
+    timeoutPolicy: OperationTimeoutPolicy(
+        dns: Some(5 * Duration.second),
+        tcpConnect: Some(5 * Duration.second),
+        tlsHandshake: Some(10 * Duration.second),
+        responseHeaders: Some(10 * Duration.second),
+        streamReadIdle: Some(45 * Duration.second)
+    )
+)
+let client = HttpClient.builder().build()
+try {
+    match (client.connectWebSocket(
+        HttpUrl.parse("https://events.example.com/socket"), context: streamContext
+    )) {
+        case WebSocketConnectResult.Connected(socket) =>
+            try {
+                let frame = socket.receive(context: streamContext)
+                let _ = frame.opcode
+            } finally {
+                socket.close(1000u16, "done", context: streamContext)
+            }
+        case WebSocketConnectResult.Rejected(response) => response.close()
+    }
+} finally {
+    client.close()
+}
+```
+
+If an event source should run without a fixed lifetime, omit the total deadline intentionally and keep phase and active-read limits. The `requestTimeout` builder setting still supplies a total cap when configured.
+
 ## Aggregate resource budgets
 
 Each `HttpClient` and `HttpServer` owns one resource ledger shared by its routes and protocol pools. Configure a client with `HttpClientBuilder.resourceLimits` or a server with `HttpServerBuilder.resourceLimits`; `HttpResourceLimits.clientDefault()` and `serverDefault()` select the defaults. `HttpClient.resourceSnapshot()` and `HttpServer.resourceSnapshot()` return a single-lock point-in-time sample with a monotonic `sampledAt`, active and reserved connection/stream counts, lifetime high-water counts, effective limits, and current non-empty origin/route owners. Connection and stream high-water counts include both active and not-yet-activated reservations. Owner rows expose active and reserved counts separately; they are snapshots, not stable identities or ordered output.
