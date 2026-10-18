@@ -1,0 +1,68 @@
+{
+  "task": "M10-002",
+  "status": "verified",
+  "scope": {
+    "instance": "One HttpClient or HttpServer resource ledger shared across its protocol pools and routes.",
+    "owner": "Canonical origin plus direct/proxy route identity; server connections share the listener owner.",
+    "snapshot": "One lock-consistent sample at sampledAt; current live counts are distinct from pre-connect and pre-stream reservations. High-water values represent peak admitted slots since instance creation.",
+    "managedBuffers": "Logical bytes held by admitted HTTP/2 received DATA segments and serialized write frames. This is not process RSS. HTTP parser limits, multipart scratch buffers, resolver caches/queues, per-pool wait queues, and synchronous observation callbacks keep their own stated bounds."
+  },
+  "scenarios": [
+    {
+      "id": "BUDGET-CONNECTION-SCOPES",
+      "paths": ["direct", "proxy", "different-origin"],
+      "assertions": ["instance, route, and origin connection limits reject excess admission", "connection factory reservations are reported separately from usable physical connections", "close and failed factory creation release exactly one slot"]
+    },
+    {
+      "id": "BUDGET-REQUEST-LIFETIME",
+      "paths": ["HTTP/1 request", "redirect", "response body retained", "cancellation"],
+      "assertions": ["one request attempt remains charged through its response body lifetime", "request and origin ceilings are shared across HTTP/1 and HTTP/2", "error, body close, and cancellation release after underlying work exits"]
+    },
+    {
+      "id": "BUDGET-STREAM-OWNERS",
+      "paths": ["HTTP/2 ordinary stream", "server push", "extended CONNECT", "stream pool wait"],
+      "assertions": ["stream reservations do not appear as active before an open stream exists", "ordinary and promised streams share instance, route, and origin ceilings", "reset, GOAWAY, connection close, and successful completion release once"]
+    },
+    {
+      "id": "BUDGET-BUFFER-SCOPES",
+      "paths": ["received DATA", "outbound DATA", "control frame", "multiple routes and origins"],
+      "assertions": ["received DATA is admitted before payload allocation and bounded by receive-window capacity", "per-route and per-origin DATA bytes share the instance budget", "control and cleanup capacity remains available when DATA capacity is saturated", "partial read, discard, failure, and writer termination release the exact retained bytes"]
+    },
+    {
+      "id": "BUDGET-WAITER-LIFECYCLE",
+      "paths": ["deadline", "cancellation", "close race", "eligible-owner contention"],
+      "assertions": ["waiters never exceed the configured limit", "cancellation and deadline remove waiter ownership promptly", "a grant racing cancellation has one owner and one release", "one busy owner cannot starve an eligible waiter from another owner"]
+    },
+    {
+      "id": "BUDGET-SNAPSHOT-CONTRACT",
+      "paths": ["active counts", "reservations", "owner rows", "high-water", "sample time"],
+      "assertions": ["all fields correspond to one ledger lock interval", "owner rows are unordered and keyed by origin plus route", "logical managed bytes exclude runtime, native TLS, kernel, and caller-owned memory", "snapshot capture time is monotonic and high-water values do not decrease"]
+    },
+    {
+      "id": "BOUNDED-COMPONENT-INVENTORY",
+      "paths": ["HTTP/1 parser", "HTTP/2 parser and writer", "multipart", "DNS", "pool queues", "hooks"],
+      "assertions": ["each independent limit states units, scope, default, and refusal/error behavior", "DNS and pool queues remain separately bounded", "observation hooks use no library queue"]
+    },
+    {
+      "id": "LINUX-RESOURCE-PROFILES",
+      "paths": ["native Linux fd limit", "native Linux memory limit", "single-CPU execution"],
+      "assertions": ["profiles record exact process limits and exit status", "deterministic cap tests remain distinct from host-resource pressure", "no OOM or killed process is counted as a normal refusal"]
+    }
+  ],
+  "verification": {
+    "focused_suites": [
+      {"path": "src/internal", "exit_status": 0, "passed": 9, "skipped": 0, "errors": 0, "failed": 0},
+      {"path": "src/internal/http2", "exit_status": 0, "passed": 187, "skipped": 0, "errors": 0, "failed": 0},
+      {"path": "src/http", "exit_status": 0, "passed": 115, "skipped": 0, "errors": 0, "failed": 0}
+    ],
+    "linux_resource_profiles": [
+      {"limit": "RLIMIT_NOFILE=64", "exit_status": 0, "result": "PASS; HTTP/2 suite 187/187."},
+      {"limit": "RLIMIT_DATA=1073741824 bytes", "exit_status": 0, "result": "PASS; HTTP/2 suite 187/187. Not an RSS measurement."},
+      {"limit": "RLIMIT_AS=4294967296 bytes", "exit_status": 0, "result": "PASS; HTTP/2 suite 187/187. Virtual address-space limit only."},
+      {"limit": "Single-CPU affinity", "exit_status": 0, "result": "PASS; HTTP/2 suite 187/187."},
+      {"limit": "RLIMIT_DATA=536870912 bytes", "exit_status": 134, "result": "Cangjie runtime startup failed while mapping memory; not treated as application refusal."},
+      {"limit": "RLIMIT_AS=1073741824 bytes", "exit_status": 134, "result": "Cangjie runtime startup failed with std::bad_alloc; not treated as application refusal."}
+    ],
+    "scope": "All validation ran on Linux x86_64 glibc. Process limits do not establish a physical-memory or RSS bound."
+  }
+}

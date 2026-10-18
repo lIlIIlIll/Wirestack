@@ -4,7 +4,7 @@ import std.collection.*
 import std.sync.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 /** Read-only bounded resource counters used by diagnostics and benchmarks. */
 public class Http2ClientMetrics {
     public let pendingWrites: Int64
@@ -127,21 +127,33 @@ public class Http2ClientConnection <: Resource {
         context!: OperationContext = OperationContext.background(),
         limits!: HttpLimits = HttpLimits(),
         http2Limits!: Http2Limits = Http2Limits(),
-        pushConfig!: ?Http2PushConfig = None<Http2PushConfig>
+        pushConfig!: ?Http2PushConfig = None<Http2PushConfig>,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ): Http2ClientConnection {
+        if (resourceBudget.isSome() != resourceOwner.isSome()) {
+            throw IllegalArgumentException("HTTP/2 resource budget and owner must be supplied together")
+        }
         let machine = Http2ConnectionStateMachine(Http2ConnectionRole.Client, limits: http2Limits)
-        let writer = Http2WriteScheduler(transport, limits: http2Limits)
+        let writer = Http2WriteScheduler(
+            transport, limits: http2Limits,
+            resourceBudget: resourceBudget, resourceOwner: resourceOwner
+        )
         let pushCapacity = clientPushCapacity(pushConfig, http2Limits)
         let flow = Http2FlowController(
             limits: http2Limits,
-            maximumStreams: combinedClientStreamCapacity(http2Limits.maxConcurrentStreams, pushCapacity)
+            maximumStreams: combinedClientStreamCapacity(http2Limits.maxConcurrentStreams, pushCapacity),
+            resourceBudget: resourceBudget,
+            resourceOwner: resourceOwner
         )
         let dispatcher = Http2ClientDispatcher(
-            machine, writer, flow, limits, http2Limits, pushConfig
+            machine, writer, flow, limits, http2Limits, pushConfig,
+            resourceBudget, resourceOwner
         )
         let reader = Http2ConnectionReader(
             transport, machine, dispatcher, limits: http2Limits,
-            additionalStreamListeners: pushCapacity
+            additionalStreamListeners: pushCapacity,
+            resourceBudget: resourceBudget, resourceOwner: resourceOwner
         )
         let registry = Http2StreamRegistry(
             Http2ConnectionRole.Client,
@@ -820,14 +832,16 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
 
     func acceptData(frame: Http2Frame): Unit {
         let decoded = decodeClientData(frame, streamId)
-        sequence.acceptData(decoded.size, frame.header.flags.isEndStream())
-        if (frame.header.flags.isEndStream()) {
-            channel.offer(decoded, Int64(frame.header.length), false)
+        let endStream = frame.header.flags.isEndStream()
+        sequence.acceptData(decoded.length, endStream)
+        channel.offerView(
+            decoded.data, decoded.offset, decoded.length, Int64(frame.header.length), endStream,
+            frame.takeReceivedBufferReservation()
+        )
+        if (endStream) {
             registry.peerEnd(streamId)
             channel.finish(None<HttpTrailer>)
             if (let Some(source) <- pushSource) { source.parentFinished() }
-        } else {
-            channel.offer(decoded, Int64(frame.header.length), false)
         }
     }
 
@@ -1021,18 +1035,60 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     func setExpectedLength(value: ?Int64): Unit { synchronized(mutex) { expectedLength = value } }
 
     func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
-        if (flowBytes < data.size) { clientStreamError(streamId, "HTTP/2 DATA accounting is smaller than content") }
+        offerView(data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>)
+    }
+
+    func offerView(
+        data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,
+        endStream: Bool, receivedReservation: ?Http2ReceivedBufferReservation
+    ): Unit {
+        if (dataStart < 0 || dataLength < 0 || dataStart + dataLength > data.size || flowBytes < dataLength) {
+            if (let Some(reservation) <- receivedReservation) { reservation.close() }
+            clientStreamError(streamId, "HTTP/2 DATA accounting or view exceeds its payload")
+        }
         var immediateCredit: Int64 = 0
-        synchronized(mutex) {
-            if (eof) { clientStreamError(streamId, "HTTP/2 DATA arrived after response completion") }
-            if (!closed && !data.isEmpty() && segments.size >= maxSegments) {
-                clientStreamError(streamId, "HTTP/2 response body segment queue reached its bound")
+        try {
+            synchronized(mutex) {
+                if (eof) { clientStreamError(streamId, "HTTP/2 DATA arrived after response completion") }
+                if (!closed && dataLength > 0 && segments.size >= maxSegments) {
+                    clientStreamError(streamId, "HTTP/2 response body segment queue reached its bound")
+                }
+                var managedBytes = 0u64
+                var flowBufferReserved = false
+                if (!closed && dataLength > 0) {
+                    managedBytes = UInt64(data.size)
+                    if (receivedReservation.isNone()) {
+                        if (!flow.tryReserveReceivedBuffer(managedBytes)) {
+                            throw Http2ProtocolException(
+                                Http2ErrorCode.RefusedStream, Http2ErrorScope.Stream(streamId),
+                                "HTTP/2 aggregate managed receive-buffer budget is exhausted"
+                            )
+                        }
+                        flowBufferReserved = true
+                    }
+                }
+                try {
+                    flow.receiveData(streamId, flowBytes)
+                    if (closed || dataLength == 0) {
+                        if (flowBufferReserved) { flow.releaseReceivedBuffer(managedBytes) }
+                        if (let Some(reservation) <- receivedReservation) { reservation.close() }
+                        immediateCredit = flowBytes
+                    } else {
+                        segments.add(Http2ClientBodySegment(
+                            data, dataStart, dataLength, flowBytes, managedBytes, receivedReservation
+                        ))
+                    }
+                    if (endStream) { eof = true }
+                    changed.notifyAll()
+                } catch (error: Exception) {
+                    if (flowBufferReserved) { flow.releaseReceivedBuffer(managedBytes) }
+                    if (let Some(reservation) <- receivedReservation) { reservation.close() }
+                    throw error
+                }
             }
-            flow.receiveData(streamId, flowBytes)
-            if (closed || data.isEmpty()) { immediateCredit = flowBytes }
-            else { segments.add(Http2ClientBodySegment(data, flowBytes)) }
-            if (endStream) { eof = true }
-            changed.notifyAll()
+        } catch (error: Exception) {
+            if (let Some(reservation) <- receivedReservation) { reservation.close() }
+            throw error
         }
         enqueueClientUpdates(writer, if (immediateCredit > 0) {
             flow.consumeReceived(streamId, immediateCredit)
@@ -1051,6 +1107,8 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         synchronized(mutex) {
             if (failure.isNone()) { failure = Some(error) }
             eof = true
+            for (segment in segments) { segment.release(flow) }
+            segments.clear()
             changed.notifyAll()
         }
     }
@@ -1089,15 +1147,18 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 let count = min(destination.length, segment.remainingData)
                 for (index in 0..count) {
                     destination.bytes[destination.offset + index] =
-                        segment.data[segment.offset + index]
+                        segment.data[segment.dataStart + segment.offset + index]
                 }
                 segment.offset += count
                 let credit = if (segment.remainingData == 0) {
                     segment.remainingFlowBytes
                 } else { count }
                 segment.remainingFlowBytes -= credit
-                if (segment.remainingData == 0) { let _ = segments.remove(at: 0) }
                 if (credit > 0) { updates = flow.consumeReceived(streamId, credit) }
+                if (segment.remainingData == 0) {
+                    let _ = segments.remove(at: 0)
+                    segment.release(flow)
+                }
                 ReadResult.Data(count)
             }
             submitClientUpdates(writer, updates, context)
@@ -1134,7 +1195,10 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
             if (closed) { return }
             closed = true
             var credit: Int64 = 0
-            for (segment in segments) { credit += segment.remainingFlowBytes }
+            for (segment in segments) {
+                credit += segment.remainingFlowBytes
+                segment.release(flow)
+            }
             segments.clear()
             if (credit > 0) { updates = flow.consumeReceivedNow(streamId, credit) }
             changed.notifyAll()
@@ -1149,12 +1213,30 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
 
 private class Http2ClientBodySegment {
     let data: Array<Byte>
+    let dataStart: Int64
+    let dataLength: Int64
+    let managedBufferBytes: UInt64
+    private let receivedReservation: ?Http2ReceivedBufferReservation
     var offset: Int64 = 0
     var remainingFlowBytes: Int64
-    prop remainingData: Int64 { get() { data.size - offset } }
-    init(data: Array<Byte>, flowBytes: Int64) {
-        this.data = data.clone()
+    prop remainingData: Int64 { get() { dataLength - offset } }
+    init(
+        data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,
+        managedBufferBytes: UInt64, receivedReservation: ?Http2ReceivedBufferReservation
+    ) {
+        this.data = data
+        this.dataStart = dataStart
+        this.dataLength = dataLength
+        this.managedBufferBytes = managedBufferBytes
+        this.receivedReservation = receivedReservation
         remainingFlowBytes = flowBytes
+    }
+
+    func release(flow: Http2FlowController): Unit {
+        match (receivedReservation) {
+            case Some(reservation) => reservation.close()
+            case None => flow.releaseReceivedBuffer(managedBufferBytes)
+        }
     }
 }
 
@@ -1166,6 +1248,8 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
     private let limits: HttpLimits
     private let http2Limits: Http2Limits
     private let pushConfig: ?Http2PushConfig
+    private let resourceBudget: ?internal.HttpResourceBudget
+    private let resourceOwner: ?internal.HttpResourceOwnerKey
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let exchanges = ArrayList<Http2ClientExchange>()
@@ -1183,7 +1267,9 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         flow: Http2FlowController,
         limits: HttpLimits,
         http2Limits: Http2Limits,
-        pushConfig: ?Http2PushConfig
+        pushConfig: ?Http2PushConfig,
+        resourceBudget: ?internal.HttpResourceBudget,
+        resourceOwner: ?internal.HttpResourceOwnerKey
     ) {
         this.machine = machine
         this.writer = writer
@@ -1191,6 +1277,8 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         this.limits = limits
         this.http2Limits = http2Limits
         this.pushConfig = pushConfig
+        this.resourceBudget = resourceBudget
+        this.resourceOwner = resourceOwner
         decoder = HpackDecoder(limits: http2Limits)
     }
 
@@ -1211,7 +1299,7 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
             if (let Some(config) <- pushConfig) {
                 pushCoordinator = Some(Http2ClientPushCoordinator(
                     config, machine, registry, flow, writer, reset,
-                    terminationRegistry, limits, http2Limits
+                    terminationRegistry, limits, http2Limits, resourceBudget, resourceOwner
                 ))
             }
         }
@@ -1399,16 +1487,34 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
 
     private func acceptData(frame: Http2Frame): Unit {
         if (let Some(value) <- findExchange(frame.header.streamId)) {
+            if (frame.wasReceiveBufferRejected) { refuseReceiveData(frame); return }
             value.acceptData(frame)
             return
         }
         if (let Some(coordinator) <- synchronized(mutex) { pushCoordinator }) {
             if (let Some(value) <- coordinator.exchange(frame.header.streamId)) {
+                if (frame.wasReceiveBufferRejected) { refuseReceiveData(frame); return }
                 value.acceptData(frame)
                 return
             }
         }
         throw inactiveClientStream(frame.header.streamId)
+    }
+
+    private func refuseReceiveData(frame: Http2Frame): Unit {
+        let streamId = frame.header.streamId
+        flow.receiveData(streamId, Int64(frame.header.length))
+        try {
+            let _ = reset.getOrThrow().cancelLocal(
+                streamId, code: Http2ErrorCode.RefusedStream,
+                reason: "HTTP/2 aggregate receive-buffer budget is exhausted"
+            )
+        } catch (_: Exception) {
+            throw Http2ProtocolException(
+                Http2ErrorCode.InternalError, Http2ErrorScope.Connection,
+                "HTTP/2 refused DATA could not be reset safely"
+            )
+        }
     }
 
     private func acceptHeaders(
@@ -1438,19 +1544,32 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
 }
 
 
-private func decodeClientData(frame: Http2Frame, streamId: Http2StreamId): Array<Byte> {
+private struct Http2DecodedClientData {
+    let data: Array<Byte>
+    let offset: Int64
+    let length: Int64
+
+    init(data: Array<Byte>, offset: Int64, length: Int64) {
+        this.data = data
+        this.offset = offset
+        this.length = length
+    }
+}
+
+private func decodeClientData(
+    frame: Http2Frame, streamId: Http2StreamId
+): Http2DecodedClientData {
     if (frame.header.streamId.value != streamId.value) {
         throw IllegalArgumentException("HTTP/2 DATA belongs to another client stream")
     }
-    let payload = frame.payload
-    if (!frame.header.flags.isPadded()) { return payload }
+    let payload = frame.payloadView()
+    if (!frame.header.flags.isPadded()) {
+        return Http2DecodedClientData(payload, 0, payload.size)
+    }
     if (payload.isEmpty()) { clientStreamError(streamId, "HTTP/2 padded DATA has no pad length") }
     let padding = Int64(payload[0])
     if (padding >= payload.size) { clientStreamError(streamId, "HTTP/2 DATA padding consumes its payload") }
-    let count = payload.size - padding - 1
-    let data = Array<Byte>(count, repeat: 0u8)
-    for (index in 0..count) { data[index] = payload[index + 1] }
-    data
+    Http2DecodedClientData(payload, 1, payload.size - padding - 1)
 }
 
 private func fragmentClientHeaders(

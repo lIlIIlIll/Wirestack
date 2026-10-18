@@ -4,6 +4,7 @@ import std.sync.Mutex
 import wirestack.internal.http1 as http1
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
+import wirestack.internal as internal
 
 /**
  * Wirestack 公开 API：表示稳定的错误分类。
@@ -45,6 +46,7 @@ public class HttpClientBuilder {
     private var configuredResolver: ?Resolver = None<Resolver>
     private var configuredRequestTimeout: ?Duration = None<Duration>
     private var configuredLimits = HttpLimits()
+    private var configuredResourceLimits = HttpResourceLimits.clientDefault()
     private var configuredRedirectPolicy = HttpRedirectPolicy()
     private var configuredRetryPolicy = HttpRetryPolicy()
     private var configuredProxy: ?HttpProxyConfig = None<HttpProxyConfig>
@@ -84,6 +86,15 @@ public class HttpClientBuilder {
  */
     public func limits(value: HttpLimits): HttpClientBuilder {
         configuredLimits = value
+        this
+    }
+    /**
+     * Sets the aggregate limits shared by every route and protocol pool.
+     *
+     * @param value The per-instance aggregate resource limits for this client.
+     */
+    public func resourceLimits(value: HttpResourceLimits): HttpClientBuilder {
+        configuredResourceLimits = value
         this
     }
 
@@ -163,6 +174,7 @@ public class HttpClientBuilder {
  * Wirestack 公开 API：build。
  */
     public func build(): HttpClient {
+        let resourceBudget = internal.HttpResourceBudget(configuredResourceLimits.toBudgetPolicy())
         var ownedSystemResolver = None<SystemResolver>
         let selected: Resolver = match (configuredResolver) {
             case Some(value) => value
@@ -184,6 +196,7 @@ public class HttpClientBuilder {
             }
             HttpClient(
                 selected, configuredRequestTimeout, configuredLimits,
+                configuredResourceLimits, resourceBudget,
                 configuredRedirectPolicy, configuredRetryPolicy, configuredProxy,
                 directTls, proxyTls, ownedSystemResolver,
                 selectedConnector, configuredCookieJar, configuredPoolHook, configuredPush
@@ -203,6 +216,8 @@ public class HttpClient <: Resource {
     private let ownedSystemResolver: ?SystemResolver
     private let requestTimeout: ?Duration
     private let limits: HttpLimits
+    private let resourceLimits: HttpResourceLimits
+    private let resourceBudget: internal.HttpResourceBudget
     private let redirectPolicy: HttpRedirectPolicy
     private let retryPolicy: HttpRetryPolicy
     private let proxy: ?HttpProxyConfig
@@ -218,6 +233,8 @@ public class HttpClient <: Resource {
     private var closed = false
 
     init(resolver: Resolver, requestTimeout: ?Duration, limits: HttpLimits,
+        resourceLimits: HttpResourceLimits,
+        resourceBudget: internal.HttpResourceBudget,
         redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
         proxy: ?HttpProxyConfig,
         directTlsHandshaker: ?http1.HttpAlpnTlsHandshaker,
@@ -231,6 +248,8 @@ public class HttpClient <: Resource {
         this.ownedSystemResolver = ownedSystemResolver
         this.requestTimeout = requestTimeout
         this.limits = limits
+        this.resourceLimits = resourceLimits
+        this.resourceBudget = resourceBudget
         this.redirectPolicy = redirectPolicy
         this.retryPolicy = retryPolicy
         this.proxy = proxy
@@ -238,23 +257,27 @@ public class HttpClient <: Resource {
         this.cookieJar = cookieJar
         this.poolHook = poolHook
         this.pushConfig = pushConfig
-        cleartext = http1.Http1CleartextClient(resolver, transportFactory, limits: limits)
+        cleartext = http1.Http1CleartextClient(
+            resolver, transportFactory, limits: limits, resourceBudget: Some(resourceBudget)
+        )
         forwardProxy = match (proxy) {
             case Some(value) => Some(http1.Http1ForwardProxyClient(
-                toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory, limits: limits
+                toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory,
+                limits: limits, resourceBudget: Some(resourceBudget)
             ))
             case None => None<http1.Http1ForwardProxyClient>
         }
         https = match (directTlsHandshaker) {
             case Some(value) => Some(http1.HttpAutomaticHttpsClient(
-                resolver, transportFactory, value, limits: limits, pushConfig: pushConfig
+                resolver, transportFactory, value, limits: limits, pushConfig: pushConfig,
+                resourceBudget: Some(resourceBudget)
             ))
             case None => None<http1.HttpAutomaticHttpsClient>
         }
         httpsProxy = match ((proxy, proxyTlsHandshaker)) {
             case (Some(value), Some(handshaker)) => Some(http1.Http1HttpsProxyClient(
                 toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory,
-                handshaker, limits: limits
+                handshaker, limits: limits, resourceBudget: Some(resourceBudget)
             ))
             case _ => None<http1.Http1HttpsProxyClient>
         }
@@ -345,7 +368,7 @@ public class HttpClient <: Resource {
         let handshake = WebSocketHandshake(url, protocols, headers, limits)
         let h1Request = requestWithCookies(handshake.http1Request, operation)
         let h2Request = requestWithCookies(handshake.http2Request, operation)
-        let result = executeDuplex(h1Request, h2Request, Some("websocket"), operation)
+        let result = executeAdmittedDuplex(h1Request, h2Request, Some("websocket"), operation)
         handshake.accept(result, webSocketLimits)
     }
 
@@ -390,7 +413,7 @@ public class HttpClient <: Resource {
         }
         let h2Request = HttpRequest(HttpMethod("CONNECT"), request.url,
             headers: headers.build(), body: request.body, retrySafety: request.retrySafety)
-        let result = executeDuplex(outgoing, h2Request, protocol, operation)
+        let result = executeAdmittedDuplex(outgoing, h2Request, protocol, operation)
         publicHttpUpgradeResult(result)
     }
 
@@ -470,6 +493,10 @@ public class HttpClient <: Resource {
             var current = request
             var redirectCount: Int64 = 0
             while (true) {
+                let requestLease = resourceBudget.acquireRequest(
+                    resourceOwner(current.url), operation
+                )
+                cancellation.retainResource(requestLease)
                 let response = executeWithRetries(
                     current, operation, trailer, cancellation.connectionCancellation
                 )
@@ -484,7 +511,10 @@ public class HttpClient <: Resource {
                 match (next) {
                     case Some(value) =>
                         try { let _ = response.body.drain(redirectPolicy.maximumDrainBytes) }
-                        finally { response.close() }
+                        finally {
+                            response.close()
+                            requestLease.close()
+                        }
                         current = value
                         redirectCount++
                     case None => return cancellation.wrap(response)
@@ -495,6 +525,18 @@ public class HttpClient <: Resource {
             cancellation.fail()
             throw wrapHttpError(error)
         }
+    }
+
+    private func resourceOwner(url: HttpUrl): internal.HttpResourceOwnerKey {
+        let route = match (proxy) {
+            case Some(value) =>
+                match (value.routeFor(url)) {
+                    case HttpProxyRoute.Direct => "direct"
+                    case HttpProxyRoute.Proxy(config) => "proxy:${config.endpoint.identity}"
+                }
+            case None => "direct"
+        }
+        internal.HttpResourceOwnerKey("${url.scheme}://${url.host}:${url.port}", route)
     }
 
     private func executeOnce(request: HttpRequest, operation: OperationContext,
@@ -578,6 +620,7 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：close。
  */
     public func close(): Unit {
+        resourceBudget.closeAdmission()
         let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
                 (None<http1.HttpAutomaticHttpsClient>, None<http1.Http1HttpsProxyClient>)
@@ -597,6 +640,10 @@ public class HttpClient <: Resource {
  * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
+    /** Returns a read-only snapshot of live aggregate resource counters. */
+    public func resourceSnapshot(): HttpResourceSnapshot {
+        resourceSnapshotFromLedger(resourceBudget.snapshot())
+    }
 
     private func httpsClient(): http1.HttpAutomaticHttpsClient {
         synchronized(mutex) {
@@ -608,7 +655,8 @@ public class HttpClient <: Resource {
                         resolver,
                         transportFactory,
                         http1.DefaultHttp1TlsHandshaker.systemDefaultAlpn(),
-                        limits: limits, pushConfig: pushConfig
+                        limits: limits, pushConfig: pushConfig,
+                        resourceBudget: Some(resourceBudget)
                     )
                     https = Some(value)
                     value
@@ -627,11 +675,43 @@ public class HttpClient <: Resource {
                         value.resolver,
                         transportFactory,
                         http1.DefaultHttp1TlsHandshaker.systemDefault(),
-                        limits: limits
+                        limits: limits, resourceBudget: Some(resourceBudget)
                     )
                     httpsProxy = Some(client)
                     client
             }
+        }
+    }
+
+    /**
+     * Runs one duplex handshake under the caller's aggregate request admission.
+     * The owner-scoped request lease is released with the rejected response body or,
+     * after a successful handshake, only when the transferred transport terminates.
+     */
+    private func executeAdmittedDuplex(h1Request: HttpRequest, h2Request: HttpRequest,
+        protocol: ?String, context: OperationContext): http1.HttpDuplexExchangeResult {
+        let requestLease = resourceBudget.acquireRequest(resourceOwner(h1Request.url), context)
+        let cancellation = HttpRequestCancellationOperation(
+            context,
+            None<HttpRequestCancellationHandle>,
+            None<HttpConnectionCancellationHandle>,
+            None<HttpStreamCancellationHandle>
+        )
+        cancellation.retainResource(requestLease)
+        let result = try {
+            executeDuplex(h1Request, h2Request, protocol, context)
+        } catch (error: Exception) {
+            cancellation.fail()
+            throw error
+        }
+        match (result) {
+            case http1.HttpDuplexExchangeResult.Response(response) =>
+                http1.HttpDuplexExchangeResult.Response(cancellation.wrap(response))
+            case http1.HttpDuplexExchangeResult.Connected(connection) =>
+                http1.HttpDuplexExchangeResult.Connected(http1.HttpDuplexConnection(
+                    connection.status, connection.headers, connection.version,
+                    HttpAdmissionRetainedTransport(connection.transport, cancellation)
+                ))
         }
     }
 }
@@ -656,4 +736,96 @@ private func withProxyAuthorization(request: HttpRequest, value: ?String): HttpR
         builder.add("Proxy-Authorization", authorization)
     }
     request.withHeaders(builder.build())
+}
+
+/** Retains one admitted request lease until the transferred duplex transport terminates. */
+private class HttpAdmissionRetainedTransport <: transport.DuplexTransport {
+    private let delegate: transport.DuplexTransport
+    private let cancellation: HttpRequestCancellationOperation
+    private let mutex = Mutex()
+    private var terminal = false
+
+    /**
+     * Wraps one exclusively transferred duplex transport.
+     * @param delegate Underlying transferred duplex transport.
+     * @param cancellation Request-cancellation owner that holds the admitted request lease.
+     */
+    init(delegate: transport.DuplexTransport, cancellation: HttpRequestCancellationOperation) {
+        this.delegate = delegate
+        this.cancellation = cancellation
+    }
+
+    /** Reports the delegated provider-neutral transport diagnostics. */
+    public prop info: transport.TransportInfo { get() { delegate.info } }
+
+    /**
+     * Reads at most destination.length bytes from the delegated transport.
+     * @param destination Caller-provided destination buffer.
+     * @param context Operation deadline and cancellation passed through unchanged.
+     */
+    public func readSome(
+        destination: transport.MutableByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): transport.ReadResult {
+        delegate.readSome(destination, context: context)
+    }
+
+    /**
+     * Writes at most source.length bytes to the delegated transport.
+     * @param source Caller-provided source bytes.
+     * @param context Operation deadline and cancellation passed through unchanged.
+     */
+    public func writeSome(
+        source: transport.ByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): Int64 {
+        delegate.writeSome(source, context: context)
+    }
+
+    /**
+     * Closes only the selected direction on the delegated transport.
+     * @param direction Direction to close.
+     */
+    public func shutdown(direction: transport.ShutdownDirection): Unit {
+        delegate.shutdown(direction)
+    }
+
+    /**
+     * Gracefully closes the delegated transport, then releases the admitted request lease.
+     * @param context Operation deadline and cancellation for the delegated close.
+     */
+    public func close(context: OperationContext): Unit {
+        if (!claimTerminal()) { return }
+        try { delegate.close(context) }
+        finally { cancellation.fail() }
+    }
+
+    /** Gracefully closes the delegated transport with the background context. */
+    public func close(): Unit { close(OperationContext.background()) }
+
+    /** Reports whether this transport or its delegate has terminated. */
+    public func isClosed(): Bool {
+        if (synchronized(mutex) { terminal }) { return true }
+        if (!delegate.isClosed()) { return false }
+        // Delegate termination is terminal for this wrapper: release the retained
+        // request admission even when the caller only observes isClosed().
+        if (claimTerminal()) { cancellation.fail() }
+        true
+    }
+
+    /**
+     * Immediately terminates the delegated transport, then releases the admitted request lease.
+     * @param reason Stable abort reason forwarded to the delegate.
+     */
+    public func abort(reason!: ?transport.AbortReason = None<transport.AbortReason>): Unit {
+        if (!claimTerminal()) { return }
+        try { delegate.abort(reason: reason) }
+        finally { cancellation.fail() }
+    }
+
+    private func claimTerminal(): Bool {
+        synchronized(mutex) {
+            if (terminal) { false } else { terminal = true; true }
+        }
+    }
 }

@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "status": "COMPLETE",
+  "scenario_matrix": "scenario-matrix.json",
+  "workspace": {
+    "branch": "gitbutler/workspace",
+    "base_branch": "origin/main",
+    "base_revision": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+    "source_workspace_preserved": true
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "libc": "glibc",
+    "cangjie": "1.3.0-alpha.06"
+  },
+  "acceptance": [
+    {
+      "status": "PASS",
+      "criterion": "Instance, route, origin, connection, request, stream, and managed-buffer accounting follows real owners.",
+      "evidence": "A single per-client or per-server ledger is shared across protocol pools. Connection, request, stream, and buffer leases track origin/route ownership and release on their owning lifecycle. H1/H2 and ALPN handoffs retain physical connection ownership."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Admission waits and queues are bounded; cancellation removes waiters; lease release is exact-once.",
+      "evidence": "Configured waiter ceilings, context-bound waits, cancellation/deadline waiter removal, owner-fair grants, and idempotent reference-counted leases are covered by focused regression tests. Server request/stream refusal is nonblocking."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Snapshots expose current and lifetime high-water resource counts and bounded owner rows.",
+      "evidence": "Public client/server snapshots expose effective limits, current and high-water counters, and currently active origin/route owners. Facade tests inspect snapshots during H1/H2 activity and after shutdown/release."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Managed HTTP/2 buffers share an aggregate budget with control-frame reserve and slow-I/O backpressure.",
+      "evidence": "Received DATA segments and queued/active serialized writer frames share the managed-byte ceiling; receive buffers are released on body consumption/close and writer reservations release on completion or cancellation. Documentation explicitly excludes RSS and unaccounted runtime/native/application memory."
+    },
+    {
+      "status": "PASS",
+      "criterion": "Defaults, hard caps, backpressure, and refusal behavior are documented; dependency boundaries remain valid.",
+      "evidence": "The HTTP/1.1 guide records client/server defaults, validation caps, cross-field receive-window rule, wait behavior, H1 503 and H2 REFUSED_STREAM behavior, and accounting scope. The architecture guard passes; public source inventory includes the new API file."
+    }
+  ],
+  "verification": [
+    {
+      "command": "scripts/architecture-guard",
+      "exit_status": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "\"$HOME/.codex/scripts/codex_cangjie_env\" cjpm check",
+      "exit_status": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "\"$HOME/.codex/scripts/codex_cangjie_env\" cjpm test src/internal --no-progress",
+      "exit_status": 0,
+      "result": "PASS; 9 passed, 0 skipped, 0 errors, 0 failed"
+    },
+    {
+      "command": "\"$HOME/.codex/scripts/codex_cangjie_env\" cjpm test src/internal/http2 --no-progress",
+      "exit_status": 0,
+      "result": "PASS; 187 passed, 0 skipped, 0 errors, 0 failed"
+    },
+    {
+      "command": "\"$HOME/.codex/scripts/codex_cangjie_env\" cjpm test src/http --no-progress",
+      "exit_status": 0,
+      "result": "PASS; 115 passed, 0 skipped, 0 errors, 0 failed"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools/tests -p \"test_m7_033_docs.py\" -v",
+      "exit_status": 0,
+      "result": "PASS; 10 tests"
+    },
+    {
+      "command": "scripts/check",
+      "exit_status": 1,
+      "result": "BLOCKED by unrelated existing release/task-graph issues: the M7-030 release tests require the absent M7-021 archive under dist/m7-021, and the M7 Linux task graph reports 16 declared unique IDs versus 15 published. Overall run: 497 tests, 1 failure, 8 errors."
+    },
+    {
+      "command": "scripts/check-docs --json --output build/check-docs-m10-002.json",
+      "exit_status": 3,
+      "result": "BLOCKED before generation: installed cjdoc is 0.7.1; repository gate requires 0.7.2."
+    }
+  ],
+  "resource_profiles": [
+    {
+      "limit": "RLIMIT_NOFILE soft=64 hard=64",
+      "command": "TMPDIR=$M10_TMP TMP=$M10_TMP TEMP=$M10_TMP \"$HOME/.codex/scripts/codex_cangjie_env\" prlimit --nofile=64:64 -- ./target/release/unittest_bin/wirestack.internal.http2",
+      "exit_status": 0,
+      "result": "PASS; HTTP/2 test runner reported 187 passed, 0 skipped, 0 errors, 0 failed."
+    },
+    {
+      "limit": "RLIMIT_DATA soft=1073741824 hard=1073741824 bytes",
+      "command": "TMPDIR=$M10_TMP TMP=$M10_TMP TEMP=$M10_TMP \"$HOME/.codex/scripts/codex_cangjie_env\" prlimit --data=1073741824:1073741824 -- ./target/release/unittest_bin/wirestack.internal.http2",
+      "exit_status": 0,
+      "result": "PASS; HTTP/2 test runner reported 187 passed, 0 skipped, 0 errors, 0 failed. RLIMIT_DATA is a process data-segment limit, not an RSS or physical-memory measurement."
+    },
+    {
+      "limit": "RLIMIT_AS soft=4294967296 hard=4294967296 bytes",
+      "command": "TMPDIR=$M10_TMP TMP=$M10_TMP TEMP=$M10_TMP \"$HOME/.codex/scripts/codex_cangjie_env\" prlimit --as=4294967296:4294967296 -- ./target/release/unittest_bin/wirestack.internal.http2",
+      "exit_status": 0,
+      "result": "PASS; HTTP/2 test runner reported 187 passed, 0 skipped, 0 errors, 0 failed. This limits virtual address space, not resident or physical memory."
+    },
+    {
+      "limit": "CPU affinity restricted to one CPU selected from the process allowed set",
+      "command": "cpu=$(python3 -c 'import os; print(min(os.sched_getaffinity(0)))') && TMPDIR=$M10_TMP TMP=$M10_TMP TEMP=$M10_TMP \"$HOME/.codex/scripts/codex_cangjie_env\" taskset -c \"$cpu\" ./target/release/unittest_bin/wirestack.internal.http2",
+      "exit_status": 0,
+      "result": "PASS; HTTP/2 test runner reported 187 passed, 0 skipped, 0 errors, 0 failed."
+    },
+    {
+      "limit": "RLIMIT_DATA soft=536870912 hard=536870912 bytes",
+      "command": "TMPDIR=$M10_TMP TMP=$M10_TMP TEMP=$M10_TMP \"$HOME/.codex/scripts/codex_cangjie_env\" prlimit --data=536870912:536870912 -- ./target/release/unittest_bin/wirestack.internal.http2",
+      "exit_status": 134,
+      "result": "STARTUP_FAILURE; Cangjie runtime initialization aborted after MemMap::MapMemory failed for a 274202624-byte mapping and raised SIGABRT. Not counted as an HTTP refusal."
+    },
+    {
+      "limit": "RLIMIT_AS soft=1073741824 hard=1073741824 bytes",
+      "command": "TMPDIR=$M10_TMP TMP=$M10_TMP TEMP=$M10_TMP \"$HOME/.codex/scripts/codex_cangjie_env\" prlimit --as=1073741824:1073741824 -- ./target/release/unittest_bin/wirestack.internal.http2",
+      "exit_status": 134,
+      "result": "STARTUP_FAILURE; Cangjie runtime initialization failed with std::bad_alloc and SIGABRT before test execution. Not counted as an HTTP refusal."
+    }
+  ],
+  "limitations": [
+    "Validation was executed only on Linux x86_64 with glibc; no other platform is claimed.",
+    "The repository-wide check and strict cjdoc generation did not pass for the recorded unrelated baseline/tool-version blockers; focused M10-002 tests, compilation, source-inventory tests, and architecture guard passed.",
+    "The 512 MiB RLIMIT_DATA and 1 GiB RLIMIT_AS profiles failed during Cangjie runtime startup; 1 GiB RLIMIT_DATA, 4 GiB RLIMIT_AS, fd=64, and single-CPU profiles passed. These process limits do not demonstrate physical-memory pressure or a process RSS bound."
+  ]
+}

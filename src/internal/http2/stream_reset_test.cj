@@ -131,7 +131,7 @@ class Http2StreamResetManagerTest {
     }
 
     @TestCase
-    func queuePressureIsAtomicAndCleanupCreditStaysBoundedForRetry(): Unit {
+    func cleanupResetUsesReservedQueueSlotAndRetriesDeferredCredit(): Unit {
         let limits = Http2Limits(
             maxConcurrentStreams: 3u32, maxPendingWrites: 2u32, maxPendingWriteBytes: 1024u32
         )
@@ -139,15 +139,16 @@ class Http2StreamResetManagerTest {
         let target = fixture.openLocal()
         let second = fixture.openLocal()
         let third = fixture.openLocal()
+        fixture.flow.receiveData(target, 3)
         let secondWrite = fixture.writer.enqueue(resetData(second, 2u8))
         let _ = fixture.writer.enqueue(resetData(third, 3u8))
-        expectResetQueueFull({ => let _ = fixture.manager.cancelLocal(target) })
-        @Expect(fixture.registry.stream(target).isSome())
-        @Expect(fixture.flow.activeStreamCount, 3)
 
-        fixture.flow.receiveData(target, 3)
-        @Expect(fixture.manager.acceptPeer(encodeHttp2RstStream(target, Http2ErrorCode.Cancel)))
+        @Expect(fixture.manager.cancelLocal(target).isSome())
+        @Expect(fixture.registry.stream(target).isNone())
+        @Expect(fixture.writer.pendingWrites, 3)
+        @Expect(fixture.flow.activeStreamCount, 2)
         @Expect(fixture.manager.deferredCredit, 3u32)
+
         @Expect(secondWrite.cancel())
         @Expect(fixture.manager.flush())
         @Expect(fixture.manager.deferredCredit, 0u32)

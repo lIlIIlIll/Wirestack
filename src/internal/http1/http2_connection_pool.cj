@@ -5,7 +5,7 @@ import std.sync.*
 import wirestack.internal.http2.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 private const HTTP_CLIENT_H2_ALPN: String = "h2"
 private const HTTP_CLIENT_H1_ALPN: String = "http/1.1"
 
@@ -163,7 +163,11 @@ public class Http2ClientPoolConnection <: Http2ExecutableConnection {
 }
 
 public interface Http2MultiplexedConnectionFactory {
-    func create(key: HttpConnectionPoolKey, context: OperationContext): Http2MultiplexedConnection
+    func create(
+        key: HttpConnectionPoolKey,
+        context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease
+    ): Http2MultiplexedConnection
 }
 
 public class Http2ConnectionPoolConfig {
@@ -193,18 +197,21 @@ public class Http2PoolLease {
     public let admission: Http2PoolStreamClaim
     internal let connectionId: Int64
     internal let key: HttpConnectionPoolKey
+    internal let streamResourceLease: ?internal.HttpResourceLease
     private let returned = AtomicBool(false)
 
     internal init(
         connectionId: Int64,
         key: HttpConnectionPoolKey,
         connection: Http2MultiplexedConnection,
-        admission: Http2PoolStreamClaim
+        admission: Http2PoolStreamClaim,
+        streamResourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ) {
         this.connectionId = connectionId
         this.key = key
         this.connection = connection
         this.admission = admission
+        this.streamResourceLease = streamResourceLease
     }
 
     internal func claimReturn(): Bool { returned.compareAndSwap(false, true) }
@@ -242,17 +249,20 @@ private class Http2PoolEntry {
     let id: Int64
     let key: HttpConnectionPoolKey
     let connection: Http2MultiplexedConnection
-    init(id: Int64, key: HttpConnectionPoolKey, connection: Http2MultiplexedConnection) {
+    let resourceLease: ?internal.HttpResourceLease
+    init(id: Int64, key: HttpConnectionPoolKey, connection: Http2MultiplexedConnection,
+        resourceLease: ?internal.HttpResourceLease) {
         this.id = id
         this.key = key
         this.connection = connection
+        this.resourceLease = resourceLease
     }
 }
 
 private enum Http2PoolDecision {
     | Reuse(Http2PoolLease)
     | Reserve(Int64)
-    | Discard(Http2MultiplexedConnection)
+    | Discard(Http2MultiplexedConnection, ?internal.HttpResourceLease)
 }
 
 /**
@@ -262,6 +272,7 @@ private enum Http2PoolDecision {
  */
 public class Http2ConnectionPool <: Resource {
     private let config: Http2ConnectionPoolConfig
+    private let resourceBudget: ?internal.HttpResourceBudget
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private var entries = ArrayList<Http2PoolEntry>()
@@ -270,8 +281,12 @@ public class Http2ConnectionPool <: Resource {
     private var waiters: Int64 = 0
     private var closed = false
 
-    public init(config!: Http2ConnectionPoolConfig = Http2ConnectionPoolConfig()) {
+    public init(
+        config!: Http2ConnectionPoolConfig = Http2ConnectionPoolConfig(),
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
+    ) {
         this.config = config
+        this.resourceBudget = resourceBudget
     }
 
     public func acquire(
@@ -282,17 +297,40 @@ public class Http2ConnectionPool <: Resource {
         endStream!: Bool = false
     ): Http2PoolLease {
         let registration = context.cancellation.register { => wakeHttp2Pool() }
+        var streamResourceLease = None<internal.HttpResourceLease>
+        var streamLeaseTransferred = false
         try {
+            streamResourceLease = match (resourceBudget) {
+                case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), context))
+                case None => None<internal.HttpResourceLease>
+            }
             while (true) {
-                match (decide(key, listener, endStream, context)) {
-                    case Http2PoolDecision.Reuse(lease) => return lease
-                    case Http2PoolDecision.Discard(connection) => closeHttp2Quietly(connection)
+                match (decide(key, listener, endStream, context, streamResourceLease)) {
+                    case Http2PoolDecision.Reuse(lease) =>
+                        streamLeaseTransferred = true
+                        return lease
+                    case Http2PoolDecision.Discard(connection, resourceLease) =>
+                        closeHttp2Quietly(connection)
+                        closeOptionalHttp2ResourceLease(resourceLease)
                     case Http2PoolDecision.Reserve(id) =>
                         var reservationOutstanding = true
+                        var connectionResourceLease = None<internal.HttpResourceLease>
                         try {
-                            let created = factory.create(key, context)
+                            connectionResourceLease = match (resourceBudget) {
+                                case Some(budget) => Some(budget.acquireConnection(
+                                    httpResourceOwnerForPoolKey(key), context
+                                ))
+                                case None => None<internal.HttpResourceLease>
+                            }
+                            // Aggregate admission can return after close() released another
+                            // request's slot; never start factory work for a closed pool.
+                            if (isClosed()) { throw http2PoolClosed() }
+                            let created = factory.create(key, context, connectionResourceLease)
+                            if (let Some(value) <- connectionResourceLease) { value.activate() }
                             let admission = try {
-                                created.openStream(listener, endStream)
+                                let value = created.openStream(listener, endStream)
+                                if (let Some(streamLease) <- streamResourceLease) { streamLease.activate() }
+                                value
                             } catch (_: Http2StreamLimitException) {
                                 synchronized(mutex) {
                                     removeHttp2Reservation(key)
@@ -300,6 +338,8 @@ public class Http2ConnectionPool <: Resource {
                                     changed.notifyAll()
                                 }
                                 abortUnpublishedHttp2(created)
+                                closeOptionalHttp2ResourceLease(connectionResourceLease)
+                                connectionResourceLease = None<internal.HttpResourceLease>
                                 continue
                             } catch (error: Exception) {
                                 abortUnpublishedHttp2(created)
@@ -314,7 +354,8 @@ public class Http2ConnectionPool <: Resource {
                                         changed.notifyAll()
                                         (false, rejectedByClose)
                                     } else {
-                                        entries.add(Http2PoolEntry(id, key, created))
+                                        entries.add(Http2PoolEntry(id, key, created, connectionResourceLease))
+                                        connectionResourceLease = None<internal.HttpResourceLease>
                                         changed.notifyAll()
                                         (true, false)
                                     }
@@ -327,11 +368,18 @@ public class Http2ConnectionPool <: Resource {
                             if (!accepted) {
                                 admission.registration.unregister()
                                 abortUnpublishedHttp2(created)
+                                closeOptionalHttp2ResourceLease(connectionResourceLease)
+                                connectionResourceLease = None<internal.HttpResourceLease>
                                 if (poolWasClosed) { throw http2PoolClosed() }
                                 continue
                             }
-                            return Http2PoolLease(id, key, created, admission)
+                            streamLeaseTransferred = true
+                            return Http2PoolLease(
+                                id, key, created, admission, streamResourceLease: streamResourceLease
+                            )
                         } catch (error: Exception) {
+                            closeOptionalHttp2ResourceLease(connectionResourceLease)
+                            connectionResourceLease = None<internal.HttpResourceLease>
                             if (reservationOutstanding) {
                                 synchronized(mutex) {
                                     removeHttp2Reservation(key)
@@ -346,33 +394,60 @@ public class Http2ConnectionPool <: Resource {
             throw http2PoolClosed()
         } finally {
             registration.unregister()
+            if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }
         }
     }
 
-    /** Adopts one connection whose ALPN result was discovered by the HTTP/1 factory path. */
+    /** Adopts one negotiated connection and its transferred aggregate lease. */
     public func adopt(
         key: HttpConnectionPoolKey,
         connection: Http2MultiplexedConnection,
         listener: Http2GoAwayListener,
         context!: OperationContext = OperationContext.background(),
-        endStream!: Bool = false
+        endStream!: Bool = false,
+        resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ): Http2PoolLease {
-        checkHttp2PoolContext(context)
-        synchronized(mutex) {
-            if (closed) { throw http2PoolClosed() }
-            if (entries.size + reservations.size >= config.maximumConnections ||
-                countHttp2ForKey(key) >= config.maximumConnectionsPerKey) {
-                throw http2PoolExhausted()
+        var connectionResourceLease = resourceLease
+        let streamResourceLease = try {
+            if (connectionResourceLease.isNone()) {
+                connectionResourceLease = match (resourceBudget) {
+                    case Some(budget) => Some(budget.acquireConnection(httpResourceOwnerForPoolKey(key), context))
+                    case None => None<internal.HttpResourceLease>
+                }
             }
-            if (!connection.acceptingNewStreams || connection.isClosed()) {
-                throw Http2StreamLimitException("adopted HTTP/2 connection is not accepting streams")
+            match (resourceBudget) {
+                case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), context))
+                case None => None<internal.HttpResourceLease>
             }
-            let id = nextId
-            nextId++
-            let admission = connection.openStream(listener, endStream)
-            entries.add(Http2PoolEntry(id, key, connection))
-            changed.notifyAll()
-            Http2PoolLease(id, key, connection, admission)
+        } catch (error: Exception) {
+            closeOptionalHttp2ResourceLease(connectionResourceLease)
+            throw error
+        }
+        try {
+            checkHttp2PoolContext(context)
+            synchronized(mutex) {
+                if (closed) { throw http2PoolClosed() }
+                if (entries.size + reservations.size >= config.maximumConnections ||
+                    countHttp2ForKey(key) >= config.maximumConnectionsPerKey) {
+                    throw http2PoolExhausted()
+                }
+                if (!connection.acceptingNewStreams || connection.isClosed()) {
+                    throw Http2StreamLimitException("adopted HTTP/2 connection is not accepting streams")
+                }
+                let id = nextId
+                nextId++
+                if (let Some(value) <- connectionResourceLease) { value.activate() }
+                let admission = connection.openStream(listener, endStream)
+                if (let Some(value) <- streamResourceLease) { value.activate() }
+                entries.add(Http2PoolEntry(id, key, connection, connectionResourceLease))
+                connectionResourceLease = None<internal.HttpResourceLease>
+                changed.notifyAll()
+                Http2PoolLease(id, key, connection, admission, streamResourceLease: streamResourceLease)
+            }
+        } catch (error: Exception) {
+            closeOptionalHttp2ResourceLease(connectionResourceLease)
+            closeOptionalHttp2ResourceLease(streamResourceLease)
+            throw error
         }
     }
 
@@ -380,7 +455,8 @@ public class Http2ConnectionPool <: Resource {
     public func release(lease: Http2PoolLease): Unit {
         if (!lease.claimReturn()) { return }
         lease.admission.registration.unregister()
-        var discard = None<Http2MultiplexedConnection>
+        closeOptionalHttp2ResourceLease(lease.streamResourceLease)
+        var discard = None<Http2PoolEntry>
         synchronized(mutex) {
             let index = findHttp2Entry(lease.connectionId)
             if (index >= 0) {
@@ -388,12 +464,15 @@ public class Http2ConnectionPool <: Resource {
                 if (entry.key == lease.key &&
                     (!entry.connection.acceptingNewStreams || entry.connection.isClosed()) &&
                     entry.connection.ownedStreamCount == 0) {
-                    discard = Some(entries.remove(at: index).connection)
+                    discard = Some(entries.remove(at: index))
                 }
             }
             changed.notifyAll()
         }
-        if (let Some(value) <- discard) { closeHttp2Quietly(value) }
+        if (let Some(entry) <- discard) {
+            closeHttp2Quietly(entry.connection)
+            closeOptionalHttp2ResourceLease(entry.resourceLease)
+        }
     }
 
     public func snapshot(): Http2ConnectionPoolSnapshot {
@@ -417,17 +496,20 @@ public class Http2ConnectionPool <: Resource {
 
     public func close(): Unit {
         let claimed = synchronized(mutex) {
-            if (closed) { Array<Http2MultiplexedConnection>() }
+            if (closed) { Array<Http2PoolEntry>() }
             else {
                 closed = true
-                let result = ArrayList<Http2MultiplexedConnection>()
-                for (entry in entries) { result.add(entry.connection) }
+                let result = ArrayList<Http2PoolEntry>()
+                for (entry in entries) { result.add(entry) }
                 entries = ArrayList<Http2PoolEntry>()
                 changed.notifyAll()
                 result.toArray()
             }
         }
-        for (connection in claimed) { connection.abort(reason: AbortReason.ApplicationAbort) }
+        for (entry in claimed) {
+            entry.connection.abort(reason: AbortReason.ApplicationAbort)
+            closeOptionalHttp2ResourceLease(entry.resourceLease)
+        }
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
@@ -436,7 +518,8 @@ public class Http2ConnectionPool <: Resource {
         key: HttpConnectionPoolKey,
         listener: Http2GoAwayListener,
         endStream: Bool,
-        context: OperationContext
+        context: OperationContext,
+        streamResourceLease: ?internal.HttpResourceLease
     ): Http2PoolDecision {
         var countedWaiter = false
         try {
@@ -446,7 +529,8 @@ public class Http2ConnectionPool <: Resource {
                     if (closed) { throw http2PoolClosed() }
                     let unusable = findUnusableEmptyConnection()
                     if (unusable >= 0) {
-                        return Http2PoolDecision.Discard(entries.remove(at: unusable).connection)
+                        let removed = entries.remove(at: unusable)
+                        return Http2PoolDecision.Discard(removed.connection, removed.resourceLease)
                     }
                     for (entry in entries) {
                         if (entry.key == key && entry.connection.acceptingNewStreams &&
@@ -454,8 +538,10 @@ public class Http2ConnectionPool <: Resource {
                             entry.connection.activeStreamCount < Int64(entry.connection.streamCapacity)) {
                             try {
                                 let admission = entry.connection.openStream(listener, endStream)
+                                if (let Some(value) <- streamResourceLease) { value.activate() }
                                 return Http2PoolDecision.Reuse(Http2PoolLease(
-                                    entry.id, entry.key, entry.connection, admission
+                                    entry.id, entry.key, entry.connection, admission,
+                                    streamResourceLease: streamResourceLease
                                 ))
                             } catch (_: Http2StreamLimitException) {
                                 // SETTINGS or GOAWAY may race the observed capacity.
@@ -538,6 +624,13 @@ public class Http2ConnectionPool <: Resource {
 
 private func closeHttp2Quietly(connection: Http2MultiplexedConnection): Unit {
     try { connection.close() } catch (_: Exception) { connection.abort(reason: AbortReason.ApplicationAbort) }
+}
+
+private func closeOptionalHttp2ResourceLease(lease: ?internal.HttpResourceLease): Unit {
+    match (lease) {
+        case Some(value) => value.close()
+        case None => ()
+    }
 }
 
 /** Unpublished connections have no owner that can complete a graceful stream drain. */
