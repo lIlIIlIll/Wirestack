@@ -88,6 +88,14 @@ try {
 
 `bodyReadIdle` starts only when the application calls `ResponseBody.read`. It does not count time spent processing a chunk between calls. HTTP/2 keeps the idle wait on the target response stream. A sibling stream or connection PING does not count as body progress. Outbound HTTP/2 `WINDOW_UPDATE` writes retain the caller's total deadline and cancellation token; they do not use the inbound body idle limit.
 
+## Automatic retries
+
+Automatic retries require a replayable request body and an attempt slot below `HttpRetryPolicy.maximumAttempts`. Idempotent methods are eligible by default; `HttpRetrySafety.ExplicitlySafe` opts an otherwise non-idempotent request in, while `HttpRetrySafety.Disabled` opts it out.
+
+Before request submission, retries require a structured retryable DNS, address-selection, TCP/proxy-connect, TLS-handshake, or pool-acquisition failure. HTTP/1 write failures use commit evidence: `SafeBeforeWrite` requires zero committed request bytes; a submitted request can retry only with structured retryability and replay safety. HTTP/2 GOAWAY retries only streams explicitly identified as not processed. Generic HTTP response-phase failures do not prove that the request was unprocessed and are not retried.
+
+All attempts reuse the original absolute request deadline and cancellation context.
+
 ## Long-lived response and WebSocket streams
 
 Use `bodyReadIdle` for SSE response bodies and `streamReadIdle` for WebSocket or upgraded-stream reads. Pass the same `OperationContext` to the WebSocket handshake and each `receive` call when one total deadline should cover the complete session. A two-hour total deadline below leaves each active read a 45-second idle cap.
