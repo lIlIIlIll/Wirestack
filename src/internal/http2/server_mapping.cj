@@ -4,6 +4,7 @@ import std.collection.ArrayList
 import std.sync.Mutex
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 /** Receives WINDOW_UPDATE frames produced by application body consumption. */
 public interface Http2ServerControlSink {
@@ -163,6 +164,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
             _ => None<Http2ServerPushSender>
         },
         localCancellation!: () -> Unit = { => },
+        bufferOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
         onOwnerTerminated!: () -> Unit = { => }
     ): Http2ServerExchange {
         if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
@@ -173,7 +175,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
             let head = decodeHttp2ServerRequestHead(fields, streamId, limits: limits, http2Limits: http2Limits)
             if (endStream) { validateServerRequestEnd(head.expectedContentLength, 0, streamId) }
             let channel = Http2ServerBodyChannel(
-                streamId, head.expectedContentLength, flow, sink, context, limits, http2Limits
+                streamId, head.expectedContentLength, flow, sink, context, limits, http2Limits,
+                bufferOwner: bufferOwner
             )
             if (endStream) { channel.finish(None<HttpTrailer>) }
             let body = ResponseBody(channel, trailerProvider: { => channel.trailer })
@@ -361,6 +364,7 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     private let context: OperationContext
     private let limits: HttpLimits
     private let maxSegments: Int64
+    private let bufferOwner: ?internal.HttpResourceOwnerKey
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let segments = ArrayList<Http2ServerBodySegment>()
@@ -380,7 +384,8 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         sink: Http2ServerControlSink,
         context: OperationContext,
         limits: HttpLimits,
-        http2Limits: Http2Limits
+        http2Limits: Http2Limits,
+        bufferOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ) {
         this.streamId = streamId
         this.expectedContentLength = expectedContentLength
@@ -388,6 +393,7 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         this.sink = sink
         this.context = context
         this.limits = limits
+        this.bufferOwner = bufferOwner
         maxSegments = Int64(http2Limits.maxPendingWrites)
     }
 
@@ -404,6 +410,17 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         if (dataStart < 0 || dataLength < 0 || dataStart + dataLength > data.size || flowBytes < dataLength) {
             if (let Some(reservation) <- receivedReservation) { reservation.close() }
             serverStreamError(streamId, "HTTP/2 DATA accounting or view exceeds its payload")
+        }
+        if (let Some(reservation) <- receivedReservation) {
+            if (let Some(owner) <- bufferOwner) {
+                if (!reservation.reattribute(owner)) {
+                    reservation.close()
+                    throw Http2ProtocolException(
+                        Http2ErrorCode.RefusedStream, Http2ErrorScope.Stream(streamId),
+                        "HTTP/2 aggregate managed receive-buffer budget is exhausted"
+                    )
+                }
+            }
         }
         var immediateCredit: Int64 = 0
         try {
@@ -429,7 +446,7 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 if (!applicationClosed && dataLength > 0) {
                     managedBytes = UInt64(data.size)
                     if (receivedReservation.isNone()) {
-                        if (!flow.tryReserveReceivedBuffer(managedBytes)) {
+                        if (!flow.tryReserveReceivedBufferFor(bufferOwner, managedBytes)) {
                             throw Http2ProtocolException(
                                 Http2ErrorCode.RefusedStream, Http2ErrorScope.Stream(streamId),
                                 "HTTP/2 aggregate managed receive-buffer budget is exhausted"
@@ -442,18 +459,19 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                     flow.receiveData(streamId, flowBytes)
                     receivedBytes = nextReceivedBytes
                     if (applicationClosed || dataLength == 0) {
-                        if (flowBufferReserved) { flow.releaseReceivedBuffer(managedBytes) }
+                        if (flowBufferReserved) { flow.releaseReceivedBufferFor(bufferOwner, managedBytes) }
                         if (let Some(reservation) <- receivedReservation) { reservation.close() }
                         immediateCredit = flowBytes
                     } else {
                         segments.add(Http2ServerBodySegment(
-                            data, dataStart, dataLength, flowBytes, managedBytes, receivedReservation
+                            data, dataStart, dataLength, flowBytes, managedBytes,
+                            receivedReservation, bufferOwner: bufferOwner
                         ))
                     }
                     if (endStream) { eof = true }
                     changed.notifyAll()
                 } catch (error: Exception) {
-                    if (flowBufferReserved) { flow.releaseReceivedBuffer(managedBytes) }
+                    if (flowBufferReserved) { flow.releaseReceivedBufferFor(bufferOwner, managedBytes) }
                     if (let Some(reservation) <- receivedReservation) { reservation.close() }
                     throw error
                 }
@@ -594,26 +612,29 @@ private class Http2ServerBodySegment {
     let dataLength: Int64
     let managedBufferBytes: UInt64
     private let receivedReservation: ?Http2ReceivedBufferReservation
+    private let bufferOwner: ?internal.HttpResourceOwnerKey
     var offset: Int64 = 0
     var remainingFlowBytes: Int64
     prop remainingData: Int64 { get() { dataLength - offset } }
 
     init(
         data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,
-        managedBufferBytes: UInt64, receivedReservation: ?Http2ReceivedBufferReservation
+        managedBufferBytes: UInt64, receivedReservation: ?Http2ReceivedBufferReservation,
+        bufferOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>
     ) {
         this.data = data
         this.dataStart = dataStart
         this.dataLength = dataLength
         this.managedBufferBytes = managedBufferBytes
         this.receivedReservation = receivedReservation
+        this.bufferOwner = bufferOwner
         remainingFlowBytes = flowBytes
     }
 
     func release(flow: Http2FlowController): Unit {
         match (receivedReservation) {
             case Some(reservation) => reservation.close()
-            case None => flow.releaseReceivedBuffer(managedBufferBytes)
+            case None => flow.releaseReceivedBufferFor(bufferOwner, managedBufferBytes)
         }
     }
 }

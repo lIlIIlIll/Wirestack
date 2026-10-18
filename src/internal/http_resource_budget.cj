@@ -109,7 +109,7 @@ public class HttpResourceBudget {
     private var receivedBufferBytes: UInt64 = 0u64
     private var controlBufferBytes: UInt64 = 0u64
     private var cleanupBufferBytes: UInt64 = 0u64
-    private var requestAdmissionClosed = false
+    private var admissionClosed = false
     private var highWaterConnections: Int64 = 0
     private var highWaterRequests: Int64 = 0
     private var highWaterStreams: Int64 = 0
@@ -138,19 +138,16 @@ public class HttpResourceBudget {
     ): HttpResourceLease {
         acquireSlot(HttpResourceKind.Stream, owner, context)
     }
-    protected func stopRequestAdmission(): Unit {
+    /** Rejects and wakes every aggregate admission class when the owning instance closes. */
+    protected func closeAdmission(): Unit {
         synchronized(mutex) {
-            requestAdmissionClosed = true
+            admissionClosed = true
             changed.notifyAll()
         }
     }
 
-    private func checkRequestAdmissionOpen(kind: HttpResourceKind): Unit {
-        match (kind) {
-            case HttpResourceKind.Request =>
-                if (requestAdmissionClosed) { throw resourceAdmissionClosed() }
-            case _ => ()
-        }
+    private func checkAdmissionOpen(): Unit {
+        if (admissionClosed) { throw resourceAdmissionClosed() }
     }
 
     public func tryAcquireConnection(owner: HttpResourceOwnerKey): ?HttpResourceLease {
@@ -224,6 +221,62 @@ public class HttpResourceBudget {
             counts.getOrThrow().receivedBufferBytes -= bytes
             removeEmptyOwnerLocked(owner)
             changed.notifyAll()
+        }
+    }
+
+    /**
+     * Moves already-reserved received-buffer bytes onto a late-resolved stream authority.
+     * Instance totals are unchanged; only route and origin attribution moves.
+     */
+    public func reattributeReceivedBuffer(
+        from: HttpResourceOwnerKey,
+        to: HttpResourceOwnerKey,
+        bytes: UInt64
+    ): Bool {
+        if (bytes == 0u64 || from == to) { return true }
+        synchronized(mutex) {
+            let source = findOwnerLocked(from)
+            if (source.isNone()) { return false }
+            let counts = source.getOrThrow()
+            if (counts.managedBufferBytes < bytes || counts.dataBufferBytes < bytes ||
+                counts.receivedBufferBytes < bytes || receivedBufferBytes < bytes) {
+                return false
+            }
+            // Instance totals do not change; only the target route/origin allowance is checked.
+            if (findOwnerLocked(to).isNone() && owners.size >= limits.maximumOwners) { return false }
+            let routeUsed = ownerDataBufferBytesLocked(to)
+            if (bytes > limits.maximumManagedBufferBytesPerRoute -
+                min(routeUsed, limits.maximumManagedBufferBytesPerRoute)) {
+                return false
+            }
+            let originTotal = originDataBufferBytesLocked(to.origin)
+            let sourceOriginBytes = if (from.origin == to.origin) {
+                min(originTotal, counts.dataBufferBytes)
+            } else {
+                0u64
+            }
+            let originUsed = originTotal - sourceOriginBytes
+            if (bytes > limits.maximumManagedBufferBytesPerOrigin -
+                min(originUsed, limits.maximumManagedBufferBytesPerOrigin)) {
+                return false
+            }
+            managedBufferBytes -= bytes
+            dataBufferBytes -= bytes
+            receivedBufferBytes -= bytes
+            counts.managedBufferBytes -= bytes
+            counts.dataBufferBytes -= bytes
+            counts.receivedBufferBytes -= bytes
+            removeEmptyOwnerLocked(from)
+            let target = ensureOwnerLocked(to)
+            managedBufferBytes += bytes
+            dataBufferBytes += bytes
+            receivedBufferBytes += bytes
+            target.managedBufferBytes += bytes
+            target.dataBufferBytes += bytes
+            target.receivedBufferBytes += bytes
+            recordHighWaterLocked()
+            changed.notifyAll()
+            true
         }
     }
 
@@ -390,6 +443,7 @@ public class HttpResourceBudget {
         try {
             synchronized(mutex) {
                 checkContext(context)
+                checkAdmissionOpen()
                 if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) {
                     throw resourceOwnersExhausted()
                 }
@@ -406,7 +460,7 @@ public class HttpResourceBudget {
                 try {
                     while (true) {
                         checkContext(context)
-                        checkRequestAdmissionOpen(kind)
+                        checkAdmissionOpen()
                         if (isNextWaiterLocked(waiter)) {
                             removeWaiterLocked(waiter)
                             let lease = grantLocked(kind, owner, amount, control, false)
@@ -459,7 +513,7 @@ public class HttpResourceBudget {
         amount: UInt64,
         control: Bool
     ): Bool {
-        checkRequestAdmissionOpen(kind)
+        checkAdmissionOpen()
         if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) { return false }
         match (kind) {
             case HttpResourceKind.Connection =>
@@ -825,7 +879,7 @@ private func resourceAdmissionClosed(): NetworkException {
         NetworkErrorCategory.Closed,
         NetworkPhase.PoolAcquire,
         NetworkErrorCode.Closed,
-        "HTTP client request admission is closed",
+        "HTTP client aggregate admission is closed",
         retryability: Retryability.Never
     )
 }

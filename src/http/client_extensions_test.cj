@@ -1,7 +1,7 @@
 package wirestack.http
 
 import std.collection.ArrayList
-import std.sync.AtomicInt64
+import std.sync.*
 import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -301,4 +301,40 @@ private func waitForHttpAdmissionWaiter(
         sleep(Duration.millisecond)
     }
     false
+}
+
+private func waitForHttpConnectionReservation(
+    client: HttpClient,
+    expected: Int64,
+    timeout: Duration
+): Bool {
+    let expiresAt = MonoTime.now() + timeout
+    while (true) {
+        if (client.resourceSnapshot().reservedConnections >= expected) { return true }
+        if (expiresAt - MonoTime.now() <= Duration.Zero) { return false }
+        sleep(Duration.millisecond)
+    }
+    false
+}
+
+private class StallingHttpConnector <: HttpConnector {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var released = false
+
+    public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
+        let _ = endpoint
+        let _ = context
+        synchronized(mutex) {
+            while (!released) { changed.wait() }
+        }
+        throw Exception("stalled connector released without a transport")
+    }
+
+    func release(): Unit {
+        synchronized(mutex) {
+            released = true
+            changed.notifyAll()
+        }
+    }
 }

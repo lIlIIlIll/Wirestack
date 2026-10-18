@@ -446,7 +446,7 @@ public class HttpServerBuilder {
             )
             let core = http1.Http1Server(
                 bound,
-                PublicHttp1Handler(selectedHandler, resourceBudget),
+                PublicHttp1Handler(selectedHandler, resourceBudget, tlsConfig.isSome()),
                 config: http1.Http1ServerConfig(
                     maximumConnections: effectiveResourceLimits.maximumConnections,
                     maximumRequestsPerConnection: maximumRequestsPerConnection,
@@ -550,9 +550,29 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
     }
 }
 
+/**
+ * Reconstructs one canonical request authority for aggregate quota owners.
+ * The parser has already validated the spelling; normalization lower-cases the
+ * host, omits the scheme's default port, and keeps IPv6 brackets.
+ * @param authority Parser-validated Host or :authority text.
+ * @param secured Whether the request arrived over TLS.
+ */
+internal func canonicalServerAuthority(authority: String, secured: Bool): String {
+    if (authority.isEmpty()) { return "" }
+    let scheme = if (secured) { "https" } else { "http" }
+    let defaultPort: UInt16 = if (secured) { 443u16 } else { 80u16 }
+    let parsed = HttpUrl.parse("${scheme}://${authority}/")
+    let host = if (parsed.host.contains(":")) { "[${parsed.host}]" } else { parsed.host }
+    if (parsed.explicitPort && parsed.port != defaultPort) { "${host}:${parsed.port}" } else { host }
+}
+
 /** Derives request and stream budget owners from the validated request authority. */
-private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
-    let origin = if (authority.isEmpty()) { "server" } else { authority }
+private func publicServerRequestOwner(
+    authority: String,
+    secured: Bool
+): internal.HttpResourceOwnerKey {
+    let canonical = canonicalServerAuthority(authority, secured)
+    let origin = if (canonical.isEmpty()) { "server" } else { canonical }
     internal.HttpResourceOwnerKey(origin, "listener")
 }
 
@@ -560,13 +580,16 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
     private let delegate: HttpServerHandler
     private let connectionCancellation: HttpConnectionCancellationHandle
     private let resourceBudget: internal.HttpResourceBudget
+    private let secured: Bool
     init(
         delegate: HttpServerHandler,
         resourceBudget: internal.HttpResourceBudget,
+        secured: Bool,
         connectionCancellation!: HttpConnectionCancellationHandle = HttpConnectionCancellationHandle()
     ) {
         this.delegate = delegate
         this.resourceBudget = resourceBudget
+        this.secured = secured
         this.connectionCancellation = connectionCancellation
     }
 
@@ -577,7 +600,7 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
  */
     public func handle(request: http1.Http1ServerRequest,
         context: transport.OperationContext): http1.Http1ServerResponse {
-        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request))
+        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request), secured)
         let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
             case Some(value) => value
             case None =>
@@ -700,14 +723,14 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
         connectionLease.activate()
         try {
             match (tlsHandshaker) {
-                case None => serveHttp1(value, context)
+                case None => serveHttp1(value, context, false)
                 case Some(handshaker) =>
                     let negotiated = handshaker.handshakeNegotiated(value, context)
                     match (negotiated.protocol) {
                         case http1.HttpServerNegotiatedProtocol.Http11 =>
-                            serveHttp1(negotiated.transport, context)
+                            serveHttp1(negotiated.transport, context, true)
                         case http1.HttpServerNegotiatedProtocol.Http2 =>
-                            serveHttp2(negotiated.transport, context)
+                            serveHttp2(negotiated.transport, context, true)
                     }
             }
         } finally { connectionLease.close() }
@@ -746,7 +769,8 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
 
     private func serveHttp1(
         transportValue: transport.DuplexTransport,
-        context: transport.OperationContext
+        context: transport.OperationContext,
+        secured: Bool
     ): Unit {
         let cancellation = HttpConnectionCancellationHandle()
         let registration = cancellation.cancellationToken.register { =>
@@ -756,7 +780,7 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
         try {
             let _ = http1.serveHttp1Connection(
                 transportValue, PublicHttp1Handler(
-                    publicHandler, resourceBudget,
+                    publicHandler, resourceBudget, secured,
                     connectionCancellation: cancellation
                 ),
                 context: context, limits: limits,
@@ -766,15 +790,16 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
     }
 
     private func serveHttp2(
-        secured: transport.DuplexTransport,
-        context: transport.OperationContext
+        transportValue: transport.DuplexTransport,
+        context: transport.OperationContext,
+        secured: Bool
     ): Unit {
         let cancellation = HttpConnectionCancellationHandle()
         let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-            publicServerRequestOwner(authority)
+            publicServerRequestOwner(authority, secured)
         }
         let created = http2.Http2ServerConnection(
-            secured, PublicHttp2Handler(publicHandler, cancellation),
+            transportValue, PublicHttp2Handler(publicHandler, cancellation),
             limits: limits, http2Limits: http2Limits,
             resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
             requestOwnerFactory: Some(requestOwnerFactory)

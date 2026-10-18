@@ -1796,3 +1796,19 @@ private class PublicRedirectPushObserver <: ResponseBodyObserver {
         }
     }
 }
+
+@Test
+class HttpServerAuthorityCanonicalizationTest {
+    @TestCase
+    func canonicalServerAuthoritiesCollapseEquivalentSpellings(): Unit {
+        @Expect(canonicalServerAuthority("Example.COM", true), "example.com")
+        @Expect(canonicalServerAuthority("Example.COM:443", true), "example.com")
+        @Expect(canonicalServerAuthority("Example.COM:8443", true), "example.com:8443")
+        @Expect(canonicalServerAuthority("Example.COM:80", false), "example.com")
+        @Expect(canonicalServerAuthority("Example.COM:8080", false), "example.com:8080")
+        @Expect(canonicalServerAuthority("[2001:DB8::1]", true), "[2001:db8::1]")
+        @Expect(canonicalServerAuthority("[2001:DB8::1]:443", true), "[2001:db8::1]")
+        @Expect(canonicalServerAuthority("[2001:DB8::1]:8443", true), "[2001:db8::1]:8443")
+        @Expect(canonicalServerAuthority("", false), "")
+    }
+}
