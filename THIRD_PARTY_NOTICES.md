@@ -20,3 +20,8 @@ The release includes the [complete license](third_party/public_suffix/LICENSE.MP
 [source identity and digests](third_party/public_suffix/source.json), and
 [offline generator](third_party/public_suffix/generate.py).
 The generated source identifies its upstream revision and snapshot digest.
+
+The optional `wirestack.gzip` package is original Wirestack Cangjie code under
+the repository's Apache-2.0 license. Its RFC1951/RFC1952 decoder adds no
+third-party compression library, native archive, runtime loader, or system zlib
+dependency. Importing HTTP without this package leaves content bodies raw.

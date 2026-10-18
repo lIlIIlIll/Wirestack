@@ -1,0 +1,390 @@
+[33mwarning[0m: unreachable expression
+   [36m==>[0m <repo>/src/internal/http_resource_budget.cj:389:9:
+    [36m| [0m
+[36m389[0m [36m| [0m          try {[0m
+    [36m| [0m [33m_[0m[33m________^[0m
+[36m390[0m [36m| [0m[33m|[0m             synchronized(mutex) {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m428[0m [36m| [0m[33m|[0m         }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________^ unreachable expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/client_pipeline.cj:91:9:
+   [36m| [0m
+[36m91[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/tls_client_pipeline.cj:861:9:
+    [36m| [0m
+[36m861[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/deterministic_fuzz_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m130[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                          if(e is AssertException) {[0m
+   [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+   [36m| [0m[34m|[0m                             throw e[0m
+   [36m| [0m[34m|[0m                         }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/deterministic_fuzz_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m130[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                          if(e is AssertIntermediateException) {[0m
+   [36m| [0m [34m_[0m[34m_____________________________________________________________^[0m
+   [36m| [0m[34m|[0m                             throw e[0m
+   [36m| [0m[34m|[0m                         }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/deterministic_fuzz_test.cj:7:1:
+    [36m| [0m
+[36m7[0m   [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m8[0m   [36m| [0m[33m|[0m class GzipDeterministicDifferentialTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m130[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m                          if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [34m_[0m[34m__________________________________________________________^[0m
+   [36m| [0m[34m|[0m                             throw e[0m
+   [36m| [0m[34m|[0m                         }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                              if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________^[0m
+    [36m| [0m[34m|[0m                                 throw e[0m
+    [36m| [0m[34m|[0m                             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                              if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________________^[0m
+    [36m| [0m[34m|[0m                                 throw e[0m
+    [36m| [0m[34m|[0m                             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                              if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m______________________________________________________________^[0m
+    [36m| [0m[34m|[0m                                 throw e[0m
+    [36m| [0m[34m|[0m                             }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                          if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+    [36m| [0m[34m|[0m                             throw e[0m
+    [36m| [0m[34m|[0m                         }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                          if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________________^[0m
+    [36m| [0m[34m|[0m                             throw e[0m
+    [36m| [0m[34m|[0m                         }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                          if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________________^[0m
+    [36m| [0m[34m|[0m                             throw e[0m
+    [36m| [0m[34m|[0m                         }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                                  if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________________^[0m
+    [36m| [0m[34m|[0m                                     throw e[0m
+    [36m| [0m[34m|[0m                                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                                  if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________________________^[0m
+    [36m| [0m[34m|[0m                                     throw e[0m
+    [36m| [0m[34m|[0m                                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                                  if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________________________^[0m
+    [36m| [0m[34m|[0m                                     throw e[0m
+    [36m| [0m[34m|[0m                                 }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                          if(e is AssertException) {[0m
+    [36m| [0m [34m_[0m[34m_________________________________________________^[0m
+    [36m| [0m[34m|[0m                             throw e[0m
+    [36m| [0m[34m|[0m                         }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                          if(e is AssertIntermediateException) {[0m
+    [36m| [0m [34m_[0m[34m_____________________________________________________________^[0m
+    [36m| [0m[34m|[0m                             throw e[0m
+    [36m| [0m[34m|[0m                         }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/gzip/native_test.cj:12:1:
+    [36m| [0m
+[36m12[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m13[0m  [36m| [0m[33m|[0m class GzipNativeTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m376[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m                          if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [34m_[0m[34m__________________________________________________________^[0m
+    [36m| [0m[34m|[0m                             throw e[0m
+    [36m| [0m[34m|[0m                         }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+
+15 warnings generated, 15 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.gzip, time elapsed: 4058944654 ns, RESULT:
+    TCS: GzipCodecTest, time elapsed: 760487980 ns, RESULT:
+    [ PASSED ] CASE: storedFixedDynamicAndOptionalFields (33028650 ns)
+    [ PASSED ] CASE: exactLimitsAndConcatenatedMembers (16235910 ns)
+    [ PASSED ] CASE: emptyAndEveryTruncation (403394460 ns)
+    [ PASSED ] CASE: checksumSizeFlagsStoredLengthAndTrailing (9150835 ns)
+    [ PASSED ] CASE: largeOverlapBombAndBoundedWork (295509919 ns)
+    [ PASSED ] CASE: incrementalOwnershipAndUnverifiedClose (1388013 ns)
+    TCS: GzipMalformedCorpusTest, time elapsed: 17772669 ns, RESULT:
+    [ PASSED ] CASE: invalidTreesReservedSymbolsAndHistory (12210681 ns)
+    [ PASSED ] CASE: legalSingleSymbolAndEmptyDistanceTree (1502161 ns)
+    [ PASSED ] CASE: emptyBlocksConsumeCumulativeBlockBudget (2030185 ns)
+    [ PASSED ] CASE: nextMemberCannotReferencePreviousHistory (1475547 ns)
+    TCS: GzipDeterministicDifferentialTest, time elapsed: 120433976 ns, RESULT:
+    [ PASSED ] CASE: fixedSeedMalformedAndValidOracleCorpus (120187461 ns)
+    TCS: GzipNativeTest, time elapsed: 3160007728 ns, RESULT:
+    [ PASSED ] CASE: rawClientDoesNotNegotiateOrDecodeAndWrapperRetainsWireMetadata (79725619 ns)
+    [ PASSED ] CASE: unsupportedCodingFailsClosedUnlessExplicitRawPassThrough (70290424 ns)
+    [ PASSED ] CASE: headAndBodylessStatusesSkipInvalidCoding (45990005 ns)
+    [ PASSED ] CASE: concatenationRequiresExplicitMemberLimitAndExactOutputLimitValidatesEof (8455962 ns)
+    [ PASSED ] CASE: crcTruncationAndHighRatioOutputFailureReleaseRealReservations (78642128 ns)
+    [ PASSED ] CASE: pendingNativeReadWakesOnParentCancellationAndLocalClose (69519459 ns)
+    [ PASSED ] CASE: parentAbsoluteDeadlineInterruptsNativeBodyRead (463686862 ns)
+    [ PASSED ] CASE: http2TypedStreamCancellationReclaimsDecoderWithoutClosingSibling (40488222 ns)
+    [ PASSED ] CASE: http2GzipCloseAndMalformedMemberLeaveActiveSiblingAlive (151744333 ns)
+    [ PASSED ] CASE: http1UnreadWideBodyAbandonsConnectionWithoutDrainingUnboundedInput (11404566 ns)
+    [ PASSED ] CASE: configuredRequestTimeoutSurvivesBufferedCpuDecoding (6899088 ns)
+    [ PASSED ] CASE: dataAdmissionUsesSameRequestTimeoutAndParentCancellationBeforeSend (216718024 ns)
+    [ PASSED ] CASE: nativeLargeBodyDecodesIncrementallyWithBoundedReadsAndReservation (1913212621 ns)
+Summary: TOTAL: 24
+    PASSED: 24, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 4065865716 ns, RESULT:
+TP: wirestack.*, time elapsed: 4065782759 ns, RESULT:
+    PASSED:
+    TP: wirestack.gzip, time elapsed: 4058944654 ns
+Summary: TOTAL: 24
+    PASSED: 24, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

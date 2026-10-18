@@ -26,6 +26,43 @@ class M7021LinuxReleaseTest(unittest.TestCase):
         }
         return {**files, "release-manifest.json": release.canonical_json(manifest)}
 
+    def test_gzip_archive_source_inventory_is_bound_and_historical_archives_read(self) -> None:
+        files = {f"src/gzip/{name}.cj": f"package wirestack.gzip\n// {name}\n".encode()
+                 for name in ("body", "client", "decoder", "model")}
+        payload = self.archive_payload(files)
+        manifest = json.loads(payload["release-manifest.json"])
+        manifest["optionalModules"] = release.optional_modules(files)
+        payload["release-manifest.json"] = release.canonical_json(manifest)
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / "wirestack.tar.gz"
+            release.write_reproducible_archive(archive, payload)
+            _, observed = release.read_verified_payload(archive)
+            self.assertEqual(manifest["optionalModules"], observed["optionalModules"])
+            for mutation in ("checksum", "license", "dependency", "missing", "duplicate"):
+                with self.subTest(mutation=mutation):
+                    changed = copy.deepcopy(manifest)
+                    module = changed["optionalModules"][0]
+                    if mutation == "checksum":
+                        module["sources"][0]["sha256"]["sha256"] = "0" * 64
+                    elif mutation == "license":
+                        module["license"] = "MIT"
+                    elif mutation == "dependency":
+                        module["nativeDependencies"] = ["zlib"]
+                    elif mutation == "missing":
+                        changed.pop("optionalModules")
+                    else:
+                        changed["optionalModules"].append(copy.deepcopy(module))
+                    release.write_reproducible_archive(archive,
+                        {**payload, "release-manifest.json": release.canonical_json(changed)})
+                    with self.assertRaisesRegex(release.ReleaseError, "optional module"):
+                        release.read_verified_payload(archive)
+            historical = self.archive_payload({"LICENSE": b"Apache license\n"}, schema=1)
+            release.write_reproducible_archive(archive, historical)
+            _, old_manifest = release.read_verified_payload(archive)
+            self.assertNotIn("optionalModules", old_manifest)
+        with self.assertRaisesRegex(release.ReleaseError, "gzip production"):
+            release.optional_modules({**files, "src/gzip/decoder_test.cj": b"test"})
+
     def test_http_files_manifest_binds_sources_tools_and_archive(self) -> None:
         archive = b"native archive"
         payload = {
