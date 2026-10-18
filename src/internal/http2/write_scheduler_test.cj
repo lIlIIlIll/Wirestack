@@ -5,6 +5,7 @@ import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 @Test
 class Http2WriteSchedulerTest {
@@ -364,8 +365,111 @@ class Http2WriteSchedulerTest {
             @Expect(first.header.streamId.value, second.header.streamId.value)
         }
     }
-}
+    @TestCase
+    func aggregateManagedBytesIncludeControlReserveAndSlowWrites(): Unit {
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = schedulerResourceBudget(65589u64, 34u64)
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
+        )
+        let data = scheduler.enqueue(schedulerData(1u32, 1u8))
+        @Expect(budget.snapshot().managedBufferBytes, 10u64)
+        expectWriteQueueFull({ => let _ = scheduler.enqueue(Http2Frame(
+            Http2FrameHeader(10u32, Http2FrameType.Data, Http2Flags(), Http2StreamId(3u32)),
+            Array<Byte>(10, repeat: 2u8)
+        )) })
+        let control = scheduler.enqueue(schedulerPing(3u8))
+        @Expect(budget.snapshot().managedBufferBytes, 27u64)
+        @Expect(data.cancel())
+        @Expect(budget.snapshot().managedBufferBytes, 17u64)
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+        @Expect(isWriteTestCancelled(data.wait()))
+        @Expect(isWriteTestWritten(control.wait()))
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
 
+        let slowBudget = schedulerResourceBudget(65589u64, 34u64)
+        let slowTransport = BlockingSchedulerTransport()
+        let slowScheduler = Http2WriteScheduler(
+            slowTransport, resourceBudget: Some(slowBudget), resourceOwner: Some(owner)
+        )
+        let active = slowScheduler.enqueue(schedulerData(1u32, 4u8))
+        let writer = spawn { slowScheduler.run() }
+        slowTransport.waitUntilEntered()
+        @Expect(slowBudget.snapshot().managedBufferBytes, 10u64)
+        slowScheduler.abort()
+        @Expect(isSchedulerTestFailed(writer.get(Duration.second)))
+        @Expect(isWriteTestFailed(active.wait()))
+        @Expect(slowBudget.snapshot().managedBufferBytes, 0u64)
+    }
+    @TestCase
+    func streamDataBuffersUseTheValidatedAuthorityOwner(): Unit {
+        let connectionOwner = internal.HttpResourceOwnerKey("server", "listener")
+        let authorityOwner = internal.HttpResourceOwnerKey("example.com", "listener")
+        let budget = schedulerResourceBudget(65589u64, 34u64)
+        let owners = Http2StreamBufferOwners()
+        owners.bind(1, authorityOwner)
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget),
+            resourceOwner: Some(connectionOwner), streamBufferOwners: Some(owners)
+        )
+        let data = scheduler.enqueue(schedulerData(1u32, 1u8))
+        let control = scheduler.enqueue(schedulerPing(2u8))
+        let pending = budget.snapshot()
+        @Expect(pending.managedBufferBytes, 27u64)
+        var authorityBuffers = 0u64
+        var connectionBuffers = 0u64
+        for (owner in pending.owners) {
+            if (owner.origin == "example.com") { authorityBuffers = owner.managedBufferBytes }
+            if (owner.origin == "server") { connectionBuffers = owner.managedBufferBytes }
+        }
+        @Expect(authorityBuffers, 10u64)
+        @Expect(connectionBuffers, 17u64)
+        @Expect(data.cancel())
+        let afterData = budget.snapshot()
+        @Expect(afterData.managedBufferBytes, 17u64)
+        @Expect(afterData.owners.size, 1)
+        @Expect(control.cancel())
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+    }
+    @TestCase
+    func cleanupFrameUsesProtectedBytesAfterOrdinaryControlIsFull(): Unit {
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = schedulerResourceBudget(65589u64, 34u64)
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
+        )
+        let control = scheduler.enqueue(schedulerPing(7u8))
+        @Expect(budget.snapshot().managedBufferBytes, 17u64)
+
+        let cleanup = scheduler.enqueue(
+            encodeHttp2RstStream(Http2StreamId(1u32), Http2ErrorCode.Cancel)
+        )
+        @Expect(budget.snapshot().managedBufferBytes, 30u64)
+        expectWriteQueueFull({ => let _ = scheduler.enqueue(
+            encodeHttp2RstStream(Http2StreamId(3u32), Http2ErrorCode.Cancel)
+        ) })
+        @Expect(budget.snapshot().managedBufferBytes, 30u64)
+
+        @Expect(cleanup.cancel())
+        @Expect(budget.snapshot().managedBufferBytes, 17u64)
+        @Expect(control.cancel())
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+    }
+}
+private func schedulerResourceBudget(
+    maximumManagedBufferBytes: UInt64,
+    reservedControlBufferBytes: UInt64
+): internal.HttpResourceBudget {
+    internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+        1, 1, 1, 8, 4, 8, 8, 4, 8,
+        maximumManagedBufferBytes, reservedControlBufferBytes, 8
+    ))
+}
 private func schedulerHeaderPart(streamId: Http2StreamId, endHeaders: Bool): Http2Frame {
     Http2Frame(
         Http2FrameHeader(

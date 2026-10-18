@@ -4,6 +4,7 @@ import std.collection.ArrayList
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 @Test
 class Http2FrameCodecTest {
@@ -97,6 +98,39 @@ class Http2FrameCodecTest {
         writeHttp2Frame(transport, expected)
         @Expect(transport.writeCalls > 1)
         @Expect(transport.bytes(), serializeHttp2Frame(expected))
+    }
+
+    @TestCase
+    func parserRefusesUnbudgetedDataBeforeRetainingItsPayload(): Unit {
+        let owner = internal.HttpResourceOwnerKey("https://example.test:443", "direct")
+        let policy = internal.HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 4,
+            maximumManagedBufferBytesPerRoute: 4u64,
+            maximumManagedBufferBytesPerOrigin: 4u64,
+            maximumOwners: 4
+        )
+        let budget = internal.HttpResourceBudget(policy)
+        @Expect(budget.tryReserveReceivedBuffer(owner, 4u64))
+        let parser = Http2FrameParser(
+            Http2Limits(), Some(budget), Some(owner)
+        )
+        let wire = serializeHttp2Frame(frame(Http2FrameType.Data, 1u32, [1, 2, 3, 4]))
+
+        let rejected = parser.feed(wire)
+        @Expect(rejected.size, 1)
+        @Expect(rejected[0].wasReceiveBufferRejected)
+        @Expect(rejected[0].payload.isEmpty())
+        @Expect(budget.snapshot().managedBufferBytes, 4u64)
+
+        budget.releaseReceivedBuffer(owner, 4u64)
+        let admitted = parser.feed(wire)
+        let expectedPayload: Array<Byte> = [1, 2, 3, 4]
+        @Expect(admitted.size, 1)
+        @Expect(!admitted[0].wasReceiveBufferRejected)
+        @Expect(admitted[0].payload, expectedPayload)
+        @Expect(budget.snapshot().managedBufferBytes, 4u64)
+        admitted[0].releaseUnclaimedReceivedBufferReservation()
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
     }
 }
 

@@ -45,6 +45,7 @@ private func exerciseNativeWebSocket(secure: Bool): Unit {
                 response.close()
                 throw Exception("WebSocket handshake rejected with ${status}")
         }
+        @Expect(client.resourceSnapshot().activeRequests, 1)
         try {
             session.send(WebSocketFrame(WebSocketOpcode.Binary, payload: [0u8, 255u8, 17u8]))
             @Expect(session.receive().payload, [0u8, 255u8, 17u8])
@@ -70,6 +71,7 @@ private func exerciseNativeWebSocket(secure: Bool): Unit {
                 deadline: Some(Deadline.after(Duration.second))))
             @Expect(session.isClosed())
         } finally { session.close() }
+        @Expect(client.resourceSnapshot().activeRequests, 0)
     } finally {
         client.close()
         let _ = server.shutdown(context: OperationContext(

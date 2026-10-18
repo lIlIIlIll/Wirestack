@@ -46,6 +46,55 @@ try {
 Always consume or close the request body before returning when the connection
 should remain reusable.
 
+## Aggregate resource budgets
+
+Each `HttpClient` and `HttpServer` owns one resource ledger shared by its routes and protocol pools. Configure a client with `HttpClientBuilder.resourceLimits` or a server with `HttpServerBuilder.resourceLimits`; `HttpResourceLimits.clientDefault()` and `serverDefault()` select the defaults. `HttpClient.resourceSnapshot()` and `HttpServer.resourceSnapshot()` return a single-lock point-in-time sample with a monotonic `sampledAt`, active and reserved connection/stream counts, lifetime high-water counts, effective limits, and current non-empty origin/route owners. Connection and stream high-water counts include both active and not-yet-activated reservations. Owner rows expose active and reserved counts separately; they are snapshots, not stable identities or ordered output.
+
+`maximumManagedBufferBytesPerRoute` and `maximumManagedBufferBytesPerOrigin` bound DATA bytes attributed to a route+origin and to all routes for an origin. `maximumOwners` bounds the number of live origin/route ledger rows. These are independent of connection, request, and stream ceilings.
+
+```cj
+let limits = HttpResourceLimits(
+    maximumConnections: 64,
+    maximumConnectionsPerRoute: 16,
+    maximumConnectionsPerOrigin: 32,
+    maximumManagedBufferBytesPerRoute: 16777216u64,
+    maximumManagedBufferBytesPerOrigin: 33554432u64,
+    maximumOwners: 4096
+)
+let client = HttpClient.builder()
+    .resourceLimits(limits)
+    .build()
+let snapshot = client.resourceSnapshot()
+```
+
+The default limits are:
+
+| Limit | Client | Server |
+| --- | ---: | ---: |
+| Connections, instance | 128 | 1024 |
+| Connections, one route + origin | 16 | 1024 |
+| Connections, one origin across routes | 32 | 1024 |
+| Requests, instance | 4096 | 4096 |
+| Requests, one route + origin | 1024 | 1024 |
+| Requests, one origin across routes | 2048 | 2048 |
+| HTTP/2 streams, instance | 4096 | 4096 |
+| HTTP/2 streams, one route + origin | 1024 | 1024 |
+| HTTP/2 streams, one origin across routes | 2048 | 2048 |
+| Managed HTTP/2 buffers, instance | 128 MiB | 128 MiB |
+| DATA buffers, one route + origin | 32 MiB | 16 MiB |
+| DATA buffers, one origin across routes | 64 MiB | 32 MiB |
+| Control and cleanup buffer reserve | 1 MiB | 1 MiB |
+| Aggregate admission waiters | 256 | 256 |
+| Current origin/route owner rows | 8192 | 8192 |
+
+The server's legacy `connectionLimit` can lower its effective connection ceiling. A route count is scoped to the exact route-and-origin owner pair; origin counts aggregate those owners. The per-route and per-origin DATA-byte limits include received body DATA and serialized writer DATA, but not control frames. Defaults may be replaced with positive limits subject to cross-field constraints. Hard validation bounds are 65,536 connections, 1,000,000 requests, 1,000,000 streams, 65,536 waiters, and 65,536 owner rows; managed buffers are capped at 1 GiB. The control reserve must contain at least 17 bytes per configured connection for cleanup traffic. The managed-buffer limit must also leave more than 65,535 bytes per configured connection after its control reserve, so a configuration can be rejected even when each individual field is below its hard bound.
+
+Client admission waits use the request's original `OperationContext`, including its absolute deadline and cancellation token. Cancelling or timing out removes that waiter; admitting beyond `maximumWaiters` fails with `NetworkException` in `PoolAcquire` and `ResourceExhausted`. The ledger wakes eligible bounded waiters as leases are released. A full owner-row table does not allocate another owner. Existing connection-pool and HTTP/2 writer queue limits remain separate; `admissionWaiters` reports only waiters on the shared resource ledger. Server request/stream admission is nonblocking: HTTP/1.1 request exhaustion returns 503 and closes that connection; HTTP/2 request or stream exhaustion is refused with `REFUSED_STREAM`.
+
+`maximumManagedBufferBytes` shares one cap across received HTTP/2 DATA retained in body segments and serialized writer frames that are queued or active. The control reserve is unavailable to DATA and is split between ordinary control traffic and protected cleanup capacity. Received DATA is charged before the parser allocates its payload array; if its owner or aggregate budget is full, the reader discards the payload without retaining that array and refuses the stream instead of waiting. Writer-side backpressure waits under the original operation context. Body consumption, body close/reset, write completion, cancellation, and terminal failure release the corresponding byte reservation.
+
+`managedBufferBytes` and its high-water value report logical accounted bytes: received DATA payload bytes (including padding) plus complete serialized outbound frame bytes. They are not process-memory or RSS measurements and exclude application/source buffers, native TLS and runtime memory, OS socket buffers, frame-header/parser scratch, and transient serialization allocations.
+
 ## Typed cancellation handles
 
 Create a handle before starting a request when another task must stop work

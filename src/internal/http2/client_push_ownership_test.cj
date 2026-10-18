@@ -6,6 +6,7 @@ import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 @Test
 class Http2ClientPushOwnershipTest {
@@ -142,7 +143,8 @@ private class ClientPushOwnershipFixture {
             reset,
             HttpLimits(),
             Http2Limits(),
-            { _ => let _ = terminations.fetchAdd(1) }
+            { _ => let _ = terminations.fetchAdd(1) },
+            None<internal.HttpResourceLease>
         )
         exchange.bindReset(reset.register(streamId, exchange))
         if (!source.admit(exchange)) {

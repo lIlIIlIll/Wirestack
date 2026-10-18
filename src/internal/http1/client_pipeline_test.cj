@@ -7,6 +7,7 @@ import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 @Test
 class Http1CleartextClientTest {
@@ -49,6 +50,28 @@ class Http1CleartextClientTest {
         @Expect(transports.connectCount, 0)
         @Expect(client.snapshot().connections, 0)
         client.close()
+    }
+
+    @TestCase
+    func closingGenerationPreservesSharedRequestAdmissionAndHeldLease(): Unit {
+        let host = HostName("example.test")
+        let resolver = StaticResolver(ResolveResult(
+            [IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 1u8])], host, ResolverSource.Static))
+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+            1, 1, 1, 2, 2, 2, 1, 1, 1, 64u64, 8u64, 1
+        ))
+        let client = Http1CleartextClient(
+            resolver, PipelineTestTransportFactory(), resourceBudget: Some(budget))
+        let owner = internal.HttpResourceOwnerKey("http://close.example:80", "direct")
+        let held = budget.tryAcquireRequest(owner).getOrThrow()
+
+        client.close()
+        @Expect(budget.snapshot().activeRequests, 1)
+        let replacement = budget.tryAcquireRequest(owner).getOrThrow()
+        @Expect(budget.snapshot().activeRequests, 2)
+        replacement.close()
+        held.close()
+        @Expect(budget.snapshot().activeRequests, 0)
     }
 }
 

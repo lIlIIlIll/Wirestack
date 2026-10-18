@@ -5,6 +5,7 @@ import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
+import wirestack.internal as internal
 import wirestack.internal.http2.*
 import wirestack.internal.http_model.*
 import wirestack.internal.resolver.*
@@ -12,6 +13,72 @@ import wirestack.internal.transport.*
 
 @Test
 class HttpAutomaticHttpsClientTest {
+    @TestCase
+    func cachedHttp11AlpnPathCanUpgradeToHttp2WithSharedResourceBudget(): Unit {
+        let resolver = automaticResolver()
+        let transports = AutomaticPipelineTransportFactory(
+            HttpNegotiatedProtocol.Http11, 1, HttpNegotiatedProtocol.Http2, 1
+        )
+        let handshaker = PassthroughAlpnHandshaker(
+            HttpNegotiatedProtocol.Http11, HttpNegotiatedProtocol.Http2
+        )
+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 4194304u64, 65536u64, 4
+        ))
+        let client = HttpAutomaticHttpsClient(
+            resolver, transports, handshaker, attemptDelay: Duration.Zero, resourceBudget: Some(budget)
+        )
+
+        let first = client.execute(HttpRequest.get("https://example.com/one"))
+        let second = client.execute(HttpRequest.get("https://example.com/two"))
+        @Expect(readAutomaticBody(first.body), "/one")
+        @Expect(readAutomaticBody(second.body), "/two")
+        first.close()
+        second.close()
+
+        @Expect(transports.connectCount, 2)
+        @Expect(handshaker.handshakeCount, 2)
+        @Expect(client.h2Snapshot().connections, 1)
+        let snapshot = budget.snapshot()
+        @Expect(snapshot.activeConnections, 2)
+        @Expect(snapshot.activeRequests, 0)
+        @Expect(snapshot.activeStreams, 0)
+        @Expect(snapshot.owners.size, 1)
+        @Expect(snapshot.owners[0].origin, "https://example.com:443")
+        @Expect(snapshot.owners[0].route, "direct")
+        @Expect(snapshot.owners[0].connections, 2)
+        @Expect(snapshot.owners[0].requests, 0)
+        @Expect(snapshot.owners[0].streams, 0)
+        client.close()
+        @Expect(budget.snapshot().activeConnections, 0)
+        @Expect(budget.snapshot().owners.size, 0)
+    }
+    @TestCase
+    func cachedHttp11AlpnPathCanUpgradeToHttp2WithoutResourceBudget(): Unit {
+        let resolver = automaticResolver()
+        let transports = AutomaticPipelineTransportFactory(
+            HttpNegotiatedProtocol.Http11, 1, HttpNegotiatedProtocol.Http2, 1
+        )
+        let handshaker = PassthroughAlpnHandshaker(
+            HttpNegotiatedProtocol.Http11, HttpNegotiatedProtocol.Http2
+        )
+        let client = HttpAutomaticHttpsClient(
+            resolver, transports, handshaker, attemptDelay: Duration.Zero
+        )
+
+        let first = client.execute(HttpRequest.get("https://example.com/one"))
+        let second = client.execute(HttpRequest.get("https://example.com/two"))
+        @Expect(readAutomaticBody(first.body), "/one")
+        @Expect(readAutomaticBody(second.body), "/two")
+        first.close()
+        second.close()
+
+        @Expect(transports.connectCount, 2)
+        @Expect(handshaker.handshakeCount, 2)
+        @Expect(client.h2Snapshot().connections, 1)
+        client.close()
+    }
+
     @TestCase
     func h2NegotiationMultiplexesTenRequestsOnOneTlsConnection(): Unit {
         let resolver = automaticResolver()
@@ -64,14 +131,24 @@ class HttpAutomaticHttpsClientTest {
         @Expect(client.h2Snapshot().connections, 0)
         client.close()
     }
+
 }
 
 private class PassthroughAlpnHandshaker <: HttpAlpnTlsHandshaker {
     private let selected: HttpNegotiatedProtocol
+    private let nextSelected: ?HttpNegotiatedProtocol
     private let handshakes = AtomicInt64(0)
     private var closed = false
 
-    init(selected: HttpNegotiatedProtocol) { this.selected = selected }
+    init(selected: HttpNegotiatedProtocol) {
+        this.selected = selected
+        this.nextSelected = None<HttpNegotiatedProtocol>
+    }
+
+    init(first: HttpNegotiatedProtocol, second: HttpNegotiatedProtocol) {
+        this.selected = first
+        this.nextSelected = Some(second)
+    }
 
     prop handshakeCount: Int64 { get() { handshakes.load() } }
     public prop tlsContextIdentity: String { get() { "automatic-test-tls" } }
@@ -87,8 +164,16 @@ private class PassthroughAlpnHandshaker <: HttpAlpnTlsHandshaker {
     ): HttpNegotiatedTlsTransport {
         let _ = host
         let _ = context
-        let _ = handshakes.fetchAdd(1)
-        HttpNegotiatedTlsTransport(selected, transport)
+        let handshakeIndex = handshakes.fetchAdd(1)
+        let negotiatedProtocol = if (handshakeIndex == 0) {
+            selected
+        } else {
+            match (nextSelected) {
+                case Some(protocol) => protocol
+                case None => selected
+            }
+        }
+        HttpNegotiatedTlsTransport(negotiatedProtocol, transport)
     }
 
     public func close(): Unit { closed = true }
@@ -98,11 +183,27 @@ private class PassthroughAlpnHandshaker <: HttpAlpnTlsHandshaker {
 private class AutomaticPipelineTransportFactory <: TransportFactory {
     private let protocol: HttpNegotiatedProtocol
     private let expectedRequests: Int64
+    private let nextProtocol: ?HttpNegotiatedProtocol
+    private let nextExpectedRequests: Int64
     private let connects = AtomicInt64(0)
 
     init(protocol: HttpNegotiatedProtocol, expectedRequests: Int64) {
         this.protocol = protocol
         this.expectedRequests = expectedRequests
+        this.nextProtocol = None<HttpNegotiatedProtocol>
+        this.nextExpectedRequests = 0
+    }
+
+    init(
+        first: HttpNegotiatedProtocol,
+        firstExpectedRequests: Int64,
+        second: HttpNegotiatedProtocol,
+        secondExpectedRequests: Int64
+    ) {
+        this.protocol = first
+        this.expectedRequests = firstExpectedRequests
+        this.nextProtocol = Some(second)
+        this.nextExpectedRequests = secondExpectedRequests
     }
 
     prop connectCount: Int64 { get() { connects.load() } }
@@ -110,15 +211,28 @@ private class AutomaticPipelineTransportFactory <: TransportFactory {
     public func connect(endpoint: SocketEndpoint, context: OperationContext): DuplexTransport {
         let _ = endpoint
         let _ = context
-        let _ = connects.fetchAdd(1)
+        let connectIndex = connects.fetchAdd(1)
+        let selectedProtocol = if (connectIndex == 0) {
+            protocol
+        } else {
+            match (nextProtocol) {
+                case Some(value) => value
+                case None => protocol
+            }
+        }
+        let requestLimit = if (connectIndex == 0 || nextProtocol.isNone()) {
+            expectedRequests
+        } else {
+            nextExpectedRequests
+        }
         let (client, server) = MemoryTransport.pair(capacity: 1024 * 1024, maxChunk: 29)
-        match (protocol) {
+        match (selectedProtocol) {
             case HttpNegotiatedProtocol.Http2 =>
-                spawn { let _ = AutomaticTestHttp2Peer(server).serveOutOfOrder(expectedRequests) }
+                spawn { let _ = AutomaticTestHttp2Peer(server).serveOutOfOrder(requestLimit) }
             case HttpNegotiatedProtocol.Http11 =>
                 spawn {
                     let _ = serveHttp1Connection(
-                        server, AutomaticHttp1Handler(), maximumRequests: expectedRequests
+                        server, AutomaticHttp1Handler(), maximumRequests: requestLimit
                     )
                 }
         }

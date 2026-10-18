@@ -1,7 +1,8 @@
 package wirestack.http
 
 import std.collection.ArrayList
-import std.sync.AtomicInt64
+import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
@@ -74,6 +75,134 @@ class HttpClientExtensionsTest {
     }
 
     @TestCase
+    func closingClientTerminatesAdmissionWaiterAndPreservesHeldRequestLease(): Unit {
+        let fixture = NativeHttpExtensionFixture()
+        let server = HttpServer.builder().listen(SocketEndpoint(
+            IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 0u16)).handler(fixture).build()
+        let serving = spawn { server.serve() }
+        let resourceLimits = HttpResourceLimits(
+            maximumConnections: 1,
+            maximumConnectionsPerRoute: 1,
+            maximumConnectionsPerOrigin: 1,
+            maximumRequests: 1,
+            maximumRequestsPerRoute: 1,
+            maximumRequestsPerOrigin: 1,
+            maximumStreams: 1,
+            maximumStreamsPerRoute: 1,
+            maximumStreamsPerOrigin: 1
+        )
+        let client = HttpClient.builder().connector(fixture).resourceLimits(resourceLimits)
+            .requestTimeout(5 * Duration.second).build()
+        let base = "http://127.0.0.1:${server.localEndpoint.port}"
+        try {
+            let held = client.get("${base}/held")
+            let waiter = spawn {
+                try {
+                    let response = client.get("${base}/waiting")
+                    response.close()
+                    false
+                } catch (error: api.NetworkException) {
+                    match (error.category) {
+                        case api.NetworkErrorCategory.Closed =>
+                            match (error.phase) {
+                                case api.NetworkPhase.PoolAcquire =>
+                                    match (error.code) {
+                                        case api.NetworkErrorCode.Closed => true
+                                        case _ => false
+                                    }
+                                case _ => false
+                            }
+                        case _ => false
+                    }
+                }
+            }
+            try {
+                @Expect(waitForHttpAdmissionWaiter(client, 1, Duration.second))
+                client.close()
+                client.close()
+                var resolved = false
+                var rejectedAsClosed = false
+                try {
+                    rejectedAsClosed = waiter.get(Duration.second)
+                    resolved = true
+                } catch (_: Exception) { }
+                @Expect(resolved)
+                @Expect(rejectedAsClosed)
+                @Expect(client.resourceSnapshot().admissionWaiters, 0)
+                @Expect(client.resourceSnapshot().activeRequests, 1)
+                @Expect(fixture.handled.load(), 1)
+                held.close()
+                held.close()
+                @Expect(client.resourceSnapshot().activeRequests, 0)
+            } finally {
+                client.close()
+                held.close()
+                try { let _ = waiter.get(5 * Duration.second) } catch (_: Exception) { }
+            }
+        } finally {
+            client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))))
+            serving.get(5 * Duration.second)
+        }
+    }
+
+    @TestCase
+    func closingClientWakesStalledConnectorConnectionAdmission(): Unit {
+        let connector = StallingHttpConnector()
+        let resourceLimits = HttpResourceLimits(
+            maximumConnections: 1,
+            maximumConnectionsPerRoute: 1,
+            maximumConnectionsPerOrigin: 1,
+            maximumRequests: 2,
+            maximumRequestsPerRoute: 2,
+            maximumRequestsPerOrigin: 2,
+            maximumStreams: 1,
+            maximumStreamsPerRoute: 1,
+            maximumStreamsPerOrigin: 1
+        )
+        let client = HttpClient.builder().connector(connector).resourceLimits(resourceLimits).build()
+        let url = "http://127.0.0.1:9/stalled"
+        let first: Future<Bool> = spawn {
+            try {
+                let response = client.get(url)
+                response.close()
+                false
+            } catch (_: Exception) { true }
+        }
+        var second: ?Future<Bool> = None<Future<Bool>>
+        try {
+            @Expect(waitForHttpConnectionReservation(client, 1, Duration.second))
+            second = Some(spawn {
+                try {
+                    let response = client.get(url)
+                    response.close()
+                    false
+                } catch (error: api.NetworkException) {
+                    match (error.code) {
+                        case api.NetworkErrorCode.Closed => true
+                        case _ => false
+                    }
+                }
+            })
+            @Expect(waitForHttpAdmissionWaiter(client, 1, Duration.second))
+            client.close()
+            client.close()
+            var secondRejected = false
+            try { secondRejected = second.getOrThrow().get(Duration.second) } catch (_: Exception) { }
+            @Expect(secondRejected)
+            @Expect(client.resourceSnapshot().admissionWaiters, 0)
+        } finally {
+            connector.release()
+            client.close()
+            try { let _ = first.get(5 * Duration.second) } catch (_: Exception) { }
+            if (let Some(value) <- second) {
+                try { let _ = value.get(5 * Duration.second) } catch (_: Exception) { }
+            }
+        }
+    }
+
+    @TestCase
     func unavailableServerPushClosesTheOwnedResponse(): Unit {
         let fixture = NativeHttpExtensionFixture()
         let server = HttpServer.builder().listen(SocketEndpoint(
@@ -97,6 +226,7 @@ private class NativeHttpExtensionFixture <:
     let connections = AtomicInt64(0)
     let acquisitions = AtomicInt64(0)
     let releases = AtomicInt64(0)
+    let handled = AtomicInt64(0)
 
     public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
         let _ = connections.fetchAdd(1)
@@ -117,6 +247,7 @@ private class NativeHttpExtensionFixture <:
         if (response.response.status == 202) { throw Exception("service rejected this response") }
     }
     public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        let _ = handled.fetchAdd(1)
         if (request.target == "/push-unavailable") {
             let pushed = HttpResponse(200, "OK", ResponseBody(RequestBody.string("owned").open()))
             var rejected = false
@@ -151,4 +282,54 @@ private func readExtensionBody(body: ResponseBody): String {
         for (index in 0..count) { output.add(buffer[index]) }
     }
     String.fromUtf8(output.toArray())
+}
+
+private func waitForHttpAdmissionWaiter(
+    client: HttpClient,
+    expected: Int64,
+    timeout: Duration
+): Bool {
+    let expiresAt = MonoTime.now() + timeout
+    while (true) {
+        if (client.resourceSnapshot().admissionWaiters >= expected) { return true }
+        if (expiresAt - MonoTime.now() <= Duration.Zero) { return false }
+        sleep(Duration.millisecond)
+    }
+    false
+}
+
+private func waitForHttpConnectionReservation(
+    client: HttpClient,
+    expected: Int64,
+    timeout: Duration
+): Bool {
+    let expiresAt = MonoTime.now() + timeout
+    while (true) {
+        if (client.resourceSnapshot().reservedConnections >= expected) { return true }
+        if (expiresAt - MonoTime.now() <= Duration.Zero) { return false }
+        sleep(Duration.millisecond)
+    }
+    false
+}
+
+private class StallingHttpConnector <: HttpConnector {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var released = false
+
+    public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
+        let _ = endpoint
+        let _ = context
+        synchronized(mutex) {
+            while (!released) { changed.wait() }
+        }
+        throw Exception("stalled connector released without a transport")
+    }
+
+    func release(): Unit {
+        synchronized(mutex) {
+            released = true
+            changed.notifyAll()
+        }
+    }
 }
