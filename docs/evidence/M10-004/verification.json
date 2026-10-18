@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-004",
+  "status": "COMPLETE",
+  "platform": "linux-x86_64-glibc",
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "workspace_safety": {
+    "repository": "<repo>",
+    "branch": "gitbutler/workspace",
+    "task_branch": "m10-004-config-generation-rotation",
+    "head": "cd6a5f7cef1b057683913eb29dc0aa181c774ad0",
+    "target_branch": "main",
+    "merge_base": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+    "initial_status": {
+      "staged_paths": 0,
+      "unstaged_paths": 52,
+      "untracked_paths": 12
+    },
+    "preserved": [
+      "M10-001, M10-002 and M10-003 workspace changes",
+      "partial M10-005 work in its separate checkout",
+      "unrelated detached repair worktrees",
+      "frozen M7-021 package archive and historical evidence"
+    ],
+    "authorized_actions": "Local implementation and verification only; no commit, push, PR or GitHub issue mutation.",
+    "initial_dirty_paths": [
+      ".gitignore",
+      "docs/api/generated/api-surface.json",
+      "docs/api/generated/coverage.json",
+      "docs/api/generated/docs.json",
+      "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b.md",
+      "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e68747470.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1107274642-1457213055.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1459411304-1648339336.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--217762376-902530301.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--562758312-1467020050.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--887133373-317905094.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--96869997-1171829526.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48747470436c69656e742367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a487474705365727665722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--1951019228-728824373.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--543205424-511961423.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--628025280-1560256325.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a696e7465726661--2016838845-284931218.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4f7065726174696f6e436f6e746578742367302829.md",
+      "docs/evidence/M7-033/docs-report.json",
+      "docs/guides/http1-linux.md",
+      "docs/planning/implementation-backlog.md",
+      "docs/planning/status.md",
+      "src/http/client.cj",
+      "src/http/facade_test.cj",
+      "src/http/retry.cj",
+      "src/http/retry_test.cj",
+      "src/http/server.cj",
+      "src/http/websocket.cj",
+      "src/internal/connector/happy_eyeballs.cj",
+      "src/internal/http1/client_connection.cj",
+      "src/internal/http1/client_connection_test.cj",
+      "src/internal/http1/client_pipeline.cj",
+      "src/internal/http1/connection_pool.cj",
+      "src/internal/http1/connection_pool_test.cj",
+      "src/internal/http1/http2_connection_pool.cj",
+      "src/internal/http1/http2_connection_pool_test.cj",
+      "src/internal/http1/proxy_client_pipeline.cj",
+      "src/internal/http1/request_writer.cj",
+      "src/internal/http1/response_reader.cj",
+      "src/internal/http1/response_reader_test.cj",
+      "src/internal/http1/server_connection.cj",
+      "src/internal/http1/tls_client_pipeline.cj",
+      "src/internal/http2/client_connection.cj",
+      "src/internal/http2/client_connection_test.cj",
+      "src/internal/http2/client_push.cj",
+      "src/internal/http2/server_connection.cj",
+      "src/internal/tls_engine/engine_pump_test.cj",
+      "src/internal/transport/operation_context.cj",
+      "src/internal/transport/operation_context_test.cj",
+      "src/operation_context.cj",
+      "tools/docs/m7_033_docs.py",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1931680831-674701885.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--1153227448-118100904.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--837915989-2033017775.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a656e756d3a4f7065726174696f6e54696d656f757453746167652367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4f70657261--2035435707-1084868009.md",
+      "docs/evidence/M10-001/",
+      "src/http/client_rotation.cj",
+      "src/http/client_rotation_test.cj",
+      "src/http/configuration_rotation.cj",
+      "src/http/server_rotation_test.cj",
+      "src/internal/http1/pool_admission.cj",
+      "tools/tasks/M10-003.json"
+    ],
+    "temporary_storage": {
+      "filesystem": "disk-backed",
+      "directory_mode": "0700",
+      "observed_available_gib": 366,
+      "environment": [
+        "TMPDIR",
+        "TMP",
+        "TEMP"
+      ]
+    }
+  },
+  "reports": {
+    "scenarios": "docs/evidence/M10-004/scenario-matrix.json",
+    "strict_docs": "docs/evidence/M10-004/docs-report.json",
+    "installed": "docs/evidence/M10-004/installed/report.json",
+    "failed_installed_attempt": "docs/evidence/M10-004/failed-installed-attempt.json",
+    "failed_before_eof": "docs/evidence/M10-004/h2-eof-before.log",
+    "passing_after_eof": "docs/evidence/M10-004/h2-eof-after.log",
+    "repository_gate": "docs/evidence/M10-004/repository-check.log",
+    "installed_sdk113": "docs/evidence/M10-004/installed-sdk113/report.json",
+    "task_gate": "docs/evidence/M10-004/task-gate.json"
+  },
+  "commands": [
+    {
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.3.0-alpha.06",
+      "scope": "Current source, canonical M10-004 task gate"
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.3.0-alpha.06",
+      "scope": "Current source, canonical M10-004 task gate"
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.3.0-alpha.06",
+      "total": 898,
+      "passed": 875,
+      "skipped": 23,
+      "errors": 0,
+      "failed": 0,
+      "scope": "Before the completed-response EOF correction; final task gate reruns this entire command."
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "--target-dir",
+        "<scratch>/sdk113",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "src/net",
+        "src/internal/http1",
+        "src/internal/http2",
+        "src/http",
+        "src/internal/tls_engine"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.1.3",
+      "total": 656,
+      "passed": 650,
+      "skipped": 6,
+      "errors": 0,
+      "failed": 0,
+      "scope": "Before the completed-response EOF correction; corrected source validation follows."
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "--filter=Http2ClientConnectionTest.*",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "src/internal/http2"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.3.0-alpha.06",
+      "total": 190,
+      "passed": 19,
+      "skipped": 171,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "argv": [
+        "env",
+        "cjHeapSize=1GB",
+        "scripts/check-docs",
+        "--json",
+        "--output",
+        "docs/evidence/M10-004/docs-report.json"
+      ],
+      "exit_code": 0,
+      "cjdoc": "0.7.2",
+      "coverage": "1599/1599 symbols; 801/801 parameters"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/check_network_capabilities.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "rows": 86,
+      "native": "NOT_RUN"
+    },
+    {
+      "argv": [
+        "scripts/check"
+      ],
+      "exit_code": 1,
+      "python_tests": 497,
+      "failures": 23,
+      "errors": 8,
+      "reason": "Existing AWS-LC advisory disposition is stale. The first Python suite stops the script before check-code; no historical spec, freeze or clock changed."
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "--target-dir",
+        "<scratch>/sdk113",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "src/net",
+        "src/internal/http1",
+        "src/internal/http2",
+        "src/http",
+        "src/internal/tls_engine"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.1.3",
+      "total": 658,
+      "passed": 652,
+      "skipped": 6,
+      "errors": 0,
+      "failed": 0,
+      "scope": "Final production source including complete and incomplete END_STREAM EOF regressions."
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m10_004_native_rotation.py",
+        "--output",
+        "docs/evidence/M10-004/installed-sdk113"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.1.3",
+      "marker": "M10_004_INSTALLED_ROTATION_PASS"
+    },
+    {
+      "argv": [
+        "scripts/check-task",
+        "M10-004",
+        "--json",
+        "--output",
+        "docs/evidence/M10-004/task-gate.json"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "selected_commands": 5,
+      "source_current": true
+    },
+    {
+      "argv": [
+        "cjpm",
+        "test",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.3.0-alpha.06",
+      "total": 900,
+      "passed": 877,
+      "skipped": 23,
+      "errors": 0,
+      "failed": 0,
+      "scope": "Final production source; canonical task gate."
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m10_004_native_rotation.py"
+      ],
+      "exit_code": 0,
+      "toolchain": "1.3.0-alpha.06",
+      "marker": "M10_004_INSTALLED_ROTATION_PASS",
+      "scope": "Final production source; canonical task gate."
+    }
+  ],
+  "risks": [
+    "Only native Linux x86_64 glibc execution is claimed.",
+    "No committed-candidate evidence seal or release qualification; exact frozen compiler remains unavailable.",
+    "The first integrated run observed the existing H2 stream-close assertion fail once; 30 correctly selected diagnostic runs passed and the subsequent full 898-test run passed without suppressing or changing that assertion.",
+    "The first final installed run failed during graceful exchange completion. Eight fresh diagnostic installations passed; a deterministic complete-response EOF regression then failed before and passed after the lifecycle correction. The exact intermittent installed cause was not retained in that initial run; the EOF root cause is independently proved.",
+    "Caller-owned resolvers and transferred H1 sessions require application lifetime/security management.",
+    "Retained owners are bounded at 64; updates reject capacity rather than cancelling graceful application work merely to free a slot."
+  ],
+  "files_changed": [
+    "src/http/client.cj",
+    "src/http/client_rotation.cj",
+    "src/http/client_rotation_test.cj",
+    "src/http/configuration_rotation.cj",
+    "src/http/server.cj",
+    "src/http/server_rotation_test.cj",
+    "src/internal/http1/client_pipeline.cj",
+    "src/internal/http1/connection_pool.cj",
+    "src/internal/http1/connection_pool_test.cj",
+    "src/internal/http1/http2_connection_pool.cj",
+    "src/internal/http1/http2_connection_pool_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/server_connection.cj",
+    "src/internal/http1/tls_client_pipeline.cj",
+    "src/internal/http1/tls_server.cj",
+    "src/internal/http2/client_connection.cj",
+    "src/internal/http2/client_connection_test.cj",
+    "src/internal/http2/server_connection.cj",
+    "src/net/dns_client_test.cj",
+    "src/net/dns_resolver_test.cj",
+    "examples/linux/m10_004/configuration_rotation.cj",
+    "tools/m10_004_native_rotation.py",
+    "tools/docs/m7_033_docs.py",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "tools/tasks/M10-004.json",
+    "docs/api/generated/",
+    "docs/evidence/M10-004/"
+  ],
+  "acceptance_status": "PASS",
+  "repository_gate_status": "FAIL",
+  "installed_source_binding": {
+    "same_production_source_digests": true,
+    "core_eof_correction": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10c6de005921b5014553c84c3039c2702f70b3b58d6f348fc198df9674137998"
+    },
+    "consumer": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b2dc1bc076e65cb3068c065e42ca64cc580a5a64b7da6ea41015451f16448290"
+    },
+    "payload_sha256": "dd0536b3469f5d90f674ac169628552cff0acfef9ab8de547371a9b69a5088cb",
+    "source_maps_in": [
+      "docs/evidence/M10-004/installed/report.json",
+      "docs/evidence/M10-004/installed-sdk113/report.json"
+    ]
+  },
+  "documentation": {
+    "status": "PASS",
+    "coverage": {
+      "parameters": {
+        "documented": 801,
+        "percent": 100,
+        "total": 801
+      },
+      "symbols": {
+        "documented": 1599,
+        "percent": 100,
+        "total": 1599
+      }
+    },
+    "heap_environment": "cjHeapSize=1GB, scoped only to documentation subprocesses"
+  },
+  "retained_failure_evidence": {
+    "directory": "$HOME/.cache/agent-tmp/wirestack-m10-004-validation.yrxmqXi3",
+    "observed_size": "3.4 MiB",
+    "disposable_sdk_test_target_removed": true
+  },
+  "suggested_next_ready_tasks": [
+    "M10-005",
+    "M11-001"
+  ]
+}

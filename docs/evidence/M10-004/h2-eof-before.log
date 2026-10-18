@@ -1,0 +1,46 @@
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'expectResetQueueFull'
+   [36m==>[0m <repo>/src/internal/http2/stream_reset_test.cj:219:1:
+    [36m| [0m
+[36m219[0m [36m| [0m  private func expectResetQueueFull(action: () -> Unit): Unit {[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m220[0m [36m| [0m[33m|[0m     var matched = false[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m223[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 17141047 ns, RESULT:
+    TCS: Http2ClientConnectionTest, time elapsed: 3866295 ns, RESULT:
+    [ ERROR  ] CASE: completedResponseRetainsBufferedBodyAfterGracefulPeerEof (1453209 ns)
+    REASON: An exception has occurred:Http2ProtocolException: HTTP/2 peer closed the transport
+	at wirestack.internal.http2.Http2ProtocolException.init(wirestack.internal.http2.Http2ErrorCode, wirestack.internal.http2.Http2ErrorScope, std.core.String)(<repo>/src/internal/http2/frame_model.cj:220)
+	at wirestack.internal.http2.Http2ClientDispatcher.readerTerminated(wirestack.internal.http2.Http2ConnectionCompletion, std.core.Option<...>)(<repo>/src/internal/http2/client_connection.cj:1464)
+	at wirestack.internal.http2.Http2ConnectionReader.run(wirestack.OperationContext)(<repo>/src/internal/http2/reader_loop.cj:170)
+	at wirestack.internal.http2.Http2ClientConnection.connect.lambda.1()(<repo>/src/internal/http2/client_connection.cj:184)
+Summary: TOTAL: 189
+    PASSED: 0, SKIPPED: 188, ERROR: 1
+    FAILED: 0, listed below:
+            TCS: Http2ClientConnectionTest, CASE: completedResponseRetainsBufferedBodyAfterGracefulPeerEof
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 23353787 ns, RESULT:
+TP: wirestack.*, time elapsed: 23248333 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.http2, time elapsed: 17141047 ns, RESULT:
+        TCS: Http2ClientConnectionTest, time elapsed: 3866295 ns, RESULT:
+        [ ERROR  ] CASE: completedResponseRetainsBufferedBodyAfterGracefulPeerEof (1453209 ns)
+Summary: TOTAL: 189
+    PASSED: 0, SKIPPED: 188, ERROR: 1
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed
