@@ -46,6 +46,25 @@ private class PoolEventSink <: NetworkEventSink {
 @Test
 class Http1ConnectionPoolTest {
     @TestCase
+    func retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse(): Unit {
+        let pool = Http1ConnectionPool()
+        let factory = PoolTestFactory()
+        let active = pool.acquire(poolTestKey(), factory)
+        let idle = pool.acquire(poolTestKey(), factory)
+        pool.release(idle)
+        pool.retire()
+        @Expect(idle.connection.isClosed())
+        @Expect(!active.connection.isClosed())
+        @Expect(pool.snapshot().connections, 1)
+        @ExpectThrows[NetworkException](pool.acquire(poolTestKey(), factory))
+        pool.release(active)
+        @Expect(active.connection.isClosed())
+        @Expect(pool.snapshot().connections, 0)
+        pool.release(active)
+        pool.close()
+    }
+
+    @TestCase
     func emitsSecretFreeAcquireAndReleaseLifecycle(): Unit {
         let pool = Http1ConnectionPool()
         let factory = PoolTestFactory()
@@ -168,45 +187,6 @@ class Http1ConnectionPoolTest {
     }
 
     @TestCase
-    func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {
-        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2
-        ))
-        let pool = Http1ConnectionPool(
-            config: Http1ConnectionPoolConfig(
-                maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1
-            ),
-            resourceBudget: Some(budget)
-        )
-        let factory = PoolTestFactory()
-        let held = pool.acquire(poolTestKey(), factory)
-        let blocker = spawn {
-            try {
-                let _ = pool.acquire(poolTestKey(), factory)
-                false
-            } catch (error: NetworkException) {
-                match (error.code) {
-                    case NetworkErrorCode.Closed => true
-                    case _ => false
-                }
-            }
-        }
-        @Expect(waitForAggregateConnectionWaiter(budget, 1, Duration.second))
-        pool.close()
-        var rejected = false
-        try { rejected = blocker.get(Duration.second) } catch (_: Exception) {}
-        @Expect(rejected)
-        // close() released the held connection only after aggregate admission; no
-        // factory work may run for the already-closed pool.
-        @Expect(factory.calls.load(), 1)
-        @Expect(pool.snapshot().reservations, 0)
-        @Expect(pool.snapshot().closed)
-        @Expect(budget.snapshot().activeConnections, 0)
-        @Expect(budget.snapshot().reservedConnections, 0)
-        pool.release(held)
-    }
-
-    @TestCase
     func failedCreationRollsBackItsCapacityReservation(): Unit {
         let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
             maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1
@@ -285,8 +265,73 @@ class Http1ConnectionPoolTest {
         pool.release(third)
         pool.close()
     }
+    @TestCase
+    func retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResult(): Unit {
+        for (strict in [false, true]) {
+            let pool = Http1ConnectionPool()
+            let factory = RotationPoolFactory()
+            let pending = spawn {
+                try { Some(pool.acquire(poolTestKey(), factory)) }
+                catch (_: NetworkException) { None<Http1PoolLease> }
+            }
+            factory.waitUntilEntered()
+            if (strict) { pool.close() } else { pool.retire() }
+            factory.release()
+            let result = pending.get(Duration.second)
+            if (strict) { @Expect(result.isNone()) }
+            else {
+                let lease = result.getOrThrow()
+                @Expect(!lease.connection.isClosed())
+                pool.release(lease)
+                @Expect(lease.connection.isClosed())
+            }
+            @Expect(factory.connection.isClosed())
+            @Expect(pool.snapshot().connections, 0)
+            @Expect(pool.snapshot().reservations, 0)
+            pool.close(); factory.peer.close()
+        }
+    }
 
     @TestCase
+    func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {
+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2
+        ))
+        let pool = Http1ConnectionPool(
+            config: Http1ConnectionPoolConfig(
+                maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1
+            ),
+            resourceBudget: Some(budget)
+        )
+        let factory = PoolTestFactory()
+        let held = pool.acquire(poolTestKey(), factory)
+        let blocker = spawn {
+            try {
+                let _ = pool.acquire(poolTestKey(), factory)
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Closed => true
+                    case _ => false
+                }
+            }
+        }
+        @Expect(waitForAggregateConnectionWaiter(budget, 1, Duration.second))
+        pool.close()
+        var rejected = false
+        try { rejected = blocker.get(Duration.second) } catch (_: Exception) {}
+        @Expect(rejected)
+        // close() released the held connection only after aggregate admission; no
+        // factory work may run for the already-closed pool.
+        @Expect(factory.calls.load(), 1)
+        @Expect(pool.snapshot().reservations, 0)
+        @Expect(pool.snapshot().closed)
+        @Expect(budget.snapshot().activeConnections, 0)
+        @Expect(budget.snapshot().reservedConnections, 0)
+        pool.release(held)
+    }
+
+@TestCase
     func sequentialOriginChangeReclaimsIdleCrossKeyConnection(): Unit {
         let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
             maximumConnections: 1, maximumConnectionsPerKey: 1,
@@ -344,6 +389,44 @@ private func poolTestKey(host!: String = "example.com"): HttpConnectionPoolKey {
         "https", host, 443, None<String>, "default-network", "tls", "trust",
         "client", "provider", "http/1.1"
     )
+}
+
+private class RotationPoolFactory <: Http1ConnectionFactory {
+    let connection: Http1ClientConnection
+    let peer: MemoryTransport
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var entered = false
+    private var released = false
+    init() {
+        let (stream, peer) = MemoryTransport.pair()
+        connection = Http1ClientConnection(stream)
+        this.peer = peer
+    }
+    public func create(_: HttpConnectionPoolKey, _: OperationContext,
+        _: ?internal.HttpResourceLease): Http1ClientConnection {
+        synchronized(mutex) {
+            entered = true; changed.notifyAll()
+            let deadline = Deadline.after(Duration.second)
+            while (!released) {
+                let remaining = deadline.remaining()
+                if (remaining <= Duration.Zero) { throw Exception("H1 rotation factory gate timed out") }
+                changed.wait(timeout: remaining)
+            }
+        }
+        connection
+    }
+    func waitUntilEntered(): Unit {
+        synchronized(mutex) {
+            let deadline = Deadline.after(Duration.second)
+            while (!entered) {
+                let remaining = deadline.remaining()
+                if (remaining <= Duration.Zero) { throw Exception("H1 rotation factory did not enter") }
+                changed.wait(timeout: remaining)
+            }
+        }
+    }
+    func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
 }
 
 private func waitForAggregateConnectionWaiter(budget: internal.HttpResourceBudget,

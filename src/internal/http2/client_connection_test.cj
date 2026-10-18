@@ -156,6 +156,58 @@ class Http2ClientConnectionTest {
     }
 
     @TestCase
+    func completedResponseRetainsBufferedBodyAfterGracefulPeerEof(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let peer = TestHttp2Peer(serverTransport)
+        let serving = spawn {
+            let _ = peer.serveOutOfOrder(1)
+            serverTransport.shutdown(ShutdownDirection.Write)
+        }
+        let connection = Http2ClientConnection.connect(clientTransport)
+        let response = try { connection.execute(HttpRequest.get("https://example.test/completed")) }
+            catch (error: Exception) { connection.abort(); serverTransport.abort(); throw error }
+        try {
+            serving.get(3 * Duration.second)
+            let limit = Deadline.after(3 * Duration.second)
+            while (connection.acceptingNewStreams) {
+                if (limit.isExpired()) { throw Exception("HTTP/2 peer EOF did not reach the reader") }
+                sleep(Duration.millisecond)
+            }
+            @Expect(readClientBody(response.body), "/completed")
+            @Expect(response.body.isFullyConsumed())
+        } finally {
+            response.close(); connection.abort(); serverTransport.abort()
+        }
+        @Expect(connection.ownedStreamCount, 0)
+    }
+
+    @TestCase
+    func peerEofBeforeEndStreamStillFailsTheAdmittedResponse(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let peer = DelayedEndHttp2Peer(serverTransport)
+        let serving = spawn { try { peer.serve() } catch (_: Exception) { false } }
+        let connection = Http2ClientConnection.connect(clientTransport)
+        let response = try { connection.execute(HttpRequest.get("https://example.test/incomplete")) }
+            catch (error: Exception) {
+                peer.releaseEndStream(); connection.abort(); serverTransport.abort(); throw error
+            }
+        try {
+            serverTransport.shutdown(ShutdownDirection.Write)
+            let limit = Deadline.after(3 * Duration.second)
+            while (connection.acceptingNewStreams) {
+                if (limit.isExpired()) { throw Exception("HTTP/2 incomplete EOF did not reach the reader") }
+                sleep(Duration.millisecond)
+            }
+            @AssertThrows[Http2ProtocolException](readClientBody(response.body))
+            @Expect(!response.body.isFullyConsumed())
+        } finally {
+            response.close(); peer.releaseEndStream(); connection.abort(); serverTransport.abort()
+            let _ = serving.get(3 * Duration.second)
+        }
+        @Expect(connection.ownedStreamCount, 0)
+    }
+
+    @TestCase
     func earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof(): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(
             capacity: 64 * 1024, maxChunk: 17
