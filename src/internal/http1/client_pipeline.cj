@@ -67,6 +67,8 @@ public class Http1CleartextClient <: Resource {
     }
 
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
+    public func retire(): Unit { pool.retire() }
+    public func abortConnections(): Unit { pool.close() }
     public func close(): Unit { pool.close() }
     public func isClosed(): Bool { pool.isClosed() }
 }
@@ -114,10 +116,15 @@ internal func upgradeHttp1Lease(
 ): Http1UpgradeExchangeResult {
     let lease = pool.acquire(key, factory, context: context)
     try {
-        lease.connection.upgradeTracked(request, context: context, onTerminated: { reusable =>
+        let result = lease.connection.upgradeTracked(request, context: context, onTerminated: { reusable =>
             if (reusable) { pool.release(lease, context: context) }
             else { pool.discard(lease, context: context) }
         })
+        match (result) {
+            case Http1UpgradeExchangeResult.Upgraded(_) => pool.transfer(lease)
+            case _ => ()
+        }
+        result
     } catch (error: Exception) {
         pool.discard(lease, context: context)
         throw error

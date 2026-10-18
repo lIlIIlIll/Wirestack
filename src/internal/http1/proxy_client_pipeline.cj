@@ -97,6 +97,8 @@ public class Http1ForwardProxyClient <: Resource {
     }
 
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
+    public func retire(): Unit { pool.retire() }
+    public func abortConnections(): Unit { pool.close() }
     public func close(): Unit { pool.close() }
     public func isClosed(): Bool { pool.isClosed() }
 }
@@ -206,6 +208,8 @@ public class Http1HttpsProxyClient <: Resource {
     }
 
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
+    public func retire(): Unit { pool.retire() }
+    public func abortConnections(): Unit { pool.close() }
     public func close(): Unit { pool.close(); handshaker.close() }
     public func isClosed(): Bool { pool.isClosed() }
 }
