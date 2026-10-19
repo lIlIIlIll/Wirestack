@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-005",
+  "issue": 177,
+  "status": "COMPLETE",
+  "acceptance_status": "PASS",
+  "platform": "linux-x86_64-glibc",
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "task_source_manifest": "task-source-sha256.txt",
+  "task_source_manifest_sha256": "30b6c4d64b01fcc72ea827c18b2803ed1a4187bc6f4b906e5e6ca48765fadbef",
+  "retained_failure_evidence": {
+    "directory": "$HOME/.cache/agent-tmp/wirestack-m10-005-integration.NOPljl6D",
+    "observed_size": "35 MiB",
+    "disposable_test_builds_and_throwaway_rotation_probe_removed": true,
+    "durable_task_evidence_size": "4.4 MiB"
+  },
+  "workspace_safety": "workspace.json",
+  "dependencies": [
+    {
+      "task": "M9-001",
+      "status": "COMPLETE",
+      "evidence": "../M9-001/evidence.json"
+    },
+    {
+      "task": "M10-001",
+      "status": "COMPLETE",
+      "evidence": "../M10-001/README.md"
+    },
+    {
+      "task": "M10-002",
+      "status": "COMPLETE",
+      "evidence": "../M10-002/verification.json"
+    },
+    {
+      "task": "M10-003",
+      "status": "COMPLETE",
+      "evidence": "../M10-003/verification.json"
+    },
+    {
+      "task": "M10-004",
+      "status": "COMPLETE",
+      "evidence": "../M10-004/verification.json"
+    }
+  ],
+  "reports": {
+    "task_gate": "task-gate.json",
+    "strict_docs": "docs-report.json",
+    "acceptance": "scenario-matrix.json",
+    "installed": "installed/report.json",
+    "sdk113": "sdk113/report.json",
+    "installed_sdk113": "sdk113/installed.json",
+    "native_resolver": "native-resolver-fixture.json",
+    "performance": "performance.json",
+    "architecture_and_capability": "fast-acceptance.json",
+    "rotation_regression": "rotation-current-source.json"
+  },
+  "commands": [
+    {
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env scripts/check-task M10-005 --json --output docs/evidence/M10-005/task-gate.json",
+      "exit_code": 0,
+      "scope": "Final source canonical task acceptance",
+      "subcommands": [
+        {
+          "id": "cjpm-check",
+          "argv": [
+            "cjpm",
+            "check"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "stdout": "logs/canonical-cjpm-check.stdout.log",
+          "stderr": "logs/canonical-cjpm-check.stderr.log"
+        },
+        {
+          "id": "cjpm-build",
+          "argv": [
+            "cjpm",
+            "build"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "stdout": "logs/canonical-cjpm-build.stdout.log",
+          "stderr": "logs/canonical-cjpm-build.stderr.log"
+        },
+        {
+          "id": "native-observation-and-regression",
+          "argv": [
+            "cjpm",
+            "test",
+            "--exclude-tags=Performance",
+            "--parallel",
+            "1",
+            "--no-progress",
+            "--no-color"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "stdout": "logs/canonical-native-observation-and-regression.stdout.log",
+          "stderr": "logs/canonical-native-observation-and-regression.stderr.log"
+        },
+        {
+          "id": "installed-observation",
+          "argv": [
+            "python3",
+            "tools/m10_005_native_observation.py",
+            "--output",
+            "docs/evidence/M10-005/installed/report.json"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "stdout": "logs/canonical-installed-observation.stdout.log",
+          "stderr": "logs/canonical-installed-observation.stderr.log"
+        },
+        {
+          "id": "documentation-check",
+          "argv": [
+            "env",
+            "cjHeapSize=1GB",
+            "scripts/check-docs",
+            "--json",
+            "--output",
+            "docs/evidence/M10-005/docs-report.json"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "stdout": "logs/canonical-documentation-check.stdout.log",
+          "stderr": "logs/canonical-documentation-check.stderr.log"
+        }
+      ]
+    },
+    {
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_code": 0,
+      "rows": 86,
+      "native": "NOT_RUN"
+    },
+    {
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> WIRESTACK_GAI_DELAY_MS=500 LD_PRELOAD=<scratch>/gai-delay.so $HOME/.codex/scripts/codex_cangjie_env cjpm test --target-dir <scratch>/alpha-native-all --filter \"SystemResolverResourceObservationTest.*,DnsResourceObservationTest.*\" --no-progress --no-color",
+      "exit_code": 0,
+      "total": 945,
+      "passed": 5,
+      "skipped": 940,
+      "errors": 0,
+      "failed": 0,
+      "log": "logs/alpha-final-native-fixture.log"
+    },
+    {
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> $HOME/.codex/scripts/codex_cangjie_env python3 tools/m10_004_native_rotation.py --output target/m10-005-rotation-probe/report.json",
+      "exit_code": 0,
+      "receipt": "rotation-current-source.json"
+    }
+  ],
+  "native_correctness": {
+    "total": 945,
+    "passed": 919,
+    "skipped": 26,
+    "errors": 0,
+    "failed": 0,
+    "performance_tag_skipped": 23,
+    "absent_native_fixture_skipped": 3,
+    "fixture_acceptance": "Native fixture cases execute independently on both SDKs; skipped cases are not counted as passed."
+  },
+  "documentation": {
+    "status": "PASS",
+    "packages": 5,
+    "symbols": {
+      "documented": 1717,
+      "total": 1717,
+      "percent": 100
+    },
+    "parameters": {
+      "documented": 861,
+      "total": 861,
+      "percent": 100
+    },
+    "heap_environment": "cjHeapSize=1GB scoped only to documentation generation"
+  },
+  "installed_source_binding": {
+    "same_current_production_digests": true,
+    "comparisons": [
+      {
+        "sdk": "1.3.0-alpha.06",
+        "receipt": "installed/report.json",
+        "source_count": 153,
+        "mismatches": []
+      },
+      {
+        "sdk": "1.1.3",
+        "receipt": "sdk113/installed.json",
+        "source_count": 153,
+        "mismatches": []
+      }
+    ],
+    "cangjie_source_manifest": "sdk113/final-current-source-sha256.txt",
+    "manifest_sha256": "0623b044db4fdf6d0da417c82a35589c0a9f0302573ee7576478657b4784d2d7",
+    "cangjie_source_files": 289,
+    "note": "Both fresh installed consumers match all153 current production source digests. The final source inventory includes test changes. Planning/status documentation was updated only after successful final runtime acceptance."
+  },
+  "repository_gate": {
+    "status": "NOT_RUN",
+    "reason": "M10-005 did not rerun the known unrelated repository-wide gate solely to reconfirm failure.",
+    "prior_observed_failure": "../M10-004/repository-check.log",
+    "scope": "The current task gate, architecture guard, capability contract and documentation gate pass; no current full-repository PASS is claimed."
+  },
+  "diagnostic_history": [
+    {
+      "command": "cjpm test --target-dir <scratch>/alpha-native-all -j4 --timeout-each=60s --no-progress --no-color",
+      "exit_code": 1,
+      "log": "logs/alpha-native-all.log",
+      "observed": "Five Performance harness errors without their required profiles, plus a 60-second server-rotation assertion harness failure. Not accepted as a passing all-inclusive run."
+    },
+    {
+      "correction": "Evaluate server.rotateTls once before assertion diagnostics. Plain native80 rotations reach generation81; corrected case passes, and SDK1.1.3 all8 server-rotation cases pass.",
+      "evidence": [
+        "logs/rotation-probe-run.log",
+        "logs/rotation-assertion-after.log",
+        "sdk113/stable113-delta-rotation.log"
+      ]
+    },
+    {
+      "observation": "Pool-hook-only redirect case passed before any production change because withHttpPoolHook already installs HttpPoolHookSink. Retained as behavior coverage; no production bug or failing-before claim.",
+      "evidence": [
+        "logs/hook-only-before.log",
+        "logs/stable113-facade-final.log"
+      ]
+    },
+    {
+      "correction": "Removed an unnecessary payload-copy test and unused exporter fixture. Current nine behavior cases pass on both SDKs.",
+      "evidence": [
+        "logs/adapter-behavior-final-alpha.log",
+        "logs/adapter-behavior-final-stable113.log"
+      ]
+    },
+    {
+      "observation": "First docs output outside the repository failed PATH_ESCAPE after100% generation; final canonical in-repository docs command exits0.",
+      "evidence": "docs-report.json"
+    },
+    {
+      "observation": "First task manifest lacked required installed --output; initial external tool deadline interrupted docs before a final gate report. Final corrected canonical gate passes.",
+      "evidence": "$HOME/.cache/agent-tmp/wirestack-m10-005-integration.NOPljl6D/canonical-first-failure"
+    },
+    {
+      "observation": "SDK1.1.3 progress collector threw after otherwise passing89 historical assertions; --no-progress corrected invocation exits0. Initial failed invocation is not claimed passed.",
+      "evidence": [
+        "sdk113/stable113-c1.log",
+        "sdk113/stable113-c1-no-progress.log"
+      ]
+    }
+  ],
+  "risks": [
+    "Native Linux x86_64 glibc only; no other platform or frozen release compiler qualification.",
+    "Uncommitted candidate; no source commit seal, signed release, publication or GitHub mutation.",
+    "Cross-owner snapshots are individually timed samples, not one global atomic transaction. Resolver owners without the optional capability are unknown; closed samples are historical.",
+    "A noncooperative exporter or cancellation callback may outlive a bounded close. The adapter returns false and reports active ownership rather than pretending the worker was reclaimed.",
+    "Raw overhead samples are short single-host measurements without an SLA or optimization claim; FD/task rollback is observed, not a universal leak proof."
+  ],
+  "files_changed": [
+    "src/operation_context.cj",
+    "src/network_event.cj",
+    "src/network_event_buffer.cj",
+    "src/network_pool_snapshot.cj",
+    "src/resolver_snapshot.cj",
+    "src/http/client.cj",
+    "src/http/server.cj",
+    "src/http/cancellation.cj",
+    "src/http/hooks.cj",
+    "src/http/observability.cj",
+    "src/http/observability_test.cj",
+    "src/http/client_extensions_test.cj",
+    "src/http/resolver.cj",
+    "src/http/resource_budget.cj",
+    "src/http/server_rotation_test.cj",
+    "src/internal/http_resource_budget.cj",
+    "src/internal/http_resource_budget_types.cj",
+    "src/internal/http_resource_observation_test.cj",
+    "src/internal/resolver/bounded_backend.cj",
+    "src/internal/resolver/system_resolver.cj",
+    "src/internal/resolver/resolver_observation_test.cj",
+    "src/internal/transport/network_observation_test.cj",
+    "src/net/dns_client.cj",
+    "src/net/dns_resolver.cj",
+    "src/net/dns_observation_test.cj",
+    "src/observability/bounded_network_event_sink.cj",
+    "src/observability/bounded_network_event_sink_test.cj",
+    "src/internal/http1/connection_pool.cj",
+    "src/internal/http1/http2_connection_pool.cj",
+    "src/internal/http1/client_pipeline.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/tls_client_pipeline.cj",
+    "src/internal/http1/client_connection.cj",
+    "src/internal/http1/request_writer.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/server_connection.cj",
+    "src/internal/http1/tls_server.cj",
+    "src/internal/http1/connection_pool_test.cj",
+    "src/internal/http1/http2_connection_pool_test.cj",
+    "src/internal/http1/client_pipeline_test.cj",
+    "src/internal/http1/client_connection_test.cj",
+    "src/internal/http1/response_reader_test.cj",
+    "src/internal/http1/automatic_tls_client_pipeline_test.cj",
+    "src/internal/http1/proxy_client_pipeline_test.cj",
+    "src/internal/http1/server_connection_test.cj",
+    "src/internal/http1/tls_server_test.cj",
+    "src/internal/connector/happy_eyeballs.cj",
+    "src/internal/connector/happy_eyeballs_test.cj",
+    "src/internal/http2/client_connection.cj",
+    "src/internal/http2/server_connection.cj",
+    "src/internal/http2/flow_control.cj",
+    "src/internal/http2/stream_reset.cj",
+    "src/internal/http2/observability.cj",
+    "src/internal/http2/observability_test.cj",
+    "src/internal/http2/client_connection_test.cj",
+    "src/internal/http2/server_cancellation.cj",
+    "src/internal/http2/server_cancellation_test.cj",
+    "src/internal/http2/server_mapping.cj",
+    "examples/linux/m10_005/observability.cj",
+    "tools/m10_005_native_observation.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/architecture_guard.py",
+    "docs/references/linux-network-capabilities.json",
+    "docs/api/README.md",
+    "docs/guides/network-foundation-linux.md",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "tools/tasks/M10-005.json",
+    "docs/api/generated/",
+    "docs/evidence/M10-005/"
+  ],
+  "suggested_next_ready_tasks": [
+    "M11-001",
+    "M11-002",
+    "M11-003"
+  ]
+}

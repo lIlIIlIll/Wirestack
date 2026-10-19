@@ -120,6 +120,13 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     public func serve(context!: OperationContext = OperationContext.background()): Unit {
         operationContext = context
         if (synchronized(mutex) { closed }) { return }
+        let cancellationRegistration = if (resourceBudget.isSome()) {
+            Some(context.cancellation.register { =>
+                let active = synchronized(mutex) { exchanges.toArray() }
+                for (exchange in active) { exchange.request.cancelStream() }
+                abort()
+            })
+        } else { None<CancellationRegistration> }
         try {
             let settings = machine.start(settings: initialHttp2Settings(
                 Http2ConnectionRole.Server, http2Limits
@@ -130,6 +137,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             let _ = reader.getOrThrow().run(context: context)
         } finally {
             abort()
+            if (let Some(value) <- cancellationRegistration) { value.unregister() }
         }
     }
 
@@ -174,9 +182,12 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                     }
                 case Http2FrameType.WindowUpdate => flow.receiveWindowUpdate(frame)
                 case Http2FrameType.RstStream =>
+                    let notifications = ArrayList<() -> Unit>()
                     synchronized(pushAdmissionMutex) {
-                        let _ = reset.getOrThrow().acceptPeer(frame)
+                        let _ = reset.getOrThrow().acceptPeer(frame,
+                            dispatch: { callback => notifications.add(callback) })
                     }
+                    for (callback in notifications) { callback() }
                 case Http2FrameType.Data =>
                     if (frame.wasReceiveBufferRejected) { refuseReceiveData(frame) }
                     else { requireExchange(frame.header.streamId).acceptData(frame) }
@@ -299,6 +310,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                     requestLease = budget.tryAcquireRequest(owner)
                     if (requestLease.isSome()) { streamLease = budget.tryAcquireStream(owner) }
                     if (requestLease.isNone() || streamLease.isNone()) {
+                        budget.recordAdmissionRejection()
                         if (let Some(lease) <- requestLease) { lease.close() }
                         if (let Some(lease) <- streamLease) { lease.close() }
                         if (let Some(owners) <- streamBufferOwners) {
@@ -315,12 +327,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                     }
                 }
                 if (let Some(lease) <- streamLease) { lease.activate() }
+                let streamContext = http2ServerStreamEventContext(operationContext, block.streamId)
+                let cancellationMeasurement = match (resourceBudget) {
+                    case Some(budget) => Some(Http2ServerCancellationMeasurement(budget))
+                    case None => None<Http2ServerCancellationMeasurement>
+                }
                 let terminalRequestLease = requestLease
                 let terminalStreamLease = streamLease
                 let exchange = try {
                     Http2ServerExchange.open(
                         block.streamId, decoded, block.endStream,
-                        registry.getOrThrow(), flow, this, limits: limits, http2Limits: http2Limits,
+                        registry.getOrThrow(), flow, this, context: streamContext, limits: limits, http2Limits: http2Limits,
                         streamAlreadyOpened: true,
                         pushSenderFactory: { head =>
                             if (let Some(scheme) <- head.scheme) {
@@ -335,6 +352,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                             } else { None<Http2ServerPushSender> }
                         },
                         localCancellation: { =>
+                            if (let Some(measurement) <- cancellationMeasurement) { measurement.requested() }
                             try {
                                 let _ = cancelLocalStream(
                                     block.streamId, Http2ErrorCode.Cancel,
@@ -342,14 +360,20 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                                 )
                             } catch (_: Exception) {}
                         },
-                        bufferOwner: exchangeBufferOwner,
-                        onOwnerTerminated: { =>
+                        onOwnerTerminated: { terminal =>
                             if (let Some(lease) <- terminalRequestLease) { lease.close() }
                             if (let Some(lease) <- terminalStreamLease) { lease.close() }
                             if (let Some(owners) <- streamBufferOwners) {
                                 owners.unbind(Int64(block.streamId.value))
                             }
                             removeExchange(block.streamId)
+                            if (let Some(measurement) <- cancellationMeasurement) { measurement.complete() }
+                            let outcome = if (terminal.isSome()) { NetworkEventOutcome.Failed }
+                                else { NetworkEventOutcome.Released }
+                            http2Observe(streamContext, NetworkEventKind.Http2StreamClosed, outcome, error: terminal)
+                        },
+                        onCancellationRequested: { =>
+                            if (let Some(measurement) <- cancellationMeasurement) { measurement.requested() }
                         }
                     )
                 } catch (error: Exception) {
@@ -364,11 +388,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                 synchronized(mutex) { exchanges.add(exchange) }
                 let registration = reset.getOrThrow().register(block.streamId, exchange)
                 exchange.bindReset(registration)
-                let response = exchange.start(handler, context: operationContext)
+                if (let Some(measurement) <- cancellationMeasurement) {
+                    measurement.bind(operationContext.cancellation, { => exchange.request.cancelStream() })
+                }
+                http2Observe(streamContext, NetworkEventKind.Http2StreamOpened, NetworkEventOutcome.Started)
+                let response = exchange.start(handler, context: streamContext)
                 let _ = spawn {
                     var transferred = false
-                    try { transferred = sendResponse(exchange, response.get()) }
+                    var failure = None<Exception>
+                    try { transferred = sendResponse(exchange, response.get(), streamContext) }
                     catch (error: Exception) {
+                        failure = Some(error)
                         try {
                             let _ = cancelLocalStream(
                                 block.streamId, Http2ErrorCode.InternalError,
@@ -376,7 +406,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                             )
                         } catch (_: Exception) {}
                     } finally {
-                        if (!transferred) { exchange.completeOwner() }
+                        if (!transferred) { exchange.completeOwner(error: failure) }
                     }
                 }
         }
@@ -384,41 +414,50 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
 
     private func sendResponse(
         exchange: Http2ServerExchange,
-        plan: Http2ServerResponsePlan
+        plan: Http2ServerResponsePlan,
+        context: OperationContext
     ): Bool {
+        // Server responses keep the caller's absolute operation budget; the stage is
+        // attributed to events only, never applied as a second timeout owner.
+        let observation = http2StageObservationContext(context, OperationTimeoutStage.RequestWrite)
+        var failure = None<Exception>
+        if (plan.duplexHandler.isNone()) {
+            http2Observe(observation, NetworkEventKind.BodyStarted, NetworkEventOutcome.Started)
+        }
+        http2Observe(observation, NetworkEventKind.StageStarted, NetworkEventOutcome.Started)
         var duplexStarted = false
         try {
             waitWrites(enqueueActiveServerHeaders(
                 plan.streamId, plan.initialHeaders, plan.endStreamOnHeaders
-            ))
+            ), context: context)
             if (plan.endStreamOnHeaders) { exchange.finishLocal(); return false }
             if (let Some(duplexHandler) <- plan.duplexHandler) {
                 let streamTransport = exchange.activateDuplex(writer, reset.getOrThrow())
                 duplexStarted = true
-                try { duplexHandler.serve(streamTransport, operationContext) }
+                try { duplexHandler.serve(streamTransport, context) }
                 finally { streamTransport.close() }
                 return true
             }
             let body = plan.openBody()
             try {
                 while (true) {
-                    let event = body.next()
+                    let event = body.next(context: context)
                     match (event.kind) {
                         case Http2ServerBodyEventKind.Data =>
-                            waitWrite(event.enqueueData(writer))
+                            waitWrite(event.enqueueData(writer), context: context)
                         case Http2ServerBodyEventKind.EndData =>
                             waitWrite(enqueueActiveServerControl(Http2Frame(
                                 Http2FrameHeader(
                                     0u32, Http2FrameType.Data, Http2Flags(raw: 0x01u8),
                                     plan.streamId, limits: http2Limits
                                 ), []
-                            )))
+                            )), context: context)
                             exchange.finishLocal()
                             return false
                         case Http2ServerBodyEventKind.Trailers =>
                             waitWrites(enqueueActiveServerHeaders(
                                 plan.streamId, event.trailerFields, true
-                            ))
+                            ), context: context)
                             exchange.finishLocal()
                             return false
                     }
@@ -431,7 +470,14 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                     try { duplexHandler.failed() } catch (_: Exception) {}
                 }
             }
+            failure = Some(error)
             throw error
+        } finally {
+            let outcome = if (failure.isSome()) { NetworkEventOutcome.Failed } else { NetworkEventOutcome.Succeeded }
+            http2Observe(observation, NetworkEventKind.StageCompleted, outcome, error: failure)
+            if (plan.duplexHandler.isNone()) {
+                http2Observe(observation, NetworkEventKind.BodyCompleted, outcome, error: failure)
+            }
         }
     }
 
@@ -679,9 +725,13 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
         code: Http2ErrorCode,
         reason: String
     ): ?Http2WriteTicket {
-        synchronized(pushAdmissionMutex) {
-            reset.getOrThrow().cancelLocal(streamId, code: code, reason: reason)
+        let notifications = ArrayList<() -> Unit>()
+        let result = synchronized(pushAdmissionMutex) {
+            reset.getOrThrow().cancelLocal(streamId, code: code, reason: reason,
+                dispatch: { callback => notifications.add(callback) })
         }
+        for (callback in notifications) { callback() }
+        result
     }
 
     internal func finishPushWorker(streamId: Http2StreamId): Unit {

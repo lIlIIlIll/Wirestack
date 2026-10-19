@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.unittest.*
+import wirestack as api
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
@@ -10,8 +11,11 @@ class Http1ServerConnectionTest {
     @TestCase
     func serializesTwoKeepAliveExchanges(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 4096, maxChunk: 3)
+        let sink = api.NetworkEventBuffer(capacity: 256)
         let running: Future<Http1ServerConnectionResult> = spawn {
-            serveHttp1Connection(server, EchoServerHandler(), maximumRequests: 2)
+            serveHttp1Connection(server, EchoServerHandler(), maximumRequests: 2,
+                context: OperationContext(eventSink: Some(sink), connectionId: Some(909),
+                    timeoutPolicy: OperationTimeoutPolicy(responseHeaders: Some(Duration.nanosecond), requestWrite: Some(Duration.nanosecond))))
         }
 
         let first = HttpRequest(HttpMethod("POST"), HttpUrl.parse("http://example.com/one"),
@@ -30,6 +34,29 @@ class Http1ServerConnectionTest {
         let result = running.get(Duration.second)
         @Expect(result.requestsServed, 2)
         @Expect(!result.closedForUnreadRequestBody)
+        var requestId = None<Int64>
+        var starts: Int64 = 0
+        var completions: Int64 = 0
+        var headers: Int64 = 0
+        for (event in sink.drain()) {
+            @Expect(event.connectionId, Some(909))
+            @Expect(event.requestId.isSome())
+            match (event.kind) {
+                case NetworkEventKind.BodyStarted =>
+                    starts++
+                    if (requestId.isSome()) { @Expect(event.requestId != requestId) }
+                    requestId = event.requestId
+                case NetworkEventKind.BodyCompleted => completions++; @Expect(event.requestId, requestId)
+                case NetworkEventKind.StageStarted =>
+                    match (event.phase) {
+                        case Some(NetworkPhase.HttpHeaders) => headers++; @Expect(event.stage.isNone())
+                        case Some(NetworkPhase.TcpWrite) => @Expect(event.stage.isNone())
+                        case _ => ()
+                    }
+                case _ => ()
+            }
+        }
+        @Expect(starts, 2); @Expect(completions, 2); @Expect(headers, 2)
         client.close()
     }
 

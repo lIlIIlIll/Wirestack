@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "task": "M10-005",
+  "root": "<repo>",
+  "temporary_directory": "<scratch>",
+  "scope": "Final current-source architecture and capability-contract checks only. No native or release qualification inferred.",
+  "status": "PASS",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "exit_code": 0,
+      "duration_ms": 12416.701368998736,
+      "stdout": "architecture guard: PASS\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/check_network_capabilities.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "duration_ms": 4010.4761460013688,
+      "observed_report": {
+        "schema_version": 1,
+        "source_task": "M9-003",
+        "status": "PASS",
+        "native": "NOT_RUN",
+        "rows": 86
+      }
+    }
+  ]
+}

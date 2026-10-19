@@ -123,7 +123,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     private var resetRegistration: ?Http2StreamResetRegistration = None<Http2StreamResetRegistration>
     private var duplexTransport: ?Http2StreamTransport = None<Http2StreamTransport>
     private var ownerComplete = false
-    private let onOwnerTerminated: () -> Unit
+    private var terminalCause: ?Exception = None<Exception>
+    private let onOwnerTerminated: (?Exception) -> Unit
+    private let onCancellationRequested: () -> Unit
 
     private init(
         streamId: Http2StreamId,
@@ -135,7 +137,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         limits: HttpLimits,
         http2Limits: Http2Limits,
         peerEnded: Bool,
-        onOwnerTerminated: () -> Unit
+        onOwnerTerminated: (?Exception) -> Unit,
+        onCancellationRequested: () -> Unit
     ) {
         this.streamId = streamId
         this.request = request
@@ -147,6 +150,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         this.http2Limits = http2Limits
         this.peerEnded = peerEnded
         this.onOwnerTerminated = onOwnerTerminated
+        this.onCancellationRequested = onCancellationRequested
     }
 
     public static func open(
@@ -165,7 +169,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         },
         localCancellation!: () -> Unit = { => },
         bufferOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
-        onOwnerTerminated!: () -> Unit = { => }
+        onOwnerTerminated!: (?Exception) -> Unit = { _ => },
+        onCancellationRequested!: () -> Unit = { => }
     ): Http2ServerExchange {
         if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
         var flowOpened = false
@@ -186,7 +191,7 @@ public class Http2ServerExchange <: Http2StreamResetListener {
                     streamId, head, body, pushSender: pushSender,
                     localCancellation: localCancellation
                 ), registry, flow, sink,
-                channel, limits, http2Limits, endStream, onOwnerTerminated
+                channel, limits, http2Limits, endStream, onOwnerTerminated, onCancellationRequested
             )
         } catch (error: Exception) {
             if (flowOpened) { let updates = flow.closeStream(streamId); if (!updates.isEmpty()) { sink.submit(updates) } }
@@ -256,10 +261,15 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     }
 
     /** Releases registry, reset, flow and connection ownership exactly once. */
-    internal func completeOwner(): Unit {
-        let (won, duplexOwned) = synchronized(mutex) {
-            if (ownerComplete) { (false, false) }
-            else { ownerComplete = true; (true, duplexTransport.isSome()) }
+    internal func completeOwner(error!: ?Exception = None<Exception>): Unit {
+        let (won, duplexOwned, cause) = synchronized(mutex) {
+            if (ownerComplete) {
+                (false, false, None<Exception>)
+            } else {
+                ownerComplete = true
+                if (let Some(value) <- error) { terminalCause = Some(value) }
+                (true, duplexTransport.isSome(), terminalCause)
+            }
         }
         if (!won) { return }
         try { bodyChannel.close() } catch (_: Exception) {}
@@ -276,7 +286,14 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         try {
             if (!updates.isEmpty()) { sink.submit(updates) }
         } finally {
-            onOwnerTerminated()
+            onOwnerTerminated(cause)
+        }
+    }
+
+    /** Retains the first terminal disposition before a duplex transport closes. */
+    private func retainTerminalCause(error: Exception): Unit {
+        synchronized(mutex) {
+            if (terminalCause.isNone()) { terminalCause = Some(error) }
         }
     }
 
@@ -319,6 +336,10 @@ public class Http2ServerExchange <: Http2StreamResetListener {
     /** Wakes a blocked handler body read after reset cleanup has claimed this stream. */
     public func streamReset(event: Http2StreamResetEvent): Unit {
         if (event.streamId.value != streamId.value) { return }
+        if (http2ErrorCodeToWire(event.code) == http2ErrorCodeToWire(Http2ErrorCode.Cancel)) {
+            onCancellationRequested()
+        }
+        retainTerminalCause(serverStreamResetDisposition(streamId, event))
         bodyChannel.reset(event)
         if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
             transport.peerTerminated(resetStream: true)
@@ -331,6 +352,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         let event = Http2StreamResetEvent(
             streamId, completion.code, completion.reason, true
         )
+        retainTerminalCause(Http2ProtocolException(
+            completion.code, Http2ErrorScope.Connection, completion.reason
+        ))
         bodyChannel.reset(event)
         if (let Some(transport) <- synchronized(mutex) { duplexTransport }) {
             transport.peerTerminated(resetStream: true)
@@ -1336,4 +1360,15 @@ private func serverLocalContentLengthError(): Nothing {
 
 private func serverStreamError(streamId: Http2StreamId, message: String): Nothing {
     throw Http2ProtocolException(Http2ErrorCode.ProtocolError, Http2ErrorScope.Stream(streamId), message)
+}
+
+/** Maps one reset event to the typed terminal cause observers receive. */
+private func serverStreamResetDisposition(streamId: Http2StreamId,
+    event: Http2StreamResetEvent): Exception {
+    if (http2ErrorCodeToWire(event.code) == http2ErrorCodeToWire(Http2ErrorCode.Cancel)) {
+        return NetworkException(NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody,
+            NetworkErrorCode.Cancelled, "HTTP/2 server stream cancelled",
+            retryability: Retryability.Never)
+    }
+    return Http2ProtocolException(event.code, Http2ErrorScope.Stream(streamId), event.reason)
 }

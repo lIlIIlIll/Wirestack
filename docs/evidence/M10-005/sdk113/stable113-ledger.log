@@ -1,0 +1,28 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal, time elapsed: 133639723 ns, RESULT:
+    TCS: HttpResourceBudgetTest, time elapsed: 122204780 ns, RESULT:
+    [ PASSED ] CASE: routeOriginAndInstanceCapsCoverConnectionsRequestsAndStreams (300566 ns)
+    [ PASSED ] CASE: receivedDataHonorsRouteOriginAndAggregateOwnerBudgets (54533 ns)
+    [ PASSED ] CASE: ownerRowsStayWithinConfiguredBoundAndRecycleAfterRelease (27674 ns)
+    [ PASSED ] CASE: eligibleOtherOwnerPreventsOneBusyOwnerFromStarvingWaiters (366612 ns)
+    [ PASSED ] CASE: cancelledAdmissionRemovesItsWaiterAndWaiterCapIsHard (594446 ns)
+    [ PASSED ] CASE: deadlineAdmissionRemovesWaiterWithoutGrantingResource (57763496 ns)
+    [ PASSED ] CASE: grantRacingCancellationCompletesAndReleasesExactlyOnce (60518007 ns)
+    [ PASSED ] CASE: concurrentRequestStormNeverExceedsAggregateOrOwnerCaps (592793 ns)
+    [ PASSED ] CASE: retainedLeaseClosesExactlyOnceAcrossConcurrentOwners (58181 ns)
+    TCS: HttpResourceObservationTest, time elapsed: 11319178 ns, RESULT:
+    [ PASSED ] CASE: actualWaiterRejectionsRecoverWithoutCountingProbesOrCancellationRequests (10779347 ns)
+    [ PASSED ] CASE: ownerLimitRejectsExactlyOnceAndReclaimsOwnerOnLastLeaseRelease (79085 ns)
+Summary: TOTAL: 11
+    PASSED: 11, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 141879949 ns, RESULT:
+TP: wirestack.*, time elapsed: 141755193 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal, time elapsed: 133639723 ns
+Summary: TOTAL: 11
+    PASSED: 11, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

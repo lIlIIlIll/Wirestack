@@ -2328,13 +2328,15 @@
         "wirestack.net.DnsClient.query",
         "wirestack.net.DnsClient.lookup",
         "wirestack.net.DnsClient.close",
-        "wirestack.net.DnsClient.isClosed"
+        "wirestack.net.DnsClient.isClosed",
+        "wirestack.net.DnsClient.resolverResourceSnapshot"
       ],
       "capability_field": null,
       "supported": true,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。"
+        "本次证据使用显式配置的本地 nameserver；有界 UDP 查询与响应解析，不声称所有部署环境的 system DNS 配置通过。",
+        "只读资源统计的独立验收见 docs/evidence/M10-005/README.md；M9-003 历史原生收据不证明新增统计接口，闭合 owner 的最后样本不是当前零值。"
       ],
       "failure": null,
       "backend_symbols": [
@@ -2354,13 +2356,15 @@
         "wirestack.net.Resolver.resolve",
         "wirestack.net.Resolver.connect",
         "wirestack.net.Resolver.close",
-        "wirestack.net.Resolver.isClosed"
+        "wirestack.net.Resolver.isClosed",
+        "wirestack.net.Resolver.resolverResourceSnapshot"
       ],
       "capability_field": null,
       "supported": true,
       "conditions": [
         "仅限 Linux x86_64 glibc 和已固定 SDK；公开 factory 创建的对象，操作结果仍是权威。",
-        "hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。"
+        "hosts 为配置快照；共用 caller OperationContext；连接测试使用受控 nameserver 和 TCP peer，不推断未执行的系统配置矩阵。",
+        "资源统计委托同一 DnsClient owner，跨模块采样不原子；新增统计接口由 M10-005 独立执行验收，不使用 M9-003 历史收据充当新证据。"
       ],
       "failure": null,
       "backend_symbols": [

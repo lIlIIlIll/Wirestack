@@ -1,5 +1,7 @@
 package wirestack.internal.http1
 
+import wirestack.NetworkConnectionPoolSnapshot
+
 import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.connector.*
@@ -41,7 +43,7 @@ public class Http1CleartextClient <: Resource {
         try {
             let result = lease.connection.executeTracked(
                 request,
-                context: context,
+                context: connectionEventContext(context, lease.connectionId),
                 trailer: trailer,
                 onTerminated: { reusable =>
                     if (reusable) {
@@ -66,6 +68,7 @@ public class Http1CleartextClient <: Resource {
         upgradeHttp1Lease(pool, factory, cleartextPoolKey(request.url), request, context)
     }
 
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot { pool.observationSnapshot() }
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func retire(): Unit { pool.retire() }
     public func abortConnections(): Unit { pool.close() }
@@ -116,7 +119,7 @@ internal func upgradeHttp1Lease(
 ): Http1UpgradeExchangeResult {
     let lease = pool.acquire(key, factory, context: context)
     try {
-        let result = lease.connection.upgradeTracked(request, context: context, onTerminated: { reusable =>
+        let result = lease.connection.upgradeTracked(request, context: connectionEventContext(context, lease.connectionId), onTerminated: { reusable =>
             if (reusable) { pool.release(lease, context: context) }
             else { pool.discard(lease, context: context) }
         })

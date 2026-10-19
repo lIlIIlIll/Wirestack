@@ -1,0 +1,10 @@
+An exception has occurred:
+Http2ProtocolException: HTTP/2 stream reset by peer
+	 at wirestack.internal.http2::Http2ServerBodyChannel::readSome(wirestack::MutableByteSpan, wirestack::OperationContext)(<scratch>/installation/wirestack-0.1.0/src/internal/http2/server_mapping.cj:520)
+	 at wirestack.internal.http2::Http2ServerBodyChannel::read(std.core::Array<...>)(<scratch>/installation/wirestack-0.1.0/src/internal/http2/server_mapping.cj:497)
+	 at wirestack::ResponseBody::read(std.core::Array<...>)(<scratch>/installation/wirestack-0.1.0/src/http_message.cj:182)
+	 at wirestack.http::HttpCancellationBodyStream::read(std.core::Array<...>)(<scratch>/installation/wirestack-0.1.0/src/http/cancellation.cj:503)
+	 at wirestack::ResponseBody::read(std.core::Array<...>)(<scratch>/installation/wirestack-0.1.0/src/http_message.cj:182)
+	 at wirestack_m10_005_observation::Handler::handle(wirestack.http::HttpServerRequest, wirestack::OperationContext)(<scratch>/consumer/src/main.cj:47)
+	 at wirestack.http::PublicHttp2Handler::handle(wirestack.internal.http2::Http2ServerRequest, wirestack::OperationContext)(<scratch>/installation/wirestack-0.1.0/src/http/server.cj:668)
+	 at wirestack.internal.http2::Http2ServerExchange::start::lambda.0()(<scratch>/installation/wirestack-0.1.0/src/internal/http2/server_mapping.cj:211)
