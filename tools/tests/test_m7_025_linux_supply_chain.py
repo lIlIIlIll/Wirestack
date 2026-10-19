@@ -240,6 +240,44 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             self.assertIn("M7-025 Linux supply-chain bundle: FAIL:", output.getvalue())
             self.assertNotIn("Traceback", output.getvalue())
 
+    def test_gzip_documents_and_tampering_fail_closed(self) -> None:
+        mutations = ("checksum", "license", "relationship", "fingerprint")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact, qualification, pin = self.fixture(root, include_gzip=True)
+            qualification_path, pin_path = root / "qualification.json", root / "pin.json"
+            qualification_path.write_bytes(supply.canonical_json(qualification))
+            pin_path.write_bytes(supply.canonical_json(pin))
+            documents = supply.build_documents(artifact, qualification, pin,
+                generator_sha256=evidence_digest.text_evidence_sha256(Path(supply.__file__)))
+            output = root / "evidence"
+            supply.write_documents(documents, output)
+            supply.validate_documents(output, artifact_path=artifact,
+                qualification_path=qualification_path, provider_pin_path=pin_path)
+            package = supply._spdx_package(documents["sbom.spdx.json"], supply.GZIP_SPDX_ID)
+            self.assertEqual("Apache-2.0", package["licenseDeclared"])
+            module = documents["provider-manifest.json"]["optionalModules"][0]
+            self.assertEqual([], module["nativeDependencies"])
+            self.assertEqual(4, len(module["sources"]))
+            for mutation in mutations:
+                with self.subTest(mutation=mutation):
+                    changed = copy.deepcopy(documents)
+                    sbom = changed["sbom.spdx.json"]
+                    gzip_package = supply._spdx_package(sbom, supply.GZIP_SPDX_ID)
+                    if mutation == "checksum":
+                        gzip_package["checksums"][0]["checksumValue"] = "0" * 64
+                    elif mutation == "license":
+                        gzip_package["licenseDeclared"] = "MIT"
+                    elif mutation == "relationship":
+                        sbom["relationships"] = [r for r in sbom["relationships"]
+                            if r["relatedSpdxElement"] != supply.GZIP_SPDX_ID]
+                    else:
+                        changed["build-fingerprint.json"]["inputs"]["optionalModules"][0]["sources"][0]["sha256"]["sha256"] = "0" * 64
+                    supply.write_documents(changed, output)
+                    with self.assertRaises(supply.SupplyChainError):
+                        supply.validate_documents(output, artifact_path=artifact,
+                            qualification_path=qualification_path, provider_pin_path=pin_path)
+
     def fixture(
         self,
         root: Path,
@@ -251,6 +289,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         include_public_suffix_license: bool = True,
         public_suffix_digest: str | None = None,
         forged_native_archive: str | None = None,
+        include_gzip: bool = False,
     ):
         root.mkdir(parents=True, exist_ok=True)
         provider_pin = supply.load_json(supply.PROVIDER_PIN)
@@ -365,6 +404,9 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             members[supply.HTTP_FILES_MANIFEST] = http_files_raw
             members[supply.HTTP_FILES_ARCHIVE] = http_archive
 
+        if include_gzip:
+            members.update({f"src/gzip/{name}.cj": f"package wirestack.gzip\n// {name}\n".encode()
+                            for name in ("body", "client", "decoder", "model")})
         payload_entries = [
             {
                 "path": path,
@@ -425,6 +467,8 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 "libc_version": "2.44",
             },
         }
+        if include_gzip:
+            release["optionalModules"] = supply.m7_021_linux_release.optional_modules(members)
         if release_schema == 2:
             release["httpFiles"] = {
                 "component": http_files["component"],

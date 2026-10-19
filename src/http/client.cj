@@ -319,6 +319,19 @@ public class HttpClient <: Resource {
  */
     public static func builder(): HttpClientBuilder { HttpClientBuilder() }
 
+    /**
+     * Starts the existing request timeout cap before optional pre-submission resource admission.
+     * Passing the result to send never extends that original monotonic deadline.
+     * @param context Parent deadline and cancellation for the entire request/body operation.
+     * @return A context capped by this client's configured request timeout.
+     */
+    public func contextForRequest(context!: OperationContext = OperationContext.background()): OperationContext {
+        match (requestTimeout) {
+            case Some(value) => context.shortenDeadline(value)
+            case None => context
+        }
+    }
+
 /**
  * Wirestack 公开 API：返回与当前对象关联的值。
  * @param context 控制本次操作的截止时间、取消和追踪范围。
@@ -405,10 +418,7 @@ public class HttpClient <: Resource {
         context!: OperationContext = OperationContext.background()
     ): WebSocketConnectResult {
         if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
-        let bounded = match (requestTimeout) {
-            case Some(value) => context.shortenDeadline(value)
-            case None => context
-        }
+        let bounded = contextForRequest(context: context)
         let operation = withHttpPoolHook(bounded, poolHook)
         let handshake = WebSocketHandshake(url, protocols, headers, limits)
         let h1Request = requestWithCookies(handshake.http1Request, operation)
@@ -443,10 +453,7 @@ public class HttpClient <: Resource {
                     throw IllegalArgumentException("an Upgrade request requires its extended CONNECT protocol")
                 }
         }
-        let bounded = match (requestTimeout) {
-            case Some(value) => context.shortenDeadline(value)
-            case None => context
-        }
+        let bounded = contextForRequest(context: context)
         let operation = withHttpPoolHook(bounded, poolHook)
         let outgoing = requestWithCookies(request, operation)
         let headers = HttpHeaders.builder(limits: limits)
@@ -547,6 +554,17 @@ public class HttpClient <: Resource {
         resourceBudget.acquireManagedBuffer(resourceOwner(url), bytes, false, context)
     }
 
+    /**
+     * Reports whether two URLs are charged to the same managed-buffer owner.
+     * Response-buffer consumers keep an existing reservation when the request and
+     * final response target share an owner, and re-home it only when they differ.
+     * @param left First URL to compare.
+     * @param right Second URL to compare.
+     */
+    protected func sameResponseBufferOwner(left: HttpUrl, right: HttpUrl): Bool {
+        resourceOwner(left) == resourceOwner(right)
+    }
+
     private func sendInternal(
         request: HttpRequest,
         context: OperationContext,
@@ -556,10 +574,7 @@ public class HttpClient <: Resource {
         streamCancellation: ?HttpStreamCancellationHandle,
         followRedirects!: Bool = true
     ): HttpResponse {
-        let bounded = match (requestTimeout) {
-            case Some(value) => context.shortenDeadline(value)
-            case None => context
-        }
+        let bounded = contextForRequest(context: context)
         let cancellation = HttpRequestCancellationOperation(
             observedRequestContext(bounded, poolHook.isSome()), requestCancellation, connectionCancellation, streamCancellation,
             metrics: Some(resourceBudget)
@@ -607,6 +622,9 @@ public class HttpClient <: Resource {
                         redirectCount++
                     case None =>
                         let result = cancellation.wrap(response)
+                        // Record the final redirect target so response-buffer wrappers can attribute
+                        // their managed-buffer reservations to the actual response owner.
+                        result.attachResponseTarget(current.url)
                         emitHttpObservation(operation, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
                         return result
                 }

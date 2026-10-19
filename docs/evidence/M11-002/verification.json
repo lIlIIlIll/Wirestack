@@ -1,0 +1,789 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-002",
+  "status": "PASS",
+  "task_status": "COMPLETE",
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "evidence_kind": "SOURCE_BOUND_WORKING_TREE_ACCEPTANCE",
+  "workspace_safety": {
+    "root": "<repo>",
+    "physical_branch": "gitbutler/workspace",
+    "logical_task_branch": "m11-002-bounded-gzip",
+    "head_at_start": "7de2c3c27a31ff61fd01f231788f3c9e17210a04",
+    "merge_base_with_main": "00d6864f8f5dee6a5c13a5a68144135e9e9601bc",
+    "initial_unstaged_paths": 101,
+    "initial_untracked_paths": 69,
+    "initial_staged_paths": 0,
+    "existing_dirty_paths": [
+      ".gitignore",
+      "docs/api/README.md",
+      "docs/api/generated/api-surface.json",
+      "docs/api/generated/coverage.json",
+      "docs/api/generated/docs.json",
+      "docs/api/generated/markdown/index.md",
+      "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b.md",
+      "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e68747470.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1107274642-1457213055.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1459411304-1648339336.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1637537498-1255756485.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--217762376-902530301.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--245111784-1532656152.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--562758312-1467020050.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--575858174-1512804344.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--887133373-317905094.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--94104685-1747649248.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--96869997-1171829526.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48747470436c69656e742367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a487474705365727665722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a53797374656d5265736f6c7665722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--1559440559-1921978670.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--1951019228-728824373.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--543205424-511961423.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--628025280-1560256325.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a696e7465726661--1062170444-1631777448.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a696e7465726661--1244598604-1120314589.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a696e7465726661--2016838845-284931218.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a636c6173733a446e73436c69656e742367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6e65743a3a636c6173733a5265736f6c7665722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a656e756d3a4e6574776f726b4576656e744b696e642367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a656e756d3a4e6574776f726b4576656e744f7574636f6d652367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a696e746572666163653a4e6574776f726b4576656e7453696e6b2367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4e6574776f726b4576656e742367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4f7065726174696f6e436f6e746578742367302829.md",
+      "docs/evidence/M7-033/docs-report.json",
+      "docs/guides/http1-linux.md",
+      "docs/guides/network-foundation-linux.md",
+      "docs/planning/implementation-backlog.md",
+      "docs/planning/status.md",
+      "docs/references/linux-network-capabilities.json",
+      "src/http/cancellation.cj",
+      "src/http/client.cj",
+      "src/http/client_extensions_test.cj",
+      "src/http/error.cj",
+      "src/http/error_test.cj",
+      "src/http/facade_test.cj",
+      "src/http/hooks.cj",
+      "src/http/resolver.cj",
+      "src/http/resource_budget.cj",
+      "src/http/retry.cj",
+      "src/http/retry_test.cj",
+      "src/http/server.cj",
+      "src/http/websocket.cj",
+      "src/internal/connector/happy_eyeballs.cj",
+      "src/internal/connector/happy_eyeballs_test.cj",
+      "src/internal/http1/automatic_tls_client_pipeline_test.cj",
+      "src/internal/http1/client_connection.cj",
+      "src/internal/http1/client_connection_test.cj",
+      "src/internal/http1/client_pipeline.cj",
+      "src/internal/http1/client_pipeline_test.cj",
+      "src/internal/http1/connection_pool.cj",
+      "src/internal/http1/connection_pool_test.cj",
+      "src/internal/http1/http2_connection_pool.cj",
+      "src/internal/http1/http2_connection_pool_test.cj",
+      "src/internal/http1/proxy_client_pipeline.cj",
+      "src/internal/http1/proxy_client_pipeline_test.cj",
+      "src/internal/http1/request_writer.cj",
+      "src/internal/http1/response_reader.cj",
+      "src/internal/http1/response_reader_test.cj",
+      "src/internal/http1/server_connection.cj",
+      "src/internal/http1/server_connection_test.cj",
+      "src/internal/http1/tls_client_pipeline.cj",
+      "src/internal/http1/tls_server.cj",
+      "src/internal/http1/tls_server_test.cj",
+      "src/internal/http2/client_connection.cj",
+      "src/internal/http2/client_connection_test.cj",
+      "src/internal/http2/client_push.cj",
+      "src/internal/http2/flow_control.cj",
+      "src/internal/http2/server_connection.cj",
+      "src/internal/http2/server_mapping.cj",
+      "src/internal/http2/stream_reset.cj",
+      "src/internal/http_resource_budget.cj",
+      "src/internal/http_resource_budget_types.cj",
+      "src/internal/resolver/bounded_backend.cj",
+      "src/internal/resolver/system_resolver.cj",
+      "src/internal/tls_engine/engine_pump_test.cj",
+      "src/internal/transport/operation_context.cj",
+      "src/internal/transport/operation_context_test.cj",
+      "src/net/dns_client.cj",
+      "src/net/dns_client_test.cj",
+      "src/net/dns_resolver.cj",
+      "src/net/dns_resolver_test.cj",
+      "src/network_event.cj",
+      "src/operation_context.cj",
+      "tools/architecture_guard.py",
+      "tools/docs/m7_033_docs.py",
+      "tools/m7_026_linux_api_freeze.py",
+      "tools/m7_032_public_api_inventory.py",
+      "tools/tests/test_m7_026_linux_api_freeze.py",
+      "tools/tests/test_m7_032_public_api_contract.py",
+      "docs/api/baselines/wirestack-linux-pre1-m11-001.json",
+      "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e6f62736572766162696c697479.md",
+      "docs/api/generated/markdown/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b2e737365.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a636c6173733a48--1931680831-674701885.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a656e756d3a4874--1540261509-896816530.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--1153227448-118100904.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--1643010048-1708066319.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--1689171392-409431798.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--312091674-2100772945.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e687474703a3a7374727563743a--837915989-2033017775.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6f62736572766162696c697479--1265130760-1355684291.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6f62736572766162696c697479--1847353890-1376239331.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6f62736572766162696c697479--585583551-1791241522.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e6f62736572766162696c697479--883361777-302873610.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a5373654465636f6465526573756c742367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a5373654465636f6465722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a537365456e636f6465722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a5373654576656e742367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a537365457863657074696f6e2367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a5373654c696d6974732367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a53736553657373696f6e2367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a53736553657373696f6e506f6c6963792367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a636c6173733a5373655772697465722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b2e7373653a3a656e756d3a5373654572726f72436f64652367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a636c6173733a4e6574776f726b4576656e744275666665722367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a656e756d3a4e6574776f726b54696d656f7574526561736f6e2367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a656e756d3a4f7065726174696f6e54696d656f757453746167652367302829.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a696e746572666163653a4e65--2136366381-735495793.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a696e746572666163653a5265--51057343-1940830198.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4e6574776f--327043443-1332222268.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4e6574776f--34654283-31836087.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a4f70657261--2035435707-1084868009.md",
+      "docs/api/generated/markdown/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a5265736f6c--1671703736-1556618892.md",
+      "docs/evidence/M10-001/",
+      "docs/evidence/M10-005/",
+      "docs/evidence/M11-001/",
+      "docs/guides/sse-linux.md",
+      "docs/references/whatwg-server-sent-events-2026-10-08.md",
+      "examples/linux/m10_004/",
+      "examples/linux/m10_005/",
+      "examples/linux/m11_001/",
+      "src/http/client_rotation.cj",
+      "src/http/client_rotation_test.cj",
+      "src/http/configuration_rotation.cj",
+      "src/http/observability.cj",
+      "src/http/observability_test.cj",
+      "src/http/server_rotation_test.cj",
+      "src/internal/http1/pool_admission.cj",
+      "src/internal/http2/observability.cj",
+      "src/internal/http2/observability_test.cj",
+      "src/internal/http2/server_cancellation.cj",
+      "src/internal/http2/server_cancellation_test.cj",
+      "src/internal/http_resource_observation_test.cj",
+      "src/internal/resolver/resolver_observation_test.cj",
+      "src/internal/transport/network_observation_test.cj",
+      "src/net/dns_observation_test.cj",
+      "src/network_event_buffer.cj",
+      "src/network_pool_snapshot.cj",
+      "src/observability/",
+      "src/resolver_snapshot.cj",
+      "src/sse/",
+      "tools/gates/m11_001_sse_streaming_profile.py",
+      "tools/m10_004_native_rotation.py",
+      "tools/m10_005_native_observation.py",
+      "tools/m11_001_native_sse.py",
+      "tools/tasks/M10-003.json",
+      "tools/tasks/M10-004.json",
+      "tools/tasks/M10-005.json",
+      "tools/tasks/M11-001.json"
+    ],
+    "unrelated_changes_preserved": true,
+    "commit_push_pr_issue_mutations": false,
+    "temp_filesystem": "disk-backed btrfs; task directory mode 0700"
+  },
+  "platform": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "toolchains": [
+    "1.3.0-alpha.06 cjnative native Linux",
+    "1.1.3 cjnative native Linux"
+  ],
+  "dependencies": {
+    "M9-001": {
+      "status": "COMPLETE",
+      "evidence": "docs/evidence/M9-001/evidence.json"
+    },
+    "M10-001": {
+      "status": "COMPLETE",
+      "evidence": "docs/evidence/M10-001/README.md"
+    },
+    "M10-002": {
+      "status": "COMPLETE",
+      "evidence": "docs/evidence/M10-002/verification.json"
+    },
+    "M10-003": {
+      "status": "COMPLETE",
+      "evidence": "docs/evidence/M10-003/verification.json"
+    }
+  },
+  "acceptance": [
+    {
+      "id": "incremental-codec",
+      "status": "PASS",
+      "evidence": [
+        "src/gzip/codec_test.cj",
+        "src/gzip/corpus_test.cj"
+      ],
+      "coverage": "Empty, one-byte/small/large, all header/trailer cuts; stored/fixed/dynamic trees, optional fields and verified physical EOF."
+    },
+    {
+      "id": "negative-and-fuzz",
+      "status": "PASS",
+      "evidence": [
+        "src/gzip/codec_test.cj",
+        "src/gzip/corpus_test.cj",
+        "src/gzip/deterministic_fuzz_test.cj",
+        "src/gzip/native_test.cj"
+      ],
+      "differential_seed": "0x1791952",
+      "differential_rows": 96,
+      "rejected_mutations": 44,
+      "exact_output_oracles": 52,
+      "coverage": "Absolute input/output/header/member/block bounds, high ratio, coding layers, illegal Huffman/history, CRC/ISIZE/header CRC, truncation, member reset and trailing bytes."
+    },
+    {
+      "id": "finite-work-memory-context",
+      "status": "PASS",
+      "maximum_counted_work_between_context_checks": 512,
+      "default_codec_retained_bound_bytes": 135168,
+      "maximum_per_read_output_bytes": 16384,
+      "evidence": [
+        "src/gzip/native_test.cj",
+        "docs/evidence/M11-002/installed/report.json"
+      ],
+      "nonclaim": "Declared conservative codec storage excludes source and caller buffers; counted work is not a wall-clock cancellation SLA."
+    },
+    {
+      "id": "metadata-and-negotiation",
+      "status": "PASS",
+      "evidence": [
+        "src/gzip/native_test.cj",
+        "examples/linux/m11_002/raw.cj",
+        "examples/linux/m11_002/gzip.cj"
+      ],
+      "coverage": "Default raw/no implicit negotiation; caller header wins; wire CL versus unknown decoded length; bodyless HEAD/204/205/304; unsupported raw opt-in."
+    },
+    {
+      "id": "native-body-ownership",
+      "status": "PASS",
+      "evidence": [
+        "src/gzip/native_test.cj",
+        "docs/evidence/M11-002/installed/report.json"
+      ],
+      "coverage": "Real H1 and TLS H2 cancellation/deadline/close/error, reservation admission/release, H2 live sibling, H1 unread abandonment and configured absolute request timeout during buffered CPU decoding."
+    },
+    {
+      "id": "installed-payload-and-supply-chain",
+      "status": "PASS",
+      "evidence": [
+        "docs/evidence/M11-002/installed/report.json",
+        "docs/evidence/M11-002/supply-chain/report.json",
+        "tools/tests/test_m7_025_linux_supply_chain.py"
+      ],
+      "coverage": "Outside-checkout raw/enabled consumers, identical direct native needed lists, original Apache-2.0 optional source component, four exact installed source digests; checksum/license/relationship/fingerprint tamper rejection."
+    },
+    {
+      "id": "docs-api-performance",
+      "status": "PASS",
+      "evidence": [
+        "docs/guides/gzip.md",
+        "docs/evidence/M11-002/docs/report.json",
+        "docs/evidence/M11-002/docs/browser.json",
+        "docs/evidence/M11-002/public-api.json",
+        "docs/evidence/M11-002/installed/report.json"
+      ],
+      "coverage": "Seven strict packages, live HTML search/navigation, current 362-declaration API inventory, measured 8 MiB raw/decoded exact checksums and explicit correctness/work-bound pass decision, no speed threshold."
+    }
+  ],
+  "results": {
+    "gzip_primary": {
+      "passed": 24,
+      "skipped": 0,
+      "failed": 0,
+      "error": 0
+    },
+    "gzip_sdk113": {
+      "passed": 24,
+      "skipped": 0,
+      "failed": 0,
+      "error": 0
+    },
+    "full_native": {
+      "passed": 986,
+      "skipped": 28,
+      "failed": 0,
+      "error": 0,
+      "skips": "Explicit existing Performance exclusions; not counted as passed"
+    },
+    "python_tooling": {
+      "passed": 48,
+      "failed": 0
+    },
+    "canonical_task_commands": {
+      "passed": 5,
+      "failed": 0
+    },
+    "installed_consumers": {
+      "passed": 2,
+      "checks": 5
+    },
+    "strict_docs": {
+      "packages": 7,
+      "status": "PASS"
+    },
+    "browser": {
+      "status": "PASS",
+      "js_errors": 0
+    },
+    "privacy": {
+      "exit_code": 0
+    }
+  },
+  "commands": [
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M11-002/logs/task-cjpm-check.stdout.log",
+      "stderr_path": "docs/evidence/M11-002/logs/task-cjpm-check.stderr.log"
+    },
+    {
+      "id": "native-gzip-and-regression",
+      "argv": [
+        "cjpm",
+        "test",
+        "--target-dir",
+        "target/m11-002-native",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "--timeout-each",
+        "60s"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M11-002/logs/task-native-gzip-and-regression.stdout.log",
+      "stderr_path": "docs/evidence/M11-002/logs/task-native-gzip-and-regression.stderr.log"
+    },
+    {
+      "id": "release-api-tooling",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_032_public_api_contract"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M11-002/logs/task-release-api-tooling.stdout.log",
+      "stderr_path": "docs/evidence/M11-002/logs/task-release-api-tooling.stderr.log"
+    },
+    {
+      "id": "installed-raw-and-gzip",
+      "argv": [
+        "python3",
+        "tools/m11_002_native_gzip.py"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M11-002/logs/task-installed-raw-and-gzip.stdout.log",
+      "stderr_path": "docs/evidence/M11-002/logs/task-installed-raw-and-gzip.stderr.log"
+    },
+    {
+      "id": "strict-seven-package-docs",
+      "argv": [
+        "scripts/check-docs",
+        "--html",
+        "--output",
+        "docs/evidence/M11-002/docs/report.json"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "timed_out": false,
+      "stdout_path": "docs/evidence/M11-002/logs/task-strict-seven-package-docs.stdout.log",
+      "stderr_path": "docs/evidence/M11-002/logs/task-strict-seven-package-docs.stderr.log"
+    },
+    {
+      "id": "native-sdk113-gzip",
+      "argv": [
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--sdk-root",
+        "$HOME/cangjie_sdk/sts1.1.3",
+        "--cwd",
+        "<repo>",
+        "cjpm",
+        "test",
+        "src/gzip",
+        "--target-dir",
+        "<scratch>/sdk113-target",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "--timeout-each",
+        "30s"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "timed_out": false,
+      "log": "docs/evidence/M11-002/logs/sdk113-gzip.log"
+    },
+    {
+      "id": "current-api",
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--write",
+        "--json"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "log": "docs/evidence/M11-002/logs/api-current.log"
+    },
+    {
+      "id": "architecture",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "log": "docs/evidence/M11-002/logs/architecture.log"
+    },
+    {
+      "id": "installed-raw-gzip-spdx-final",
+      "argv": [
+        "python3",
+        "tools/m11_002_native_gzip.py",
+        "--scratch-parent",
+        "<scratch>"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "log": "docs/evidence/M11-002/logs/installed-final.log"
+    },
+    {
+      "id": "privacy",
+      "argv": [
+        "git",
+        "privacy-check"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "log": "docs/evidence/M11-002/logs/privacy.log"
+    }
+  ],
+  "source_sha256": {
+    "src/http/client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6ddb1caa7d28decc282151c677a97f53f48889b2d01f459ceccbe601e063fe83"
+    },
+    "src/http/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "034c7e2ca2fa22db4c4353c4f78cc832a730bc1bfa5e741566b9e69315649f7d"
+    },
+    "src/http_message.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1e324d3d5bc13bfc2d46984bb377fffe90b5370ef8134e0489658cd963d18a0a"
+    },
+    "src/gzip/model.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bdbe6f4703a77aacd004a80f7bb709afbd0c122bab597896b717dd651d151f26"
+    },
+    "src/gzip/decoder.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ecbf181d97f852ba9eb914d1de38ceab498a7c52380ad609b91fa61eef3d4082"
+    },
+    "src/gzip/body.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b18e40d4bc1cd038dfb8e739a0381eeef2ec6effa0c80e488fb12c508e7a9f0"
+    },
+    "src/gzip/client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7dd5b31b36bb6ea36723573dfea6aabef6c73644ce6e3a74aee35e3cc1e04024"
+    },
+    "src/gzip/codec_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5f96a06ffbbd8c2fe622a78e875f172071469e10382d54f2e3ea76b57666d643"
+    },
+    "src/gzip/corpus_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "97576d65af9e20a78c6125ddb1559a3222c005ef1a686d87ba955cf61fdc4012"
+    },
+    "src/gzip/deterministic_fuzz_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5e3fb0a15c6dff96213f9655ff75020996accb775815d6a7651339c360105fb6"
+    },
+    "src/gzip/native_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2b393b577a4f98e69ba0c3e24654babf0f982ce92329968691dfcc9fbcb47886"
+    },
+    "src/gzip/native_support_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "75f40cb2ef29fbce48529da359cfc18417f69b90b83b9790e91bad774e05dce0"
+    },
+    "examples/linux/m11_002/raw.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "98c50447adc756d0fbef7ba6a9bc697bc122e6c5687de8bbb2d88d9cfca666ec"
+    },
+    "examples/linux/m11_002/gzip.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "990672060c809eb76f86d93995cd79713c09e7120245468ae85f3a18b54f0548"
+    },
+    "tools/m11_002_native_gzip.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78861c9c861097aa09dc64410aacf4d154f1a4d622c4b5d739e6634daf3222be"
+    },
+    "tools/architecture_guard.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bcdab2032ce568278a10900f6e8c7cf541cadc0019dcec4d8c45295418a95bc1"
+    },
+    "tools/docs/m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a8a66970173c74b2aec9a81d191ae11927ee8ca4ce9427f43376082ff7bb0ea5"
+    },
+    "tools/m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e2d34b7d22d1974d9aad00806eb3463657e53a4e2c2d4df692b459ab5df0f279"
+    },
+    "tools/m7_032_public_api_inventory.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ca2447d2ffe46b4c8214b19812a948447e9500865762e3926cfd94f9524c7bd1"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "59e1736cb7ba7152493077ac3ba8fc8cd3e433f68228900326bded07906e5012"
+    },
+    "tools/m7_025_linux_supply_chain.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b7a15290f28b7cf14e8a1fdc5bacafaab6c53e14e35ec268c4fb1afd46cf273a"
+    },
+    "tools/tests/test_m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5bbc8b323188d03a681ba5fb956a4a1ed02a22c8470bc73d1f9629a34664cb61"
+    },
+    "tools/tests/test_m7_025_linux_supply_chain.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9166520db2f428ded6e852c4abbbb45d1ba54f425ca5973dac95f03d5c68b3ac"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "12703c15f7762bb8b52ea4b426011e96962fd2c53af3a055cdee8380008afd89"
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "adbf4b77767261c093f2ee9e0c5cc1502fa997758087b5fe9391355d78945f00"
+    },
+    "docs/api/baselines/wirestack-linux-pre1-m11-002.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a61f49f0bbc273d9853dd77109b354a2a178712a6d9dfcf144c856070f72bd0c"
+    },
+    "docs/guides/gzip.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "13f2449602c6bae34c03df08778169f0703abf0c37281163d9646a2c244cac01"
+    },
+    "docs/references/rfc1951-rfc1952-gzip.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ed65715bb796379511dd3852c08c40b92ab35f57ed8a546080304b7bfd0c5116"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "04a23a66e47b476b3c8d1ead31e627f89e4552fe4c949780456a3f4ad01945c9"
+    },
+    "tools/tasks/M11-002.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "97f1cbe14892f4332695630241c7fca3f5aba53e15e2b3056fe20d1dbe41d318"
+    },
+    "docs/api/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b8964ecc1dd1358a692bae25be3361e811213d191a795053b66b4cde911ff5f"
+    }
+  },
+  "reports": {
+    "docs/evidence/M11-002/task-gate.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce41eb98061057ccc7156a237f18a0e3aa93727b0e482a2330646dd19b4262aa"
+    },
+    "docs/evidence/M11-002/installed/report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65fe9168879107fe5fd8d5842d270aa2ffa02de722a98d8cf5754d8b7d004e6b"
+    },
+    "docs/evidence/M11-002/supply-chain/report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44bf78d20f7146a66091fd0538719f920da03d9f75aab888ad3e62e40017a8b7"
+    },
+    "docs/evidence/M11-002/docs/report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4b1e61e929f6cd8351bccf979662a93a09e4b94de0b7b8779b0a9c5844e05be5"
+    },
+    "docs/evidence/M11-002/docs/browser.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3e1df5df4aa77d60ee3a750e3115dea9aaa99617fd75e4ececf36eb66b8a1704"
+    },
+    "docs/evidence/M11-002/public-api.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3f0d94aefc549bc606205034ac8d6386b34c8e8778d5fb004a20e0ccc9cd0d5d"
+    }
+  },
+  "benchmark": {
+    "status": "PASS",
+    "rows": [
+      {
+        "mode": "raw",
+        "bytes": 8388608,
+        "checksum": 813694976,
+        "elapsed_ns": 679952029,
+        "MiB_per_second": 11.765535889003134,
+        "maximum_work_between_checks": 0,
+        "codec_retained_bound_bytes": 0
+      },
+      {
+        "mode": "gzip",
+        "bytes": 8388608,
+        "checksum": 813694976,
+        "elapsed_ns": 7296705407,
+        "MiB_per_second": 1.096385225080528,
+        "maximum_work_between_checks": 512,
+        "codec_retained_bound_bytes": 135168
+      }
+    ],
+    "decision": "Exact 8 MiB/checksum validated in both modes; gzip work <=512 and declared storage bound; no speed improvement or regression threshold claimed."
+  },
+  "non_claims": [
+    "No commit/revision seal, push, PR, merge or issue mutation.",
+    "No release signing, formal M7/M8 qualification, long soak or non-Linux platform support.",
+    "Output before fully validated EOF is provisional; HTTP trailers remain explicitly documented wire metadata.",
+    "No new encoder, server compression, runtime codec fallback, stacked coding decoder or WebSocket compression."
+  ],
+  "next_ready_task_ids": [
+    "M11-003"
+  ],
+  "logs_sha256": {
+    "docs/evidence/M11-002/logs/combined-gzip.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d9df794943f79b28ae4a4faf51c7e4f789087c4e5fb045e55140fb2a861895e4"
+    },
+    "docs/evidence/M11-002/logs/full-native.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "be597905e849a24d15c52dd1308610c191881bc18e07e55a9230e0cba57209d4"
+    },
+    "docs/evidence/M11-002/logs/sdk113-gzip.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a3eb8660a58f1524ea66b49b8f96e1f5ce0e285bfae6090111a7060660857a90"
+    },
+    "docs/evidence/M11-002/logs/python-integration.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3d53cf28571573c480b8ddef7a29b1279411472b4bd885f9eec1af2e3bbc96ef"
+    },
+    "docs/evidence/M11-002/logs/main-check.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65ca0e7df450c476a9eb9ea515ec382a9b29d9b65ff1b207c59c6302b6dc4378"
+    },
+    "docs/evidence/M11-002/logs/architecture.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0042db8452f1b3d01ffef1cfb53a61fc2ccf2629a5630d6a3810af9882f47cfb"
+    },
+    "docs/evidence/M11-002/logs/api-current.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9db0aa17fa5bbf408847dc8be61b114b0a751b6fe415dcb890bc184e698fd9d6"
+    },
+    "docs/evidence/M11-002/logs/strict-docs.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8e804aa7cd57ff414a9d97e7a1c818c12a865b2ad4be18f3eb08fc1da7cc8789"
+    },
+    "docs/evidence/M11-002/logs/supply-chain-smoke.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6367250c497ea51deb410fd9d1aa43431ed5e5a7127fccaac624ba3a4a5b216f"
+    },
+    "docs/evidence/M11-002/logs/installed-final.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9ba553ca0ab29edbf0fd348e9ba876a29b2a096fa11a6dc9344d67fe5f084b00"
+    },
+    "docs/evidence/M11-002/logs/privacy.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M11-002/logs/task-cjpm-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "65ca0e7df450c476a9eb9ea515ec382a9b29d9b65ff1b207c59c6302b6dc4378"
+    },
+    "docs/evidence/M11-002/logs/task-cjpm-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M11-002/logs/task-native-gzip-and-regression.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "91e6222a9418d3ab1e94ad5441b363022d0383fd742b1b4522d24d11af6cc0a2"
+    },
+    "docs/evidence/M11-002/logs/task-native-gzip-and-regression.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bfb821be9f838abaf3f2627d4c2dbd0ddc28d1a2ec856f0beeab71c3587f07c7"
+    },
+    "docs/evidence/M11-002/logs/task-release-api-tooling.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M11-002/logs/task-release-api-tooling.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce86b905298f461e2be599ea53d27bdc6c65d2f414ce58179f127ad853b048d2"
+    },
+    "docs/evidence/M11-002/logs/task-installed-raw-and-gzip.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9ba553ca0ab29edbf0fd348e9ba876a29b2a096fa11a6dc9344d67fe5f084b00"
+    },
+    "docs/evidence/M11-002/logs/task-installed-raw-and-gzip.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M11-002/logs/task-strict-seven-package-docs.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8e804aa7cd57ff414a9d97e7a1c818c12a865b2ad4be18f3eb08fc1da7cc8789"
+    },
+    "docs/evidence/M11-002/logs/task-strict-seven-package-docs.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "docs_generated": {
+    "status": "PASS",
+    "taskScopedGeneratedFiles": {
+      "api": "docs/api/generated/api-surface.json",
+      "coverage": "docs/api/generated/coverage.json",
+      "docs": "docs/api/generated/docs.json",
+      "html": "target/doc/html",
+      "markdown": "docs/api/generated/markdown"
+    }
+  },
+  "evidence_integrity": {
+    "status": "PASS",
+    "source_digests": 31,
+    "reports": 6,
+    "logs": 21,
+    "archive_runner_and_gzip_source_identity": "PASS",
+    "task_document_links": "PASS",
+    "log": "docs/evidence/M11-002/logs/evidence-integrity.log",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "184972a403a5df3a21beee239446af5f3683126b5b0a10e0844e02bc20f6c15f"
+    }
+  }
+}
