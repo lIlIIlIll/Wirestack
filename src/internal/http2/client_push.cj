@@ -299,10 +299,21 @@ internal class Http2ClientPushSource <: HttpPushSource {
                     selected.reject(Http2ErrorCode.Cancel, "HTTP/2 push policy rejected the promise")
                     continue
                 }
+                // The header wait is bounded by the response-headers stage budget;
+                // losing one offer must not turn the whole receive into an
+                // unbounded wait on a promised stream that never sends HEADERS.
+                let headerContext = context.forStage(OperationTimeoutStage.ResponseHeaders)
                 let response = try {
-                    selected.awaitResponse(context)
+                    selected.awaitResponse(headerContext)
                 } catch (error: Exception) {
                     if (context.isCancellationRequested() || context.isDeadlineExceeded()) {
+                        throw error
+                    }
+                    if (headerContext.isDeadlineExceeded()) {
+                        selected.reject(
+                            Http2ErrorCode.Cancel,
+                            "HTTP/2 push response-header wait exceeded its budget"
+                        )
                         throw error
                     }
                     synchronized(mutex) { removeOfferLocked(selected); changed.notifyAll() }
@@ -428,7 +439,10 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         sequence = Http2ClientResponseSequence(
             streamId, request.method, limits: limits, http2Limits: http2Limits
         )
-        channel = Http2ClientBodyChannel(streamId, flow, writer, parentContext, http2Limits)
+        channel = Http2ClientBodyChannel(
+            streamId, flow, writer, parentContext, http2Limits,
+            readTimeoutStage: OperationTimeoutStage.BodyReadIdle
+        )
     }
 
     func bindReset(value: Http2StreamResetRegistration): Unit {

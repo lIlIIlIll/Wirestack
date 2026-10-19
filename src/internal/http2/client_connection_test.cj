@@ -448,6 +448,85 @@ class Http2ClientConnectionTest {
     }
 }
 
+@Test
+class Http2ClientResponseHeaderWakeupRaceTest {
+    @TestCase
+    func publishedResponseAfterHeaderBudgetExpiryIsRejected(): Unit {
+        let fixture = ResponseHeaderWakeupRaceFixture()
+        let clock = ResponseHeaderRaceClock(MonoTime.now())
+        let operationContext = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock))
+        )
+        let waitContext = operationContext.forStage(OperationTimeoutStage.ResponseHeaders)
+        fixture.exchange.acceptHeaders([
+            HpackHeaderField(":status", "200"),
+            HpackHeaderField("content-length", "0")
+        ], false)
+        // The final HEADERS are already published; the stage budget expires before
+        // this waiter reacquires the exchange mutex and observes the response.
+        clock.advance(2 * Duration.second)
+        var timedOut = false
+        var published = None<HttpResponse>
+        try {
+            published = Some(fixture.exchange.awaitResponse(waitContext))
+        } catch (error: NetworkException) {
+            match (error.category) {
+                case NetworkErrorCategory.DeadlineExceeded =>
+                    match (error.phase) {
+                        case NetworkPhase.HttpHeaders => timedOut = true
+                        case _ => ()
+                    }
+                case _ => ()
+            }
+        } finally {
+            if (let Some(value) <- published) {
+                try { value.close() } catch (_: Exception) {}
+            }
+            fixture.dispose()
+        }
+        @Expect(timedOut)
+    }
+}
+
+private class ResponseHeaderRaceClock <: MonotonicClock {
+    private var current: MonoTime
+    init(start: MonoTime) { current = start }
+    public func now(): MonoTime { current }
+    func advance(value: Duration): Unit { current = current + value }
+}
+
+private class ResponseHeaderWakeupRaceFixture {
+    let exchange: Http2ClientExchange
+    private let transport: DuplexTransport
+
+    init() {
+        let (owned, _) = MemoryTransport.pair(capacity: 64 * 1024)
+        transport = owned
+        let registry = Http2StreamRegistry(Http2ConnectionRole.Client)
+        let flow = Http2FlowController()
+        let writer = Http2WriteScheduler(owned)
+        let machine = Http2ConnectionStateMachine(Http2ConnectionRole.Client)
+        let _ = machine.start()
+        let _ = machine.receive(encodeHttp2Settings([]))
+        let goAway = Http2GoAwayManager(machine, registry, flow, writer)
+        let signal = Http2ClientExecutionSignal()
+        let admission = goAway.openLocal(signal, endStream: false)
+        let reset = Http2StreamResetManager(registry, flow, writer)
+        let readerRegistry = Http2ReaderTerminationRegistry(8u32)
+        let termination = readerRegistry.register(signal)
+        exchange = Http2ClientExchange(
+            admission.stream.id, HttpMethod("GET"), registry, flow, writer, reset,
+            admission.registration, termination, signal,
+            OperationContext.background(), HttpLimits(), Http2Limits(),
+            None<Http2ClientPushSource>, false, { => }
+        )
+    }
+
+    func dispose(): Unit {
+        try { transport.abort(reason: None<AbortReason>) } catch (_: Exception) {}
+    }
+}
+
 private class RejectedConnectHttp2Peer {
     private let transport: DuplexTransport
     private let machine = Http2ConnectionStateMachine(Http2ConnectionRole.Server)

@@ -5,6 +5,7 @@ import std.sync.*
 import std.time.MonoTime
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack as api
 import wirestack.internal.http1 as http1test
 import wirestack.internal.transport_stdnet as stdnettest
 
@@ -458,6 +459,111 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func publicHttp2BodyIdleDeadlineIgnoresSiblingResponses(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicSiblingFairnessHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(8u32)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .build()
+        var slowResponse = None<HttpResponse>
+        try {
+            let response = client.get(
+                "https://example.com:${server.localEndpoint.port}/large-stall",
+                context: OperationContext(timeoutPolicy: api.OperationTimeoutPolicy(
+                    bodyReadIdle: Some(250 * Duration.millisecond)
+                ))
+            )
+            slowResponse = Some(response)
+            @Expect(response.version, HttpVersion.Http2)
+            handler.waitUntilConnectionWindowExhausted()
+
+            let drainBuffer = Array<Byte>(4096, repeat: 0u8)
+            var drained: Int64 = 0
+            while (drained < 65535) {
+                let count = response.body.read(drainBuffer)
+                if (count <= 0) { throw Exception("HTTP/2 stalled body ended before its receive window") }
+                drained += count
+            }
+            @Expect(drained, 65535)
+
+            let readStarted = AtomicInt64(0)
+            let readResult = AtomicInt64(0)
+            let waiting = spawn {
+                readStarted.store(1)
+                try {
+                    let _ = response.body.read(Array<Byte>(1, repeat: 0u8))
+                    readResult.store(2)
+                    2
+                } catch (error: NetworkException) {
+                    match (error.category) {
+                        case NetworkErrorCategory.DeadlineExceeded =>
+                            readResult.store(1)
+                            1
+                        case _ =>
+                            readResult.store(3)
+                            3
+                    }
+                } catch (_: Exception) {
+                    readResult.store(4)
+                    4
+                }
+            }
+            let startup = Deadline.after(Duration.second)
+            while (readStarted.load() == 0 && !startup.isExpired()) {
+                sleep(Duration.millisecond)
+            }
+            @Expect(readStarted.load(), 1)
+            @Expect(readResult.load(), 0)
+
+            var completed: Int64 = 0
+            var timedOutDuringSiblingResponses = false
+            for (_ in 0..40) {
+                let sibling = client.get(
+                    "https://example.com:${server.localEndpoint.port}/small"
+                )
+                try {
+                    @Expect(sibling.version, HttpVersion.Http2)
+                    @Expect(readPublicBody(sibling.body), "ok")
+                    completed++
+                } finally {
+                    sibling.close()
+                }
+                sleep(20 * Duration.millisecond)
+                if (readResult.load() == 1) { timedOutDuringSiblingResponses = true }
+            }
+            @Expect(completed, 40)
+            @Expect(handler.siblingCalls.load(), 40)
+            @Expect(timedOutDuringSiblingResponses)
+            @Expect(readResult.load(), 1)
+            @Expect(waiting.get(2 * Duration.second), 1)
+        } finally {
+            handler.releaseLargeBody()
+            if (let Some(value) <- slowResponse) { value.close() }
+            client.close()
+            clientTls.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            serving.get(5 * Duration.second)
+            serverTls.close()
+        }
+    }
+
+    @TestCase
     func tlsHttp2StreamLimitIsAppliedAcrossConcurrentPublicRequests(): Unit {
         let certificate = publicTlsTestCertificateDer()
         let serverTls = HttpServerTlsConfig(
@@ -707,6 +813,84 @@ class HttpFacadeTest {
             @Expect(response.status, 200)
             @Expect(handler.calls.load(), 2)
             response.close()
+        } finally {
+            client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(Duration.second))
+            ))
+            serving.get(Duration.second)
+        }
+    }
+
+    @TestCase
+    func retryCannotRestartTheOriginalAbsoluteDeadline(): Unit {
+        let clock = PublicDeadlineTestClock(MonoTime.now())
+        let total = Deadline.after(100 * Duration.millisecond, clock: clock)
+        let host = HostName("retry-budget.test")
+        let resolver = DeadlineProbePublicResolver(
+            ResolveResult(
+                [IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])],
+                host,
+                ResolverSource.Static
+            ),
+            clock,
+            total.expiresAt,
+            failFirst: true,
+            firstAdvance: 75 * Duration.millisecond,
+            laterAdvance: 30 * Duration.millisecond
+        )
+        let client = HttpClient.builder()
+            .resolver(resolver)
+            .retryPolicy(HttpRetryPolicy(maximumAttempts: 2))
+            .build()
+        try {
+            let error = @AssertThrows[NetworkException](client.get(
+                "http://retry-budget.test/ready",
+                context: OperationContext(
+                    deadline: Some(total),
+                    timeoutPolicy: api.OperationTimeoutPolicy(dns: Some(5 * Duration.second))
+                )
+            ))
+            @Expect(match (error.code) { case NetworkErrorCode.TimedOut => true; case _ => false })
+            @Expect(resolver.calls.load(), 2)
+            @Expect(resolver.matchingDeadlines.load(), 2)
+        } finally {
+            client.close()
+        }
+    }
+
+    @TestCase
+    func redirectCannotRestartTheOriginalAbsoluteDeadline(): Unit {
+        let clock = PublicDeadlineTestClock(MonoTime.now())
+        let total = Deadline.after(Duration.second, clock: clock)
+        let handler = PublicRedirectHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("redirect-budget.test")
+        let resolver = DeadlineProbePublicResolver(
+            ResolveResult([server.localEndpoint.address], host, ResolverSource.Static),
+            clock,
+            total.expiresAt,
+            failFirst: false,
+            firstAdvance: Duration.Zero,
+            laterAdvance: 2 * Duration.second
+        )
+        let client = HttpClient.builder().resolver(resolver).build()
+        try {
+            let error = @AssertThrows[NetworkException](client.get(
+                "http://redirect-budget.test:${server.localEndpoint.port}/start",
+                context: OperationContext(
+                    deadline: Some(total),
+                    timeoutPolicy: api.OperationTimeoutPolicy(dns: Some(5 * Duration.second))
+                )
+            ))
+            @Expect(match (error.code) { case NetworkErrorCode.TimedOut => true; case _ => false })
+            @Expect(resolver.calls.load(), 2)
+            @Expect(resolver.matchingDeadlines.load(), 2)
+            @Expect(handler.calls.load(), 1)
         } finally {
             client.close()
             let _ = server.shutdown(context: OperationContext(
@@ -1424,6 +1608,7 @@ private class PublicRedirectHandler <: HttpServerHandler {
                 ResponseBody.empty(),
                 headers: HttpHeaders.builder()
                     .add("Location", "/final")
+                    .add("Connection", "close")
                     .add("Content-Length", "0")
                     .build()
             ))
@@ -1436,6 +1621,62 @@ private class PublicRedirectHandler <: HttpServerHandler {
                 headers: HttpHeaders.builder().add("Content-Length", "0").build()
             ))
         }
+    }
+}
+
+private class PublicDeadlineTestClock <: api.MonotonicClock {
+    private var current: MonoTime
+
+    init(start: MonoTime) { current = start }
+
+    public func now(): MonoTime { current }
+
+    func advance(duration: Duration): Unit {
+        current = current + duration
+    }
+}
+
+private class DeadlineProbePublicResolver <: Resolver {
+    private let result: ResolveResult
+    private let clock: PublicDeadlineTestClock
+    private let originalExpiry: MonoTime
+    private let failFirst: Bool
+    private let firstAdvance: Duration
+    private let laterAdvance: Duration
+    let calls = AtomicInt64(0)
+    let matchingDeadlines = AtomicInt64(0)
+
+    init(
+        result: ResolveResult,
+        clock: PublicDeadlineTestClock,
+        originalExpiry: MonoTime,
+        failFirst!: Bool,
+        firstAdvance!: Duration,
+        laterAdvance!: Duration
+    ) {
+        this.result = result
+        this.clock = clock
+        this.originalExpiry = originalExpiry
+        this.failFirst = failFirst
+        this.firstAdvance = firstAdvance
+        this.laterAdvance = laterAdvance
+    }
+
+    public func resolve(host: HostName, service: ?String, options: ResolveOptions,
+        context: OperationContext): ResolveResult {
+        let _ = host
+        let _ = service
+        let _ = options
+        if (let Some(deadline) <- context.deadline) {
+            if (deadline.expiresAt == originalExpiry) { matchingDeadlines.fetchAdd(1) }
+        }
+        let call = calls.fetchAdd(1)
+        if (call == 0 && failFirst) {
+            clock.advance(firstAdvance)
+            throw ResolveException(ResolveErrorCode.TemporaryFailure, "scripted temporary DNS failure")
+        }
+        if (call > 0) { clock.advance(laterAdvance) }
+        result
     }
 }
 
