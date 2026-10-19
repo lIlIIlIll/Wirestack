@@ -125,6 +125,35 @@ public class HttpCancellationHandles {
         this.connection = connection
         this.stream = stream
     }
+
+    /** Retains one cleanup callback on every supplied typed handle for an extended body lifetime.
+     * The callback runs at most once when any supplied handle is cancelled, and runs immediately
+     * when a supplied handle was already cancelled before this call.
+     * @param callback Cleanup that closes the extended body and releases its owned resources.
+     * @return An idempotent lifetime; close it when the extended body reaches EOF or terminal cleanup.
+     */
+    public func retainCancellation(callback: () -> Unit): Resource {
+        // One shared once-gate: sequential or concurrent cancellation of different supplied
+        // handles must not run non-idempotent caller cleanup more than once.
+        let claimed = AtomicBool(false)
+        let once = { =>
+            if (claimed.compareAndSwap(false, true)) { callback() }
+        }
+        let registrations = ArrayList<CancellationRegistration>()
+        match (request) {
+            case Some(value) => registrations.add(value.cancellationToken.register(once))
+            case None => ()
+        }
+        match (connection) {
+            case Some(value) => registrations.add(value.cancellationToken.register(once))
+            case None => ()
+        }
+        match (stream) {
+            case Some(value) => registrations.add(value.cancellationToken.register(once))
+            case None => ()
+        }
+        HttpRetainedCancellationLifetime(registrations.toArray())
+    }
 }
 
 private class HttpHandleCancellationState {
@@ -188,10 +217,10 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         }
         if (response.body.isFullyConsumed()) {
             release()
-            if (pushes.isNone()) { return response }
+            if (pushes.isNone() && response.operationContext.isSome()) { return response }
             return HttpResponse(
                 response.status, response.reason, response.body,
-                version: response.version, headers: response.headers, pushes: pushes
+                version: response.version, headers: response.headers, pushes: pushes, operationContext: Some(context)
             )
         }
         let delegate = response.body
@@ -206,7 +235,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             ),
             version: response.version,
             headers: response.headers,
-            pushes: pushes
+            pushes: pushes,
+            operationContext: Some(context)
         )
     }
 
@@ -390,7 +420,8 @@ private class HttpCancellationPushSource <: HttpPushSource {
                         ),
                         version: response.version,
                         headers: response.headers,
-                        pushes: response.pushes
+                        pushes: response.pushes,
+                        operationContext: response.operationContext
                     )
                 ))
             case None =>
@@ -511,4 +542,23 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
  * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { delegate.isClosed() }
+}
+
+/** Retained typed-handle cancellation over one extended response body lifetime. */
+private class HttpRetainedCancellationLifetime <: Resource {
+    private let registrations: Array<CancellationRegistration>
+    private let mutex = Mutex()
+    private var closed = false
+
+    init(registrations: Array<CancellationRegistration>) { this.registrations = registrations }
+
+    /** Unregisters every retained typed-handle callback exactly once. */
+    public func close(): Unit {
+        let first = synchronized(mutex) {
+            if (closed) { false } else { closed = true; true }
+        }
+        if (first) { for (value in registrations) { value.unregister() } }
+    }
+    /** Reports whether this retained cancellation lifetime has been closed. */
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
 }
