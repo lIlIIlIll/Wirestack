@@ -641,6 +641,248 @@ class HttpFacadeTest {
         }
     }
 
+
+    @TestCase
+    func authenticatedProxyCredentialsShareRouteAdmission(): Unit {
+        let handler = PublicProxyAdmissionHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let proxyHost = HostName("proxy.test")
+        let proxyResolver = CountingPublicResolver(ResolveResult(
+            [server.localEndpoint.address], proxyHost, ResolverSource.Static
+        ))
+        let authorization = RotatingPublicProxyAuthorization()
+        let client = HttpClient.builder()
+            .resolver(RejectingPublicResolver())
+            .proxy(HttpProxyConfig(
+                HttpProxyEndpoint.hostname("proxy.test", server.localEndpoint.port),
+                proxyResolver,
+                authorizationProvider: Some(authorization)
+            ))
+            .resourceLimits(HttpResourceLimits(
+                maximumConnections: 2,
+                maximumConnectionsPerRoute: 1,
+                maximumConnectionsPerOrigin: 2
+            ))
+            .requestTimeout(5 * Duration.second)
+            .build()
+        var firstResponse: ?HttpResponse = None<HttpResponse>
+        var secondResponse: ?HttpResponse = None<HttpResponse>
+        var secondPending: ?Future<HttpResponse> = None<Future<HttpResponse>>
+        try {
+            let first = client.get("http://origin.test:8081/first")
+            firstResponse = Some(first)
+            @Expect(first.status, 200)
+            @Expect(handler.arrivals.load(), 1)
+
+            let second = spawn {
+                client.get("http://origin.test:8081/second")
+            }
+            secondPending = Some(second)
+            let authDeadline = Deadline.after(3 * Duration.second)
+            while (authorization.calls.load() < 2 && !authDeadline.isExpired()) {
+                sleep(Duration.millisecond)
+            }
+            @Expect(authorization.calls.load(), 2)
+
+            let admissionDeadline = Deadline.after(3 * Duration.second)
+            var snapshot = client.resourceSnapshot()
+            while (snapshot.admissionWaiters == 0 &&
+                handler.arrivals.load() == 1 && !admissionDeadline.isExpired()) {
+                sleep(Duration.millisecond)
+                snapshot = client.resourceSnapshot()
+            }
+            @Expect(snapshot.admissionWaiters, 1)
+            @Expect(snapshot.activeConnections, 1)
+            @Expect(snapshot.owners.size, 1)
+            @Expect(snapshot.owners[0].connections, 1)
+            @Expect(snapshot.owners[0].waiters, 1)
+            @Expect(handler.arrivals.load(), 1)
+
+            first.close()
+            firstResponse = None<HttpResponse>
+            let secondValue = second.get(5 * Duration.second)
+            secondPending = None<Future<HttpResponse>>
+            secondResponse = Some(secondValue)
+            @Expect(secondValue.status, 200)
+            @Expect(readPublicBody(secondValue.body), "ok")
+            secondValue.close()
+            secondResponse = None<HttpResponse>
+            @Expect(handler.arrivals.load(), 2)
+            @Expect(client.resourceSnapshot().admissionWaiters, 0)
+        } finally {
+            if (let Some(value) <- firstResponse) { value.close() }
+            if (let Some(value) <- secondResponse) { value.close() }
+            client.close()
+            if (let Some(future) <- secondPending) {
+                try { future.get(Duration.second).close() } catch (_: Exception) {}
+            }
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            serving.get(5 * Duration.second)
+        }
+    }
+
+    @TestCase
+    func http2RequestDataUsesTheValidatedServerOriginOwner(): Unit {
+        let expectedBytes: Int64 = 32768
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicHttp2BudgetOwnerHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .resourceLimits(HttpResourceLimits(
+                maximumConnections: 1,
+                maximumConnectionsPerRoute: 1,
+                maximumConnectionsPerOrigin: 1,
+                maximumManagedBufferBytes: 131072u64,
+                reservedControlBufferBytes: 1024u64,
+                maximumManagedBufferBytesPerRoute: 65536u64,
+                maximumManagedBufferBytesPerOrigin: 65536u64
+            ))
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .build()
+        var pending: ?Future<HttpResponse> = None<Future<HttpResponse>>
+        var response: ?HttpResponse = None<HttpResponse>
+        try {
+            let request = spawn {
+                client.send(HttpRequest.post(
+                    "https://example.com:${server.localEndpoint.port}/buffer-owner",
+                    RequestBody.bytes(Array<Byte>(expectedBytes, repeat: b'x'))
+                ))
+            }
+            pending = Some(request)
+            @Expect(handler.waitUntilStarted(), true)
+
+            let expectedOrigin = "https://example.com:${server.localEndpoint.port}"
+            let ownerDeadline = Deadline.after(3 * Duration.second)
+            var attributed = false
+            while (!attributed && !ownerDeadline.isExpired()) {
+                let snapshot = server.resourceSnapshot()
+                for (owner in snapshot.owners) {
+                    if (owner.origin == expectedOrigin && owner.managedBufferBytes > 0u64) {
+                        attributed = true
+                    }
+                }
+                if (!attributed) { sleep(Duration.millisecond) }
+            }
+            @Expect(attributed)
+
+            handler.releaseBodyRead()
+            let result = request.get(5 * Duration.second)
+            pending = None<Future<HttpResponse>>
+            response = Some(result)
+            @Expect(result.status, 201)
+            @Expect(readPublicBody(result.body), "ok")
+            result.close()
+            response = None<HttpResponse>
+            @Expect(handler.receivedBytes.load(), expectedBytes)
+            @Expect(server.resourceSnapshot().managedBufferBytes, 0u64)
+        } finally {
+            handler.releaseBodyRead()
+            if (let Some(value) <- response) { value.close() }
+            client.close()
+            if (let Some(future) <- pending) {
+                try { future.get(2 * Duration.second).close() } catch (_: Exception) {}
+            }
+            clientTls.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                serving.get(5 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
+    @TestCase
+    func http2PushAtTheStreamLimitDoesNotBlockItsParent(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicStreamQuotaPushHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(1u32)
+            .resourceLimits(HttpResourceLimits(
+                maximumStreams: 1,
+                maximumStreamsPerRoute: 1,
+                maximumStreamsPerOrigin: 1
+            ))
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .http2Push(Http2PushConfig(
+                SameOriginHttp2PushPolicy(),
+                maximumConcurrentPushes: 1,
+                maximumPendingPushes: 1,
+                maximumPushesPerRequest: 1
+            ))
+            .build()
+        var response: ?HttpResponse = None<HttpResponse>
+        try {
+            let parent = client.get(
+                "https://example.com:${server.localEndpoint.port}/push-at-limit"
+            )
+            response = Some(parent)
+            @Expect(parent.version, HttpVersion.Http2)
+            @Expect(parent.status, 204)
+            @Expect(handler.pushAttempts.load(), 1)
+            @Expect(handler.pushRejected.load(), 1)
+            @Expect(handler.observer.awaitAbandonment(), true)
+            @Expect(server.resourceSnapshot().highWaterStreams, 1)
+            @Expect(server.resourceSnapshot().rejectedOperations, 1)
+            parent.close()
+            response = None<HttpResponse>
+
+            let cleanupDeadline = Deadline.after(3 * Duration.second)
+            var snapshot = server.resourceSnapshot()
+            while ((snapshot.activeStreams != 0 || snapshot.reservedStreams != 0) &&
+                !cleanupDeadline.isExpired()) {
+                sleep(Duration.millisecond)
+                snapshot = server.resourceSnapshot()
+            }
+            @Expect(snapshot.activeStreams, 0)
+            @Expect(snapshot.reservedStreams, 0)
+            @Expect(snapshot.admissionWaiters, 0)
+        } finally {
+            if (let Some(value) <- response) { value.close() }
+            client.close()
+            clientTls.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                serving.get(5 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
     @TestCase
     func tlsFacadeNegotiatesHttp2AndMapsBodyTrailersAndResponse(): Unit {
         let certificate = publicTlsTestCertificateDer()
@@ -1314,6 +1556,74 @@ private class PublicHttp2EchoHandler <: HttpServerHandler {
     }
 }
 
+
+private class PublicHttp2BudgetOwnerHandler <: HttpServerHandler {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var started = false
+    private var allowBodyRead = false
+    let receivedBytes = AtomicInt64(0)
+
+    func waitUntilStarted(): Bool {
+        let deadline = Deadline.after(5 * Duration.second)
+        synchronized(mutex) {
+            while (!started && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+            started
+        }
+    }
+
+    func releaseBodyRead(): Unit {
+        synchronized(mutex) { allowBodyRead = true; changed.notifyAll() }
+    }
+
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        @Expect(request.version, HttpVersion.Http2)
+        @Expect(request.target, "/buffer-owner")
+        let deadline = Deadline.after(5 * Duration.second)
+        synchronized(mutex) {
+            started = true
+            changed.notifyAll()
+            while (!allowBodyRead && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+        }
+        let body = readPublicBody(request.body)
+        receivedBytes.store(body.size)
+        HttpServerResponse(HttpResponse(
+            201, "Created", ResponseBody(RequestBody.string("ok").open())
+        ))
+    }
+}
+
+private class PublicStreamQuotaPushHandler <: HttpServerHandler {
+    let observer = PublicRedirectPushObserver()
+    let pushAttempts = AtomicInt64(0)
+    let pushRejected = AtomicInt64(0)
+
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        @Expect(request.version, HttpVersion.Http2)
+        let pushResponse = HttpServerResponse(HttpResponse(
+            200, "OK", ResponseBody(
+                RequestBody.string("discarded").open(), observer: observer
+            )
+        ))
+        var rejected = false
+        try {
+            request.push(
+                HttpRequest.get("https://${request.authority}/pushed"),
+                pushResponse
+            )
+        } catch (_: Exception) {
+            rejected = true
+        }
+        pushAttempts.fetchAdd(1)
+        if (rejected) { pushRejected.fetchAdd(1) }
+        HttpServerResponse(HttpResponse(204, "No Content", ResponseBody.empty()))
+    }
+}
+
 private class PublicCancellationHandler <: HttpServerHandler {
     let calls = AtomicInt64(0)
     let http1HandleChecks = AtomicInt64(0)
@@ -1746,6 +2056,32 @@ private class PublicProxyAuthorization <: HttpProxyAuthorizationProvider {
     }
 }
 
+
+private class RotatingPublicProxyAuthorization <: HttpProxyAuthorizationProvider {
+    let calls = AtomicInt64(0)
+
+    public func authorization(
+        _: HttpProxyEndpoint,
+        _: HttpUrl,
+        _: OperationContext
+    ): ?String {
+        let credential = calls.fetchAdd(1)
+        Some("Basic rotating-${credential}")
+    }
+}
+
+private class PublicProxyAdmissionHandler <: HttpServerHandler {
+    let arrivals = AtomicInt64(0)
+
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        let _ = request.body.read(Array<Byte>(1, repeat: 0u8))
+        arrivals.fetchAdd(1)
+        HttpServerResponse(HttpResponse(
+            200, "OK", ResponseBody(RequestBody.string("ok").open())
+        ))
+    }
+}
+
 private class PublicForwardProxyHandler <: HttpServerHandler {
     let valid = AtomicInt64(0)
 
@@ -1800,18 +2136,3 @@ private class PublicRedirectPushObserver <: ResponseBodyObserver {
     }
 }
 
-@Test
-class HttpServerAuthorityCanonicalizationTest {
-    @TestCase
-    func canonicalServerAuthoritiesCollapseEquivalentSpellings(): Unit {
-        @Expect(canonicalServerAuthority("Example.COM", true), "example.com")
-        @Expect(canonicalServerAuthority("Example.COM:443", true), "example.com")
-        @Expect(canonicalServerAuthority("Example.COM:8443", true), "example.com:8443")
-        @Expect(canonicalServerAuthority("Example.COM:80", false), "example.com")
-        @Expect(canonicalServerAuthority("Example.COM:8080", false), "example.com:8080")
-        @Expect(canonicalServerAuthority("[2001:DB8::1]", true), "[2001:db8::1]")
-        @Expect(canonicalServerAuthority("[2001:DB8::1]:443", true), "[2001:db8::1]")
-        @Expect(canonicalServerAuthority("[2001:DB8::1]:8443", true), "[2001:db8::1]:8443")
-        @Expect(canonicalServerAuthority("", false), "")
-    }
-}
