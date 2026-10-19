@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "family": "candidate-gates",
+  "status": "CANCELED",
+  "qualification": "NOT_QUALIFIED",
+  "archive": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "82d0047047e4341ba284e4b6e60d44179e75ea311bab4e3f4b8e16fa3e1bae5b"
+  },
+  "reason": "Candidate replacement required after independent review found stale third-party notice identity. Execution held on owner instruction. This attempt is not final candidate evidence.",
+  "tls": "PASS_OLD_ARCHIVE_ONLY",
+  "fuzz": "PASS_OLD_ARCHIVE_ONLY",
+  "performance": "INCOMPLETE_CANCELED",
+  "soak": "NOT_RUN"
+}

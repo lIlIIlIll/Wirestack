@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-sort.a:
+
+sort.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNaw4sortIG_G0_HRNat5ArrayIG_EF0G0_G_EbbEL0_E$g-0x4>:
+       0:	add    %al,(%rax)
+	...
+
+0000000000000004 <_CCNaw4sortIG_G0_HRNat5ArrayIG_EF0G0_G_EbbEL0_E$g>:
+       4:	push   %rbp
+       5:	mov    %rsp,%rbp
+       8:	call   d <_CCNaw4sortIG_G0_HRNat5ArrayIG_EF0G0_G_EbbEL0_E$g+0x9>
+       d:	push   %r14
+       f:	push   %r13
+      11:	push   %r12
+      13:	push   %rbx
+      14:	sub    $0x38,%rsp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "fcdeca66c43c57d58b909cec06ee88e952049755da280577e383c733243d365b"}

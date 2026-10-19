@@ -1,0 +1,21 @@
+In archive <scratch>/wirestack/target/native/resolver/current/lib/libwirestack_resolver.a:
+
+wirestack_resolver.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <wirestack_resolver_pool_create>:
+   0:	push   %rbp
+   1:	push   %r15
+   3:	push   %r14
+   5:	push   %r13
+   7:	push   %r12
+   9:	push   %rbx
+   a:	sub    $0x18,%rsp
+   e:	lea    -0x401(%rsi),%rax
+  15:	mov    $0x1,%r15d
+  1b:	cmp    $0xfffffffffffffc00,%rax
+  21:	jb     f2 <wirestack_resolver_pool_create+0xf2>
+  27:	mov    %rdi,%rbp
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "a388b96d6959f0bd0543d383abc7f55e95717b268f298982cf8cccd1ea55fb34"}

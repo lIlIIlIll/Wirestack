@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "$HOME/.cache/agent-tmp/wirestack-m12-004-repaired-performance.veaHB0/capture/bootstrap.py", line 40, in <module>
+    os.execv('/bin/bash', ['/bin/bash', '--noprofile', '--norc', '-c', 'source "$CANGJIE_HOME/envsetup.sh" && exec /usr/bin/python3 "$1"', 'namespace-sdk-shell', str(BASE / 'capture/driver.py')])
+PermissionError: [Errno 13] Permission denied

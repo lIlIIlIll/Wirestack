@@ -363,7 +363,7 @@ main(args: Array<String>): Int64 {
             for (_ in 0..rounds) {
                 let futures = ArrayList<Future<(Int64, Int64, Int64, Int64)>>()
                 let admitted = AtomicInt64(0)
-                let releaseRound = AtomicBool(concurrent == 1)
+                let releaseRound = AtomicBool(false)
                 for (_ in 0..concurrent) {
                     let task = spawn {
                         let ownBuffer = if (concurrent == 1) { buffer } else { Array<Byte>(bufferSize, repeat: 0u8) }
@@ -389,8 +389,9 @@ main(args: Array<String>): Int64 {
                 if (concurrent > 1) {
                     waitPerf(owner, { => admitted.load() == concurrent })
                     perfRequire(client.resourceSnapshot().activeRequests == concurrent, "missing concurrent response owners")
-                    releaseRound.store(true)
                 }
+                // The coordinator opens every round, after concurrent owners are admitted.
+                releaseRound.store(true)
                 for (task in futures) {
                     let result = task.get(owner.deadline.getOrThrow().remaining())
                     latencies.add(result[0]); bytes += result[1]; checksum += result[2]; readCalls += result[3]

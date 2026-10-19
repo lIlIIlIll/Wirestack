@@ -1,0 +1,148 @@
+{
+  "command": "<scratch>/candidate-streams/target/release/bin/main websocket_slow <scratch>/certificate.der <scratch>/key.pk8 ",
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "closure": {
+    "ld-linux-x86-64.so.2": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757"
+      },
+      "read_only": true,
+      "loaded": true,
+      "mountinfo": "645 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/ld-linux-x86-64.so.2 /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libBrokenLocale.so.1": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8de5810863aa9bbbe839a7a80d95f3ee38331e81649bda1f9bd59d7053e17857"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "646 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libBrokenLocale.so.1 /usr/lib/x86_64-linux-gnu/libBrokenLocale.so.1 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libanl.so.1": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "737ef2aa6264abb020f650c9bea03166f6b496757fe1c543845e7802569ac8f9"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "647 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libanl.so.1 /usr/lib/x86_64-linux-gnu/libanl.so.1 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libc.so.6": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "02c8c3d06180beee9c7d0392aa85736c7d19f274a81e7f8f0b3d9e28e0641524"
+      },
+      "read_only": true,
+      "loaded": true,
+      "mountinfo": "648 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libc.so.6 /usr/lib/x86_64-linux-gnu/libc.so.6 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libdl.so.2": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "9b3812e7f6b766e2d0a1d9eeca1a58c1272392859e8b04f708b2f86b2256d03c"
+      },
+      "read_only": true,
+      "loaded": true,
+      "mountinfo": "649 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libdl.so.2 /usr/lib/x86_64-linux-gnu/libdl.so.2 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libm.so.6": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "965106704753eefe8c31ae7da6daba3ead3d18c52b19b5fcc41178bcc4aa999d"
+      },
+      "read_only": true,
+      "loaded": true,
+      "mountinfo": "650 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libm.so.6 /usr/lib/x86_64-linux-gnu/libm.so.6 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libmvec.so.1": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "c807927adfba7c54714a232b348c9afef8b0ad91799eae3a353f1911734b6834"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "651 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libmvec.so.1 /usr/lib/x86_64-linux-gnu/libmvec.so.1 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libnss_compat.so.2": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b861b1d0a00985de2eeaf457c6051be96ea61f5b17b603687c7dc9beae90d8a5"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "652 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libnss_compat.so.2 /usr/lib/x86_64-linux-gnu/libnss_compat.so.2 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libnss_dns.so.2": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "b1b0ce68f503030178a16ad42dbab940466c8285e757164605d2a8f60701066e"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "653 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libnss_dns.so.2 /usr/lib/x86_64-linux-gnu/libnss_dns.so.2 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libnss_files.so.2": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "09d707895bf1a4b3ac96a3db760460c11a6a1e4c7b5d8087ca9437adbc51acdd"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "655 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libnss_files.so.2 /usr/lib/x86_64-linux-gnu/libnss_files.so.2 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libpthread.so.0": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "839b91403f89fa4c6888d50deb2b59cd0612f8cfe3d57dd9d6314832b4cb31ab"
+      },
+      "read_only": true,
+      "loaded": true,
+      "mountinfo": "656 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libpthread.so.0 /usr/lib/x86_64-linux-gnu/libpthread.so.0 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libresolv.so.2": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "ee828b251a61761a9e529a791758ec8a1fbefd85693e2dc23501fedb8cf2f31d"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "657 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libresolv.so.2 /usr/lib/x86_64-linux-gnu/libresolv.so.2 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "librt.so.1": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e06e12b8a78494908d08376838c380fb3817bfd7d54f6a86ef050016f7ade5f8"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "658 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/librt.so.1 /usr/lib/x86_64-linux-gnu/librt.so.1 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    },
+    "libutil.so.1": {
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "8c2cbf01f52acb42478b9ab10506af9878b7e8d47aefacc8896bb5b37384c222"
+      },
+      "read_only": true,
+      "loaded": false,
+      "mountinfo": "659 601 253:1 /<user>/.cache/agent-tmp/wirestack-m12-004-server.JFVwz8/input/glibc244/libutil.so.1 /usr/lib/x86_64-linux-gnu/libutil.so.1 ro,relatime - ext4 <host-device> rw,quota,usrquota,grpquota"
+    }
+  },
+  "loaded_maps": "00400000-00829000 r-xp 00000000 fd:01 251938555                          <sdk>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so\n00829000-00a29000 ---p 00429000 fd:01 251938555                          <sdk>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so\n00a29000-00a2c000 r--p 00429000 fd:01 251938555                          <sdk>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so\n00a2c000-00a2d000 rw-p 0042c000 fd:01 251938555                          <sdk>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so\n00a2d000-00a3a000 rw-p 00000000 00:00 0 \n560bfbd10000-560bfc7f0000 r-xp 00000000 fd:01 239806387                  <scratch>/candidate-streams/target/release/bin/main\n560bfc7f0000-560bfc962000 r--p 00ae0000 fd:01 239806387                  <scratch>/candidate-streams/target/release/bin/main\n560bfc962000-560bfc9cb000 r--p 00c51000 fd:01 239806387                  <scratch>/candidate-streams/target/release/bin/main\n560bfc9cb000-560bfce06000 rw-p 00cba000 fd:01 239806387                  <scratch>/candidate-streams/target/release/bin/main\n560bfce06000-560bfce0c000 rw-p 00000000 00:00 0 \n560c33ae0000-560c33caa000 rw-p 00000000 00:00 0                          [heap]\n7f2a04000000-7f2a04021000 rw-p 00000000 00:00 0 \n7f2a04021000-7f2a08000000 ---p 00000000 00:00 0 \n7f2a0ac31000-7f2a0ac32000 ---p 00000000 00:00 0 \n7f2a0ac32000-7f2a0bd32000 rw-p 00000000 00:00 0 \n7f2a0bd32000-7f2a0bd33000 ---p 00000000 00:00 0 \n7f2a0bd33000-7f2a0be33000 rw-p 00000000 00:00 0 \n7f2a0be33000-7f2a0be34000 ---p 00000000 00:00 0 \n7f2a0be34000-7f2a0c634000 rw-p 00000000 00:00 0 \n7f2a0c634000-7f2a0c635000 ---p 00000000 00:00 0 \n7f2a0c635000-7f2a0ce35000 rw-p 00000000 00:00 0 \n7f2a0ce35000-7f2a0fc35000 rw-p 00000000 00:00 0 \n7f2a0fc35000-7f2a3047a000 rw-p 00000000 00:00 0 \n7f2a3047a000-7f2a30514000 r--p 00000000 fd:00 31588402                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30\n7f2a30514000-7f2a30625000 r-xp 0009a000 fd:00 31588402                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30\n7f2a30625000-7f2a30694000 r--p 001ab000 fd:00 31588402                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30\n7f2a30694000-7f2a30695000 ---p 0021a000 fd:00 31588402                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30\n7f2a30695000-7f2a306a0000 r--p 0021a000 fd:00 31588402                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30\n7f2a306a0000-7f2a306a3000 rw-p 00225000 fd:00 31588402                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30\n7f2a306a3000-7f2a306a6000 rw-p 00000000 00:00 0 \n7f2a306a6000-7f2a306ca000 r--p 00000000 fd:01 238962129                  /usr/lib/x86_64-linux-gnu/libc.so.6\n7f2a306ca000-7f2a30845000 r-xp 00024000 fd:01 238962129                  /usr/lib/x86_64-linux-gnu/libc.so.6\n7f2a30845000-7f2a308bb000 r--p 0019f000 fd:01 238962129                  /usr/lib/x86_64-linux-gnu/libc.so.6\n7f2a308bb000-7f2a308bf000 r--p 00214000 fd:01 238962129                  /usr/lib/x86_64-linux-gnu/libc.so.6\n7f2a308bf000-7f2a308c1000 rw-p 00218000 fd:01 238962129                  /usr/lib/x86_64-linux-gnu/libc.so.6\n7f2a308c1000-7f2a308c9000 rw-p 00000000 00:00 0 \n7f2a308c9000-7f2a308d9000 r--p 00000000 fd:01 238962131                  /usr/lib/x86_64-linux-gnu/libm.so.6\n7f2a308d9000-7f2a30975000 r-xp 00010000 fd:01 238962131                  /usr/lib/x86_64-linux-gnu/libm.so.6\n7f2a30975000-7f2a309fe000 r--p 000ac000 fd:01 238962131                  /usr/lib/x86_64-linux-gnu/libm.so.6\n7f2a309fe000-7f2a309ff000 r--p 00134000 fd:01 238962131                  /usr/lib/x86_64-linux-gnu/libm.so.6\n7f2a309ff000-7f2a30a00000 rw-p 00135000 fd:01 238962131                  /usr/lib/x86_64-linux-gnu/libm.so.6\n7f2a30a00000-7f2a30a11000 r-xp 00000000 fd:01 251938554                  <sdk>/runtime/lib/linux_x86_64_cjnative/libboundscheck.so\n7f2a30a11000-7f2a30c10000 ---p 00011000 fd:01 251938554                  <sdk>/runtime/lib/linux_x86_64_cjnative/libboundscheck.so\n7f2a30c10000-7f2a30c11000 r--p 00010000 fd:01 251938554                  <sdk>/runtime/lib/linux_x86_64_cjnative/libboundscheck.so\n7f2a30c11000-7f2a30c12000 rw-p 00011000 fd:01 251938554                  <sdk>/runtime/lib/linux_x86_64_cjnative/libboundscheck.so\n7f2a30c23000-7f2a30c24000 rw-p 00000000 00:00 0 \n7f2a30c24000-7f2a30c45000 rw-p 00000000 00:00 0 \n7f2a30c45000-7f2a30c47000 ---p 00000000 00:00 0 \n7f2a30c47000-7f2a30c48000 r--p 00000000 00:00 0 \n7f2a30c48000-7f2a30c89000 rw-p 00000000 00:00 0 \n7f2a30c89000-7f2a30c8e000 rw-p 00000000 00:00 0 \n7f2a30c8e000-7f2a30c8f000 r--p 00000000 fd:01 238962130                  /usr/lib/x86_64-linux-gnu/libdl.so.2\n7f2a30c8f000-7f2a30c90000 r-xp 00001000 fd:01 238962130                  /usr/lib/x86_64-linux-gnu/libdl.so.2\n7f2a30c90000-7f2a30c91000 r--p 00002000 fd:01 238962130                  /usr/lib/x86_64-linux-gnu/libdl.so.2\n7f2a30c91000-7f2a30c92000 r--p 00002000 fd:01 238962130                  /usr/lib/x86_64-linux-gnu/libdl.so.2\n7f2a30c92000-7f2a30c93000 rw-p 00003000 fd:01 238962130                  /usr/lib/x86_64-linux-gnu/libdl.so.2\n7f2a30c93000-7f2a30c94000 r--p 00000000 fd:01 238962136                  /usr/lib/x86_64-linux-gnu/libpthread.so.0\n7f2a30c94000-7f2a30c95000 r-xp 00001000 fd:01 238962136                  /usr/lib/x86_64-linux-gnu/libpthread.so.0\n7f2a30c95000-7f2a30c96000 r--p 00002000 fd:01 238962136                  /usr/lib/x86_64-linux-gnu/libpthread.so.0\n7f2a30c96000-7f2a30c97000 r--p 00002000 fd:01 238962136                  /usr/lib/x86_64-linux-gnu/libpthread.so.0\n7f2a30c97000-7f2a30c98000 rw-p 00003000 fd:01 238962136                  /usr/lib/x86_64-linux-gnu/libpthread.so.0\n7f2a30c98000-7f2a30c9b000 r--p 00000000 fd:00 31599608                   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1\n7f2a30c9b000-7f2a30cb2000 r-xp 00003000 fd:00 31599608                   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1\n7f2a30cb2000-7f2a30cb6000 r--p 0001a000 fd:00 31599608                   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1\n7f2a30cb6000-7f2a30cb7000 r--p 0001d000 fd:00 31599608                   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1\n7f2a30cb7000-7f2a30cb8000 rw-p 0001e000 fd:00 31599608                   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1\n7f2a30cb8000-7f2a30cbc000 rw-p 00000000 00:00 0 \n7f2a30cbc000-7f2a30cc7000 r--p 00000000 fd:00 39322211                   /etc/ld.so.cache\n7f2a30cc7000-7f2a30cc8000 r--p 00000000 fd:01 238962126                  /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n7f2a30cc8000-7f2a30cf5000 r-xp 00001000 fd:01 238962126                  /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n7f2a30cf5000-7f2a30d04000 r--p 0002e000 fd:01 238962126                  /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n7f2a30d04000-7f2a30d06000 r--p 0003d000 fd:01 238962126                  /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n7f2a30d06000-7f2a30d07000 rw-p 0003f000 fd:01 238962126                  /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n7f2a30d07000-7f2a30d08000 rw-p 00000000 00:00 0 \n7ffd32629000-7ffd3264a000 rw-p 00000000 00:00 0                          [stack]\n7ffd32775000-7ffd32779000 r--p 00000000 00:00 0                          [vvar]\n7ffd32779000-7ffd3277b000 r-xp 00000000 00:00 0                          [vdso]\nffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]\n",
+  "runtime_environment": {
+    "CANGJIE_HOME": "<sdk>",
+    "LD_LIBRARY_PATH": "<sdk>/runtime/lib/linux_x86_64_cjnative:<sdk>/tools/lib:",
+    "PATH": "<sdk>/bin:<sdk>/tools/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:$HOME/.cjpm/bin"
+  },
+  "note": "Independent outside-namespace live native observation; hashes through /proc/PID/root; observer scans every0.2s until first captured native then exits."
+}

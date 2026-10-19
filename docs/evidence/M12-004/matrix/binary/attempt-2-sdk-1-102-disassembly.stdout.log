@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-posix.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000007758 <_init@@Base>:
+    7758:	sub    $0x8,%rsp
+    775c:	mov    0x20783d(%rip),%rax        # 20efa0 <__gmon_start__>
+    7763:	test   %rax,%rax
+    7766:	je     776a <_init@@Base+0x12>
+    7768:	call   *%rax
+    776a:	add    $0x8,%rsp
+    776e:	ret
+
+Disassembly of section .plt:
+
+0000000000007770 <chmod@plt-0x10>:
+    7770:	push   0x207892(%rip)        # 20f008 <_CNbd9NULL_BYTEE@@Base+0x3b8>
+    7776:	jmp    *0x207894(%rip)        # 20f010 <_CNbd9NULL_BYTEE@@Base+0x3c0>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "41bf46a500b13f2281bd69dc9c2e708d349b6911b3d0cde1d41f03f8bcd0b8c9"}

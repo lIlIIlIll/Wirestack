@@ -1,0 +1,21 @@
+
+<sdk-1>/tools/bin/cjpm:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000202508 <_init@@Base>:
+  202508:	sub    $0x8,%rsp
+  20250c:	mov    0xaae26d(%rip),%rax        # cb0780 <__gmon_start__>
+  202513:	test   %rax,%rax
+  202516:	je     20251a <_init@@Base+0x12>
+  202518:	call   *%rax
+  20251a:	add    $0x8,%rsp
+  20251e:	ret
+
+Disassembly of section .plt:
+
+0000000000202520 <CJ_MCC_DecodeStackTrace@plt-0x10>:
+  202520:	push   0xaaeae2(%rip)        # cb1008 <_fini@@Base+0x333f84>
+  202526:	jmp    *0xaaeae4(%rip)        # cb1010 <_fini@@Base+0x333f8c>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "eb2d31e95fd92c9a1f3daa513115b5d5e802c4367439fd40d9eb1b58e530d956"}

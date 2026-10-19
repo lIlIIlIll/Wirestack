@@ -1,0 +1,21 @@
+In archive <scratch>/wirestack/target/native/current/lib/libwirestack_tls_provider.a:
+
+wirestack_tls_provider.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <wirestack_tls_private_key_validate_pkcs8>:
+       0:	push   %r15
+       2:	push   %r14
+       4:	push   %rbx
+       5:	sub    $0x10,%rsp
+       9:	mov    %fs:0x28,%rax
+      12:	mov    %rax,0x8(%rsp)
+      17:	mov    %rdi,(%rsp)
+      1b:	test   %rdi,%rdi
+      1e:	je     75 <wirestack_tls_private_key_validate_pkcs8+0x75>
+      20:	mov    %rsi,%r14
+      23:	test   %rsi,%rsi
+      26:	jle    75 <wirestack_tls_private_key_validate_pkcs8+0x75>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "ebbcaf7945fea09f66fb429c444c7c2c9ce54b89005632b1aa0b0fefa4defd2f"}

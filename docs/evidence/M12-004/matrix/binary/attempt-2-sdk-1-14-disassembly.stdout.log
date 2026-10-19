@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-convert.a:
+
+floatparse.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_STRTOD>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	push   %r14
+   6:	push   %rbx
+   7:	sub    $0x20,%rsp
+   b:	mov    %fs:0x28,%rax
+  14:	mov    %rax,-0x18(%rbp)
+  18:	test   %rdi,%rdi
+  1b:	je     a8 <CJ_STRTOD+0xa8>
+  21:	mov    %rdi,%rbx
+  24:	movq   $0x0,-0x20(%rbp)
+  2c:	mov    0x0(%rip),%eax        # 32 <CJ_STRTOD+0x32>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "dacb0a2371722376914ad910ec4df2532c803d944cdb25ec5dae6e2a41f566b4"}

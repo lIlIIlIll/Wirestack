@@ -9,7 +9,7 @@ Run the M12-003 lifecycle gate against an extracted Wirestack archive and the ex
 - The verified archive at `docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz`. Its production payload must equal the current checkout. An archive/source mismatch fails before building consumers.
 - Disk-backed `$HOME/.cache/agent-tmp` with sufficient free space. No privileged networking, global firewall change, or production fault hook is required.
 
-Other SDKs are rejected before execution. The complete qualified SDK closure (compiler, CJPM, import metadata, modules, static libraries, runtime), observed native runtime mappings (or an explicitly marked loader resolution for a very short process), archive, provider, source, probes, and consumer binaries are fingerprinted in the report; collection compares the complete closure, not only `cjc` and four shared libraries.
+Other SDKs are rejected before execution. Compiler, runtime files, observed native runtime mappings (or an explicitly marked loader resolution for a very short process), archive, provider, source, probes, and consumer binaries are fingerprinted in the report.
 
 ## Run daily smoke
 
@@ -79,7 +79,7 @@ Recovery is explicit application policy, not transparent retry or automatic SSE 
 
 Fault admission, publication, sequence consumption, cancellation entry, and rotation/shutdown ordering use events or condition barriers with absolute deadlines, not timing sleeps. The reused gzip cleanup observer polls an actual public ledger with a bounded deadline; it does not schedule faults or retry failed requests.
 
-Owned process groups, native consumers, peer sockets/thread, samplers, handlers, configurations, and pending operations have bounded cleanup, including timeout and interruption. A passing profile must record the complete cleanup contract: reaped process, zero remaining owned processes, stopped resource sampler, and a joined wire peer with a closed listener when the protocol layer used one. Command logs are bounded to 1 MiB per stream and published paths are normalized. Native future cancellation diagnostics may appear on stderr; the accepted typed terminal and joined completion/cleanup assertions determine the result, not absence of diagnostics.
+Owned process groups, native consumers, peer sockets/thread, samplers, handlers, configurations, and pending operations have bounded cleanup, including timeout and interruption. Command logs are bounded to 1 MiB per stream and published paths are normalized. Native future cancellation diagnostics may appear on stderr; the accepted typed terminal and joined completion/cleanup assertions determine the result, not absence of diagnostics.
 
 ## Qualification boundary
 

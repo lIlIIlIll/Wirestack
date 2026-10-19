@@ -1,0 +1,25 @@
+{
+  "reviewed_private_adapter": {
+    "bootstrap.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "99580c69bf0d96e99083381e3bdcc0206c8e372d1bcb37cc74656580703e2c0a"
+    },
+    "driver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "baf4fdefab725a3adc0507659a67510d35685966eb5992346d352f2c6aef7b4e"
+    },
+    "launch.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2f0582a4ae12ec593d063f20b4b5b0f470850212a10636946416af6fc9c9a52"
+    }
+  },
+  "contract": {
+    "performance_function": "AST extracted unchanged from frozen source",
+    "cjpm": "only interception, child mount hides entire repository readonly",
+    "glibc": "verified14files, loader plus13 libraries, readonly bind mount, fresh exec before SDK",
+    "qualification": "NOT_QUALIFIED",
+    "measurements": "528 planned, no retries or changed thresholds",
+    "host": "unprivileged UID; namespace root; 8 nonexclusive physical NUMA0 cores"
+  },
+  "measurement_result": "NOT_ASSERTED"
+}

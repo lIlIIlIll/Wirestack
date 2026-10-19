@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-unittest.common.a:
+
+unittest.common.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CNby13Configuration8toStringHvE10printEntryHCNat13StringBuilderET1_CNby16ConfigurationKeyECNat3AnyEE-0x14>:
+       0:	xor    %eax,%eax
+       2:	ret
+       3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+      10:	add    %al,(%rax)
+	...
+
+0000000000000014 <_CNby13Configuration8toStringHvE10printEntryHCNat13StringBuilderET1_CNby16ConfigurationKeyECNat3AnyEE>:
+      14:	push   %rbp
+      15:	mov    %rsp,%rbp
+      18:	call   1d <_CNby13Configuration8toStringHvE10printEntryHCNat13StringBuilderET1_CNby16ConfigurationKeyECNat3AnyEE+0x9>
+      1d:	push   %r14
+      1f:	push   %r13
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "cfa420e5dc9ef38016c93c796fc80c0bf4ec2162ebcefbb9959e685c499fa71a"}

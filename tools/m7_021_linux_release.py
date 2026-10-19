@@ -50,7 +50,6 @@ EXPECTED_SMOKE_LINES = {
     "transportBackend=std-net",
     "runtimeIoBackend=cjnative",
     "tlsProvider=aws-lc",
-    "tlsProviderVersion=5.5.0",
     "externalOpenSslDependency=false",
 }
 PROJECT_LICENSE_EXPRESSION = "Apache-2.0"
@@ -104,6 +103,10 @@ EXCLUDED_PLATFORM_PARTS = {
 
 class ReleaseError(RuntimeError):
     """Raised when the artifact cannot satisfy the M7-021 release contract."""
+    def __init__(self, detail: str, *, code: str = "RELEASE_INVALID"):
+        self.code = code
+        self.detail = detail
+        super().__init__(f"{code}: {detail}")
 
 
 def canonical_json(value: Any) -> bytes:
@@ -348,7 +351,7 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
             artifact_payload_sha256(provider_archive_bytes),
         )
     ):
-        raise ReleaseError("TLS provider native archive provenance is invalid")
+        raise ReleaseError("TLS provider native archive provenance is invalid", code="NATIVE_ARCHIVE_PROVENANCE")
     resolver_archive = resolver_manifest.get("archive")
     resolver_archive_bytes = payload.get("target/native/resolver/current/lib/libwirestack_resolver.a")
     if (
@@ -367,7 +370,7 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         provider_manifest.get("test_only_key_log", False) is not False
         or "key-log" in provider_manifest.get("capabilities", [])
     ):
-        raise ReleaseError("test-only TLS key logging cannot enter a release artifact")
+        raise ReleaseError("test-only TLS key logging cannot enter a release artifact", code="KEYLOG_CAPABILITY_FORBIDDEN")
 
     entries = [
         {
@@ -663,9 +666,10 @@ def consumer_manifest(installed: Path) -> str:
 '''
 
 
-def validate_smoke_output(output: str) -> None:
+def validate_smoke_output(output: str, *, provider_version: str = "5.5.0") -> None:
     lines = set(output.splitlines())
-    missing = sorted(EXPECTED_SMOKE_LINES - lines)
+    expected = EXPECTED_SMOKE_LINES | {f"tlsProviderVersion={provider_version}"}
+    missing = sorted(expected - lines)
     fingerprint = next((line for line in lines if line.startswith("buildFingerprint=")), "")
     if missing:
         raise ReleaseError(f"installed consumer smoke omitted required output: {missing}")
@@ -673,7 +677,7 @@ def validate_smoke_output(output: str) -> None:
         raise ReleaseError("installed consumer reported an empty build fingerprint")
 
 
-def build_and_run_consumer(installed: Path, work: Path) -> tuple[Path, str, str]:
+def build_and_run_consumer(installed: Path, work: Path, *, provider_version: str = "5.5.0") -> tuple[Path, str, str]:
     consumer = work / "consumer"
     source = consumer / "src"
     source.mkdir(parents=True)
@@ -684,7 +688,7 @@ def build_and_run_consumer(installed: Path, work: Path) -> tuple[Path, str, str]
     if not binary.is_file():
         raise ReleaseError("clean consumer build did not produce target/release/bin/main")
     smoke_output = run([str(binary)], cwd=consumer)
-    validate_smoke_output(smoke_output)
+    validate_smoke_output(smoke_output, provider_version=provider_version)
     return binary, build_output, smoke_output
 
 

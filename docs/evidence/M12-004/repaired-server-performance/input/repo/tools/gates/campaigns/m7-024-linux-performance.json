@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "gate_id": "M7-024-LINUX-PERFORMANCE",
+  "profile": "linux-glibc-x86_64",
+  "environment": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "cangjie": "1.1.0-alpha.20260817040003",
+    "target": "x86_64-unknown-linux-gnu",
+    "cjpm": "1.1.3",
+    "optimization": "-O2"
+  },
+  "artifacts": {
+    "raw_tcp": {
+      "path": "docs/evidence/M1-027/linux_x86_64/final-net05-formal11.data",
+      "sha256": "2bab904ceeaad6c1aec87bdc8b3c04db85c8da16154cc90c2c382fc66cda70b8"
+    },
+    "cancellation": {
+      "path": "docs/evidence/M1-025/linux_x86_64/report.data",
+      "sha256": "03f2ab715c8ef28458bfe5f71f48d6a6b725bc4adbf0d02645be81e5a9509a8a"
+    },
+    "dns_to_connected": {
+      "path": "docs/evidence/M2-016/linux_glibc_x86_64/dns-to-connected.json",
+      "sha256": "087da7ab38ab939b5a1ab81410936c3fe3326b23f0f7912b7fc04b072e22cc86"
+    },
+    "tls": {
+      "path": "docs/evidence/M6-025/linux_glibc_x86_64/m3-028-requalification.report",
+      "sha256": "9ee4cf08eab8c5872d8c2923444beaa075209540e0e01758e1963a61dd482926"
+    },
+    "http1": {
+      "path": "docs/evidence/M5-030/linux_x86_64/http1-benchmark.data",
+      "sha256": "8521871dedd09f2439abbf4cbfa27edb9048db839f87dd2a71042937d8db19e1"
+    },
+    "http2": {
+      "path": "docs/evidence/M7-024/linux_glibc_x86_64/http2-benchmark-after-m6-026.json",
+      "sha256": "ca9cbf1710cffdae0d75361cbc6796c69d5459e15146a1ddc8dcbd5a41b145c6",
+      "source_sha256": "2450fe679d91e0dd51c735a969f71351c6b378b76525a4b6d1a8b88248cd9b07"
+    },
+    "sse": {
+      "path": "docs/evidence/M6-023/linux_x86_64/sse-streaming-profile.json",
+      "sha256": "3e5c39c925a753e5917969cdbf5f067b6b4a5a18a4475485e26775ac001212ec"
+    }
+  },
+  "domains": [
+    "raw-tcp",
+    "dns-to-connected",
+    "tls",
+    "http1",
+    "http2",
+    "cancellation",
+    "sse",
+    "memory"
+  ],
+  "thresholds": {
+    "raw_tcp": {
+      "payload_bytes": [1024, 16384, 65536, 1048576, 104857600],
+      "measured_rounds": 11,
+      "warmup_rounds": 1,
+      "minimum_throughput_ratio": 0.95,
+      "maximum_p95_latency_ratio": 1.10,
+      "maximum_staging_copied_bytes": 0
+    },
+    "dns_to_connected": {
+      "profiles": ["cancellation", "ipv6-available", "ipv6-blackhole", "loss-1pct", "rtt-100ms", "rtt-20ms"],
+      "measured_rounds": 11,
+      "samples_per_round": 8,
+      "samples_per_profile": 88,
+      "maximum_cancellation_p99_ns": 50000000
+    },
+    "tls": {
+      "measured_rounds": 11,
+      "minimum_bulk_throughput_ratio": 0.90,
+      "maximum_full_handshake_p50_ratio": 1.10,
+      "maximum_full_handshake_p95_ratio": 1.20,
+      "minimum_resumed_rounds": 11,
+      "maximum_body_growth_kib": 32768,
+      "maximum_body_growth_ratio": 0.25,
+      "maximum_idle_kib_per_connection": 48.0
+    },
+    "http1": {
+      "measured_rounds": 7,
+      "minimum_throughput_ratio": 0.90,
+      "streamed_body_bytes": [16777216, 67108864],
+      "maximum_rss_growth_kib": 16384,
+      "maximum_rss_ratio": 1.50
+    },
+    "http2": {
+      "concurrency": [1, 10, 100],
+      "measured_rounds_per_pass": 20,
+      "passes": 2,
+      "maximum_connection_ratio": 0.25,
+      "maximum_pending_writes": 256,
+      "maximum_pending_write_bytes": 1048576,
+      "maximum_outstanding_flow_permits": 0
+    },
+    "cancellation": {
+      "scenarios": ["blocked-read", "blocked-write"],
+      "warmup_samples": 2,
+      "measured_samples": 100,
+      "maximum_p99_ns": 50000000
+    },
+    "sse": {
+      "protocols": ["h1", "h2"],
+      "minimum_duration_seconds": 3600,
+      "minimum_events": 1000000,
+      "maximum_cancel_latency_ns": 50000000,
+      "minimum_resource_samples": 300,
+      "maximum_fd_growth": 2,
+      "maximum_socket_growth": 2,
+      "maximum_thread_growth": 2,
+      "maximum_rss_growth_kib": 32768,
+      "maximum_application_pending_bytes": 0,
+      "maximum_sequence_errors": 0
+    }
+  }
+}

@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-console.a:
+
+console_write.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_CONSOLE_Flush>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	cmp    $0x1,%edi
+  18:	jne    23 <CJ_CONSOLE_Flush+0x23>
+  1a:	mov    0x0(%rip),%rax        # 21 <CJ_CONSOLE_Flush+0x21>
+  21:	jmp    2a <CJ_CONSOLE_Flush+0x2a>
+  23:	mov    0x0(%rip),%rax        # 2a <CJ_CONSOLE_Flush+0x2a>
+  2a:	mov    (%rax),%rdi
+  2d:	call   32 <CJ_CONSOLE_Flush+0x32>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "cb047a9335f33c59c4cb5913397c31ca2ee32c8e9d12f37b065af7091b7687db"}

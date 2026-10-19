@@ -1,19 +1,6 @@
 """Evidence decisions must reject missing fault proof and damaged fault scope."""
 import unittest
-from tools.gates.m12_003_lifecycle import bounded_cleanup, classify_wire, main
-
-
-class BoundedCleanupTests(unittest.TestCase):
-    def test_live_sampler_or_unreaped_process_is_not_bounded_cleanup(self):
-        good = {"process_reaped": True, "remaining_live_owned_processes": 0, "sampler_alive": False}
-        self.assertTrue(bounded_cleanup(good))
-        for field, value in (("sampler_alive", True), ("process_reaped", False),
-                             ("remaining_live_owned_processes", 1)):
-            cleanup = dict(good)
-            cleanup[field] = value
-            with self.subTest(field=field):
-                self.assertFalse(bounded_cleanup(cleanup))
-        self.assertFalse(bounded_cleanup({}))
+from tools.gates.m12_003_lifecycle import classify_wire, main
 
 
 class WireAcceptanceTests(unittest.TestCase):

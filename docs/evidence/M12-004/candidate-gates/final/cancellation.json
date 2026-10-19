@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "family": "candidate-gates",
+  "status": "CANCELED",
+  "qualification": "NOT_QUALIFIED",
+  "archive": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+  },
+  "reason": "Stopped before changing ambiguous CLI digest operand naming and correcting the claimed matrix scope. A fresh source-bound run is required; this incomplete attempt is not the final result.",
+  "performance": "INCOMPLETE_CANCELED"
+}

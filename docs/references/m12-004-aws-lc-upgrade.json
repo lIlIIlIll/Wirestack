@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "scope": "NON_PRODUCTION_UPGRADE_REHEARSAL_ONLY",
+  "provider_id": "aws-lc",
+  "provider_version": "5.11.0",
+  "source": {
+    "kind": "git",
+    "url": "https://github.com/aws/aws-lc.git",
+    "tag": "v5.11.0",
+    "commit": "fa9bc8d6f7cfb2cf849b247fb06bbbfc41ecc9d6",
+    "tree": "e9d52ead35793426b465d4ec694e34d4ee9a6d5e",
+    "content_sha256": "ece6d5e872aaf5210aaabc32b16788f6e31d6afe5ecc74b7d514827bf5c906bb"
+  },
+  "source_identity_domain": "text-utf8-lf-v1",
+  "source_identity_input": "commit followed by LF, tree followed by LF",
+  "release": {
+    "url": "https://github.com/aws/aws-lc/releases/tag/v5.11.0",
+    "api_url": "https://api.github.com/repos/aws/aws-lc/releases/latest",
+    "published_at": "2026-10-01T23:32:14Z",
+    "draft": false,
+    "prerelease": false,
+    "immutable": false,
+    "tag_resolution_command": ["git", "ls-remote", "https://github.com/aws/aws-lc.git", "refs/tags/v5.11.0", "refs/tags/v5.11.0^{}"]
+  },
+  "baseline": {
+    "provider_version": "5.5.0",
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+  },
+  "patches": [],
+  "license_expression": "Apache-2.0 OR ISC",
+  "sdk_policy": "STS_ONLY",
+  "production_pin_changed": false,
+  "security_clearance": "NOT_GRANTED",
+  "qualification": "NOT_QUALIFIED",
+  "constraints": [
+    "Build from the exact clean commit and tree, not a subsequently moved tag.",
+    "Keep the accepted ADR-0003 production pin unchanged.",
+    "Rebuild the package and regenerate its SBOM and fingerprints; old reports are not candidate evidence.",
+    "Review public advisory applicability and the complete upstream diff before promotion.",
+    "Formal qualification and production signing remain separate gates."
+  ]
+}

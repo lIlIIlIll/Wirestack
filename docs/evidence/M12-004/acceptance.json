@@ -1,0 +1,203 @@
+{
+  "artifact": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+  },
+  "blockers": [
+    {
+      "code": "PERFORMANCE_P95_THRESHOLD",
+      "detail": "Measured TLS full-handshake P95 ratio 1.2051572750772457 exceeds1.20; no native sample failures and no rerun to green."
+    },
+    {
+      "code": "PERFORMANCE_REPEATABILITY_NOT_ACCEPTED",
+      "detail": "31 NOISY comparisons and2 PASS; stable overall slowdown and root cause are not established."
+    },
+    {
+      "code": "ROLLBACK_SECURITY_DISPOSITION_MISSING",
+      "detail": "Exact original artifact has no independently authorized fresh truthful signed disposition; restore NOT_RUN."
+    },
+    {
+      "code": "CURRENT_SECURITY_FINDING_OPEN",
+      "detail": "Candidate WebSocket eager declared-frame allocation remains OPEN; selected-hunk review does not close all review coverage gaps."
+    },
+    {
+      "code": "FORMAL_QUALIFICATION_NOT_GRANTED",
+      "detail": "Uncommitted source, no complete independently approved source-bound qualification, formal M7-024 campaign or86400-second soak; signing not authorized."
+    }
+  ],
+  "checks": {
+    "architecture": {
+      "argv": [
+        "scripts/architecture-guard"
+      ],
+      "exit_code": 0,
+      "output": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "0042db8452f1b3d01ffef1cfb53a61fc2ccf2629a5630d6a3810af9882f47cfb"
+        },
+        "path": "docs/evidence/M12-004/integration/architecture.log"
+      }
+    },
+    "public-api": {
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "exit_code": 0,
+      "output": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "59a5ebcf0da705430af4043ea226dbe660ce47c62dd9b546daecf7046435acca"
+        },
+        "path": "docs/evidence/M12-004/integration/public-api.log"
+      }
+    }
+  },
+  "criteria": {
+    "candidate_full_fuzz": "PASS",
+    "candidate_performance": "FAIL",
+    "candidate_tls": "PASS",
+    "formal_source_review_performance_soak_signing": "BLOCKED",
+    "independent_tls_coexistence": "PASS",
+    "installed_source_ca": "PASS",
+    "inventory": "PASS",
+    "native_minimum_floor": "PASS",
+    "rollback_current_security_authorization": "BLOCKED",
+    "rollback_exact_archive_authentication": "PASS",
+    "rollback_restore": "NOT_RUN",
+    "upgrade_consumer": "PASS",
+    "verifier_controls": "PASS"
+  },
+  "production_pin_changed": false,
+  "qualification": "NOT_QUALIFIED",
+  "reports": [
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "81733ab6361f5482da20d4a5b5bc1b49960ad246b05850d2648c89b2aac3c029"
+      },
+      "path": "docs/evidence/M12-004/workspace.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "87e2a12557d43db63710c5481edf5dac1915a40c051e62b9e3d0578a0c6f32db"
+      },
+      "path": "docs/evidence/M12-004/upgrade/report.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "52297359ca9dd664627b064412bb9d474164d5695ea15cc110e7322a80bfc07d"
+      },
+      "path": "docs/evidence/M12-004/inventory/candidate/inventory.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c76af0446f621ec96849cbb2f394f95659bfd20512981df81248534648cbffdb"
+      },
+      "path": "docs/evidence/M12-004/verifier-controls/candidate-verification.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5e80a312f4a4d7baa4b044ed4023898507c8cfcf02630e58ee70f2bcea80dfd4"
+      },
+      "path": "docs/evidence/M12-004/rollback/final-candidate-refusal.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e78bd20f7889417ae23fef7a999faa6c00f0f8d8bee45e8004c44c53b73c75d3"
+      },
+      "path": "docs/evidence/M12-004/review/independent-review.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1c8a7ddcbdbfef8539ea5f4d609a26dee3c2c732f5ef8b86e986c8b77f6df9d7"
+      },
+      "path": "docs/evidence/M12-004/review/independent-review-followup.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c5743509b7983daa2d7b177affdb86bbf5d8f28612f611728f60a1d3e7d2e828"
+      },
+      "path": "docs/evidence/M12-004/candidate-gates/final2/report.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ced8dc893d8f2bdb7e461567db311f6e6dec99aca351064ddc8602c71effebb7"
+      },
+      "path": "docs/evidence/M12-004/matrix/installed/sts113-upgrade/report.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "40953b4a30798131e9259334d2bfe3e323ecb60c28a114ec6f303fa0c12cae7c"
+      },
+      "path": "docs/evidence/M12-004/matrix/installed/index.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b76d7347f636c5d9a3513ca0af454b41be54e4b4a40dc0d9e7c04b792ad31fde"
+      },
+      "path": "docs/evidence/M12-004/matrix/native-floor/index.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "dff5dba2bcb39baa4b095bd9cbed7be2b81c7f7e5f5e4b04f0a895facd23114f"
+      },
+      "path": "docs/evidence/M12-004/matrix/native-floor/native-glibc244/report.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "65a41b6ba982a0b7447d8178dd1dca9a9173050187e7a141e9c41f7d8020da09"
+      },
+      "path": "docs/evidence/M12-004/matrix/native-floor/owned-cleanup.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a074144e588b3a6a8696cc77f5824d7527aa9998fd4aebb5a0830626ee80d3f3"
+      },
+      "path": "docs/evidence/M12-004/matrix/binary/report.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "044b2b4ccf2dae5eeca16454aa4340e6d7f5946598a05318b11f5b69dab358a2"
+      },
+      "path": "docs/evidence/M12-004/matrix/binary/index.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "db83b0bf753c3cd163dbf8cc2af7d9a42a3d59c3f133d668542d29e71d6b8840"
+      },
+      "path": "docs/evidence/M12-004/matrix/binary/summary.json"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "69c686de2ce7c8f02c8a08d64ff1ed0a7a5f29c882f3561461251ee7e13d56e6"
+      },
+      "path": "docs/evidence/M12-004/integration/tests.json"
+    }
+  ],
+  "revision_scope": "Safety HEAD only; it does not contain uncommitted candidate changes or qualify this source.",
+  "schema_version": 1,
+  "sdk_policy": "STS_ONLY",
+  "signing_authorized": false,
+  "source_committed": false,
+  "source_revision_record": "e023996a847a863bc52be20983139ff6d28d9625",
+  "status": "BLOCKED",
+  "task_id": "M12-004"
+}

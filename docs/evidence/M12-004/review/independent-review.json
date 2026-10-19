@@ -1,0 +1,388 @@
+{
+  "advisories": [
+    {
+      "baseline_5_5_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "basis": "Both exact snapshots contain leading wildcard handling and rejection of multi-label non-ASCII CNs in cn2dnsid. Wirestack additionally sets X509_CHECK_FLAG_NEVER_CHECK_SUBJECT at native shim line 1343.",
+      "candidate_5_11_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "cve": null,
+      "id": "GHSA-3jrg-j22w-mpmc",
+      "limits": "Static exact-snapshot assessment, not an exploit regression execution or cryptographic audit. Does not use numeric 5 > 1 comparison as sole proof.",
+      "returned_ranges": [
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC"
+          },
+          "patched_versions": "1.71.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": ">= v1.61.0, < 1.71.0"
+        }
+      ],
+      "source": "crypto/x509/v3_ncons.c:259-371",
+      "url": "https://github.com/aws/aws-lc/security/advisories/GHSA-3jrg-j22w-mpmc"
+    },
+    {
+      "baseline_5_5_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "basis": "Both snapshots require an actual IDP match or an absent/empty IDP, and reject unsupported reasons/indirect CRLs. Candidate additionally removes relative-name CRL distribution-point support. Wirestack shim exposes no CRL_CHECK enablement. API range says <v1.71.0 but description adds >=v1.24.0 and separate FIPS 3.0-3.3 lineage.",
+      "candidate_5_11_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "cve": "CVE-2026-4428",
+      "id": "GHSA-q87m-xr7j-vrww",
+      "limits": "Static exact-snapshot assessment, not an exploit regression execution or cryptographic audit. Does not use numeric 5 > 1 comparison as sole proof.",
+      "returned_ranges": [
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC"
+          },
+          "patched_versions": "1.71.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": " < v1.71.0"
+        },
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC-FIPS"
+          },
+          "patched_versions": "3.3.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": "3.0.0"
+        }
+      ],
+      "source": "crypto/x509/x509_vfy.c:1054-1207",
+      "url": "https://github.com/aws/aws-lc/security/advisories/GHSA-q87m-xr7j-vrww"
+    },
+    {
+      "baseline_5_5_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "basis": "Both snapshots compare the authenticated message digest, initialize verification over encoded authenticated attributes, and invoke EVP_VerifyFinal. No PKCS7_verify call is exposed by the Wirestack shim.",
+      "candidate_5_11_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "cve": "CVE-2026-3338",
+      "id": "GHSA-jchq-39cv-q4wj",
+      "limits": "Static exact-snapshot assessment, not an exploit regression execution or cryptographic audit. Does not use numeric 5 > 1 comparison as sole proof.",
+      "returned_ranges": [
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC"
+          },
+          "patched_versions": "v1.69.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": ">= v1.41, < v1.69.0"
+        }
+      ],
+      "source": "crypto/pkcs7/pkcs7.c:1632-1678",
+      "url": "https://github.com/aws/aws-lc/security/advisories/GHSA-jchq-39cv-q4wj"
+    },
+    {
+      "baseline_5_5_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "basis": "Both snapshots use CRYPTO_memcmp for EVP CIPHER CCM tag verification and cleanse output on mismatch. FIPS 3.0-3.2 range is a separate lineage, not the selected non-FIPS static build. Wirestack exposes no EVP CCM selection.",
+      "candidate_5_11_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "cve": "CVE-2026-3337",
+      "id": "GHSA-frmv-5gcm-jwxh",
+      "limits": "Static exact-snapshot assessment, not an exploit regression execution or cryptographic audit. Does not use numeric 5 > 1 comparison as sole proof.",
+      "returned_ranges": [
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC"
+          },
+          "patched_versions": "v1.69.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": ">= v1.21.0, < v1.69.0"
+        },
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC"
+          },
+          "patched_versions": "AWS-LC-FIPS-3.2.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": ">= AWS-LC-FIPS-3.0.0, < AWS-LC-FIPS-3.2.0"
+        }
+      ],
+      "source": "crypto/fipsmodule/cipher/e_aesccm.c:596-600",
+      "url": "https://github.com/aws/aws-lc/security/advisories/GHSA-frmv-5gcm-jwxh"
+    },
+    {
+      "baseline_5_5_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "basis": "Both snapshots perform X509_verify_cert inside the per-signer loop, failing immediately on any signer failure. No PKCS7_verify call is exposed by the Wirestack shim.",
+      "candidate_5_11_0": "NOT_AFFECTED_BY_DESCRIBED_DEFECT_SOURCE_ASSESSED",
+      "cve": "CVE-2026-3336",
+      "id": "GHSA-cfwj-9wp5-wqvp",
+      "limits": "Static exact-snapshot assessment, not an exploit regression execution or cryptographic audit. Does not use numeric 5 > 1 comparison as sole proof.",
+      "returned_ranges": [
+        {
+          "package": {
+            "ecosystem": "",
+            "name": "AWS-LC"
+          },
+          "patched_versions": "v1.69.0",
+          "vulnerable_functions": [],
+          "vulnerable_version_range": ">= v1.41, < v1.69.0"
+        }
+      ],
+      "source": "crypto/pkcs7/pkcs7.c:1736-1754",
+      "url": "https://github.com/aws/aws-lc/security/advisories/GHSA-cfwj-9wp5-wqvp"
+    }
+  ],
+  "binding_checks": {
+    "archive": true,
+    "declared_builder_sources_current": true,
+    "native_archive": true,
+    "native_manifest_matches_report": true,
+    "package_source_manifest": true,
+    "payload_verified": true,
+    "sdk_matches_qualified_oracle": true,
+    "sdk_matches_report": true,
+    "sidecar_digests": true,
+    "source_identity": true
+  },
+  "candidate_unchanged_during_review": true,
+  "evidence": "docs/evidence/M12-004/review/review-bindings.json",
+  "family": "independent-upgrade-security-review",
+  "findings": [
+    {
+      "evidence": "Archived THIRD_PARTY_NOTICES.md says AWS-LC 5.5.0 and 991e67ff4cf04df4dd89e407f8b920c6936cb56a; embedded native provider and regenerated SPDX identify 5.11.0 and fa9bc8d6f7cfb2cf849b247fb06bbbfc41ecc9d6. Builder copies candidate LICENSE but leaves project notice unchanged.",
+      "id": "M12-004-REVIEW-001",
+      "impact": "Artifact legal/source identity narrative contradicts its audited dependencies, misleading downstream source inventory and vulnerability review. Hashing the stale notice does not make its semantic identity correct.",
+      "paths": [
+        {
+          "lines": "3-5",
+          "path": "THIRD_PARTY_NOTICES.md"
+        },
+        {
+          "lines": "128-132",
+          "path": "tools/m12_004_upgrade.py"
+        }
+      ],
+      "reproduction": {
+        "executed": true,
+        "method": "Read THIRD_PARTY_NOTICES.md directly from the verified candidate tar payload and compare with native manifest/SPDX. No execution of packaged code."
+      },
+      "required_action": "Update the isolated candidate package notice to its selected version/commit before collecting payload. Preserve production baseline notices. Rebuild candidate, SPDX and all artifact-bound proof.",
+      "scope": "actual selected candidate archive",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "Candidate notice identifies the wrong AWS-LC release and commit"
+    },
+    {
+      "evidence": "Required current_review_inputs contains only the historical protocol/native reviews and HPACK triage. Required known IDs come only from findings in the first two reviews. Newly returned GHSA IDs in current inventory, review gaps and coverageGaps are not required or bound. advisory_review_complete=true plus a signed list of historical finding dispositions is enough for this condition even if fresh advisory IDs are absent.",
+      "id": "M12-004-REVIEW-002",
+      "impact": "A cryptographically valid disposition need not prove complete fresh advisory review, weakening the intended independently authorized rollback boundary. This does not show an actual restored or unauthorized package.",
+      "paths": [
+        {
+          "lines": "156-168",
+          "path": "tools/m12_004_rollback.py"
+        }
+      ],
+      "reproduction": {
+        "executed": false,
+        "method": "Source-level acceptance analysis: retain valid original artifact/qualification bindings, authorize every ID generated by known, omit all five fresh GHSA IDs and gap IDs, set advisory_review_complete=true. The conditions at 156-168 have no predicate that rejects these omissions. A real authorized signature would still be required; no signing or restore attempted."
+      },
+      "required_action": "Bind current inventory, official response digests and this fresh review to disposition; require explicit evidence-backed dispositions for returned advisory IDs and unresolved relevant findings/gaps. Preserve independent authorized key prerequisite and fail closed without it.",
+      "scope": "rollback authorization verifier",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "Rollback signed disposition can omit fresh public advisory IDs"
+    },
+    {
+      "evidence": "Verified candidate source matches reviewed current source. readWireFrame validates length then constructs Array<Byte>(length) at 654 before readWebSocketExact at 655. Default ceiling is 1 MiB and accepted maximum is 1 GiB.",
+      "id": "M8-007-PROTOCOL-002",
+      "impact": "Small remote input retains full per-frame allocation; finite per-frame/connection limits mitigate but do not provide an aggregate memory budget. Dependency upgrade does not remediate this source behavior.",
+      "paths": [
+        {
+          "lines": "110-118,623-655",
+          "path": "src/http/websocket.cj"
+        }
+      ],
+      "reproduction": {
+        "executed": false,
+        "limit": "No stalled-peer/high-memory runtime experiment performed.",
+        "steps": [
+          "Admit a WebSocket connection under default frame limits.",
+          "Send a role-correct header declaring 1 MiB, including mask bytes if required.",
+          "Withhold payload and use a receive context without a short deadline.",
+          "Source allocates the full declared frame before blocking. Repeat across admitted connections."
+        ]
+      },
+      "required_action": "Security owner must resolve this existing finding through bounded incremental receive and aggregate allocation accounting, or provide independently authorized disposition under applicable policy. This reviewer grants no waiver.",
+      "scope": "actual candidate public WebSocket parser",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "Candidate WebSocket reader still allocates declared frame before receiving payload"
+    },
+    {
+      "evidence": "Candidate contains a generated fixed 512-edge binary tree and one indexed edge lookup per input bit. It does not contain historical per-bit exact/prefix scans. Candidate source digest is recorded separately from historical triage source 78c1f32c35219f4f309e82cb93f6960952b1e2e6b1ad4de106eda13e4235b585. Historical 5.590-second result must not be attributed to candidate.",
+      "id": "M8-007-PROTOCOL-001",
+      "paths": [
+        {
+          "lines": "86-137",
+          "path": "src/internal/http2/hpack_huffman.cj"
+        }
+      ],
+      "reproduction": {
+        "executed": true,
+        "method": "Compare verified archive source bytes with current source; inspect decoder/trie builder control flow."
+      },
+      "required_action": "Keep historical reports unchanged; obtain fresh exact-candidate correctness, maximum-valid-input cost and sibling-stream responsiveness evidence before formal closure.",
+      "scope": "source mechanism only, not formal qualification",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "Historical linear-scan HPACK mechanism is absent from selected candidate"
+    },
+    {
+      "evidence": "This reviewer inspected source, not the separate worker execution results. Source still decodes synchronously; indexed constant work eliminates the reported table scans but is not an end-to-end cancellation or fairness proof.",
+      "id": "M12-004-REVIEW-003",
+      "paths": [
+        {
+          "lines": "86-137",
+          "path": "src/internal/http2/hpack_huffman.cj"
+        }
+      ],
+      "required_action": "Review fresh candidate-bound worker performance/fuzz proof and explicit limits; do not promote using historical PASS-looking measurements.",
+      "scope": "formal candidate requalification",
+      "severity": "GATE",
+      "status": "NOT_COMPLETED",
+      "title": "Source-remediated HPACK still needs candidate-bound execution acceptance"
+    },
+    {
+      "evidence": "Actual archived source calls validateBodyFraming with limits.maxBodyBytes during construction and rejects ContentLength(expected) above that limit, before writeHead. Historical unbounded fixed-body finding does not describe this candidate.",
+      "id": "M8-007-PROTOCOL-003",
+      "paths": [
+        {
+          "lines": "91-100,157-170",
+          "path": "src/internal/http1/request_writer.cj"
+        }
+      ],
+      "reproduction": {
+        "executed": true,
+        "method": "Inspect exact archived source; no test execution by reviewer."
+      },
+      "required_action": "Retain a candidate-bound regression proving zero transport writes at limit+1; not a reason to rewrite old findings.",
+      "scope": "source correctness only",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "Candidate fixed-length HTTP/1 writer now applies maxBodyBytes before writing"
+    },
+    {
+      "evidence": "Large exact upstream diff was inventoried and security-critical selected hunks reviewed, not fully audited. No formal candidate soak, exhaustive native ABI/sanitizer audit, human approval or production signature performed in this review.",
+      "id": "M12-004-REVIEW-004",
+      "required_action": "Complete separately authorized formal gates against final immutable artifact and source bindings. Current candidate remains NOT_QUALIFIED.",
+      "scope": "promotion/signing",
+      "severity": "GATE",
+      "status": "NOT_COMPLETED",
+      "title": "Full upstream and formal release acceptance remain incomplete"
+    }
+  ],
+  "formal_review_limits": {
+    "candidate_formal_soak": "NOT_COMPLETED_IN_THIS_REVIEW",
+    "candidate_fuzz_and_performance": "Separate worker owns fresh candidate proof; this report does not adopt results not yet reviewed.",
+    "compatibility": "Public C ABI signatures inspected as unchanged; no full API/ABI binary compatibility proof performed.",
+    "complete_upstream_diff": "NOT_COMPLETED",
+    "diff_size": "594 changed files, 110231 insertions, 10366 deletions",
+    "executable_checks": "Existing release.read_verified_payload and typed digest calculations only. No compiler, SDK runtime, tests, sanitizers, exploit campaign or signatures executed by reviewer.",
+    "full_cryptographic_audit": "NOT_COMPLETED",
+    "independent_human_approval": "NOT_COMPLETED",
+    "promotion_qualified": "NO",
+    "review_extent": "Complete changed-path inventory retained; selected security-critical C/SSL/ASN.1/X.509/PKCS7/CCM paths and project integration changes reviewed. Not every changed assembly, test, CI, documentation or cryptographic implementation hunk was manually audited."
+  },
+  "official_evidence": {
+    "aws_bulletins": "Retrieved HTML contains no AWS-LC/CVE-2026-4428/CVE-2026-333x matches. It is an index response, not complete linked bulletin contents or a negative clearance.",
+    "release_urls": [
+      "https://github.com/aws/aws-lc/releases/tag/v5.5.0",
+      "https://github.com/aws/aws-lc/releases/tag/v5.11.0"
+    ],
+    "repository_advisories": "docs/evidence/M12-004/inventory/current/advisory-repository-advisories.txt",
+    "repository_advisories_returned": 5,
+    "repository_advisory_pagination": "FIRST_PAGE_ONLY",
+    "security_policy": "Official policy describes coordinated disclosure and shared responsibility; unpublished issues may exist.",
+    "uncertainties": [
+      "Bounded public first-page intake may omit additional pages, private or unpublished advisories.",
+      "Release notes without a CVE are not proof of safety.",
+      "No fresh human/vendor security disposition authorizes rollback or promotion."
+    ],
+    "version_lineage": "Exact snapshots are rolling non-FIPS AWS-LC mainline. VERSIONING.md distinguishes rolling major/minor numbering from separately versioned FIPS branches; advisory 1.x/FIPS ranges were checked against affected source functions, not a simple numeric comparison. Local checkout lacks v1.69.0 and v1.71.0 tag objects, so full historical fix-commit ancestry was not established."
+  },
+  "production_signing": "NOT_AUTHORIZED_NOT_PERFORMED",
+  "qualification": "NOT_QUALIFIED",
+  "reviewed_at_utc": "2026-10-09T20:09:19.681550+00:00",
+  "reviewed_upgrade_changes": {
+    "shared_release": "Existing typed ReleaseError codes own archive provenance/keylog/stale fuzz rejection. Candidate smoke accepts explicit selected provider_version; historical qualification defaults remain baseline scoped. Verifier controls intentionally use historical TEST_ONLY cryptographic fixture and selected native mutation controls, not a production signature.",
+    "shim_identity": "Version now comes from AWSLC_VERSION_NUMBER_STRING. Mandatory WIRESTACK_TLS_PROVIDER_SOURCE_FINGERPRINT compiler macro replaces stale source identity. Builder smoke compares both expected version and source identity; C ABI functions/signatures unchanged.",
+    "supply_chain": "Native/archive/source/provider/SPDX fingerprints and STS compiler/runtime/import closure matched independently computed digests. Correct machine-readable metadata does not resolve the wrong textual notice.",
+    "upstream_hardening": [
+      "SSL buffer deserialization validates integer offsets/sizes before forming pointers.",
+      "TLS 1.3 client checks negotiated cipher against offered/configured list.",
+      "ASN.1 pretty-parser EOC must have zero content and two-byte header.",
+      "PKCS7 decrypt retains CEK length and substitutes dummy key for unusable length.",
+      "CCM cipher rejects input lengths above INT_MAX.",
+      "Relative-name CRL distribution point support is removed; callers requiring it need compatibility assessment.",
+      "System crypto-policy loading is opt-in ENABLE_CRYPTO_POLICIES=OFF by default in exact candidate CMake source, so new policy parser is not automatically activated by existing build options."
+    ]
+  },
+  "reviewer": {
+    "human_review": false,
+    "identity": "independent upgrade security review subagent",
+    "implementation_modified": false,
+    "independently_controlled_toolchain": false,
+    "kind": "AI_REVIEW_SUBAGENT",
+    "separate_process_assignment": true,
+    "shared_repository_and_model_family": true
+  },
+  "rollback_boundary": {
+    "current_artifact_qualified": "NO",
+    "deployment_restore_by_reviewer": "NOT_ATTEMPTED",
+    "fresh_security_disposition": "MISSING_NOT_AUTHORED",
+    "gate_design": "Original GH attestation subject/source/workflow/signer, signed qualification inputs, exact historical archive/source comparison, and current STS probe are distinct from fresh independent security permission. Private deployment compare-and-swap is after security gate. CLI public key/hash require externally established independent authority; accepting supplied CLI inputs is not itself proof of that authority.",
+    "historical_artifact_sha256": "5896572753484b3f64903b2b4ccc4f0f471ddab33ef034f5c3b1bb1c3d509669",
+    "historical_authentication": "Reviewed original-attestation verifier and existing retrieval/rehearsal evidence; not re-executed by this reviewer.",
+    "historical_consumer": "Existing STS consumer PASS is historical archive compatibility evidence only, not fresh security authorization.",
+    "original_approved_signer_commit": "ffd6551656ef990591dbd3bb9c67e6720588dd15",
+    "original_source_commit": "2fcaac47f0ad75b87d73235810f6b096a1a2157e",
+    "reported_blocker": {
+      "code": "SECURITY_DISPOSITION_MISSING",
+      "detail": "SECURITY_DISPOSITION_MISSING: fresh signed artifact-bound advisory disposition required"
+    },
+    "status": "BLOCKED"
+  },
+  "schema_version": 1,
+  "scope": "NON_PRODUCTION_UPGRADE_REHEARSAL_ONLY",
+  "security_clearance": "NOT_GRANTED",
+  "snapshot_rule": "Any artifact, provider, source, SDK or reviewed helper change invalidates applicability to the changed item; recompute bindings and review fixes. Findings refer to the exact digests in this packet.",
+  "status": "REQUIRES_REMEDIATION",
+  "supporting_evidence_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "b92f4562322f75629f8a86b9ee98d42620f2fd45e61744dfa6114255653fc485"
+  },
+  "target": {
+    "artifact": {
+      "bytes": 2917625,
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "82d0047047e4341ba284e4b6e60d44179e75ea311bab4e3f4b8e16fa3e1bae5b"
+      },
+      "path": "docs/evidence/M12-004/upgrade/candidate.tar.gz"
+    },
+    "baseline_production_pin_changed": false,
+    "native_archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "42b8bdd4b06aadf02f2fc4f0b7cfaa79cb048d1a5f1fb4cf8ac70212b9d82356"
+    },
+    "native_build_fingerprint": "853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c",
+    "package_source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a9c666e57f964fd8f9d1dae0ccf9f627d82bd9e62fffceb9e55b298c04ddefc0"
+    },
+    "sdk_execution_by_reviewer": "NONE",
+    "sdk_policy": "STS_ONLY",
+    "sdk_selected": "<sts-sdk>",
+    "upstream_base_commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "upstream_candidate_commit": "fa9bc8d6f7cfb2cf849b247fb06bbbfc41ecc9d6",
+    "upstream_candidate_tree": "e9d52ead35793426b465d4ec694e34d4ee9a6d5e",
+    "upstream_source_identity": {
+      "commit": "fa9bc8d6f7cfb2cf849b247fb06bbbfc41ecc9d6",
+      "content_sha256": "ece6d5e872aaf5210aaabc32b16788f6e31d6afe5ecc74b7d514827bf5c906bb",
+      "tree": "e9d52ead35793426b465d4ec694e34d4ee9a6d5e"
+    }
+  },
+  "task_id": "M12-004"
+}

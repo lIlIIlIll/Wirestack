@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-posixFFI.a:
+
+file_dirc.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_OS_IsType>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	push   %rbx
+   5:	sub    $0x98,%rsp
+   c:	mov    %esi,%ebx
+   e:	mov    %rdi,%rsi
+  11:	mov    %fs:0x28,%rax
+  1a:	mov    %rax,-0x10(%rbp)
+  1e:	lea    -0xa0(%rbp),%rdx
+  25:	mov    $0x1,%edi
+  2a:	call   2f <CJ_OS_IsType+0x2f>
+  2f:	test   %eax,%eax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "9e474f0e3c2b74b94eafa1c74281d00feed7602c3686a13a350c81a9854ed162"}

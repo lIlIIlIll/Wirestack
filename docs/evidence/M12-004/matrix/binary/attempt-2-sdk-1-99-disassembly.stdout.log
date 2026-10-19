@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-net.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000003d868 <_init@@Base>:
+   3d868:	sub    $0x8,%rsp
+   3d86c:	mov    0x2776f5(%rip),%rax        # 2b4f68 <__gmon_start__>
+   3d873:	test   %rax,%rax
+   3d876:	je     3d87a <_init@@Base+0x12>
+   3d878:	call   *%rax
+   3d87a:	add    $0x8,%rsp
+   3d87e:	ret
+
+Disassembly of section .plt:
+
+000000000003d880 <CJ_SockCommHooksReg@plt-0x10>:
+   3d880:	push   0x277782(%rip)        # 2b5008 <_CNaf9OS_OTHERSE@@Base+0x2c18>
+   3d886:	jmp    *0x277784(%rip)        # 2b5010 <_CNaf9OS_OTHERSE@@Base+0x2c20>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "0deb9c54decde1685223bd875ab5e157e918b69bcb95421c0ca588b238fd87d6"}
