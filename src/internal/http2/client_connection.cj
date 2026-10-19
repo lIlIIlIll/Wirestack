@@ -609,7 +609,7 @@ public class Http2ClientConnection <: Resource {
                         ),
                         payload
                     )
-                    waitClientWrite(writer.enqueueReservedData(frame, permit), context)
+                    waitClientWrite(writer.enqueueReservedData(frame, permit, context: context), context)
                     health.observeOutboundActivity()
                 }
             }
@@ -1125,10 +1125,6 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     }
 
     func setExpectedLength(value: ?Int64): Unit { synchronized(mutex) { expectedLength = value } }
-
-    func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
-        offerView(data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>)
-    }
 
     func offerView(
         data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,

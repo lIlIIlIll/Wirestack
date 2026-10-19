@@ -209,7 +209,7 @@ class Http2WriteSchedulerTest {
             Http2FrameHeader(3u32, Http2FrameType.Data, Http2Flags(), streamId),
             [1u8, 2u8, 3u8]
         )
-        let ticket = scheduler.enqueueReservedData(frame, permit)
+        let ticket = scheduler.enqueueReservedData(frame, permit, context: OperationContext.background())
 
         @Expect(flow.snapshot(streamId).sendWindow, 65535)
         @Expect(flow.snapshot(streamId).reservedSendBytes, 3)
@@ -236,7 +236,7 @@ class Http2WriteSchedulerTest {
             permit: Some(permit)
         )
 
-        let ticket = event.enqueueData(scheduler)
+        let ticket = event.enqueueData(scheduler, OperationContext.background())
         @Expect(flow.snapshot(streamId).sendWindow, 65535)
         @Expect(flow.snapshot(streamId).reservedSendBytes, 3)
         scheduler.close()
@@ -256,7 +256,7 @@ class Http2WriteSchedulerTest {
         let ticket = scheduler.enqueueReservedData(Http2Frame(
             Http2FrameHeader(4u32, Http2FrameType.Data, Http2Flags(), streamId),
             [1u8, 2u8, 3u8, 4u8]
-        ), permit)
+        ), permit, context: OperationContext.background())
 
         @Expect(ticket.cancel())
         @Expect(isWriteTestCancelled(ticket.wait()))
@@ -488,6 +488,7 @@ class Http2WriteSchedulerTest {
         @Expect(isSchedulerTestClosed(scheduler.run()))
     }
 }
+
 
 private class TicketWaitReviewClock <: MonotonicClock {
     private var current: MonoTime
