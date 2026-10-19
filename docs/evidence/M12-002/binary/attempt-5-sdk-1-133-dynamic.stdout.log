@@ -1,0 +1,38 @@
+
+Dynamic section at offset 0xa820b0 contains 35 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-lsp.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so.2]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000e (SONAME)             Library soname: [libcjlint.so]
+ 0x0000000000000010 (SYMBOLIC)           0x0
+ 0x000000000000000f (RPATH)              Library rpath: [@ORIGIN/../../tools/lib]
+ 0x000000000000000c (INIT)               0xa0b88
+ 0x000000000000000d (FINI)               0x94ca88
+ 0x0000000000000019 (INIT_ARRAY)         0xc7d648
+ 0x000000000000001b (INIT_ARRAYSZ)       1664 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0xc7dcc8
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x190
+ 0x0000000000000005 (STRTAB)             0x1e520
+ 0x0000000000000006 (SYMTAB)             0x6a18
+ 0x000000000000000a (STRSZ)              455732 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0xc82320
+ 0x0000000000000002 (PLTRELSZ)           7824 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x9ecf8
+ 0x0000000000000007 (RELA)               0x8fa40
+ 0x0000000000000008 (RELASZ)             62136 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x0000000000000018 (BIND_NOW)           
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffffe (VERNEED)            0x8f8f0
+ 0x000000006fffffff (VERNEEDNUM)         4
+ 0x000000006ffffff0 (VERSYM)             0x8d954
+ 0x000000006ffffff9 (RELACOUNT)          2121
+ 0x0000000000000000 (NULL)               0x0

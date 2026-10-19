@@ -1,0 +1,660 @@
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(absvdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(absvsi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(absvti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(adddf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(addsf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(addvdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(addvsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(addvti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(apple_versioning.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ashldi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ashlti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ashrdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ashrti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(bswapdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(bswapsi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(clzdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(clzsi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(clzti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(cmpdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(cmpti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(comparedf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(comparesf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ctzdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ctzsi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ctzti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divdc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divdf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divmoddi4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divmodsi4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divmodti4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divsc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divsf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(extendsfdf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ffsdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ffssi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ffsti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixdfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixdfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixdfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixsfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixsfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixsfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunsdfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunsdfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunsdfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunssfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunssfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunssfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatsidf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatsisf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floattidf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floattisf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatunsidf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatunsisf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatuntidf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatuntisf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(int_util.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(lshrdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(lshrti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(moddi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(modsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(modti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(muldc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(muldf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(muldi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulodi4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulosi4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(muloti4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulsc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulsf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(multi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulvdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulvsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulvti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negdf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negsf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negvdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negvsi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(negvti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(os_version_check.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(paritydi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(paritysi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(parityti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(popcountdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(popcountsi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(popcountti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(powidf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(powisf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(subdf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(subsf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(subvdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(subvsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(subvti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(trampoline_setup.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(truncdfsf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ucmpdi2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(ucmpti2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(udivdi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(udivmoddi4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(udivmodsi4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(udivmodti4.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(udivsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(udivti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(umoddi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(umodsi3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(umodti3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(truncdfbf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(truncsfbf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(emutls.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(enable_execute_stack.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(eprintf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(gcc_personality_v0.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(clear_cache.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(addtf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(comparetf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divtc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divtf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(extenddftf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(extendhftf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(extendsftf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixtfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixtfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixtfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunstfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunstfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunstfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatditf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatsitf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floattitf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatunditf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatunsitf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatuntitf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(multc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(multf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(powitf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(subtf3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(trunctfdf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(trunctfhf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(trunctfsf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(cpu_model.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fp_mode.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatdidf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatdisf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatundidf.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatundisf.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(extendhfsf2.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(truncsfhf2.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(truncdfhf2.S.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(divxc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixxfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixxfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunsxfdi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunsxfsi.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(fixunsxfti.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floattixf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatuntixf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(mulxc3.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(powixf2.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatdixf.c.o)
+
+There is no dynamic section in this file.
+
+File: <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a(floatundixf.S.o)
+
+There is no dynamic section in this file.

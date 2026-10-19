@@ -1,0 +1,21 @@
+
+<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-reflect.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000002c260 <_init@@Base>:
+   2c260:	sub    $0x8,%rsp
+   2c264:	mov    0x24f7dd(%rip),%rax        # 27ba48 <__gmon_start__>
+   2c26b:	test   %rax,%rax
+   2c26e:	je     2c272 <_init@@Base+0x12>
+   2c270:	call   *%rax
+   2c272:	add    $0x8,%rsp
+   2c276:	ret
+
+Disassembly of section .plt:
+
+000000000002c280 <_CNam18TypeTemplateParser18parseGenericStringHRNat5ArrayIhEllRNat6StringE@plt-0x10>:
+   2c280:	push   0x24fd82(%rip)        # 27c008 <_CNam13MODULE_SUFFIXE@@Base+0x2b78>
+   2c286:	jmp    *0x24fd84(%rip)        # 27c010 <_CNam13MODULE_SUFFIXE@@Base+0x2b80>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "1e37a325042e4819123574b94917dadb32dc3a5c0daebbc990786ce0de14b9f4"}

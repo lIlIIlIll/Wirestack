@@ -1,0 +1,21 @@
+
+Dynamic section at offset 0x3ee60 contains 18 entries:
+  Tag        Type                         Name/Value
+ 0x000000000000000e (SONAME)             Library soname: [ld-linux-x86-64.so.2]
+ 0x000000006ffffef5 (GNU_HASH)           0x308
+ 0x0000000000000005 (STRTAB)             0x8b0
+ 0x0000000000000006 (SYMTAB)             0x4f0
+ 0x000000000000000a (STRSZ)              709 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000007 (RELA)               0xcb8
+ 0x0000000000000008 (RELASZ)             24 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffc (VERDEF)             0xbc8
+ 0x000000006ffffffd (VERDEFNUM)          7
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffff0 (VERSYM)             0xb76
+ 0x0000000000000024 (RELR)               0xcd0
+ 0x0000000000000023 (RELRSZ)             32 (bytes)
+ 0x0000000000000025 (RELRENT)            8 (bytes)
+ 0x0000000000000000 (NULL)               0x0

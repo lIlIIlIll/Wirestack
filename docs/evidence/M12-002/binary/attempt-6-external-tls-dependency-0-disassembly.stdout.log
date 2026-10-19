@@ -1,0 +1,21 @@
+
+/usr/lib/libcrypto.so.3:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000053000 <.init>:
+   53000:	endbr64
+   53004:	sub    $0x8,%rsp
+   53008:	mov    0x5509c9(%rip),%rax        # 5a39d8 <__gmon_start__>
+   5300f:	test   %rax,%rax
+   53012:	je     53016 <OPENSSL_3.0.0@@OPENSSL_3.0.0+0x53016>
+   53014:	call   *%rax
+   53016:	call   1a0560 <CRYPTO_clear_free@@OPENSSL_3.0.0+0x100>
+   5301b:	add    $0x8,%rsp
+   5301f:	ret
+
+Disassembly of section .text:
+
+0000000000053040 <AES_encrypt@@OPENSSL_3.0.0-0xf50>:
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "8c8653f1c155c4c8047a105f5e00ff35ae3a3ec06535074449f411fddc75b9ac"}

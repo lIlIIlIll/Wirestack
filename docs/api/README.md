@@ -7,6 +7,10 @@ Wirestack 对应用开发者公开 `wirestack.net`、`wirestack.http` 和 `wires
 显式可选的 gzip 内容解压由 `wirestack.gzip` 提供；默认 HTTP client 保持原始 body，
 不自动协商或解压。用法和边界见 [有界 gzip 指南](../guides/gzip.md)。
 
+Linux 部署须区分安装源码重编译与预编译程序的 SDK/runtime ABI。
+选择实际执行过的 [部署矩阵](../guides/linux-deployment-matrix.md)，并核验对应安装产物、
+CA 路径和 native 依赖。更换 SDK 或 provider 后不得沿用旧报告资格化新产物。
+
 最新生成的 HTML 会发布到
 [`lIlIIlIll.github.io/Wirestack`](https://lIlIIlIll.github.io/Wirestack/)。Pages workflow
 从 `main` 重新生成站点；HTML 不提交到仓库。

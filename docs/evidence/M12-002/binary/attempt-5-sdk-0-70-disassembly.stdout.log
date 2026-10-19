@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libclang_rt-builtins.a:
+
+absvdi2.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text.__absvdi2:
+
+0000000000000000 <__absvdi2>:
+   0:	push   %rax
+   1:	mov    %fs:0x28,%rax
+   a:	mov    %rax,(%rsp)
+   e:	movabs $0x8000000000000000,%rax
+  18:	cmp    %rax,%rdi
+  1b:	je     38 <__absvdi2+0x38>
+  1d:	mov    %rdi,%rax
+  20:	neg    %rax
+  23:	cmovs  %rdi,%rax
+  27:	mov    %fs:0x28,%rcx
+  30:	cmp    (%rsp),%rcx
+  34:	jne    50 <__absvdi2+0x50>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "e8dd243368760d29ade0ce4809c1fad8900050d069cf2383c21a00bc4a156737"}

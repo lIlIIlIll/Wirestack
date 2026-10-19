@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-deriving.resolve.a:
+
+deriving.resolve.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNbm10lambdaTypeHCNax10LambdaExprECNbm5ScopeEEL_E$g-0x14>:
+       0:	xor    %eax,%eax
+       2:	ret
+       3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+      10:	add    %al,(%rax)
+	...
+
+0000000000000014 <_CCNbm10lambdaTypeHCNax10LambdaExprECNbm5ScopeEEL_E$g>:
+      14:	push   %rbp
+      15:	mov    %rsp,%rbp
+      18:	call   1d <_CCNbm10lambdaTypeHCNax10LambdaExprECNbm5ScopeEEL_E$g+0x9>
+      1d:	push   %r14
+      1f:	push   %rbx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "2af512b5a3d9b3bd8e8035eb138303f5d3510285dd077ad546c0f0203056fe87"}

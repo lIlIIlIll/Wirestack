@@ -1,0 +1,21 @@
+
+<sdk-1>/tools/lib/libcjprof.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000520d8 <_init@@Base>:
+   520d8:	sub    $0x8,%rsp
+   520dc:	mov    0x317ef5(%rip),%rax        # 369fd8 <__gmon_start__>
+   520e3:	test   %rax,%rax
+   520e6:	je     520ea <_init@@Base+0x12>
+   520e8:	call   *%rax
+   520ea:	add    $0x8,%rsp
+   520ee:	ret
+
+Disassembly of section .plt:
+
+00000000000520f0 <_Znam@plt-0x10>:
+   520f0:	push   0x31768a(%rip)        # 369780 <_ZTVSt23_Sp_counted_ptr_inplaceINSt12experimental10filesystem2v17__cxx1128recursive_directory_iterator10_Dir_stackESaIS5_ELN9__gnu_cxx12_Lock_policyE2EE@@Base+0x290>
+   520f6:	jmp    *0x31768c(%rip)        # 369788 <_ZTVSt23_Sp_counted_ptr_inplaceINSt12experimental10filesystem2v17__cxx1128recursive_directory_iterator10_Dir_stackESaIS5_ELN9__gnu_cxx12_Lock_policyE2EE@@Base+0x298>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "5862a5def6e398dc67986e7c8c3af0c3000db5a93c575e3e04520f267e6a1ef4"}

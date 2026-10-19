@@ -1,0 +1,21 @@
+In archive $HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/source-sdk/stable-native/relocated/consumers/decoded/target/release/wirestack/libwirestack.observability.a:
+
+wirestack.observability.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CGP23wirestack.observabilityiiHv-0x4>:
+       0:	add    %al,(%rax)
+	...
+
+0000000000000004 <_CGP23wirestack.observabilityiiHv>:
+       4:	push   %rbp
+       5:	mov    %rsp,%rbp
+       8:	call   d <_CGP23wirestack.observabilityiiHv+0x9>
+       d:	push   %rax
+       e:	mov    0x28(%r15),%rax
+      12:	cmp    %rax,%rsp
+      15:	jbe    5c <_CGP23wirestack.observabilityiiHv+0x58>
+      17:	mov    0x0(%rip),%rax        # 1e <_CGP23wirestack.observabilityiiHv+0x1a>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "a6cf25c1ad83191e703262aa4b51a65f91d2be4512ba829312335640f99fb72c"}

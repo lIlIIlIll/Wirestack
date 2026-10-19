@@ -1,0 +1,21 @@
+
+<sdk-1>/tools/lib/libcjlint.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+00000000000a0b88 <_init@@Base>:
+   a0b88:	sub    $0x8,%rsp
+   a0b8c:	mov    0xbe229d(%rip),%rax        # c82e30 <__gmon_start__>
+   a0b93:	test   %rax,%rax
+   a0b96:	je     a0b9a <_init@@Base+0x12>
+   a0b98:	call   *%rax
+   a0b9a:	add    $0x8,%rsp
+   a0b9e:	ret
+
+Disassembly of section .plt:
+
+00000000000a0ba0 <_ZNK7Cangjie4CHIR13CustomTypeDef11IsClassLikeEv@plt-0x10>:
+   a0ba0:	push   0xbe1782(%rip)        # c82328 <_ZTIN7Cangjie9CodeCheck22CJLintCompilerInstanceE@@Base+0x290>
+   a0ba6:	jmp    *0xbe1784(%rip)        # c82330 <_ZTIN7Cangjie9CodeCheck22CJLintCompilerInstanceE@@Base+0x298>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "b67540d8e009aabce177c6caa0d63f7811c134d5efc3125cb1e61679e4322c8f"}

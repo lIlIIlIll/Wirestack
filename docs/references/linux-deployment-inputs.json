@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "selected_archive": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "payload_fingerprint": "6f7e9d20f021ffb84fa91a8cf28f7a17488b8e3fa17e607975ed2af6d568ac3e",
+  "sdk_profiles": [
+    {
+      "profile": "stable",
+      "compiler_version": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "compiler_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+      },
+      "cjpm_version": "Cangjie Project Manager: 1.1.3",
+      "runtime_and_imports": "docs/evidence/M12-002/source-sdk/stable-native/report.json",
+      "sdk_source_commit": "UNKNOWN_NOT_RECONSTRUCTED_FROM_VERSION_LABEL"
+    },
+    {
+      "profile": "candidate",
+      "compiler_version": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "compiler_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "724b2a273d79195bdddda68f71b23346cdbecf2e4c4208ba200a29f16ffa036f"
+      },
+      "cjpm_version": "Cangjie Project Manager: 1.3.0-alpha.06",
+      "runtime_and_imports": "docs/evidence/M12-002/source-sdk/candidate-native/report.json",
+      "sdk_source_commit": "UNKNOWN_NOT_RECONSTRUCTED_FROM_VERSION_LABEL"
+    }
+  ],
+  "tls_provider": {
+    "name": "AWS-LC",
+    "version": "5.5.0",
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "archive": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "a3ae2da76b1e432adde3cce3c1db581d8b3bf9ae4f83917d4fa185f2906e737d"
+    },
+    "historical_native_builder": "Clang15.0.7; original executable fingerprint unavailable, not retroactively qualified"
+  },
+  "native_build_options_and_fingerprints": "docs/evidence/M12-002/source-sdk/stable-native/report.json",
+  "glibc_package": "glibc 2.44+r50+g1848099f063e-1",
+  "glibc_runtime_files": "docs/evidence/M12-002/platform/glibc244-runtime.json",
+  "guest_image": "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img",
+  "guest_image_sha256": "012d81fade7e8ff4428fc35dfeee711d66d1f47d5ea9c5c8ced96a85b959835c",
+  "guest_image_signature": "NOT_VERIFIED",
+  "guest_kernel": "5.15.0-198-generic",
+  "qemu": "QEMU emulator version 11.1.2"
+}

@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-astFFI.a:
+
+Node.cpp.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_ZNK7Cangjie3AST8Modifier8ToStringB5cxx11Ev>:
+       0:	push   %rbp
+       1:	mov    %rsp,%rbp
+       4:	push   %r15
+       6:	push   %r14
+       8:	push   %r12
+       a:	push   %rbx
+       b:	sub    $0x10,%rsp
+       f:	mov    %rdi,%r15
+      12:	mov    %fs:0x28,%rax
+      1b:	mov    %rax,-0x28(%rbp)
+      1f:	cmpb   $0x0,0x101(%rsi)
+      26:	je     8c <_ZNK7Cangjie3AST8Modifier8ToStringB5cxx11Ev+0x8c>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "dadb4eb483b854418841988590a9a8a52c31d23ce9454916e34e0b96bc945d67"}

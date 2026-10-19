@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-database.a:
+
+database.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CGPaeflHv-0x14>:
+   0:	xor    %eax,%eax
+   2:	ret
+   3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  10:	add    %al,(%rax)
+	...
+
+0000000000000014 <_CGPaeflHv>:
+  14:	push   %rbp
+  15:	mov    %rsp,%rbp
+  18:	call   1d <_CGPaeflHv+0x9>
+  1d:	push   %rax
+  1e:	mov    0x28(%r15),%rax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "cb98ff3bde02111fe1501ab18130bbc28a36b1a333ae8355b6c437922f6b2721"}

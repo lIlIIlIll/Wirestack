@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "scope": "binary/ABI native dependencies and same-process symbol coexistence only",
+  "status": "PASS_SELECTED_HOST_AND_BINDINGS",
+  "release_qualification": "NOT_QUALIFIED",
+  "report": {
+    "path": "docs/evidence/M12-002/binary/report.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9fa41daf328da90a7922dd7ff2d7f59a23d68ac0c5dccb290ed2cdec4828908e"
+    }
+  },
+  "archive_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+  },
+  "payload_sha256": "6f7e9d20f021ffb84fa91a8cf28f7a17488b8e3fa17e607975ed2af6d568ac3e",
+  "source_file_count": 164,
+  "environment": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "kernel": "7.2.7-arch1-1",
+    "libc": [
+      "glibc",
+      "2.44"
+    ]
+  },
+  "sdk_bindings": [
+    {
+      "sdk": 0,
+      "compiler": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+      },
+      "runtime": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "6ac1c91488100ef87c273bd9ab5015f712bc91f566f3bac74150a4485d2adc36"
+      },
+      "input_count": 130
+    },
+    {
+      "sdk": 1,
+      "compiler": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "724b2a273d79195bdddda68f71b23346cdbecf2e4c4208ba200a29f16ffa036f"
+      },
+      "runtime": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "f3de5cd3b5e1f24b3436e66909c67a4f29bfd9ba8ca9dd5054de8b65cf9ed528"
+      },
+      "input_count": 136
+    }
+  ],
+  "acceptance": {
+    "elf_dependency_symbol_and_isa_inventory": {
+      "status": "PASS",
+      "scan_count": 333,
+      "shipped_native_archives": 3,
+      "optional_compiled_archives": 30,
+      "installed_public_executables": 10,
+      "coexist_executables": 2,
+      "absolute_path_hazard_count": 0,
+      "maximum_imported_symbol_versions": [
+        "GLIBC_2.44",
+        "GLIBCXX_3.4.22",
+        "CXXABI_1.3.11"
+      ],
+      "minimum_cpu": "Not inferred from raw ISA instructions or GNU baseline notes; guarded provider dispatch and Main native VM evidence are separate."
+    },
+    "source_independent_same_process_behavior": {
+      "status": "PASS",
+      "checkout_hidden": true,
+      "mechanism": "TEST_FIXTURE_ONLY explicit selected SSL/crypto paths; RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND; shared base libc/pthread",
+      "checks": [
+        "independent_cangjie_native",
+        "wirestack_verified_tls",
+        "independent_verified_tls",
+        "wirestack_after_independent_cleanup",
+        "same_process_identity_preserved"
+      ],
+      "ordinary_unisolated_openssl": "UNSUPPORTED: direct global OpenSSL_version resolves AWS-LC despite independent OpenSSL 3 fixture headers; no production fallback"
+    },
+    "same_binary_runtime_crosses": {
+      "status": "PASS",
+      "matrix": [
+        {
+          "built_sdk": 0,
+          "runtime_sdk": 0,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "f0fd5e60fa4c5c9899cde4030d03f164a0e98eeb2276eeb925462191614148f5"
+          },
+          "command": "attempt-9-abi-0-to-0",
+          "abi_result": "PASS",
+          "semantic_result": "PASS",
+          "runtime_loaded_library": "<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so",
+          "runtime_loading_proof": {
+            "path": "docs/evidence/M12-002/binary/attempt-9-abi-0-to-0.stderr.log",
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "b1f816f599919bc521ea95b60cfb5786776082e16ae406db7babb61a30d2f49f"
+            }
+          }
+        },
+        {
+          "built_sdk": 0,
+          "runtime_sdk": 1,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "f0fd5e60fa4c5c9899cde4030d03f164a0e98eeb2276eeb925462191614148f5"
+          },
+          "command": "attempt-9-abi-0-to-1",
+          "abi_result": "PASS",
+          "semantic_result": "PASS",
+          "runtime_loaded_library": "<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so",
+          "runtime_loading_proof": {
+            "path": "docs/evidence/M12-002/binary/attempt-9-abi-0-to-1.stderr.log",
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "562f812a66183ce6c8a4c16e663b84a7a9f2960b841e773d4ba295cee309593f"
+            }
+          }
+        },
+        {
+          "built_sdk": 1,
+          "runtime_sdk": 0,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "6d15e033bf85827e2021fcb30e964bd6b3845164bf5cb1bc9a111b3c87f41cdc"
+          },
+          "command": "attempt-9-abi-1-to-0",
+          "abi_result": "PASS",
+          "semantic_result": "PASS",
+          "runtime_loaded_library": "<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so",
+          "runtime_loading_proof": {
+            "path": "docs/evidence/M12-002/binary/attempt-9-abi-1-to-0.stderr.log",
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "952a7d86cf1443be1a3a2800c27d1d5146cb9de5458ea7c16d1e75be3baabd81"
+            }
+          }
+        },
+        {
+          "built_sdk": 1,
+          "runtime_sdk": 1,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "6d15e033bf85827e2021fcb30e964bd6b3845164bf5cb1bc9a111b3c87f41cdc"
+          },
+          "command": "attempt-9-abi-1-to-1",
+          "abi_result": "PASS",
+          "semantic_result": "PASS",
+          "runtime_loaded_library": "<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so",
+          "runtime_loading_proof": {
+            "path": "docs/evidence/M12-002/binary/attempt-9-abi-1-to-1.stderr.log",
+            "digest": {
+              "domain": "text-utf8-lf-v1",
+              "sha256": "08a358dece837090fea9bed980af551e6c1653de281dfda3d70775058f6f8013"
+            }
+          }
+        }
+      ],
+      "semantic_vs_abi": "Both reported separately. No rebuild required by these four tested exact binary/runtime combinations; not a general ABI compatibility promise."
+    },
+    "native_boundary_tests": {
+      "status": "PASS",
+      "count": 6,
+      "command": {
+        "id": "attempt-9-boundary-tests",
+        "argv": [
+          "/usr/bin/python3",
+          "-m",
+          "unittest",
+          "tools.tests.test_m12_002_binary"
+        ],
+        "cwd": "<repo>",
+        "checkout_hidden": false,
+        "environment": {},
+        "stdout": {
+          "path": "docs/evidence/M12-002/binary/attempt-9-boundary-tests.stdout.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "stderr": {
+          "path": "docs/evidence/M12-002/binary/attempt-9-boundary-tests.stderr.log",
+          "digest": {
+            "domain": "text-utf8-lf-v1",
+            "sha256": "c5514f775df49805f40a11c63b719aaa3284a30e99a8850ca52b0e2d829ffba3"
+          }
+        },
+        "exit_code": 0
+      }
+    },
+    "changed_input_rejection": {
+      "status": "PASS",
+      "cases": 2,
+      "evidence": {
+        "path": "docs/evidence/M12-002/binary/input-rejection.json",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "86bc10d2fdf76dcf04b5dabdc920f80c791c3ca1dea104735a4c1c9bc3afa5ae"
+        }
+      },
+      "meaning": "Changed actual runtime under unchanged stable compiler and recompressed archive fail closed; neither qualifies changed inputs."
+    },
+    "unsafe_namespace_failure": {
+      "status": "UNSUPPORTED_UNSAFE_COEXISTENCE_PROFILE",
+      "exit_code": 139,
+      "evidence": {
+        "path": "docs/evidence/M12-002/binary/unsafe-namespace.json",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "2f7f5a9259c21e8946bb98d25acca85025d8f1094789f6d00a953c23bca1df55"
+        }
+      },
+      "not_sdk_abi_failure": true,
+      "earlier_dlmopen_passes_qualify": false,
+      "core": {
+        "path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/binary/run-8/candidate-crash.core",
+        "bytes": 614850560
+      }
+    },
+    "binding_verification": {
+      "status": "PASS",
+      "argv": [
+        "python3",
+        "tools/m12_002_binary.py",
+        "--verify",
+        "--archive",
+        "docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",
+        "--sdk",
+        "$HOME/cangjie_sdk/sts1.1.3",
+        "--sdk",
+        "$HOME/cangjie_sdk/main/linux_x64/vanilla/20260924/cangjie",
+        "--scratch",
+        "<task-scratch>/binary/run-9",
+        "--wrapper",
+        "$HOME/.codex/scripts/codex_cangjie_env",
+        "--openssl-library",
+        "/usr/lib/libssl.so.3",
+        "--openssl-crypto-library",
+        "/usr/lib/libcrypto.so.3"
+      ],
+      "exit_code": 0,
+      "stdout": "M12_002_BINARY_BINDING_PASS\n",
+      "wall_time_seconds": 5.54
+    }
+  },
+  "publication_compaction": {
+    "status": "PASS",
+    "evidence": {
+      "path": "docs/evidence/M12-002/binary/evidence-compaction.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6f0690e39408808393bb82bb332b16a1e833725749010d245f4ae80595f076cc"
+      }
+    },
+    "original_final_report": {
+      "path": "docs/evidence/M12-002/binary/report-pre-compaction.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9606fc65a475127b9db4cd0b0327a47a7f85bc075d61845848c95c6be0622ebc"
+      }
+    },
+    "meaning": "Only oversized published static-disassembly representations changed; full raw outputs and original digests retained. Native verdicts unchanged and current binding verifier passed afterwards."
+  },
+  "remaining_boundaries": [
+    "Historical shipped native compiler executable digest UNKNOWN; recorded compiler versions/build flags and archive inputs retained.",
+    "UNKNOWN: SDK compiler version and ELF notes do not bind upstream build flags",
+    "Main owns native minimum CPU/kernel/glibc deployment decisions and formal qualification. GLIBC_2.44 import inventory agrees with Main observed glibc2.35 startup failure; it alone is not sufficient native minimum proof.",
+    "Ordinary unisolated same-namespace OpenSSL coexistence is unsupported, not qualified by the explicit test fixture."
+  ],
+  "retained_private_evidence": {
+    "path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/binary",
+    "size": "14GiB",
+    "contents": "Full raw ELF/disassembly outputs, distinct installed builds, changed-input probe snapshots and the diagnosed unsafe-namespace core."
+  }
+}
