@@ -1,0 +1,3 @@
+serve --port N --certificate DER --key PKCS8 --max-requests N --max-streams N --budget-ms N
+stdin: rotate DER PKCS8 | secure-rotate DER PKCS8 | stop
+self-check certificateDER keyPKCS8DER untrustedDER
