@@ -109,7 +109,7 @@ public class Http2StreamTransport <: DuplexTransport {
                 ),
                 payload
             )
-            waitDuplexWrite(writer.enqueueReservedData(frame, permit), context)
+            waitDuplexWrite(writer.enqueueReservedData(frame, permit, context: context), context)
             permit.amount
         } catch (error: Exception) {
             if (context.isCancellationRequested() || context.isDeadlineExceeded()) {

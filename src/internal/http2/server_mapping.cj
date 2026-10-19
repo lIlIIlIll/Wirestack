@@ -421,12 +421,6 @@ internal class Http2ServerBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         maxSegments = Int64(http2Limits.maxPendingWrites)
     }
 
-    func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {
-        offerView(
-            data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>
-        )
-    }
-
     func offerView(
         data: Array<Byte>, dataStart: Int64, dataLength: Int64, flowBytes: Int64,
         endStream: Bool, receivedReservation: ?Http2ReceivedBufferReservation
@@ -715,7 +709,10 @@ public class Http2ServerBodyEvent {
     }
 
     /** Transfers the reserved permit to the single writer before any flow credit is consumed. */
-    internal func enqueueData(writer: Http2WriteScheduler): Http2WriteTicket {
+    internal func enqueueData(
+        writer: Http2WriteScheduler,
+        context: OperationContext
+    ): Http2WriteTicket {
         let dataFrame = match (frame) {
             case Some(value) => value
             case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA frame")
@@ -724,7 +721,7 @@ public class Http2ServerBodyEvent {
             case Some(value) => value
             case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA permit")
         }
-        try { writer.enqueueReservedData(dataFrame, dataPermit) }
+        try { writer.enqueueReservedData(dataFrame, dataPermit, context: context) }
         finally { if (let Some(body) <- owner) { body.completePermit(dataPermit) } }
     }
 
