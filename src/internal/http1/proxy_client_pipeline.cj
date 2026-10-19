@@ -152,7 +152,7 @@ public class Http1HttpsProxyClient <: Resource {
         // closed to one lease and never enter the reusable pool.
         let authenticated = proxyAuthorization.isSome()
         let routeIdentity = if (authenticated) {
-            "${endpoint.identity}|authenticated-no-reuse"
+            "${endpoint.identity}${HTTP_PROXY_AUTHENTICATED_NO_REUSE_SUFFIX}"
         } else {
             endpoint.identity
         }
@@ -190,7 +190,7 @@ public class Http1HttpsProxyClient <: Resource {
         }
         let authenticated = proxyAuthorization.isSome()
         let routeIdentity = if (authenticated) {
-            "${endpoint.identity}|authenticated-no-reuse"
+            "${endpoint.identity}${HTTP_PROXY_AUTHENTICATED_NO_REUSE_SUFFIX}"
         } else { endpoint.identity }
         let key = HttpConnectionPoolKey(
             "https", request.url.host, request.url.port, Some(routeIdentity), "default",
