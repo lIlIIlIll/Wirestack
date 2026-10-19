@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-003",
+  "family": "resources",
+  "id": "resource_supervisor_cancellation",
+  "status": "PASS",
+  "seed": 184003,
+  "command": [
+    "$HOME/.codex/scripts/codex_cangjie_env",
+    "--sdk-root",
+    "$HOME/cangjie_sdk/sts1.1.3",
+    "--",
+    "systemd-run",
+    "--user",
+    "--scope",
+    "--quiet",
+    "--unit=wirestack-m12-003-cancel-d8721b18b9",
+    "-p",
+    "CPUQuota=25%",
+    "-p",
+    "MemoryMax=512M",
+    "python3",
+    "<scratch>/cancellation-profile.py",
+    "--binary",
+    "<scratch>/run-cfn8jmcp/consumer/target/release/bin/main",
+    "--scenario",
+    "cpu",
+    "--certificate",
+    "<scratch>/run-cfn8jmcp/certificate.der",
+    "--key",
+    "<scratch>/run-cfn8jmcp/key.pk8",
+    "--result",
+    "<scratch>/supervisor-cancellation.json"
+  ],
+  "signal_command": [
+    "systemctl",
+    "--user",
+    "kill",
+    "--signal=SIGTERM",
+    "wirestack-m12-003-cancel-d8721b18b9.scope"
+  ],
+  "signal_exit": 0,
+  "launcher_exit": -2,
+  "native_consumer_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "e5d3aa99cc5b9535e364ce0d303ba24b5c96e4644df7e6ac641af63f365fefaa"
+  },
+  "driver_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "0144f5b6725c37e37bcc49b15ac66d9ea02787a210934bc53985f6fd569a475f"
+  },
+  "observed": {
+    "exit_code": -15,
+    "timed_out": false,
+    "elapsed_ms": 200,
+    "applied_fault_proof": {
+      "cpu_max": "25000 100000",
+      "memory_max": "536870912",
+      "cpu_before": {
+        "usage_usec": 47327,
+        "user_usec": 43367,
+        "system_usec": 3959,
+        "nice_usec": 0,
+        "core_sched.force_idle_usec": 0,
+        "nr_periods": 2,
+        "nr_throttled": 1,
+        "throttled_usec": 73864,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      },
+      "memory_before": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "cpu_after": {
+        "usage_usec": 90700,
+        "user_usec": 79904,
+        "system_usec": 10796,
+        "nice_usec": 0,
+        "core_sched.force_idle_usec": 0,
+        "nr_periods": 4,
+        "nr_throttled": 2,
+        "throttled_usec": 141893,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      },
+      "memory_after": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      }
+    },
+    "samples": [
+      {
+        "elapsed_ms": 0,
+        "fd": 3,
+        "tasks": 1,
+        "rss_kib": 512
+      },
+      {
+        "elapsed_ms": 20,
+        "fd": 3,
+        "tasks": 4,
+        "rss_kib": 19484
+      },
+      {
+        "elapsed_ms": 22,
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23228
+      },
+      {
+        "elapsed_ms": 42,
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23228
+      },
+      {
+        "elapsed_ms": 62,
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23228
+      },
+      {
+        "elapsed_ms": 83,
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23228
+      },
+      {
+        "elapsed_ms": 103,
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23228
+      },
+      {
+        "elapsed_ms": 123,
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23228
+      },
+      {
+        "elapsed_ms": 144,
+        "fd": 3,
+        "tasks": 6,
+        "rss_kib": 23308
+      }
+    ],
+    "phase_samples": {
+      "before": {
+        "fd": 3,
+        "tasks": 5,
+        "rss_kib": 23092
+      }
+    },
+    "dns_packets": [],
+    "cleanup": {
+      "child_reaped": true,
+      "dns_thread_stopped": true
+    },
+    "stdout": "MARK before\n",
+    "stderr": ""
+  },
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<scratch>/cancellation-profile.py\", line 112, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"<scratch>/cancellation-profile.py\", line 82, in main\n    point = sample(child.pid)\n  File \"<scratch>/cancellation-profile.py\", line 30, in sample\n    rss = next(int(line.split()[1]) for line in (root / 'status').read_text().splitlines() if line.startswith('VmRSS:'))\n                                                 ~~~~~^~~~~~~~~~\n  File \"/usr/lib/python3.14/pathlib/__init__.py\", line 174, in __truediv__\n    return self.with_segments(self, key)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^\n  File \"/usr/lib/python3.14/pathlib/__init__.py\", line 162, in with_segments\n    return type(self)(*pathsegments)\n           ~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/pathlib/__init__.py\", line 635, in __new__\n    return object.__new__(cls)\n           ~~~~~~~~~~~~~~^^^^^\n  File \"<scratch>/cancellation-profile.py\", line 38, in interrupted\n    raise KeyboardInterrupt('resource profile cancelled')\nKeyboardInterrupt: resource profile cancelled\n"
+}

@@ -1,0 +1,1504 @@
+{
+  "profiles": [
+    {
+      "id": "dns_no_response",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "FAULT_COMPLETE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":310,\"recovery\":true}\nCLEANUP {\"dns_closed\":true}\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 310,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "dns_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 45,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 94,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 143,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 188,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 235,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 285,
+            "process_count": 1,
+            "rss_kib": 24120,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "query_received",
+            "bytes": 36,
+            "id": 39944
+          },
+          {
+            "event": "query_received",
+            "bytes": 39,
+            "id": 37579
+          },
+          {
+            "event": "recovery_answer_sent",
+            "bytes": 55
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":7,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 7,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23924,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "actual_dns_traffic": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "dns_late_result",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "FAULT_COMPLETE\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":310,\"recovery\":true}\nCLEANUP {\"dns_closed\":true}\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 310,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "dns_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 60,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 105,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 151,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 201,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 246,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 293,
+            "process_count": 1,
+            "rss_kib": 24148,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 5
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "query_received",
+            "bytes": 36,
+            "id": 1711
+          },
+          {
+            "event": "late_answer_sent_after_caller_deadline",
+            "bytes": 52
+          },
+          {
+            "event": "query_received",
+            "bytes": 39,
+            "id": 29627
+          },
+          {
+            "event": "recovery_answer_sent",
+            "bytes": 55
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23904,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "actual_dns_traffic": true,
+        "late_result_after_deadline": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "ipv6_blackhole",
+      "seed": 12003,
+      "status": "FAIL",
+      "error": "command failed (2): tc qdisc add dev lo clsact\nError: Specified qdisc kind is unknown.\n"
+    },
+    {
+      "id": "multicandidate_cancel",
+      "seed": 12003,
+      "status": "FAIL",
+      "error": "{\"command\": [\"tc\", \"qdisc\", \"add\", \"dev\", \"lo\", \"clsact\"], \"exit_code\": 2, \"output\": \"Error: Specified qdisc kind is unknown.\\n\"}"
+    },
+    {
+      "id": "delay_loss",
+      "seed": 12003,
+      "status": "FAIL",
+      "error": "{\"command\": [\"tc\", \"qdisc\", \"add\", \"dev\", \"lo\", \"root\", \"netem\", \"delay\", \"20ms\", \"loss\", \"random\", \"10%\", \"seed\", \"12003\"], \"exit_code\": 2, \"output\": \"Error: Specified qdisc kind is unknown.\\n\"}"
+    },
+    {
+      "id": "rst",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"network\",\"duration_ms\":8,\"transferred\":0}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "network",
+          "duration_ms": 8,
+          "transferred": 0
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23856,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 1,
+            "connection": 1
+          },
+          {
+            "event": "abortive_close",
+            "linger_seconds": 0
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":0,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 0,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24076,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "rst_applied": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "silent_disconnect",
+      "seed": 12003,
+      "status": "FAIL",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 1,
+        "timed_out": false,
+        "output": "An exception has occurred:\nException: silent peer did not respect deadline\n\t at wirestack_m12_003_network::require(Bool, std.core::String)($HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/src/main.cj:11)\n\t at wirestack_m12_003_network::runTcp(std.core::String, UInt16)($HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/src/main.cj:136)\n\t at wirestack_m12_003_network::main()($HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/src/main.cj:149)\n",
+        "result": null,
+        "native_cleanup": null,
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23952,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "actual isolated packet/netem",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 1,
+            "connection": 1
+          }
+        ],
+        "fixture_errors": [
+          "{\"command\": [\"tc\", \"qdisc\", \"add\", \"dev\", \"lo\", \"clsact\"], \"exit_code\": 2, \"output\": \"Error: Specified qdisc kind is unknown.\\n\"}"
+        ]
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":8,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 8,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23884,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": false,
+        "native_cleanup": false,
+        "process_reclaimed": true,
+        "fixture_clean": false,
+        "filter_dropped_real_packets": false,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "peer_no_read",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"deadline\",\"duration_ms\":509,\"transferred\":32768}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 509,
+          "transferred": 32768
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24128,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 86,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 133,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 179,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 225,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 270,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 316,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 367,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 412,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 457,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 502,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 547,
+            "process_count": 1,
+            "rss_kib": 25744,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "receive_disabled",
+            "effective_receive_buffer": 8192
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":8,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 8,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23836,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "backpressure_applied": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "peer_no_write",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"deadline\",\"duration_ms\":509,\"transferred\":0}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 509,
+          "transferred": 0
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 66,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 111,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 156,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 206,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 251,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 299,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 345,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 395,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 441,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 487,
+            "process_count": 1,
+            "rss_kib": 23648,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          },
+          {
+            "elapsed_ms": 535,
+            "process_count": 1,
+            "rss_kib": 24144,
+            "fd_count": 4,
+            "socket_count": 0,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 1,
+            "connection": 1
+          },
+          {
+            "event": "response_disabled"
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":8,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 8,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23960,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "peer_response_disabled": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "http_rst",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "ATTEMPT 1\nFAULT_COMPLETE\nATTEMPT 2\nRESULT {\"outcome\":\"network\",\"duration_ms\":8,\"attempts\":2,\"recovery\":true}\nCLEANUP {\"connections\":0,\"requests\":0,\"streams\":0,\"buffers\":0}\n",
+        "result": {
+          "outcome": "network",
+          "duration_ms": 8,
+          "attempts": 2,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "connections": 0,
+          "requests": 0,
+          "streams": 0,
+          "buffers": 0
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24344,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 1
+          },
+          {
+            "event": "abortive_close",
+            "linger_seconds": 0
+          },
+          {
+            "event": "accepted",
+            "connection": 2
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 2
+          },
+          {
+            "event": "reply_sent",
+            "connection": 2
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":8,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 8,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 23940,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "rst_applied": true,
+        "new_connection_after_removal": true
+      }
+    },
+    {
+      "id": "http_no_write",
+      "seed": 12003,
+      "status": "PASS",
+      "consumer": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "ATTEMPT 1\nFAULT_COMPLETE\nATTEMPT 2\nRESULT {\"outcome\":\"deadline\",\"duration_ms\":1504,\"attempts\":2,\"recovery\":true}\nCLEANUP {\"connections\":0,\"requests\":0,\"streams\":0,\"buffers\":0}\n",
+        "result": {
+          "outcome": "deadline",
+          "duration_ms": 1504,
+          "attempts": 2,
+          "recovery": true
+        },
+        "native_cleanup": {
+          "connections": 0,
+          "requests": 0,
+          "streams": 0,
+          "buffers": 0
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 82,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 128,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 175,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 220,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 266,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 314,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 362,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 409,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 454,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 499,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 544,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 589,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 637,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 687,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 733,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 778,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 823,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 869,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 915,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 961,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1006,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1052,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1098,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1144,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1189,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1236,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1283,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1330,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1376,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1423,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1468,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 1515,
+            "process_count": 1,
+            "rss_kib": 24300,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 8
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "applied_fault_proof": {
+        "scope": "native socket fixture",
+        "tc": {
+          "command": [
+            "tc",
+            "-s",
+            "filter",
+            "show",
+            "dev",
+            "lo",
+            "egress"
+          ],
+          "raw": "",
+          "bytes": 0,
+          "packets": 0,
+          "dropped": 0
+        },
+        "fixture_events": [
+          {
+            "event": "accepted",
+            "connection": 1
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 1
+          },
+          {
+            "event": "response_disabled"
+          },
+          {
+            "event": "accepted",
+            "connection": 2
+          },
+          {
+            "event": "request_received",
+            "bytes": 52,
+            "connection": 2
+          },
+          {
+            "event": "reply_sent",
+            "connection": 2
+          }
+        ],
+        "fixture_errors": []
+      },
+      "recovery": {
+        "command": [
+          "$HOME/.codex/scripts/codex_cangjie_env",
+          "--sdk-root",
+          "$HOME/cangjie_sdk/sts1.1.3",
+          "--cwd",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5",
+          "$HOME/.cache/agent-tmp/wirestack-m12-003.s8hdyf/network/run5/consumers/network/target/release/bin/main"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "output": "RESULT {\"outcome\":\"success\",\"duration_ms\":8,\"transferred\":1}\nCLEANUP {\"stream_closed\":true}\n",
+        "result": {
+          "outcome": "success",
+          "duration_ms": 8,
+          "transferred": 1
+        },
+        "native_cleanup": {
+          "stream_closed": true
+        },
+        "process_resource_samples": [
+          {
+            "elapsed_ms": 0,
+            "process_count": 1,
+            "rss_kib": 24028,
+            "fd_count": 5,
+            "socket_count": 1,
+            "thread_count": 6
+          }
+        ],
+        "process_reclaimed": true
+      },
+      "cleanup": {
+        "fixture_threads_joined": true,
+        "impairments_removed": true,
+        "post_removal_qdisc": "qdisc noqueue 0: root refcnt 2 \n Sent 0 bytes 0 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "semantic_criteria": {
+        "native_semantics": true,
+        "native_cleanup": true,
+        "process_reclaimed": true,
+        "fixture_clean": true,
+        "peer_response_disabled": true,
+        "new_connection_after_removal": true
+      }
+    }
+  ]
+}

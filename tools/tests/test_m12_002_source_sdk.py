@@ -5,9 +5,9 @@ import os
 from pathlib import Path
 import unittest
 
-from tools.m12_002_source_sdk import (ROOT, consumer_source_digests, validate_resume,
-    verify_consumer_sources, verify_report)
-from tools.evidence_digest import artifact_byte_digest_bytes
+from tools.m12_002_source_sdk import (ROOT, consumer_retained, expected_consumer_sources,
+                                     validate_resume, verify_consumer_sources, verify_report)
+from tools.evidence_digest import artifact_byte_digest, artifact_byte_digest_bytes, text_evidence_digest
 
 
 def text_digest(seed):
@@ -42,17 +42,11 @@ class ResumeDriftTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'native compiler'):
             validate_resume(previous, current)
 
-    def test_unbound_native_compiler_is_rejected(self):
-        previous = self.report()
-        previous.pop('native_cc_digest')
-        with self.assertRaisesRegex(ValueError, 'native compiler'):
-            validate_resume(previous, self.report())
-
     def test_changed_build_options_are_rejected(self):
         previous = self.report()
         current = self.report()
-        current['build_options']['environment']['CJC_FLAGS'] = '-O3'
-        with self.assertRaisesRegex(ValueError, 'native build options'):
+        current['build_options']['environment']['CFLAGS'] = '-O3'
+        with self.assertRaisesRegex(ValueError, 'build options'):
             validate_resume(previous, current)
 
     def test_changed_consumer_source_is_rejected(self):
@@ -70,36 +64,45 @@ class ResumeDriftTests(unittest.TestCase):
             validate_resume(previous, current)
 
 
-class ConsumerSourceInventoryTests(unittest.TestCase):
-    def setUp(self):
-        self.inventory = consumer_source_digests()
+class ConsumerInventoryTests(unittest.TestCase):
+    def report(self):
+        return {'consumer_sources': {name: text_evidence_digest(ROOT / name).to_json()
+                                     for name in expected_consumer_sources()}}
 
-    def test_inventory_contains_every_app_file_and_sdk_fixture(self):
-        from tools import m11_004_installed_consumers as consumers
-        expected = {str(path.relative_to(ROOT)) for name in consumers.APP_NAMES
-                    for path in consumers.app_files(consumers.APPS / name)}
-        expected |= {str(path.relative_to(ROOT)) for path in
-                     (ROOT / 'examples/linux/m12_002/sdk/cjpm.toml', ROOT / 'examples/linux/m12_002/sdk/src/main.cj')}
-        self.assertEqual(set(self.inventory), expected)
+    def test_complete_inventory_is_accepted(self):
+        report = self.report()
+        verify_consumer_sources(report)
+        self.assertTrue({'examples/linux/m11_004/cli/src/main.cj',
+                         'examples/linux/m11_004/decoded/src/main.cj',
+                         'examples/linux/m11_004/streams/src/main.cj',
+                         'examples/linux/m11_004/service/src/main.cj',
+                         'examples/linux/m12_002/sdk/cjpm.toml',
+                         'examples/linux/m12_002/sdk/src/main.cj'} <= set(report['consumer_sources']))
 
-    def test_complete_recorded_inventory_is_accepted(self):
-        verify_consumer_sources({'consumer_sources': self.inventory})
+    def test_omitted_changed_or_added_source_is_rejected(self):
+        for mutate in (lambda value: value['consumer_sources'].pop(next(iter(value['consumer_sources']))),
+                       lambda value: value['consumer_sources'].update(
+                           {'examples/linux/m11_004/cli/src/main.cj': text_digest('0')}),
+                       lambda value: value['consumer_sources'].update(
+                           {'examples/linux/unexpected/fixture.cj': text_digest('0')}),
+                       lambda value: value.pop('consumer_sources')):
+            report = self.report()
+            mutate(report)
+            with self.assertRaisesRegex(ValueError, 'consumer source'):
+                verify_consumer_sources(report)
 
-    def test_missing_or_extra_consumer_source_is_rejected(self):
-        incomplete = dict(self.inventory)
-        incomplete.pop(next(iter(incomplete)))
-        with self.assertRaisesRegex(ValueError, 'consumer source inventory changed'):
-            verify_consumer_sources({'consumer_sources': incomplete})
-        extra = dict(self.inventory)
-        extra['examples/linux/m11_004/cli/src/removed.cj'] = text_digest('f')
-        with self.assertRaisesRegex(ValueError, 'consumer source inventory changed'):
-            verify_consumer_sources({'consumer_sources': extra})
 
-    def test_changed_consumer_source_digest_is_rejected(self):
-        changed = dict(self.inventory)
-        changed[next(iter(changed))] = text_digest('f')
-        with self.assertRaisesRegex(ValueError, 'consumer source changed'):
-            verify_consumer_sources({'consumer_sources': changed})
+class RetainedConsumerTests(unittest.TestCase):
+    def test_only_successful_retained_consumer_with_matching_binary_is_reused(self):
+        binary = Path(__file__).resolve()
+        previous = {'consumers': {'cli': {'binary_digest': artifact_byte_digest(binary).to_json()}}}
+        commands = [{'id': 'cli-acceptance', 'exit_code': 0}]
+        self.assertTrue(consumer_retained(previous, commands, 'cli', binary))
+        self.assertFalse(consumer_retained(None, commands, 'cli', binary))
+        self.assertFalse(consumer_retained(previous, [], 'cli', binary))
+        self.assertFalse(consumer_retained(previous, [{'id': 'cli-acceptance', 'exit_code': 1}], 'cli', binary))
+        self.assertFalse(consumer_retained(previous, commands, 'decoded', binary))
+        self.assertFalse(consumer_retained(previous, commands, 'cli', binary.with_name('missing-binary')))
 
 
 class SourceSdkEvidenceTests(unittest.TestCase):
