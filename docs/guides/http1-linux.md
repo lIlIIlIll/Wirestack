@@ -50,7 +50,9 @@ should remain reusable.
 
 Existing `HttpClientBuilder.requestTimeout` callers need no migration. It remains a cap for the complete request, including retries, redirects, and response-body reads. Add `OperationTimeoutPolicy` through `OperationContext` when one phase needs a shorter limit. If both `requestTimeout` and `OperationContext.deadline` are set, the earlier absolute deadline wins.
 
-Every configured stage limit must be positive and cannot extend the absolute deadline. An omitted stage limit adds no extra timer. Retries and redirects reuse the request deadline rather than starting a new total budget. For HTTP/1 `Expect: 100-continue`, one `responseHeaders` budget covers both the continue wait and the final response headers. Sending the request body does not restart that budget.
+Every configured stage limit must be positive and cannot extend the absolute deadline. An omitted stage limit adds no extra timer. Retries and redirects reuse the request deadline rather than starting a new total budget.
+
+For HTTP/1, one `requestWrite` context spans the request head and body. The writer does not restart its stage limit after the head. For HTTP/1 `Expect: 100-continue`, one `responseHeaders` budget covers both the continue wait and the final response headers. Writing the request body does not restart that response-header budget.
 
 ```cj
 let loopback = IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])

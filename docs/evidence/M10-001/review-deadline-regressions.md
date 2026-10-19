@@ -99,3 +99,49 @@ Exit: 0. `TOTAL: 204`; `PASSED: 1`; `SKIPPED: 203`; `ERROR: 0`; `FAILED: 0`.
 ```
 
 Exit: 0. `TOTAL: 163`; `PASSED: 1`; `SKIPPED: 162`; `ERROR: 0`; `FAILED: 0`.
+## Stack #200 T1–T5 focused replay on SDK 1.1.3
+
+All commands below used the qualified SDK wrapper with `TMPDIR`, `TMP`, and `TEMP` set to `<task-tmp>`, and `DISABLE_ZOXIDE=1`.
+
+The T4 and T5 red runs used the new regression tests before their production fixes. The first combined green run used the composite GitButler stack workspace, including the M10-002 child changes. The exact M10-001 candidate replay is recorded in [review-regressions.json](stack-200-review/review-regressions.json).
+
+### T4: one HTTP/1 RequestWrite budget across head and body
+
+Failing before the production change:
+
+```sh
+<qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
+  cjpm test src/internal/http1 \
+  --filter=Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody \
+  --no-color --no-progress
+```
+
+Exit: 1. The selected assertion failed because `Http1RequestWriteException` was not thrown; the request-body writer received a restarted stage budget.
+
+After the change, the same command exited 0: `TOTAL 170`, `PASSED 1`, `SKIPPED 169`, `ERROR 0`, `FAILED 0`.
+
+### T5: transferred push retains parent cancellation context
+
+Failing before the production change:
+
+```sh
+<qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
+  cjpm test src/http \
+  --filter=HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls \
+  --no-color --no-progress
+```
+
+Exit: 1. The selected real TLS HTTP/2 integration case errored with `NoneValueException` when checking the transferred response's missing `operationContext`.
+
+After the change, the same command exited 0: `TOTAL 165`, `PASSED 1`, `SKIPPED 164`, `ERROR 0`, `FAILED 0`. The test also verifies typed cancellation stops the pushed body while a sibling request remains healthy.
+
+### Combined owner regressions
+
+```sh
+<qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
+  cjpm test src/internal/http1 src/internal/http2 src/http \
+  --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls \
+  --no-color --no-progress
+```
+
+Exit: 0. `TOTAL 539`, `PASSED 9`, `SKIPPED 530`, `ERROR 0`, `FAILED 0`. This is focused regression evidence, not a rerun of the full M10-001 acceptance suite or a release qualification.

@@ -45,9 +45,19 @@ The deadline path does not allocate a scheduled timer handle: it passes the rema
 
 ## Review follow-up
 
-The review regression run covers literal proxy TCP-connect budgets, reuse of one response-header budget across a `100-continue` body write, HTTP/2 flow-control updates under the total deadline, and retention of flow-control update-write failures. Stack #200 follow-ups add post-read context checks for HTTP/1 headers/body/upgrades, terminal HTTP/2 ticket waits, late literal proxy success, and WebSocket stream reads. Exact commands and results: [review-deadline-regressions.md](review-deadline-regressions.md).
+The Stack #200 regressions cover post-read deadlines, terminal HTTP/2 ticket waits, late proxy success, one HTTP/1 `requestWrite` budget across the request head and body, and cancellation context on transferred pushes.
 
-The additional follow-up tests ran on the available wrapper toolchain (Cangjie 1.3.0-alpha.20261010001050, CJPM 1.3.0-alpha.06) as focused smoke checks. They do not replace or repeat the original full acceptance run on SDK 1.1.3.
+The focused T1–T5 replay on pinned SDK 1.1.3 is recorded in [revision-bound review regressions](stack-200-review/review-regressions.json). Red/green commands and outcomes are in [review-deadline-regressions.md](review-deadline-regressions.md).
+
+Root issues:
+
+- T1, [#226](https://github.com/lIlIIlIll/Wirestack/issues/226)
+- T2, [#223](https://github.com/lIlIIlIll/Wirestack/issues/223)
+- T3, [#222](https://github.com/lIlIIlIll/Wirestack/issues/222)
+- T4, [#225](https://github.com/lIlIIlIll/Wirestack/issues/225)
+- T5, [#224](https://github.com/lIlIIlIll/Wirestack/issues/224)
+
+The earlier alpha-toolchain run remains historical smoke evidence. The pinned SDK replay does not replace or repeat the original full task acceptance.
 
 ## Workspace snapshot (initial task capture; historical)
 
