@@ -152,8 +152,32 @@ public class Http2FrameParser {
     public func feed(input: Array<Byte>): Array<Http2Frame> {
         if (failed) { throw IllegalStateException("HTTP/2 frame parser cannot continue after a protocol error") }
         let frames = ArrayList<Http2Frame>()
+        var offset: Int64 = 0
         try {
-            for (value in input) {
+            while (offset < input.size) {
+                let (nextOffset, frame) = feedNext(input, offset)
+                offset = nextOffset
+                if (let Some(value) <- frame) { frames.add(value) }
+                else { break }
+            }
+        } catch (error: Exception) {
+            for (frame in frames) { frame.releaseUnclaimedReceivedBufferReservation() }
+            throw error
+        }
+        frames.toArray()
+    }
+
+    /** Consumes bytes through at most one complete frame, preserving the caller's input span. */
+    internal func feedNext(input: Array<Byte>, start: Int64): (Int64, ?Http2Frame) {
+        if (failed) { throw IllegalStateException("HTTP/2 frame parser cannot continue after a protocol error") }
+        if (start < 0 || start > input.size) {
+            throw IllegalArgumentException("HTTP/2 frame parser input offset is out of range")
+        }
+        var offset = start
+        try {
+            while (offset < input.size) {
+                let value = input[offset]
+                offset++
                 match (currentHeader) {
                     case None =>
                         headerBytes.add(value)
@@ -164,9 +188,7 @@ public class Http2FrameParser {
                             if (isDataFrameType(header.frameType) && header.length > 0u32) {
                                 if (let Some(budget) <- resourceBudget) {
                                     let owner = receivedBufferOwner(header.streamId)
-                                    if (!budget.tryReserveReceivedBuffer(
-                                        owner, UInt64(header.length)
-                                    )) {
+                                    if (!budget.tryReserveReceivedBuffer(owner, UInt64(header.length))) {
                                         rejectingDataPayload = true
                                     } else {
                                         currentReservation = Some(Http2ReceivedBufferReservation(
@@ -178,21 +200,24 @@ public class Http2FrameParser {
                             if (!rejectingDataPayload && header.length > 0u32) {
                                 payloadBytes = Array<Byte>(Int64(header.length), repeat: 0u8)
                             }
-                            if (header.length == 0u32) { finishFrame(frames, header) }
+                            if (header.length == 0u32) {
+                                return (offset, Some(finishFrame(header)))
+                            }
                         }
                     case Some(header) =>
                         if (!rejectingDataPayload) { payloadBytes[payloadOffset] = value }
                         payloadOffset++
-                        if (payloadOffset == Int64(header.length)) { finishFrame(frames, header) }
+                        if (payloadOffset == Int64(header.length)) {
+                            return (offset, Some(finishFrame(header)))
+                        }
                 }
             }
         } catch (error: Exception) {
             failed = true
-            for (frame in frames) { frame.releaseUnclaimedReceivedBufferReservation() }
             releasePartialFrame()
             throw error
         }
-        frames.toArray()
+        (offset, None<Http2Frame>)
     }
 
     public func hasIncompleteFrame(): Bool {
@@ -210,19 +235,20 @@ public class Http2FrameParser {
         headerBytes.clear()
     }
 
-    private func finishFrame(frames: ArrayList<Http2Frame>, header: Http2FrameHeader): Unit {
-        frames.add(Http2Frame(
+    private func finishFrame(header: Http2FrameHeader): Http2Frame {
+        let frame = Http2Frame(
             header,
             payloadBytes,
             currentReservation,
             rejectingDataPayload,
             true
-        ))
+        )
         payloadBytes = []
         payloadOffset = 0
         currentReservation = None<Http2ReceivedBufferReservation>
         rejectingDataPayload = false
         currentHeader = None<Http2FrameHeader>
+        frame
     }
 }
 

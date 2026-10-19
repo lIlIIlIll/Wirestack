@@ -49,6 +49,7 @@ class Http2ConnectionReaderTest {
         @Expect(isReaderTestOpenOrClosed(machine.phase))
     }
 
+
     @TestCase
     func eofDuringPrefaceOrFrameFailsAndWakesEveryStream(): Unit {
         let prefaceMachine = Http2ConnectionStateMachine(Http2ConnectionRole.Server)
