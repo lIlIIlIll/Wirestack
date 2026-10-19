@@ -45,7 +45,9 @@ The deadline path does not allocate a scheduled timer handle: it passes the rema
 
 ## Review follow-up
 
-The review regression run covers literal proxy TCP-connect budgets, reuse of one response-header budget across a `100-continue` body write, HTTP/2 flow-control updates under the total deadline, and retention of flow-control update-write failures. Exact commands and results: [review-deadline-regressions.md](review-deadline-regressions.md).
+The review regression run covers literal proxy TCP-connect budgets, reuse of one response-header budget across a `100-continue` body write, HTTP/2 flow-control updates under the total deadline, and retention of flow-control update-write failures. Stack #200 follow-ups add post-read context checks for HTTP/1 headers/body/upgrades, terminal HTTP/2 ticket waits, late literal proxy success, and WebSocket stream reads. Exact commands and results: [review-deadline-regressions.md](review-deadline-regressions.md).
+
+The additional follow-up tests ran on the available wrapper toolchain (Cangjie 1.3.0-alpha.20261010001050, CJPM 1.3.0-alpha.06) as focused smoke checks. They do not replace or repeat the original full acceptance run on SDK 1.1.3.
 
 ## Workspace snapshot (initial task capture; historical)
 

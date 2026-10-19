@@ -414,7 +414,11 @@ internal class Http1PrefixedTransport <: DuplexTransport {
             emitHttpStage(readContext, true)
             try {
                 let result = if (count > 0) { ReadResult.Data(count) }
-                    else { delegate.readSome(destination, context: readContext) }
+                    else {
+                        let delegated = delegate.readSome(destination, context: readContext)
+                        checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                        delegated
+                    }
                 emitHttpStage(readContext, false)
                 result
             } catch (error: Exception) {
@@ -963,6 +967,17 @@ private func readHttp1Transport(
     context: OperationContext,
     phase: NetworkPhase
 ): ReadResult {
+    let result = readHttp1TransportResult(transport, destination, context, phase)
+    checkHttp1ReadContext(context, phase)
+    result
+}
+
+private func readHttp1TransportResult(
+    transport: DuplexTransport,
+    destination: MutableByteSpan,
+    context: OperationContext,
+    phase: NetworkPhase
+): ReadResult {
     try {
         transport.readSome(destination, context: context)
     } catch (error: NetworkException) {
@@ -979,6 +994,21 @@ private func readHttp1Transport(
             )
         }
         throw error
+    }
+}
+
+private func checkHttp1ReadContext(context: OperationContext, phase: NetworkPhase): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled, phase, NetworkErrorCode.Cancelled,
+            "HTTP/1 read cancelled", retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded, phase, NetworkErrorCode.TimedOut,
+            "HTTP/1 read deadline exceeded", retryability: Retryability.Temporary
+        )
     }
 }
 
