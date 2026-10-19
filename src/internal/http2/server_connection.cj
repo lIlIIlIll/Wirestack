@@ -4,6 +4,7 @@ import std.collection.ArrayList
 import std.sync.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 
 /** One production HTTP/2 server connection with one reader and one writer. */
 public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerControlSink & Resource {
@@ -19,6 +20,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     private let encoder: HpackEncoder
     private let limits: HttpLimits
     private let http2Limits: Http2Limits
+    private let resourceBudget: ?internal.HttpResourceBudget
+    private let resourceOwner: ?internal.HttpResourceOwnerKey
+    private let requestOwnerFactory: Option<(String) -> internal.HttpResourceOwnerKey>
+    private let streamBufferOwners: ?Http2StreamBufferOwners
     private let mutex = Mutex()
     private let pushAdmissionMutex = Mutex()
     private let exchanges = ArrayList<Http2ServerExchange>()
@@ -37,23 +42,47 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
         transport: DuplexTransport,
         handler: Http2ServerHandler,
         limits!: HttpLimits = HttpLimits(),
-        http2Limits!: Http2Limits = Http2Limits()
+        http2Limits!: Http2Limits = Http2Limits(),
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
+        resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
+        requestOwnerFactory!: Option<(String) -> internal.HttpResourceOwnerKey> =
+            None<(String) -> internal.HttpResourceOwnerKey>
     ) {
         this.transport = transport
         this.handler = handler
         this.limits = limits
         this.http2Limits = http2Limits
+        this.resourceBudget = resourceBudget
+        this.resourceOwner = resourceOwner
+        this.requestOwnerFactory = requestOwnerFactory
+        if (resourceBudget.isSome() != resourceOwner.isSome()) {
+            throw IllegalArgumentException("HTTP/2 resource budget and owner must be supplied together")
+        }
+        let createdStreamBufferOwners = if (requestOwnerFactory.isSome()) {
+            Some(Http2StreamBufferOwners())
+        } else {
+            None<Http2StreamBufferOwners>
+        }
+        streamBufferOwners = createdStreamBufferOwners
         machine = Http2ConnectionStateMachine(Http2ConnectionRole.Server, limits: http2Limits)
-        writer = Http2WriteScheduler(transport, limits: http2Limits)
+        writer = Http2WriteScheduler(
+            transport, limits: http2Limits,
+            resourceBudget: resourceBudget, resourceOwner: resourceOwner,
+            streamBufferOwners: createdStreamBufferOwners
+        )
         flow = Http2FlowController(
             limits: http2Limits,
-            maximumStreams: combinedServerStreamCapacity(http2Limits)
+            maximumStreams: combinedServerStreamCapacity(http2Limits),
+            resourceBudget: resourceBudget,
+            resourceOwner: resourceOwner
         )
         decoder = HpackDecoder(limits: http2Limits)
         encoder = HpackEncoder(limits: http2Limits)
         let createdReader = Http2ConnectionReader(
             transport, machine, this, limits: http2Limits,
-            additionalStreamListeners: http2Limits.maxConcurrentPushes
+            additionalStreamListeners: http2Limits.maxConcurrentPushes,
+            resourceBudget: resourceBudget, resourceOwner: resourceOwner,
+            streamBufferOwners: createdStreamBufferOwners
         )
         reader = Some(createdReader)
         let createdRegistry = Http2StreamRegistry(
@@ -66,6 +95,25 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             createdRegistry, flow, writer, limits: http2Limits,
             additionalStreamListeners: http2Limits.maxConcurrentPushes
         ))
+    }
+
+    /**
+     * Resolves the aggregate-budget owner for one validated request authority.
+     * Connections and connection buffers stay owned by the listener.
+     */
+    private func requestOwner(authority: String): internal.HttpResourceOwnerKey {
+        match (requestOwnerFactory) {
+            case Some(factory) => factory(authority)
+            case None => resourceOwner.getOrThrow()
+        }
+    }
+
+    /** Resolves the authority-scoped DATA-buffer owner, or None for listener-owned internals. */
+    private func streamBufferOwner(authority: String): ?internal.HttpResourceOwnerKey {
+        match (requestOwnerFactory) {
+            case Some(factory) => Some(factory(authority))
+            case None => None<internal.HttpResourceOwnerKey>
+        }
     }
 
     public func serve(context!: OperationContext = OperationContext.background()): Unit {
@@ -122,7 +170,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                     synchronized(pushAdmissionMutex) {
                         let _ = reset.getOrThrow().acceptPeer(frame)
                     }
-                case Http2FrameType.Data => requireExchange(frame.header.streamId).acceptData(frame)
+                case Http2FrameType.Data =>
+                    if (frame.wasReceiveBufferRejected) { refuseReceiveData(frame) }
+                    else { requireExchange(frame.header.streamId).acceptData(frame) }
                 case Http2FrameType.PushPromise =>
                     throw Http2ProtocolException(
                         Http2ErrorCode.ProtocolError, Http2ErrorScope.Connection,
@@ -151,7 +201,22 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             }
         }
     }
-
+    private func refuseReceiveData(frame: Http2Frame): Unit {
+        let streamId = frame.header.streamId
+        let _ = requireExchange(streamId)
+        flow.receiveData(streamId, Int64(frame.header.length))
+        try {
+            let _ = cancelLocalStream(
+                streamId, Http2ErrorCode.RefusedStream,
+                "HTTP/2 aggregate receive-buffer budget is exhausted"
+            )
+        } catch (_: Exception) {
+            throw Http2ProtocolException(
+                Http2ErrorCode.InternalError, Http2ErrorScope.Connection,
+                "HTTP/2 refused DATA could not be reset safely"
+            )
+        }
+    }
     public func readerTerminated(
         completion: Http2ConnectionCompletion,
         terminalGoAway: ?Http2Frame
@@ -205,9 +270,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                     registry.getOrThrow(), block.streamId, endStream: block.endStream
                 )
                 let decoded = decoder.decode(block.bytes)
-                if (let Some(_) <- decodeHttp2ServerRequestHead(
+                let requestHead = decodeHttp2ServerRequestHead(
                     decoded, block.streamId, limits: limits, http2Limits: http2Limits
-                ).protocol) {
+                )
+                if (requestHead.protocol.isSome()) {
                     if (!machine.localSettings.enableConnectProtocol) {
                         throw Http2ProtocolException(
                             Http2ErrorCode.ProtocolError, Http2ErrorScope.Stream(block.streamId),
@@ -215,32 +281,78 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                         )
                     }
                 }
-                let exchange = Http2ServerExchange.open(
-                    block.streamId, decoded, block.endStream,
-                    registry.getOrThrow(), flow, this, limits: limits, http2Limits: http2Limits,
-                    streamAlreadyOpened: true,
-                    pushSenderFactory: { head =>
-                        if (let Some(scheme) <- head.scheme) {
-                            if (head.protocol.isNone() && machine.peerSettings.enablePush) {
-                                Some<Http2ServerPushSender>(
-                                    Http2ServerPushSenderImpl(
-                                        this, block.streamId,
-                                        HttpUrl.parse("${scheme}://${head.authority}/")
-                                    )
-                                )
-                            } else { None<Http2ServerPushSender> }
-                        } else { None<Http2ServerPushSender> }
-                    },
-                    localCancellation: { =>
+                let exchangeBufferOwner = streamBufferOwner(requestHead.authority)
+                var requestLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+                var streamLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
+                if (let Some(budget) <- resourceBudget) {
+                    let owner = requestOwner(requestHead.authority)
+                    if (let Some(owners) <- streamBufferOwners) {
+                        owners.bind(Int64(block.streamId.value), owner)
+                    }
+                    requestLease = budget.tryAcquireRequest(owner)
+                    if (requestLease.isSome()) { streamLease = budget.tryAcquireStream(owner) }
+                    if (requestLease.isNone() || streamLease.isNone()) {
+                        if (let Some(lease) <- requestLease) { lease.close() }
+                        if (let Some(lease) <- streamLease) { lease.close() }
+                        if (let Some(owners) <- streamBufferOwners) {
+                            owners.unbind(Int64(block.streamId.value))
+                        }
+                        machine.markPeerStreamProcessed(block.streamId)
                         try {
                             let _ = cancelLocalStream(
-                                block.streamId, Http2ErrorCode.Cancel,
-                                "HTTP/2 server stream cancelled by public handle"
+                                block.streamId, Http2ErrorCode.RefusedStream,
+                                "HTTP/2 aggregate request or stream budget is exhausted"
                             )
-                        } catch (_: Exception) {}
-                    },
-                    onOwnerTerminated: { => removeExchange(block.streamId) }
-                )
+                        } catch (_: Exception) { abort() }
+                        return
+                    }
+                }
+                if (let Some(lease) <- streamLease) { lease.activate() }
+                let terminalRequestLease = requestLease
+                let terminalStreamLease = streamLease
+                let exchange = try {
+                    Http2ServerExchange.open(
+                        block.streamId, decoded, block.endStream,
+                        registry.getOrThrow(), flow, this, limits: limits, http2Limits: http2Limits,
+                        streamAlreadyOpened: true,
+                        pushSenderFactory: { head =>
+                            if (let Some(scheme) <- head.scheme) {
+                                if (head.protocol.isNone() && machine.peerSettings.enablePush) {
+                                    Some<Http2ServerPushSender>(
+                                        Http2ServerPushSenderImpl(
+                                            this, block.streamId,
+                                            HttpUrl.parse("${scheme}://${head.authority}/")
+                                        )
+                                    )
+                                } else { None<Http2ServerPushSender> }
+                            } else { None<Http2ServerPushSender> }
+                        },
+                        localCancellation: { =>
+                            try {
+                                let _ = cancelLocalStream(
+                                    block.streamId, Http2ErrorCode.Cancel,
+                                    "HTTP/2 server stream cancelled by public handle"
+                                )
+                            } catch (_: Exception) {}
+                        },
+                        bufferOwner: exchangeBufferOwner,
+                        onOwnerTerminated: { =>
+                            if (let Some(lease) <- terminalRequestLease) { lease.close() }
+                            if (let Some(lease) <- terminalStreamLease) { lease.close() }
+                            if (let Some(owners) <- streamBufferOwners) {
+                                owners.unbind(Int64(block.streamId.value))
+                            }
+                            removeExchange(block.streamId)
+                        }
+                    )
+                } catch (error: Exception) {
+                    if (let Some(lease) <- requestLease) { lease.close() }
+                    if (let Some(lease) <- streamLease) { lease.close() }
+                    if (let Some(owners) <- streamBufferOwners) {
+                        owners.unbind(Int64(block.streamId.value))
+                    }
+                    throw error
+                }
                 machine.markPeerStreamProcessed(block.streamId)
                 synchronized(mutex) { exchanges.add(exchange) }
                 let registration = reset.getOrThrow().register(block.streamId, exchange)
@@ -328,6 +440,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
         var promised: ?Http2StreamId = None<Http2StreamId>
         var worker: ?Http2ServerPushWorker = None<Http2ServerPushWorker>
         var promiseAdmitted = false
+        var streamLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         try {
             if (request.method != HttpMethod("GET")) {
                 throw IllegalArgumentException("HTTP/2 server push requires GET")
@@ -353,6 +466,13 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
 
             acquirePushSlot(context)
             slotOwned = true
+            match ((resourceBudget, resourceOwner)) {
+                case (Some(budget), Some(_)) =>
+                    streamLease = Some(budget.acquireStream(
+                        requestOwner(parentOrigin.authority), context
+                    ))
+                case _ => ()
+            }
             // Reserve the promised id first, then perform response mapping
             // without excluding the reader: header-only mapping may close an
             // application body.
@@ -365,11 +485,15 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             }
             let streamId = promised.getOrThrow()
             flow.openStream(streamId)
+            if (let Some(owners) <- streamBufferOwners) {
+                owners.bind(Int64(streamId.value), requestOwner(parentOrigin.authority))
+            }
+            if (let Some(lease) <- streamLease) { lease.activate() }
             let responsePlan = mapHttp2ServerResponse(
                 streamId, request.method, handled, flow,
                 limits: limits, http2Limits: http2Limits
             )
-            let ownedWorker = Http2ServerPushWorker(this, responsePlan, lifetime)
+            let ownedWorker = Http2ServerPushWorker(this, responsePlan, lifetime, streamLease)
             var promiseTickets = Array<Http2WriteTicket>()
             // The final parent/promised-stream check and promise admission are
             // atomic with peer RST_STREAM handling.
@@ -380,6 +504,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                 }
                 adoptPushWorker(ownedWorker)
                 worker = Some(ownedWorker)
+                streamLease = None<internal.HttpResourceLease>
                 slotOwned = false
                 ownedWorker.bindReset(reset.getOrThrow().register(streamId, ownedWorker))
                 promiseTickets = encodeAndEnqueuePushPromise(
@@ -399,6 +524,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                 ownedWorker.complete()
             } else {
                 try { handled.response.close() } catch (_: Exception) {}
+                if (let Some(lease) <- streamLease) { lease.close() }
                 if (let Some(value) <- lifetime) {
                     try { value.close() } catch (_: Exception) {}
                 }
@@ -552,6 +678,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     }
 
     internal func finishPushWorker(streamId: Http2StreamId): Unit {
+        if (let Some(owners) <- streamBufferOwners) { owners.unbind(Int64(streamId.value)) }
         synchronized(mutex) {
             for (index in 0..pushWorkers.size) {
                 if (pushWorkers[index].streamId.value == streamId.value) {
@@ -583,6 +710,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     }
 
     private func releaseUnpromisedStream(streamId: Http2StreamId, error: Exception): Unit {
+        if (let Some(owners) <- streamBufferOwners) { owners.unbind(Int64(streamId.value)) }
         try {
             let _ = registry.getOrThrow().reset(
                 streamId, Http2ErrorCode.InternalError,
@@ -693,6 +821,7 @@ internal class Http2ServerPushWorker <: Http2StreamResetListener {
     private let connection: Http2ServerConnection
     private let plan: Http2ServerResponsePlan
     private let lifetime: ?Resource
+    private let streamLease: ?internal.HttpResourceLease
     private let mutex = Mutex()
     private var resetRegistration: ?Http2StreamResetRegistration =
         None<Http2StreamResetRegistration>
@@ -703,11 +832,13 @@ internal class Http2ServerPushWorker <: Http2StreamResetListener {
     init(
         connection: Http2ServerConnection,
         plan: Http2ServerResponsePlan,
-        lifetime: ?Resource
+        lifetime: ?Resource,
+        streamLease: ?internal.HttpResourceLease
     ) {
         this.connection = connection
         this.plan = plan
         this.lifetime = lifetime
+        this.streamLease = streamLease
         streamId = plan.streamId
     }
 
@@ -777,6 +908,7 @@ internal class Http2ServerPushWorker <: Http2StreamResetListener {
         if (let Some(value) <- lifetime) {
             try { value.close() } catch (_: Exception) {}
         }
+        if (let Some(value) <- streamLease) { value.close() }
         connection.finishPushWorker(streamId)
     }
 }

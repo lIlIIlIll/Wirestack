@@ -5,6 +5,7 @@ import wirestack.internal.common.*
 import wirestack.internal.connector.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.internal as internal
 import wirestack as api
 
 /** DNS and typed-address proxy endpoint forms retained without string reparsing. */
@@ -46,10 +47,11 @@ public class Http1ForwardProxyClient <: Resource {
         poolConfig!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
         limits!: HttpLimits = HttpLimits(),
         attemptDelay!: Duration = 250 * Duration.millisecond,
-        continueTimeout!: Duration = Duration.second
+        continueTimeout!: Duration = Duration.second,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
         this.endpoint = endpoint
-        pool = Http1ConnectionPool(config: poolConfig)
+        pool = Http1ConnectionPool(config: poolConfig, resourceBudget: resourceBudget)
         factory = Http1ForwardProxyConnectionFactory(
             endpoint, resolver, transportFactory, limits, attemptDelay, continueTimeout
         )
@@ -120,13 +122,14 @@ public class Http1HttpsProxyClient <: Resource {
         poolConfig!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
         limits!: HttpLimits = HttpLimits(),
         attemptDelay!: Duration = 250 * Duration.millisecond,
-        continueTimeout!: Duration = Duration.second
+        continueTimeout!: Duration = Duration.second,
+        resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
         this.endpoint = endpoint
         this.resolver = resolver
         this.transportFactory = transportFactory
         this.handshaker = handshaker
-        pool = Http1ConnectionPool(config: poolConfig)
+        pool = Http1ConnectionPool(config: poolConfig, resourceBudget: resourceBudget)
         this.limits = limits
         this.attemptDelay = attemptDelay
         this.continueTimeout = continueTimeout
@@ -223,7 +226,8 @@ private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
         this.continueTimeout = continueTimeout
     }
 
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         if (key.proxyRoute != Some(endpoint.identity)) {
             throw IllegalArgumentException("HTTP forward proxy factory received a mismatched route key")
         }
@@ -271,7 +275,8 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
         this.continueTimeout = continueTimeout
     }
 
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         if (key.scheme != "https" || key.proxyRoute != Some(routeIdentity) ||
             key.originHost != target.host || key.originPort != target.port) {
             throw IllegalArgumentException("HTTPS proxy factory received a mismatched route key")

@@ -6,7 +6,7 @@ import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
-
+import wirestack.internal as internal
 private class PoolTestClock <: MonotonicClock {
     private var current: MonoTime
     init() { current = MonoTime.now() }
@@ -18,7 +18,8 @@ private class PoolTestFactory <: Http1ConnectionFactory {
     let calls = AtomicInt64(0)
     private let peers = ArrayList<MemoryTransport>()
 
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         let _ = key
         if (context.isCancellationRequested()) { throw Exception("factory called after cancellation") }
         calls.fetchAdd(1)
@@ -29,7 +30,8 @@ private class PoolTestFactory <: Http1ConnectionFactory {
 }
 
 private class FailingPoolFactory <: Http1ConnectionFactory {
-    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {
         let _ = key
         let _ = context
         throw Exception("connect failed")
@@ -166,6 +168,45 @@ class Http1ConnectionPoolTest {
     }
 
     @TestCase
+    func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {
+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2
+        ))
+        let pool = Http1ConnectionPool(
+            config: Http1ConnectionPoolConfig(
+                maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1
+            ),
+            resourceBudget: Some(budget)
+        )
+        let factory = PoolTestFactory()
+        let held = pool.acquire(poolTestKey(), factory)
+        let blocker = spawn {
+            try {
+                let _ = pool.acquire(poolTestKey(), factory)
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Closed => true
+                    case _ => false
+                }
+            }
+        }
+        @Expect(waitForAggregateConnectionWaiter(budget, 1, Duration.second))
+        pool.close()
+        var rejected = false
+        try { rejected = blocker.get(Duration.second) } catch (_: Exception) {}
+        @Expect(rejected)
+        // close() released the held connection only after aggregate admission; no
+        // factory work may run for the already-closed pool.
+        @Expect(factory.calls.load(), 1)
+        @Expect(pool.snapshot().reservations, 0)
+        @Expect(pool.snapshot().closed)
+        @Expect(budget.snapshot().activeConnections, 0)
+        @Expect(budget.snapshot().reservedConnections, 0)
+        pool.release(held)
+    }
+
+    @TestCase
     func failedCreationRollsBackItsCapacityReservation(): Unit {
         let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(
             maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1
@@ -215,4 +256,14 @@ private func poolTestKey(host!: String = "example.com"): HttpConnectionPoolKey {
         "https", host, 443, None<String>, "default-network", "tls", "trust",
         "client", "provider", "http/1.1"
     )
+}
+
+private func waitForAggregateConnectionWaiter(budget: internal.HttpResourceBudget,
+    expected: Int64, timeout: Duration): Bool {
+    let expiresAt = MonoTime.now() + timeout
+    while (budget.snapshot().admissionWaiters < expected) {
+        if (MonoTime.now() >= expiresAt) { return false }
+        sleep(Duration.millisecond)
+    }
+    true
 }

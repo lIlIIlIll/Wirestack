@@ -1,5 +1,7 @@
 package wirestack.internal.http1
 
+import wirestack.internal as internal
+
 /** Complete security and routing partition key for HTTP connection reuse. */
 public struct HttpConnectionPoolKey <: Equatable<HttpConnectionPoolKey> & Hashable {
     public let scheme: String
@@ -75,4 +77,13 @@ public struct HttpConnectionPoolKey <: Equatable<HttpConnectionPoolKey> & Hashab
         hasher.write(alpnPolicy)
         hasher.finish()
     }
+}
+
+/** Stable aggregate-budget owner shared by every protocol pool for this route. */
+public func httpResourceOwnerForPoolKey(key: HttpConnectionPoolKey): internal.HttpResourceOwnerKey {
+    let route = match (key.proxyRoute) {
+        case Some(value) => "proxy:${value}"
+        case None => "direct"
+    }
+    internal.HttpResourceOwnerKey("${key.scheme}://${key.originHost}:${key.originPort}", route)
 }
