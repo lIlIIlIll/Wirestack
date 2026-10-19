@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-003",
+  "dependencies": [
+    "M9-001",
+    "M10-001",
+    "M10-005"
+  ],
+  "allowed_paths": [
+    "src/common.cj",
+    "src/cancellation.cj",
+    "src/gzip/client.cj",
+    "src/http_message.cj",
+    "src/http_url.cj",
+    "src/net/dns_resolver.cj",
+    "src/http/websocket_url.cj",
+    "src/http/websocket_url_test.cj",
+    "src/http/websocket.cj",
+    "src/http/websocket_handshake.cj",
+    "src/http/websocket_handshake_test.cj",
+    "src/http/websocket_lifecycle_test.cj",
+    "src/http/client.cj",
+    "src/http/client_rotation.cj",
+    "src/http/facade_test.cj",
+    "src/http/duplex.cj",
+    "src/http/cancellation.cj",
+    "src/internal/connector/happy_eyeballs.cj",
+    "src/internal/connector/happy_eyeballs_test.cj",
+    "src/internal/http1/client_pipeline.cj",
+    "src/internal/http1/tls_client_pipeline.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/automatic_tls_client_pipeline_test.cj",
+    "src/internal/http1/tls_client_pipeline_test.cj",
+    "src/internal/http1/proxy_client_pipeline_test.cj",
+    "src/internal/http1/tls_server_test.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/protocol_upgrade.cj",
+    "src/internal/http2/client_connection.cj",
+    "examples/linux/m8_005/native_http.cj",
+    "examples/linux/m11_003/websocket.cj",
+    "tools/m11_003_native_websocket.py",
+    "tools/tests/test_m11_003_native_websocket.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/m7_032_public_api_inventory.py",
+    "README.md",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m11-003.json",
+    "docs/guides/websocket.md",
+    "docs/guides/http1-linux.md",
+    "docs/guides/http-parity-linux.md",
+    "docs/planning/status.md",
+    "tools/tasks/M11-003.json",
+    "docs/evidence/M11-003",
+    "docs/api/generated",
+    "tools/m11_002_native_gzip.py"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "current-public-api",
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "native-websocket-and-regression",
+      "argv": [
+        "cjpm",
+        "test",
+        "--target-dir",
+        "target/m11-003-native",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "--timeout-each",
+        "60s"
+      ],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "release-api-tooling",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_032_public_api_contract",
+        "tools.tests.test_m11_003_native_websocket"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "installed-native-websocket",
+      "argv": [
+        "python3",
+        "tools/m11_003_native_websocket.py"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "strict-seven-package-docs",
+      "argv": [
+        "scripts/check-docs",
+        "--html",
+        "--output",
+        "docs/evidence/M11-003/docs/report.json"
+      ],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M11-003/workspace.json",
+    "docs/evidence/M11-003/verification.json",
+    "docs/evidence/M11-003/installed/report.json",
+    "docs/evidence/M11-003/installed-sdk113/report.json",
+    "docs/evidence/M11-003/docs/report.json",
+    "docs/evidence/M11-003/public-api.json"
+  ],
+  "timeout_seconds": 1200,
+  "long_running_gate": false,
+  "source_paths": [
+    "src/common.cj",
+    "src/cancellation.cj",
+    "src/gzip/client.cj",
+    "src/http_message.cj",
+    "src/http_url.cj",
+    "src/net/dns_resolver.cj",
+    "src/http/websocket_url.cj",
+    "src/http/websocket_url_test.cj",
+    "src/http/websocket.cj",
+    "src/http/websocket_handshake.cj",
+    "src/http/websocket_handshake_test.cj",
+    "src/http/websocket_lifecycle_test.cj",
+    "src/http/client.cj",
+    "src/http/client_rotation.cj",
+    "src/http/facade_test.cj",
+    "src/http/duplex.cj",
+    "src/http/cancellation.cj",
+    "src/internal/connector/happy_eyeballs.cj",
+    "src/internal/connector/happy_eyeballs_test.cj",
+    "src/internal/http1/client_pipeline.cj",
+    "src/internal/http1/tls_client_pipeline.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/automatic_tls_client_pipeline_test.cj",
+    "src/internal/http1/tls_client_pipeline_test.cj",
+    "src/internal/http1/proxy_client_pipeline_test.cj",
+    "src/internal/http1/tls_server_test.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/protocol_upgrade.cj",
+    "src/internal/http2/client_connection.cj",
+    "examples/linux/m8_005/native_http.cj",
+    "examples/linux/m11_003/websocket.cj",
+    "tools/m11_003_native_websocket.py",
+    "tools/tests/test_m11_003_native_websocket.py",
+    "tools/docs/m7_033_docs.py",
+    "tools/m7_032_public_api_inventory.py",
+    "README.md",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m11-003.json",
+    "docs/guides/websocket.md",
+    "docs/guides/http1-linux.md",
+    "docs/guides/http-parity-linux.md",
+    "docs/planning/status.md",
+    "tools/tasks/M11-003.json",
+    "tools/m11_002_native_gzip.py"
+  ]
+}

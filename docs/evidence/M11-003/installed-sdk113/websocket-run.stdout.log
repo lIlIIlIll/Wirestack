@@ -1,0 +1,17 @@
+CHECK ws_h1_host_target_fragments_ping PASS
+CHECK wss_h2_authority_target_fragments_ping PASS
+CHECK native_explicit_default_ports PASS
+CHECK h1_rejection_consume_close PASS
+CHECK h1_managed_subprotocol_abrupt_rollback PASS
+CHECK h2_rejection_consume_close PASS
+CHECK h2_managed_subprotocol_abrupt_rollback PASS
+CHECK tls_canonical_identity_mismatch PASS
+CHECK native_proxy_auth_isolation PASS
+CAPACITY frame_limit=32768 retained=32772 high_water=32772 capacity=262144 connections=1
+CHECK h2_bounded_backpressure_sibling PASS
+CHECK h2_blocked_sender_close_rollback PASS
+CHECK h2_cancel_close_races_sibling PASS
+CHECK native_ipv4_ipv6 PASS
+CHECK native_wss_ip_san_no_dns_sni PASS
+CHECK native_shutdown_resource_rollback PASS
+M11_003_INSTALLED_WEBSOCKET_PASS

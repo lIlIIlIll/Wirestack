@@ -149,12 +149,12 @@ internal class ClientAlpnTlsLease <: http1.HttpAlpnTlsHandshaker {
     /** Negotiation policy retained by the snapshot. */
     public prop alpnPolicy: String { get() { delegate.alpnPolicy } }
     /** Negotiates using the retained immutable context.
-     * @param host Peer certificate name.
+     * @param reference Origin DNS or IP certificate identity; literals never send DNS SNI.
      * @param stream Connected transport.
      * @param context Original deadline and cancellation. */
-    public func handshakeNegotiated(host: HostName, stream: api.DuplexTransport,
+    public func handshakeNegotiated(reference: api.ReferenceIdentity, stream: api.DuplexTransport,
         context: OperationContext): http1.HttpNegotiatedTlsTransport {
-        delegate.handshakeNegotiated(host, stream, context)
+        delegate.handshakeNegotiated(reference, stream, context)
     }
     /** Releases this TLS context reference once. */
     public func close(): Unit {
@@ -183,11 +183,11 @@ internal class ClientProxyTlsLease <: http1.Http1TlsHandshaker {
     /** Negotiation policy retained by the snapshot. */
     public prop alpnPolicy: String { get() { delegate.alpnPolicy } }
     /** Authenticates the tunnel peer using the retained context.
-     * @param host Peer certificate name.
+     * @param reference Tunnel origin DNS or IP certificate identity, independent of the proxy endpoint.
      * @param stream Connected tunnel transport.
      * @param context Original deadline and cancellation. */
-    public func handshake(host: HostName, stream: api.DuplexTransport,
-        context: OperationContext): api.DuplexTransport { delegate.handshake(host, stream, context) }
+    public func handshake(reference: api.ReferenceIdentity, stream: api.DuplexTransport,
+        context: OperationContext): api.DuplexTransport { delegate.handshake(reference, stream, context) }
     /** Releases this TLS context reference once. */
     public func close(): Unit {
         if (closed.compareAndSwap(false, true)) { owner.release() }
@@ -201,9 +201,10 @@ internal class ClientProxyTlsLease <: http1.Http1TlsHandshaker {
 internal class ClientRotationTransport <: api.DuplexTransport {
     private let delegate: api.DuplexTransport
     private let lease: ClientRotationLease
+    private let cancellation: HttpRequestCancellationOperation
     private let closed = AtomicBool(false)
-    init(delegate: api.DuplexTransport, lease: ClientRotationLease) {
-        this.delegate = delegate; this.lease = lease
+    init(delegate: api.DuplexTransport, lease: ClientRotationLease, cancellation: HttpRequestCancellationOperation) {
+        this.delegate = delegate; this.lease = lease; this.cancellation = cancellation
     }
     /** Underlying transport metadata. */
     public prop info: api.TransportInfo { get() { delegate.info } }
@@ -226,7 +227,7 @@ internal class ClientRotationTransport <: api.DuplexTransport {
      * @param context Bounded close operation. */
     public func close(context: OperationContext): Unit {
         if (closed.compareAndSwap(false, true)) {
-            try { delegate.close(context) } finally { lease.close() }
+            try { delegate.close(context) } finally { lease.close(); cancellation.fail() }
         }
     }
     /** Closes the transport and releases its generation once. */
@@ -235,7 +236,7 @@ internal class ClientRotationTransport <: api.DuplexTransport {
      * @param reason Structured abort cause. */
     public func abort(reason!: ?api.AbortReason): Unit {
         if (closed.compareAndSwap(false, true)) {
-            try { delegate.abort(reason: reason) } finally { lease.close() }
+            try { delegate.abort(reason: reason) } finally { lease.close(); cancellation.fail() }
         }
     }
     /** Reports whether this transport owner was closed. */

@@ -1,0 +1,10 @@
+COMMAND: python3 -m unittest -v tools.tests.test_m11_003_native_websocket.EvidenceRedactionTest
+test_every_url_component_is_removed_before_evidence_storage (tools.tests.test_m11_003_native_websocket.EvidenceRedactionTest.test_every_url_component_is_removed_before_evidence_storage) ... ok
+test_malformed_authority_fails_closed (tools.tests.test_m11_003_native_websocket.EvidenceRedactionTest.test_malformed_authority_fails_closed) ... ok
+test_path_and_fixture_address_redaction_still_applies (tools.tests.test_m11_003_native_websocket.EvidenceRedactionTest.test_path_and_fixture_address_redaction_still_applies) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+EXIT_STATUS=0

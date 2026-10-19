@@ -52,9 +52,10 @@ private class ServerDuplexAdapter <: http1.Http1DuplexHandler & http2.Http2Duple
     /**
      * Invokes the delegate with the retained request-cancellation context, then releases its cancellation links.
      * @param transport Exclusive HTTP/1.1 connection or HTTP/2 stream transferred for this session.
+     * @param context Canonical handshake/session context with actual request, connection and stream correlation.
      */
-    public func serve(transport: api.DuplexTransport, _: OperationContext): Unit {
-        try { delegate.serve(transport, cancellation.context) }
+    public func serve(transport: api.DuplexTransport, context: OperationContext): Unit {
+        try { delegate.serve(transport, context.withCancellation(cancellation.context.cancellation)) }
         finally { cancellation.fail() }
     }
     /** Releases request-cancellation links when response validation or commitment prevents session startup. */
@@ -78,7 +79,7 @@ internal class WebSocketServerHandler <: HttpDuplexHandler {
      */
     public func serve(transport: api.DuplexTransport, context: OperationContext): Unit {
         let connection = WebSocketConnection(transport, WebSocketRole.Server,
-            subProtocol: protocol, limits: limits)
+            subProtocol: protocol, limits: limits, context: context)
         try { delegate.serve(connection, context) }
         finally { connection.close() }
     }

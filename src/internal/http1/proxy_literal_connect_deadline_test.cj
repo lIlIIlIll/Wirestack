@@ -5,6 +5,7 @@ import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
+import wirestack.ReferenceIdentity
 import wirestack.internal.common.*
 import wirestack.internal.http_model.*
 import wirestack.internal.resolver.*
@@ -226,9 +227,9 @@ private class ProxyReviewPassthroughHandshaker <: Http1TlsHandshaker {
     public prop providerIdentity: String { get() { "proxy-review-provider" } }
     public prop alpnPolicy: String { get() { "http/1.1" } }
 
-    public func handshake(host: HostName, transport: DuplexTransport,
+    public func handshake(reference: ReferenceIdentity, transport: DuplexTransport,
         context: OperationContext): DuplexTransport {
-        let _ = host
+        let _ = reference
         let _ = context
         handshakes.fetchAdd(1)
         transport

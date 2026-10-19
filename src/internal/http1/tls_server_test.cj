@@ -67,7 +67,7 @@ class Http1TlsServerTest {
         try {
             let accepting = spawn { server.handshake(serverTransport, context) }
             let negotiated = client.handshakeNegotiated(
-                HostName("example.com"), clientTransport, context
+                ReferenceIdentity.Dns(HostName("example.com")), clientTransport, context
             )
             let accepted = accepting.get(3 * Duration.second)
             @Expect(client.alpnPolicy, "h2,http/1.1")
@@ -139,7 +139,7 @@ private func runTlsHttp1Exchange(
                 secured, TlsServerStaticHandler(), context: serverContext, maximumRequests: 1
             )
         }
-        let secured = client.handshake(HostName("example.com"), clientTransport, context)
+        let secured = client.handshake(ReferenceIdentity.Dns(HostName("example.com")), clientTransport, context)
         let connection = Http1ClientConnection(secured)
         let response = connection.execute(
             HttpRequest.get("https://example.com/secure"), context: context

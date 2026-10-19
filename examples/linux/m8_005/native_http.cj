@@ -367,8 +367,8 @@ func runWebSocketHttp1(): Unit {
     let serving: Future<Unit> = spawn { server.serve() }
     let client = localClient(server, "socket.test").build()
     try {
-        let session = connectedSocket(client.connectWebSocket(HttpUrl.parse(
-            "http://socket.test:${server.localEndpoint.port}/socket"),
+        let session = connectedSocket(client.connectWebSocket(WebSocketUrl.parse(
+            "ws://socket.test:${server.localEndpoint.port}/socket"),
             protocols: ["echo"], context: boundedContext()))
         exchangeAndClose(session)
     } finally {
@@ -391,7 +391,8 @@ func runWebSocketHttp2Push(): Unit {
         .build()
     let base = "https://example.com:${server.localEndpoint.port}"
     try {
-        let session = connectedSocket(client.connectWebSocket(HttpUrl.parse("${base}/socket"),
+        let session = connectedSocket(client.connectWebSocket(WebSocketUrl.parse(
+            "wss://example.com:${server.localEndpoint.port}/socket"),
             protocols: ["echo"], context: boundedContext()))
         try {
             let payload: Array<Byte> = [0u8, 255u8, 17u8, 128u8]
