@@ -148,7 +148,7 @@ public class Http2ClientConnection <: Resource {
         )
         let dispatcher = Http2ClientDispatcher(
             machine, writer, flow, limits, http2Limits, pushConfig,
-            resourceBudget, resourceOwner
+            resourceBudget, resourceOwner, context
         )
         let reader = Http2ConnectionReader(
             transport, machine, dispatcher, limits: http2Limits,
@@ -296,33 +296,43 @@ public class Http2ClientConnection <: Resource {
         connectionCancellation!: CancellationToken = CancellationToken.none(),
         onTerminated!: () -> Unit = { => }
     ): HttpResponse {
+        let streamContext = http2StreamEventContext(context, stream.id)
         let termination = reader.terminationRegistry.register(signal)
         var exchange: ?Http2ClientExchange = None<Http2ClientExchange>
         var initialHeadersQueued = false
         try {
-            let pushSource = dispatcher.newPushSource(stream.id, request.url, context)
+            let pushSource = dispatcher.newPushSource(stream.id, request.url, streamContext)
             let opened = Http2ClientExchange(
                 stream.id, request.method, registry, flow, writer, reset,
-                goAwayRegistration, termination, signal, context, limits, http2Limits,
+                goAwayRegistration, termination, signal, streamContext, limits, http2Limits,
                 pushSource, false, onTerminated
             )
             exchange = Some(opened)
             signal.attach(opened)
             opened.bindReset(reset.register(opened.streamId, opened))
             dispatcher.add(opened)
+            opened.observeOpened()
             signal.attachInitialHeadersWakeup({ => wakeInitialHeaders() })
-            let requestWriteContext = context.forStage(OperationTimeoutStage.RequestWrite)
-            let initialTickets = enqueueInitialHeaderFields(
-                opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, signal, requestWriteContext
-            )
-            initialHeadersQueued = true
-            opened.bindCancellation(context.cancellation, connectionCancellation)
-            waitClientWrites(initialTickets, requestWriteContext)
-            health.observeOutboundActivity()
-            if (!plan.endStreamOnHeaders) {
-                sendRequestBody(opened, plan.openBody(), requestWriteContext)
+            let requestWriteContext = streamContext.forStage(OperationTimeoutStage.RequestWrite)
+            http2Observe(requestWriteContext, NetworkEventKind.StageStarted, NetworkEventOutcome.Started)
+            try {
+                let initialTickets = enqueueInitialHeaderFields(
+                    opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, signal, requestWriteContext)
+                initialHeadersQueued = true
+                opened.bindCancellation(streamContext.cancellation, connectionCancellation)
+                waitClientWrites(initialTickets, requestWriteContext)
+                health.observeOutboundActivity()
+                if (!plan.endStreamOnHeaders) {
+                    sendRequestBody(opened, plan.openBody(), requestWriteContext)
+                }
+                http2Observe(requestWriteContext, NetworkEventKind.StageCompleted, NetworkEventOutcome.Succeeded)
+            } catch (error: Exception) {
+                http2Observe(requestWriteContext, NetworkEventKind.StageCompleted, NetworkEventOutcome.Failed, error: Some(error))
+                throw error
             }
-            opened.awaitResponse(context.forStage(OperationTimeoutStage.ResponseHeaders))
+            let responseContext = streamContext.forStage(OperationTimeoutStage.ResponseHeaders)
+            if (responseContext.eventSink.isNone()) { opened.awaitResponse(responseContext) }
+            else { http2ObservedStage(responseContext, { => opened.awaitResponse(responseContext) }) }
         } catch (error: Exception) {
             if (!initialHeadersQueued) { abandonInitialHeaders(stream.id) }
             match (exchange) {
@@ -358,30 +368,40 @@ public class Http2ClientConnection <: Resource {
         connectionCancellation: CancellationToken,
         onTerminated: () -> Unit
     ): Http2ConnectResult {
+        let streamContext = http2StreamEventContext(context, stream.id)
         let termination = reader.terminationRegistry.register(signal)
         var exchange: ?Http2ClientExchange = None<Http2ClientExchange>
         var initialHeadersQueued = false
         try {
-            let pushSource = dispatcher.newPushSource(stream.id, request.url, context)
+            let pushSource = dispatcher.newPushSource(stream.id, request.url, streamContext)
             let opened = Http2ClientExchange(
                 stream.id, request.method, registry, flow, writer, reset,
-                goAwayRegistration, termination, signal, context, limits, http2Limits,
+                goAwayRegistration, termination, signal, streamContext, limits, http2Limits,
                 pushSource, true, onTerminated
             )
             exchange = Some(opened)
             signal.attach(opened)
             opened.bindReset(reset.register(opened.streamId, opened))
             dispatcher.add(opened)
+            opened.observeOpened()
             signal.attachInitialHeadersWakeup({ => wakeInitialHeaders() })
-            let requestWriteContext = context.forStage(OperationTimeoutStage.RequestWrite)
-            let initialTickets = enqueueInitialHeaderFields(
-                opened.streamId, plan.initialHeaders, false, signal, requestWriteContext
-            )
-            initialHeadersQueued = true
-            opened.bindCancellation(context.cancellation, connectionCancellation)
-            waitClientWrites(initialTickets, requestWriteContext)
-            health.observeOutboundActivity()
-            let result = opened.awaitConnect(context.forStage(OperationTimeoutStage.ResponseHeaders))
+            let requestWriteContext = streamContext.forStage(OperationTimeoutStage.RequestWrite)
+            http2Observe(requestWriteContext, NetworkEventKind.StageStarted, NetworkEventOutcome.Started)
+            try {
+                let initialTickets = enqueueInitialHeaderFields(
+                    opened.streamId, plan.initialHeaders, false, signal, requestWriteContext)
+                initialHeadersQueued = true
+                opened.bindCancellation(streamContext.cancellation, connectionCancellation)
+                waitClientWrites(initialTickets, requestWriteContext)
+                health.observeOutboundActivity()
+                http2Observe(requestWriteContext, NetworkEventKind.StageCompleted, NetworkEventOutcome.Succeeded)
+            } catch (error: Exception) {
+                http2Observe(requestWriteContext, NetworkEventKind.StageCompleted, NetworkEventOutcome.Failed, error: Some(error))
+                throw error
+            }
+            let responseContext = streamContext.forStage(OperationTimeoutStage.ResponseHeaders)
+            let result = if (responseContext.eventSink.isNone()) { opened.awaitConnect(responseContext) }
+                else { http2ObservedStage(responseContext, { => opened.awaitConnect(responseContext) }) }
             match (result) {
                 case Http2ConnectResult.Connected(_) => opened.releaseHandshakeCancellation()
                 case Http2ConnectResult.Rejected(_) => ()
@@ -705,6 +725,20 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
     private var connectionCancellation: ?CancellationRegistration = None<CancellationRegistration>
     private var connection: ?Http2ClientConnection = None<Http2ClientConnection>
     private var terminal = false
+    private var bodyObserved = false
+    private var bodyAbandoned = false
+
+    func observeOpened(): Unit {
+        http2Observe(context, NetworkEventKind.Http2StreamOpened, NetworkEventOutcome.Started)
+    }
+
+    private func observeBodyStarted(): Unit {
+        if (context.eventSink.isNone()) { return }
+        let owns = synchronized(mutex) {
+            if (bodyObserved) { false } else { bodyObserved = true; true }
+        }
+        if (owns) { http2Observe(context, NetworkEventKind.BodyStarted, NetworkEventOutcome.Started) }
+    }
 
     init(
         streamId: Http2StreamId,
@@ -857,7 +891,7 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
     func awaitResponse(waitContext: OperationContext): HttpResponse {
         let registration = waitContext.cancellation.register { => wake() }
         try {
-            synchronized(mutex) {
+            let result = synchronized(mutex) {
                 while (response.isNone() && failure.isNone()) {
                     checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
                     match (waitContext.deadline) {
@@ -872,6 +906,8 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
                 if (let Some(error) <- failure) { throw error }
                 response.getOrThrow()
             }
+            observeBodyStarted()
+            result
         } finally {
             registration.unregister()
         }
@@ -880,7 +916,7 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
     func awaitConnect(waitContext: OperationContext): Http2ConnectResult {
         let registration = waitContext.cancellation.register { => wake() }
         try {
-            synchronized(mutex) {
+            let result = synchronized(mutex) {
                 while (connectResult.isNone() && failure.isNone()) {
                     checkClientContext(waitContext, phase: NetworkPhase.HttpHeaders)
                     match (waitContext.deadline) {
@@ -894,6 +930,11 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
                 if (let Some(error) <- failure) { throw error }
                 connectResult.getOrThrow()
             }
+            match (result) {
+                case Http2ConnectResult.Rejected(_) => observeBodyStarted()
+                case _ => ()
+            }
+            result
         } finally {
             registration.unregister()
         }
@@ -959,6 +1000,7 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
 
     public func completed(): Unit { finish() }
     public func abandoned(): Unit {
+        synchronized(mutex) { bodyAbandoned = true }
         try { let _ = reset.cancelLocal(streamId) } catch (_: Exception) {}
         finish()
     }
@@ -993,6 +1035,18 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         if (let Some(value) <- connection) { value.remove(streamId) }
         if (let Some(value) <- pushSource) { value.parentFinished() }
         try { onTerminated() } catch (_: Exception) {}
+        if (context.eventSink.isNone()) { return }
+        let bodyFailure = channel.terminalFailure
+        let disposition = synchronized(mutex) {
+            (bodyObserved, if (bodyFailure.isSome()) { bodyFailure } else { failure }, bodyAbandoned)
+        }
+        let outcome = if (disposition[1].isSome()) { NetworkEventOutcome.Failed }
+            else if (disposition[2]) { NetworkEventOutcome.Discarded }
+            else { NetworkEventOutcome.Succeeded }
+        if (disposition[0]) {
+            http2Observe(channel.observationContext, NetworkEventKind.BodyCompleted, outcome, error: disposition[1])
+        }
+        http2Observe(channel.observationContext, NetworkEventKind.Http2StreamClosed, outcome, error: disposition[1])
     }
     private func endRejectedConnectRequest(): Unit {
         let _ = writer.enqueue(Http2Frame(
@@ -1045,6 +1099,11 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     private var detached = false
     public prop contentLength: ?Int64 { get() { synchronized(mutex) { expectedLength } } }
     prop trailer: ?HttpTrailer { get() { synchronized(mutex) { retainedTrailer } } }
+    private var failureContext = None<OperationContext>
+    prop observationContext: OperationContext { get() {
+        synchronized(mutex) { match (failureContext) { case Some(value) => value; case None => defaultContext } }
+    } }
+    prop terminalFailure: ?Exception { get() { synchronized(mutex) { failure } } }
 
     init(
         streamId: Http2StreamId,
@@ -1136,9 +1195,12 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         }
     }
 
-    func fail(error: Exception): Unit {
+    func fail(error: Exception, observationContext!: ?OperationContext = None<OperationContext>): Unit {
         synchronized(mutex) {
-            if (failure.isNone()) { failure = Some(error) }
+            if (failure.isNone()) {
+                failure = Some(error)
+                if (let Some(context) <- observationContext) { failureContext = Some(context) }
+            }
             eof = true
             for (segment in segments) { segment.release(flow) }
             segments.clear()
@@ -1153,15 +1215,43 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
         }
     }
 
-    public func readSome(
+    public func readSome(destination: MutableByteSpan, context: OperationContext): ReadResult {
+        if (destination.isEmpty()) { return ReadResult.Data(0) }
+        if (defaultContext.eventSink.isNone()) {
+            return readActive(destination, context, context)
+        }
+        let observed = context.withEventSink(defaultContext.eventSink).withEventCorrelation(
+            requestId: defaultContext.requestId, attemptId: defaultContext.attemptId,
+            connectionId: defaultContext.connectionId, streamId: defaultContext.streamId
+        ).forStage(readTimeoutStage)
+        try {
+            http2ObservedStage(observed, {
+                => readActive(
+                    destination, observed, context,
+                    observationContext: Some<OperationContext>(observed), staged: true
+                )
+            })
+        } catch (error: Exception) {
+            synchronized(mutex) {
+                if (failure.isNone()) { failure = Some(error); failureContext = Some(observed) }
+            }
+            throw error
+        }
+    }
+
+    private func readActive(
         destination: MutableByteSpan,
-        context: OperationContext
+        context: OperationContext,
+        writeContext: OperationContext,
+        observationContext!: ?OperationContext = None<OperationContext>,
+        staged!: Bool = false
     ): ReadResult {
         if (destination.isEmpty()) { return ReadResult.Data(0) }
         submitClientUpdatesAndRetainFailure(
-            flow.flushStalledConnectionReceiveCredit(), context
+            flow.flushStalledConnectionReceiveCredit(), writeContext,
+            observationContext: observationContext
         )
-        let readContext = context.forStage(readTimeoutStage)
+        let readContext = if (staged) { context } else { context.forStage(readTimeoutStage) }
         let registration = readContext.cancellation.register { => wake() }
         var updates = Array<Http2Frame>()
         try {
@@ -1173,9 +1263,10 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                         case None => changed.wait()
                     }
                 }
-                checkClientContext(readContext)
                 if (readContext.isCancellationRequested()) { checkClientContext(readContext) }
-                if (readContext.isDeadlineExceeded()) { checkClientContext(readContext) }
+                if (readContext.isDeadlineExceeded() && writeContext.isDeadlineExceeded()) {
+                    checkClientContext(writeContext)
+                }
                 if (let Some(error) <- failure) { throw error }
                 if (closed) { return ReadResult.EndOfStream }
                 if (segments.isEmpty()) { return ReadResult.EndOfStream }
@@ -1197,7 +1288,7 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
                 }
                 ReadResult.Data(count)
             }
-            submitClientUpdatesAndRetainFailure(updates, context)
+            submitClientUpdatesAndRetainFailure(updates, writeContext, observationContext: observationContext)
             result
         } finally {
             registration.unregister()
@@ -1205,15 +1296,17 @@ internal class Http2ClientBodyChannel <: HttpBodyStream & Http2DuplexInbound {
     }
 
     private func submitClientUpdatesAndRetainFailure(
-        frames: Array<Http2Frame>, context: OperationContext
+        frames: Array<Http2Frame>, context: OperationContext,
+        observationContext!: ?OperationContext = None<OperationContext>
     ): Unit {
         try {
             submitClientUpdates(writer, frames, context)
         } catch (error: Exception) {
-            fail(error)
+            fail(error, observationContext: observationContext)
             throw error
         }
     }
+
     public func awaitEnd(context: OperationContext): Unit {
         let endContext = context.forStage(readTimeoutStage)
         let registration = endContext.cancellation.register { => wake() }
@@ -1297,6 +1390,7 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
     private let pushConfig: ?Http2PushConfig
     private let resourceBudget: ?internal.HttpResourceBudget
     private let resourceOwner: ?internal.HttpResourceOwnerKey
+    private let connectionContext: OperationContext
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let exchanges = ArrayList<Http2ClientExchange>()
@@ -1316,7 +1410,8 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         http2Limits: Http2Limits,
         pushConfig: ?Http2PushConfig,
         resourceBudget: ?internal.HttpResourceBudget,
-        resourceOwner: ?internal.HttpResourceOwnerKey
+        resourceOwner: ?internal.HttpResourceOwnerKey,
+        connectionContext: OperationContext
     ) {
         this.machine = machine
         this.writer = writer
@@ -1326,6 +1421,7 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         this.pushConfig = pushConfig
         this.resourceBudget = resourceBudget
         this.resourceOwner = resourceOwner
+        this.connectionContext = connectionContext
         decoder = HpackDecoder(limits: http2Limits)
     }
 
@@ -1439,7 +1535,14 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
                 case Http2FrameType.Settings => handleSettings(frame)
                 case Http2FrameType.WindowUpdate => flow.receiveWindowUpdate(frame)
                 case Http2FrameType.RstStream => let _ = reset.getOrThrow().acceptPeer(frame)
-                case Http2FrameType.GoAway => let _ = goAway.getOrThrow().acceptPeer(result)
+                case Http2FrameType.GoAway =>
+                    let manager = goAway.getOrThrow()
+                    let observeDrain = connectionContext.eventSink.isSome() && manager.remoteGoAway.isNone()
+                    let _ = manager.acceptPeer(result)
+                    if (observeDrain && manager.remoteGoAway.isSome()) {
+                        http2Observe(connectionContext, NetworkEventKind.ConnectionDraining,
+                            NetworkEventOutcome.Started)
+                    }
                 case Http2FrameType.Data => acceptData(frame)
                 case Http2FrameType.PushPromise => ()
                 case _ => ()

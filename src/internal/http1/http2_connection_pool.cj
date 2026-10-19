@@ -1,6 +1,8 @@
 package wirestack.internal.http1
 
 import std.collection.ArrayList
+import wirestack.NetworkConnectionPoolSnapshot
+import wirestack.nextNetworkCorrelationId
 import std.sync.*
 import std.time.*
 import wirestack.internal.http2.*
@@ -255,12 +257,15 @@ private class Http2PoolEntry {
     // A saturated pool yields this connection's next drained slot to a waiting
     // cross-key owner; existing streams finish but no same-key refill is admitted.
     var yielding = false
+    var observationContext: ?OperationContext
     init(id: Int64, key: HttpConnectionPoolKey, connection: Http2MultiplexedConnection,
-        createdAt: MonoTime, resourceLease: ?internal.HttpResourceLease) {
+        createdAt: MonoTime, resourceLease: ?internal.HttpResourceLease,
+        context!: OperationContext = OperationContext.background()) {
         this.id = id
         this.key = key
         this.connection = connection
         this.createdAt = createdAt
+        this.observationContext = if (context.eventSink.isSome()) { Some(context) } else { None<OperationContext> }
         this.resourceLease = resourceLease
     }
 }
@@ -268,7 +273,7 @@ private class Http2PoolEntry {
 private enum Http2PoolDecision {
     | Reuse(Http2PoolLease)
     | Reserve(Int64)
-    | Discard(Http2MultiplexedConnection, ?internal.HttpResourceLease)
+    | Discard(Http2PoolEntry)
 }
 
 /**
@@ -285,7 +290,7 @@ public class Http2ConnectionPool <: Resource {
     private let changed = synchronized(mutex) { mutex.condition() }
     private var entries = ArrayList<Http2PoolEntry>()
     private var reservations = ArrayList<HttpConnectionPoolKey>()
-    private var nextId: Int64 = 1
+    private var pendingStreamClaims: Int64 = 0
     private var waiters: Int64 = 0
     private var closed = false
     private var retiring = false
@@ -319,9 +324,13 @@ public class Http2ConnectionPool <: Resource {
         endStream!: Bool = false
     ): Http2PoolLease {
         let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
+        emitHttpStage(poolContext, true)
+        var poolStageOpen = true
         let registration = poolContext.cancellation.register { => wakeHttp2Pool() }
         var streamResourceLease = None<internal.HttpResourceLease>
         var streamLeaseTransferred = false
+        var pendingClaimOutstanding = true
+        synchronized(mutex) { pendingStreamClaims++ }
         try {
             streamResourceLease = match (resourceBudget) {
                 case Some(budget) => Some(budget.acquireStream(httpResourceOwnerForPoolKey(key), poolContext))
@@ -331,10 +340,16 @@ public class Http2ConnectionPool <: Resource {
                 match (decide(key, listener, endStream, poolContext, streamResourceLease)) {
                     case Http2PoolDecision.Reuse(lease) =>
                         streamLeaseTransferred = true
+                        pendingClaimOutstanding = false
+                        emitHttpStage(poolContext, false)
+                        poolStageOpen = false
+                        emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Reused)
+                        emitReusedConnectionStages(context, lease.connectionId, key.scheme == "https")
                         return lease
-                    case Http2PoolDecision.Discard(connection, resourceLease) =>
-                        closeHttp2Quietly(connection)
-                        closeOptionalHttp2ResourceLease(resourceLease)
+                    case Http2PoolDecision.Discard(entry) =>
+                        closeHttp2Quietly(entry.connection)
+                        closeOptionalHttp2ResourceLease(entry.resourceLease)
+                        emitOwnedPoolEvent(entry.observationContext, entry.id, NetworkEventKind.ConnectionClosed)
                     case Http2PoolDecision.Reserve(id) =>
                         var reservationOutstanding = true
                         var connectionResourceLease = None<internal.HttpResourceLease>
@@ -345,10 +360,11 @@ public class Http2ConnectionPool <: Resource {
                                 ))
                                 case None => None<internal.HttpResourceLease>
                             }
+                            if (poolStageOpen) { emitHttpStage(poolContext, false); poolStageOpen = false }
                             // Aggregate admission can return after close() released another
                             // request's slot; never start factory work for a closed pool.
                             if (isClosed()) { throw http2PoolClosed() }
-                            let created = factory.create(key, context, connectionResourceLease)
+                            let created = factory.create(key, connectionEventContext(context, id), connectionResourceLease)
                             if (let Some(value) <- connectionResourceLease) { value.activate() }
                             let admission = try {
                                 let value = created.openStream(listener, endStream)
@@ -377,7 +393,9 @@ public class Http2ConnectionPool <: Resource {
                                         changed.notifyAll()
                                         (false, rejectedByClose)
                                     } else {
-                                        entries.add(Http2PoolEntry(id, key, created, clock.now(), connectionResourceLease))
+                                        entries.add(Http2PoolEntry(id, key, created, clock.now(), connectionResourceLease, context: context))
+                                        pendingStreamClaims--
+                                        pendingClaimOutstanding = false
                                         connectionResourceLease = None<internal.HttpResourceLease>
                                         changed.notifyAll()
                                         (true, false)
@@ -397,6 +415,8 @@ public class Http2ConnectionPool <: Resource {
                                 continue
                             }
                             streamLeaseTransferred = true
+                            if (poolStageOpen) { emitHttpStage(poolContext, false); poolStageOpen = false }
+                            emitPoolAcquired(poolContext, id, NetworkEventOutcome.Succeeded)
                             return Http2PoolLease(
                                 id, key, created, admission, streamResourceLease: streamResourceLease
                             )
@@ -415,7 +435,11 @@ public class Http2ConnectionPool <: Resource {
                 }
             }
             throw http2PoolClosed()
+        } catch (error: Exception) {
+            if (poolStageOpen) { emitHttpStage(poolContext, false, code: Some(httpObservationError(error))) }
+            throw error
         } finally {
+            if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }
             registration.unregister()
             if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }
         }
@@ -431,6 +455,9 @@ public class Http2ConnectionPool <: Resource {
         resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ): Http2PoolLease {
         let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
+        emitHttpStage(poolContext, true)
+        var pendingClaimOutstanding = true
+        synchronized(mutex) { pendingStreamClaims++ }
         var connectionResourceLease = resourceLease
         let streamResourceLease = try {
             if (connectionResourceLease.isNone()) {
@@ -444,12 +471,14 @@ public class Http2ConnectionPool <: Resource {
                 case None => None<internal.HttpResourceLease>
             }
         } catch (error: Exception) {
+            synchronized(mutex) { pendingStreamClaims-- }
+            emitHttpStage(poolContext, false, code: Some(httpObservationError(error)))
             closeOptionalHttp2ResourceLease(connectionResourceLease)
             throw error
         }
         try {
             checkHttp2PoolContext(poolContext)
-            synchronized(mutex) {
+            let lease = synchronized(mutex) {
                 if (closed) { throw http2PoolClosed() }
                 if (entries.size + reservations.size >= config.maximumConnections ||
                     countHttp2ForKey(key) >= config.maximumConnectionsPerKey) {
@@ -458,17 +487,23 @@ public class Http2ConnectionPool <: Resource {
                 if (!connection.acceptingNewStreams || connection.isClosed()) {
                     throw Http2StreamLimitException("adopted HTTP/2 connection is not accepting streams")
                 }
-                let id = nextId
-                nextId++
+                let id = context.connectionId ?? nextNetworkCorrelationId()
                 if (let Some(value) <- connectionResourceLease) { value.activate() }
                 let admission = connection.openStream(listener, endStream)
                 if (let Some(value) <- streamResourceLease) { value.activate() }
-                entries.add(Http2PoolEntry(id, key, connection, clock.now(), connectionResourceLease))
+                entries.add(Http2PoolEntry(id, key, connection, clock.now(), connectionResourceLease, context: context))
+                pendingStreamClaims--
+                pendingClaimOutstanding = false
                 connectionResourceLease = None<internal.HttpResourceLease>
                 changed.notifyAll()
                 Http2PoolLease(id, key, connection, admission, streamResourceLease: streamResourceLease)
             }
+            emitHttpStage(poolContext, false)
+            emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Succeeded)
+            lease
         } catch (error: Exception) {
+            if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }
+            emitHttpStage(poolContext, false, code: Some(httpObservationError(error)))
             closeOptionalHttp2ResourceLease(connectionResourceLease)
             closeOptionalHttp2ResourceLease(streamResourceLease)
             throw error
@@ -476,7 +511,8 @@ public class Http2ConnectionPool <: Resource {
     }
 
     /** Signals stream completion; duplicate or foreign releases are ignored. */
-    public func release(lease: Http2PoolLease): Unit {
+    public func release(lease: Http2PoolLease,
+        context!: OperationContext = OperationContext.background()): Unit {
         if (!lease.claimReturn()) { return }
         lease.admission.registration.unregister()
         closeOptionalHttp2ResourceLease(lease.streamResourceLease)
@@ -506,9 +542,31 @@ public class Http2ConnectionPool <: Resource {
             }
             changed.notifyAll()
         }
+        emitPoolReleased(context, lease.connectionId, NetworkEventOutcome.Released)
         if (let Some(entry) <- discard) {
             closeHttp2Quietly(entry.connection)
             closeOptionalHttp2ResourceLease(entry.resourceLease)
+            emitPoolConnectionClosed(context, entry.id)
+        }
+    }
+
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot {
+        synchronized(mutex) {
+            var leased: Int64 = 0
+            var idle: Int64 = 0
+            var active: Int64 = 0
+            var draining: Int64 = 0
+            for (entry in entries) {
+                let owned = entry.connection.ownedStreamCount
+                active += owned
+                if (owned > 0) { leased++ }
+                else if (!retiring && !closed && entry.connection.acceptingNewStreams && !entry.connection.isClosed()) { idle++ }
+                if (retiring || closed || !entry.connection.acceptingNewStreams) { draining++ }
+            }
+            NetworkConnectionPoolSnapshot(leasedConnections: leased, idleConnections: idle,
+                connectingConnections: reservations.size, queuedRequests: waiters,
+                activeStreams: active, reservedStreams: pendingStreamClaims,
+                drainingConnections: draining, sampledAt: clock.now())
         }
     }
 
@@ -538,7 +596,13 @@ public class Http2ConnectionPool <: Resource {
 
     /** Blocks every future stream claim without interrupting owned streams. */
     public func retire(): Unit {
-        let claimed = synchronized(mutex) {
+        let (claimed, draining) = synchronized(mutex) {
+            let newlyDraining = ArrayList<Http2PoolEntry>()
+            if (!retiring) {
+                for (entry in entries) {
+                    if (entry.connection.acceptingNewStreams && !entry.connection.isClosed()) { newlyDraining.add(entry) }
+                }
+            }
             retiring = true
             let result = ArrayList<Http2PoolEntry>()
             var index: Int64 = entries.size
@@ -549,11 +613,15 @@ public class Http2ConnectionPool <: Resource {
                 }
             }
             changed.notifyAll()
-            result.toArray()
+            (result.toArray(), newlyDraining.toArray())
+        }
+        for (entry in draining) {
+            emitOwnedPoolEvent(entry.observationContext, entry.id, NetworkEventKind.ConnectionDraining)
         }
         for (entry in claimed) {
             closeHttp2Quietly(entry.connection)
             closeOptionalHttp2ResourceLease(entry.resourceLease)
+            emitOwnedPoolEvent(entry.observationContext, entry.id, NetworkEventKind.ConnectionClosed)
         }
     }
 
@@ -572,6 +640,7 @@ public class Http2ConnectionPool <: Resource {
         for (entry in claimed) {
             entry.connection.abort(reason: AbortReason.ApplicationAbort)
             closeOptionalHttp2ResourceLease(entry.resourceLease)
+            emitOwnedPoolEvent(entry.observationContext, entry.id, NetworkEventKind.ConnectionClosed)
         }
     }
 
@@ -605,7 +674,7 @@ public class Http2ConnectionPool <: Resource {
                     if (unusable >= 0) {
                         let removed = entries.remove(at: unusable)
                         changed.notifyAll()
-                        return Http2PoolDecision.Discard(removed.connection, removed.resourceLease)
+                        return Http2PoolDecision.Discard(removed)
                     }
                     let next = admissionQueue.firstEligible({ candidate => canAcquireHttp2(candidate, now) })
                     let ownsTurn = match (next) {
@@ -624,7 +693,9 @@ public class Http2ConnectionPool <: Resource {
                                 entry.connection.activeStreamCount < Int64(entry.connection.streamCapacity)) {
                                 try {
                                     let admission = entry.connection.openStream(listener, endStream)
+                                    entry.observationContext = if (context.eventSink.isSome()) { Some(context) } else { None<OperationContext> }
                                     if (let Some(value) <- streamResourceLease) { value.activate() }
+                                    pendingStreamClaims--
                                     return Http2PoolDecision.Reuse(Http2PoolLease(
                                         entry.id, entry.key, entry.connection, admission,
                                         streamResourceLease: streamResourceLease
@@ -637,8 +708,7 @@ public class Http2ConnectionPool <: Resource {
                         if (!hasHttp2Reservation(key) &&
                             entries.size + reservations.size < config.maximumConnections &&
                             countHttp2ForKey(key) < config.maximumConnectionsPerKey) {
-                            let id = nextId
-                            nextId++
+                            let id = nextNetworkCorrelationId()
                             reservations.add(key)
                             return Http2PoolDecision.Reserve(id)
                         }
@@ -653,9 +723,7 @@ public class Http2ConnectionPool <: Resource {
                             if (idle >= 0) {
                                 let removed = entries.remove(at: idle)
                                 changed.notifyAll()
-                                return Http2PoolDecision.Discard(
-                                    removed.connection, removed.resourceLease
-                                )
+                                return Http2PoolDecision.Discard(removed)
                             }
                         }
                     }

@@ -5,6 +5,7 @@ import std.sync.*
 import std.time.*
 import wirestack.internal.common.*
 import wirestack.internal.transport.*
+import wirestack as api
 
 private const RESOLVER_OK: Int32 = 0
 private const RESOLVER_OUT_OF_MEMORY: Int32 = 2
@@ -75,17 +76,21 @@ public struct ResolverPoolMetrics {
     public let rejectedJobs: Int64
 
     internal init(values: Array<UInt64>) {
-        workerCount = Int64(values[0])
-        queueCapacity = Int64(values[1])
-        activeJobs = Int64(values[2])
-        queuedJobs = Int64(values[3])
-        runningJobs = Int64(values[4])
-        peakActiveJobs = Int64(values[5])
-        peakQueuedJobs = Int64(values[6])
-        submittedJobs = Int64(values[7])
-        completedJobs = Int64(values[8])
-        rejectedJobs = Int64(values[9])
+        workerCount = resolverMetric(values[0])
+        queueCapacity = resolverMetric(values[1])
+        activeJobs = resolverMetric(values[2])
+        queuedJobs = resolverMetric(values[3])
+        runningJobs = resolverMetric(values[4])
+        peakActiveJobs = resolverMetric(values[5])
+        peakQueuedJobs = resolverMetric(values[6])
+        submittedJobs = resolverMetric(values[7])
+        completedJobs = resolverMetric(values[8])
+        rejectedJobs = resolverMetric(values[9])
     }
+}
+
+private func resolverMetric(value: UInt64): Int64 {
+    if (value > UInt64(Int64.Max)) { Int64.Max } else { Int64(value) }
 }
 
 /**
@@ -100,6 +105,11 @@ public struct ResolverPoolMetrics {
 internal class BoundedSystemResolverBackend {
     private let mutex = Mutex()
     private var poolHandle: UInt64 = 0u64
+    private let ownerId = api.nextNetworkCorrelationId()
+    private var closed = false
+    private var finalMetrics = None<ResolverPoolMetrics>
+    private var finalSnapshot = None<api.ResolverResourceSnapshot>
+    private let metricValues = Array<UInt64>(RESOLVER_METRIC_COUNT, repeat: 0u64)
 
     internal init(workerCount!: Int64 = 4, queueCapacity!: Int64 = 64) {
         if (workerCount <= 0 || workerCount > 32) {
@@ -163,51 +173,50 @@ internal class BoundedSystemResolverBackend {
     }
 
     internal func metrics(): ResolverPoolMetrics {
+        synchronized(mutex) { metricsLocked() }
+    }
+
+    internal func resourceSnapshot(): api.ResolverResourceSnapshot {
         synchronized(mutex) {
-            let current = requireOpen()
-            let values = Array<UInt64>(RESOLVER_METRIC_COUNT, repeat: 0u64)
-            let status = unsafe {
-                let raw = acquireArrayRawData(values)
-                try {
-                    wirestack_resolver_pool_metrics(
-                        current,
-                        raw.pointer,
-                        UInt64(RESOLVER_METRIC_COUNT)
-                    )
-                } finally {
-                    releaseArrayRawData(raw)
-                }
-            }
-            if (status != RESOLVER_OK) {
-                throw ResolveException(
-                    ResolveErrorCode.SystemFailure,
-                    "failed to read resolver pool metrics: ${status}"
-                )
-            }
-            ResolverPoolMetrics(values)
+            if (let Some(value) <- finalSnapshot) { return value }
+            let value = metricsLocked()
+            api.ResolverResourceSnapshot(ownerId, value.activeJobs, value.queuedJobs,
+                value.runningJobs, 0, value.rejectedJobs)
         }
+    }
+
+    private func metricsLocked(): ResolverPoolMetrics {
+        if (let Some(value) <- finalMetrics) { return value }
+        let values = metricValues
+        let status = unsafe {
+            let raw = acquireArrayRawData(values)
+            try { wirestack_resolver_pool_metrics(poolHandle, raw.pointer, UInt64(RESOLVER_METRIC_COUNT)) }
+            finally { releaseArrayRawData(raw) }
+        }
+        if (status != RESOLVER_OK) {
+            throw ResolveException(ResolveErrorCode.SystemFailure, "failed to read resolver pool metrics")
+        }
+        ResolverPoolMetrics(values)
     }
 
     internal func close(): Unit {
-        let current = synchronized(mutex) {
-            let value = poolHandle
-            poolHandle = 0u64
-            value
-        }
-        if (current != 0u64) {
-            let status = unsafe { wirestack_resolver_pool_destroy(current) }
+        synchronized(mutex) {
+            if (closed) { return }
+            let value = metricsLocked()
+            let sample = api.ResolverResourceSnapshot(ownerId, value.activeJobs, value.queuedJobs,
+                value.runningJobs, 0, value.rejectedJobs, isLive: false)
+            let status = unsafe { wirestack_resolver_pool_destroy(poolHandle) }
             if (status != RESOLVER_OK) {
-                throw ResolveException(
-                    ResolveErrorCode.SystemFailure,
-                    "failed to close resolver pool: ${status}"
-                )
+                throw ResolveException(ResolveErrorCode.SystemFailure, "failed to close resolver pool")
             }
+            finalMetrics = Some(value)
+            finalSnapshot = Some(sample)
+            poolHandle = 0u64
+            closed = true
         }
     }
 
-    internal func isClosed(): Bool {
-        synchronized(mutex) { poolHandle == 0u64 }
-    }
+    internal func isClosed(): Bool { synchronized(mutex) { closed } }
 
     private func submit(
         host: HostName,
@@ -365,7 +374,7 @@ internal class BoundedSystemResolverBackend {
     }
 
     private func requireOpen(): UInt64 {
-        if (poolHandle == 0u64) {
+        if (closed) {
             throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool is closed")
         }
         poolHandle

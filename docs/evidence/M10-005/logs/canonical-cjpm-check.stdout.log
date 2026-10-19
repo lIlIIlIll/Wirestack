@@ -1,0 +1,3 @@
+The valid serial compilation order is:
+    wirestack -> wirestack.internal.identity -> wirestack.internal.platform -> wirestack.internal.platform.android -> wirestack.internal.platform.apple -> wirestack.internal.platform.harmony -> wirestack.internal.platform.linux -> wirestack.internal.platform.windows -> wirestack.internal.common -> wirestack.internal.http_files -> wirestack.internal.http_model -> wirestack.observability -> wirestack.internal.transport -> wirestack.internal.trust -> wirestack.internal -> wirestack.internal.resolver -> wirestack.internal.tls_engine -> wirestack.internal.connector -> wirestack.internal.http2 -> wirestack.tls -> wirestack.internal.http1 -> wirestack.internal.transport_stdnet -> wirestack.net -> wirestack.http
+cjpm check success

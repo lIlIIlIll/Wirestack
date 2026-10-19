@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "task": "M10-005",
+  "status": "PASS",
+  "gate_exit_code": 0,
+  "commands": [
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 814.66
+    },
+    {
+      "id": "cjpm-build",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 10347.478
+    },
+    {
+      "id": "native-observation-and-regression",
+      "argv": [
+        "cjpm",
+        "test",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 82673.118
+    },
+    {
+      "id": "installed-observation",
+      "argv": [
+        "python3",
+        "tools/m10_005_native_observation.py",
+        "--output",
+        "docs/evidence/M10-005/installed/report.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 21632.398
+    },
+    {
+      "id": "documentation-check",
+      "argv": [
+        "env",
+        "cjHeapSize=1GB",
+        "scripts/check-docs",
+        "--json",
+        "--output",
+        "docs/evidence/M10-005/docs-report.json"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 253079.326
+    }
+  ],
+  "native_summary": "Summary: TOTAL: 945\n    PASSED: 919, SKIPPED: 26, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+  "installed": {
+    "status": "PASS",
+    "qualification": "NOT_QUALIFIED",
+    "checks": {
+      "bounded_exporter_measurement": "PASS",
+      "custom_resolver_unknown": "PASS",
+      "dns_cap": "PASS",
+      "h1_reuse_resources": "PASS",
+      "h2_backpressure": "PASS",
+      "h2_reuse_resources": "PASS",
+      "headers_cap": "PASS",
+      "logical_retry_redirect": "PASS",
+      "native_fd_task_stability": "PASS",
+      "native_shutdown": "PASS",
+      "pool_wait": "PASS",
+      "secret_safe_proxy_tls": "PASS",
+      "tls_cap": "PASS"
+    },
+    "native_resources": {
+      "after_load": {
+        "fds": 10,
+        "rss_kib": 62908,
+        "tasks": 15
+      },
+      "baseline": {
+        "fds": 10,
+        "rss_kib": 75964,
+        "tasks": 15
+      }
+    },
+    "candidate_committed": false,
+    "measurement": {
+      "drop_counter_scope": "cumulative_per_mode_sink_and_collector",
+      "identical_workload_warmed_before_baseline": true,
+      "measured_mean_overhead_ratio": {
+        "async_exporter": 0.2939138768094578,
+        "root_buffer": -0.13552129480153208
+      },
+      "request_count_per_sample": 30,
+      "samples": [
+        {
+          "drops": 0,
+          "duration_ns": 20404287,
+          "events": 0,
+          "index": 0,
+          "mode": "disabled",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 22709990,
+          "events": 0,
+          "index": 1,
+          "mode": "disabled",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 19340144,
+          "events": 0,
+          "index": 2,
+          "mode": "disabled",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 18198589,
+          "events": 690,
+          "index": 0,
+          "mode": "root_buffer",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 18465714,
+          "events": 690,
+          "index": 1,
+          "mode": "root_buffer",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 17326214,
+          "events": 690,
+          "index": 2,
+          "mode": "root_buffer",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 26537225,
+          "events": 690,
+          "index": 0,
+          "mode": "async_exporter",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 26665030,
+          "events": 690,
+          "index": 1,
+          "mode": "async_exporter",
+          "requests": 30
+        },
+        {
+          "drops": 0,
+          "duration_ns": 27608387,
+          "events": 690,
+          "index": 2,
+          "mode": "async_exporter",
+          "requests": 30
+        }
+      ],
+      "sla_claim": false,
+      "warmup_requests_per_mode": 12
+    },
+    "command_exits": [
+      {
+        "name": "certificate",
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "certificate_der",
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "key_der",
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "compiler",
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "package_manager",
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "consumer_build",
+        "exit_code": 0,
+        "timed_out": false
+      },
+      {
+        "name": "consumer_run",
+        "exit_code": 0,
+        "timed_out": false
+      }
+    ]
+  },
+  "docs": {
+    "status": "PASS",
+    "combined": {
+      "parameters": {
+        "documented": 861,
+        "percent": 100,
+        "total": 861
+      },
+      "symbols": {
+        "documented": 1717,
+        "percent": 100,
+        "total": 1717
+      }
+    },
+    "packages": [
+      {
+        "package": "wirestack",
+        "status": "PASS",
+        "coverage": {
+          "parameters": {
+            "documented": 315,
+            "percent": 100,
+            "total": 315
+          },
+          "symbols": {
+            "documented": 755,
+            "percent": 100,
+            "total": 755
+          }
+        }
+      },
+      {
+        "package": "wirestack.http",
+        "status": "PASS",
+        "coverage": {
+          "parameters": {
+            "documented": 594,
+            "percent": 100,
+            "total": 594
+          },
+          "symbols": {
+            "documented": 1243,
+            "percent": 100,
+            "total": 1243
+          }
+        }
+      },
+      {
+        "package": "wirestack.tls",
+        "status": "PASS",
+        "coverage": {
+          "parameters": {
+            "documented": 379,
+            "percent": 100,
+            "total": 379
+          },
+          "symbols": {
+            "documented": 931,
+            "percent": 100,
+            "total": 931
+          }
+        }
+      },
+      {
+        "package": "wirestack.net",
+        "status": "PASS",
+        "coverage": {
+          "parameters": {
+            "documented": 507,
+            "percent": 100,
+            "total": 507
+          },
+          "symbols": {
+            "documented": 1023,
+            "percent": 100,
+            "total": 1023
+          }
+        }
+      },
+      {
+        "package": "wirestack.observability",
+        "status": "PASS",
+        "coverage": {
+          "parameters": {
+            "documented": 326,
+            "percent": 100,
+            "total": 326
+          },
+          "symbols": {
+            "documented": 785,
+            "percent": 100,
+            "total": 785
+          }
+        }
+      }
+    ]
+  }
+}

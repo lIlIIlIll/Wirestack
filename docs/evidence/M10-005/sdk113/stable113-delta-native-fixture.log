@@ -1,0 +1,106 @@
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.tls[0m, time elapsed: 1278786 ns, RESULT:
+Summary: TOTAL: 9
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 9, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.observability[0m, time elapsed: 1560916 ns, RESULT:
+Summary: TOTAL: 10
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 10, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.http1[0m, time elapsed: 11812177 ns, RESULT:
+Summary: TOTAL: 147
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 147, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal[0m, time elapsed: 1420563 ns, RESULT:
+Summary: TOTAL: 11
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 11, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.connector[0m, time elapsed: 1552913 ns, RESULT:
+Summary: TOTAL: 18
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 18, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.resolver[0m, time elapsed: 1678929395 ns, RESULT:
+    TCS: [33mSystemResolverResourceObservationTest[0m, time elapsed: 1674394307 ns, RESULT:
+    [[32m PASSED [0m] CASE: realLocalhostCompletionPreservesOwnerAndFinalSample (529292477 ns)
+    [[32m PASSED [0m] CASE: abandonedNativeWorkRemainsVisibleUntilWorkerFinishesAndClosedSampleIsHistorical (511494062 ns)
+    [[32m PASSED [0m] CASE: closeDuringBlockedWorkRetainsNonCurrentNonzeroOriginalSample (631955169 ns)
+Summary: TOTAL: 34
+    [32mPASSED[0m: 3, [32mSKIPPED[0m: 31, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.common[0m, time elapsed: 1436061 ns, RESULT:
+Summary: TOTAL: 9
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 9, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.http[0m, time elapsed: 15271833 ns, RESULT:
+Summary: TOTAL: 141
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 141, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.transport[0m, time elapsed: 10118255 ns, RESULT:
+Summary: TOTAL: 91
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 91, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.trust[0m, time elapsed: 1158038 ns, RESULT:
+Summary: TOTAL: 10
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 10, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.transport_stdnet[0m, time elapsed: 5493080 ns, RESULT:
+Summary: TOTAL: 67
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 67, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.net[0m, time elapsed: 577622025 ns, RESULT:
+    TCS: [33mDnsResourceObservationTest[0m, time elapsed: 543928914 ns, RESULT:
+    [[32m PASSED [0m] CASE: snapshotsFollowActualUdpAdmissionQueueRejectionCacheAndClose (21253489 ns)
+    [[32m PASSED [0m] CASE: nativeFallbackSnapshotsRetainAbandonedWorkAndHistoricalCloseSample (521548669 ns)
+Summary: TOTAL: 124
+    [32mPASSED[0m: 2, [32mSKIPPED[0m: 122, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.platform.linux[0m, time elapsed: 836739 ns, RESULT:
+Summary: TOTAL: 5
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 5, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.tls_engine[0m, time elapsed: 10443339 ns, RESULT:
+Summary: TOTAL: 73
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 73, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+TP: [33mwirestack.internal.http2[0m, time elapsed: 21307813 ns, RESULT:
+Summary: TOTAL: 196
+    [32mPASSED[0m: 0, [32mSKIPPED[0m: 196, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2498576503 ns, RESULT:
+TP: [33mwirestack[0m.*, time elapsed: 2498536865 ns, RESULT:
+    PASSED:
+    TP: [33mwirestack.internal.platform.linux[0m, time elapsed: 836739 ns
+    TP: [33mwirestack.internal.common[0m, time elapsed: 1436061 ns
+    TP: [33mwirestack.observability[0m, time elapsed: 1560916 ns
+    TP: [33mwirestack.internal.transport[0m, time elapsed: 10118255 ns
+    TP: [33mwirestack.internal.trust[0m, time elapsed: 1158038 ns
+    TP: [33mwirestack.internal[0m, time elapsed: 1420563 ns
+    TP: [33mwirestack.internal.resolver[0m, time elapsed: 1678929395 ns
+    TP: [33mwirestack.internal.tls_engine[0m, time elapsed: 10443339 ns
+    TP: [33mwirestack.internal.connector[0m, time elapsed: 1552913 ns
+    TP: [33mwirestack.internal.http2[0m, time elapsed: 21307813 ns
+    TP: [33mwirestack.tls[0m, time elapsed: 1278786 ns
+    TP: [33mwirestack.internal.http1[0m, time elapsed: 11812177 ns
+    TP: [33mwirestack.internal.transport_stdnet[0m, time elapsed: 5493080 ns
+    TP: [33mwirestack.net[0m, time elapsed: 577622025 ns
+    TP: [33mwirestack.http[0m, time elapsed: 15271833 ns
+Summary: TOTAL: 945
+    [32mPASSED[0m: 5, [32mSKIPPED[0m: 940, ERROR: 0
+    [31mFAILED[0m: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

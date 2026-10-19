@@ -164,7 +164,9 @@ class Http2ClientConnectionTest {
             serverTransport.shutdown(ShutdownDirection.Write)
         }
         let connection = Http2ClientConnection.connect(clientTransport)
-        let response = try { connection.execute(HttpRequest.get("https://example.test/completed")) }
+        let events = api.NetworkEventBuffer(capacity: 64)
+        let response = try { connection.execute(HttpRequest.get("https://example.test/completed"),
+            context: OperationContext(eventSink: Some<api.NetworkEventSink>(events), connectionId: Some(700))) }
             catch (error: Exception) { connection.abort(); serverTransport.abort(); throw error }
         try {
             serving.get(3 * Duration.second)
@@ -179,6 +181,16 @@ class Http2ClientConnectionTest {
             response.close(); connection.abort(); serverTransport.abort()
         }
         @Expect(connection.ownedStreamCount, 0)
+        var closedEvents: Int64 = 0
+        var bodyEvents: Int64 = 0
+        for (event in events.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.Http2StreamClosed => closedEvents += 1
+                case NetworkEventKind.BodyCompleted => bodyEvents += 1
+                case _ => ()
+            }
+        }
+        @Expect(closedEvents, 1); @Expect(bodyEvents, 1)
     }
 
     @TestCase
@@ -215,7 +227,9 @@ class Http2ClientConnectionTest {
         let peer = DelayedEndHttp2Peer(serverTransport)
         let serving = spawn { peer.serve() }
         let connection = Http2ClientConnection.connect(clientTransport)
-        let response = connection.execute(HttpRequest.get("https://example.test/abandoned"))
+        let events = api.NetworkEventBuffer(capacity: 64)
+        let response = connection.execute(HttpRequest.get("https://example.test/abandoned"),
+            context: OperationContext(eventSink: Some<api.NetworkEventSink>(events), connectionId: Some(700)))
 
         @Expect(connection.activeStreamCount, 1)
         response.close()
@@ -224,6 +238,16 @@ class Http2ClientConnectionTest {
 
         peer.releaseEndStream()
         @Expect(serving.get(Duration.second * 5), true)
+        var closedEvents: Int64 = 0
+        var bodyEvents: Int64 = 0
+        for (event in events.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.Http2StreamClosed => closedEvents += 1
+                case NetworkEventKind.BodyCompleted => bodyEvents += 1
+                case _ => ()
+            }
+        }
+        @Expect(closedEvents, 1); @Expect(bodyEvents, 1)
         @Expect(connection.acceptingNewStreams)
         connection.abort()
         serverTransport.abort()
@@ -294,7 +318,9 @@ class Http2ClientConnectionTest {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024, maxChunk: 19)
         let peer = DrainingHttp2Peer(serverTransport)
         let serving = spawn { peer.serve() }
-        let connection = Http2ClientConnection.connect(clientTransport)
+        let events = api.NetworkEventBuffer(capacity: 32)
+        let connection = Http2ClientConnection.connect(clientTransport,
+            context: OperationContext(eventSink: Some(events), connectionId: Some(700)))
         let response = connection.execute(HttpRequest.get("https://example.test/accepted"))
         try { @Expect(readClientBody(response.body), "accepted") } finally { response.close() }
 
@@ -302,6 +328,17 @@ class Http2ClientConnectionTest {
         @Expect(!connection.acceptingNewStreams)
         @Expect(expectDrainingRejection(connection))
         @Expect(connection.activeStreamCount, 0)
+        var drainingEvents: Int64 = 0
+        for (event in events.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.ConnectionDraining =>
+                    drainingEvents += 1
+                    @Expect(event.connectionId.getOrThrow(), 700)
+                    @Expect(event.streamId.isNone())
+                case _ => ()
+            }
+        }
+        @Expect(drainingEvents, 1)
         connection.abort()
     }
 

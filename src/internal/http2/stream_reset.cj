@@ -96,7 +96,8 @@ public class Http2StreamResetManager {
     public func cancelLocal(
         streamId: Http2StreamId,
         code!: Http2ErrorCode = Http2ErrorCode.Cancel,
-        reason!: String = "HTTP/2 stream cancelled locally"
+        reason!: String = "HTTP/2 stream cancelled locally",
+        dispatch!: ((() -> Unit) -> Unit) = { callback => callback() }
     ): ?Http2WriteTicket {
         validateResetReason(reason)
         var listener: ?Http2StreamResetListener = None<Http2StreamResetListener>
@@ -124,12 +125,15 @@ public class Http2StreamResetManager {
             flushDeferredCreditLocked()
             Some(accepted)
         }
-        notifyResetListener(listener, event)
+        let claimedListener = listener
+        let claimedEvent = event
+        dispatch({ => notifyResetListener(claimedListener, claimedEvent) })
         ticket
     }
 
     /** Applies one peer reset and ignores a duplicate reset for an already-closed stream. */
-    public func acceptPeer(frame: Http2Frame): Bool {
+    public func acceptPeer(frame: Http2Frame,
+        dispatch!: ((() -> Unit) -> Unit) = { callback => callback() }): Bool {
         let code = decodeHttp2RstStream(frame)
         let streamId = frame.header.streamId
         var listener: ?Http2StreamResetListener = None<Http2StreamResetListener>
@@ -149,7 +153,9 @@ public class Http2StreamResetManager {
             flushDeferredCreditLocked()
             true
         }
-        notifyResetListener(listener, event)
+        let claimedListener = listener
+        let claimedEvent = event
+        dispatch({ => notifyResetListener(claimedListener, claimedEvent) })
         won
     }
 
