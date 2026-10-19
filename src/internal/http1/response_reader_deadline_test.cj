@@ -281,6 +281,47 @@ class Http1RequestWriteBudgetReviewTest {
             case _ => @Fail("request-write budget expiry lost its network cause")
         }
     }
+    @TestCase
+    func completeRequestReusesOneRequestWriteBudgetForHeadAndBody(): Unit {
+        let clock = ReviewContinueManualClock()
+        let transport = ReviewWriteBudgetTransport(
+            clock,
+            headWriteAdvance: 4 * Duration.millisecond,
+            bodyWriteAdvance: 2 * Duration.millisecond
+        )
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"),
+            headers: HttpHeaders.builder().add("Content-Length", "1").build(),
+            body: RequestBody.bytes([120u8])
+        )
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(requestWrite: Some(5 * Duration.millisecond))
+        )
+        let error = @AssertThrows[Http1RequestWriteException](
+            writeHttp1Request(transport, request, context: context)
+        )
+        @Expect(transport.headWrites, 1)
+        @Expect(transport.bodyWriteAttempted, true)
+        @Expect(transport.bodyWriteExpired, true)
+        @Expect(transport.bodyWriteCompleted, false)
+        @Expect(error.evidence.wireBytesWritten > 0)
+        @Expect(error.evidence.bodyBytesWritten, 0)
+        @Expect(clock.now(), clock.start + 6 * Duration.millisecond)
+        match (error.cause.getOrThrow()) {
+            case value: api.NetworkException =>
+                match (value.code) {
+                    case api.NetworkErrorCode.TimedOut => ()
+                    case _ => @Fail("request-write budget expiry lost its timeout")
+                }
+                match (value.phase) {
+                    case api.NetworkPhase.TcpWrite => ()
+                    case _ => @Fail("request-write budget expiry lost its TCP-write phase")
+                }
+            case _ => @Fail("request-write budget expiry lost its network cause")
+        }
+    }
+
 }
 
 @Test
@@ -503,6 +544,8 @@ private class ReviewContinueBudgetTransport <: DuplexTransport {
 
 private class ReviewWriteBudgetTransport <: DuplexTransport {
     private let clock: ReviewContinueManualClock
+    private let headWriteAdvance: Duration
+    private let bodyWriteAdvance: Duration
     private var reads: Int64 = 0
     private var writes: Int64 = 0
     private var headWriteCount: Int64 = 0
@@ -510,7 +553,16 @@ private class ReviewWriteBudgetTransport <: DuplexTransport {
     private var expiredBody = false
     private var completedBody = false
 
-    init(clock: ReviewContinueManualClock) { this.clock = clock }
+    init(
+        clock: ReviewContinueManualClock,
+        headWriteAdvance!: Duration = 6 * Duration.millisecond,
+        bodyWriteAdvance!: Duration = Duration.Zero
+    ) {
+        this.clock = clock
+        this.headWriteAdvance = headWriteAdvance
+        this.bodyWriteAdvance = bodyWriteAdvance
+    }
+
 
     prop headWrites: Int64 { get() { headWriteCount } }
     prop bodyWriteAttempted: Bool { get() { attemptedBody } }
@@ -538,7 +590,7 @@ private class ReviewWriteBudgetTransport <: DuplexTransport {
         writes++
         if (writes == 1) {
             headWriteCount++
-            clock.advance(6 * Duration.millisecond)
+            clock.advance(headWriteAdvance)
             return source.length
         }
         attemptedBody = true
@@ -549,6 +601,16 @@ private class ReviewWriteBudgetTransport <: DuplexTransport {
                 api.NetworkPhase.TcpWrite,
                 api.NetworkErrorCode.TimedOut,
                 "request-write budget expired before the body write"
+            )
+        }
+        clock.advance(bodyWriteAdvance)
+        if (context.isDeadlineExceeded()) {
+            expiredBody = true
+            throw api.NetworkException(
+                api.NetworkErrorCategory.DeadlineExceeded,
+                api.NetworkPhase.TcpWrite,
+                api.NetworkErrorCode.TimedOut,
+                "request-write budget expired during the body write"
             )
         }
         completedBody = true
