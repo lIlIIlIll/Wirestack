@@ -257,12 +257,14 @@ public class Http2WriteScheduler {
     }
 
     private func waitForQueuedBuffer(
-        bytes: UInt64, control: Bool, context: OperationContext
+        bytes: UInt64,
+        control: Bool,
+        streamId: Int64,
+        context: OperationContext
     ): ?internal.HttpResourceLease {
         if (let Some(budget) <- resourceBudget) {
-            Some(budget.acquireManagedBuffer(
-                resourceOwner.getOrThrow(), bytes, control, context
-            ))
+            let owner = if (control) { resourceOwner.getOrThrow() } else { streamBufferOwner(streamId) }
+            Some(budget.acquireManagedBuffer(owner, bytes, control, context))
         } else { None<internal.HttpResourceLease> }
     }
 
@@ -300,6 +302,17 @@ public class Http2WriteScheduler {
                 return true
             }
             throw Http2WriteQueueFullException("HTTP/2 pending write limit reached")
+        }
+    }
+
+    private func checkQueueCapacityImmediately(count: Int64, bytes: UInt64): Unit {
+        synchronized(mutex) {
+            if (!isSchedulerOpen(schedulerState)) {
+                throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+            }
+            if (!queueCapacityAvailableLocked(count, bytes)) {
+                throw Http2WriteQueueFullException("HTTP/2 pending write limit reached")
+            }
         }
     }
 
@@ -401,15 +414,30 @@ public class Http2WriteScheduler {
      */
     public func enqueueReservedData(
         frame: Http2Frame,
-        permit: Http2SendPermit
+        permit: Http2SendPermit,
+        context!: OperationContext
     ): Http2WriteTicket {
-        if (!isDataFrame(frame.header.frameType) ||
-            frame.header.streamId.value != permit.streamId.value ||
-            Int64(frame.header.length) != permit.amount) {
-            throw IllegalArgumentException("HTTP/2 DATA frame does not match its flow permit")
+        var reservedBufferLease = None<internal.HttpResourceLease>
+        var leaseTransferred = false
+        try {
+            if (!isDataFrame(frame.header.frameType) ||
+                frame.header.streamId.value != permit.streamId.value ||
+                Int64(frame.header.length) != permit.amount) {
+                throw IllegalArgumentException("HTTP/2 DATA frame does not match its flow permit")
+            }
+            let size = UInt64(frame.header.length) + 9u64
+            checkQueueCapacityImmediately(1, size)
+            reservedBufferLease = waitForQueuedBuffer(
+                size, false, Int64(frame.header.streamId.value), context
+            )
+            checkWriterContext(context)
+            leaseTransferred = true
+            enqueueOwned(frame, Some(permit), reservedBufferLease: reservedBufferLease)
+        } catch (error: Exception) {
+            if (!leaseTransferred) { releaseBufferLease(reservedBufferLease) }
+            let _ = permit.cancel()
+            throw error
         }
-        try { enqueueOwned(frame, Some(permit)) }
-        catch (error: Exception) { let _ = permit.cancel(); throw error }
     }
     /**
      * Atomically admits one HPACK-bearing control sequence. Admission is
@@ -501,7 +529,7 @@ public class Http2WriteScheduler {
         var bufferLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
         var queueReserved = false
         try {
-            bufferLease = waitForQueuedBuffer(totalBytes, true, context)
+            bufferLease = waitForQueuedBuffer(totalBytes, true, 0, context)
             reserveQueueCapacityWaiting(frames.size, totalBytes, context)
             queueReserved = true
             let encoded = ArrayList<Array<Byte>>()
@@ -539,14 +567,17 @@ public class Http2WriteScheduler {
 
     private func enqueueOwned(
         frame: Http2Frame,
-        permit: ?Http2SendPermit
+        permit: ?Http2SendPermit,
+        reservedBufferLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ): Http2WriteTicket {
         let size = UInt64(frame.header.length) + 9u64
         let cleanup = isCleanupFrame(frame)
         let control = !isDataFrame(frame.header.frameType) || cleanup
-        let bufferLease = reserveQueuedBuffer(
-            size, control, Int64(frame.header.streamId.value), cleanup: cleanup
-        )
+        let bufferLease = if (reservedBufferLease.isSome()) {
+            reservedBufferLease
+        } else {
+            reserveQueuedBuffer(size, control, Int64(frame.header.streamId.value), cleanup: cleanup)
+        }
         var cleanupSlot = false
         var queueReserved = false
         var transferred = false
