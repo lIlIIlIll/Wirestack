@@ -161,6 +161,35 @@ class RepositoryToolingTests(unittest.TestCase):
             tooling.validate_repository_tasks(self.root)
         self.assertEqual("DEPENDENCY_MISSING", caught.exception.code)
 
+    def test_incomplete_unrelated_dependency_does_not_block_selected_task(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCK-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["BASE-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCK-001"]))
+
+        self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root, "TEST-001"))
+        self.assertEqual(2, len(tooling.validate_repository_tasks(self.root)))
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "OTHER-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_selected_task_rejects_incomplete_transitive_dependency(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "MID-001": "COMPLETE",
+            "BASE-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["MID-001"]))
+        self.write_manifest(self.manifest("MID-001", ["BASE-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
     def test_dependency_cycle_is_rejected(self) -> None:
         self.write_planning({"TEST-001": "COMPLETE", "TEST-002": "COMPLETE"})
         first = self.manifest("TEST-001", ["TEST-002"])

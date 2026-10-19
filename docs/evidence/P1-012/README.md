@@ -75,15 +75,18 @@ BLOCKED, or FAIL return FAIL.
 Task manifests live at `tools/tasks/<TASK-ID>.json` and use
 `tools/tasks/schema-v1.json`. Schema v1 requires:
 
-- task ID and completed dependencies;
+- task ID and declared dependencies (COMPLETE for a task-specific check);
 - allowed repository paths and supported platforms;
 - acceptance command arguments, timeout, gate and long-running marker;
 - required evidence paths;
 - task timeout and task-level long-running marker;
 - source paths whose SHA-256 values bind retained evidence to the code.
 
-Unknown fields and schema versions fail closed. Dependencies must exist in the
-backlog and status, have COMPLETE status, and form an acyclic graph.
+Dependency IDs must exist in the backlog and status, and all manifests must
+form an acyclic graph. A repository-wide `validate-tasks` run checks this
+structure but does not require every task to be ready. A task-specific check
+also requires every transitive dependency of the selected task to be COMPLETE;
+unrelated blocked tasks do not invalidate that selection.
 
 ## Stable exit codes
 
@@ -99,11 +102,24 @@ backlog and status, have COMPLETE status, and form an acyclic graph.
 
 ## Evidence boundary
 
-The machine reports in this directory record native Linux glibc execution.
-The current-toolchain requalification ran `scripts/check-task P1-012` and
-`scripts/check-full`; both returned PASS. The task gate validated the 16-path,
-12-scenario, 10-test plan and all 17 repository-tooling unit tests. The full
-gate delegated to `scripts/check` and returned exit 0.
+The focused recheck ran `scripts/check-task P1-012 --json` and passed. The
+updated plan validates 17 paths, 13 scenarios, and 11 tests; all 39 repository
+tooling tests pass. The `validate-tasks` CLI also passes with blocked tasks
+outside a selected dependency closure. The regression records the original
+M12-003 INVALID result and its post-fix transition to task execution in
+[`dependency-scope-reproduction.json`](dependency-scope-reproduction.json).
+
+The post-fix M12-003 acceptance commands ran: 47 fault-contract tests passed
+with one environment-gated skip, while its current-source evidence verifier
+failed on drift in `tools/gates/m12_003_resources.py`; M12-003 remains BLOCKED.
+The deliberately blocked M10-004 selection still returns INVALID for its
+incomplete M10-003 dependency.
+
+[`full-check.json`](full-check.json) is the unchanged historical 2026-09-01
+PASS receipt. A current `scripts/check-full` run is recorded separately in
+[`full-check-current.json`](full-check-current.json): 584 tests, 25 failures,
+16 errors, and 4 skips, caused by unrelated stale or missing qualification
+evidence. No current repository-wide full PASS is claimed.
 
 P1-012 did not run the one-hour SSE profile, the 24-hour soak, or another long
 profile. It did not modify runtime, std, stdx, or an SDK, and did not build an

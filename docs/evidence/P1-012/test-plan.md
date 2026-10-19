@@ -16,8 +16,9 @@ change product networking behavior.
 | P003 | Only an optional capability or clean-worktree condition is absent | Doctor reports DEGRADED without claiming PASS |
 | P004 | Task manifest uses schema v1, safe repository-relative paths and complete typed fields | Contract is accepted |
 | P005 | Manifest has an unknown schema/field, missing task, escaping path or invalid timeout | Contract fails closed |
-| P006 | Declared dependencies are present in backlog/status and acyclic | Dependency graph is accepted |
+| P006 | Declared dependency IDs exist in backlog/status and the complete manifest graph is acyclic | Contract validation accepts the structural graph |
 | P007 | A dependency is absent or manifests form a cycle | Contract validation fails closed |
+| P017 | A requested task has a complete transitive dependency closure while unrelated tasks may remain blocked | The selected task is not rejected by unrelated dependency state |
 | P008 | Fast/task/full validation selects only non-long commands | Selected commands execute with bounded capture and stable status/exit |
 | P009 | A long command is reachable from fast/full or a task command has inconsistent long metadata | Validation rejects the contract before execution |
 | P010 | Long validation explicitly selects a task's long commands | Only long commands execute; no implicit fallback |
@@ -53,6 +54,7 @@ change product networking behavior.
 | S004 | Unknown schema/field, missing task, path escape or invalid timeout | P005 | Validation fails before command execution | Assert stable INVALID result and exact structured issue code | boundary,error | P0 |
 | S005 | Missing dependency and two manifests with a dependency cycle | P007 | Validation fails closed | Assert missing ID or cycle members are reported | error,regression | P0 |
 | S006 | Fast, task and full selection over mixed command metadata | P008,P009 | Fast/full never select long commands and malformed long placement is rejected | Assert selected command IDs and zero long executions | safety,regression | P0 |
+| S013 | Requested task has a COMPLETE transitive dependency closure; unrelated task has a BLOCKED dependency | P006,P017 | Only the requested task's dependency closure determines dependency readiness | Assert selected task passes; selecting the blocked task fails with DEPENDENCY_INCOMPLETE | boundary,regression | P0 |
 | S007 | Explicit long selection for a task with or without long commands | P010 | Only declared long commands run; no-long task returns stable SKIPPED | Assert command inventory and exit code | boundary | P1 |
 | S008 | PASS/nonzero/timeout command through shared command runner | P008,P015,P016 | Result, duration, bounded excerpts and full log paths are retained | Assert stable exit mapping and truncation flags | normal,error | P0 |
 | S009 | Existing report with injected failure before replace, followed by success | P011 | Existing report survives failure; success atomically replaces it | Assert old bytes remain then complete JSON appears | fault-injection | P0 |
@@ -74,6 +76,7 @@ change product networking behavior.
 | T008 | S012 | P014 | SKIPPED acceptance disguised by PASS summary | FAIL | Assert successful acceptance requires every report PASS | unit,security |
 | T009 | S003,S006,S010 | P004,P006,P008,P012 | Public scripts against repository P1-012 | Task check and freshness check PASS | Assert machine reports and stable zero exits | integration |
 | T010 | S001,S006,S008 | P001,P008,P009,P015 | `scripts/check-fast` and `scripts/check-full` | Both exclude long profiles; full delegates to existing `scripts/check` | Assert command inventory and no soak/profile command | integration |
+| T011 | S013 | P006,P017 | Temporary manifests with unrelated and transitive incomplete dependencies | Selected task passes only when its full dependency closure is COMPLETE | Assert unrelated BLOCKED dependency does not reject selected task; transitive BLOCKED dependency is rejected | unit,regression |
 
 ## Evidence boundary
 

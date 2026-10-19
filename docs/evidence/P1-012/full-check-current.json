@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "kind": "current-full-check-result",
+  "command": "scripts/check-full --json --output docs/evidence/P1-012/full-check.json",
+  "status": "FAIL",
+  "exit_code": 1,
+  "duration_ms": 28727.564,
+  "test_summary": {
+    "run": 584,
+    "failures": 25,
+    "errors": 16,
+    "skipped": 4
+  },
+  "representative_failures": [
+    "M12-002 native platform test rejects different SDK bytes",
+    "M3-031 desktop evidence tests reject stale provider advisory disposition",
+    "M7-030 release evidence tests lack required retained qualification inputs",
+    "TLS provider PoC tests reject stale advisory and historical result fixtures"
+  ],
+  "p1_012_scoped_gate": "PASS",
+  "interpretation": "The focused P1-012 acceptance gate passes. The repository-wide full gate remains failing on unrelated stale or missing qualification evidence; this run does not qualify that evidence."
+}

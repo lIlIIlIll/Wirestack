@@ -234,8 +234,6 @@ def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[
         for dependency in task["dependencies"]:
             if dependency not in backlog or dependency not in statuses:
                 raise ContractError("DEPENDENCY_MISSING", f"{task_id} dependency is absent: {dependency}")
-            if statuses[dependency] != "COMPLETE":
-                raise ContractError("DEPENDENCY_INCOMPLETE", f"{task_id} dependency is not COMPLETE: {dependency}")
     visiting: list[str] = []
     visited: set[str] = set()
 
@@ -253,6 +251,23 @@ def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[
 
     for task_id in sorted(tasks):
         visit(task_id)
+    if requested is not None:
+        checked: set[str] = set()
+
+        def require_complete_dependencies(task_id: str) -> None:
+            if task_id in checked:
+                return
+            checked.add(task_id)
+            for dependency in tasks[task_id]["dependencies"]:
+                if statuses[dependency] != "COMPLETE":
+                    raise ContractError(
+                        "DEPENDENCY_INCOMPLETE",
+                        f"{task_id} dependency is not COMPLETE: {dependency}",
+                    )
+                if dependency in tasks:
+                    require_complete_dependencies(dependency)
+
+        require_complete_dependencies(requested)
     return tasks
 
 
