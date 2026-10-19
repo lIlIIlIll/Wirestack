@@ -174,6 +174,53 @@ class Http1HttpsProxyDialCapReviewTest {
     }
 }
 
+@Test
+class Http1LiteralProxyLateSuccessReviewTest {
+    @TestCase
+    func lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent(): Unit {
+        let proxyAddress = IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 9u8])
+        let resolver = StaticResolver(ResolveResult(
+            [proxyAddress], HostName("proxy.test"), ResolverSource.Static
+        ))
+        let clock = ProxyReviewManualClock()
+        let factory = ProxyReviewDialTransportFactory(clock, lateSuccess: true)
+        let events = ProxyReviewEventSink()
+        let client = Http1ForwardProxyClient(
+            Http1ProxyEndpoint.address(proxyAddress, 3128, "proxy.test:3128"), resolver, factory
+        )
+        let cap = 50 * Duration.millisecond
+        let context = OperationContext(
+            deadline: Some(Deadline.after(2 * Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(tcpConnect: Some(cap)),
+            eventSink: Some<api.NetworkEventSink>(events)
+        )
+        try {
+            let error = @AssertThrows[api.NetworkException](client.execute(
+                HttpRequest.get("http://origin.test/path"), context: context
+            ))
+            match (error.category) {
+                case api.NetworkErrorCategory.DeadlineExceeded => ()
+                case _ => @Fail("late proxy dial did not report a deadline error")
+            }
+            match (error.code) {
+                case api.NetworkErrorCode.TimedOut => ()
+                case _ => @Fail("late proxy dial did not report a timeout code")
+            }
+            match (error.phase) {
+                case api.NetworkPhase.TcpConnect => ()
+                case _ => @Fail("late proxy dial lost its TCP-connect phase")
+            }
+            @Expect(factory.calls, 1)
+            @Expect(factory.deadlineExpired, true)
+            @Expect(factory.writeCalls, 0)
+            @Expect(factory.abortCalls, 1)
+            @Expect(events.successfulTcpConnected, 0)
+        } finally {
+            client.close()
+        }
+    }
+}
+
 private class ProxyReviewManualClock <: MonotonicClock {
     private var current = MonoTime.now()
     public func now(): MonoTime { current }
@@ -183,18 +230,28 @@ private class ProxyReviewManualClock <: MonotonicClock {
 private class ProxyReviewDialTransportFactory <: TransportFactory {
     private let clock: ProxyReviewManualClock
     private let advanceClock: Bool
+    private let lateSuccess: Bool
+    private let lateTransport: ProxyReviewLateResponseTransport
     private var connectCalls: Int64 = 0
     private var capturedDeadlineRemaining = None<Duration>
     private var didExpireDeadline = false
 
-    init(clock: ProxyReviewManualClock, advanceClock!: Bool = true) {
+    init(
+        clock: ProxyReviewManualClock,
+        advanceClock!: Bool = true,
+        lateSuccess!: Bool = false
+    ) {
         this.clock = clock
         this.advanceClock = advanceClock
+        this.lateSuccess = lateSuccess
+        lateTransport = ProxyReviewLateResponseTransport()
     }
 
     prop calls: Int64 { get() { connectCalls } }
     prop deadlineRemaining: ?Duration { get() { capturedDeadlineRemaining } }
     prop deadlineExpired: Bool { get() { didExpireDeadline } }
+    prop writeCalls: Int64 { get() { lateTransport.writeCalls } }
+    prop abortCalls: Int64 { get() { lateTransport.abortCalls } }
 
     public func connect(endpoint: SocketEndpoint, context: OperationContext): DuplexTransport {
         let _ = endpoint
@@ -206,6 +263,7 @@ private class ProxyReviewDialTransportFactory <: TransportFactory {
         if (advanceClock) { clock.advance(51 * Duration.millisecond) }
         didExpireDeadline = context.isDeadlineExceeded()
         if (didExpireDeadline) {
+            if (lateSuccess) { return lateTransport }
             throw api.NetworkException(
                 api.NetworkErrorCategory.DeadlineExceeded,
                 api.NetworkPhase.TcpConnect,
@@ -214,6 +272,60 @@ private class ProxyReviewDialTransportFactory <: TransportFactory {
             )
         }
         throw IllegalStateException("expected proxy dial failure")
+    }
+}
+
+private class ProxyReviewLateResponseTransport <: DuplexTransport {
+    private let responseWire: Array<Byte>
+    private let writes = AtomicInt64(0)
+    private let aborts = AtomicInt64(0)
+    private var wireOffset: Int64 = 0
+
+    init() {
+        responseWire = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n".toArray()
+    }
+
+    prop writeCalls: Int64 { get() { writes.load() } }
+    prop abortCalls: Int64 { get() { aborts.load() } }
+    public prop info: TransportInfo { get() { TransportInfo("proxy-review-late-success-test") } }
+
+    public func readSome(destination: MutableByteSpan, context!: OperationContext): ReadResult {
+        let _ = context
+        if (wireOffset == responseWire.size) { return ReadResult.EndOfStream }
+        let count = min(destination.length, responseWire.size - wireOffset)
+        for (index in 0..count) {
+            destination.bytes[destination.offset + index] = responseWire[wireOffset + index]
+        }
+        wireOffset += count
+        ReadResult.Data(count)
+    }
+
+    public func writeSome(source: ByteSpan, context!: OperationContext): Int64 {
+        let _ = context
+        writes.fetchAdd(1)
+        source.length
+    }
+
+    public func shutdown(_: ShutdownDirection): Unit {}
+    public func close(): Unit {}
+    public func isClosed(): Bool { false }
+    public func close(_: OperationContext): Unit {}
+    public func abort(reason!: ?api.AbortReason): Unit {
+        let _ = reason
+        aborts.fetchAdd(1)
+    }
+}
+
+private class ProxyReviewEventSink <: api.NetworkEventSink {
+    private let successfulTcpConnectedCount = AtomicInt64(0)
+    prop successfulTcpConnected: Int64 { get() { successfulTcpConnectedCount.load() } }
+
+    public func emit(event: api.NetworkEvent): Unit {
+        match ((event.kind, event.outcome)) {
+            case (api.NetworkEventKind.TcpConnected, api.NetworkEventOutcome.Succeeded) =>
+                successfulTcpConnectedCount.fetchAdd(1)
+            case _ => ()
+        }
     }
 }
 

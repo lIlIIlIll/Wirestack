@@ -1,6 +1,7 @@
 package wirestack.http
 
 import std.collection.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
@@ -258,6 +259,87 @@ class WebSocketConnectionTest {
             "mutations=${mutations.size} schedules=${schedules.size} executions=${executions} " +
             "maxInputBytes=${maximumInputBytes} readCalls=${readCalls} decision=PASS"
         )
+    }
+}
+
+@Test
+class WebSocketLateReadDeadlineReviewTest {
+    @TestCase
+    func successfulBytesAfterStreamIdleAreNotPublished(): Unit {
+        let clock = WebSocketDeadlineReviewClock(MonoTime.now())
+        let transport = WebSocketLateReadTransport(clock)
+        let connection = WebSocketConnection(transport, WebSocketRole.Server)
+        let context = api.OperationContext(
+            deadline: Some(api.Deadline.after(Duration.second, clock: clock)),
+            timeoutPolicy: api.OperationTimeoutPolicy(
+                streamReadIdle: Some(5 * Duration.millisecond)
+            )
+        )
+        try {
+            let error = @AssertThrows[WebSocketException](connection.receive(context: context))
+            match (error.code) {
+                case WebSocketErrorCode.ContextStopped => ()
+                case _ => @Fail("late WebSocket bytes did not report a stopped context")
+            }
+            @Expect(connection.isClosed())
+            @Expect(transport.readCalls, 3)
+        } finally {
+            connection.close()
+        }
+    }
+}
+
+private class WebSocketDeadlineReviewClock <: MonotonicClock {
+    private var current: MonoTime
+
+    init(start: MonoTime) { current = start }
+    public func now(): MonoTime { current }
+    func advance(duration: Duration): Unit { current = current + duration }
+}
+
+private class WebSocketLateReadTransport <: api.DuplexTransport {
+    private let clock: WebSocketDeadlineReviewClock
+    private let wire = webSocketTestMaskedFrame(1u8, true, [b'x'])
+    private var wireOffset: Int64 = 0
+    private var reads: Int64 = 0
+    private var closed = false
+
+    init(clock: WebSocketDeadlineReviewClock) { this.clock = clock }
+
+    prop readCalls: Int64 { get() { reads } }
+    public prop info: api.TransportInfo { get() { api.TransportInfo("websocket-late-read-test") } }
+
+    public func readSome(
+        destination: api.MutableByteSpan,
+        context!: api.OperationContext = api.OperationContext.background()
+    ): api.ReadResult {
+        let _ = context
+        reads++
+        if (reads == 3) { clock.advance(6 * Duration.millisecond) }
+        if (wireOffset == wire.size) { return api.ReadResult.EndOfStream }
+        let count = min(destination.length, wire.size - wireOffset)
+        for (index in 0..count) {
+            destination.bytes[destination.offset + index] = wire[wireOffset + index]
+        }
+        wireOffset += count
+        api.ReadResult.Data(count)
+    }
+
+    public func writeSome(
+        source: api.ByteSpan,
+        context!: api.OperationContext = api.OperationContext.background()
+    ): Int64 {
+        let _ = context
+        source.length
+    }
+
+    public func shutdown(_: api.ShutdownDirection): Unit {}
+    public func close(): Unit { closed = true }
+    public func isClosed(): Bool { closed }
+    public func close(_: api.OperationContext): Unit { closed = true }
+    public func abort(reason!: ?api.AbortReason): Unit {
+        let _ = reason
+        closed = true
     }
 }
 

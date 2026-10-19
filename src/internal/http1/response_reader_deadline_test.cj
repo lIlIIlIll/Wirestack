@@ -113,6 +113,136 @@ class Http1ResponseHeaderBoundaryReviewTest {
 }
 
 @Test
+class Http1LateReadDeadlineReviewTest {
+    @TestCase
+    func responseHeadersReturnedAfterBudgetExpiryAreRejected(): Unit {
+        let clock = ReviewContinueManualClock()
+        let transport = ReviewUpgradeReadBudgetTransport(
+            "HTTP/1.1 417 Expectation Failed\r\nContent-Length: 0\r\n\r\n",
+            clock: Some(clock), lateHeader: true
+        )
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"),
+            headers: HttpHeaders.builder()
+                .add("Content-Length", "1")
+                .add("Expect", "100-continue")
+                .build(),
+            body: RequestBody.bytes([120u8])
+        )
+        let writer = Http1RequestWriter(request)
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(responseHeaders: Some(5 * Duration.millisecond))
+        )
+        let error = @AssertThrows[api.NetworkException](exchangeHttp1ExpectContinue(
+            transport, request, writer, Duration.second, context: context
+        ))
+        match (error.category) {
+            case api.NetworkErrorCategory.DeadlineExceeded => ()
+            case _ => @Fail("late response headers did not report a deadline error")
+        }
+        match (error.code) {
+            case api.NetworkErrorCode.TimedOut => ()
+            case _ => @Fail("late response headers did not report a timeout code")
+        }
+        match (error.phase) {
+            case api.NetworkPhase.HttpHeaders => ()
+            case _ => @Fail("late response headers lost their phase")
+        }
+        @Expect(writer.evidence.bodyBytesWritten, 0)
+    }
+
+    @TestCase
+    func responseBodyBytesReturnedAfterIdleExpiryAreRejected(): Unit {
+        let clock = ReviewContinueManualClock()
+        let transport = ReviewUpgradeReadBudgetTransport(
+            "HTTP/1.1 200 OK\r\nContent-Length: 1\r\n\r\n",
+            clock: Some(clock), tail: [120u8], lateTail: true
+        )
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"),
+            headers: HttpHeaders.builder()
+                .add("Content-Length", "1")
+                .add("Expect", "100-continue")
+                .build(),
+            body: RequestBody.bytes([121u8])
+        )
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(
+                responseHeaders: Some(5 * Duration.millisecond),
+                bodyReadIdle: Some(5 * Duration.millisecond)
+            )
+        )
+        let result = exchangeHttp1ExpectContinue(
+            transport, request, Http1RequestWriter(request), Duration.second, context: context
+        )
+        try {
+            let error = @AssertThrows[api.NetworkException](
+                result.response.body.read(Array<Byte>(1, repeat: 0u8))
+            )
+            match (error.category) {
+                case api.NetworkErrorCategory.DeadlineExceeded => ()
+                case _ => @Fail("late response body data did not report a deadline error")
+            }
+            match (error.code) {
+                case api.NetworkErrorCode.TimedOut => ()
+                case _ => @Fail("late response body data did not report a timeout code")
+            }
+            match (error.phase) {
+                case api.NetworkPhase.HttpBody => ()
+                case _ => @Fail("late response body data lost its phase")
+            }
+        } finally {
+            result.response.close()
+        }
+    }
+
+    @TestCase
+    func upgradedBytesReturnedAfterIdleExpiryAreRejected(): Unit {
+        let clock = ReviewContinueManualClock()
+        let transport = ReviewUpgradeReadBudgetTransport(
+            "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: review/1\r\n\r\n",
+            clock: Some(clock), tail: [120u8], lateTail: true
+        )
+        let request = HttpRequest.get("http://example.test/socket").withHeaders(
+            HttpHeaders.builder()
+                .add("Connection", "Upgrade")
+                .add("Upgrade", "review/1")
+                .build()
+        )
+        let upgraded = match (performHttp1Upgrade(transport, request)) {
+            case Http1UpgradeExchangeResult.Upgraded(value) => value
+            case _ => throw Exception("expected HTTP/1 Upgrade handoff")
+        }
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(streamReadIdle: Some(5 * Duration.millisecond))
+        )
+        let buffer = Array<Byte>(1, repeat: 0u8)
+        try {
+            let error = @AssertThrows[api.NetworkException](upgraded.transport.readSome(
+                MutableByteSpan(buffer), context: context
+            ))
+            match (error.category) {
+                case api.NetworkErrorCategory.DeadlineExceeded => ()
+                case _ => @Fail("late upgraded data did not report a deadline error")
+            }
+            match (error.code) {
+                case api.NetworkErrorCode.TimedOut => ()
+                case _ => @Fail("late upgraded data did not report a timeout code")
+            }
+            match (error.phase) {
+                case api.NetworkPhase.TcpRead => ()
+                case _ => @Fail("late upgraded data lost its TCP-read phase")
+            }
+        } finally {
+            upgraded.transport.abort(reason: Some(api.AbortReason.DeadlineExceeded))
+        }
+    }
+}
+
+@Test
 class Http1RequestWriteBudgetReviewTest {
     @TestCase
     func expectContinueReusesOneRequestWriteBudgetForHeadAndBody(): Unit {
@@ -244,22 +374,45 @@ private func reviewReadBudgetContext(): OperationContext {
 
 private class ReviewUpgradeReadBudgetTransport <: DuplexTransport {
     private let responseWire: Array<Byte>
+    private let clock: ?ReviewContinueManualClock
+    private let tail: Array<Byte>
+    private let lateHeader: Bool
+    private let lateTail: Bool
     private var wireOffset: Int64 = 0
+    private var tailOffset: Int64 = 0
     private var budgetRemaining: ?Duration = None<Duration>
 
-    init(responseWire: String) { this.responseWire = responseWire.toArray() }
-
-    prop readBudgetRemaining: ?Duration { get() { budgetRemaining } }
-
-    public prop info: TransportInfo { get() { TransportInfo("review-upgrade-read-budget-test") } }
+    init(
+        responseWire: String,
+        clock!: ?ReviewContinueManualClock = None<ReviewContinueManualClock>,
+        tail!: Array<Byte> = [],
+        lateHeader!: Bool = false,
+        lateTail!: Bool = false
+    ) {
+        this.responseWire = responseWire.toArray()
+        this.clock = clock
+        this.tail = tail
+        this.lateHeader = lateHeader
+        this.lateTail = lateTail
+    }
 
     public func readSome(destination: MutableByteSpan, context!: OperationContext): ReadResult {
         if (wireOffset < responseWire.size) {
+            if (lateHeader) { clock.getOrThrow().advance(6 * Duration.millisecond) }
             let count = min(destination.length, responseWire.size - wireOffset)
             for (index in 0..count) {
                 destination.bytes[destination.offset + index] = responseWire[wireOffset + index]
             }
             wireOffset += count
+            return ReadResult.Data(count)
+        }
+        if (tailOffset < tail.size) {
+            if (lateTail) { clock.getOrThrow().advance(6 * Duration.millisecond) }
+            let count = min(destination.length, tail.size - tailOffset)
+            for (index in 0..count) {
+                destination.bytes[destination.offset + index] = tail[tailOffset + index]
+            }
+            tailOffset += count
             return ReadResult.Data(count)
         }
         budgetRemaining = match (context.deadline) {
@@ -268,6 +421,10 @@ private class ReviewUpgradeReadBudgetTransport <: DuplexTransport {
         }
         ReadResult.EndOfStream
     }
+
+    prop readBudgetRemaining: ?Duration { get() { budgetRemaining } }
+
+    public prop info: TransportInfo { get() { TransportInfo("review-upgrade-read-budget-test") } }
 
     public func writeSome(source: ByteSpan, context!: OperationContext): Int64 {
         let _ = context
