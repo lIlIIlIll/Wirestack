@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-004",
+  "dependencies": [
+    "M9-001",
+    "M9-002",
+    "M9-003",
+    "M10-001",
+    "M10-002",
+    "M10-003",
+    "M10-004",
+    "M10-005",
+    "M11-001",
+    "M11-002",
+    "M11-003"
+  ],
+  "allowed_paths": [
+    "examples/linux/m11_004",
+    "tools/m11_004_installed_consumers.py",
+    "tools/tests/test_m11_004_installed_consumers.py",
+    "tools/tasks/M11-004.json",
+    "README.md",
+    "docs/guides/installed-applications-linux.md",
+    "docs/planning/status.md",
+    "docs/evidence/M11-004"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "current-public-api",
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "application-doc-contract",
+      "argv": [
+        "python3",
+        "tools/m11_004_installed_consumers.py",
+        "--validate-only"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "installed-application-release-api-tooling",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m11_004_installed_consumers",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_032_public_api_contract"
+      ],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "installed-applications",
+      "argv": [
+        "python3",
+        "tools/m11_004_installed_consumers.py"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M11-004/workspace.json",
+    "docs/evidence/M11-004/dependencies.json",
+    "docs/evidence/M11-004/public-api.json",
+    "docs/evidence/M11-004/verification.json",
+    "docs/evidence/M11-004/installed/report.json",
+    "docs/evidence/M11-004/installed-sdk113/report.json"
+  ],
+  "timeout_seconds": 1200,
+  "long_running_gate": false,
+  "source_paths": [
+    "examples/linux/m11_004/cli/cjpm.toml",
+    "examples/linux/m11_004/cli/src/main.cj",
+    "examples/linux/m11_004/cli/src/acceptance.cj",
+    "examples/linux/m11_004/decoded/cjpm.toml",
+    "examples/linux/m11_004/decoded/src/main.cj",
+    "examples/linux/m11_004/decoded/src/acceptance.cj",
+    "examples/linux/m11_004/streams/cjpm.toml",
+    "examples/linux/m11_004/streams/src/main.cj",
+    "examples/linux/m11_004/streams/src/acceptance.cj",
+    "examples/linux/m11_004/streams/src/fixture.cj",
+    "examples/linux/m11_004/service/cjpm.toml",
+    "examples/linux/m11_004/service/src/main.cj",
+    "tools/m11_004_installed_consumers.py",
+    "tools/tests/test_m11_004_installed_consumers.py",
+    "tools/tasks/M11-004.json",
+    "README.md",
+    "docs/guides/installed-applications-linux.md"
+  ]
+}

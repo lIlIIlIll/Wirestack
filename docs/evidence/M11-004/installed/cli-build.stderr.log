@@ -1,0 +1,236 @@
+[33mwarning[0m: unreachable expression
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http_resource_budget.cj:389:9:
+    [36m| [0m
+[36m389[0m [36m| [0m          try {[0m
+    [36m| [0m [33m_[0m[33m________^[0m
+[36m390[0m [36m| [0m[33m|[0m             synchronized(mutex) {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m428[0m [36m| [0m[33m|[0m         }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________^ unreachable expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+[33mwarning[0m: unused function:'waitUntilWriteActive'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:696:5:
+    [36m| [0m
+[36m696[0m [36m| [0m      internal func waitUntilWriteActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m697[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m706[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilReceiveActive'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/transport_stdnet/udp_socket.cj:718:5:
+    [36m| [0m
+[36m718[0m [36m| [0m      func waitUntilReceiveActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m719[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m725[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilAcceptActive'
+    [36m==>[0m <scratch>/install/wirestack/src/internal/transport_stdnet/package.cj:1054:5:
+     [36m| [0m
+[36m1054[0m [36m| [0m      func waitUntilAcceptActive(timeout: Duration): Bool {[0m
+     [36m| [0m [33m_[0m[33m____^[0m
+[36m1055[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+     [36m| [0m[33m|[0m ...[0m
+[36m1063[0m [36m| [0m[33m|[0m     }[0m
+     [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+     [36m| [0m
+     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+3 warnings generated, 3 warnings printed.
+[33mwarning[0m: unused function:'offer'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http2/server_mapping.cj:401:5:
+    [36m| [0m
+[36m401[0m [36m| [0m      func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m402[0m [36m| [0m[33m|[0m         offerView([0m
+    [36m| [0m[33m|[0m ...[0m
+[36m405[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'offer'
+    [36m==>[0m <scratch>/install/wirestack/src/internal/http2/client_connection.cj:1122:5:
+     [36m| [0m
+[36m1122[0m [36m| [0m      func offer(data: Array<Byte>, flowBytes: Int64, endStream: Bool): Unit {[0m
+     [36m| [0m [33m_[0m[33m____^[0m
+[36m1123[0m [36m| [0m[33m|[0m         offerView(data, 0, data.size, flowBytes, endStream, None<Http2ReceivedBufferReservation>)[0m
+[36m1124[0m [36m| [0m[33m|[0m     }[0m
+     [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+     [36m| [0m
+     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <scratch>/install/wirestack/src/internal/http1/client_pipeline.cj:92:9:
+   [36m| [0m
+[36m92[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'size'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http1/pool_admission.cj:101:5:
+    [36m| [0m
+[36m101[0m [36m| [0m    func size(): Int64 { waiterCount }[0m
+    [36m| [0m    [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http1/connection_pool.cj:551:5:
+    [36m| [0m
+[36m551[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m552[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m561[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http1/http2_connection_pool.cj:636:5:
+    [36m| [0m
+[36m636[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m637[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m646[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <scratch>/install/wirestack/src/internal/http1/tls_client_pipeline.cj:865:9:
+    [36m| [0m
+[36m865[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+7 warnings generated, 7 warnings printed.
+[33mwarning[0m: unused import 'std.time.*'
+ [36m==>[0m <scratch>/consumers/cli/src/acceptance.cj:4:1:
+  [36m| [0m
+[36m4[0m [36m| [0mimport std.time.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused import 'std.sync.*'
+ [36m==>[0m <scratch>/consumers/cli/src/main.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport std.sync.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused import 'std.time.*'
+ [36m==>[0m <scratch>/consumers/cli/src/main.cj:8:1:
+  [36m| [0m
+[36m8[0m [36m| [0mimport std.time.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
+   [36m==>[0m <scratch>/consumers/cli/src/main.cj:190:40:
+    [36m| [0m
+[36m190[0m [36m| [0m    } catch (error: DownloadFailure) { Console.stdErr.write("ERROR category=application code=${error.code}\n".toArray()); if (error.code == 2) { 2 } else { 1 } }[0m
+    [36m| [0m                                       [33m^^^^^^^ deprecated[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+[33mwarning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
+   [36m==>[0m <scratch>/consumers/cli/src/main.cj:191:252:
+    [36m| [0m
+[36m191[0m [36m| [0m      catch (error: NetworkException) { let code = match (error.code) { case NetworkErrorCode.Cancelled => 1; case NetworkErrorCode.TimedOut => 2; case NetworkErrorCode.ResourceExhausted => 3; case NetworkErrorCode.UnexpectedEof => 4; case _ => 99 }; Console.stdErr.write("ERROR category=network phase=${phaseName(error.phase)} code=${code}\n".toArray()); 1 }[0m
+    [36m| [0m                                                                                                                                                                                                                                                           [33m^^^^^^^ deprecated[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+[33mwarning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
+   [36m==>[0m <scratch>/consumers/cli/src/main.cj:192:162:
+    [36m| [0m
+[36m192[0m [36m| [0m      catch (error: HttpException) { let code = match (error.code) { case HttpErrorCode.PoolExhausted => 3; case HttpErrorCode.StreamReset => 4; case _ => 99 }; Console.stdErr.write("ERROR category=http phase=${httpCausePhase(error)} code=${code}\n".toArray()); 1 }[0m
+    [36m| [0m                                                                                                                                                                 [33m^^^^^^^ deprecated[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+[33mwarning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
+   [36m==>[0m <scratch>/consumers/cli/src/main.cj:193:45:
+    [36m| [0m
+[36m193[0m [36m| [0m      catch (_: IllegalArgumentException) { Console.stdErr.write("ERROR category=usage code=2\n".toArray()); 2 }[0m
+    [36m| [0m                                            [33m^^^^^^^ deprecated[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+[33mwarning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
+   [36m==>[0m <scratch>/consumers/cli/src/main.cj:194:30:
+    [36m| [0m
+[36m194[0m [36m| [0m      catch (_: Exception) { Console.stdErr.write("ERROR category=application code=99\n".toArray()); 1 }[0m
+    [36m| [0m                             [33m^^^^^^^ deprecated[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff deprecated`
+
+[33mwarning[0m: unused variable:'destination'
+  [36m==>[0m <scratch>/consumers/cli/src/acceptance.cj:21:22:
+   [36m| [0m
+[36m21[0m [36m| [0m    public func read(destination: Array<Byte>): Int64 {[0m
+   [36m| [0m                     [33m^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'proxy'
+  [36m==>[0m <scratch>/consumers/cli/src/main.cj:62:31:
+   [36m| [0m
+[36m62[0m [36m| [0m    public func authorization(proxy: HttpProxyEndpoint, target: HttpUrl, context: OperationContext): ?String { Some(value) }[0m
+   [36m| [0m                              [33m^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'target'
+  [36m==>[0m <scratch>/consumers/cli/src/main.cj:62:57:
+   [36m| [0m
+[36m62[0m [36m| [0m    public func authorization(proxy: HttpProxyEndpoint, target: HttpUrl, context: OperationContext): ?String { Some(value) }[0m
+   [36m| [0m                                                        [33m^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'context'
+  [36m==>[0m <scratch>/consumers/cli/src/main.cj:62:74:
+   [36m| [0m
+[36m62[0m [36m| [0m    public func authorization(proxy: HttpProxyEndpoint, target: HttpUrl, context: OperationContext): ?String { Some(value) }[0m
+   [36m| [0m                                                                         [33m^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+12 warnings generated, 12 warnings printed.

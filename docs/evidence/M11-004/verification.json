@@ -1,0 +1,398 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-004",
+  "status": "BLOCKED",
+  "status_detail": {
+    "reason": "No committed native run binds the tracked sources of this review revision.",
+    "pre_review_reports": [
+      "docs/evidence/M11-004/installed/report.json",
+      "docs/evidence/M11-004/installed-sdk113/report.json"
+    ],
+    "pre_review_runner_digest": "fbaff2577108a890fb0c6ffadbee9f1bae4eb2f37ab35d4c9d768c886e3c89dd",
+    "review_round_reports": [
+      "docs/evidence/M11-004/installed-review/report.json",
+      "docs/evidence/M11-004/installed-review-m9/report.json"
+    ],
+    "review_round_runner_digest": "05daa6700304e698e309cacfdff33b2e078162771e47933cbdf3461587792f9f",
+    "changed_after_review_round_reports": [
+      "examples/linux/m11_004/streams/src/fixture.cj",
+      "examples/linux/m11_004/service/src/main.cj",
+      "docs/guides/installed-applications-linux.md"
+    ],
+    "stale_against_this_file": [
+      "examples/linux/m11_004/cli/src/main.cj",
+      "examples/linux/m11_004/decoded/src/main.cj",
+      "examples/linux/m11_004/streams/src/main.cj",
+      "examples/linux/m11_004/streams/src/fixture.cj",
+      "examples/linux/m11_004/service/src/main.cj",
+      "tools/m11_004_installed_consumers.py",
+      "tools/tests/test_m11_004_installed_consumers.py",
+      "docs/guides/installed-applications-linux.md"
+    ],
+    "working_tree_contract_check": {
+      "argv": ["python3", "tools/m11_004_installed_consumers.py", "--validate-only"],
+      "result": "M11_004_APPLICATION_CONTRACT_PASS",
+      "scope": "Working tree only; not a substitute for regenerated installed reports."
+    },
+    "required_before_complete": [
+      "Run the installed consumer runner on the default SDK profile and on the qualified SDK 1.1.3 profile on Linux x86_64 glibc.",
+      "Regenerate docs/evidence/M11-004/installed/report.json with python3 tools/m11_004_installed_consumers.py.",
+      "Regenerate docs/evidence/M11-004/installed-sdk113/report.json with python3 tools/m11_004_installed_consumers.py --include-m9 --output docs/evidence/M11-004/installed-sdk113.",
+      "Run scripts/check-task M11-004 --json --output docs/evidence/M11-004/task-gate.json.",
+      "Rebuild this file from the regenerated reports and restore a source-bound COMPLETE status."
+    ]
+  },
+  "platform": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "release_qualification": "NOT_QUALIFIED",
+  "candidate_committed": false,
+  "public_api": "UNCHANGED:363",
+  "production_source_files": 164,
+  "installed_profiles": {
+    "installed": {
+      "path": "docs/evidence/M11-004/installed/report.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e68be98e187ffeaee9c0c8470490ba3c63b74d32af075a3ab5b60376672980d2"
+      },
+      "status": "PASS",
+      "checks": 47,
+      "compiler": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "compiler_binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "724b2a273d79195bdddda68f71b23346cdbecf2e4c4208ba200a29f16ffa036f"
+      },
+      "archive_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+      },
+      "consumers": {
+        "cli": {
+          "checks": 11,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "55d2d050f882b59a6e8db6c1290890c2dc05bb3732faee9e8bdb92f1fcbf481d"
+          },
+          "feature_symbols": {
+            "sse": false,
+            "gzip": false,
+            "observability": false
+          }
+        },
+        "decoded": {
+          "checks": 10,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "1ac1eef7122d019da987be2b47780c005547b601cfdf67e77a4b3445bff7965c"
+          },
+          "feature_symbols": {
+            "sse": false,
+            "gzip": true,
+            "observability": false
+          }
+        },
+        "streams": {
+          "checks": 12,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "b1b2a8f234032a2e2dbbdd87a174c2152d955c6f4aaa3c6ac5d97fb426d4e393"
+          },
+          "feature_symbols": {
+            "sse": true,
+            "gzip": false,
+            "observability": false
+          }
+        },
+        "service": {
+          "checks": 14,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "8d20cc9646746fc2083148e398ae13341ddd9ce665dfc2d9a8b9bb7af5dec4c8"
+          },
+          "feature_symbols": {
+            "sse": true,
+            "gzip": false,
+            "observability": false
+          }
+        }
+      }
+    },
+    "installed-sdk113": {
+      "path": "docs/evidence/M11-004/installed-sdk113/report.json",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f63358d934564f007c48f25da59fca2d1f9f8627fc659be656047a05b0d9e238"
+      },
+      "status": "PASS",
+      "checks": 47,
+      "compiler": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+      "compiler_binary_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bf2536ea4dbb266ecca660decedad40bdcc373f4090a9eb70ded03bca52b4aae"
+      },
+      "archive_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e430f08ff8596b1c43c1d1090b5c42d721abac3c03505656b2aea107ee7a079f"
+      },
+      "consumers": {
+        "cli": {
+          "checks": 11,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "00a3cccdb4dae9a6b487eb3edaba6394db6076e460be0f96c2d71c63a3d9f29b"
+          },
+          "feature_symbols": {
+            "sse": false,
+            "gzip": false,
+            "observability": false
+          }
+        },
+        "decoded": {
+          "checks": 10,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "729c8d899935902cd85c483de077c0c222af98b43807d88ea11349222065bb5a"
+          },
+          "feature_symbols": {
+            "sse": false,
+            "gzip": true,
+            "observability": false
+          }
+        },
+        "streams": {
+          "checks": 12,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "3408bbd139bbcb2f0800f86bb97462f0efcf5aceb876c22ea8cdae06bd940361"
+          },
+          "feature_symbols": {
+            "sse": true,
+            "gzip": false,
+            "observability": false
+          }
+        },
+        "service": {
+          "checks": 14,
+          "binary_digest": {
+            "domain": "artifact-bytes-v1",
+            "sha256": "3ce2e76592b20159021bd5f45d1dd390e12e25de8c80be1e16518a96ac0c7e3d"
+          },
+          "feature_symbols": {
+            "sse": true,
+            "gzip": false,
+            "observability": false
+          }
+        }
+      },
+      "m9_native_modes": 9
+    }
+  },
+  "task_gate": {
+    "path": "docs/evidence/M11-004/task-gate.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e6078822be3e3b0c3132cefd24b12753edf30c326f78b5c8380756d1197a21e7"
+    },
+    "status": "PASS"
+  },
+  "source_digests": {
+    "examples/linux/m11_004/cli/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2990c7e28f508a42c9d3dd4e82ce8c0f182e33e8ec6afbd781e7be158fe54486"
+    },
+    "examples/linux/m11_004/cli/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b1458c6f1717c0e843f3121592853553a9ed94c767a4c9778692a9645f80d876"
+    },
+    "examples/linux/m11_004/cli/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "66817afa6779aa5fe1b82aeb21f418b2caf208bbcffa5c1e04d43b0041ca9912"
+    },
+    "examples/linux/m11_004/decoded/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "250447c22abc80d62cbbc337e8c324738c71fa681274e293aa75b9db1a6aadfd"
+    },
+    "examples/linux/m11_004/decoded/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9237ba16adcd47a089a700f9c9370fdf8e1a6ff59af4ee36b1ce71000c0fab1b"
+    },
+    "examples/linux/m11_004/decoded/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1e4f9e5a8ac60f05030bf1ee4e876f47e97721981f623de31959ed28ea9af46e"
+    },
+    "examples/linux/m11_004/streams/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "62ea29be65a7ec375ce56c6e4bc6d6baf6bebfee852813defcd91f258ed7ad0f"
+    },
+    "examples/linux/m11_004/streams/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "751177c08d2aa594f3e09b203db3052c8852a5925c690943c5f5c95a58b4f16e"
+    },
+    "examples/linux/m11_004/streams/src/acceptance.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bda1f56253aecbd41b4c9f26df927b457f3a0c3c81a69054638503f994e734a6"
+    },
+    "examples/linux/m11_004/streams/src/fixture.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "11d49b86bc0ae249cd95e1fba7a4b4d4ce29bedd6637c3ee9ccbc5e4ccd23b68"
+    },
+    "examples/linux/m11_004/service/cjpm.toml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8e5260e1e8638edc922620a293e4e9e340689f8bfe78b5ec6448e2e7d2bb8b4f"
+    },
+    "examples/linux/m11_004/service/src/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+    },
+    "tools/m11_004_installed_consumers.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fbaff2577108a890fb0c6ffadbee9f1bae4eb2f37ab35d4c9d768c886e3c89dd"
+    },
+    "tools/tests/test_m11_004_installed_consumers.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7a52749abb3d59bdfca24056b0c73c954bf11e294bb78a4b06743c174d1e101e"
+    },
+    "tools/tasks/M11-004.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1a6f0f92c2fbfde1c2c0911211f38a83d92e5e61eef2fc7f386c51e41b7d00dc"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9b3f0ed2d451b061e56352ab7b9d7305c2096ec79be8b02fccb0c0e2d19ddcef"
+    },
+    "docs/guides/installed-applications-linux.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "012722a95228f3e8123574890e58dd548b044c10882c303de73189957b451389"
+    }
+  },
+  "compiled_documentation_regions": 6,
+  "negative_gate_tests": 9,
+  "release_api_and_consumer_tests": 57,
+  "peer_abort_outcome": "SDK1.1.3 produced typed HttpException.ProtocolViolation after real producer admission and server close. Accepted as protocol failure, not relabelled as EOF/reset; output and resource invariants remain mandatory.",
+  "network_fixture": "Private user/network namespace; owned TAP descriptor, link-local documentation address, real native multicast packet; no host route/interface mutation or module loading.",
+  "unchanged_scope": [
+    "production packages",
+    "public API/baselines/generated API docs",
+    "SDK and upstream repositories",
+    "previous task status/evidence"
+  ],
+  "not_claimed": [
+    "SDK1.1.0 execution",
+    "default-SDK native socket-option qualification",
+    "delay-injected M9 send-control/active-send profiles",
+    "full production-library test suite rerun",
+    "another platform",
+    "performance",
+    "security review",
+    "long soak",
+    "signed or qualified release"
+  ],
+  "cleanup": "Task-specific extracted packages, disposable keys and scratch removed after evidence retention; earlier workspaces preserved.",
+  "canonical_commands": [
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": {
+        "path": "docs/evidence/M11-004/logs/task-cjpm-check.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "65ca0e7df450c476a9eb9ea515ec382a9b29d9b65ff1b207c59c6302b6dc4378"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/logs/task-cjpm-check.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "installed-application-release-api-tooling",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m11_004_installed_consumers",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_025_linux_supply_chain",
+        "tools.tests.test_m7_026_linux_api_freeze",
+        "tools.tests.test_m7_032_public_api_contract"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": {
+        "path": "docs/evidence/M11-004/logs/task-installed-application-release-api-tooling.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/logs/task-installed-application-release-api-tooling.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e39f09e28e36dfe51767ada0b6ac8a35c24533cb05ec62a5484364ff3bef2a72"
+        }
+      }
+    },
+    {
+      "id": "installed-applications",
+      "argv": [
+        "python3",
+        "tools/m11_004_installed_consumers.py"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": {
+        "path": "docs/evidence/M11-004/logs/task-installed-applications.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f1034dcfb67be85b6d61c43a58bd083ed40afec17599d01ec37ae33c8e11ca0d"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M11-004/logs/task-installed-applications.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "additional_checks": [
+    {
+      "argv": [
+        "scripts/architecture-guard"
+      ],
+      "exit_code": 0,
+      "log": "docs/evidence/M11-004/architecture.log"
+    },
+    {
+      "argv": [
+        "scripts/check-m7-032-public-api",
+        "--json"
+      ],
+      "exit_code": 0,
+      "log": "docs/evidence/M11-004/public-api.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/m11_004_installed_consumers.py",
+        "--validate-only"
+      ],
+      "exit_code": 0,
+      "log": "docs/evidence/M11-004/contracts.log"
+    }
+  ]
+}

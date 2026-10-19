@@ -1,0 +1,3 @@
+SERVICE_READY port=36395
+RESOURCE service connections=0 requests=0 streams=0 reserved=0 buffers=0 waiters=0 owners=0
+SERVICE_STOPPED
