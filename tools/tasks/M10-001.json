@@ -3,6 +3,7 @@
   "task_id": "M10-001",
   "dependencies": ["M9-001"],
   "allowed_paths": [
+    ".gitignore",
     "docs/api/generated/docs.json",
     "docs/evidence/M10-001",
     "docs/guides/http1-linux.md",
@@ -74,6 +75,7 @@
   "timeout_seconds": 5400,
   "long_running_gate": false,
   "source_paths": [
+    ".gitignore",
     "docs/api/generated/docs.json",
     "docs/evidence/M10-001/README.md",
     "docs/evidence/M10-001/review-deadline-regressions.md",
