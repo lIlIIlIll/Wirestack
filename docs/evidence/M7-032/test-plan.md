@@ -24,6 +24,7 @@ backward-compatibility comparison with the historical M7-026 baseline.
 | P008 | Existing experimental public declaration changes or disappears | New inventory generation | Reachable | No compatibility verdict is required. |
 | P009 | Final source differs from API, artifact, performance, or SBOM evidence | Evidence freshness gates | Reachable error path | Stale PASS is rejected. |
 | P010 | Long-duration soak is selected by a non-long gate | Task contract validation | Reachable error path | M7-032 never starts the 24-hour soak. |
+| P011 | M7 validation receives an M7-032 report while the current M11 inventory is separately selected | Task-owned default pair plus explicit inventory/report arguments | Reachable error path | M7 defaults must resolve together; M11 paths must be supplied explicitly |
 
 ## Semantic scenario matrix
 
@@ -38,6 +39,7 @@ backward-compatibility comparison with the historical M7-026 baseline.
 | S007 | Historical M7-026 declarations differ | New inventory | P008 | Inventory is accepted as the new contract | No compatibility shim or verdict is produced | api | P0 |
 | S008 | Mutated source after PASS evidence | Sealed reports | P009 | Evidence becomes STALE/FAIL | Source digest mismatch is explicit | evidence,negative | P0 |
 | S009 | M7-032 task entry through fast/full gates | Valid manifest | P010 | No long command is selected | Every selected command has `long_running=false` | task-contract | P0 |
+| S010 | M7 and M11 inventories exist under one temporary repository root | M7 default pair is valid; M11 pair is explicit | P011 | Each validation uses only its matching inventory/report pair | M7 defaults pass, M11 explicit pair passes, and a corrupted M7 report fails even while the M11 pair remains valid | regression,evidence | P0 |
 
 ## Test-plan matrix
 
@@ -49,6 +51,7 @@ backward-compatibility comparison with the historical M7-026 baseline.
 | T004 | S006 | P007 | Temporary Linux consumer | Build and run PASS | No internal import; observable public behavior succeeds | integration |
 | T005 | S008 | P009 | Sealed report plus source mutation | STALE/FAIL | Digest drift invalidates prior PASS | evidence |
 | T006 | S009 | P010 | M7-032 manifest | Contract validation PASS | No long-running command in fast/task/full selection | static |
+| T007 | S010 | P011 | Temporary repository root with distinct M7 and M11 paths | M7 default pair and explicit M11 pair pass; corrupted M7 report fails closed | Run the CLI entry point and assert both inventory identities and the stale-report error | integration,regression |
 
 ## Excluded gates
 

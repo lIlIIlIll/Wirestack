@@ -22,8 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M7-032"
 SCHEMA_VERSION = 1
 PROFILE = "linux-x86_64-glibc"
-DEFAULT_INVENTORY = ROOT / "docs/api/baselines/wirestack-linux-pre1-m11-003.json"
-DEFAULT_REPORT = ROOT / "docs/evidence/M11-003/public-api.json"
+DEFAULT_INVENTORY = Path("docs/api/baselines/wirestack-linux-pre1-m7-032.json")
+DEFAULT_REPORT = Path("docs/evidence/M7-032/linux_x86_64/public-api.json")
 PUBLIC_PACKAGES = frozenset(api_scan.PUBLIC_PACKAGES)
 
 
@@ -117,11 +117,22 @@ def write_json(path: Path, value: Mapping[str, Any]) -> None:
     temporary.replace(path)
 
 
+def resolve_evidence_path(root: Path, path: Path | None, default: Path) -> Path:
+    selected = default if path is None else path
+    return selected if selected.is_absolute() else root / selected
+
+
 def validate(
     root: Path = ROOT,
-    inventory_path: Path = DEFAULT_INVENTORY,
-    report_path: Path = DEFAULT_REPORT,
+    inventory_path: Path | None = None,
+    report_path: Path | None = None,
 ) -> dict[str, Any]:
+    inventory_path = resolve_evidence_path(
+        root, inventory_path, DEFAULT_INVENTORY
+    )
+    report_path = resolve_evidence_path(
+        root, report_path, DEFAULT_REPORT
+    )
     current = build_inventory(root)
     require(load_json(inventory_path) == current, "committed public API inventory is stale")
     report = build_report(inventory_path, current)
@@ -132,8 +143,8 @@ def validate(
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
-    parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
+    parser.add_argument("--inventory", type=Path)
+    parser.add_argument("--report", type=Path)
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--json", action="store_true")
     return parser.parse_args(argv)
@@ -142,11 +153,17 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     try:
+        inventory_path = resolve_evidence_path(
+            args.root, args.inventory, DEFAULT_INVENTORY
+        )
+        report_path = resolve_evidence_path(
+            args.root, args.report, DEFAULT_REPORT
+        )
         inventory = build_inventory(args.root)
         if args.write:
-            write_json(args.inventory, inventory)
-            write_json(args.report, build_report(args.inventory, inventory))
-        report = validate(args.root, args.inventory, args.report)
+            write_json(inventory_path, inventory)
+            write_json(report_path, build_report(inventory_path, inventory))
+        report = validate(args.root, inventory_path, report_path)
     except (PublicApiInventoryError, api_scan.ApiFreezeError) as error:
         payload = {"taskId": TASK_ID, "status": "FAIL", "error": str(error)}
         print(json.dumps(payload, sort_keys=True) if args.json
