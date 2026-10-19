@@ -36,6 +36,19 @@ The repository-wide `scripts/check` run previously stopped in its initial toolin
 
 The previously recorded strict documentation check remains blocked before generation because installed `cjdoc` is 0.7.1 while the repository requires 0.7.2. No other platform is claimed. GitHub issue #174 was not updated.
 
+## Stack #200 PR clean-build source-tree mutation
+
+Pre-sync PR #216 head `182f12e489787ffa7d4692bfe7fe130f2d920fb2` failed only at the final source-tree mutation step ([Clean Cangjie Build run 39318412391](https://github.com/lIlIIlIll/Wirestack/actions/runs/39318412391)): `scripts/check-code` and the installed public-consumer build had completed successfully, but `scripts/check-docs` rewrote tracked `docs/api/generated/docs.json`. `report-build-status` then failed with `CJDOC_RESULT=success` and `WIRESTACK_RESULT=failure`. The separate architecture, harness, pinned-cjdoc build, and API-doc generation checks passed at that PR head; the latest-main docs deployment was skipped.
+
+Using the run's pinned `cjdoc 0.7.2` artifact and the Cangjie/CJPM 1.1.3 wrapper on Linux x86_64 glibc, the exact documentation command passed:
+
+```sh
+<qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
+  scripts/check-docs --json --output build/check-docs.json
+```
+
+Exit: 0. Combined API documentation coverage: 1,873/1,873 symbols and 950/950 parameters. The regenerated `docs/api/generated/docs.json` SHA-256 is `1fde2a6cc279ae78347a2013f698fc97303c41e5400e5825a871f0834e1b86c1`. After the generator completed and before this report update, `but diff` showed `docs/api/generated/docs.json` as its only changed tracked path. The child follow-up carries this generated output so the clean-build gate can verify a source tree already synchronized with the pinned generator. This does not resolve the separately recorded HTTP/1 fairness nondeterminism or the PR's incomplete Q4 permit/lease ordering. The post-sync CI result remains attached to PR #216.
+
 ## Evidence boundary
 
 These results validate the Stack #200 follow-up on Linux x86_64 with the available SDK as smoke evidence. They do not requalify SDK 1.1.3, establish other-platform support, or clear the repository-wide tooling/documentation blockers. The intermittent HTTP/2 connection-pool fairness test remains outside this M10-002 follow-up and requires a separate scoped investigation if it persists.
