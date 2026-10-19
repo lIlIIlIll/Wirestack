@@ -1,0 +1,102 @@
+[
+  {
+    "id": "architecture",
+    "argv": [
+      "python3",
+      "tools/architecture_guard.py",
+      "--root",
+      ".",
+      "--format",
+      "text"
+    ],
+    "exit_code": 0,
+    "wall_ns": 6370549245,
+    "log": "docs/evidence/M12-001/architecture-final.log"
+  },
+  {
+    "id": "public-api",
+    "argv": [
+      "scripts/check-m7-032-public-api",
+      "--json"
+    ],
+    "exit_code": 0,
+    "wall_ns": 2334863399,
+    "log": "docs/evidence/M12-001/public-api-final.log"
+  },
+  {
+    "id": "task",
+    "argv": [
+      "python3",
+      "-m",
+      "tools.repository.repository_tooling",
+      "check",
+      "task",
+      "M12-001",
+      "--output",
+      "docs/evidence/M12-001/task-gate.json"
+    ],
+    "exit_code": 0,
+    "wall_ns": 1143341198,
+    "log": "docs/evidence/M12-001/task-final.log"
+  },
+  {
+    "id": "disjoint-comparison",
+    "argv": [
+      "python3",
+      "tools/benchmarks/m12_001_end_to_end.py",
+      "compare",
+      "--baseline",
+      "docs/evidence/M12-001/native-final/report.json",
+      "--candidate",
+      "docs/evidence/M12-001/native-final/report.json",
+      "--baseline-rounds",
+      "0:7",
+      "--candidate-rounds",
+      "7:14",
+      "--output",
+      "docs/evidence/M12-001/comparison.json"
+    ],
+    "exit_code": 2,
+    "wall_ns": 495292138,
+    "log": "docs/evidence/M12-001/disjoint-comparison-final.log"
+  },
+  {
+    "id": "self-comparison",
+    "argv": [
+      "python3",
+      "tools/benchmarks/m12_001_end_to_end.py",
+      "compare",
+      "--baseline",
+      "docs/evidence/M12-001/native-final/report.json",
+      "--candidate",
+      "docs/evidence/M12-001/native-final/report.json",
+      "--output",
+      "docs/evidence/M12-001/self-comparison-rejected.json"
+    ],
+    "exit_code": 3,
+    "wall_ns": 460024353,
+    "log": "docs/evidence/M12-001/self-comparison-final.log"
+  },
+  {
+    "id": "live-sdk-metadata-privacy",
+    "argv": [
+      "$HOME/.codex/scripts/codex_cangjie_env",
+      "--sdk-root",
+      "<sdk>",
+      "--cwd",
+      "<repo>",
+      "python3",
+      "<scratch>/environment-smoke.py",
+      "<scratch>"
+    ],
+    "environment": {
+      "PYTHONPATH": "<repo>",
+      "TMPDIR": "<scratch>",
+      "TMP": "<scratch>",
+      "TEMP": "<scratch>"
+    },
+    "exit_code": 0,
+    "wall_ns": 1311207004,
+    "evidence": "docs/evidence/M12-001/metadata-smoke/report.json"
+  }
+]

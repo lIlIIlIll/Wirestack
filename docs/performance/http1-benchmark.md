@@ -43,3 +43,10 @@ final decision.
 The benchmark classes use `@Tag[Performance]`. The canonical `scripts/check`
 command excludes that tag so 16/64 MiB measurements do not contend with
 ordinary concurrency tests. The benchmark runner selects each class directly.
+
+## Current full-stack baseline
+
+[M12-001](end-to-end-baselines.md) measures the current development-accepted
+installed artifact across native TCP/UDP, TLS, H1/H2, SSE and WebSocket.
+Its33-case corpus, raw outcomes and noise-aware regression policy are separate
+from this historical stdx comparison; neither report proves universal speedup.

@@ -1,0 +1,10 @@
+Command: TMPDIR=$TASK_TMP TMP=$TASK_TMP TEMP=$TASK_TMP python3 tools/benchmarks/m12_001_end_to_end.py verify
+Exit status: 1
+
+Traceback (most recent call last):
+  File "<repo>/tools/benchmarks/m12_001_end_to_end.py", line 558, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo>/tools/benchmarks/m12_001_end_to_end.py", line 525, in main
+    raise ValueError("current production/probe source differs from measured native source")
+ValueError: current production/probe source differs from measured native source
