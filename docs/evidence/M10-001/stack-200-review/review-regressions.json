@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "source_task": "M10-001",
+  "status": "PASS",
+  "acceptance_status": "PASS_FOCUSED_ONLY",
+  "revision": "6223022ef3943437596ad9fedcd8571b975a382e",
+  "scope": "Stack #200 T1-T5 focused regression follow-up only. This report does not replace or requalify the original M10-001 acceptance.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.1.3",
+    "cjpm": "1.1.3"
+  },
+  "checks": [
+    {
+      "id": "stack-200-focused-regressions",
+      "revision": "6223022ef3943437596ad9fedcd8571b975a382e",
+      "command": "cjpm test src/internal/http1 src/internal/http2 src/http --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls --no-color --no-progress",
+      "exit_code": 0,
+      "total": 537,
+      "passed": 9,
+      "skipped": 528,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "http-packages-full-regression",
+      "revision": "935351da4880f2d4e1be963100ca19146ea8b6f5",
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http1 src/internal/http2 src/http",
+      "exit_code": 1,
+      "total": 537,
+      "passed": 530,
+      "skipped": 6,
+      "errors": 0,
+      "failed": 1,
+      "failure": {
+        "test": "HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission",
+        "assertion": "secondRejected was false at the expected rejection assertion"
+      }
+    },
+    {
+      "id": "isolated-admission-close-case",
+      "revision": "6223022ef3943437596ad9fedcd8571b975a382e",
+      "command": "cjpm test src/http --filter=HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission --no-color --no-progress",
+      "exit_code": 0,
+      "total": 163,
+      "passed": 1,
+      "skipped": 162,
+      "errors": 0,
+      "failed": 0
+    }
+  ],
+  "full_suite_failure_assessment": {
+    "classification": "Intermittent behavior is consistent with a previously documented full-suite failure of the same case; exact cause is not established.",
+    "prior_evidence": "docs/evidence/M10-002/stack-200-follow-up.md records a full src/http failure at this case, an isolated pass, and a subsequent full-suite pass.",
+    "scope_note": "M10-001 changes do not modify the resource-admission implementation or this test. The current full-suite invocation remains a failure and is not reported as a pass."
+  },
+  "github_checks": [
+    {
+      "workflow": "Analyze (actions)",
+      "run_id": 39314979935,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314979935"
+    },
+    {
+      "workflow": "Analyze (c-cpp)",
+      "run_id": 39314979935,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314979935"
+    },
+    {
+      "workflow": "Analyze (python)",
+      "run_id": 39314979935,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314979935"
+    },
+    {
+      "workflow": "Clean Cangjie Build — Build pinned cjdoc 0.7.2",
+      "run_id": 39314986669,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986669"
+    },
+    {
+      "workflow": "M7-033 Developer Documentation — Build pinned cjdoc 0.7.2",
+      "run_id": 39314986691,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986691"
+    },
+    {
+      "workflow": "CodeQL",
+      "run_id": 118274281827,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/runs/118274281827"
+    },
+    {
+      "workflow": "M7-033 Developer Documentation — Generate public API docs / cjdoc 0.7.2",
+      "run_id": 39314986691,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986691"
+    },
+    {
+      "workflow": "Architecture Guard",
+      "run_id": 39314986795,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986795"
+    },
+    {
+      "workflow": "Clean Cangjie Build — clean-cangjie-build",
+      "run_id": 39314986669,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986669"
+    },
+    {
+      "workflow": "Gate Harness",
+      "run_id": 39314986806,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986806"
+    },
+    {
+      "workflow": "Harness tests — NET-01",
+      "run_id": 39314986630,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986630"
+    },
+    {
+      "workflow": "Harness tests — NET-02",
+      "run_id": 39314986649,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986649"
+    },
+    {
+      "workflow": "Harness tests — NET-03",
+      "run_id": 39314986658,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986658"
+    },
+    {
+      "workflow": "Harness tests — DNS carrier",
+      "run_id": 39314986741,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986741"
+    },
+    {
+      "workflow": "Clean Cangjie Build — report-build-status",
+      "run_id": 39314986669,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986669"
+    },
+    {
+      "workflow": "M7-033 Developer Documentation — report-docs-status",
+      "run_id": 39314986691,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986691"
+    },
+    {
+      "workflow": "Validate",
+      "run_id": 39314986735,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986735"
+    },
+    {
+      "workflow": "M7-033 Developer Documentation — Deploy latest main documentation",
+      "run_id": 39314986691,
+      "status": "SKIPPED",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986691"
+    }
+  ],
+  "github_check_note": "At exact candidate source revision 6223022ef3943437596ad9fedcd8571b975a382e, all listed applicable GitHub checks passed. The latest-main documentation deployment was skipped by its workflow.",
+  "task_boundary": "The original M10-001 task remains COMPLETE under its historical acceptance evidence. This supplemental Stack #200 report records the five focused fixes and the exact validation boundary on this candidate. No other platform or release qualification is claimed."
+}

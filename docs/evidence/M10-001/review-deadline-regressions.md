@@ -148,7 +148,8 @@ Exit: 0. `TOTAL 539`, `PASSED 9`, `SKIPPED 530`, `ERROR 0`, `FAILED 0`. This is 
 
 ### Exact-head full-suite observation on SDK 1.1.3
 
-At candidate source revision `935351da4880f2d4e1be963100ca19146ea8b6f5`, the nine T1–T5 focused regressions passed: `TOTAL 537`, `PASSED 9`, `SKIPPED 528`, `ERROR 0`, `FAILED 0`.
+At earlier exact source revision `935351da4880f2d4e1be963100ca19146ea8b6f5`, the nine T1–T5 focused regressions passed: `TOTAL 537`, `PASSED 9`, `SKIPPED 528`, `ERROR 0`, `FAILED 0`.
+The evidence-registration candidate `6223022ef3943437596ad9fedcd8571b975a382e` changes only evidence, task-manifest, and ignore metadata from that source. The same focused command was rerun on that exact candidate and passed with the same counts. The separate composite-stack run in the preceding section included the M10-002 child and is not the M10-001 candidate result.
 
 The complete HTTP package run returned exit 1:
 
@@ -160,6 +161,6 @@ The complete HTTP package run returned exit 1:
 
 Result: `TOTAL 537`, `PASSED 530`, `SKIPPED 6`, `ERROR 0`, `FAILED 1`. The failure was `HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission`; `secondRejected` was false at its assertion.
 
-The isolated rerun of that case on the same candidate exited 0: `TOTAL 163`, `PASSED 1`, `SKIPPED 162`, `ERROR 0`, `FAILED 0`.
+The isolated case passed on source revision `935351da4880f2d4e1be963100ca19146ea8b6f5`, then passed again on evidence-registration candidate `6223022ef3943437596ad9fedcd8571b975a382e`: `TOTAL 163`, `PASSED 1`, `SKIPPED 162`, `ERROR 0`, `FAILED 0`.
 
-The M10-002 Stack #200 follow-up report records an earlier full `src/http` failure at this same case, an isolated pass, and a subsequent full-suite pass. Treat the current result as an observed intermittent failure, not a pass; its cause is not established. M10-001 does not change the resource-admission implementation or this test. The exact-head GitHub checks passed. This focused follow-up does not replace the historical full M10-001 acceptance or requalify other platforms.
+The M10-002 Stack #200 follow-up report records an earlier full `src/http` failure at this same case, an isolated pass, and a subsequent full-suite pass. Treat the M10-001 full-suite result as an observed intermittent failure, not a pass; its cause is not established. M10-001 does not change the resource-admission implementation or this test. At exact candidate source revision `6223022ef3943437596ad9fedcd8571b975a382e`, all listed applicable GitHub checks passed; the latest-main documentation deployment was skipped by its workflow. This focused follow-up does not replace the historical full M10-001 acceptance or requalify other platforms.
