@@ -1,0 +1,15 @@
+Command: TMPDIR=$TASK_TMP TMP=$TASK_TMP TEMP=$TASK_TMP python3 tools/gates/m12_003_campaign.py verify
+Exit status: 1
+
+Traceback (most recent call last):
+  File "<repo>/tools/gates/m12_003_campaign.py", line 262, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo>/tools/gates/m12_003_campaign.py", line 252, in main
+    result = verify(args.output, args.sdk_root)
+  File "<repo>/tools/gates/m12_003_campaign.py", line 172, in verify
+    require(text_evidence_digest(repository_path(name)) == parse_text_digest(digest, name), 'bound input changed: ' + name)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/gates/m12_003_campaign.py", line 29, in require
+    raise ValueError(message)
+ValueError: bound input changed: tools/gates/m12_003_network.py

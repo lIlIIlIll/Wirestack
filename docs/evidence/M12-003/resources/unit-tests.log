@@ -1,0 +1,18 @@
+test_deadline_overshoot_is_enforced (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_deadline_overshoot_is_enforced) ... ok
+test_duplicate_native_completion_fails (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_duplicate_native_completion_fails) ... ok
+test_kernel_oom_cannot_be_supported_even_with_success_marker (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_kernel_oom_cannot_be_supported_even_with_success_marker) ... ok
+test_marker_cannot_replace_missing_public_ledger (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_marker_cannot_replace_missing_public_ledger) ... ok
+test_pressure_requires_ceiling_proof_and_real_allocation (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_pressure_requires_ceiling_proof_and_real_allocation) ... ok
+test_quota_without_throttling_does_not_prove_cpu_fault (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_quota_without_throttling_does_not_prove_cpu_fault) ... ok
+test_refusal_label_without_structured_refusal_is_not_trusted (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_refusal_label_without_structured_refusal_is_not_trusted) ... ok
+test_residue_missing_samples_and_incomplete_cleanup_fail_closed (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_residue_missing_samples_and_incomplete_cleanup_fail_closed) ... ok
+test_signal_alone_is_not_kernel_oom (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_signal_alone_is_not_kernel_oom) ... ok
+test_supported_pass_cannot_conceal_retained_failed_diagnostic (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_supported_pass_cannot_conceal_retained_failed_diagnostic) ... ok
+test_supported_profile_retains_distinct_logical_counters (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_supported_profile_retains_distinct_logical_counters) ... ok
+test_unknown_process_failure_is_not_library_refusal_or_oom (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_unknown_process_failure_is_not_library_refusal_or_oom) ... ok
+test_unlimited_or_wrong_cgroup_is_not_fault_application (tools.gates.tests.test_m12_003_resources.ResourceEvidenceTests.test_unlimited_or_wrong_cgroup_is_not_fault_application) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.004s
+
+OK

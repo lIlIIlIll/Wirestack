@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-003",
+  "family": "network",
+  "qualification": "NOT_QUALIFIED",
+  "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> python3 -m unittest tools.gates.tests.test_m12_003_network",
+  "exit_code": 0,
+  "tests_discovered": 4,
+  "tests_exercised": 3,
+  "tests_skipped": 1,
+  "observed_output": "Ran 4 tests in 0.399s; OK (skipped=1)",
+  "exercised_behavior": [
+    "DNS answer retains transaction ID, question, counts and exact IPv4 payload",
+    "Malformed DNS compression label and trailing question bytes fail closed",
+    "Real isolated TCP abortive reset, non-writing and non-reading peers shut down their sockets and owned thread"
+  ],
+  "packet_regression": {
+    "status": "BLOCKED",
+    "reason": "Known host missing netem kernel support; not rerun unchanged",
+    "enable_only_in_authorized_capable_guest": "WIRESTACK_NETWORK_PACKET_TESTS=1 python3 -m unittest tools.gates.tests.test_m12_003_network",
+    "required_behavior": "Actual loss100% drops the original response; after event-controlled loss removal, kernel TCP retransmission delivers exact seeded bytes and a subsequent request; actual drop counters and cleanup are mandatory"
+  }
+}

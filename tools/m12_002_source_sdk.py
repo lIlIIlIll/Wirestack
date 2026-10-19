@@ -37,23 +37,24 @@ def sdk_binding(sdk: Path) -> dict:
     return files
 
 
-def consumer_source_digests() -> dict:
-    """Complete consumer-source inventory: every application file plus the task-owned SDK fixture."""
-    sources = {str(path.relative_to(ROOT)): text_evidence_digest(path).to_json()
-        for name in consumers.APP_NAMES for path in consumers.app_files(consumers.APPS / name)}
-    sources.update({str(path.relative_to(ROOT)): text_evidence_digest(path).to_json()
-        for path in [ROOT / 'examples/linux/m12_002/sdk/cjpm.toml', ROOT / 'examples/linux/m12_002/sdk/src/main.cj']})
-    return sources
+def expected_consumer_sources() -> set[str]:
+    """Complete M11-004 application and M12-002 fixture source inventory."""
+    expected = {path.relative_to(ROOT).as_posix() for name in consumers.APP_NAMES
+                for path in consumers.app_files(consumers.APPS / name)}
+    expected |= {path.relative_to(ROOT).as_posix() for path in
+                 (ROOT / 'examples/linux/m12_002/sdk/cjpm.toml', ROOT / 'examples/linux/m12_002/sdk/src/main.cj')}
+    return expected
 
 
 def verify_consumer_sources(report: dict) -> None:
-    expected = consumer_source_digests()
+    """Reject omitted or changed consumer/fixture sources against the complete inventory."""
     recorded = report.get('consumer_sources')
-    if not isinstance(recorded, dict) or recorded.keys() != expected.keys():
-        raise ValueError('consumer source inventory changed; recompile and rerun consumers')
-    for relative, digest in expected.items():
-        if not text_evidence_sha256_equal(recorded[relative], digest):
-            raise ValueError('consumer source changed')
+    expected = expected_consumer_sources()
+    if not isinstance(recorded, dict) or set(recorded) != expected:
+        raise ValueError('consumer source inventory changed')
+    for relative in sorted(expected):
+        if not text_evidence_sha256_equal(recorded[relative], text_evidence_digest(ROOT / relative).to_json()):
+            raise ValueError('consumer source changed: ' + relative)
 
 
 def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path) -> None:
@@ -83,17 +84,28 @@ def validate_resume(previous: dict, report: dict) -> None:
     """Reject retained results whose captured inputs do not match this resume attempt."""
     if not text_evidence_sha256_equal(previous.get('runner_digest'), report['runner_digest']):
         raise ValueError('cannot resume a changed capture runner')
-    previous_cc = previous.get('native_cc_digest')
-    if not isinstance(previous_cc, dict) or not artifact_byte_sha256_equal(previous_cc, report['native_cc_digest']):
-        raise ValueError('cannot resume a changed or unbound native compiler')
-    if previous.get('build_options') != report.get('build_options'):
-        raise ValueError('cannot resume changed native build options')
+    if not artifact_byte_sha256_equal(previous.get('native_cc_digest'), report['native_cc_digest']):
+        raise ValueError('cannot resume a changed native compiler')
+    if previous.get('build_options') != report['build_options']:
+        raise ValueError('cannot resume changed build options')
     previous_sources = previous.get('consumer_sources', {})
     current_sources = report['consumer_sources']
     if previous_sources.keys() != current_sources.keys() or any(
             not text_evidence_sha256_equal(previous_sources[key], current_sources[key])
             for key in current_sources):
         raise ValueError('cannot resume changed consumer sources')
+
+
+def consumer_retained(previous: dict | None, commands: list[dict], name: str, binary: Path) -> bool:
+    """A retained consumer is reusable only with a successful acceptance command and matching binary bytes."""
+    if not isinstance(previous, dict) or name not in previous.get('consumers', {}):
+        return False
+    if not any(command['id'] == name + '-acceptance' and command['exit_code'] == 0 for command in commands):
+        return False
+    if not binary.is_file():
+        return False
+    return artifact_byte_sha256_equal(previous['consumers'][name].get('binary_digest'),
+                                      artifact_byte_digest(binary).to_json())
 
 
 class Capture:
@@ -200,13 +212,17 @@ def capture(args) -> dict:
         'consumer_recompile_required': True, 'runner_digest': text_evidence_digest(Path(__file__)).to_json(),
         'archive_digest': artifact_byte_digest(args.archive).to_json(), 'commands': run.commands,
         'platform': release.platform_identity(), 'kernel': platform.release(), 'consumers': {},
-        'consumer_sources': consumer_source_digests()}
+        'consumer_sources': {relative: text_evidence_digest(ROOT / relative).to_json()
+                             for relative in sorted(expected_consumer_sources())}}
+    native_cc = shutil.which('cc')
+    if native_cc is None:
+        raise ValueError('native compiler is unavailable')
+    report['native_cc_digest'] = artifact_byte_digest(Path(native_cc)).to_json()
+    report['build_options'] = {'command': ['cjpm', 'build'], 'consumer_compile_option': '', 'consumer_link_option': '', 'cpu_override': 'none',
+        'environment': {key: run.normalize(run.env.get(key, '')) for key in ('CFLAGS', 'CXXFLAGS', 'LDFLAGS', 'CJC_FLAGS')}}
     previous = None
     try:
         report['sdk_files'] = sdk_binding(sdk)
-        report['native_cc_digest'] = artifact_byte_digest(Path(shutil.which('cc'))).to_json()
-        report['build_options'] = {'command': ['cjpm', 'build'], 'consumer_compile_option': '', 'consumer_link_option': '', 'cpu_override': 'none',
-            'environment': {key: run.normalize(run.env.get(key, '')) for key in ('CFLAGS', 'CXXFLAGS', 'LDFLAGS', 'CJC_FLAGS')}}
         historical = json.loads(args.qualification.read_text())
         if historical.get('status') != 'PASS' or not artifact_byte_sha256_equal(historical['toolchain']['compiler_binary_digest'], artifact_byte_digest(sdk / 'bin/cjc').to_json()):
             raise ValueError('available SDK does not match its accepted installed-consumer compiler binding')
@@ -274,10 +290,13 @@ def capture(args) -> dict:
             run.run('key-der', ['openssl', 'pkcs8', '-topk8', '-nocrypt', '-in', str(work / 'certificate.key'), '-outform', 'DER', '-out', str(work / 'key.der')], work, hidden=False)
         certs = [str(work / p) for p in ('certificate.der', 'key.der', 'untrusted.der')]
         for name in consumers.APP_NAMES:
-            if name in report['consumers']:
-                continue
             cwd = relocated / 'consumers' / name
             binary = cwd / 'target/release/bin/main'
+            if consumer_retained(previous, run.commands, name, binary):
+                continue
+            run.commands[:] = [command for command in run.commands
+                               if command['id'] not in {name + '-help', name + '-dependencies', name + '-acceptance'}]
+            report['consumers'].pop(name, None)
             run.run(name + '-help', [str(binary), '--help'], cwd, old=old)
             needed = sorted(re.findall(r'\(NEEDED\).*?\[(.*?)\]', run.run(name + '-dependencies', ['readelf', '-d', str(binary)], cwd, old=old)))
             consumers.validate_needed(needed)
@@ -288,8 +307,9 @@ def capture(args) -> dict:
             else:
                 text = run.run(name + '-acceptance', [str(binary), 'self-check', *certs], cwd, timeout=180, old=old)
             report['consumers'][name] = {'binary_digest': artifact_byte_digest(binary).to_json(), 'pass_checks': consumers.validate_checks(text, name), 'needed': needed}
-        if 'cli' in report['consumers'] and 'proxy_observations' not in report:
-            raise ValueError('resumed capture lacks the CLI proxy observations; rerun the capture')
+        missing = sorted(set(consumers.APP_NAMES) - set(report['consumers']))
+        if missing:
+            raise ValueError('consumer acceptance incomplete: ' + ', '.join(missing))
         service = relocated / 'consumers/service'
         trust = relocated / 'consumers/trust'
         report['ca_checks'] = {}

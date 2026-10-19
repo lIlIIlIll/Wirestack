@@ -1,0 +1,19 @@
+DECODE protocol=h1 encoded_bytes=30 decoded_bytes=10 members=1 verified=true
+RESOURCE buffers=0 requests=0 streams=0 reserved_streams=0 admission_waiters=0 pool_waiters=0
+RESOURCE buffers=0 requests=0 streams=0 reserved_streams=0 admission_waiters=0 pool_waiters=0
+FAULT protocol=h1 typed_code=OutputLimit elapsed_ns=2225784 recovery=true
+RESOURCE buffers=0 requests=0 streams=0 reserved_streams=0 admission_waiters=0 pool_waiters=0
+FAULT protocol=h1 typed_code=ChecksumMismatch elapsed_ns=2519986 recovery=true
+CHECK native_gzip_h1 PASS
+DECODE protocol=h2 encoded_bytes=30 decoded_bytes=10 members=1 verified=true
+RESOURCE buffers=0 requests=0 streams=0 reserved_streams=0 admission_waiters=0 pool_waiters=0
+RESOURCE buffers=0 requests=0 streams=0 reserved_streams=0 admission_waiters=0 pool_waiters=0
+FAULT protocol=h2 typed_code=OutputLimit elapsed_ns=12751279 recovery=true
+RESOURCE buffers=0 requests=0 streams=0 reserved_streams=0 admission_waiters=0 pool_waiters=0
+FAULT protocol=h2 typed_code=ChecksumMismatch elapsed_ns=13206112 recovery=true
+CHECK native_gzip_h2 PASS
+BENCH mode=raw bytes=8388608 checksum=813694976 elapsed_ns=590115001 max_work_between_checks=0 retained_bound=0
+BENCH mode=gzip bytes=8388608 checksum=813694976 elapsed_ns=7769209301 max_work_between_checks=512 retained_bound=135168
+CHECK bounded_decode_baseline PASS
+CHECK native_shutdown PASS
+M11_002_INSTALLED_GZIP_PASS
