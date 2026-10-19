@@ -1,0 +1,226 @@
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:24:9:
+   [36m| [0m
+[36m24[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:36:9:
+   [36m| [0m
+[36m36[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool_test.cj:20:1:
+    [36m| [0m
+[36m20[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m21[0m  [36m| [0m[33m|[0m class Http2ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m434[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m                None < NetworkException >[0m
+    [36m| [0m                [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool_test.cj:20:1:
+    [36m| [0m
+[36m20[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m21[0m  [36m| [0m[33m|[0m class Http2ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m434[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < NetworkException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:48:1:
+    [36m| [0m
+[36m48[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m49[0m  [36m| [0m[33m|[0m class Http1ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m407[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m            None < NetworkException >[0m
+    [36m| [0m            [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+[33mwarning[0m: the warning originates in the macro `Test` (consider using `--debug-macro` for more info)
+   [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:48:1:
+    [36m| [0m
+[36m48[0m  [36m| [0m  @Test[0m
+    [36m| [0m [33m_[0m[33m^[0m
+[36m49[0m  [36m| [0m[33m|[0m class Http1ConnectionPoolTest {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m407[0m [36m| [0m[33m|[0m }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m^[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: unused expression
+    [36m| [0m
+    [36m| [0m        None < NetworkException >[0m
+    [36m| [0m        [34m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+
+6 warnings generated, 6 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 2425435592 ns, RESULT:
+    TCS: HttpAutomaticHttpsClientTest, time elapsed: 6773818 ns, RESULT:
+    [ PASSED ] CASE: h2NegotiationMultiplexesTenRequestsOnOneTlsConnection (3188221 ns)
+    [ PASSED ] CASE: http11NegotiationFallsBackAndReusesTheAdoptedConnection (2042795 ns)
+    TCS: Http1ClientConnectionTest, time elapsed: 29163758 ns, RESULT:
+    [ PASSED ] CASE: physicalCloseTerminatesAnUnconsumedObservedBodyOnce (745348 ns)
+    [ PASSED ] CASE: expectContinueWaitsForApprovalBeforeOpeningBody (1235032 ns)
+    [ PASSED ] CASE: finalRejectionBeforeContinueNeverOpensRequestBody (1093448 ns)
+    [ PASSED ] CASE: continueWaitTimeoutSendsBodyUnderTheOriginalBudget (17515151 ns)
+    [ PASSED ] CASE: serializesRequestsUntilBodyEofThenReusesConnection (1506055 ns)
+    [ PASSED ] CASE: earlyBodyCloseClosesInsteadOfReturningConnectionForReuse (1566753 ns)
+    [ PASSED ] CASE: connectionCloseResponseIsNeverReusableAfterEof (1236266 ns)
+    [ PASSED ] CASE: executionFailurePreservesNetworkErrorEvidence (104481 ns)
+    [ PASSED ] CASE: responseFailureCarriesCommittedRequestEvidence (803876 ns)
+    TCS: Http1CleartextClientTest, time elapsed: 6304906 ns, RESULT:
+    [ PASSED ] CASE: observedAttemptsReusePhysicalIdentityAndCompleteEachBodyOnce (2465746 ns)
+    [ PASSED ] CASE: resolvesConnectsAndReusesOnlyAfterBodyCompletion (2432681 ns)
+    [ PASSED ] CASE: rejectsHttpsBeforeDnsOrPoolMutation (81716 ns)
+    TCS: Http1ConnectionPoolTest, time elapsed: 17274808 ns, RESULT:
+    [ PASSED ] CASE: transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilClose (592909 ns)
+    [ PASSED ] CASE: globalPhysicalIdsRemainStableAcrossClaimsAndPools (743130 ns)
+    [ PASSED ] CASE: throwingReentrantSinkCannotChangePoolOwnership (373992 ns)
+    [ PASSED ] CASE: boundedFullSinkDoesNotPreventWaiterCancellationOrReclamation (336234 ns)
+    [ PASSED ] CASE: retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse (556533 ns)
+    [ PASSED ] CASE: emitsSecretFreeAcquireAndReleaseLifecycle (333002 ns)
+    [ PASSED ] CASE: reusesOnlyTheSameCompleteKey (550103 ns)
+    [ PASSED ] CASE: enforcesTotalPerKeyIdleAndWaiterBounds (1135747 ns)
+    [ PASSED ] CASE: activeWaitHonorsCancellationAndReleasesWaiterSlot (578365 ns)
+    [ PASSED ] CASE: evictsExpiredAndClosedConnectionsInsteadOfReusingThem (1541465 ns)
+    [ PASSED ] CASE: failedCreationRollsBackItsCapacityReservation (1087716 ns)
+    [ PASSED ] CASE: evictsLeasedConnectionAtMaximumLifetimeOnRelease (1403748 ns)
+    [ PASSED ] CASE: expiresConnectionsAtMaximumLifetime (658745 ns)
+    [ PASSED ] CASE: admissionRotatesOriginsAndYieldsTheFullPoolSlot (1670874 ns)
+    [ PASSED ] CASE: retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResult (1053999 ns)
+    TCS: Http2ConnectionPoolTest, time elapsed: 2024753870 ns, RESULT:
+    [ PASSED ] CASE: throwingReentrantH2ObserverSeesAdmittedNotReservedStreams (358876 ns)
+    [ PASSED ] CASE: observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreams (347858 ns)
+    [ PASSED ] CASE: retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination (206741 ns)
+    [ PASSED ] CASE: retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult (293065 ns)
+    [ PASSED ] CASE: alpnPrefersH2AndFallsBackOnlyToHttp11 (52653 ns)
+    [ PASSED ] CASE: oneConnectionIsSharedUntilPeerStreamCapacityIsFull (333268 ns)
+    [ PASSED ] CASE: concurrentFirstUseDoesNotCreateAConnectionStampede (3815325 ns)
+    [ PASSED ] CASE: newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted (205065 ns)
+    [ PASSED ] CASE: closeRacingUnpublishedAdmissionReleasesConnectionOwners (795731 ns)
+    [ PASSED ] CASE: completeSecurityKeyPreventsCrossContextReuse (681677 ns)
+    [ PASSED ] CASE: drainingConnectionRetainsExistingStreamButReceivesNoNewLease (184203 ns)
+    [ PASSED ] CASE: drainingConnectionWaitsForNonLocalOwnersBeforeDiscard (175732 ns)
+    [ PASSED ] CASE: fullBoundedPoolHonorsOneCallerDeadline (163343 ns)
+    [ PASSED ] CASE: poolCloseAbortsEverySharedConnectionExactlyOnce (94890 ns)
+    [ PASSED ] CASE: drainsExpiredHttp2ConnectionAfterActiveStreamCompletion (129213 ns)
+    [ PASSED ] CASE: expiresConnectionsAtMaximumLifetime (124529 ns)
+    [ PASSED ] CASE: admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot (2011930031 ns)
+    TCS: Http1ProxyClientPipelineTest, time elapsed: 10252549 ns, RESULT:
+    [ PASSED ] CASE: directProxyAddressHasNoDnsSpanAndOneCorrelatedConnectExchange (2645623 ns)
+    [ PASSED ] CASE: dynamicConnectCredentialsNeverReuseAnAuthenticatedTunnel (4589830 ns)
+    [ PASSED ] CASE: rejectedConnectDrainsClosesAndReturnsStructuredNonRetryableFailure (1678852 ns)
+    TCS: Http1RequestWriterTest, time elapsed: 3628359 ns, RESULT:
+    [ PASSED ] CASE: twoStageWriterDoesNotOpenBodyBeforeExplicitCommit (481667 ns)
+    [ PASSED ] CASE: writesFixedBodyThroughPartialTransportOperations (476325 ns)
+    [ PASSED ] CASE: streamsUnknownLengthBodyAsCanonicalChunks (419090 ns)
+    [ PASSED ] CASE: rejectsDeclaredMismatchBeforeWritingAnything (109026 ns)
+    [ PASSED ] CASE: fixedBodyLimitRejectsBeforeConsumingOrCommittingRequest (119846 ns)
+    [ PASSED ] CASE: prematureBodyEofRetainsPartialCommitEvidence (375289 ns)
+    [ PASSED ] CASE: emptyFramingProbesSourceInsteadOfDroppingUnexpectedBytes (124615 ns)
+    TCS: Http1ResponseReaderTest, time elapsed: 149887557 ns, RESULT:
+    [ PASSED ] CASE: upgradedReadsKeepOwnerCorrelationWithoutReplacingCallerIdleBudget (13768671 ns)
+    [ PASSED ] CASE: bodyTerminationSeparatesIdleTimeoutAbandonmentEofAndCancellation (10777373 ns)
+    [ PASSED ] CASE: explicitUpgradeTransfersOnlyAMatching101Protocol (530891 ns)
+    [ PASSED ] CASE: mismatchedUpgradeResponseFailsClosed (554102 ns)
+    [ PASSED ] CASE: explicitConnectTransfersBufferedTunnelBytesAndTransportOwnership (455953 ns)
+    [ PASSED ] CASE: failedConnectRemainsAnHttpResponseAndClosesAfterBody (473746 ns)
+    [ PASSED ] CASE: readsInterimAndFixedResponseWithoutBufferingTheBody (424984 ns)
+    [ PASSED ] CASE: bodyReadIdleStartsWhenTheCallerBeginsReading (65750695 ns)
+    [ PASSED ] CASE: timeoutAndCancellationRaceAbandonsBodyExactlyOnce (49845990 ns)
+    [ PASSED ] CASE: received4xxAnd5xxRemainHttpResponses (1682674 ns)
+    [ PASSED ] CASE: decodesChunkedResponseAndPublishesTrailerAtEof (470713 ns)
+    [ PASSED ] CASE: closeDelimitedBodyCompletesOnlyAtTransportEof (367882 ns)
+    [ PASSED ] CASE: chunkedStreamingResponseMayExceedThePerSegmentBodyBound (376030 ns)
+    [ PASSED ] CASE: prematureFixedBodyEofAbandonsResponseExactlyOnce (344697 ns)
+    [ PASSED ] CASE: rejectsImplicitUpgradeAndConnectTransportTransfer (695318 ns)
+    TCS: Http1ServerConnectionTest, time elapsed: 7548705 ns, RESULT:
+    [ PASSED ] CASE: serializesTwoKeepAliveExchanges (2040230 ns)
+    [ PASSED ] CASE: unreadRequestBodyForcesConnectionCloseAfterResponse (778529 ns)
+    [ PASSED ] CASE: handlerFailureProducesBounded500AndCloses (775460 ns)
+    [ PASSED ] CASE: rejectedHandoffReleasesSessionOwnershipExactlyOnce (1618261 ns)
+    [ PASSED ] CASE: selectedUpgradeOfferTransfersBufferedSessionBytes (879276 ns)
+    TCS: Http1ServerTest, time elapsed: 26166540 ns, RESULT:
+    [ PASSED ] CASE: shutdownAbortsConnectionBlockedInsideTlsHandshake (5611767 ns)
+    [ PASSED ] CASE: acceptSideTlsHookOwnsConnectionAndClosesAfterShutdown (620837 ns)
+    [ PASSED ] CASE: gracefulShutdownStopsAcceptAfterCompletedConnection (507728 ns)
+    [ PASSED ] CASE: expiredShutdownAbortsBlockedConnectionAndReturnsBoundedly (8261635 ns)
+    [ PASSED ] CASE: connectionLimitPreventsSecondAcceptUntilCapacityReturns (9760706 ns)
+    TCS: Http1HttpsClientTest, time elapsed: 2462440 ns, RESULT:
+    [ PASSED ] CASE: partitionsHandshakesAndReusesHttpsAfterBodyCompletion (1297503 ns)
+    [ PASSED ] CASE: zeroLengthConnectionCloseDoesNotWaitForTlsPeerShutdown (638755 ns)
+    TCS: Http1TlsServerTest, time elapsed: 132889155 ns, RESULT:
+    [ PASSED ] CASE: alpnServerRejectsAClientWithNoSharedHttpProtocol (59267103 ns)
+    [ PASSED ] CASE: automaticClientOffersH2FirstAndFallsBackToServerHttp11 (21366079 ns)
+    [ PASSED ] CASE: requiredMutualTlsCarriesAuthenticatedHttp1Exchange (26172227 ns)
+    [ PASSED ] CASE: realAwsLcHandshakeCarriesOneHttp1Exchange (24011251 ns)
+Summary: TOTAL: 147
+    PASSED: 87, SKIPPED: 60, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.connector, time elapsed: 15123357 ns, RESULT:
+    TCS: AttemptPlanTest, time elapsed: 2510742 ns, RESULT:
+    [ PASSED ] CASE: alternatesFamiliesAndPreservesFamilyOrder (318688 ns)
+    [ PASSED ] CASE: firstFamilyControlsPreferenceAndDuplicatesAreRemoved (67614 ns)
+    [ PASSED ] CASE: distinctIpv6ZonesAreNotDeduplicated (34625 ns)
+    [ PASSED ] CASE: rejectsEmptyCandidatesAndNegativeDelay (55789 ns)
+    TCS: HappyEyeballsConnectorTest, time elapsed: 9683721 ns, RESULT:
+    [ PASSED ] CASE: candidateIndicesAndSkippedCandidatesPreservePhysicalCorrelation (393198 ns)
+    [ PASSED ] CASE: emitsCompleteDnsAttemptAndConnectedLifecycle (132309 ns)
+    [ PASSED ] CASE: blackholedFirstCandidateIsCancelledAndJoinedBeforeReturn (6124029 ns)
+    [ PASSED ] CASE: ipv6FirstSuccessSkipsLaterIpv4Attempt (115986 ns)
+    [ PASSED ] CASE: simultaneousSuccessKeepsOneWinnerAndAbortsEveryLoser (265494 ns)
+    [ PASSED ] CASE: allFailuresAreJoinedAndRetainedAsDiagnostics (113646 ns)
+    [ PASSED ] CASE: preCancelledParentStartsNeitherDnsNorAttempts (50536 ns)
+    [ PASSED ] CASE: parentCancellationAfterSuccessPreventsWinnerPublication (156529 ns)
+    [ PASSED ] CASE: deadlineAtSuccessBoundaryPreventsWinnerPublication (112397 ns)
+    TCS: ConnectionRouteTest, time elapsed: 2688294 ns, RESULT:
+    [ PASSED ] CASE: directRouteRetainsItsLocalOriginResolver (153434 ns)
+    [ PASSED ] CASE: explicitProxySeparatesOriginAndProxyDns (75866 ns)
+    [ PASSED ] CASE: typedIpTargetsNeverCarryResolvers (110443 ns)
+    [ PASSED ] CASE: rejectsDelegatedDnsWithoutAnOwningProxyAndInvalidConnectTargets (84898 ns)
+    [ PASSED ] CASE: networkAndTlsParametersAreBoundedAndOwned (727162 ns)
+Summary: TOTAL: 18
+    PASSED: 18, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2452780592 ns, RESULT:
+TP: wirestack.*, time elapsed: 2452727962 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.connector, time elapsed: 15123357 ns
+    TP: wirestack.internal.http1, time elapsed: 2425435592 ns
+Summary: TOTAL: 165
+    PASSED: 105, SKIPPED: 60, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

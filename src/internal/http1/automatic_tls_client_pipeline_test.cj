@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.collection.*
+import wirestack as api
 import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -117,12 +118,40 @@ class HttpAutomaticHttpsClientTest {
             resolver, transports, handshaker, attemptDelay: Duration.Zero
         )
 
-        let first = client.execute(HttpRequest.get("https://example.com/one"))
+        let sink = api.NetworkEventBuffer(capacity: 256)
+        let first = client.execute(HttpRequest.get("https://example.com/one"),
+            context: OperationContext(eventSink: Some(sink), requestId: Some(501), attemptId: Some(601)))
         @Expect(readAutomaticBody(first.body), "/one")
         first.close()
-        let second = client.execute(HttpRequest.get("https://example.com/two"))
+        let firstEvents = sink.drain()
+        var connectionId = None<Int64>
+        for (event in firstEvents) {
+            match (event.kind) {
+                case NetworkEventKind.DnsStarted => connectionId = event.connectionId
+                case NetworkEventKind.HttpConnectionAcquired | NetworkEventKind.BodyStarted | NetworkEventKind.BodyCompleted =>
+                    @Expect(event.connectionId, connectionId)
+                case _ => ()
+            }
+        }
+        @Expect(connectionId.isSome())
+        let second = client.execute(HttpRequest.get("https://example.com/two"),
+            context: OperationContext(eventSink: Some(sink), requestId: Some(501), attemptId: Some(602)))
         @Expect(readAutomaticBody(second.body), "/two")
         second.close()
+        var skipped: Int64 = 0
+        for (event in sink.drain()) {
+            @Expect(event.attemptId, Some(602))
+            match (event.kind) {
+                case NetworkEventKind.DnsCompleted | NetworkEventKind.TlsHandshakeCompleted =>
+                    @Expect(event.connectionId, connectionId)
+                    match (event.outcome) { case NetworkEventOutcome.NotExecuted => skipped++; case _ => @Fail("reused security stage executed") }
+                case NetworkEventKind.HttpConnectionAcquired | NetworkEventKind.BodyStarted | NetworkEventKind.BodyCompleted =>
+                    @Expect(event.connectionId, connectionId)
+                case _ => ()
+            }
+        }
+        @Expect(skipped, 2)
+        @Expect(client.observationSnapshot().idleConnections, 1)
 
         @Expect(transports.connectCount, 1)
         @Expect(handshaker.handshakeCount, 1)

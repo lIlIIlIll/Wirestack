@@ -2,6 +2,7 @@ package wirestack.internal.http1
 
 import std.sync.AtomicInt64
 import std.unittest.*
+import wirestack as api
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
 import wirestack.internal.common.*
@@ -10,6 +11,48 @@ import wirestack.internal.transport.*
 
 @Test
 class Http1ProxyClientPipelineTest {
+    @TestCase
+    func directProxyAddressHasNoDnsSpanAndOneCorrelatedConnectExchange(): Unit {
+        let host = HostName("proxy.test")
+        let resolver = StaticResolver(ResolveResult([IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 1u8])], host, ResolverSource.Static))
+        let factory = ConnectPipelineTransportFactory(SuccessfulConnectHandler())
+        let sink = api.NetworkEventBuffer(capacity: 256)
+        let client = Http1HttpsProxyClient(Http1ProxyEndpoint.address(
+            IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 1u8]), 3128, "proxy.test:3128"),
+            resolver, factory, ProxyPassthroughHandshaker())
+        let response = client.execute(HttpRequest.get("https://origin.test/one"), proxyAuthorization: Some("Basic first"),
+            context: OperationContext(eventSink: Some(sink), requestId: Some(701), attemptId: Some(702)))
+        @Expect(readProxyPipelineBody(response.body), "tunnel-one")
+        response.close()
+        var physical = None<Int64>
+        var skipped: Int64 = 0
+        var proxyStarts: Int64 = 0
+        var proxyEnds: Int64 = 0
+        for (event in sink.drain()) {
+            @Expect(event.requestId, Some(701)); @Expect(event.attemptId, Some(702))
+            match (event.kind) {
+                case NetworkEventKind.DnsStarted => @Fail("typed proxy address started DNS")
+                case NetworkEventKind.DnsCompleted =>
+                    match (event.outcome) { case NetworkEventOutcome.NotExecuted => skipped++; case _ => @Fail("typed proxy DNS was executed") }
+                case NetworkEventKind.ConnectAttemptStarted =>
+                    physical = event.connectionId; @Expect(physical.isSome()); @Expect(event.connectionAttemptIndex, Some(1))
+                case NetworkEventKind.ProxyTunnelEstablished | NetworkEventKind.HttpConnectionAcquired | NetworkEventKind.BodyCompleted =>
+                    @Expect(event.connectionId, physical)
+                case NetworkEventKind.StageStarted =>
+                    match (event.stage) { case Some(OperationTimeoutStage.ProxyConnect) => proxyStarts++; case _ => () }
+                case NetworkEventKind.StageCompleted =>
+                    match (event.stage) { case Some(OperationTimeoutStage.ProxyConnect) => proxyEnds++; case _ => () }
+                case _ => ()
+            }
+        }
+        @Expect(skipped, 1); @Expect(proxyStarts, 1); @Expect(proxyEnds, 1)
+        @Expect(client.observationSnapshot().idleConnections, 0)
+        @Expect(client.observationSnapshot().leasedConnections, 0)
+        @Expect(client.observationSnapshot().connectingConnections, 0)
+        client.close()
+        @Expect(client.observationSnapshot().idleConnections, 0)
+    }
+
     @TestCase
     func dynamicConnectCredentialsNeverReuseAnAuthenticatedTunnel(): Unit {
         let proxyHost = HostName("proxy.test")

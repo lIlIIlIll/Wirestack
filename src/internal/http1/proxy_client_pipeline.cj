@@ -1,5 +1,7 @@
 package wirestack.internal.http1
 
+import wirestack.NetworkConnectionPoolSnapshot
+
 import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.connector.*
@@ -69,7 +71,7 @@ public class Http1ForwardProxyClient <: Resource {
         )
         let lease = pool.acquire(key, factory, context: context)
         try {
-            let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
+            let result = lease.connection.executeTracked(request, context: connectionEventContext(context, lease.connectionId), trailer: trailer,
                 onTerminated: { reusable =>
                     if (reusable) {
                         pool.release(lease, context: context)
@@ -96,6 +98,7 @@ public class Http1ForwardProxyClient <: Resource {
         upgradeHttp1Lease(pool, factory, key, request, context)
     }
 
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot { pool.observationSnapshot() }
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func retire(): Unit { pool.retire() }
     public func abortConnections(): Unit { pool.close() }
@@ -164,7 +167,7 @@ public class Http1HttpsProxyClient <: Resource {
         )
         let lease = pool.acquire(key, factory, context: context)
         try {
-            let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
+            let result = lease.connection.executeTracked(request, context: connectionEventContext(context, lease.connectionId), trailer: trailer,
                 onTerminated: { reusable =>
                     if (reusable && !authenticated) {
                         pool.release(lease, context: context)
@@ -200,13 +203,14 @@ public class Http1HttpsProxyClient <: Resource {
         )
         let lease = pool.acquire(key, factory, context: context)
         try {
-            lease.connection.upgradeTracked(request, context: context, onTerminated: { reusable =>
+            lease.connection.upgradeTracked(request, context: connectionEventContext(context, lease.connectionId), onTerminated: { reusable =>
                 if (reusable && !authenticated) { pool.release(lease, context: context) }
                 else { pool.discard(lease, context: context) }
             })
         } catch (error: Exception) { pool.discard(lease, context: context); throw error }
     }
 
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot { pool.observationSnapshot() }
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func retire(): Unit { pool.retire() }
     public func abortConnections(): Unit { pool.close() }
@@ -235,16 +239,7 @@ private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
         if (key.proxyRoute != Some(endpoint.identity)) {
             throw IllegalArgumentException("HTTP forward proxy factory received a mismatched route key")
         }
-        let transport = match (endpoint.ipAddress) {
-            case Some(address) =>
-                let connectContext = context.forStage(OperationTimeoutStage.TcpConnect)
-                let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), connectContext)
-                emitProxyTcpConnected(context)
-                connected
-            case None =>
-                let host = endpoint.hostName.getOrThrow()
-                connector.connect(host, endpoint.port, context: context).transport
-        }
+        let transport = connectProxy(endpoint, connector, transportFactory, context)
         Http1ClientConnection(
             transport, limits: limits, continueTimeout: continueTimeout,
             targetForm: Http1RequestTargetForm.Absolute
@@ -287,18 +282,22 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
             throw IllegalArgumentException("HTTPS proxy factory received a mismatched route key")
         }
         let proxyTransport = connectProxy(endpoint, connector, transportFactory, context)
+        let proxyContext = context.forStage(OperationTimeoutStage.ProxyConnect)
+        emitHttpStage(proxyContext, true)
         let exchanged = try {
             performHttp1Connect(
                 proxyTransport, target, headers: connectHeaders,
-                context: context.forStage(OperationTimeoutStage.ProxyConnect), limits: limits
+                context: proxyContext, limits: limits
             )
         } catch (error: Exception) {
-            emitProxyTunnelEvent(context, NetworkEventOutcome.Failed, proxyEventCode(error))
+            emitHttpStage(proxyContext, false, code: proxyEventCode(error))
+            emitProxyTunnelEvent(proxyContext, NetworkEventOutcome.Failed, proxyEventCode(error))
             throw error
         }
         match (exchanged) {
             case Http1ConnectExchangeResult.Tunnel(tunnel) =>
-                emitProxyTunnelEvent(context, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
+                emitHttpStage(proxyContext, false)
+                emitProxyTunnelEvent(proxyContext, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
                 try {
                     let tls = handshaker.handshake(
                         HostName(key.originHost), tunnel.transport,
@@ -311,12 +310,12 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
                     throw error
                 }
             case Http1ConnectExchangeResult.Response(result) =>
+                emitHttpStage(proxyContext, false, code: Some(NetworkErrorCode.ConnectRefused))
+                emitProxyTunnelEvent(proxyContext, NetworkEventOutcome.Failed, Some(NetworkErrorCode.ConnectRefused))
                 let status = result.response.status
                 let reason = result.response.reason
                 try { let _ = result.response.body.drain(64 * 1024) }
                 finally { result.response.close() }
-                emitProxyTunnelEvent(context, NetworkEventOutcome.Failed,
-                    Some(NetworkErrorCode.ConnectRefused))
                 throw Http1ProxyConnectException(status, reason)
         }
     }
@@ -345,9 +344,21 @@ private func connectProxy(endpoint: Http1ProxyEndpoint, connector: HappyEyeballs
     match (endpoint.ipAddress) {
         case Some(address) =>
             let connectContext = context.forStage(OperationTimeoutStage.TcpConnect)
-            let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), connectContext)
-            emitProxyTcpConnected(context)
-            connected
+            emitNetworkEvent(context, NetworkEvent(NetworkEventKind.DnsCompleted, NetworkEventOutcome.NotExecuted,
+                stage: Some(OperationTimeoutStage.Dns)))
+            emitNetworkEvent(connectContext, NetworkEvent(NetworkEventKind.ConnectAttemptStarted, NetworkEventOutcome.Started,
+                connectionAttemptIndex: Some(1)))
+            try {
+                let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), connectContext)
+                emitNetworkEvent(connectContext, NetworkEvent(NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Succeeded,
+                    connectionAttemptIndex: Some(1)))
+                emitProxyTcpConnected(connectContext)
+                connected
+            } catch (error: Exception) {
+                emitNetworkEvent(connectContext, NetworkEvent(NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Failed,
+                    connectionAttemptIndex: Some(1), errorCode: proxyEventCode(error)))
+                throw error
+            }
         case None => connector.connect(endpoint.hostName.getOrThrow(), endpoint.port, context: context).transport
     }
 }

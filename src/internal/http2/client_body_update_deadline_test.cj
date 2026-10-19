@@ -2,7 +2,6 @@ package wirestack.internal.http2
 
 import std.collection.ArrayList
 import std.sync.*
-import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
@@ -14,7 +13,9 @@ class Http2ClientBodyUpdateReviewTest {
     func bodyWindowUpdatesUseTotalBudgetInsteadOfInboundIdleBudget(): Unit {
         for (stalled in [false, true]) {
             let total = Deadline.after(Duration.second)
+            let events = api.NetworkEventBuffer(capacity: 16)
             let context = OperationContext(
+                eventSink: Some<NetworkEventSink>(events),
                 deadline: Some(total),
                 timeoutPolicy: OperationTimeoutPolicy(
                     bodyReadIdle: Some(5 * Duration.millisecond)
@@ -68,7 +69,9 @@ class Http2ClientBodyUpdateReviewTest {
     @TestCase
     func bodyWindowUpdateWriteFailuresAreRetained(): Unit {
         for (preRead in [true, false]) {
+            let events = api.NetworkEventBuffer(capacity: 16)
             let context = OperationContext(
+                eventSink: Some<NetworkEventSink>(events),
                 deadline: Some(Deadline.after(Duration.second)),
                 timeoutPolicy: OperationTimeoutPolicy(
                     bodyReadIdle: Some(5 * Duration.millisecond)
@@ -110,13 +113,23 @@ class Http2ClientBodyUpdateReviewTest {
                     }
                     @Expect(rejectedAfterFailure)
                 }
-                var retainedFailure = false
+                let retainedFailure = channel.terminalFailure.getOrThrow()
+                @Expect(channel.observationContext.stage.isSome())
+                @Expect(match (retainedFailure) {
+                    case _: IllegalStateException => true
+                    case _ => false
+                })
+                var repeatedFailure = None<Exception>
                 try {
                     let _ = channel.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)), context)
-                } catch (_: Exception) {
-                    retainedFailure = true
+                } catch (error: Exception) {
+                    repeatedFailure = Some(error)
                 }
-                @Expect(retainedFailure)
+                match (repeatedFailure) {
+                    case Some(error) =>
+                        @Expect(error.toString() == retainedFailure.toString())
+                    case None => @Fail("HTTP/2 body channel forgot its terminal write failure")
+                }
             } finally {
                 transport.release()
                 writer.close()

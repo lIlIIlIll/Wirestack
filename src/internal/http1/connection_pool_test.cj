@@ -78,16 +78,19 @@ class Http1ConnectionPoolTest {
         let second = pool.acquire(poolTestKey(), factory, context: context)
         pool.discard(second, context: context)
 
-        @Expect(sink.events.size, 5)
-        expectPoolEvent(sink.events[0], NetworkEventKind.HttpConnectionAcquired,
+        // Stage/correlation events share this sink; assert only the pool lifecycle sequence.
+        let poolEvents = ArrayList<NetworkEvent>()
+        for (event in sink.events) { if (isPoolLifecycleEvent(event)) { poolEvents.add(event) } }
+        @Expect(poolEvents.size, 5)
+        expectPoolEvent(poolEvents[0], NetworkEventKind.HttpConnectionAcquired,
             NetworkEventOutcome.Succeeded, first.id)
-        expectPoolEvent(sink.events[1], NetworkEventKind.HttpConnectionReleased,
+        expectPoolEvent(poolEvents[1], NetworkEventKind.HttpConnectionReleased,
             NetworkEventOutcome.Released, first.id)
-        expectPoolEvent(sink.events[2], NetworkEventKind.HttpConnectionAcquired,
+        expectPoolEvent(poolEvents[2], NetworkEventKind.HttpConnectionAcquired,
             NetworkEventOutcome.Reused, second.id)
-        expectPoolEvent(sink.events[3], NetworkEventKind.HttpConnectionReleased,
+        expectPoolEvent(poolEvents[3], NetworkEventKind.HttpConnectionReleased,
             NetworkEventOutcome.Discarded, second.id)
-        expectPoolEvent(sink.events[4], NetworkEventKind.ConnectionClosed,
+        expectPoolEvent(poolEvents[4], NetworkEventKind.ConnectionClosed,
             NetworkEventOutcome.Succeeded, second.id)
         pool.close()
     }
@@ -353,6 +356,16 @@ class Http1ConnectionPoolTest {
         @Expect(replacement.connection.isClosed(), false)
         pool.release(replacement)
         pool.close()
+    }
+}
+
+
+private func isPoolLifecycleEvent(event: NetworkEvent): Bool {
+    match (event.kind) {
+        case NetworkEventKind.HttpConnectionAcquired => true
+        case NetworkEventKind.HttpConnectionReleased => true
+        case NetworkEventKind.ConnectionClosed => true
+        case _ => false
     }
 }
 

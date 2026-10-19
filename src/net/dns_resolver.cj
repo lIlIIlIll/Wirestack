@@ -300,7 +300,7 @@ private func parseDnsIpLiteral(value: String): ?api.IpAddress {
  * The hosts file is snapshotted at construction. Construct a new resolver to reload it.
  * HostName has already discarded a trailing root dot; use the String overload for absolute names.
  */
-public class Resolver <: api.Resolver & Resource {
+public class Resolver <: api.Resolver & Resource & api.ResolverResourceOwner {
     private let dns: DnsClient
     private let hosts: Array<DnsHostsEntry>
     /** Immutable settings used for search ordering and the total lookup budget. */
@@ -389,6 +389,11 @@ public class Resolver <: api.Resolver & Resource {
     public func close(): Unit { dns.close() }
     /** Reports whether the owned DNS client is closed. */
     public func isClosed(): Bool { dns.isClosed() }
+
+    /** Samples the owned DNS client's real work and cache without starting a lookup. */
+    public func resolverResourceSnapshot(): api.ResolverResourceSnapshot {
+        dns.resolverResourceSnapshot()
+    }
 
     private func requireReady(context: api.OperationContext): Unit {
         checkDnsContext(context)

@@ -163,6 +163,18 @@ public struct OperationContext {
  * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let eventSink: ?NetworkEventSink
+    /** Optional logical request identifier, preserved across attempts. */
+    public let requestId: ?Int64
+    /** Optional identifier for one connection or protocol attempt. */
+    public let attemptId: ?Int64
+    /** Globally unique physical connection identifier when assigned. */
+    public let connectionId: ?Int64
+    /** HTTP/2 stream identifier scoped to connectionId. */
+    public let streamId: ?Int64
+    /** Current stage, when this context was derived for a stage. */
+    public let stage: ?OperationTimeoutStage
+    /** Stage that shortened the effective deadline; None means the total deadline. */
+    public let deadlineStage: ?OperationTimeoutStage
     /** Stage caps remain children of the same total operation deadline. */
     public let timeoutPolicy: OperationTimeoutPolicy
 
@@ -175,14 +187,34 @@ public struct OperationContext {
  * @param trace Opaque trace identifiers propagated to network event sinks.
  * @param eventSink Optional destination for network lifecycle events.
  * @param timeoutPolicy Optional positive stage caps and active-read idle limits.
+ * @param requestId Positive logical request identifier, or None.
+ * @param attemptId Positive attempt identifier, or None.
+ * @param connectionId Positive physical connection identifier, or None.
+ * @param streamId Positive connection-local HTTP/2 stream identifier, or None.
+ * @param stage Current operation stage, or None.
+ * @param deadlineStage Stage that shortened the effective deadline, or None for a total budget.
  */
     public init(
         deadline!: ?Deadline = None<Deadline>,
         cancellation!: CancellationToken = CancellationToken.none(),
         trace!: ?NetworkTraceContext = None<NetworkTraceContext>,
         eventSink!: ?NetworkEventSink = None<NetworkEventSink>,
-        timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy()
+        timeoutPolicy!: OperationTimeoutPolicy = OperationTimeoutPolicy(),
+        requestId!: ?Int64 = None<Int64>, attemptId!: ?Int64 = None<Int64>,
+        connectionId!: ?Int64 = None<Int64>, streamId!: ?Int64 = None<Int64>,
+        stage!: ?OperationTimeoutStage = None<OperationTimeoutStage>,
+        deadlineStage!: ?OperationTimeoutStage = None<OperationTimeoutStage>
     ) {
+        requireNetworkCorrelationId(requestId)
+        requireNetworkCorrelationId(attemptId)
+        requireNetworkCorrelationId(connectionId)
+        requireNetworkCorrelationId(streamId)
+        this.requestId = requestId
+        this.attemptId = attemptId
+        this.connectionId = connectionId
+        this.streamId = streamId
+        this.stage = stage
+        this.deadlineStage = deadlineStage
         this.deadline = deadline
         this.cancellation = cancellation
         this.trace = trace
@@ -203,7 +235,8 @@ public struct OperationContext {
     public func withTimeoutPolicy(value: OperationTimeoutPolicy): OperationContext {
         OperationContext(
             deadline: deadline, cancellation: cancellation, trace: trace, eventSink: eventSink,
-            timeoutPolicy: value
+            timeoutPolicy: value, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: deadlineStage
         )
     }
 
@@ -211,10 +244,22 @@ public struct OperationContext {
  * @param stage Stage whose optional timeout should be applied.
  */
     public func forStage(stage: OperationTimeoutStage): OperationContext {
-        match (timeoutPolicy.timeoutFor(stage)) {
+        let next = match (timeoutPolicy.timeoutFor(stage)) {
             case Some(duration) => shortenDeadline(duration)
             case None => this
         }
+        let owner = match (next.deadline) {
+            case Some(candidate) => match (deadline) {
+                case Some(parent) => if (candidate.expiresAt < parent.expiresAt) { Some(stage) } else { deadlineStage }
+                case None => Some(stage)
+            }
+            case None => deadlineStage
+        }
+        OperationContext(
+            deadline: next.deadline, cancellation: cancellation, trace: trace, eventSink: eventSink,
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: Some(stage), deadlineStage: owner
+        )
     }
 
 /**
@@ -224,7 +269,8 @@ public struct OperationContext {
     public func withCancellation(token: CancellationToken): OperationContext {
         OperationContext(
             deadline: deadline, cancellation: token, trace: trace, eventSink: eventSink,
-            timeoutPolicy: timeoutPolicy
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: deadlineStage
         )
     }
 
@@ -234,7 +280,8 @@ public struct OperationContext {
     public func withTrace(value: ?NetworkTraceContext): OperationContext {
         OperationContext(
             deadline: deadline, cancellation: cancellation, trace: value, eventSink: eventSink,
-            timeoutPolicy: timeoutPolicy
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: deadlineStage
         )
     }
 
@@ -244,8 +291,22 @@ public struct OperationContext {
     public func withEventSink(value: ?NetworkEventSink): OperationContext {
         OperationContext(
             deadline: deadline, cancellation: cancellation, trace: trace, eventSink: value,
-            timeoutPolicy: timeoutPolicy
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: deadlineStage
         )
+    }
+
+/** Replaces correlation without changing operation budget or cancellation.
+ * @param requestId Logical request identifier, or None to clear it.
+ * @param attemptId Attempt identifier, or None to clear it.
+ * @param connectionId Physical connection identifier, or None to clear it.
+ * @param streamId Connection-local HTTP/2 stream identifier, or None to clear it.
+ */
+    public func withEventCorrelation(requestId!: ?Int64, attemptId!: ?Int64,
+        connectionId!: ?Int64, streamId!: ?Int64): OperationContext {
+        OperationContext(deadline: deadline, cancellation: cancellation, trace: trace, eventSink: eventSink,
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: deadlineStage)
     }
 
 /** Adds or shortens the deadline. It never extends an existing budget.
@@ -256,9 +317,14 @@ public struct OperationContext {
             case Some(parent) => parent.child(duration)
             case None => Deadline.after(duration)
         }
+        let owner = match (deadline) {
+            case Some(parent) => if (next.expiresAt < parent.expiresAt) { stage } else { deadlineStage }
+            case None => stage
+        }
         OperationContext(
             deadline: Some(next), cancellation: cancellation, trace: trace, eventSink: eventSink,
-            timeoutPolicy: timeoutPolicy
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: owner
         )
     }
 
@@ -275,9 +341,14 @@ public struct OperationContext {
                 }
             case None => candidate
         }
+        let owner = match (deadline) {
+            case Some(parent) => if (next.expiresAt < parent.expiresAt) { None<OperationTimeoutStage> } else { deadlineStage }
+            case None => None<OperationTimeoutStage>
+        }
         OperationContext(
             deadline: Some(next), cancellation: cancellation, trace: trace, eventSink: eventSink,
-            timeoutPolicy: timeoutPolicy
+            timeoutPolicy: timeoutPolicy, requestId: requestId, attemptId: attemptId,
+            connectionId: connectionId, streamId: streamId, stage: stage, deadlineStage: owner
         )
     }
 

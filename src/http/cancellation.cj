@@ -2,6 +2,8 @@ package wirestack.http
 
 import std.collection.ArrayList
 import std.sync.*
+import std.time.MonoTime
+import wirestack.internal as internal
 import wirestack.internal.transport as transport
 
 /** The public cancellation scope owned by one typed HTTP handle. */
@@ -153,6 +155,9 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     private var retainedLifetimes: Int64 = 0
     private var retainedResources = ArrayList<Resource>()
     private var resourcesReleased = false
+    private var resourcesReclaimed = false
+    private var cancellationStarted: ?MonoTime = None<MonoTime>
+    private let metrics: ?internal.HttpResourceBudget
     internal let context: OperationContext
     internal let connectionCancellation: transport.CancellationToken
 
@@ -160,8 +165,10 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         parent: OperationContext,
         request: ?HttpRequestCancellationHandle,
         connection: ?HttpConnectionCancellationHandle,
-        stream: ?HttpStreamCancellationHandle
+        stream: ?HttpStreamCancellationHandle,
+        metrics!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>
     ) {
+        this.metrics = metrics
         context = parent.withCancellation(source.token)
         connectionCancellation = match (connection) {
             case Some(value) => value.cancellationToken
@@ -263,6 +270,13 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     }
 
     private func cancelAndRelease(): Unit {
+        if (metrics.isSome()) {
+            synchronized(mutex) {
+                if (!resourcesReclaimed && cancellationStarted.isNone()) {
+                    cancellationStarted = Some(MonoTime.now())
+                }
+            }
+        }
         source.cancel()
         releaseRegistrations()
     }
@@ -294,7 +308,16 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             retainedResources = ArrayList<Resource>()
             result
         }
-        for (resource in claimed) { resource.close() }
+        try { for (resource in claimed) { resource.close() } }
+        finally {
+            let started = synchronized(mutex) {
+                resourcesReclaimed = true
+                cancellationStarted
+            }
+            if (let Some(time) <- started) {
+                if (let Some(budget) <- metrics) { budget.recordCancellationCompletion(MonoTime.now() - time) }
+            }
+        }
     }
 }
 

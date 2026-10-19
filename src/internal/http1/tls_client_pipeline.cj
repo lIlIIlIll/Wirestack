@@ -1,5 +1,7 @@
 package wirestack.internal.http1
 
+import wirestack.NetworkConnectionPoolSnapshot
+
 import std.collection.ArrayList
 import std.sync.Mutex
 import wirestack.internal.http_model.*
@@ -207,7 +209,8 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTPS handshaker is closed") }
         }
-        emitTlsHandshakeEvent(operation, NetworkEventOutcome.Started, None<NetworkErrorCode>)
+        let handshakeContext = operation.forStage(OperationTimeoutStage.TlsHandshake)
+        emitTlsHandshakeEvent(handshakeContext, NetworkEventOutcome.Started, None<NetworkErrorCode>)
         try {
             let engine = provider.createClientEngine(
                 context,
@@ -215,7 +218,7 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
                 serverName: Some(host)
             )
             let connection = TlsConnection.handshake(
-                engine, transport, context: operation, pump: TlsEnginePump()
+                engine, transport, context: handshakeContext, pump: TlsEnginePump()
             )
             let protocol = try {
                 match (connection.handshakeInfo) {
@@ -230,14 +233,14 @@ public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandsh
                 connection.abort(reason: Some(AbortReason.ProtocolFailure))
                 throw error
             }
-            emitTlsHandshakeEvent(operation, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
+            emitTlsHandshakeEvent(handshakeContext, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
             HttpNegotiatedTlsTransport(protocol, connection)
         } catch (error: Exception) {
             let code = match (error) {
                 case value: NetworkException => Some(value.code)
                 case _ => Some(NetworkErrorCode.SystemFailure)
             }
-            emitTlsHandshakeEvent(operation, NetworkEventOutcome.Failed, code)
+            emitTlsHandshakeEvent(handshakeContext, NetworkEventOutcome.Failed, code)
             throw error
         }
     }
@@ -303,7 +306,7 @@ public class Http1HttpsClient <: Resource {
         }
         let lease = pool.acquire(tlsPoolKey(request.url, handshaker), factory, context: context)
         try {
-            let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
+            let result = lease.connection.executeTracked(request, context: connectionEventContext(context, lease.connectionId), trailer: trailer,
                 onTerminated: { reusable =>
                     if (reusable) {
                         pool.release(lease, context: context)
@@ -326,6 +329,7 @@ public class Http1HttpsClient <: Resource {
         upgradeHttp1Lease(pool, factory, tlsPoolKey(request.url, handshaker), request, context)
     }
 
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot { pool.observationSnapshot() }
     public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
     public func retire(): Unit { pool.retire() }
     public func abortConnections(): Unit { pool.close() }
@@ -383,11 +387,14 @@ private class HttpProtocolCache {
 private class Http11NegotiatedException <: Exception {
     let connection: ?Http1ClientConnection
     let resourceLease: ?internal.HttpResourceLease
+    let connectionId: ?Int64
     init(
+        connectionId!: ?Int64 = None<Int64>,
         connection!: ?Http1ClientConnection = None<Http1ClientConnection>,
         resourceLease!: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
     ) {
         super("HTTPS ALPN selected HTTP/1.1")
+        this.connectionId = connectionId
         this.connection = connection
         this.resourceLease = resourceLease
     }
@@ -397,8 +404,10 @@ private class Http11NegotiatedException <: Exception {
 private class Http2NegotiatedException <: Exception {
     let connection: Http2ClientPoolConnection
     let resourceLease: ?internal.HttpResourceLease
-    init(connection: Http2ClientPoolConnection, resourceLease: ?internal.HttpResourceLease) {
+    let connectionId: ?Int64
+    init(connection: Http2ClientPoolConnection, resourceLease: ?internal.HttpResourceLease, connectionId!: ?Int64) {
         super("HTTPS ALPN selected h2")
+        this.connectionId = connectionId
         this.connection = connection
         this.resourceLease = resourceLease
     }
@@ -473,6 +482,7 @@ private class AutomaticTlsNegotiator {
             case HttpNegotiatedProtocol.Http11 =>
                 cache.put(key, CachedHttpProtocol.Http11)
                 throw Http11NegotiatedException(
+                    connectionId: context.connectionId,
                     connection: Some(Http1ClientConnection(
                         negotiated.transport, limits: limits, continueTimeout: continueTimeout
                     )),
@@ -508,7 +518,7 @@ private class AutomaticTlsNegotiator {
                                 None<internal.HttpResourceOwnerKey>
                             }
                         )),
-                        retainOptionalHttpResourceLease(resourceLease)
+                        retainOptionalHttpResourceLease(resourceLease), connectionId: context.connectionId
                     )
                 } catch (error: Http2NegotiatedException) {
                     throw error
@@ -613,7 +623,8 @@ public class HttpAutomaticHttpsClient <: Resource {
                     executeHttp1(key, request, context, trailer)
                 } catch (switched: Http2NegotiatedException) {
                     executeAdoptedHttp2(
-                        key, switched.connection, switched.resourceLease, request, context, trailer,
+                        key, switched.connection, switched.resourceLease, request,
+                        negotiatedEventContext(context, switched.connectionId), trailer,
                         connectionCancellation
                     )
                 }
@@ -624,7 +635,8 @@ public class HttpAutomaticHttpsClient <: Resource {
                     match (fallback.connection) {
                         case Some(connection) =>
                             executeAdoptedHttp1(
-                                key, connection, fallback.resourceLease, request, context, trailer
+                                key, connection, fallback.resourceLease, request,
+                                negotiatedEventContext(context, fallback.connectionId), trailer
                             )
                         case None => executeHttp1(key, request, context, trailer)
                     }
@@ -652,7 +664,8 @@ public class HttpAutomaticHttpsClient <: Resource {
                     let signal = Http2ClientExecutionSignal()
                     let lease = try {
                         h2Pool.adopt(
-                            key, switched.connection, signal, context: context, endStream: false,
+                            key, switched.connection, signal,
+                            context: negotiatedEventContext(context, switched.connectionId), endStream: false,
                             resourceLease: switched.resourceLease
                         )
                     } catch (error: Exception) { switched.connection.close(); throw error }
@@ -667,7 +680,8 @@ public class HttpAutomaticHttpsClient <: Resource {
                     let lease = match (fallback.connection) {
                         case Some(connection) =>
                             try {
-                                h1Pool.adopt(key, connection, context: context,
+                                h1Pool.adopt(key, connection,
+                                    context: negotiatedEventContext(context, fallback.connectionId),
                                     resourceLease: fallback.resourceLease)
                             }
                             catch (error: Exception) { connection.close(); throw error }
@@ -683,7 +697,7 @@ public class HttpAutomaticHttpsClient <: Resource {
     ): HttpDuplexExchangeResult {
         try {
             let result = lease.connection.upgradeTracked(
-                request, context: context, onTerminated: { reusable =>
+                request, context: connectionEventContext(context, lease.connectionId), onTerminated: { reusable =>
                     if (reusable) { h1Pool.release(lease, context: context) }
                     else { h1Pool.discard(lease, context: context) }
                 }
@@ -710,12 +724,15 @@ public class HttpAutomaticHttpsClient <: Resource {
                 case _ => throw IllegalStateException("HTTP/2 pool returned a non-executable connection")
             }
             mapHttp2Connect(executable.connectClaimed(
-                request, protocol, lease.admission, signal, context, connectionCancellation,
-                { => h2Pool.release(lease) }
+                request, protocol, lease.admission, signal, connectionEventContext(context, lease.connectionId), connectionCancellation,
+                { => h2Pool.release(lease, context: context) }
             ))
-        } catch (error: Exception) { h2Pool.release(lease); throw error }
+        } catch (error: Exception) { h2Pool.release(lease, context: context); throw error }
     }
 
+    public func observationSnapshot(): NetworkConnectionPoolSnapshot {
+        h1Pool.observationSnapshot().combinedWith(h2Pool.observationSnapshot())
+    }
     public func h1Snapshot(): Http1ConnectionPoolSnapshot { h1Pool.snapshot() }
     public func h2Snapshot(): Http2ConnectionPoolSnapshot { h2Pool.snapshot() }
     public func retire(): Unit { h2Pool.retire(); h1Pool.retire() }
@@ -739,16 +756,16 @@ public class HttpAutomaticHttpsClient <: Resource {
         let executable = match (lease.connection) {
             case value: Http2ExecutableConnection => value
             case _ =>
-                h2Pool.release(lease)
+                h2Pool.release(lease, context: context)
                 throw IllegalStateException("HTTP/2 pool returned a non-executable connection")
         }
         try {
             executable.executeClaimed(
-                request, plan, lease.admission, signal, context, connectionCancellation,
-                { => h2Pool.release(lease) }
+                request, plan, lease.admission, signal, connectionEventContext(context, lease.connectionId), connectionCancellation,
+                { => h2Pool.release(lease, context: context) }
             )
         } catch (error: Exception) {
-            h2Pool.release(lease)
+            h2Pool.release(lease, context: context)
             throw error
         }
     }
@@ -784,11 +801,11 @@ public class HttpAutomaticHttpsClient <: Resource {
         }
         try {
             connection.executeClaimed(
-                request, plan, lease.admission, signal, context, connectionCancellation,
-                { => h2Pool.release(lease) }
+                request, plan, lease.admission, signal, connectionEventContext(context, lease.connectionId), connectionCancellation,
+                { => h2Pool.release(lease, context: context) }
             )
         } catch (error: Exception) {
-            h2Pool.release(lease)
+            h2Pool.release(lease, context: context)
             throw error
         }
     }
@@ -816,7 +833,7 @@ public class HttpAutomaticHttpsClient <: Resource {
         try {
             lease.connection.executeTracked(
                 request,
-                context: context,
+                context: connectionEventContext(context, lease.connectionId),
                 trailer: trailer,
                 onTerminated: { reusable =>
                     if (reusable) { h1Pool.release(lease, context: context) }

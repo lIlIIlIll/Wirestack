@@ -105,13 +105,18 @@ public class Http1RequestWriter {
         context!: OperationContext = OperationContext.background()
     ): Http1RequestCommitEvidence {
         if (headWritten) { invalidWriterState("HTTP/1 request head has already been written", tracker.snapshot()) }
+        let writeContext = context.forStage(OperationTimeoutStage.RequestWrite)
+        emitHttpStage(writeContext, true)
         try {
-            writeTracked(transport, head.bytesForWrite(), tracker, context)
+            writeTracked(transport, head.bytesForWrite(), tracker, writeContext)
+            emitHttpStage(writeContext, false)
             headWritten = true
             tracker.snapshot()
         } catch (error: Http1RequestWriteException) {
+            emitHttpStage(writeContext, false, code: Some(httpObservationError(error)))
             throw error
         } catch (error: Exception) {
+            emitHttpStage(writeContext, false, code: Some(httpObservationError(error)))
             writeFailure(error, tracker.snapshot())
         }
     }
@@ -123,13 +128,18 @@ public class Http1RequestWriter {
         if (!headWritten || bodyWritten) {
             invalidWriterState("HTTP/1 request body requires one completed head and one write", tracker.snapshot())
         }
+        let writeContext = context.forStage(OperationTimeoutStage.RequestWrite)
+        emitHttpStage(writeContext, true)
         try {
-            writeRequestBody(transport, request.body, head.framing, tracker, context, limits, trailer)
+            writeRequestBody(transport, request.body, head.framing, tracker, writeContext, limits, trailer)
+            emitHttpStage(writeContext, false)
             bodyWritten = true
             tracker.snapshot()
         } catch (error: Http1RequestWriteException) {
+            emitHttpStage(writeContext, false, code: Some(httpObservationError(error)))
             throw error
         } catch (error: Exception) {
+            emitHttpStage(writeContext, false, code: Some(httpObservationError(error)))
             writeFailure(error, tracker.snapshot())
         }
     }
