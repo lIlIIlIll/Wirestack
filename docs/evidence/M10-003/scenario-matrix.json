@@ -1,0 +1,91 @@
+{
+  "task": "M10-003",
+  "source": "docs/planning/implementation-backlog.md and GitHub issue #175",
+  "dimensions": ["pool protocol", "admission order", "connection lifecycle", "request submission state", "body lifecycle"],
+  "scenarios": [
+    {
+      "id": "P1-S1-T1",
+      "path": "HTTP/1 bounded pool admission",
+      "scenario": "With global capacity occupied, a later route waiter must receive the next available pool slot before an earlier route can repeatedly reuse it; complete connection key remains isolated.",
+      "expected": "Waiter admission rotates by owner, queue stays within configured bound, the original ConnectionPool deadline/cancellation remains authoritative.",
+      "test": "new: Http1ConnectionPoolTest.admissionRotatesOriginsAndYieldsTheFullPoolSlot"
+    },
+    {
+      "id": "P1-S2-T1",
+      "path": "HTTP/2 bounded pool admission",
+      "scenario": "A drained stream releases a globally saturated pool slot while another key waits; a different key is selected before the prior key can monopolize reuse.",
+      "expected": "Fair waiter advances, the old stream is completed once, and the new connection retains full key isolation.",
+      "test": "new: Http2ConnectionPoolTest.admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot"
+    },
+    {
+      "id": "P1-S3-T1",
+      "path": "Pool timeout and cancellation cleanup",
+      "scenario": "A queued HTTP/1 or HTTP/2 acquisition is cancelled or exhausts its original absolute deadline.",
+      "expected": "The operation terminates with its structured error and removes its waiter slot without changing another waiter's turn.",
+      "test": "existing: Http1ConnectionPoolTest.activeWaitHonorsCancellationAndReleasesWaiterSlot; Http2ConnectionPoolTest.fullBoundedPoolHonorsOneCallerDeadline"
+    },
+    {
+      "id": "P2-S1-T1",
+      "path": "HTTP/1 idle and active lifetime eviction",
+      "scenario": "A connection exceeds the finite pool maximum age while idle or while leased, then is acquired or released.",
+      "expected": "Expired idle connections are not reused; an expired active connection is discarded on release exactly once and a replacement can be created.",
+      "test": "new: Http1ConnectionPoolTest.expiresConnectionsAtMaximumLifetime; Http1ConnectionPoolTest.evictsLeasedConnectionAtMaximumLifetimeOnRelease"
+    },
+    {
+      "id": "P2-S2-T1",
+      "path": "HTTP/2 draining lifetime eviction",
+      "scenario": "A connection exceeds maximum age while carrying a stream, then the stream completes and a later request arrives.",
+      "expected": "No new stream is assigned to the expired connection; the current stream drains, the old connection closes once, and a replacement is admitted.",
+      "test": "new: Http2ConnectionPoolTest.expiresConnectionsAtMaximumLifetime; Http2ConnectionPoolTest.drainsExpiredHttp2ConnectionAfterActiveStreamCompletion"
+    },
+    {
+      "id": "P2-S3-T1",
+      "path": "HTTP/1 failed connection health",
+      "scenario": "A remote close, transport failure, protocol failure, or unconsumed response body occurs before a pool release.",
+      "expected": "The failed connection is not returned to the reusable pool; body close closes the HTTP/1 connection.",
+      "test": "existing: Http1ConnectionPoolTest.reusesOnlyTheSameCompleteKey; Http1ClientConnectionTest.earlyBodyCloseClosesInsteadOfReturningConnectionForReuse"
+    },
+    {
+      "id": "P2-S4-T1",
+      "path": "HTTP/2 GOAWAY and stream failure lifecycle",
+      "scenario": "GOAWAY drains existing accepted streams, while an RST_STREAM affects only its owning stream; body close/reset does not terminate siblings.",
+      "expected": "A draining connection is replaced only after its owned streams terminate; unrelated streams remain usable.",
+      "test": "existing: Http2ConnectionPoolTest.drainingConnectionRetainsExistingStreamButReceivesNoNewLease; Http2ClientConnectionTest.peerResetFailsOnlyItsStreamAndConnectionRemainsUsable; Http2ClientConnectionTest.peerGoAwayDrainsConnectionWithoutFailingAcceptedStream"
+    },
+    {
+      "id": "P3-S1-T1",
+      "path": "HTTP/1 successful submission followed by response-read failure",
+      "scenario": "The request write completes, then response headers fail with a structured retryable network error.",
+      "expected": "The error retains its original structured network fields and cause plus immutable write evidence; retry policy still requires safe method or explicit safety and a replayable body.",
+      "test": "new: Http1ClientConnectionTest.executionFailurePreservesNetworkErrorEvidence; Http1ClientConnectionTest.responseFailureCarriesCommittedRequestEvidence; HttpRetryPolicyTest.retryRequiresPhaseOrSubmissionEvidence"
+    },
+    {
+      "id": "P3-S2-T1",
+      "path": "HTTP/1 partial write and one-shot retry gate",
+      "scenario": "A write fails before or after request bytes are committed, or the body is one-shot.",
+      "expected": "SafeBeforeWrite requires no committed bytes; partial/submitted failures retry only when structured retryability, request safety, replayability, attempt limit, and remaining operation budget permit it.",
+      "test": "existing: HttpRetryPolicyTest.retriesOnlyIdempotentReplayableStructuredFailures; HttpRetryPolicyTest.explicitSafetyAllowsPostButDisabledAndOneShotFailClosed"
+    },
+    {
+      "id": "P3-S3-T1",
+      "path": "HTTP/2 uncertain submission and GOAWAY retry gate",
+      "scenario": "A generic HTTP response-phase failure has uncertain processing state; GOAWAY separately identifies definitely-unprocessed versus uncertain streams.",
+      "expected": "Missing response or generic HTTP-phase error is not proof of non-execution; only definitely-unprocessed GOAWAY can use that retry path.",
+      "test": "new: HttpRetryPolicyTest.retryRequiresPhaseOrSubmissionEvidence; existing: HttpRetryPolicyTest.goAwayRetriesOnlyDefinitelyUnprocessedSafeReplayableRequests"
+    },
+    {
+      "id": "P4-S1-T1",
+      "path": "Bounded response-body cleanup",
+      "scenario": "An unconsumed HTTP/1 or HTTP/2 response body is closed before the peer completes it.",
+      "expected": "HTTP/1 abandons the response and closes rather than reuses the connection; HTTP/2 resets only its owning stream without waiting for peer EOF, leaving sibling streams and the connection usable.",
+      "test": "existing: Http1ClientConnectionTest.earlyBodyCloseClosesInsteadOfReturningConnectionForReuse; Http2ClientConnectionTest.peerResetFailsOnlyItsStreamAndConnectionRemainsUsable; new: Http2ClientConnectionTest.earlyResponseCloseCancelsOnlyItsStreamWithoutWaitingForPeerEof"
+    },
+    {
+      "id": "P5-S1-T1",
+      "path": "Resource ownership and diagnostics",
+      "scenario": "Admission, release, cancellation, eviction, and replacement are observed through pool/resource snapshots and secret-free events.",
+      "expected": "No duplicate return, resource lease, waiter, or connection remains after cleanup; complete pool key identity remains unchanged.",
+      "test": "existing: Http1ConnectionPoolTest.emitsSecretFreeAcquireAndReleaseLifecycle; Http2ConnectionPoolTest.completeSecurityKeyPreventsCrossContextReuse; pool snapshot lifecycle cases"
+    }
+  ]
+}
