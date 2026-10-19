@@ -2,6 +2,8 @@ package wirestack.http
 
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack as api
+import wirestack.internal.transport.MemoryTransport
 
 @Test
 class WebSocketHandshakeTest {
@@ -14,6 +16,55 @@ class WebSocketHandshakeTest {
     func nativeHttp2ExtendedConnectKeepsSiblingRequestsUsable(): Unit {
         exerciseNativeWebSocket(true)
     }
+
+    @TestCase
+    func invalidHandshakeResponseReportsFailedLogicalCompletion(): Unit {
+        let events = api.NetworkEventBuffer(capacity: 64)
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])],
+                HostName("example.test"), ResolverSource.Static)))
+            .connector(WebSocketInvalidHandshakeConnector())
+            .requestTimeout(Duration.second)
+            .build()
+        try {
+            var rejected = false
+            try {
+                let _ = client.connectWebSocket(WebSocketUrl.parse("ws://example.test/socket"),
+                    context: OperationContext(eventSink: Some<NetworkEventSink>(events)))
+            } catch (_: WebSocketException) { rejected = true }
+            @Expect(rejected)
+            var succeeded: Int64 = 0
+            var failed: Int64 = 0
+            for (event in events.drain()) {
+                match ((event.kind, event.outcome)) {
+                    case (NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded) => succeeded++
+                    case (NetworkEventKind.RequestCompleted, NetworkEventOutcome.Failed) => failed++
+                    case _ => ()
+                }
+            }
+            @Expect(succeeded, 0)
+            @Expect(failed, 1)
+            @Expect(client.observationSnapshot().resources.activeRequests, 0)
+        } finally {
+            client.close()
+        }
+    }
+}
+
+private class WebSocketInvalidHandshakeConnector <: HttpConnector {
+    public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
+        let _ = endpoint
+        let _ = context
+        let (client, peer) = MemoryTransport.pair()
+        let _ = spawn { api.writeAll(peer, api.ByteSpan(webSocketInvalidAcceptResponse())) }
+        client
+    }
+}
+
+private func webSocketInvalidAcceptResponse(): Array<Byte> {
+    ("HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n" +
+        "Sec-WebSocket-Accept: invalid\r\n\r\n").toArray()
 }
 
 private func exerciseNativeWebSocket(secure: Bool): Unit {
@@ -37,7 +88,9 @@ private func exerciseNativeWebSocket(secure: Bool): Unit {
     let scheme = if (secure) { "https" } else { "http" }
     let base = "${scheme}://example.com:${server.localEndpoint.port}"
     try {
-        let result = client.connectWebSocket(HttpUrl.parse("${base}/socket"), protocols: ["echo"])
+        let socketScheme = if (secure) { "wss" } else { "ws" }
+        let result = client.connectWebSocket(WebSocketUrl.parse(
+            "${socketScheme}://example.com:${server.localEndpoint.port}/socket"), protocols: ["echo"])
         let session = match (result) {
             case WebSocketConnectResult.Connected(value) => value
             case WebSocketConnectResult.Rejected(response) =>

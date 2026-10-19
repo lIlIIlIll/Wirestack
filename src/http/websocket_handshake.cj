@@ -50,7 +50,7 @@ internal class WebSocketHandshake {
             retrySafety: api.HttpRetrySafety.Disabled)
     }
 
-    func accept(value: http1.HttpDuplexExchangeResult, limits: WebSocketLimits): WebSocketConnectResult {
+    func accept(value: http1.HttpDuplexExchangeResult, limits: WebSocketLimits, context: OperationContext): WebSocketConnectResult {
         match (value) {
             case http1.HttpDuplexExchangeResult.Response(response) => WebSocketConnectResult.Rejected(response)
             case http1.HttpDuplexExchangeResult.Connected(connection) =>
@@ -76,7 +76,8 @@ internal class WebSocketHandshake {
                         subProtocol = Some(selected[0])
                     }
                     WebSocketConnectResult.Connected(WebSocketConnection(connection.transport,
-                        WebSocketRole.Client, subProtocol: subProtocol, limits: limits))
+                        WebSocketRole.Client, subProtocol: subProtocol, limits: limits,
+                        context: connection.operationContext.withCancellation(context.cancellation)))
                 } catch (error: Exception) {
                     connection.transport.abort(reason: Some(api.AbortReason.ProtocolFailure))
                     throw WebSocketException(WebSocketErrorCode.ProtocolViolation,

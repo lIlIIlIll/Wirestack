@@ -1,0 +1,19 @@
+COMMAND: cjpm test src/internal/connector --filter=HappyEyeballsConnectorTest.literalDialEmitsDnsNotExecutedWithoutResolving --no-color --no-progress
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.connector, time elapsed: 2399977 ns, RESULT:
+    TCS: HappyEyeballsConnectorTest, time elapsed: 1439488 ns, RESULT:
+    [ PASSED ] CASE: literalDialEmitsDnsNotExecutedWithoutResolving (435180 ns)
+Summary: TOTAL: 19
+    PASSED: 1, SKIPPED: 18, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 10594553 ns, RESULT:
+TP: wirestack.*, time elapsed: 10484776 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.connector, time elapsed: 2399977 ns
+Summary: TOTAL: 19
+    PASSED: 1, SKIPPED: 18, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
+EXIT_STATUS=0
