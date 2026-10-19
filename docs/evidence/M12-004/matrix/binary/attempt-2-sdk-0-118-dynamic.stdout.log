@@ -1,0 +1,41 @@
+
+Dynamic section at offset 0xd3480 contains 38 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-core.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-collection.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-convert.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-random.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-sort.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-unittest.common.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-std-math.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcangjie-runtime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libboundscheck.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN]
+ 0x000000000000000c (INIT)               0x48278
+ 0x000000000000000d (FINI)               0xc3bbc
+ 0x0000000000000019 (INIT_ARRAY)         0x2d2a50
+ 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x2d2a60
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x0000000000000004 (HASH)               0x190
+ 0x000000006ffffef5 (GNU_HASH)           0x23c8
+ 0x0000000000000005 (STRTAB)             0xaa50
+ 0x0000000000000006 (SYMTAB)             0x3dd8
+ 0x000000000000000a (STRSZ)              54201 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x2d4000
+ 0x0000000000000002 (PLTRELSZ)           6000 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x46b08
+ 0x0000000000000007 (RELA)               0x18788
+ 0x0000000000000008 (RELASZ)             189312 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x0000000000000018 (BIND_NOW)           
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffffe (VERNEED)            0x18718
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x000000006ffffff0 (VERSYM)             0x17e0a
+ 0x000000006ffffff9 (RELACOUNT)          4763
+ 0x0000000000000000 (NULL)               0x0

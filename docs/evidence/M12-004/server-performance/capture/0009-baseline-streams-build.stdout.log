@@ -1,0 +1,2 @@
+CHECKOUT_MASK=PASS; entire snapshot repository hidden by readonly child mount
+cjpm build success

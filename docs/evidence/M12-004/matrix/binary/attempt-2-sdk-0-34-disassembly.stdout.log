@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-math.a:
+
+math.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_MATH_Tan>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x10,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	call   1a <CJ_MATH_Tan+0x1a>
+  1a:	mov    %fs:0x28,%rax
+  23:	cmp    -0x8(%rbp),%rax
+  27:	jne    2f <CJ_MATH_Tan+0x2f>
+  29:	add    $0x10,%rsp
+  2d:	pop    %rbp
+  2e:	ret
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "cd3c7980f93e8e16df5e32554fee7b145fdfeb8e6f9a5f58dcf2f872fda6a395"}

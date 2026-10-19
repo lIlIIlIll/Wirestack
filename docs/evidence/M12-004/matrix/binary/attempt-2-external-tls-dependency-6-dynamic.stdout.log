@@ -1,0 +1,38 @@
+
+Dynamic section at offset 0x134b40 contains 35 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-x86-64.so.2]
+ 0x000000000000000e (SONAME)             Library soname: [libm.so.6]
+ 0x000000000000000c (INIT)               0x10000
+ 0x000000000000000d (FINI)               0xabbd0
+ 0x0000000000000019 (INIT_ARRAY)         0x135b28
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x135b30
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x340
+ 0x0000000000000005 (STRTAB)             0xb240
+ 0x0000000000000006 (SYMTAB)             0x2ca8
+ 0x000000000000000a (STRSZ)              11654 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000070000000 (DT_X86_64_PLT)      0x10040
+ 0x0000000070000001 (DT_X86_64_PLTSZ)    0x10
+ 0x0000000070000003 (DT_X86_64_PLTENT)   0x10
+ 0x0000000000000003 (PLTGOT)             0x135dc0
+ 0x0000000000000002 (PLTRELSZ)           24 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0xf510
+ 0x0000000000000007 (RELA)               0xeeb0
+ 0x0000000000000008 (RELASZ)             1632 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffc (VERDEF)             0xeae8
+ 0x000000006ffffffd (VERDEFNUM)          22
+ 0x000000000000001e (FLAGS)              BIND_NOW STATIC_TLS
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x000000006ffffffe (VERNEED)            0xedf0
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x000000006ffffff0 (VERSYM)             0xdfc6
+ 0x0000000000000024 (RELR)               0xf528
+ 0x0000000000000023 (RELRSZ)             32 (bytes)
+ 0x0000000000000025 (RELRENT)            8 (bytes)
+ 0x0000000000000000 (NULL)               0x0

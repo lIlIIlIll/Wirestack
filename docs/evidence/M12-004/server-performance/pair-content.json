@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "scope": "Exact paired archive content comparison; no runtime rerun",
+  "status": "RECORDED",
+  "baseline_source_count": 164,
+  "candidate_source_count": 164,
+  "changed_cangjie_source_paths": [],
+  "changed_other_payload_paths": [
+    "THIRD_PARTY_NOTICES.md",
+    "release-manifest.json",
+    "target/native/current/lib/libwirestack_tls_provider.a",
+    "target/native/current/provider-manifest.json"
+  ],
+  "cangjie_sources_identical": true,
+  "attribution_limit": "All observed differences are listed; performance compares exact development archives, not an assumed provider-only synthetic binary."
+}

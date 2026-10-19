@@ -1,0 +1,30 @@
+
+ref.o:
+00000000000005f4 T _CGPbfifHv
+0000000000000054 T _CGPbfiiHv
+0000000000000064 T _CGPbfilHv
+0000000000000584 T _CGPbfirHv
+00000000000000c0 T _CNbf11WeakRefBase6<init>HNNat6OptionICNat6ObjectEENNbf13CleanupPolicyE
+0000000000000100 T _CNbf13CleanupPolicyeqHNNbfY0_E
+0000000000000120 T _CNbf13CleanupPolicyneHNNbfY0_E
+0000000000000140 T _CNbf21getEagerWeakRefPolicyHv
+0000000000000150 T _CNbf24getDeferredWeakRefPolicyHv
+0000000000000160 T _CNbf7WeakRefIG_E13cleanupPolicypgHv
+0000000000000170 T _CNbf7WeakRefIG_E5clearHv
+00000000000001b4 T _CNbf7WeakRefIG_E5valuepgHv
+0000000000000500 T _CNbf7WeakRefIG_E6<init>HG_NNbf13CleanupPolicyE
+0000000000000540 T _CVNbf13CleanupPolicyeqHNNbfY0_E$Nbf13CleanupPolicyE$CNat5EqualIG_ENNbf13CleanupPolicyE
+0000000000000560 T _CVNbf13CleanupPolicyneHNNbfY0_E$Nbf13CleanupPolicyE$CNat8NotEqualIG_ENNbf13CleanupPolicyE
+0000000000000000 V DW.ref..L__cj_personality_v0$
+00000000000002a0 V std.core:Equal<std.ref:CleanupPolicy>.ti
+0000000000000240 V std.core:Equatable<std.ref:CleanupPolicy>.ti
+0000000000000300 V std.core:NotEqual<std.ref:CleanupPolicy>.ti
+0000000000000060 V std.core:Option<std.core:Object>.ti
+0000000000000180 V std.ref:CleanupPolicy:0.ti
+00000000000001e0 V std.ref:CleanupPolicy:1.ti
+0000000000000120 D std.ref:CleanupPolicy.ti
+00000000000000c0 D std.ref:WeakRefBase.ti
+0000000000000000 D std.ref:WeakRef.tt
+0000000000000000 D std_std.ref.packageInfo
+0000000000000010 V Unit.Val
+0000000000000000 V VArray<Int8,0>.ti

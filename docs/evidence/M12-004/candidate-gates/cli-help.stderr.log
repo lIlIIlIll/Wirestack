@@ -1,0 +1,2 @@
+<repo>/tools/m12_004_candidate_gates.py:235: SyntaxWarning: 'return' in a 'finally' block
+  return 1

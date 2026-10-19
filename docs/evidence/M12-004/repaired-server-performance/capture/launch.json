@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "0-7",
+    "unshare",
+    "--user",
+    "--map-root-user",
+    "--mount",
+    "/usr/bin/python3",
+    "$HOME/.cache/agent-tmp/wirestack-m12-004-repaired-performance.veaHB0/capture/bootstrap.py",
+    "glibc"
+  ],
+  "exit_code": 0,
+  "host_original_unchanged": true,
+  "sdk_392_before_exec_pass": true
+}

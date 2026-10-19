@@ -13,7 +13,7 @@ The current host returns `tc` exit 2 with `Specified qdisc kind is unknown`. `mo
 
 ## Run the complete profile set
 
-Use a new scratch directory. The runner verifies archive membership and binds the consumer, production inputs, the namespace/impairment/sampling helper (`tools/gates/m2_015_native_network.py`), the compiled test-only resolver interposer source (`tools/gates/native/gai_delay.c`), selected provider archives and the complete STS compiler/runtime/import closure in the report.
+Use a new scratch directory. The runner verifies archive membership and binds the consumer, production inputs, selected provider archives and STS compiler/runtime/import files in the report.
 
 ```sh
 scratch=$(mktemp -d "$HOME/.cache/agent-tmp/m12-003-network.XXXXXXXX")

@@ -57,6 +57,15 @@ Successful byte throughput never counts failed operations.
 | SSE/WebSocket |H1/H2, slow reader, cancellation/disconnect, fragmented messages and control frames | Native authenticated TLS for both protocols. H1 uses an explicit public TLS connector; URL framing alone is not the security claim. Steady intervals exceed250ms; first delivery includes opening/handshake. |
 | Overload |Client waiter admission/rejection, server503, successful recovery | One waiter, real typed PoolExhausted and separate503 outcomes; all rejection latencies retained. Queue delay is not mutex contention. |
 
+HTTP measurement rounds use one coordinator-owned release gate. Each round
+starts closed. Concurrent rounds first retain all response owners and check
+their live count; the coordinator then opens the gate for every round before
+joining futures, including serial rounds. The [M12-004 repair evidence](../evidence/M12-004/http-round-release/summary.json)
+binds the changed consumer source and its STS-only native correctness run.
+Historical M12-001 measurements and the failed M12-004 performance captures
+retain their original source and artifact bindings. New performance comparisons
+must build both legs from the same current consumer source.
+
 Normal, slow, overload, failure and cleanup regimes are reported separately.
 Long-stream producers offer one bounded message at a time, paced 2 ms; slow
 consumers pause 1 ms after offer. Their latency includes that pause. This proves

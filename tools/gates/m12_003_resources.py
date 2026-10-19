@@ -20,7 +20,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from tools import m7_021_linux_release as release
 from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
-from tools.m12_002_source_sdk import sdk_binding
 
 SOURCE = ROOT / 'examples/linux/m12_003/resources'
 SCENARIOS = ('buffers', 'requests', 'pool', 'streams', 'resolver', 'low_fd', 'cpu', 'memory', 'memory_pressure')
@@ -215,8 +214,6 @@ def main():
                          'cjpm': run('cjpm', ['cjpm', '--version']).strip(), 'compiler_digest': artifact_byte_digest(sdk / 'bin/cjc').to_json(),
                          'runtime_digest': artifact_byte_digest(sdk / 'runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so').to_json(),
                          'std_net_digest': artifact_byte_digest(sdk / 'runtime/lib/linux_x86_64_cjnative/libcangjie-std-net.so').to_json()}
-        # Bind the same complete SDK closure the network campaign records, not just three files.
-        report['sdk_files'] = sdk_binding(sdk)
         payload, manifest = release.read_verified_payload(args.archive)
         installed = release.extract_archive(args.archive, work / 'installation')
         _, current = release.collect_payload(ROOT)

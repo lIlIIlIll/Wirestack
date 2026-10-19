@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-runtime.a:
+
+CompilerCalls.cpp.o:     file format elf64-x86-64
+
+
+Disassembly of section .text.MCC_ThrowStackOverflowError:
+
+0000000000000000 <CJ_MCC_ThrowStackOverflowError>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	mov    0x8(%rbp),%rsi
+   8:	pop    %rbp
+   9:	jmp    e <_ZGVZ18MCC_AcquireRawDataE14unreadablePage+0x6>
+
+Disassembly of section .text.MCC_OnFinalizerCreated:
+
+0000000000000000 <CJ_MCC_OnFinalizerCreated>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	push   %rbx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "ad62789b75e5d3d0251386278fba349dda55076598c45bcc9b108068b9b02610"}

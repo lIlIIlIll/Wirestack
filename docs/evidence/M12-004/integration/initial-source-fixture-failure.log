@@ -1,0 +1,133 @@
+test_candidate_cannot_promote_or_apply_unreviewed_patches (tools.tests.test_m12_004_upgrade.UpgradeBoundaries.test_candidate_cannot_promote_or_apply_unreviewed_patches) ... ok
+test_new_candidate_rejects_old_runtime_provider_identity (tools.tests.test_m12_004_upgrade.UpgradeBoundaries.test_new_candidate_rejects_old_runtime_provider_identity) ... ok
+test_non_sts_sdk_is_rejected_before_reading_or_executing_it (tools.tests.test_m12_004_upgrade.UpgradeBoundaries.test_non_sts_sdk_is_rejected_before_reading_or_executing_it) ... ok
+test_unrelated_upstream_and_changed_baseline_require_reselection (tools.tests.test_m12_004_upgrade.UpgradeBoundaries.test_unrelated_upstream_and_changed_baseline_require_reselection) ... ok
+test_actual_baseline_consistency (tools.tests.test_m12_004_inventory.InventoryTests.test_actual_baseline_consistency) ... ERROR
+test_gzip_changed_code (tools.tests.test_m12_004_inventory.InventoryTests.test_gzip_changed_code) ... FAIL
+test_gzip_compression_dependency (tools.tests.test_m12_004_inventory.InventoryTests.test_gzip_compression_dependency) ... FAIL
+test_gzip_unlisted_source (tools.tests.test_m12_004_inventory.InventoryTests.test_gzip_unlisted_source) ... FAIL
+test_keylog_manifest (tools.tests.test_m12_004_inventory.InventoryTests.test_keylog_manifest) ... ok
+test_license_notice_drift (tools.tests.test_m12_004_inventory.InventoryTests.test_license_notice_drift) ... ok
+test_psl_bytes_drift (tools.tests.test_m12_004_inventory.InventoryTests.test_psl_bytes_drift) ... ok
+test_psl_license_drift (tools.tests.test_m12_004_inventory.InventoryTests.test_psl_license_drift) ... ok
+test_public_symbol_added (tools.tests.test_m12_004_inventory.InventoryTests.test_public_symbol_added) ... ok
+test_public_symbol_removed (tools.tests.test_m12_004_inventory.InventoryTests.test_public_symbol_removed) ... ok
+test_replaced_native_archive (tools.tests.test_m12_004_inventory.InventoryTests.test_replaced_native_archive) ... ok
+test_source_revision_drift (tools.tests.test_m12_004_inventory.InventoryTests.test_source_revision_drift) ... ok
+test_external_native_artifact_is_bound_preserved_and_sanitized (tools.tests.test_m12_004_verifier_controls.VerifierControlsTest.test_external_native_artifact_is_bound_preserved_and_sanitized) ... ok
+test_message_text_cannot_override_structured_rejection_code (tools.tests.test_m12_004_verifier_controls.VerifierControlsTest.test_message_text_cannot_override_structured_rejection_code) ... ok
+test_positive_fixtures_native_smoke_and_originals (tools.tests.test_m12_004_verifier_controls.VerifierControlsTest.test_positive_fixtures_native_smoke_and_originals) ... ok
+test_real_cli_rejects_all_mutations_with_exact_codes (tools.tests.test_m12_004_verifier_controls.VerifierControlsTest.test_real_cli_rejects_all_mutations_with_exact_codes) ... ok
+test_report_cannot_claim_candidate_or_sdk_qualification (tools.tests.test_m12_004_verifier_controls.VerifierControlsTest.test_report_cannot_claim_candidate_or_sdk_qualification) ... ok
+test_unrelated_errors_and_accidental_acceptance_never_pass (tools.tests.test_m12_004_verifier_controls.VerifierControlsTest.test_unrelated_errors_and_accidental_acceptance_never_pass) ... ok
+test_actual_cli_rejects_missing_archive_without_replacement (tools.tests.test_m12_004_rollback.RollbackTest.test_actual_cli_rejects_missing_archive_without_replacement) ... ok
+test_atomic_restore_preserves_exact_archive_and_original_sidecar (tools.tests.test_m12_004_rollback.RollbackTest.test_atomic_restore_preserves_exact_archive_and_original_sidecar) ... ok
+test_candidate_drift_leaves_active_deployment_unchanged (tools.tests.test_m12_004_rollback.RollbackTest.test_candidate_drift_leaves_active_deployment_unchanged) ... ok
+test_current_findings_cannot_be_omitted (tools.tests.test_m12_004_rollback.RollbackTest.test_current_findings_cannot_be_omitted) ... ok
+test_preflight_cannot_be_security_disposition (tools.tests.test_m12_004_rollback.RollbackTest.test_preflight_cannot_be_security_disposition) ... ok
+test_replaced_authority_key (tools.tests.test_m12_004_rollback.RollbackTest.test_replaced_authority_key) ... ok
+test_stale_signed_disposition (tools.tests.test_m12_004_rollback.RollbackTest.test_stale_signed_disposition) ... ok
+test_tampered_signed_disposition (tools.tests.test_m12_004_rollback.RollbackTest.test_tampered_signed_disposition) ... ok
+test_unresolved_advisory_not_waived (tools.tests.test_m12_004_rollback.RollbackTest.test_unresolved_advisory_not_waived) ... ok
+test_valid_nonproduction_disposition_signature (tools.tests.test_m12_004_rollback.RollbackTest.test_valid_nonproduction_disposition_signature) ... ok
+test_wrong_artifact_even_with_valid_signature (tools.tests.test_m12_004_rollback.RollbackTest.test_wrong_artifact_even_with_valid_signature) ... ok
+test_archive_bounds_cumulative_global_pax_fields (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_bounds_cumulative_global_pax_fields) ... ok
+test_archive_budget_includes_serialized_headers_and_padding (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_budget_includes_serialized_headers_and_padding) ... ok
+test_archive_is_byte_reproducible_and_has_normalized_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_is_byte_reproducible_and_has_normalized_metadata) ... ok
+test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_member_limit_accepts_boundary_and_rejects_one_extra_byte) ... ok
+test_archive_rejects_aggregate_payload_over_limit (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_aggregate_payload_over_limit) ... ok
+test_archive_rejects_excessive_member_headers (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_excessive_member_headers) ... ok
+test_archive_rejects_oversized_pax_metadata (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_oversized_pax_metadata) ... ok
+test_archive_rejects_sparse_encodings_before_map_expansion (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_archive_rejects_sparse_encodings_before_map_expansion) ... ok
+test_committed_qualification_report_is_structurally_valid (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_committed_qualification_report_is_structurally_valid) ... ok
+test_consumer_manifest_points_only_at_installed_package (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_consumer_manifest_points_only_at_installed_package) ... ok
+test_dependency_parsers_return_stable_names_without_addresses (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_dependency_parsers_return_stable_names_without_addresses) ... ok
+test_duplicate_members_and_fifos_are_rejected (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_duplicate_members_and_fifos_are_rejected) ... ok
+test_extraction_refuses_a_contaminated_installation_directory (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_extraction_refuses_a_contaminated_installation_directory) ... ok
+test_gzip_archive_source_inventory_is_bound_and_historical_archives_read (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_gzip_archive_source_inventory_is_bound_and_historical_archives_read) ... ok
+test_http_files_manifest_binds_sources_tools_and_archive (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_http_files_manifest_binds_sources_tools_and_archive) ... ok
+test_main_translates_invalid_text_digest_to_controlled_failure (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_main_translates_invalid_text_digest_to_controlled_failure) ... ok
+test_noncanonical_root_and_file_directory_overlap_fail_closed (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_noncanonical_root_and_file_directory_overlap_fail_closed) ... ok
+test_openssl_dependency_names_fail_closed (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_openssl_dependency_names_fail_closed) ... ok
+test_payload_loader_strings_fail_closed (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_payload_loader_strings_fail_closed) ... ok
+test_production_sources_exclude_every_test_file (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_production_sources_exclude_every_test_file) ... ok
+test_safe_extract_rejects_parent_traversal (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_safe_extract_rejects_parent_traversal) ... ok
+test_strict_validation_rejects_source_drift (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_strict_validation_rejects_source_drift) ... ok
+test_structural_validation_accepts_frozen_input_keys_but_rejects_escape (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_structural_validation_accepts_frozen_input_keys_but_rejects_escape) ... ok
+test_text_metadata_digest_is_line_ending_stable_while_payload_digest_is_exact (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_text_metadata_digest_is_line_ending_stable_while_payload_digest_is_exact) ... ok
+test_unlisted_and_missing_files_cannot_enter_an_installation (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_unlisted_and_missing_files_cannot_enter_an_installation) ... ok
+test_verified_extraction_preserves_exact_bytes_and_rejects_same_size_mutation (tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_verified_extraction_preserves_exact_bytes_and_rejects_same_size_mutation) ... ok
+test_actual_native_archive_bytes_must_match_component_manifests (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_actual_native_archive_bytes_must_match_component_manifests) ... ok
+test_artifact_digest_mismatch_fails_closed (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_artifact_digest_mismatch_fails_closed) ... ok
+test_committed_bundle_is_stale_after_digest_domain_migration (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_committed_bundle_is_stale_after_digest_domain_migration) ... ok
+test_fingerprint_is_stable_and_dependency_sensitive (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_fingerprint_is_stable_and_dependency_sensitive) ... ok
+test_generation_is_byte_deterministic (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_generation_is_byte_deterministic) ... ok
+test_gzip_documents_and_tampering_fail_closed (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_gzip_documents_and_tampering_fail_closed) ... ok
+test_main_translates_invalid_license_text_to_controlled_failure (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_main_translates_invalid_license_text_to_controlled_failure) ... ok
+test_sbom_distinguishes_project_and_public_suffix_licenses (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_sbom_distinguishes_project_and_public_suffix_licenses) ... ok
+test_schema_two_rejects_missing_public_suffix_license (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_schema_two_rejects_missing_public_suffix_license) ... ok
+test_schema_two_rejects_public_suffix_data_outside_its_source_pin (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_schema_two_rejects_public_suffix_data_outside_its_source_pin) ... ok
+test_schema_two_requires_http_files_payload_but_schema_one_remains_readable (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_schema_two_requires_http_files_payload_but_schema_one_remains_readable) ... ok
+test_schema_two_sidecars_self_validate_with_explicit_task_metadata (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_schema_two_sidecars_self_validate_with_explicit_task_metadata) ... ok
+test_wrong_project_license_expression_fails_closed (tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_wrong_project_license_expression_fails_closed) ... ok
+
+======================================================================
+ERROR: test_actual_baseline_consistency (tools.tests.test_m12_004_inventory.InventoryTests.test_actual_baseline_consistency)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m12_004_inventory.py", line 18, in test_actual_baseline_consistency
+    sources, gzip = self.check()
+                    ~~~~~~~~~~^^
+  File "<repo>/tools/tests/test_m12_004_inventory.py", line 15, in check
+    return inventory.validate_components(metadata or self.metadata, payload or self.payload, root or inventory.ROOT)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_004_inventory.py", line 57, in validate_components
+    require(d.text_evidence_digest(source_root / name).sha256 == sha, 'native source drift: ' + name)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_004_inventory.py", line 27, in require
+    raise ValueError(message)
+ValueError: native source drift: native/tls/aws_lc/wirestack_tls_provider.c
+
+======================================================================
+FAIL: test_gzip_changed_code (tools.tests.test_m12_004_inventory.InventoryTests.test_gzip_changed_code)
+----------------------------------------------------------------------
+ValueError: native source drift: native/tls/aws_lc/wirestack_tls_provider.c
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m12_004_inventory.py", line 68, in test_gzip_changed_code
+    with self.assertRaisesRegex(ValueError, 'gzip source digest'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "gzip source digest" does not match "native source drift: native/tls/aws_lc/wirestack_tls_provider.c"
+
+======================================================================
+FAIL: test_gzip_compression_dependency (tools.tests.test_m12_004_inventory.InventoryTests.test_gzip_compression_dependency)
+----------------------------------------------------------------------
+ValueError: native source drift: native/tls/aws_lc/wirestack_tls_provider.c
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m12_004_inventory.py", line 62, in test_gzip_compression_dependency
+    with self.assertRaisesRegex(ValueError, 'gzip native dependency'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "gzip native dependency" does not match "native source drift: native/tls/aws_lc/wirestack_tls_provider.c"
+
+======================================================================
+FAIL: test_gzip_unlisted_source (tools.tests.test_m12_004_inventory.InventoryTests.test_gzip_unlisted_source)
+----------------------------------------------------------------------
+ValueError: native source drift: native/tls/aws_lc/wirestack_tls_provider.c
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m12_004_inventory.py", line 74, in test_gzip_unlisted_source
+    with self.assertRaisesRegex(ValueError, 'gzip source inventory'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "gzip source inventory" does not match "native source drift: native/tls/aws_lc/wirestack_tls_provider.c"
+
+----------------------------------------------------------------------
+Ran 72 tests in 4.019s
+
+FAILED (failures=3, errors=1)

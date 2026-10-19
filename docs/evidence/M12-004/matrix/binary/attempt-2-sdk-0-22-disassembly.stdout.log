@@ -1,0 +1,21 @@
+In archive <sdk-0>/lib/linux_x86_64_cjnative/libcangjie-std-database.sql.a:
+
+database.sql.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCLNbn12ResourcePoolICNbn10ConnectionEE23backgroundCheckIdleLifeHv$0_$g-0x14>:
+       0:	xor    %eax,%eax
+       2:	ret
+       3:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+      10:	add    %al,(%rax)
+	...
+
+0000000000000014 <_CCLNbn12ResourcePoolICNbn10ConnectionEE23backgroundCheckIdleLifeHv$0_$g>:
+      14:	push   %rbp
+      15:	mov    %rsp,%rbp
+      18:	call   1d <_CCLNbn12ResourcePoolICNbn10ConnectionEE23backgroundCheckIdleLifeHv$0_$g+0x9>
+      1d:	push   %r14
+      1f:	push   %rbx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "c3f2cfb3f96991e2d2eb43abddbb0206f2d7729d2e152714a396a9d3f805d329"}

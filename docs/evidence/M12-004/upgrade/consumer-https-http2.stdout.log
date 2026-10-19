@@ -1,0 +1,9 @@
+HTTPS_CLIENT_SERVER=PASS
+PUBLIC_TLS_FACADE=PASS
+HTTP_VERSION=2
+transportBackend=std-net
+runtimeIoBackend=cjnative
+tlsProvider=aws-lc
+tlsProviderVersion=5.11.0
+externalOpenSslDependency=false
+buildFingerprint=853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c

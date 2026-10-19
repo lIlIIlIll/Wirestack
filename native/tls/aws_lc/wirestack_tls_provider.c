@@ -23,6 +23,9 @@
 #if !defined(WIRESTACK_TLS_BUILD_FINGERPRINT)
 #error "Wirestack's Linux provider requires a repository build fingerprint"
 #endif
+#if !defined(WIRESTACK_TLS_PROVIDER_SOURCE_FINGERPRINT)
+#error "Wirestack's Linux provider requires its verified source fingerprint"
+#endif
 
 #define WIRESTACK_TLS_PROVIDER_MAGIC UINT64_C(0x5753544c53505231)
 #define WIRESTACK_TLS_ENGINE_MAGIC UINT64_C(0x5753544c53454e31)
@@ -823,13 +826,13 @@ const char *wirestack_tls_provider_id(uint64_t handle) {
 }
 
 const char *wirestack_tls_provider_version(uint64_t handle) {
-    return provider_from_handle(handle) == NULL ? NULL : "5.5.0";
+    return provider_from_handle(handle) == NULL ? NULL : AWSLC_VERSION_NUMBER_STRING;
 }
 
 const char *wirestack_tls_provider_fingerprint(uint64_t handle) {
     return provider_from_handle(handle) == NULL
         ? NULL
-        : "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478";
+        : WIRESTACK_TLS_PROVIDER_SOURCE_FINGERPRINT;
 }
 
 const char *wirestack_tls_provider_build_fingerprint(uint64_t handle) {

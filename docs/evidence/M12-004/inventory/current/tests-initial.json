@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-004",
+  "family": "inventory",
+  "status": "PASS",
+  "sdk_policy": "STS_ONLY",
+  "qualification": "NOT_QUALIFIED",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_m12_004_inventory"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.193s\n\nOK\n",
+  "source_digests": {
+    "tools/m12_004_inventory.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5a25ef9cd7934ebffb5f0b14181fee007739ae90c364aa1152ca4effd2a20354"
+    },
+    "tools/tests/test_m12_004_inventory.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d0792e481377069b566b8eb76b01dfb36f4960bdaf7d6ae2a3c714aae3da1186"
+    }
+  }
+}

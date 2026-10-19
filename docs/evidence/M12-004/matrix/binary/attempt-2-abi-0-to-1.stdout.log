@@ -1,0 +1,11 @@
+IDENTITY wirestack aws-lc 5.11.0 853f00dafbe98960b18bf973f48037976e31e3811d3405b58bac393a1a91539c
+CHECK independent_cangjie_native PASS
+CHECK wirestack_verified_tls PASS
+BOUNDARY crypto OpenSSL_version global=0x55c33687bba0 independent=0x7f5ac49a1f80 owners_distinct=1 independent_owner=/usr/lib/libcrypto.so.3
+BOUNDARY libc pthread_getspecific global=0x7f5aec499d60 independent=0x7f5aec499d60 owner_shared=1 pthread_create_shared=1 pthread_key_create_shared=1
+BOUNDARY symbols SSL_connect global=0x55c3368946a0 isolated=0x7f5ac4f2c560 owners_distinct=1 global_owner=<scratch>/coexist-0/target/release/bin/main independent_owner=/usr/lib/libssl.so.3
+BOUNDARY unisolated_openssl UNSUPPORTED resolved_identity=AWS-LC 5.11.0
+IDENTITY independent_tls OpenSSL 3.6.5 29 Sep 2026 isolation=deepbind libc=shared verified_peer=example.test bytes=38
+CHECK independent_verified_tls PASS
+CHECK wirestack_after_independent_cleanup PASS
+CHECK same_process_identity_preserved PASS
