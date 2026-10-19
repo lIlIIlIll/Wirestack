@@ -1,0 +1,27 @@
+RESOURCE active buffers=3465473 session_reservation=3465473
+RESOURCE stream buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+CHECK writer_unicode_literal PASS
+RESOURCE cancel buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+EVENT request_id=6 connection_id=8 stream_id=0
+EVENT request_id=9 connection_id=11 stream_id=0
+RESOURCE h1-close buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+CONNECTION h1 old=8 replacement=11
+CHECK h1_unread_close PASS
+EVENT request_id=12 connection_id=15 stream_id=1
+EVENT request_id=13 connection_id=15 stream_id=3
+RESOURCE h2-close buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+CONNECTION h2 closed=15 surviving=15
+CHECK h2_sibling_close PASS
+RESOURCE reconnect buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+CURSOR parsed=cursor-1 acknowledged=false duplicate=true last_event_id_received=true submissions=3
+CHECK reconnect_duplicate_cursor PASS
+RESOURCE terminal buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+POST eof_submissions=1 redirect_submissions=1 destination_submissions=0
+CHECK terminal_and_post_no_replay PASS
+RESOURCE active buffers=3465473 session_reservation=3465473
+RESOURCE stream buffers=0 requests=0 streams=0 admission_waiters=0 pool_waiters=0
+CHECK writer_unicode_literal PASS
+CHECK cancel_then_new_request PASS
+SERVER requests=14 flushed=10 producers=0
+CHECK native_shutdown PASS
+M11_001_INSTALLED_SSE_PASS

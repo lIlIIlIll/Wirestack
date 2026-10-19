@@ -524,6 +524,7 @@ public class HttpResourceBudget {
         cleanup: Bool
     ): ?HttpResourceLease {
         synchronized(mutex) {
+            checkAdmissionOpen()
             if (!canAcquireBufferLocked(owner, bytes, control, cleanup) ||
                 (!cleanup && nextWaiterLocked(HttpResourceKind.Buffer).isSome())) {
                 return None<HttpResourceLease>

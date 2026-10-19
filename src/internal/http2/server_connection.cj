@@ -360,6 +360,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                                 )
                             } catch (_: Exception) {}
                         },
+                        bufferOwner: exchangeBufferOwner,
                         onOwnerTerminated: { terminal =>
                             if (let Some(lease) <- terminalRequestLease) { lease.close() }
                             if (let Some(lease) <- terminalStreamLease) { lease.close() }
