@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "kind": "requalification-status",
+  "source_task": "M12-002",
+  "status": "IN_PROGRESS",
+  "completion_claim": false,
+  "release_qualification": "NOT_QUALIFIED",
+  "recorded_at_utc": "2026-10-17T22:27:37Z",
+  "method": "Typed text-evidence and artifact-byte SHA-256 comparison between the committed M12-002 reports and this revision. No capture, measurement or verification command was rerun for this record; the retained scratch inputs and SDK installations are not available in this checkout.",
+  "captured_evidence": {
+    "acceptance": "docs/evidence/M12-002/README.md",
+    "verification_snapshot": "docs/evidence/M12-002/verification.json",
+    "task_gate": "docs/evidence/M12-002/task-gate.json",
+    "deployment_matrix": "docs/evidence/M12-002/deployment-matrix.json"
+  },
+  "stale_bindings": {
+    "docs/evidence/M12-002/verification.json": {
+      "source_digests_rejected_at_revision": [
+        "docs/api/README.md"
+      ],
+      "capture_sources_changed_by_review_corrections": [
+        "tools/m12_002_source_sdk.py",
+        "tools/m12_002_binary.py",
+        "tools/m12_002_deployment.py",
+        "tools/tests/test_m12_002_source_sdk.py",
+        "tools/tests/test_m12_002_binary.py"
+      ]
+    },
+    "docs/evidence/M12-002/source-sdk/stable-native/report.json": {
+      "production_inputs_changed": [
+        "src/gzip/body.cj",
+        "src/http/client.cj",
+        "src/internal/connector/happy_eyeballs.cj",
+        "src/internal/http1/response_reader.cj",
+        "src/internal/http1/tls_client_pipeline.cj",
+        "src/internal/http2/client_connection.cj",
+        "src/internal/http_resource_budget.cj",
+        "src/net/dns_client.cj",
+        "src/sse/decoder.cj",
+        "src/sse/session.cj"
+      ],
+      "consumer_sources_changed": [
+        "examples/linux/m11_004/cli/src/main.cj",
+        "examples/linux/m11_004/decoded/src/main.cj",
+        "examples/linux/m11_004/streams/src/main.cj"
+      ],
+      "capture_runner_changed": true
+    },
+    "docs/evidence/M12-002/source-sdk/candidate-native/report.json": {
+      "production_inputs_changed": [
+        "src/gzip/body.cj",
+        "src/http/client.cj",
+        "src/internal/connector/happy_eyeballs.cj",
+        "src/internal/http1/response_reader.cj",
+        "src/internal/http1/tls_client_pipeline.cj",
+        "src/internal/http2/client_connection.cj",
+        "src/internal/http_resource_budget.cj",
+        "src/net/dns_client.cj",
+        "src/sse/decoder.cj",
+        "src/sse/session.cj"
+      ],
+      "consumer_sources_changed": [
+        "examples/linux/m11_004/cli/src/main.cj",
+        "examples/linux/m11_004/decoded/src/main.cj",
+        "examples/linux/m11_004/streams/src/main.cj"
+      ],
+      "capture_runner_changed": true
+    },
+    "docs/evidence/M12-002/platform/westmere-glibc244/report.json": {
+      "support_sources_changed": [
+        "tools/m11_003_native_websocket.py",
+        "tools/m11_004_installed_consumers.py"
+      ],
+      "capture_runner_changed": false
+    },
+    "docs/evidence/M12-002/binary/report.json": {
+      "production_inputs_changed": [
+        "src/gzip/body.cj",
+        "src/http/client.cj",
+        "src/internal/connector/happy_eyeballs.cj",
+        "src/internal/http1/response_reader.cj",
+        "src/internal/http1/tls_client_pipeline.cj",
+        "src/internal/http2/client_connection.cj",
+        "src/internal/http_resource_budget.cj",
+        "src/net/dns_client.cj",
+        "src/sse/decoder.cj",
+        "src/sse/session.cj"
+      ],
+      "fixture_inputs_changed": [
+        "tools/m12_002_binary.py",
+        "tools/tests/test_m12_002_binary.py"
+      ]
+    }
+  },
+  "rejected_commands": {
+    "python3 tools/m12_002_deployment.py verify": "Rejects this revision: the committed source-SDK, native, binary and verification records bind digests that the current tree no longer matches. The private retained archive and exact SDK installations required to rerun the command are not present in a clean checkout.",
+    "python3 tools/m12_002_deployment.py contracts": "Requires WIRESTACK_STABLE_SDK_ROOT and WIRESTACK_CANDIDATE_SDK_ROOT; the selected SDK installations are not available in a clean checkout."
+  },
+  "required_before_completion": [
+    "Recollect both installed-source profiles, the native platform profile and the binary matrix with the exact retained SDKs, native VM, archive and retained capture root.",
+    "Regenerate docs/evidence/M12-002/verification.json with tools/m12_002_deployment.py collect --binary-report <verified report> after the final source and documentation edits.",
+    "Rerun scripts/check-task M12-002 --json to regenerate the task gate from the corrected capture.",
+    "Only then link the regenerated reports and claim COMPLETE."
+  ],
+  "not_run": [
+    {
+      "gate": "qualified-deployment-inputs",
+      "reason": "The retained private archive, SDK installations and native capture root are absent; rerunning requires the exact retained environment."
+    },
+    {
+      "gate": "native minimum profile",
+      "reason": "No Cangjie toolchain or KVM/private-glibc runtime is available in this checkout."
+    }
+  ]
+}

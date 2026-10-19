@@ -1,0 +1,11 @@
+{
+  "task_id": "M12-002",
+  "status": "PASS",
+  "command": "git privacy-check --message <selected-task-text>",
+  "exit_code": 0,
+  "scope": "Task source_paths, all M12-002 JSON/log/Markdown evidence and docs/planning/status.md",
+  "scope_mode": "Selected uncommitted task text; not an index or commit verification",
+  "normalization": "Relative or placeholder paths, generic guest identity and documentation network addresses",
+  "commits_created": false,
+  "pushes_performed": false
+}

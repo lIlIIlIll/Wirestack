@@ -1,0 +1,111 @@
+
+Version symbols section '.gnu.version' contains 330 entries:
+ Addr: 0x0000000000003d46  Offset: 0x00003d46  Link: 6 (.dynsym)
+  000:   0 (*local*)       2 (CANGJIE)       3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  004:   4 (GLIBC_2.43)    0 (*local*)       5 (GLIBC_2.44)    2 (CANGJIE)    
+  008:   3 (GLIBC_2.2.5)   2 (CANGJIE)       3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)
+  00c:   2 (CANGJIE)       3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)    
+  010:   7 (GLIBC_2.14)    2 (CANGJIE)       8 (GLIBC_2.33)    3 (GLIBC_2.2.5)
+  014:   2 (CANGJIE)       3 (GLIBC_2.2.5)   0 (*local*)       2 (CANGJIE)    
+  018:   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  01c:   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  020:   9 (GLIBC_2.29)    2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  024:   3 (GLIBC_2.2.5)   a (GLIBC_2.3.4)   9 (GLIBC_2.29)    2 (CANGJIE)    
+  028:   2 (CANGJIE)       b (GLIBC_2.34)    2 (CANGJIE)       3 (GLIBC_2.2.5)
+  02c:   2 (CANGJIE)       3 (GLIBC_2.2.5)   c (GLIBC_2.4)     2 (CANGJIE)    
+  030:   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  034:   2 (CANGJIE)       0 (*local*)       0 (*local*)       3 (GLIBC_2.2.5)
+  038:   3 (GLIBC_2.2.5)   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  03c:   2 (CANGJIE)       2 (CANGJIE)       2 (CANGJIE)       6 (GLIBC_2.2.5)
+  040:   2 (CANGJIE)       3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)    
+  044:   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  048:   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   c (GLIBC_2.4)     b (GLIBC_2.34) 
+  04c:   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)       3 (GLIBC_2.2.5)
+  050:   c (GLIBC_2.4)     6 (GLIBC_2.2.5)   d (GLIBC_2.3.2)   b (GLIBC_2.34) 
+  054:   3 (GLIBC_2.2.5)   b (GLIBC_2.34)    b (GLIBC_2.34)    3 (GLIBC_2.2.5)
+  058:   6 (GLIBC_2.2.5)   0 (*local*)       3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  05c:   e (GLIBC_2.17)    2 (CANGJIE)       2 (CANGJIE)       6 (GLIBC_2.2.5)
+  060:   3 (GLIBC_2.2.5)   2 (CANGJIE)       9 (GLIBC_2.29)    6 (GLIBC_2.2.5)
+  064:   b (GLIBC_2.34)    f (GLIBC_2.10)    4 (GLIBC_2.43)    4 (GLIBC_2.43) 
+  068:   2 (CANGJIE)       6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  06c:   2 (CANGJIE)       2 (CANGJIE)       0 (*local*)       2 (CANGJIE)    
+  070:   0 (*local*)       8 (GLIBC_2.33)    3 (GLIBC_2.2.5)   9 (GLIBC_2.29) 
+  074:   d (GLIBC_2.3.2)   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  078:  10 (GLIBC_2.27)    2 (CANGJIE)       0 (*local*)       3 (GLIBC_2.2.5)
+  07c:   4 (GLIBC_2.43)    2 (CANGJIE)       3 (GLIBC_2.2.5)   4 (GLIBC_2.43) 
+  080:   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  084:   2 (CANGJIE)       2 (CANGJIE)       6 (GLIBC_2.2.5)   b (GLIBC_2.34) 
+  088:   2 (CANGJIE)       2 (CANGJIE)       d (GLIBC_2.3.2)   3 (GLIBC_2.2.5)
+  08c:   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  090:   3 (GLIBC_2.2.5)   2 (CANGJIE)       3 (GLIBC_2.2.5)   4 (GLIBC_2.43) 
+  094:   3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)
+  098:   3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)
+  09c:   2 (CANGJIE)      11 (GLIBC_2.3)    12 (GLIBC_2.16)    2 (CANGJIE)    
+  0a0:   3 (GLIBC_2.2.5)   0 (*local*)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  0a4:   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)
+  0a8:   2 (CANGJIE)       3 (GLIBC_2.2.5)   4 (GLIBC_2.43)    0 (*local*)    
+  0ac:   2 (CANGJIE)       6 (GLIBC_2.2.5)  10 (GLIBC_2.27)    2 (CANGJIE)    
+  0b0:   3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)
+  0b4:   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)
+  0b8:   2 (CANGJIE)       2 (CANGJIE)       6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  0bc:   d (GLIBC_2.3.2)   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)
+  0c0:   2 (CANGJIE)       2 (CANGJIE)      10 (GLIBC_2.27)    3 (GLIBC_2.2.5)
+  0c4:   3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)       2 (CANGJIE)    
+  0c8:   3 (GLIBC_2.2.5)   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  0cc:   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  0d0:   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)       3 (GLIBC_2.2.5)
+  0d4:   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)  13 (GLIBC_2.38)    2 (CANGJIE)    
+  0d8:   6 (GLIBC_2.2.5)  11 (GLIBC_2.3)     2 (CANGJIE)       3 (GLIBC_2.2.5)
+  0dc:   6 (GLIBC_2.2.5)   2 (CANGJIE)       9 (GLIBC_2.29)    0 (*local*)    
+  0e0:   2 (CANGJIE)       6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  0e4:   2 (CANGJIE)       3 (GLIBC_2.2.5)  10 (GLIBC_2.27)    3 (GLIBC_2.2.5)
+  0e8:   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  0ec:   b (GLIBC_2.34)   13 (GLIBC_2.38)    2 (CANGJIE)       d (GLIBC_2.3.2)
+  0f0:   8 (GLIBC_2.33)    b (GLIBC_2.34)    6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  0f4:   2 (CANGJIE)       2 (CANGJIE)      14 (GLIBC_2.38)    b (GLIBC_2.34) 
+  0f8:   5 (GLIBC_2.44)   14 (GLIBC_2.38)    3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)
+  0fc:   6 (GLIBC_2.2.5)   2 (CANGJIE)      10 (GLIBC_2.27)    3 (GLIBC_2.2.5)
+  100:   3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)       6 (GLIBC_2.2.5)
+  104:   2 (CANGJIE)       3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)    
+  108:   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   0 (*local*)       3 (GLIBC_2.2.5)
+  10c:   a (GLIBC_2.3.4)   2 (CANGJIE)       2 (CANGJIE)       4 (GLIBC_2.43) 
+  110:   2 (CANGJIE)       3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  114:   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)   b (GLIBC_2.34) 
+  118:   2 (CANGJIE)       6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   b (GLIBC_2.34) 
+  11c:   0 (*local*)       3 (GLIBC_2.2.5)   2 (CANGJIE)       2 (CANGJIE)    
+  120:   3 (GLIBC_2.2.5)  11 (GLIBC_2.3)     3 (GLIBC_2.2.5)   2 (CANGJIE)    
+  124:   3 (GLIBC_2.2.5)   b (GLIBC_2.34)    6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  128:   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)
+  12c:   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)
+  130:   2 (CANGJIE)       2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)
+  134:   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)   3 (GLIBC_2.2.5)   6 (GLIBC_2.2.5)
+  138:   3 (GLIBC_2.2.5)   2 (CANGJIE)       b (GLIBC_2.34)    c (GLIBC_2.4)  
+  13c:   2 (CANGJIE)       2 (CANGJIE)       3 (GLIBC_2.2.5)   4 (GLIBC_2.43) 
+  140:   1 (*global*)      1 (*global*)      1 (*global*)      3 (GLIBC_2.2.5)
+  144:   1 (*global*)      1 (*global*)      3 (GLIBC_2.2.5)   1 (*global*)   
+  148:   1 (*global*)      1 (*global*)   
+
+Version needs section '.gnu.version_r' contains 3 entries:
+ Addr: 0x0000000000003fe0  Offset: 0x00003fe0  Link: 7 (.dynstr)
+  000000: Version: 1  File: libm.so.6  Cnt: 6
+  0x0010:   Name: GLIBC_2.38  Flags: none  Version: 19
+  0x0020:   Name: GLIBC_2.27  Flags: none  Version: 16
+  0x0030:   Name: GLIBC_2.29  Flags: none  Version: 9
+  0x0040:   Name: GLIBC_2.2.5  Flags: none  Version: 6
+  0x0050:   Name: GLIBC_2.44  Flags: none  Version: 5
+  0x0060:   Name: GLIBC_2.43  Flags: none  Version: 4
+  0x0070: Version: 1  File: libc.so.6  Cnt: 12
+  0x0080:   Name: GLIBC_2.38  Flags: none  Version: 20
+  0x0090:   Name: GLIBC_2.16  Flags: none  Version: 18
+  0x00a0:   Name: GLIBC_2.3  Flags: none  Version: 17
+  0x00b0:   Name: GLIBC_2.10  Flags: none  Version: 15
+  0x00c0:   Name: GLIBC_2.17  Flags: none  Version: 14
+  0x00d0:   Name: GLIBC_2.3.2  Flags: none  Version: 13
+  0x00e0:   Name: GLIBC_2.4  Flags: none  Version: 12
+  0x00f0:   Name: GLIBC_2.34  Flags: none  Version: 11
+  0x0100:   Name: GLIBC_2.3.4  Flags: none  Version: 10
+  0x0110:   Name: GLIBC_2.33  Flags: none  Version: 8
+  0x0120:   Name: GLIBC_2.14  Flags: none  Version: 7
+  0x0130:   Name: GLIBC_2.2.5  Flags: none  Version: 3
+  0x0140: Version: 1  File: libcangjie-runtime.so  Cnt: 1
+  0x0150:   Name: CANGJIE  Flags: none  Version: 2

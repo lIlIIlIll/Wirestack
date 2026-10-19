@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-timeFFI.a:
+
+time.c.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <CJ_TIME_Now>:
+   0:	push   %rbp
+   1:	mov    %rsp,%rbp
+   4:	sub    $0x20,%rsp
+   8:	mov    %fs:0x28,%rax
+  11:	mov    %rax,-0x8(%rbp)
+  15:	xorps  %xmm0,%xmm0
+  18:	movaps %xmm0,-0x20(%rbp)
+  1c:	lea    -0x20(%rbp),%rsi
+  20:	xor    %edi,%edi
+  22:	call   27 <CJ_TIME_Now+0x27>
+  27:	mov    -0x20(%rbp),%rax
+  2b:	mov    -0x18(%rbp),%rdx
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "4d6c4296fda2828713a056e0a1bdfd71f638c47c38b1c401b884381dbd33c349"}

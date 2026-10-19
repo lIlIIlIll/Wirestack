@@ -1,0 +1,21 @@
+
+<sdk-1>/lib/libstdFFI.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+000000000000a0c0 <_init@@Base>:
+    a0c0:	sub    $0x8,%rsp
+    a0c4:	mov    0x270ead(%rip),%rax        # 27af78 <__gmon_start__>
+    a0cb:	test   %rax,%rax
+    a0ce:	je     a0d2 <_init@@Base+0x12>
+    a0d0:	call   *%rax
+    a0d2:	add    $0x8,%rsp
+    a0d6:	ret
+
+Disassembly of section .plt:
+
+000000000000a0e0 <__isnanf@plt-0x10>:
+    a0e0:	push   0x2708a2(%rip)        # 27a988 <FLAG_HAS_EXT_PART@@Base+0x22e7e0>
+    a0e6:	jmp    *0x2708a4(%rip)        # 27a990 <FLAG_HAS_EXT_PART@@Base+0x22e7e8>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "773c02675322c28a603afb49074add407c764b4c34423fc277685c4861b94150"}

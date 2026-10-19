@@ -1,0 +1,21 @@
+
+<sdk-1>/runtime/lib/linux_x86_64_cjnative/libcangjie-std-sort.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000005448 <_init@@Base>:
+    5448:	sub    $0x8,%rsp
+    544c:	mov    0x227acd(%rip),%rax        # 22cf20 <__gmon_start__>
+    5453:	test   %rax,%rax
+    5456:	je     545a <_init@@Base+0x12>
+    5458:	call   *%rax
+    545a:	add    $0x8,%rsp
+    545e:	ret
+
+Disassembly of section .plt:
+
+0000000000005460 <CJ_MCC_NewArray64@plt-0x10>:
+    5460:	push   0x227ba2(%rip)        # 22d008 <_fini@@Base+0x201e5c>
+    5466:	jmp    *0x227ba4(%rip)        # 22d010 <_fini@@Base+0x201e64>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "6dd8ced4feef716db870c76cddced5378d65360fa4d2c25cbc3dad3ff873d0fb"}

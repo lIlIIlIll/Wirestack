@@ -1,0 +1,78 @@
+{
+  "task_id": "M12-002",
+  "status": "UNSUPPORTED_UNSAFE_COEXISTENCE_PROFILE",
+  "mechanism": "dlmopen LM_ID_NEWLM on a shared Cangjie/native worker; withdrawn",
+  "failed_execution": "docs/evidence/M12-002/binary/attempt-8-abi-1-to-1.stderr.log",
+  "failed_exit_code": 139,
+  "abi_diagnosis": "NOT_SDK_ABI_INCOMPATIBILITY; native TLS thread-storage corruption",
+  "unsafe_prior_passes_qualify": false,
+  "observed": [
+    "pthread_getspecific returned 0xffffffffffffffff",
+    "AWS-LC CRYPTO_get_thread_local dereferenced that pointer",
+    "the call was post-independent-cleanup TlsRuntime.info/provider_create"
+  ],
+  "cause_hypothesis": "[INFERENCE] duplicate libc/pthread key-allocation domains share native-thread TSD",
+  "replacement": "explicit RTLD_LOCAL|RTLD_DEEPBIND in the base namespace, shared libc/pthread entries, fresh verified Wirestack TLS after cleanup",
+  "binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "ec89a6fa5f0ffec7d3417d537f8063af7d12e5da05e2156bc8fcabfe71c89560"
+  },
+  "core_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "3ef6719cf395af2dbeb2748d68e3b025380cbab448fa0dab4e203c46b2813329"
+  },
+  "core_path": "<scratch>/candidate-crash.core",
+  "failed_stderr_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "10140806d15b2533239ecf998cd6c98628059f76f6f92e91bab3acb42bd86580"
+  },
+  "diagnostic_commands": [
+    {
+      "id": "unsafe-namespace-core-diagnosis",
+      "argv": [
+        "gdb",
+        "-batch",
+        "-ex",
+        "set pagination off",
+        "-ex",
+        "set debuginfod enabled off",
+        "-ex",
+        "set solib-search-path <sdk-1>/runtime/lib/linux_x86_64_cjnative",
+        "<scratch>/coexist-1/target/release/bin/main",
+        "<scratch>/candidate-crash.core",
+        "-ex",
+        "bt 12",
+        "-ex",
+        "info registers rax rdi rbp rsp fs_base",
+        "-ex",
+        "disassemble CRYPTO_get_thread_local",
+        "-ex",
+        "x/8i 0x56068a9a6320",
+        "-ex",
+        "x/wx &g_thread_local_key",
+        "-ex",
+        "x/wx &g_thread_local_key_created"
+      ],
+      "cwd": "<repo>",
+      "checkout_hidden": false,
+      "environment": {
+        "DEBUGINFOD_URLS": ""
+      },
+      "stdout": {
+        "path": "docs/evidence/M12-002/binary/unsafe-namespace-core-diagnosis.stdout.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "85e4830137ab4d1175f8f10110c40420bfb04a51bddcb43b7c1635b0de927705"
+        }
+      },
+      "stderr": {
+        "path": "docs/evidence/M12-002/binary/unsafe-namespace-core-diagnosis.stderr.log",
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "exit_code": 0
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "task_id": "M12-002",
+  "profile": "stable-native",
+  "status": "PASS",
+  "evidence_kind": "observed session command results",
+  "commands": [
+    {
+      "cwd": "<repo>",
+      "argv": ["python3", "tools/m12_002_source_sdk.py", "--sdk-root", "<sdk>", "--archive", "docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz", "--verify", "docs/evidence/M12-002/source-sdk/stable-native/report.json"],
+      "exit_code": 0,
+      "stdout": "M12_002_SOURCE_SDK_VERIFY_PASS\n"
+    },
+    {
+      "cwd": "<repo>",
+      "environment": {"WIRESTACK_SOURCE_SDK_REPORT": "docs/evidence/M12-002/source-sdk/stable-native/report.json", "WIRESTACK_SOURCE_SDK_ROOT": "<sdk>", "TMPDIR": "<scratch>", "TMP": "<scratch>", "TEMP": "<scratch>"},
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m12_002_source_sdk"],
+      "exit_code": 0,
+      "summary": "Ran 5 tests in 7.430s; OK"
+    }
+  ],
+  "scope": "Retained real native report succeeds; archive/compiler/runtime changes invalidate it; rebuild proof cannot become binary cross-SDK support."
+}

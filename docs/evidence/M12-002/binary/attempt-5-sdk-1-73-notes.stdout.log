@@ -1,0 +1,36 @@
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(GCDAProfiling.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfiling.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingInternal.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingValue.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingBuffer.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingFile.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingMerge.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingMergeFile.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingNameVar.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingVersionVar.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingWriter.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformDarwin.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformFuchsia.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformLinux.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformOther.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingPlatformWindows.c.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingRuntime.cpp.o)
+
+File: <sdk-1>/lib/linux_x86_64_cjnative/libclang_rt-profile.a(InstrProfilingUtil.c.o)

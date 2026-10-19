@@ -1,0 +1,466 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-002",
+  "native_profile_status": "PASS",
+  "guest_original_glibc_after_namespace": "glibc 2.35",
+  "host_and_guest_system_glibc_files_overwritten": false,
+  "initial_glibc235_profile": "FAIL_UNSUPPORTED",
+  "initial_linux_target_selector": "FAIL_WINDOWS_COFF_REQUIRED_BY_MISTAKE",
+  "initial_loader_copy": "FAIL_EXECUTABLE_PERMISSION_LOST_FIXED_WITHOUT_BYTE_CHANGES",
+  "image_fetch_initial_exit_code": 28,
+  "image_resume_exit_code": 0,
+  "image_sha256": "012d81fade7e8ff4428fc35dfeee711d66d1f47d5ea9c5c8ced96a85b959835c",
+  "transfer_commands": [
+    {
+      "id": "guest-directory",
+      "argv": [
+        "ssh",
+        "-i",
+        "<task-temp>/platform/vm-westmere/identity",
+        "-p",
+        "45827",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=3",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=<task-temp>/platform/vm-westmere/known-hosts",
+        "-o",
+        "LogLevel=ERROR",
+        "tester@192.0.2.1",
+        "sudo mkdir -p /opt/wirestack-matrix; sudo chown tester:tester /opt/wirestack-matrix"
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "transfer",
+      "argv": [
+        "scp",
+        "-q",
+        "-i",
+        "<task-temp>/platform/vm-westmere/identity",
+        "-P",
+        "45827",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=3",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=<task-temp>/platform/vm-westmere/known-hosts",
+        "-o",
+        "LogLevel=ERROR",
+        "<task-temp>/platform/sdk113.tar.gz",
+        "<task-temp>/platform/stable-consumers.tar.gz",
+        "<task-temp>/platform/support.tar.gz",
+        "tester@192.0.2.1:/opt/wirestack-matrix/"
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "guest-install",
+      "argv": [
+        "ssh",
+        "-i",
+        "<task-temp>/platform/vm-westmere/identity",
+        "-p",
+        "45827",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=3",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=<task-temp>/platform/vm-westmere/known-hosts",
+        "-o",
+        "LogLevel=ERROR",
+        "tester@192.0.2.1",
+        "cd /opt/wirestack-matrix && mkdir sdk consumers support && tar -xzf sdk113.tar.gz -C sdk && tar -xzf stable-consumers.tar.gz -C consumers && tar -xzf support.tar.gz -C support"
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "guest-archive-bytes",
+      "argv": [
+        "ssh",
+        "-i",
+        "<task-temp>/platform/vm-westmere/identity",
+        "-p",
+        "45827",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=3",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=<task-temp>/platform/vm-westmere/known-hosts",
+        "-o",
+        "LogLevel=ERROR",
+        "tester@192.0.2.1",
+        "cd /opt/wirestack-matrix && sha256sum sdk113.tar.gz stable-consumers.tar.gz support.tar.gz"
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "guest-native-toolchain-install",
+      "argv": [
+        "ssh",
+        "-i",
+        "<task-temp>/platform/vm-westmere/identity",
+        "-p",
+        "45827",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=3",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=<task-temp>/platform/vm-westmere/known-hosts",
+        "-o",
+        "LogLevel=ERROR",
+        "tester@192.0.2.1",
+        "sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential python3-tomli"
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "guest-native-acceptance",
+      "argv": [
+        "ssh",
+        "-i",
+        "<task-temp>/platform/vm-westmere/identity",
+        "-p",
+        "45827",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=3",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=<task-temp>/platform/vm-westmere/known-hosts",
+        "-o",
+        "LogLevel=ERROR",
+        "tester@192.0.2.1",
+        "python3 /opt/wirestack-matrix/support/tools/m12_002_platform.py --sdk-root /opt/wirestack-matrix/sdk --tree /opt/wirestack-matrix/consumers --fixtures /opt/wirestack-matrix/support/fixtures --stable-report /opt/wirestack-matrix/support/stable-report.json --host-kernel 7.2.7-arch1-1 --image-provenance /opt/wirestack-matrix/support/image-provenance.json --output /opt/wirestack-matrix/native-westmere"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "logs": [
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-failing-selector-source.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-failing-selector-source.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-linux-selector-failure.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-linux-selector-failure.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-native-final.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-native-final.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-native-glibc244-executable.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-native-glibc244-executable.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-native-glibc244.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0958eced3935b522876132151b5e573f180c4ec2e1e3e26539a83f58c06182c1"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/collect-native-glibc244.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-archive-bytes.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-archive-bytes.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "20d0fe59cc4c4e807c71e1401730c7f99c230edcf54a99437854258c28785cd9"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-directory.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-directory.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-glibc244-unpack.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-glibc244-unpack.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-install.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-install.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-loader-mode-fix.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-loader-mode-fix.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-acceptance-final.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05fce64939bde91755dfdbf3268fcb8635e1f70f698c28dacf214308cf122ea2"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-acceptance-final.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-acceptance.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d1b34e051135ad83e692f65b48d0a7c664ea5b8d407dc9126071b453d6740e1b"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-acceptance.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-glibc244-executable.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-glibc244-executable.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "57986798e821342b8088db53747085b522b182eb50067be2d99adc3afa3b461a"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-glibc244.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e88e76bd7ff70e528ed40673286a41341feb227a8cd080971fcff550c997b2e4"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-glibc244.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-toolchain-install.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-native-toolchain-install.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "64e510ac26defbd5cbb2afb3b2b51063ac077db9066d1d14019ba4c0c83028d7"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-outside-namespace-glibc.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/guest-outside-namespace-glibc.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2c6c80f81a99db1604b04e9bb1bef2e7e215b2322cd3e465b70f05ad2a9e8896"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/image-fetch.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ad5ec79321d2cb9978e377b538290f365c796e35b68d3d686d62a746c0187cda"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/image-fetch.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/image-resume.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ae7b5d27befdffb2692cc2f03062cca228f45f4e4d90bf1eae48eca1595b0d10"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/image-resume.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/range-fetch.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4319d9e2a1fe87c6447bcd18b4b3c4e2b57098de55d4b81b58aef2e6efd28c3f"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/range-fetch.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/transfer-corrected-selector.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/transfer-corrected-selector.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/transfer-glibc244.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/transfer-glibc244.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/transfer.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/platform/orchestration/transfer.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

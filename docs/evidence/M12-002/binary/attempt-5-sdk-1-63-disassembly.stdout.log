@@ -1,0 +1,21 @@
+In archive <sdk-1>/lib/linux_x86_64_cjnative/libcangjie-std-unittest.diff.a:
+
+unittest.diff.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_CCNcb18AssertPrintableMapIG_G0_G1_E6pprintHG_G_CNby13PrettyPrinterERNat6StringEYA_lEL_E$g-0x114>:
+       0:	mov    0x0(%rip),%rax        # 7 <_CCNcb18AssertPrintableMapIG_G0_G1_E6pprintHG_G_CNby13PrettyPrinterERNat6StringEYA_lEL_E$g-0x10d>
+       7:	ret
+       8:	nopl   0x0(%rax,%rax,1)
+      10:	mov    (%rsi),%rax
+      13:	ret
+      14:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+      20:	push   %rbp
+      21:	mov    %rsp,%rbp
+      24:	mov    %rsi,%rdx
+      27:	mov    %edi,%esi
+      29:	lea    0x0(%rip),%rdi        # 30 <_CCNcb18AssertPrintableMapIG_G0_G1_E6pprintHG_G_CNby13PrettyPrinterERNat6StringEYA_lEL_E$g-0xe4>
+      30:	call   35 <_CCNcb18AssertPrintableMapIG_G0_G1_E6pprintHG_G_CNby13PrettyPrinterERNat6StringEYA_lEL_E$g-0xdf>
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "8e773749273d3912804d9e743631185d43f513cd25a19a3d2daa40c02cd0e07f"}

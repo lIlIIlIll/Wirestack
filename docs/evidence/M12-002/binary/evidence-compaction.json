@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "status": "PASS_PUBLICATION_COMPACTION",
+  "meaning": "Representation change only. No native command was rerun or prior native failure reclassified. Full raw output retained privately; original normalized full-log digests preserved as historical metadata.",
+  "previous_report": "docs/evidence/M12-002/binary/report-pre-compaction.json",
+  "changed_reports": [
+    "docs/evidence/M12-002/binary/input-rejection.json",
+    "docs/evidence/M12-002/binary/report.json",
+    "docs/evidence/M12-002/binary/attempt-8.json",
+    "docs/evidence/M12-002/binary/attempt-7.json",
+    "docs/evidence/M12-002/binary/attempt-6.json",
+    "docs/evidence/M12-002/binary/attempt-5.json",
+    "docs/evidence/M12-002/binary/attempt-4.json",
+    "docs/evidence/M12-002/binary/attempt-3.json",
+    "docs/evidence/M12-002/binary/attempt-2.json",
+    "docs/evidence/M12-002/binary/attempt-1.json"
+  ],
+  "outputs": [
+    {
+      "published_path": "docs/evidence/M12-002/binary/sdk-0-0-disassembly.stdout.log",
+      "published_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "aa48eaeb8491266dc8a9cc0f991d43468a817ad3268b0c7fa83f37905057ab80"
+      },
+      "original_published_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5541164ff4ed9d56aa6da3115fe031a8f772b6422209498b4551deee1315c11d"
+      },
+      "full_raw_path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/binary/run-1/sdk-0-0-disassembly.stdout.raw",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "aeaa6254614b8f59c2b55cfc5c558314a01cb3044904eec254631d9df3108b4f"
+      },
+      "bytes": 2555868611
+    },
+    {
+      "published_path": "docs/evidence/M12-002/binary/archive-0-disassembly.stdout.log",
+      "published_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7ffd92591950fe9f1387ace1e435e2ceb89e61211a83c99e8a4f3d2bdd0097fb"
+      },
+      "original_published_digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8a5ac53a49819fd72af87e430165555586e487eda888708202d4239327d70153"
+      },
+      "full_raw_path": "$HOME/.cache/agent-tmp/wirestack-m12-002.XCXlIZ/binary/run-1/archive-0-disassembly.stdout.raw",
+      "digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "bbf50d4d02fb6435e22f69740d30347a8beaa1807d10a33ad422edb9596be582"
+      },
+      "bytes": 26247784
+    }
+  ]
+}

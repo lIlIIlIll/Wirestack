@@ -1,0 +1,4 @@
+<installed-tree>/consumers/cli/target/release/bin/main: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.38' not found (required by <installed-tree>/consumers/cli/target/release/bin/main)
+<installed-tree>/consumers/cli/target/release/bin/main: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.44' not found (required by <installed-tree>/consumers/cli/target/release/bin/main)
+<installed-tree>/consumers/cli/target/release/bin/main: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.43' not found (required by <installed-tree>/consumers/cli/target/release/bin/main)
+<installed-tree>/consumers/cli/target/release/bin/main: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.38' not found (required by <installed-tree>/consumers/cli/target/release/bin/main)

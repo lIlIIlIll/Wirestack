@@ -1,0 +1,21 @@
+
+/usr/lib/libssl.so.3:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+0000000000014000 <.init>:
+   14000:	endbr64
+   14004:	sub    $0x8,%rsp
+   14008:	mov    0xe0ef1(%rip),%rax        # f4f00 <__gmon_start__>
+   1400f:	test   %rax,%rax
+   14012:	je     14016 <OPENSSL_3.0.0@@OPENSSL_3.0.0+0x14016>
+   14014:	call   *%rax
+   14016:	add    $0x8,%rsp
+   1401a:	ret
+
+Disassembly of section .text:
+
+0000000000014040 <i2d_SSL_SESSION@@OPENSSL_3.0.0-0xae0>:
+   14040:	mov    0x18,%rax
+Complete disassembly retained in private scratch; raw output binding: {"domain": "artifact-bytes-v1", "sha256": "18b3427df820fd84d4c820518fe8ff86895b5d3bd934429cb7c426a87be37fa5"}
