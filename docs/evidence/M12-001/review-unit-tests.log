@@ -1,0 +1,36 @@
+Command: TMPDIR=$TASK_TMP TMP=$TASK_TMP TEMP=$TASK_TMP python3 -m unittest tools.benchmarks.tests.test_m12_001_end_to_end -v
+Exit status: 0
+
+test_existing_wrong_archive_fails_without_reconstruction (tools.benchmarks.tests.test_m12_001_end_to_end.BaselineArchiveVerification.test_existing_wrong_archive_fails_without_reconstruction) ... ok
+test_missing_archive_is_reconstructed_and_checked_against_payload_and_bytes (tools.benchmarks.tests.test_m12_001_end_to_end.BaselineArchiveVerification.test_missing_archive_is_reconstructed_and_checked_against_payload_and_bytes) ... ok
+test_missing_profiler_returns_optional_unavailable_record (tools.benchmarks.tests.test_m12_001_end_to_end.BaselineArchiveVerification.test_missing_profiler_returns_optional_unavailable_record) ... ok
+test_missing_reconstruction_inputs_are_explicitly_unavailable (tools.benchmarks.tests.test_m12_001_end_to_end.BaselineArchiveVerification.test_missing_reconstruction_inputs_are_explicitly_unavailable) ... ok
+test_wrong_reconstructed_payload_or_archive_cannot_pass (tools.benchmarks.tests.test_m12_001_end_to_end.BaselineArchiveVerification.test_wrong_reconstructed_payload_or_archive_cannot_pass) ... ok
+test_checksum_drift_prevents_averaging_different_work (tools.benchmarks.tests.test_m12_001_end_to_end.NativeSampleValidation.test_checksum_drift_prevents_averaging_different_work) ... ok
+test_failed_requests_are_not_hidden_by_successful_bytes (tools.benchmarks.tests.test_m12_001_end_to_end.NativeSampleValidation.test_failed_requests_are_not_hidden_by_successful_bytes) ... ok
+test_missing_latencies_include_rejected_operations (tools.benchmarks.tests.test_m12_001_end_to_end.NativeSampleValidation.test_missing_latencies_include_rejected_operations) ... ok
+test_nearest_rank_tail_does_not_interpolate_away_outlier (tools.benchmarks.tests.test_m12_001_end_to_end.NativeSampleValidation.test_nearest_rank_tail_does_not_interpolate_away_outlier) ... ok
+test_overload_without_actual_rejection_is_invalid (tools.benchmarks.tests.test_m12_001_end_to_end.NativeSampleValidation.test_overload_without_actual_rejection_is_invalid) ... ok
+test_resources_must_be_reclaimed (tools.benchmarks.tests.test_m12_001_end_to_end.NativeSampleValidation.test_resources_must_be_reclaimed) ... ok
+test_cached_summary_cannot_invent_more_throughput (tools.benchmarks.tests.test_m12_001_end_to_end.RawEvidenceBinding.test_cached_summary_cannot_invent_more_throughput) ... ok
+test_changed_native_output_cannot_keep_old_digest (tools.benchmarks.tests.test_m12_001_end_to_end.RawEvidenceBinding.test_changed_native_output_cannot_keep_old_digest) ... ok
+test_omitted_feature_cannot_pass_full_layer_gate (tools.benchmarks.tests.test_m12_001_end_to_end.RawEvidenceBinding.test_omitted_feature_cannot_pass_full_layer_gate) ... ok
+test_one_native_execution_cannot_be_seven_rounds (tools.benchmarks.tests.test_m12_001_end_to_end.RawEvidenceBinding.test_one_native_execution_cannot_be_seven_rounds) ... ok
+test_faster_but_different_byte_count_is_rejected (tools.benchmarks.tests.test_m12_001_end_to_end.ReadBufferCandidate.test_faster_but_different_byte_count_is_rejected) ... ok
+test_more_throughput_with_worse_tail_is_rejected (tools.benchmarks.tests.test_m12_001_end_to_end.ReadBufferCandidate.test_more_throughput_with_worse_tail_is_rejected) ... ok
+test_repeatable_equivalent_work_gain_requires_fewer_measured_reads (tools.benchmarks.tests.test_m12_001_end_to_end.ReadBufferCandidate.test_repeatable_equivalent_work_gain_requires_fewer_measured_reads) ... ok
+test_scheduler_noise_does_not_authorize_optimization (tools.benchmarks.tests.test_m12_001_end_to_end.ReadBufferCandidate.test_scheduler_noise_does_not_authorize_optimization) ... ok
+test_small_sample_cannot_support_optimization (tools.benchmarks.tests.test_m12_001_end_to_end.ReadBufferCandidate.test_small_sample_cannot_support_optimization) ... ok
+test_environment_change_cannot_pass (tools.benchmarks.tests.test_m12_001_end_to_end.RegressionClassification.test_environment_change_cannot_pass) ... ok
+test_failed_correctness_wins_over_environment_mismatch (tools.benchmarks.tests.test_m12_001_end_to_end.RegressionClassification.test_failed_correctness_wins_over_environment_mismatch) ... ok
+test_insufficient_rounds_cannot_pass (tools.benchmarks.tests.test_m12_001_end_to_end.RegressionClassification.test_insufficient_rounds_cannot_pass) ... ok
+test_noisy_candidate_is_not_a_pass (tools.benchmarks.tests.test_m12_001_end_to_end.RegressionClassification.test_noisy_candidate_is_not_a_pass) ... ok
+test_outcome_contract_mismatch_is_inconclusive (tools.benchmarks.tests.test_m12_001_end_to_end.RegressionClassification.test_outcome_contract_mismatch_is_inconclusive) ... ok
+test_throughput_gain_cannot_hide_tail_regression (tools.benchmarks.tests.test_m12_001_end_to_end.RegressionClassification.test_throughput_gain_cannot_hide_tail_regression) ... ok
+test_unmeasured_round_cannot_be_selected (tools.benchmarks.tests.test_m12_001_end_to_end.RoundCohortSelection.test_unmeasured_round_cannot_be_selected) ... ok
+test_warmup_and_old_rounds_cannot_hide_later_regression (tools.benchmarks.tests.test_m12_001_end_to_end.RoundCohortSelection.test_warmup_and_old_rounds_cannot_hide_later_regression) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.180s
+
+OK
