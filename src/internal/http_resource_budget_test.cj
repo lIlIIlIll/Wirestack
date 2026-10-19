@@ -391,69 +391,65 @@ class HttpResourceBudgetTest {
         @Expect(!unexpected.load())
     }
     @TestCase
-    func closeAdmissionWakesConnectionStreamAndBufferWaiters(): Unit {
-        let budget = ledgerTestBudget(1, 1, 1, 1, 1, 1, 1, 1, 1, 64u64, 8u64, 4)
-        let owner = HttpResourceOwnerKey("https://close.example:443", "direct")
-        let heldConnection = budget.tryAcquireConnection(owner).getOrThrow()
-        let heldStream = budget.tryAcquireStream(owner).getOrThrow()
-        let heldBuffer = budget.tryAcquireManagedBuffer(owner, 8u64, true, cleanup: true).getOrThrow()
-        let closedConnections = AtomicBool(false)
-        let closedStreams = AtomicBool(false)
-        let closedBuffers = AtomicBool(false)
+    func closedAdmissionWakesManagedBufferWaitersInsteadOfGrantingToAClosedClient(): Unit {
+        let budget = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 131104u64, 17u64, 4))
+        let owner = HttpResourceOwnerKey("https://buffer-close.example:443", "direct")
+        let held = budget.tryAcquireManagedBuffer(owner, 60000u64, false).getOrThrow()
+        let closed = AtomicBool(false)
         let unexpected = AtomicBool(false)
-        let connectionWaiter = spawn {
+        let waiter = spawn {
             try {
-                let lease = budget.acquireConnection(owner, OperationContext.background())
+                let lease = budget.acquireManagedBuffer(owner, 60000u64, false,
+                    OperationContext.background())
                 lease.close()
             } catch (error: NetworkException) {
                 match (error.code) {
-                    case NetworkErrorCode.Closed => closedConnections.store(true)
+                    case NetworkErrorCode.Closed => closed.store(true)
                     case _ => unexpected.store(true)
                 }
             }
         }
-        let streamWaiter = spawn {
-            try {
-                let lease = budget.acquireStream(owner, OperationContext.background())
-                lease.close()
-            } catch (error: NetworkException) {
-                match (error.code) {
-                    case NetworkErrorCode.Closed => closedStreams.store(true)
-                    case _ => unexpected.store(true)
-                }
-            }
-        }
-        let bufferWaiter = spawn {
-            try {
-                let lease = budget.acquireManagedBuffer(
-                    owner, 8u64, true, OperationContext.background()
-                )
-                lease.close()
-            } catch (error: NetworkException) {
-                match (error.code) {
-                    case NetworkErrorCode.Closed => closedBuffers.store(true)
-                    case _ => unexpected.store(true)
-                }
-            }
-        }
-        @Expect(waitForBudgetWaiters(budget, 3, Duration.second))
+
+        @Expect(waitForBudgetWaiters(budget, 1, Duration.second))
         budget.closeAdmission()
-        connectionWaiter.get(Duration.second)
-        streamWaiter.get(Duration.second)
-        bufferWaiter.get(Duration.second)
-        @Expect(closedConnections.load())
-        @Expect(closedStreams.load())
-        @Expect(closedBuffers.load())
+        waiter.get(Duration.second)
+
+        @Expect(closed.load())
         @Expect(!unexpected.load())
-        let retained = budget.snapshot()
-        @Expect(retained.admissionWaiters, 0)
-        @Expect(retained.reservedConnections, 1)
-        @Expect(retained.reservedStreams, 1)
-        @Expect(retained.managedBufferBytes, 8u64)
-        heldConnection.close()
-        heldStream.close()
-        heldBuffer.close()
-        @Expect(budget.snapshot().owners.size, 0)
+        @Expect(budget.snapshot().managedBufferBytes, 60000u64)
+        @Expect(budget.snapshot().admissionWaiters, 0)
+        held.close()
+        @Expect(budget.snapshot().managedBufferBytes, 0u64)
+
+        let rejectedAfterClose = AtomicBool(false)
+        try {
+            let lease = budget.acquireManagedBuffer(owner, 1u64, false, OperationContext.background())
+            lease.close()
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.Closed => rejectedAfterClose.store(true)
+                case _ => unexpected.store(true)
+            }
+        }
+        @Expect(rejectedAfterClose.load())
+        @Expect(!unexpected.load())
+
+        var tryRejectedAfterClose = false
+        try {
+            let lease = budget.tryAcquireManagedBuffer(owner, 1u64, false)
+            match (lease) {
+                case Some(value) => value.close()
+                case None => ()
+            }
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.Closed => tryRejectedAfterClose = true
+                case _ => unexpected.store(true)
+            }
+        }
+        @Expect(tryRejectedAfterClose)
+        @Expect(!unexpected.load())
     }
     @TestCase
     func retainedLeaseClosesExactlyOnceAcrossConcurrentOwners(): Unit {

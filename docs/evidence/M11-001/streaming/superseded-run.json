@@ -1,0 +1,9 @@
+{
+  "task_id": "M11-001",
+  "runtime_handle": "bg_48",
+  "status": "SUPERSEDED",
+  "exit_code": 143,
+  "reason": "Production session invalid-response classification fixed after compilation; run stopped and restarted against corrected source.",
+  "formal_acceptance": false,
+  "start_receipt": "formal-start.json"
+}

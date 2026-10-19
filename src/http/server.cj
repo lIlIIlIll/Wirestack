@@ -446,7 +446,7 @@ public class HttpServerBuilder {
             )
             let core = http1.Http1Server(
                 bound,
-                PublicHttp1Handler(selectedHandler, resourceBudget),
+                PublicHttp1Handler(selectedHandler, resourceBudget, tlsConfig.isSome()),
                 config: http1.Http1ServerConfig(
                     maximumConnections: effectiveResourceLimits.maximumConnections,
                     maximumRequestsPerConnection: maximumRequestsPerConnection,
@@ -572,6 +572,21 @@ public class HttpServer <: Resource {
     }
 }
 
+/** Extracts the parser-validated authority from one HTTP/1 request head. */
+private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): String {
+    match (request.head.headers.getFirst("host")) {
+        case Some(value) => value
+        case None => ""
+    }
+}
+
+/**
+ * Reconstructs one canonical request authority for aggregate quota owners.
+ * The parser has already validated the spelling; normalization lower-cases the
+ * host, omits the scheme's default port, and keeps IPv6 brackets.
+ * @param authority Parser-validated Host or :authority text.
+ * @param secured Whether the request arrived over TLS.
+ */
 internal func canonicalServerAuthority(authority: String, secured: Bool): String {
     if (authority.isEmpty()) { return "" }
     let scheme = if (secured) { "https" } else { "http" }
@@ -581,18 +596,35 @@ internal func canonicalServerAuthority(authority: String, secured: Bool): String
     if (parsed.explicitPort && parsed.port != defaultPort) { "${host}:${parsed.port}" } else { host }
 }
 
+/** Derives request and stream budget owners from the validated request authority. */
+private func publicServerRequestOwner(
+    authority: String,
+    secured: Bool
+): internal.HttpResourceOwnerKey {
+    let canonical = canonicalServerAuthority(authority, secured)
+    let origin = if (canonical.isEmpty()) { "server" } else { canonical }
+    internal.HttpResourceOwnerKey(origin, "listener")
+}
+
+
+private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
+    publicServerRequestOwner(authority, false)
+}
+
 private class PublicHttp1Handler <: http1.Http1ServerHandler {
     private let delegate: HttpServerHandler
     private let connectionCancellation: HttpConnectionCancellationHandle
     private let resourceBudget: internal.HttpResourceBudget
-    private let resourceOwner = internal.HttpResourceOwnerKey("server", "listener")
+    private let secured: Bool
     init(
         delegate: HttpServerHandler,
         resourceBudget: internal.HttpResourceBudget,
+        secured: Bool,
         connectionCancellation!: HttpConnectionCancellationHandle = HttpConnectionCancellationHandle()
     ) {
         this.delegate = delegate
         this.resourceBudget = resourceBudget
+        this.secured = secured
         this.connectionCancellation = connectionCancellation
     }
 
@@ -605,7 +637,8 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
         context: transport.OperationContext): http1.Http1ServerResponse {
         let operation = observedRequestContext(context, delegate is ServiceHookHandler)
         emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
-        let requestLease = match (resourceBudget.tryAcquireRequest(resourceOwner)) {
+        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request), false)
+        let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
             case Some(value) => value
             case None =>
                 resourceBudget.recordAdmissionRejection()
@@ -846,11 +879,14 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
     private func serveHttp1(value: transport.DuplexTransport, context: transport.OperationContext,
         entry: PublicServerConnectionEntry): Unit {
         let cancellation = entry.connectionCancellation
+        let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
+            publicServerRequestOwner(authority, false)
+        }
         let registration = cancellation.cancellationToken.register { => value.abort(reason: Some(transport.AbortReason.Cancelled)) }
         let control = http1.Http1ServerDrainControl(value)
         entry.installHttp1(control)
         try {
-            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(publicHandler, resourceBudget,
+            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(publicHandler, resourceBudget, false,
                 connectionCancellation: cancellation), context: context, limits: limits,
                 maximumRequests: maximumHttp1Requests, drainControl: Some(control))
         } finally { registration.unregister() }
@@ -859,8 +895,12 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
     private func serveHttp2(value: transport.DuplexTransport, context: transport.OperationContext,
         entry: PublicServerConnectionEntry): Unit {
         let cancellation = entry.connectionCancellation
-        let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
-            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner))
+                let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
+            publicServerRequestOwner(authority, false)
+        }
+let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
+            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
+            requestOwnerFactory: Some(requestOwnerFactory))
         let registration = cancellation.cancellationToken.register { => created.abort() }
         entry.installHttp2(created)
         try { created.serve(context: context) }
