@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
+  "revision": "7915e84f89182eac40e0f361fcf4c58b8818732e",
   "status": "BLOCKED",
   "acceptance_status": "BLOCKED",
   "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
@@ -45,8 +45,8 @@
       "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
       "exit_code": 0,
       "status": "PASS",
-      "total": 1099,
-      "passed": 1071,
+      "total": 1104,
+      "passed": 1076,
       "skipped": 28,
       "errors": 0,
       "failed": 0
@@ -56,8 +56,8 @@
       "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 210,
-      "passed": 210,
+      "total": 213,
+      "passed": 213,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -67,8 +67,8 @@
       "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 210,
-      "passed": 210,
+      "total": 213,
+      "passed": 213,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -78,8 +78,8 @@
       "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 210,
-      "passed": 210,
+      "total": 213,
+      "passed": 213,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -89,8 +89,8 @@
       "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
       "exit_code": 0,
       "status": "PASS",
-      "total": 210,
-      "passed": 210,
+      "total": 213,
+      "passed": 213,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -101,12 +101,14 @@
       "exit_code": 0,
       "status": "PASS",
       "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
-      "docs_sha256": "1fde2a6cc279ae78347a2013f698fc97303c41e5400e5825a871f0834e1b86c1",
+      "docs_sha256": "5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099",
       "api_symbols_covered": 1873,
       "api_symbols_total": 1873,
       "parameters_covered": 950,
       "parameters_total": 950,
-      "package_layers_at_full_coverage": 7
+      "package_layers_at_full_coverage": 7,
+      "checked_in_canonical_docs_sha256": "1fde2a6cc279ae78347a2013f698fc97303c41e5400e5825a871f0834e1b86c1",
+      "note": "The strict check passed. Its generated docs.json used pretty serialization, so that generated file was restored to the checked-in canonical compact serialization; the report records generated output."
     },
     {
       "id": "repository-check",
@@ -124,11 +126,11 @@
         "M12-002 platform-support source mismatch",
         "M7 task-graph expectation drift"
       ],
-      "note": "Re-run after canonical docs generation at source revision 3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1; it still stopped in the initial tooling unittest stage. Separate Cangjie, resource-profile, and canonical documentation checks were run independently."
+      "note": "Re-run after the current-source docs check at revision 7915e84f89182eac40e0f361fcf4c58b8818732e; it still stopped in the initial tooling unittest stage. The generated docs.json was restored to the checked-in compact serialization after the strict docs check. Separate Cangjie, resource-profile, and documentation checks were run independently."
     }
   ],
   "task_gate": {
-    "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json --output <task-tmp>/check-task-3638.json",
+    "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json",
     "exit_code": 2,
     "status": "INVALID",
     "issues": [
@@ -148,7 +150,7 @@
       "finding": "The only reported mutation was docs/api/generated/docs.json: the committed file used pretty serialization while the pinned CI CJDoc generator emitted compact serialization.",
       "resolved_in_revision": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1"
     },
-    "current_source": [
+    "previous_published_head": [
       {
         "run_id": 39400213874,
         "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
@@ -165,7 +167,12 @@
         "result": "Strict documentation gate and public clean consumer passed.",
         "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400212565"
       }
-    ]
+    ],
+    "post_fix_head_ci": {
+      "status": "NOT_RUN",
+      "source_revision": "7915e84f89182eac40e0f361fcf4c58b8818732e",
+      "note": "No GitHub Actions run has completed for the reviewed source revision. Runs recorded above are historical and bind only the previous published revision."
+    }
   },
   "full_suite_stability": {
     "earlier_run": {
@@ -187,16 +194,27 @@
       "errors": 0,
       "failed": 0
     },
-    "interpretation": "The latest complete native run passed. The earlier intermittent pool-fairness failure is in M10-003 scope and was not changed here; retain it as a stability risk, not as a pass."
+    "interpretation": "The final complete native run passed after correcting the budgets in three newly added scheduler regression tests. An earlier full run in this evidence sequence had an intermittent pool-fairness timeout; its isolated case passed. That pool case is outside the Q4 source changes and remains a stability risk, not a pass."
   },
   "noncanonical_attempts": [
     {
       "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2 with an extra cjHeapSize=1GB override",
       "exit_code": 134,
       "status": "FAILED_BEFORE_TESTS",
-      "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The manifest-equivalent run with the default heap passed 210/210; this noncanonical attempt is not counted as an acceptance result."
+      "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The manifest-equivalent run with the default heap passed 213/213; this noncanonical attempt is not counted as an acceptance result."
     }
   ],
+  "intermediate_regression_run": {
+    "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+    "exit_code": 1,
+    "status": "FAILED_THEN_FIXED",
+    "total": 1104,
+    "passed": 1073,
+    "skipped": 28,
+    "errors": 3,
+    "failed": 0,
+    "result": "Three new scheduler cases exhausted the test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected; the final full run passed 1076 with zero errors."
+  },
   "decision": {
     "task_status": "BLOCKED",
     "pr_216": "Remain OPEN and DRAFT; do not mark ready while repository-check and task-graph blockers remain.",
