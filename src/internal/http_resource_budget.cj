@@ -77,15 +77,15 @@ private class HttpResourceWaiter {
     let id: Int64
     let kind: HttpResourceKind
     let owner: HttpResourceOwnerKey
-    let amount: UInt64
+    let minimumAmount: UInt64
     let control: Bool
 
     init(id: Int64, kind: HttpResourceKind, owner: HttpResourceOwnerKey,
-        amount: UInt64, control: Bool) {
+        control: Bool, minimumAmount: UInt64) {
         this.id = id
         this.kind = kind
         this.owner = owner
-        this.amount = amount
+        this.minimumAmount = minimumAmount
         this.control = control
     }
 }
@@ -204,6 +204,69 @@ public class HttpResourceBudget {
     ): HttpResourceLease {
         if (bytes == 0u64) { throw IllegalArgumentException("HTTP managed-buffer reservation must be non-zero") }
         acquireBuffer(owner, bytes, control, context)
+    }
+
+    /** Waits until a minimum DATA-buffer prefix fits, then leases the largest feasible amount. */
+    internal func acquireManagedDataBufferUpTo(
+        owner: HttpResourceOwnerKey,
+        maximumBytes: UInt64,
+        minimumBytes: UInt64,
+        context: OperationContext
+    ): (HttpResourceLease, UInt64) {
+        if (minimumBytes == 0u64 || maximumBytes < minimumBytes) {
+            throw IllegalArgumentException("HTTP DATA buffer minimum must fit within its maximum")
+        }
+        let registration = context.cancellation.register { => wakeWaiters() }
+        try {
+            synchronized(mutex) {
+                checkContext(context)
+                checkAdmissionOpen()
+                if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) {
+                    recordRejectionLocked()
+                    throw resourceOwnersExhausted()
+                }
+                let available = maximumAcquireableDataBufferLocked(owner, maximumBytes)
+                if (nextWaiterLocked(HttpResourceKind.Buffer).isNone() && available >= minimumBytes) {
+                    return (grantLocked(HttpResourceKind.Buffer, owner, available, false, false), available)
+                }
+                if (waiters.size >= limits.maximumWaiters) {
+                    recordRejectionLocked()
+                    throw resourceWaitersExhausted()
+                }
+                let waiter = HttpResourceWaiter(
+                    nextWaiterId, HttpResourceKind.Buffer, owner, false, minimumBytes
+                )
+                nextWaiterId++
+                waiters.add(waiter)
+                ensureOwnerLocked(owner).waiters++
+                highWaterWaiters = max(highWaterWaiters, waiters.size)
+                changed.notifyAll()
+                try {
+                    while (true) {
+                        checkContext(context)
+                        checkAdmissionOpen()
+                        if (isNextWaiterLocked(waiter)) {
+                            let grantBytes = maximumAcquireableDataBufferLocked(owner, maximumBytes)
+                            if (grantBytes >= minimumBytes) {
+                                removeWaiterLocked(waiter)
+                                let lease = grantLocked(
+                                    HttpResourceKind.Buffer, owner, grantBytes, false, false
+                                )
+                                changed.notifyAll()
+                                return (lease, grantBytes)
+                            }
+                        }
+                        waitForChangeLocked(context)
+                    }
+                    throw IllegalStateException("unreachable HTTP DATA buffer admission state")
+                } finally {
+                    removeWaiterLocked(waiter)
+                    changed.notifyAll()
+                }
+            }
+        } finally {
+            registration.unregister()
+        }
     }
 
     /** Accounts received DATA bytes without blocking the connection reader. */
@@ -476,7 +539,7 @@ public class HttpResourceBudget {
                     recordRejectionLocked()
                     throw resourceWaitersExhausted()
                 }
-                let waiter = HttpResourceWaiter(nextWaiterId, kind, owner, amount, control)
+                let waiter = HttpResourceWaiter(nextWaiterId, kind, owner, control, amount)
                 nextWaiterId++
                 waiters.add(waiter)
                 ensureOwnerLocked(owner).waiters++
@@ -582,25 +645,41 @@ public class HttpResourceBudget {
                         min(managedBufferBytes, limits.maximumManagedBufferBytes)
             }
         } else {
-            let controlReserve = min(limits.reservedControlBufferBytes, limits.maximumManagedBufferBytes)
-            let receiveReserve = min(
-                UInt64(limits.maximumConnections) * 65535u64,
-                limits.maximumManagedBufferBytes - controlReserve
-            )
-            let dataBudget = limits.maximumManagedBufferBytes - controlReserve - receiveReserve
-            let outboundUsed = dataBufferBytes - receivedBufferBytes
-            let routeUsed = ownerDataBufferBytesLocked(owner)
-            let originUsed = originDataBufferBytesLocked(owner.origin)
-            amount <= dataBudget - min(outboundUsed, dataBudget) &&
-                amount <= limits.maximumManagedBufferBytesPerRoute -
-                    min(routeUsed, limits.maximumManagedBufferBytesPerRoute) &&
-                amount <= limits.maximumManagedBufferBytesPerOrigin -
-                    min(originUsed, limits.maximumManagedBufferBytesPerOrigin) &&
-                amount <= limits.maximumManagedBufferBytes -
-                    min(managedBufferBytes, limits.maximumManagedBufferBytes)
+            maximumAcquireableDataBufferLocked(owner, amount) >= amount
         }
     }
 
+    private func maximumAcquireableDataBufferLocked(
+        owner: HttpResourceOwnerKey,
+        maximumBytes: UInt64
+    ): UInt64 {
+        if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) { return 0u64 }
+        let controlReserve = min(limits.reservedControlBufferBytes, limits.maximumManagedBufferBytes)
+        let receiveReserve = min(
+            UInt64(limits.maximumConnections) * 65535u64,
+            limits.maximumManagedBufferBytes - controlReserve
+        )
+        let dataBudget = limits.maximumManagedBufferBytes - controlReserve - receiveReserve
+        let outboundUsed = dataBufferBytes - receivedBufferBytes
+        let routeUsed = ownerDataBufferBytesLocked(owner)
+        let originUsed = originDataBufferBytesLocked(owner.origin)
+        min(
+            maximumBytes,
+            min(
+                dataBudget - min(outboundUsed, dataBudget),
+                min(
+                    limits.maximumManagedBufferBytesPerRoute -
+                        min(routeUsed, limits.maximumManagedBufferBytesPerRoute),
+                    min(
+                        limits.maximumManagedBufferBytesPerOrigin -
+                            min(originUsed, limits.maximumManagedBufferBytesPerOrigin),
+                        limits.maximumManagedBufferBytes -
+                            min(managedBufferBytes, limits.maximumManagedBufferBytes)
+                    )
+                )
+            )
+        )
+    }
     private func canAcquireReceivedBufferLocked(
         owner: HttpResourceOwnerKey,
         amount: UInt64
@@ -687,7 +766,9 @@ public class HttpResourceBudget {
         var leastRecent: Int64 = 0
         for (waiter in waiters) {
             if (!sameHttpResourceKind(waiter.kind, kind)) { continue }
-            if (!canAcquireLocked(waiter.kind, waiter.owner, waiter.amount, waiter.control)) { continue }
+            if (!canAcquireLocked(
+                waiter.kind, waiter.owner, waiter.minimumAmount, waiter.control
+            )) { continue }
             let counts = findOwnerLocked(waiter.owner).getOrThrow()
             match (selected) {
                 case None =>
