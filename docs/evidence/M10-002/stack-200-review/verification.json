@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "7915e84f89182eac40e0f361fcf4c58b8818732e",
+  "revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
   "status": "BLOCKED",
   "acceptance_status": "BLOCKED",
   "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
@@ -45,19 +45,43 @@
       "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
       "exit_code": 0,
       "status": "PASS",
-      "total": 1104,
-      "passed": 1076,
+      "total": 1107,
+      "passed": 1079,
       "skipped": 28,
       "errors": 0,
       "failed": 0
+    },
+    {
+      "id": "impossible-data-buffer-minimum-regression",
+      "command": "cjpm test --filter='HttpResourceBudgetTest.impossibleDataBufferMinimumDoesNotRegisterWaiter' --parallel 1 --no-progress --no-color src/internal",
+      "pre_fix": {
+        "source_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e",
+        "exit_code": 1,
+        "total": 16,
+        "passed": 0,
+        "skipped": 15,
+        "errors": 0,
+        "failed": 1,
+        "result": "With the regression test added to the working tree while implementation remained at 2eb92251a0a600c974dc6c59b2313c806e660e5e, both route-cap=9 and origin-cap=9 timed out instead of rejecting; highWaterAdmissionWaiters became 1 and rejectedOperations remained 0."
+      },
+      "post_fix": {
+        "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+        "exit_code": 0,
+        "total": 16,
+        "passed": 1,
+        "skipped": 15,
+        "errors": 0,
+        "failed": 0,
+        "result": "Both impossible minima reject immediately with no waiter or owner; exact 10-byte capacity acquires and releases successfully."
+      }
     },
     {
       "id": "resource-profile-nofile-64",
       "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 213,
-      "passed": 213,
+      "total": 215,
+      "passed": 215,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -67,8 +91,8 @@
       "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 213,
-      "passed": 213,
+      "total": 215,
+      "passed": 215,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -78,8 +102,8 @@
       "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 213,
-      "passed": 213,
+      "total": 215,
+      "passed": 215,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -88,27 +112,31 @@
       "id": "resource-profile-single-cpu",
       "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
       "exit_code": 0,
-      "status": "PASS",
-      "total": 213,
-      "passed": 213,
+      "status": "PASS_ON_IMMEDIATE_RETRY",
+      "total": 215,
+      "passed": 215,
       "skipped": 0,
       "errors": 0,
-      "failed": 0
+      "failed": 0,
+      "first_attempt": {
+        "exit_code": 1,
+        "result": "214 passed, 1 failed: Http2ClientConnectionTest.queuedHalfCloseCancellationDoesNotWaitForConnectionWriter reported same-direction transport operation already active / transport direction is closed; immediate identical rerun passed 215/215."
+      }
     },
     {
       "id": "documentation-check",
-      "command": "source <qualified-cangjie-sdk>/envsetup.sh && CJDOC_BIN=<pinned-CI-cjdoc-0.7.2> cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "command": "scripts/check-code (documentation stage, pinned CJDoc 0.7.2)",
       "exit_code": 0,
       "status": "PASS",
       "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
-      "docs_sha256": "5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099",
+      "docs_sha256": "c0b3f311e670e8c983e280b1b312ab0b1d2c22df9cee6a44f188bbeb9272348c",
       "api_symbols_covered": 1873,
       "api_symbols_total": 1873,
       "parameters_covered": 950,
       "parameters_total": 950,
       "package_layers_at_full_coverage": 7,
-      "checked_in_canonical_docs_sha256": "1fde2a6cc279ae78347a2013f698fc97303c41e5400e5825a871f0834e1b86c1",
-      "note": "The strict check passed. Its generated docs.json used pretty serialization, so that generated file was restored to the checked-in canonical compact serialization; the report records generated output."
+      "checked_in_canonical_docs_sha256": "c0b3f311e670e8c983e280b1b312ab0b1d2c22df9cee6a44f188bbeb9272348c",
+      "note": "The current-source scripts/check-code gate revalidated strict docs with CJDoc 0.7.2. The generated docs.json output still matches the checked-in file byte-for-byte; the docs-report records the same SHA-256 and complete symbol/parameter coverage."
     },
     {
       "id": "repository-check",
@@ -126,7 +154,7 @@
         "M12-002 platform-support source mismatch",
         "M7 task-graph expectation drift"
       ],
-      "note": "Re-run after the current-source docs check at revision 7915e84f89182eac40e0f361fcf4c58b8818732e; it still stopped in the initial tooling unittest stage. The generated docs.json was restored to the checked-in compact serialization after the strict docs check. Separate Cangjie, resource-profile, and documentation checks were run independently."
+      "note": "Re-run on exact source revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87; it still failed in the initial tooling unittest stage. The strict docs check passed with the unchanged generated docs.json. Separate Cangjie, resource-profile, and documentation checks were run independently."
     }
   ],
   "task_gate": {
@@ -139,16 +167,16 @@
         "detail": "M10-003 dependency is not COMPLETE: M10-002"
       }
     ],
-    "note": "The task validator checks dependencies across all task manifests. M10-002 declares M9-001, which is COMPLETE; the current first finding is the downstream M10-003 dependency on BLOCKED M10-002. M10-004 is also marked COMPLETE while M10-003 remains BLOCKED. M10-003/#175 and M10-004 were not modified."
+    "note": "The task validator was rerun against source revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87. M10-002 declares M9-001, which is COMPLETE; the current finding is downstream M10-003 depending on BLOCKED M10-002. M10-004 is also marked COMPLETE while M10-003 remains BLOCKED. M10-003/#175 and M10-004 were not modified."
   },
   "github_ci": {
     "initial_clean_build": {
-      "run_id": 39393344922,
-      "head_sha": "eaa76e4e0018e47cb0e3a42a35fd582a5963dc60",
+      "run_id": 39448838666,
+      "head_sha": "b031cfd545e375b3a13f747c8eafe616bee5309e",
       "status": "FAIL",
       "failed_step": "Reject build-time source-tree mutation",
-      "finding": "The only reported mutation was docs/api/generated/docs.json: the committed file used pretty serialization while the pinned CI CJDoc generator emitted compact serialization.",
-      "resolved_in_revision": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1"
+      "finding": "The committed docs/api/generated/docs.json did not match the exact pinned CI CJDoc generator output.",
+      "resolved_in_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e"
     },
     "previous_published_head": [
       {
@@ -156,7 +184,7 @@
         "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
         "workflow": "Clean Cangjie Build",
         "status": "PASS",
-        "result": "Current-source build/test gate, installed public consumer, and source-tree mutation rejection all passed.",
+        "result": "Historical current-source build/test gate, installed public consumer, and source-tree mutation rejection passed on that earlier revision.",
         "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400213874"
       },
       {
@@ -164,15 +192,145 @@
         "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
         "workflow": "M7-033 Developer Documentation",
         "status": "PASS",
-        "result": "Strict documentation gate and public clean consumer passed.",
+        "result": "Historical strict documentation gate and public clean consumer passed on that earlier revision.",
         "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400212565"
       }
     ],
-    "post_fix_head_ci": {
-      "status": "NOT_RUN",
-      "source_revision": "7915e84f89182eac40e0f361fcf4c58b8818732e",
-      "note": "No GitHub Actions run has completed for the reviewed source revision. Runs recorded above are historical and bind only the previous published revision."
+    "previous_candidate_head_ci": {
+      "source_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e",
+      "runs": [
+        {
+          "run_id": 39458729218,
+          "workflow": "Clean Cangjie Build",
+          "status": "FAIL",
+          "result": "Run current-source build and test gate failed.",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39458729218"
+        },
+        {
+          "run_id": 39458729333,
+          "workflow": "M7-033 Developer Documentation",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39458729333"
+        },
+        {
+          "run_id": 39458729178,
+          "workflow": "Threat Model",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729332,
+          "workflow": "Architecture Guard",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729109,
+          "workflow": "NET01",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458728958,
+          "workflow": "NET02",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729240,
+          "workflow": "NET03",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729253,
+          "workflow": "Gate Harness",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729057,
+          "workflow": "DNS Carrier Thread",
+          "status": "PASS"
+        }
+      ]
+    },
+    "final_head_ci": {
+      "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+      "status": "PASS",
+      "runs": [
+        {
+          "run_id": 39468864351,
+          "workflow": "DNS Carrier Thread Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864351"
+        },
+        {
+          "run_id": 39468864648,
+          "workflow": "NET-03 Absolute Deadline Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864648"
+        },
+        {
+          "run_id": 39468864636,
+          "workflow": "Threat Model",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864636"
+        },
+        {
+          "run_id": 39468864424,
+          "workflow": "NET-01 Close Wakeup Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864424"
+        },
+        {
+          "run_id": 39468864628,
+          "workflow": "Gate Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864628"
+        },
+        {
+          "run_id": 39468864638,
+          "workflow": "Architecture Guard",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864638"
+        },
+        {
+          "run_id": 39468865010,
+          "workflow": "NET-02 Full Duplex and Race Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468865010"
+        },
+        {
+          "run_id": 39468864649,
+          "workflow": "Clean Cangjie Build",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864649"
+        },
+        {
+          "run_id": 39468864637,
+          "workflow": "M7-033 Developer Documentation",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864637"
+        },
+        {
+          "run_id": 39468856823,
+          "workflow": "PR #216",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468856823"
+        }
+      ],
+      "note": "All 10 GitHub Actions workflows completed successfully on the exact pushed source revision."
     }
+  },
+  "review": {
+    "reviewed_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+    "baseline_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e",
+    "result": "NO_FINDINGS",
+    "method": "Independent read-only reviewer subagent; exact source and test diff inspected, no build or tests run.",
+    "findings": []
+  },
+  "pr_description": {
+    "status": "NOT_UPDATED",
+    "reviewed_head": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+    "body_status": "STALE",
+    "body_revision_claim": "7915e84f89182eac40e0f361fcf4c58b8818732e",
+    "reason": "The public PR page is readable, but GitHub CLI authentication is unavailable and xd://github exposes no PR-edit operation. A previous GitButler description sync returned Failed to get pull request.",
+    "next_action": "Refresh the description through an authenticated PR-edit route. Keep #216 open and draft until then."
   },
   "full_suite_stability": {
     "earlier_run": {
@@ -194,14 +352,14 @@
       "errors": 0,
       "failed": 0
     },
-    "interpretation": "The final complete native run passed after correcting the budgets in three newly added scheduler regression tests. An earlier full run in this evidence sequence had an intermittent pool-fairness timeout; its isolated case passed. That pool case is outside the Q4 source changes and remains a stability risk, not a pass."
+    "interpretation": "The final complete native run on revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed 1079/1107 with 28 skips. An earlier full run had an intermittent pool-fairness timeout; its isolated case passed. A prior candidate CPU-affinity profile failed the GOAWAY activeStreamCount assertion (214/215) before an immediate identical retry passed 215/215. On the current revision, the CPU profile failed once in queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (214/215) before the identical retry passed 215/215. These remain stability risks, not unconditional passes."
   },
   "noncanonical_attempts": [
     {
       "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2 with an extra cjHeapSize=1GB override",
       "exit_code": 134,
       "status": "FAILED_BEFORE_TESTS",
-      "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The manifest-equivalent run with the default heap passed 213/213; this noncanonical attempt is not counted as an acceptance result."
+      "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The earlier manifest-equivalent run with the default heap passed 213/213; this noncanonical attempt is not counted as acceptance evidence."
     }
   ],
   "intermediate_regression_run": {
@@ -213,11 +371,11 @@
     "skipped": 28,
     "errors": 3,
     "failed": 0,
-    "result": "Three new scheduler cases exhausted the test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected; the final full run passed 1076 with zero errors."
+    "result": "Three new scheduler cases exhausted the test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected; the final current-source full run on e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed 1079/1107 with zero errors."
   },
   "decision": {
     "task_status": "BLOCKED",
-    "pr_216": "Remain OPEN and DRAFT; do not mark ready while repository-check and task-graph blockers remain.",
+    "pr_216": "Remain OPEN and DRAFT; do not mark ready while repository-check and task-graph blockers remain. The PR description is still stale because no authenticated edit route is available.",
     "issue_174": "Remains open and untouched.",
     "m10_003_issue_175": "Not started and untouched."
   }
