@@ -2,7 +2,14 @@
 
 ## Status
 
-COMPLETE
+Historical M7-032 acceptance: COMPLETE at revision
+`1816323cb2e87221e9b55d390aa1a42d9e5e98fa`. The original source-bound seal is
+available in the [base revision](https://github.com/lIlIIlIll/Wirestack/blob/d496a242fec98cc3271f8f71b5a79a3aba60feea/docs/evidence/M7-032/evidence.json).
+
+Current-source requalification: BLOCKED. The canonical `evidence.json` is an
+explicit BLOCKED marker; no current-source PASS seal is claimed. The verifier
+returns `ACCEPTANCE_NOT_PASS` for this marker; see
+[`current-evidence-verification.json`](current-evidence-verification.json).
 
 ## Scope
 
@@ -38,25 +45,28 @@ repair.
 
 ## Current verification and requalification limits
 
-The focused validator tests pass 3/3, the M7-032 test plan validates with 11
-paths, 10 scenarios, and 7 test cases, and the architecture guard passes with
-zero violations.
+The focused validator suite passes 3/3; the M7-032 test plan validates with 11
+paths, 10 scenarios, and 7 tests; the architecture guard passes with zero
+violations. These checks cover the paired-path and relative-root repair only.
 
-The current `scripts/check-task M7-032` run returns `INVALID` before command
-execution because repository-wide readiness rejects
-`M10-004 -> M10-003`. The full M7 Python acceptance command ran 106 tests and
-failed one existing status-consistency assertion: a completed task depends on
-blocked M10-004. This remediation does not weaken either readiness check.
+The normalized [composite-workspace task-check summary](current-task-check.json)
+records `scripts/check-task M7-032` exiting 1 after
+executing all eight commands. The combined Python suite ran 109 tests and
+failed one status-consistency assertion: M10-004 is COMPLETE while its M10-003
+dependency is BLOCKED. The architecture guard passed. The historical M7 API
+inventory rejected current source (243 declarations in the M7 snapshot versus
+363 now); it was not regenerated. The clean-consumer command failed because
+the pinned AWS-LC source is absent in offline mode. `cjpm check`, `cjpm build`,
+and `cjpm test` could not execute because `cjpm` is unavailable.
 
-The historical M7 inventory remains at 243 declarations and correctly rejects
-the current 363-declaration source. It was not regenerated. The current
-M11-003 inventory also differs from source despite the same declaration count;
-the M11-003 owner task must refresh that baseline and its report before its
-current-source check can pass.
+The explicit M11-003 inventory/report pair also differs from current source:
+the current `HttpCancellationHandles.retainCancellation` declaration is absent
+from the M11-003 baseline. That owner baseline remains unchanged pending its
+own task evidence. Neither historical snapshot is treated as a current-source
+PASS.
 
-The selected-task gate stopped before clean-consumer or Cangjie commands.
-Compiler, build, test, and native consumer acceptance are not claimed by this
-validator remediation.
+Current native consumer and Cangjie acceptance are not claimed. The previous
+task report and seal are historical, not proof for this validator repair.
 
 ## Release evidence boundary
 

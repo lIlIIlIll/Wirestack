@@ -96,28 +96,48 @@
       "drift": "Current wirestack.http.HttpCancellationHandles has retainCancellation(callback: () -> Unit): Resource; the M11-003 baseline does not."
     },
     "task_check": {
-      "command": "scripts/check-task M7-032 --json --output <scratch>/m7-032-task-check.json",
-      "exit_code": 2,
-      "status": "INVALID",
-      "commands": [],
-      "issues": [
-        {
-          "code": "DEPENDENCY_INCOMPLETE",
-          "detail": "M10-004 dependency is not COMPLETE: M10-003"
-        }
-      ]
+      "command": "scripts/check-task M7-032 --json --output docs/evidence/M7-032/current-task-check.json",
+      "exit_code": 1,
+      "status": "FAIL",
+      "report": "docs/evidence/M7-032/current-task-check.json",
+      "workspace_scope": "Composite GitButler workspace with M7-032 and P1-012 patches applied; not an isolated M7-032 PR-head run.",
+      "command_status": {
+        "test-plan-matrix": "PASS",
+        "ownership-and-fault-injection-tests": "FAIL",
+        "architecture-guard": "PASS",
+        "public-api-inventory": "FAIL",
+        "clean-consumer-examples": "FAIL",
+        "cangjie-check": "FAIL",
+        "cangjie-build": "FAIL",
+        "cangjie-tests": "FAIL"
+      }
     },
     "python_acceptance_suite": {
       "command": "python3 -m unittest tools.tests.test_m7_032_public_api_contract tools.tests.test_architecture_guard tools.tests.test_m7_linux_task_graph tools.repository.tests.test_repository_tooling -v",
       "exit_code": 1,
-      "tests_run": 106,
+      "tests_run": 109,
       "failures": 1,
       "status": "FAIL",
-      "failure": "test_evolution_status_matches_readiness_classification reports a completed task depending on blocked M10-004 (expected COMPLETE, got BLOCKED)."
+      "failure": "test_evolution_status_matches_readiness_classification fails because M10-004 is COMPLETE while its M10-003 dependency is BLOCKED."
     },
     "clean_consumer_and_cangjie": {
-      "status": "NOT_RUN",
-      "reason": "The task gate rejected the task before selecting acceptance commands; no clean-consumer, Cangjie check, build, or test command ran."
+      "status": "FAIL",
+      "clean_consumer": {
+        "exit_code": 1,
+        "error": "pinned AWS-LC source is absent and --offline was requested"
+      },
+      "cangjie": {
+        "commands": ["cjpm check", "cjpm build", "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color"],
+        "status": "UNAVAILABLE",
+        "reason": "cjpm is not installed; all three commands failed with error_code EXEC."
+      }
     }
+  },
+  "current_evidence_verification": {
+    "command": "scripts/verify-evidence M7-032 --json --output docs/evidence/M7-032/current-evidence-verification.json",
+    "exit_code": 1,
+    "status": "FAIL",
+    "issue_code": "ACCEPTANCE_NOT_PASS",
+    "detail": "evidence acceptance_status is not PASS"
   }
 }
