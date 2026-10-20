@@ -3,8 +3,8 @@
   "source_task": "M10-001",
   "status": "PASS",
   "acceptance_status": "PASS_FOCUSED_ONLY",
-  "revision": "6223022ef3943437596ad9fedcd8571b975a382e",
-  "scope": "Stack #200 T1-T5 focused regression follow-up only. This report does not replace or requalify the original M10-001 acceptance.",
+  "revision": "9f32a05ed11dab33feaefda2a15a70a3b94521f2",
+  "scope": "Stack #200 T1-T5 and finding 6 current-source follow-up. This report does not replace or requalify the original M10-001 acceptance.",
   "platform": "linux-x86_64-glibc",
   "toolchain": {
     "cangjie": "1.1.3",
@@ -47,12 +47,86 @@
       "skipped": 162,
       "errors": 0,
       "failed": 0
+    },
+    {
+      "id": "current-source-focused-regressions",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "cjpm test src/internal/http1 src/internal/http2 src/http --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls --no-color --no-progress",
+      "exit_code": 0,
+      "total": 538,
+      "passed": 10,
+      "skipped": 528,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "current-source-http-packages-full",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http1 src/internal/http2 src/http",
+      "exit_code": 0,
+      "total": 538,
+      "passed": 532,
+      "skipped": 6,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "current-source-architecture-guard",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0
+    },
+    {
+      "id": "current-source-network-capability-contract",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_code": 0
+    },
+    {
+      "id": "current-source-cjpm-check",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "cjpm check",
+      "exit_code": 0
+    },
+    {
+      "id": "current-source-cjpm-build",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "cjpm build",
+      "exit_code": 0
+    },
+    {
+      "id": "public-api-docs-default-heap",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "scripts/check-docs --json",
+      "exit_code": 1,
+      "failure": "Seven package checks passed, but the combined CJDoc process failed to allocate 9,186,376 bytes."
+    },
+    {
+      "id": "public-api-docs-1gb-heap",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "env cjHeapSize=1GB scripts/check-docs --json",
+      "exit_code": 0,
+      "api_symbols": 1873,
+      "documented_api_symbols": 1873,
+      "parameters": 950,
+      "documented_parameters": 950,
+      "package_layers_passed": 7,
+      "combined_report": "PASS"
+    },
+    {
+      "id": "current-task-gate-preflight",
+      "revision": "97cac410c727b301e1f85a0b8e61595980292287",
+      "command": "scripts/check-task M10-001 --json --output <task-tmp>/M10-001-task-check-isolated.json",
+      "exit_code": 2,
+      "result": "INVALID",
+      "commands_executed": 0,
+      "blocker": "DEPENDENCY_INCOMPLETE: M10-004 depends on M10-003, which is BLOCKED."
     }
   ],
   "full_suite_failure_assessment": {
-    "classification": "Intermittent behavior is consistent with a previously documented full-suite failure of the same case; exact cause is not established.",
-    "prior_evidence": "docs/evidence/M10-002/stack-200-follow-up.md records a full src/http failure at this case, an isolated pass, and a subsequent full-suite pass.",
-    "scope_note": "M10-001 changes do not modify the resource-admission implementation or this test. The current full-suite invocation remains a failure and is not reported as a pass."
+    "classification": "An earlier full-suite failure remains unexplained; a subsequent current-source full HTTP package run passed.",
+    "prior_evidence": "The 935351da4880f2d4e1be963100ca19146ea8b6f5 full-suite run failed at HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission; the isolated case passed, and docs/evidence/M10-002/stack-200-follow-up.md records a later full-suite pass.",
+    "scope_note": "The current-source run at 97cac410c727b301e1f85a0b8e61595980292287 passed 532/538 with 6 skipped. This does not establish the cause of the earlier failure or replace the original task acceptance."
   },
   "github_checks": [
     {
@@ -165,5 +239,5 @@
     }
   ],
   "github_check_note": "At exact candidate source revision 6223022ef3943437596ad9fedcd8571b975a382e, all listed applicable GitHub checks passed. The latest-main documentation deployment was skipped by its workflow.",
-  "task_boundary": "The original M10-001 task remains COMPLETE under its historical acceptance evidence. This supplemental Stack #200 report records the five focused fixes and the exact validation boundary on this candidate. No other platform or release qualification is claimed."
+  "task_boundary": "The original M10-001 task remains COMPLETE under its historical acceptance evidence. This supplemental report records six focused fixes and current-source verification, but the current task-gate preflight is INVALID because M10-004 depends on BLOCKED M10-003. No other platform or release qualification is claimed."
 }
