@@ -350,9 +350,71 @@
     },
     "current_candidate_ci": {
       "source_revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
-      "status": "PENDING_PUSH",
-      "runs": [],
-      "note": "The source commit has not been pushed yet, so no CI runs exist for this candidate. The previous pushed source revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed all 10 workflows."
+      "head_sha": "f4034849f9d74c3301ccd0a1f3527909d057886f",
+      "status": "PASS",
+      "runs": [
+        {
+          "run_id": 39482209836,
+          "workflow": "NET-02 Full Duplex and Race Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209836"
+        },
+        {
+          "run_id": 39482209905,
+          "workflow": "Architecture Guard",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209905"
+        },
+        {
+          "run_id": 39482209864,
+          "workflow": "Threat Model",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209864"
+        },
+        {
+          "run_id": 39482209866,
+          "workflow": "Gate Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209866"
+        },
+        {
+          "run_id": 39482209799,
+          "workflow": "NET-01 Close Wakeup Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209799"
+        },
+        {
+          "run_id": 39482209804,
+          "workflow": "NET-03 Absolute Deadline Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209804"
+        },
+        {
+          "run_id": 39482209896,
+          "workflow": "DNS Carrier Thread Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209896"
+        },
+        {
+          "run_id": 39482210007,
+          "workflow": "M7-033 Developer Documentation",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482210007"
+        },
+        {
+          "run_id": 39482209786,
+          "workflow": "Clean Cangjie Build",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482209786"
+        },
+        {
+          "run_id": 39482207763,
+          "workflow": "PR #216",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39482207763"
+        }
+      ],
+      "note": "All 10 GitHub Actions workflows passed on the pushed branch head f4034849f9d74c3301ccd0a1f3527909d057886f, including Clean Cangjie Build and M7-033 Developer Documentation. The two local combined CJDoc runs still failed with allocation errors; those results remain recorded under documentation-check."
     }
   },
   "review": {
@@ -427,7 +489,7 @@
   },
   "decision": {
     "task_status": "BLOCKED",
-    "pr_216": "Remain OPEN and DRAFT. The current candidate is blocked by scripts/check, the combined strict-documentation OOM, and the downstream task-graph validator; do not mark ready. The PR description is stale and could not be updated through available authenticated routes.",
+    "pr_216": "Remain OPEN and DRAFT. The local scripts/check-code combined documentation check OOMed twice, while the pushed head f4034849f9d74c3301ccd0a1f3527909d057886f passed the GitHub documentation and clean-build workflows. Do not mark ready while scripts/check and the task-graph validator still fail. The PR description remains stale and could not be updated through available authenticated routes.",
     "issue_174": "Remains open and untouched.",
     "m10_003_issue_175": "Not started and untouched."
   }
