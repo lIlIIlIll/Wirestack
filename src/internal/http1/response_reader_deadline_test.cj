@@ -153,6 +153,44 @@ class Http1LateReadDeadlineReviewTest {
     }
 
     @TestCase
+    func lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody(): Unit {
+        let clock = ReviewContinueManualClock()
+        let transport = ReviewUpgradeReadBudgetTransport(
+            "HTTP/1.1 417 Expectation Failed\r\nContent-Length: 0\r\n\r\n",
+            clock: Some(clock), lateHeader: true
+        )
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"),
+            headers: HttpHeaders.builder()
+                .add("Content-Length", "1")
+                .add("Expect", "100-continue")
+                .build(),
+            body: RequestBody.bytes([120u8])
+        )
+        let writer = Http1RequestWriter(request)
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock)),
+            timeoutPolicy: OperationTimeoutPolicy(responseHeaders: Some(20 * Duration.millisecond))
+        )
+        let error = @AssertThrows[api.NetworkException](exchangeHttp1ExpectContinue(
+            transport, request, writer, 5 * Duration.millisecond, context: context
+        ))
+        @Expect(writer.evidence.bodyBytesWritten, 0)
+        match (error.category) {
+            case api.NetworkErrorCategory.DeadlineExceeded => ()
+            case _ => @Fail("late final response did not retain its deadline error")
+        }
+        match (error.code) {
+            case api.NetworkErrorCode.TimedOut => ()
+            case _ => @Fail("late final response lost its timeout code")
+        }
+        match (error.phase) {
+            case api.NetworkPhase.HttpHeaders => ()
+            case _ => @Fail("late final response lost its response-header phase")
+        }
+    }
+
+    @TestCase
     func responseBodyBytesReturnedAfterIdleExpiryAreRejected(): Unit {
         let clock = ReviewContinueManualClock()
         let transport = ReviewUpgradeReadBudgetTransport(

@@ -136,6 +136,9 @@ public func exchangeHttp1ExpectContinue(
         }
         let parsed = try {
             observedHttp1ReadHead(reader, waitContext)
+        } catch (error: Http1LateReadCompletionException) {
+            // The response bytes were consumed; this is not an empty continue wait.
+            throw error
         } catch (error: NetworkException) {
             if (!bodySent && !context.isDeadlineExceeded() &&
                 isContinueWaitTimeout(error) && continueBudget.isDeadlineExceeded() &&
@@ -558,6 +561,21 @@ private func isContinueWaitTimeout(error: NetworkException): Bool {
     }
 }
 
+/** Marks a read that consumed bytes before losing its deadline race. */
+private class Http1LateReadCompletionException <: NetworkException {
+    init(phase: NetworkPhase) {
+        super(
+            NetworkErrorCategory.DeadlineExceeded,
+            phase,
+            NetworkErrorCode.TimedOut,
+            "HTTP/1 read completed after its operation deadline",
+            retryability: Retryability.Temporary
+        )
+    }
+
+    protected override func getClassName(): String { "Http1LateReadCompletionException" }
+}
+
 private func responseCanReuse(head: Http1ResponseHead): Bool {
     match (head.framing) {
         case Http1BodyFraming.CloseDelimited | Http1BodyFraming.Tunnel => return false
@@ -968,7 +986,15 @@ private func readHttp1Transport(
     phase: NetworkPhase
 ): ReadResult {
     let result = readHttp1TransportResult(transport, destination, context, phase)
-    checkHttp1ReadContext(context, phase)
+    if (context.isCancellationRequested()) {
+        checkHttp1ReadContext(context, phase)
+    }
+    if (context.isDeadlineExceeded()) {
+        match (result) {
+            case ReadResult.Data(_) => throw Http1LateReadCompletionException(phase)
+            case ReadResult.EndOfStream => checkHttp1ReadContext(context, phase)
+        }
+    }
     result
 }
 

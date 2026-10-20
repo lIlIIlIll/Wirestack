@@ -10,8 +10,15 @@
     "docs/planning/status.md",
     "src/http/cancellation.cj",
     "src/http/facade_test.cj",
+    "src/http/websocket.cj",
+    "src/http/websocket_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/proxy_literal_connect_deadline_test.cj",
     "src/internal/http1/request_writer.cj",
+    "src/internal/http1/response_reader.cj",
     "src/internal/http1/response_reader_deadline_test.cj",
+    "src/internal/http2/write_scheduler.cj",
+    "src/internal/http2/write_scheduler_test.cj",
     "tools/tasks/M10-001.json"
   ],
   "platforms": ["linux-x86_64-glibc"],
@@ -53,7 +60,7 @@
     },
     {
       "id": "stack-200-focused-regressions",
-      "argv": ["cjpm", "test", "src/internal/http1", "src/internal/http2", "src/http", "--filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls", "--no-color", "--no-progress"],
+      "argv": ["cjpm", "test", "src/internal/http1", "src/internal/http2", "src/http", "--filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls", "--no-color", "--no-progress"],
       "timeout_seconds": 1800,
       "long_running": false,
       "gate": "task"
@@ -83,8 +90,15 @@
     "docs/planning/status.md",
     "src/http/cancellation.cj",
     "src/http/facade_test.cj",
+    "src/http/websocket.cj",
+    "src/http/websocket_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/proxy_literal_connect_deadline_test.cj",
     "src/internal/http1/request_writer.cj",
+    "src/internal/http1/response_reader.cj",
     "src/internal/http1/response_reader_deadline_test.cj",
+    "src/internal/http2/write_scheduler.cj",
+    "src/internal/http2/write_scheduler_test.cj",
     "tools/tasks/M10-001.json"
   ]
 }
