@@ -602,6 +602,7 @@ private class LiveHttp2Server <: Resource {
         handler: Http2ServerHandler,
         serverLimits: Http2Limits,
         clientPushLimit: Int64,
+        transportScheme!: String = "http",
         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
         resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
         requestOwnerFactory!: Option<(String, String) -> internal.HttpResourceOwnerKey> =
@@ -611,7 +612,7 @@ private class LiveHttp2Server <: Resource {
             capacity: 64 * 1024, maxChunk: 4096
         )
         let createdServer = Http2ServerConnection(
-            serverTransport, handler, http2Limits: serverLimits,
+            serverTransport, handler, transportScheme, http2Limits: serverLimits,
             resourceBudget: resourceBudget, resourceOwner: resourceOwner,
             requestOwnerFactory: requestOwnerFactory
         )
