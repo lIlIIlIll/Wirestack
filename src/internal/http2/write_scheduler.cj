@@ -285,9 +285,9 @@ public class Http2WriteScheduler {
     private func waitForStreamBuffer(
         flow: Http2FlowController,
         streamId: Http2StreamId,
-        bytes: UInt64,
+        maximumBytes: UInt64,
         context: OperationContext
-    ): ?internal.HttpResourceLease {
+    ): (internal.HttpResourceLease, UInt64) {
         let terminationToken = flow.streamTerminationToken(streamId)
         let linkedCancellation = CancellationSource()
         let callerRegistration = context.cancellation.register {
@@ -298,10 +298,10 @@ public class Http2WriteScheduler {
                 => let _ = linkedCancellation.cancel()
             }
             try {
-                waitForQueuedBuffer(
-                    bytes,
-                    false,
-                    Int64(streamId.value),
+                resourceBudget.getOrThrow().acquireManagedDataBufferUpTo(
+                    streamBufferOwner(Int64(streamId.value)),
+                    maximumBytes,
+                    10u64,
                     context.withCancellation(linkedCancellation.token)
                 )
             } finally {
@@ -441,9 +441,8 @@ public class Http2WriteScheduler {
     }
 
     /**
-     * Acquires the exact DATA-frame buffer lease before trying flow credit.
-     * Releases the lease before a blocking flow wait; a granted permit is followed
-     * only by a nonblocking buffer probe. Queue capacity precedes payload allocation.
+     * Acquires a feasible DATA-frame buffer lease before trying flow credit.
+     * The wait holds no flow permit and recomputes the frame size after a budget grant.
      */
     public func enqueueDataWaiting(
         flow: Http2FlowController,
@@ -465,11 +464,25 @@ public class Http2WriteScheduler {
         }
         while (requested > 0) {
             checkWriterContext(context)
-            let bufferLease = waitForStreamBuffer(
+            let availableBeforeBuffer = flow.availableSendCredit(streamId, requested)
+            if (availableBeforeBuffer > 0 && availableBeforeBuffer < requested) {
+                requested = availableBeforeBuffer
+            }
+            let (bufferLease, bufferBytes) = waitForStreamBuffer(
                 flow, streamId, UInt64(requested) + 9u64, context
-            ).getOrThrow()
+            )
             var leaseTransferred = false
             try {
+                let leasedPayload = Int64(bufferBytes - 9u64)
+                if (leasedPayload < requested) {
+                    requested = leasedPayload
+                    continue
+                }
+                let availableAfterBuffer = flow.availableSendCredit(streamId, requested)
+                if (availableAfterBuffer > 0 && availableAfterBuffer < requested) {
+                    requested = availableAfterBuffer
+                    continue
+                }
                 if (let Some(permit) <- flow.tryReserveSend(streamId, requested)) {
                     if (permit.amount < requested) {
                         requested = permit.amount

@@ -104,6 +104,15 @@ public class Http2FlowController {
     internal prop maximumOutboundDataPayload: Int64 {
         get() { synchronized(mutex) { minFlow(peerMaxFrameSize, Int64(limits.maxFrameSize)) } }
     }
+
+    /** Reports current unreserved stream and connection credit without acquiring a permit. */
+    internal func availableSendCredit(streamId: Http2StreamId, requested: Int64): Int64 {
+        requirePositiveFlowBytes(requested)
+        synchronized(mutex) {
+            requireFlowOpenLocked()
+            reservableLocked(requireFlowStreamLocked(streamId), requested)
+        }
+    }
     public prop bufferedReceiveBytes: Int64 {
         get() {
             synchronized(mutex) {
