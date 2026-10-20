@@ -2,13 +2,32 @@
   "schema_version": 1,
   "task_id": "M7-032",
   "kind": "public-api-validator-default-path-regression",
+  "current_requalification_status": "BLOCKED",
   "regression": {
     "command": "python3 -m unittest tools.tests.test_m7_032_public_api_contract -v",
     "exit_code": 0,
     "tests_run": 3,
+    "failures": 0,
     "status": "PASS"
   },
+  "test_plan": {
+    "command": "DISABLE_ZOXIDE=1 python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-032/test-plan.md --json",
+    "exit_code": 0,
+    "status": "PASS",
+    "counts": {
+      "paths": 11,
+      "scenarios": 10,
+      "tests": 7
+    }
+  },
+  "architecture_guard": {
+    "command": "DISABLE_ZOXIDE=1 scripts/architecture-guard --format json",
+    "exit_code": 0,
+    "status": "PASS",
+    "violations": 0
+  },
   "temporary_root_cli": {
+    "root_argument": "relative path",
     "default_m7_pair": {
       "command": "python3 tools/m7_032_public_api_inventory.py --root <scratch> --write",
       "exit_code": 0,
@@ -21,19 +40,38 @@
       "inventory_sha256": "086d08a610475f1e5bd528f98d675ddf8a8a16f440dd294f3bb79c07b9643db2"
     },
     "explicit_m11_pair": {
-      "command": "python3 tools/m7_032_public_api_inventory.py --root <scratch> --inventory docs/api/baselines/wirestack-linux-pre1-m11-001.json --report docs/evidence/M11-001/public-api.json --write",
+      "command": "python3 tools/m7_032_public_api_inventory.py --root <scratch> --inventory docs/api/baselines/wirestack-linux-pre1-m11-003.json --report docs/evidence/M11-003/public-api.json --write",
       "exit_code": 0,
       "status": "PASS",
       "declarations": 363,
       "resolved_aliases": 114,
       "inventory_sha256": "086d08a610475f1e5bd528f98d675ddf8a8a16f440dd294f3bb79c07b9643db2",
+      "m7_inventory_unchanged": true,
       "m7_report_unchanged": true
     },
+    "one_sided_overrides": {
+      "inventory_only": {
+        "command": "python3 tools/m7_032_public_api_inventory.py --root <scratch> --inventory <path> --write --json",
+        "exit_code": 1,
+        "status": "EXPECTED_REJECTION",
+        "error": "--inventory and --report must be provided together",
+        "all_m7_and_m11_artifacts_unchanged": true
+      },
+      "report_only": {
+        "command": "python3 tools/m7_032_public_api_inventory.py --root <scratch> --report <path> --write --json",
+        "exit_code": 1,
+        "status": "EXPECTED_REJECTION",
+        "error": "--inventory and --report must be provided together",
+        "all_m7_and_m11_artifacts_unchanged": true
+      },
+      "direct_validate_calls": "Both partial path pairs raise PublicApiInventoryError before validation or writes."
+    },
     "corrupted_m7_report": {
-      "exercise": "the CLI regression test changes the M7 report digest while a valid M11 pair remains present",
+      "exercise": "The CLI regression test corrupts the M7 report while a valid M11-003 pair remains present.",
       "exit_code": 1,
-      "status": "FAIL",
-      "error": "committed public API report is stale"
+      "status": "EXPECTED_REJECTION",
+      "error": "committed public API report is stale",
+      "explicit_m11_pair_still_passes": true
     }
   },
   "current_checkout": {
@@ -46,26 +84,40 @@
       "current_source_declarations": 363,
       "baseline_regenerated": false
     },
-    "task_check": {
-      "command": "scripts/check-task M7-032 --json --output <scratch>/m7-task-check-current.json",
+    "m11_003_explicit": {
+      "command": "scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-linux-pre1-m11-003.json --report docs/evidence/M11-003/public-api.json",
       "exit_code": 1,
       "status": "FAIL",
-      "command_results": {
-        "test-plan-matrix": "PASS",
-        "ownership-and-fault-injection-tests": "FAIL",
-        "architecture-guard": "PASS",
-        "public-api-inventory": "FAIL",
-        "clean-consumer-examples": "FAIL",
-        "cangjie-check": "FAIL",
-        "cangjie-build": "FAIL",
-        "cangjie-tests": "FAIL"
-      },
-      "blockers": [
-        "The existing Linux task-graph test expects M10-004 to be BLOCKED while status.md records COMPLETE; M10-004 depends on BLOCKED M10-003.",
-        "The historical M7-032 baseline contains 243 declarations; the current source inventory contains 363. The restored task-scoped default rejects that drift rather than substituting M11 evidence.",
-        "The offline clean-consumer gate cannot find the pinned AWS-LC source.",
-        "cjc and cjpm are unavailable; command-version probes exited 127."
+      "error": "committed public API inventory is stale",
+      "baseline_inventory_sha256": "aebe1c4bcf9f283a9334c70e6bb5ef5ab7c88528c634f3ba0922023ef1565f8c",
+      "current_source_inventory_sha256": "086d08a610475f1e5bd528f98d675ddf8a8a16f440dd294f3bb79c07b9643db2",
+      "declarations": 363,
+      "resolved_aliases": 114,
+      "drift": "Current wirestack.http.HttpCancellationHandles has retainCancellation(callback: () -> Unit): Resource; the M11-003 baseline does not."
+    },
+    "task_check": {
+      "command": "scripts/check-task M7-032 --json --output <scratch>/m7-032-task-check.json",
+      "exit_code": 2,
+      "status": "INVALID",
+      "commands": [],
+      "issues": [
+        {
+          "code": "DEPENDENCY_INCOMPLETE",
+          "detail": "M10-004 dependency is not COMPLETE: M10-003"
+        }
       ]
+    },
+    "python_acceptance_suite": {
+      "command": "python3 -m unittest tools.tests.test_m7_032_public_api_contract tools.tests.test_architecture_guard tools.tests.test_m7_linux_task_graph tools.repository.tests.test_repository_tooling -v",
+      "exit_code": 1,
+      "tests_run": 106,
+      "failures": 1,
+      "status": "FAIL",
+      "failure": "test_evolution_status_matches_readiness_classification reports a completed task depending on blocked M10-004 (expected COMPLETE, got BLOCKED)."
+    },
+    "clean_consumer_and_cangjie": {
+      "status": "NOT_RUN",
+      "reason": "The task gate rejected the task before selecting acceptance commands; no clean-consumer, Cangjie check, build, or test command ran."
     }
   }
 }

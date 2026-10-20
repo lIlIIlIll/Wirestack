@@ -127,6 +127,11 @@ def validate(
     inventory_path: Path | None = None,
     report_path: Path | None = None,
 ) -> dict[str, Any]:
+    require(
+        (inventory_path is None) == (report_path is None),
+        "--inventory and --report must be provided together",
+    )
+    root = root.resolve()
     inventory_path = resolve_evidence_path(
         root, inventory_path, DEFAULT_INVENTORY
     )
@@ -153,17 +158,22 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     try:
+        if (args.inventory is None) != (args.report is None):
+            raise PublicApiInventoryError(
+                "--inventory and --report must be provided together"
+            )
+        root = args.root.resolve()
         inventory_path = resolve_evidence_path(
-            args.root, args.inventory, DEFAULT_INVENTORY
+            root, args.inventory, DEFAULT_INVENTORY
         )
         report_path = resolve_evidence_path(
-            args.root, args.report, DEFAULT_REPORT
+            root, args.report, DEFAULT_REPORT
         )
-        inventory = build_inventory(args.root)
+        inventory = build_inventory(root)
         if args.write:
             write_json(inventory_path, inventory)
             write_json(report_path, build_report(inventory_path, inventory))
-        report = validate(args.root, inventory_path, report_path)
+        report = validate(root, inventory_path, report_path)
     except (PublicApiInventoryError, api_scan.ApiFreezeError) as error:
         payload = {"taskId": TASK_ID, "status": "FAIL", "error": str(error)}
         print(json.dumps(payload, sort_keys=True) if args.json

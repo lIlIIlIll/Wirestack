@@ -39,7 +39,7 @@ backward-compatibility comparison with the historical M7-026 baseline.
 | S007 | Historical M7-026 declarations differ | New inventory | P008 | Inventory is accepted as the new contract | No compatibility shim or verdict is produced | api | P0 |
 | S008 | Mutated source after PASS evidence | Sealed reports | P009 | Evidence becomes STALE/FAIL | Source digest mismatch is explicit | evidence,negative | P0 |
 | S009 | M7-032 task entry through fast/full gates | Valid manifest | P010 | No long command is selected | Every selected command has `long_running=false` | task-contract | P0 |
-| S010 | M7 and M11 inventories exist under one temporary repository root | M7 default pair is valid; M11 pair is explicit | P011 | Each validation uses only its matching inventory/report pair | M7 defaults pass, M11 explicit pair passes, and a corrupted M7 report fails even while the M11 pair remains valid | regression,evidence | P0 |
+| S010 | M7 and M11 inventories exist under one temporary repository root | M7 default pair is valid; M11 pair is explicit | P011 | Each validation uses only its matching inventory/report pair | M7 defaults and explicit M11 pair pass; one-sided inventory/report write overrides fail without modifying either pair; corrupted M7 report fails while M11 remains valid | regression,evidence | P0 |
 
 ## Test-plan matrix
 
@@ -51,7 +51,7 @@ backward-compatibility comparison with the historical M7-026 baseline.
 | T004 | S006 | P007 | Temporary Linux consumer | Build and run PASS | No internal import; observable public behavior succeeds | integration |
 | T005 | S008 | P009 | Sealed report plus source mutation | STALE/FAIL | Digest drift invalidates prior PASS | evidence |
 | T006 | S009 | P010 | M7-032 manifest | Contract validation PASS | No long-running command in fast/task/full selection | static |
-| T007 | S010 | P011 | Temporary repository root with distinct M7 and M11 paths | M7 default pair and explicit M11 pair pass; corrupted M7 report fails closed | Run the CLI entry point and assert both inventory identities and the stale-report error | integration,regression |
+| T007 | S010 | P011 | Temporary repository root with relative `--root` and distinct M7/M11 paths | M7 pair passes, explicit M11 pair passes, and both one-sided `--write` overrides fail | Relative paths resolve once; neither one-sided call modifies either artifact pair; corrupt M7 report fails | integration,regression |
 
 ## Excluded gates
 
