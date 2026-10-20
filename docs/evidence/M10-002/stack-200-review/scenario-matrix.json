@@ -92,15 +92,15 @@
     },
     {
       "id": "current-toolchain-build-test-docs",
-      "status": "BLOCKED_DOCS_OOM_AND_REPO_GATES",
-      "criterion": "Current source passes pinned SDK check/build, resolver build, and full native regression; current strict generated documentation and repository-wide/task gates remain blocked.",
+      "status": "BLOCKED_LOCAL_DOCS_AND_REPO_GATES",
+      "criterion": "Current source passes pinned SDK check/build, resolver build, and full native regression; the pushed GitHub docs/build workflows also pass. Local combined strict documentation, repository-wide, and task-graph gates remain blocked.",
       "coverage": [
         "cjpm check",
         "cjpm build",
         "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
         "scripts/check-code (includes strict docs with pinned CJDoc 0.7.2)"
       ],
-      "note": "On 5d6b2c7358e08169ede6198b472b37d773e017d, cjpm check/build, scripts/build-linux-resolver --quiet, and the full native suite passed (1,080/1,108, 28 skipped). All four HTTP/2 resource profiles passed 216/216 on the first attempt. Both current scripts/check-code combined CJDoc 0.7.2 runs failed with allocation errors after per-package coverage checks and renders passed; docs-report.json records an earlier pass, not these runs. scripts/check failed in its tooling tests (25 failures, 16 errors, 4 skipped), and the task validator returned INVALID because downstream M10-003 depends on BLOCKED M10-002. No installed-consumer check is an M10-002 acceptance criterion."
+      "note": "On source revision 5d6b2c7358e08169ede6198b472b37d773e017d, cjpm check/build, scripts/build-linux-resolver --quiet, and the full native suite passed (1,080/1,108, 28 skipped). All four HTTP/2 resource profiles passed 216/216 on the first attempt. Both local scripts/check-code combined CJDoc 0.7.2 runs failed with allocation errors after per-package checks and renders passed; the checked-in docs-report.json is historical. All 10 GitHub Actions workflows passed on pushed head f4034849f9d74c3301ccd0a1f3527909d057886f, including the documentation and clean-build workflows. scripts/check failed with 25 failures, 16 errors, 4 skipped; the task validator returned INVALID because downstream M10-003 depends on BLOCKED M10-002. No installed-consumer check is an M10-002 acceptance criterion."
     }
   ],
   "review": {
