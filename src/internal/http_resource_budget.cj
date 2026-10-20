@@ -216,6 +216,14 @@ public class HttpResourceBudget {
         if (minimumBytes == 0u64 || maximumBytes < minimumBytes) {
             throw IllegalArgumentException("HTTP DATA buffer minimum must fit within its maximum")
         }
+        if (minimumBytes > maximumConfiguredDataBufferBytes()) {
+            synchronized(mutex) {
+                checkContext(context)
+                checkAdmissionOpen()
+                recordRejectionLocked()
+                throw resourceDataBufferMinimumUnreachable()
+            }
+        }
         let registration = context.cancellation.register { => wakeWaiters() }
         try {
             synchronized(mutex) {
@@ -648,18 +656,31 @@ public class HttpResourceBudget {
             maximumAcquireableDataBufferLocked(owner, amount) >= amount
         }
     }
+    private func maximumDataBufferBudget(): UInt64 {
+        let controlReserve = min(limits.reservedControlBufferBytes, limits.maximumManagedBufferBytes)
+        let receiveReserve = min(
+            UInt64(limits.maximumConnections) * 65535u64,
+            limits.maximumManagedBufferBytes - controlReserve
+        )
+        limits.maximumManagedBufferBytes - controlReserve - receiveReserve
+    }
+
+    private func maximumConfiguredDataBufferBytes(): UInt64 {
+        min(
+            maximumDataBufferBudget(),
+            min(
+                limits.maximumManagedBufferBytesPerRoute,
+                limits.maximumManagedBufferBytesPerOrigin
+            )
+        )
+    }
 
     private func maximumAcquireableDataBufferLocked(
         owner: HttpResourceOwnerKey,
         maximumBytes: UInt64
     ): UInt64 {
         if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) { return 0u64 }
-        let controlReserve = min(limits.reservedControlBufferBytes, limits.maximumManagedBufferBytes)
-        let receiveReserve = min(
-            UInt64(limits.maximumConnections) * 65535u64,
-            limits.maximumManagedBufferBytes - controlReserve
-        )
-        let dataBudget = limits.maximumManagedBufferBytes - controlReserve - receiveReserve
+        let dataBudget = maximumDataBufferBudget()
         let outboundUsed = dataBufferBytes - receivedBufferBytes
         let routeUsed = ownerDataBufferBytesLocked(owner)
         let originUsed = originDataBufferBytesLocked(owner.origin)
@@ -985,6 +1006,16 @@ private func resourceWaitersExhausted(): NetworkException {
         NetworkErrorCode.ResourceExhausted,
         "HTTP aggregate resource waiter limit exceeded",
         retryability: Retryability.Temporary
+    )
+}
+
+private func resourceDataBufferMinimumUnreachable(): NetworkException {
+    NetworkException(
+        NetworkErrorCategory.ResourceExhausted,
+        NetworkPhase.PoolAcquire,
+        NetworkErrorCode.ResourceExhausted,
+        "HTTP DATA buffer minimum exceeds configured capacity",
+        retryability: Retryability.Never
     )
 }
 
