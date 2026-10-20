@@ -164,3 +164,50 @@ Result: `TOTAL 537`, `PASSED 530`, `SKIPPED 6`, `ERROR 0`, `FAILED 1`. The failu
 The isolated case passed on source revision `935351da4880f2d4e1be963100ca19146ea8b6f5`, then passed again on evidence-registration candidate `6223022ef3943437596ad9fedcd8571b975a382e`: `TOTAL 163`, `PASSED 1`, `SKIPPED 162`, `ERROR 0`, `FAILED 0`.
 
 The M10-002 Stack #200 follow-up report records an earlier full `src/http` failure at this same case, an isolated pass, and a subsequent full-suite pass. Treat the M10-001 full-suite result as an observed intermittent failure, not a pass; its cause is not established. M10-001 does not change the resource-admission implementation or this test. At exact candidate source revision `6223022ef3943437596ad9fedcd8571b975a382e`, all listed applicable GitHub checks passed; the latest-main documentation deployment was skipped by its workflow. This focused follow-up does not replace the historical full M10-001 acceptance or requalify other platforms.
+
+## Current-source follow-up: late final response after `100-continue`
+
+The new regression `Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody` uses a fake transport that returns a final HTTP 417 after the `100-continue` wait has expired. It asserts that no request-body bytes are written and that the returned failure retains the structured deadline category, code, and `HttpHeaders` phase.
+
+All commands used pinned Cangjie/CJPM 1.1.3 via `<qualified-wrapper>`, with `TMPDIR`, `TMP`, and `TEMP` set to `<task-tmp>` and `DISABLE_ZOXIDE=1`. The fixed source was `97cac410c727b301e1f85a0b8e61595980292287`.
+
+Focused HTTP regressions:
+
+```sh
+<qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
+  cjpm test src/internal/http1 src/internal/http2 src/http \
+  --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls \
+  --no-color --no-progress
+```
+
+Exit 0. `TOTAL 538`, `PASSED 10`, `SKIPPED 528`, `ERROR 0`, `FAILED 0`.
+
+Full HTTP package suite:
+
+```sh
+<qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
+  cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color \
+  src/internal/http1 src/internal/http2 src/http
+```
+
+Exit 0. `TOTAL 538`, `PASSED 532`, `SKIPPED 6`, `ERROR 0`, `FAILED 0`.
+
+The current-source architecture guard, network capability check, `cjpm check`,
+and `cjpm build` each exited 0.
+
+`scripts/check-docs --json` exited 1 under the default heap: all seven package
+checks passed, but the combined CJDoc process failed to allocate 9,186,376
+bytes. The retry with the validated heap setting passed:
+
+```sh
+env cjHeapSize=1GB scripts/check-docs --json
+```
+
+Exit 0. All seven package layers and the combined report passed; the combined
+coverage is 1,873/1,873 API symbols and 950/950 parameters. The M10-001 task
+manifest now uses this `env cjHeapSize=1GB` command.
+
+The isolated current-source task-gate preflight returned `INVALID` (exit 2)
+before executing commands: M10-004 depends on BLOCKED M10-003. This is a
+dependency blocker, not a passing task acceptance. The earlier full-suite
+failure of `HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission` remains unexplained despite the later passing full HTTP run.

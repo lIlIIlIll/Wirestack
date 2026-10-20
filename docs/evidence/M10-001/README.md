@@ -59,6 +59,26 @@ Root issues:
 
 The earlier alpha-toolchain run remains historical smoke evidence. The pinned SDK replay does not replace or repeat the original full task acceptance.
 
+### Current-source follow-up
+
+The supplemental replay adds finding 6: when an HTTP/1 final response arrives
+after the `100-continue` wait deadline and has been consumed, the client must
+return that response without sending the request body. The pinned SDK focused
+replay and full HTTP package suite both passed on the fixed source.
+
+The strict documentation check passed after setting the CJDoc heap to 1 GiB;
+the task manifest now records that command. The M10-001 task gate itself
+returned `INVALID` before running commands because M10-004 depends on BLOCKED
+M10-003. This follow-up therefore does not claim full current task acceptance.
+The earlier full-suite failure remains unexplained and is not erased by the
+later passing run. The original M10-001 COMPLETE status remains based on its
+historical acceptance evidence.
+
+Exact commands and results are in
+[review-deadline-regressions.md](review-deadline-regressions.md) and the
+revision-bound report at
+[review-regressions.json](stack-200-review/review-regressions.json).
+
 ## Workspace snapshot (initial task capture; historical)
 
 - GitButler workspace view: `gitbutler/workspace`; the M10-001 changes remain uncommitted in the workspace, and the named `m10-001-unified-deadline` branch has no task commits. HEAD: `b2ab351ab3ee`; merge base with `main`: `00d6864f5d`.
