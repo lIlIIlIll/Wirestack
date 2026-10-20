@@ -67,7 +67,7 @@
     },
     {
       "id": "public-api-docs",
-      "argv": ["scripts/check-docs", "--json"],
+      "argv": ["env", "cjHeapSize=1GB", "scripts/check-docs", "--json"],
       "timeout_seconds": 1800,
       "long_running": false,
       "gate": "task"
