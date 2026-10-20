@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "f05ee90d1f32dce35c6cd5b9799001d9d1f19233",
+  "revision": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
   "status": "BLOCKED",
   "acceptance_status": "BLOCKED",
   "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
@@ -97,11 +97,11 @@
     },
     {
       "id": "documentation-check",
-      "command": "env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "command": "source <qualified-cangjie-sdk>/envsetup.sh && CJDOC_BIN=<pinned-CI-cjdoc-0.7.2> cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
       "exit_code": 0,
       "status": "PASS",
       "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
-      "docs_sha256": "ca388be4388b4f8c1be35dbe65f6cf2a6ffddf3f63f60ba5802154ab71cd4b29",
+      "docs_sha256": "1fde2a6cc279ae78347a2013f698fc97303c41e5400e5825a871f0834e1b86c1",
       "api_symbols_covered": 1873,
       "api_symbols_total": 1873,
       "parameters_covered": 950,
@@ -124,20 +124,48 @@
         "M12-002 platform-support source mismatch",
         "M7 task-graph expectation drift"
       ],
-      "note": "scripts/check stopped in its initial tooling unittest stage; the separately listed Cangjie, resource-profile, and documentation checks were run independently."
+      "note": "Re-run after canonical docs generation at source revision 3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1; it still stopped in the initial tooling unittest stage. Separate Cangjie, resource-profile, and canonical documentation checks were run independently."
     }
   ],
   "task_gate": {
-    "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json --output <task-tmp>/check-task-source-commit.json",
+    "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json --output <task-tmp>/check-task-3638.json",
     "exit_code": 2,
     "status": "INVALID",
     "issues": [
       {
         "code": "DEPENDENCY_INCOMPLETE",
-        "detail": "M10-004 dependency is not COMPLETE: M10-003"
+        "detail": "M10-003 dependency is not COMPLETE: M10-002"
       }
     ],
-    "note": "This is a global task-graph inconsistency. M10-002 declares M9-001 as its dependency; M10-003/#175 was not modified."
+    "note": "The task validator checks dependencies across all task manifests. M10-002 declares M9-001, which is COMPLETE; the current first finding is the downstream M10-003 dependency on BLOCKED M10-002. M10-004 is also marked COMPLETE while M10-003 remains BLOCKED. M10-003/#175 and M10-004 were not modified."
+  },
+  "github_ci": {
+    "initial_clean_build": {
+      "run_id": 39393344922,
+      "head_sha": "eaa76e4e0018e47cb0e3a42a35fd582a5963dc60",
+      "status": "FAIL",
+      "failed_step": "Reject build-time source-tree mutation",
+      "finding": "The only reported mutation was docs/api/generated/docs.json: the committed file used pretty serialization while the pinned CI CJDoc generator emitted compact serialization.",
+      "resolved_in_revision": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1"
+    },
+    "current_source": [
+      {
+        "run_id": 39400213874,
+        "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
+        "workflow": "Clean Cangjie Build",
+        "status": "PASS",
+        "result": "Current-source build/test gate, installed public consumer, and source-tree mutation rejection all passed.",
+        "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400213874"
+      },
+      {
+        "run_id": 39400212565,
+        "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
+        "workflow": "M7-033 Developer Documentation",
+        "status": "PASS",
+        "result": "Strict documentation gate and public clean consumer passed.",
+        "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400212565"
+      }
+    ]
   },
   "full_suite_stability": {
     "earlier_run": {
