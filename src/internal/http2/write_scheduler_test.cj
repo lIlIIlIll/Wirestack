@@ -219,6 +219,87 @@ class Http2WriteSchedulerTest {
     }
 
     @TestCase
+    func q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall(): Unit {
+        let streamId = Http2StreamId(1u32)
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = schedulerResourceBudget(65635u64, 34u64)
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
+        )
+        let flow = Http2FlowController()
+        flow.applyPeerSettings(schedulerObservationFlowUpdate(1u32))
+        flow.openStream(streamId)
+
+        let sink = SchedulerObservationSink()
+        let context = OperationContext(
+            trace: Some(api.NetworkTraceContext("q4-trace", spanId: "request-write")),
+            eventSink: Some(sink),
+            requestId: Some<Int64>(701),
+            attemptId: Some<Int64>(703),
+            connectionId: Some<Int64>(707),
+            streamId: Some<Int64>(Int64(streamId.value)),
+            stage: Some(api.OperationTimeoutStage.RequestWrite)
+        )
+        let (ticket, admitted) = scheduler.enqueueDataWaiting(
+            flow, streamId, ByteSpan([1u8, 2u8]), context
+        )
+        @Expect(admitted, 1)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 1)
+        @Expect(budget.snapshot().managedBufferBytes, 10u64)
+
+        flow.applyPeerSettings(schedulerObservationFlowUpdate(0u32))
+        @Expect(flow.snapshot(streamId).sendWindow, 0)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 1)
+
+        let writer = spawn { scheduler.run() }
+        var creditRestored = false
+        var completedNormally = false
+        try {
+            @Expect(waitForSchedulerFlowStalls(flow, 1, Duration.second))
+            flow.receiveWindowUpdate(encodeHttp2WindowUpdate(streamId, 1u32))
+            creditRestored = true
+            scheduler.close()
+            @Expect(isSchedulerTestClosed(writer.get(Duration.second)))
+            @Expect(isWriteTestWritten(ticket.wait()))
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+            @Expect(budget.snapshot().managedBufferBytes, 0u64)
+
+            let events = sink.events()
+            @Expect(events.size, 2)
+            if (events.size == 2) {
+                @Expect(isSchedulerObservationStart(events[0]))
+                @Expect(isSchedulerObservationCompleted(events[1]))
+                for (event in events) {
+                    @Expect(event.requestId, Some<Int64>(701))
+                    @Expect(event.attemptId, Some<Int64>(703))
+                    @Expect(event.connectionId, Some<Int64>(707))
+                    @Expect(event.streamId, Some<Int64>(Int64(streamId.value)))
+                    @Expect(isSchedulerRequestWriteStage(event.stage))
+                    match (event.trace) {
+                        case Some(trace) =>
+                            @Expect(trace.traceId, "q4-trace")
+                            @Expect(trace.spanId, "request-write")
+                        case None => @Fail("flow-control event lost caller trace context")
+                    }
+                }
+            }
+            completedNormally = true
+        } finally {
+            if (!creditRestored) {
+                try {
+                    flow.receiveWindowUpdate(encodeHttp2WindowUpdate(streamId, 1u32))
+                    creditRestored = true
+                } catch (_: Exception) {}
+            }
+            if (!completedNormally) {
+                scheduler.abort()
+                try { let _ = writer.get(Duration.second) } catch (_: Exception) {}
+            }
+        }
+    }
+
+
+    @TestCase
     func cancellingQueuedFlowControlledDataReturnsAllCapacity(): Unit {
         let flow = Http2FlowController()
         let streamId = Http2StreamId(1u32)
@@ -1364,4 +1445,58 @@ private func isSchedulerTestClosed(value: Http2WriteSchedulerState): Bool {
 
 private func isSchedulerTestFailed(value: Http2WriteSchedulerState): Bool {
     match (value) { case Http2WriteSchedulerState.Failed => true; case _ => false }
+}
+
+private class SchedulerObservationSink <: api.NetworkEventSink {
+    private let mutex = Mutex()
+    private let recorded = ArrayList<api.NetworkEvent>()
+
+    public func emit(event: api.NetworkEvent): Unit {
+        synchronized(mutex) { recorded.add(event) }
+    }
+
+    func events(): Array<api.NetworkEvent> {
+        synchronized(mutex) { recorded.toArray() }
+    }
+}
+
+private func schedulerObservationFlowUpdate(initialWindow: UInt32): Http2SettingsUpdate {
+    Http2SettingsUpdate(
+        Http2SettingsSnapshot(4096u32, true, 100u32, initialWindow, 16384u32, 65536u32),
+        0,
+        http2SettingsAck()
+    )
+}
+
+private func isSchedulerObservationStart(event: api.NetworkEvent): Bool {
+    match (event.kind) {
+        case api.NetworkEventKind.LocalBackpressureStarted =>
+            match (event.outcome) {
+                case api.NetworkEventOutcome.Started => true
+                case _ => false
+            }
+        case _ => false
+    }
+}
+
+private func isSchedulerObservationCompleted(event: api.NetworkEvent): Bool {
+    match (event.kind) {
+        case api.NetworkEventKind.LocalBackpressureCompleted =>
+            match (event.outcome) {
+                case api.NetworkEventOutcome.Succeeded => true
+                case _ => false
+            }
+        case _ => false
+    }
+}
+
+private func isSchedulerRequestWriteStage(stage: ?api.OperationTimeoutStage): Bool {
+    match (stage) {
+        case Some(value) =>
+            match (value) {
+                case api.OperationTimeoutStage.RequestWrite => true
+                case _ => false
+            }
+        case None => false
+    }
 }
