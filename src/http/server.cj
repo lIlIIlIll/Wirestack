@@ -902,9 +902,12 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
         let requestOwnerFactory: (String, String) -> internal.HttpResourceOwnerKey = {
             scheme, authority => publicServerRequestOwner(authority, scheme)
         }
-        let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
-            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
-            requestOwnerFactory: Some(requestOwnerFactory))
+        let transportScheme = if (entry.generation.isSome()) { "https" } else { "http" }
+        let created = http2.Http2ServerConnection(
+            value, PublicHttp2Handler(publicHandler, cancellation), transportScheme,
+            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget),
+            resourceOwner: Some(resourceOwner), requestOwnerFactory: Some(requestOwnerFactory)
+        )
         let registration = cancellation.cancellationToken.register { => created.abort() }
         entry.installHttp2(created)
         try { created.serve(context: context) }

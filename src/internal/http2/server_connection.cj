@@ -10,6 +10,7 @@ import wirestack.internal as internal
 public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerControlSink & Resource {
     private let transport: DuplexTransport
     private let handler: Http2ServerHandler
+    private let transportScheme: String
     private let machine: Http2ConnectionStateMachine
     private let writer: Http2WriteScheduler
     private let flow: Http2FlowController
@@ -42,6 +43,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     public init(
         transport: DuplexTransport,
         handler: Http2ServerHandler,
+        transportScheme: String,
         limits!: HttpLimits = HttpLimits(),
         http2Limits!: Http2Limits = Http2Limits(),
         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
@@ -51,6 +53,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     ) {
         this.transport = transport
         this.handler = handler
+        this.transportScheme = transportScheme
         this.limits = limits
         this.http2Limits = http2Limits
         this.resourceBudget = resourceBudget
@@ -307,7 +310,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                 }
                 let requestScheme = match (requestHead.scheme) {
                     case Some(value) => value
-                    case None => "http"
+                    case None => transportScheme
                 }
                 let exchangeBufferOwner = streamBufferOwner(requestScheme, requestHead.authority)
                 var requestLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
