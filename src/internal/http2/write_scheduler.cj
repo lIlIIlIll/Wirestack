@@ -489,6 +489,7 @@ public class Http2WriteScheduler {
                         let _ = permit.cancel()
                         continue
                     }
+                    if (context.eventSink.isSome()) { permit.observationContext = Some(context) }
                     leaseTransferred = true
                     return enqueueDataWithPermit(
                         streamId, source, permit, Some(bufferLease), context
