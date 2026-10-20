@@ -452,7 +452,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             let body = plan.openBody()
             try {
                 while (true) {
-                    let event = body.next(context: context)
+                    let event = body.next()
                     match (event.kind) {
                         case Http2ServerBodyEventKind.Data =>
                             waitWrite(event.enqueueData(writer, context), context: context)
@@ -636,7 +636,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
         let body = plan.openBody()
         try {
             while (true) {
-                let event = body.next(context: context)
+                let event = body.next()
                 match (event.kind) {
                     case Http2ServerBodyEventKind.Data =>
                         waitWrite(event.enqueueData(writer, context), context: context)

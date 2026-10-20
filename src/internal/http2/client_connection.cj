@@ -598,18 +598,12 @@ public class Http2ClientConnection <: Resource {
                 if (count == 0) { break }
                 var offset: Int64 = 0
                 while (offset < count) {
-                    let permit = flow.reserveSend(exchange.streamId, count - offset, context: context)
-                    let payload = Array<Byte>(permit.amount, repeat: 0u8)
-                    for (index in 0..permit.amount) { payload[index] = staging[offset + index] }
-                    offset += permit.amount
-                    let frame = Http2Frame(
-                        Http2FrameHeader(
-                            UInt32(payload.size), Http2FrameType.Data, Http2Flags(),
-                            exchange.streamId, limits: http2Limits
-                        ),
-                        payload
+                    let (ticket, written) = writer.enqueueDataWaiting(
+                        flow, exchange.streamId,
+                        ByteSpan(staging, offset: offset, length: count - offset), context
                     )
-                    waitClientWrite(writer.enqueueReservedData(frame, permit, context: context), context)
+                    offset += written
+                    waitClientWrite(ticket, context)
                     health.observeOutboundActivity()
                 }
             }
