@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+  "revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
   "status": "BLOCKED",
   "acceptance_status": "BLOCKED",
   "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
@@ -41,12 +41,19 @@
       "result": "cjpm build success; compiler emitted unreachable-block warnings, with no build errors."
     },
     {
+      "id": "linux-resolver-build",
+      "command": "scripts/build-linux-resolver --quiet",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "Linux resolver build completed successfully."
+    },
+    {
       "id": "full-native-regression",
       "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
       "exit_code": 0,
       "status": "PASS",
-      "total": 1107,
-      "passed": 1079,
+      "total": 1108,
+      "passed": 1080,
       "skipped": 28,
       "errors": 0,
       "failed": 0
@@ -76,12 +83,36 @@
       }
     },
     {
+      "id": "q4-fast-path-observation-context-regression",
+      "command": "cjpm test --filter='Http2WriteSchedulerTest.q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall' --parallel 1 --no-progress --no-color src/internal/http2",
+      "pre_fix": {
+        "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+        "exit_code": 1,
+        "total": 216,
+        "passed": 0,
+        "skipped": 215,
+        "errors": 0,
+        "failed": 1,
+        "result": "After a peer SETTINGS shrink stalled the queued DATA write, the background writer emitted no caller-correlated backpressure events."
+      },
+      "post_fix": {
+        "source_revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+        "exit_code": 0,
+        "total": 216,
+        "passed": 1,
+        "skipped": 215,
+        "errors": 0,
+        "failed": 0,
+        "result": "Backpressure start/completion events retained the caller trace, request, attempt, connection, stream, and RequestWrite stage; the permit and managed-buffer bytes returned to zero."
+      }
+    },
+    {
       "id": "resource-profile-nofile-64",
       "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 215,
-      "passed": 215,
+      "total": 216,
+      "passed": 216,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -91,8 +122,8 @@
       "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 215,
-      "passed": 215,
+      "total": 216,
+      "passed": 216,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -102,8 +133,8 @@
       "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 215,
-      "passed": 215,
+      "total": 216,
+      "passed": 216,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -112,31 +143,32 @@
       "id": "resource-profile-single-cpu",
       "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
       "exit_code": 0,
-      "status": "PASS_ON_IMMEDIATE_RETRY",
-      "total": 215,
-      "passed": 215,
+      "status": "PASS",
+      "total": 216,
+      "passed": 216,
       "skipped": 0,
       "errors": 0,
-      "failed": 0,
-      "first_attempt": {
-        "exit_code": 1,
-        "result": "214 passed, 1 failed: Http2ClientConnectionTest.queuedHalfCloseCancellationDoesNotWaitForConnectionWriter reported same-direction transport operation already active / transport direction is closed; immediate identical rerun passed 215/215."
-      }
+      "failed": 0
     },
     {
       "id": "documentation-check",
-      "command": "scripts/check-code (documentation stage, pinned CJDoc 0.7.2)",
-      "exit_code": 0,
-      "status": "PASS",
-      "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
-      "docs_sha256": "c0b3f311e670e8c983e280b1b312ab0b1d2c22df9cee6a44f188bbeb9272348c",
-      "api_symbols_covered": 1873,
-      "api_symbols_total": 1873,
-      "parameters_covered": 950,
-      "parameters_total": 950,
-      "package_layers_at_full_coverage": 7,
-      "checked_in_canonical_docs_sha256": "c0b3f311e670e8c983e280b1b312ab0b1d2c22df9cee6a44f188bbeb9272348c",
-      "note": "The current-source scripts/check-code gate revalidated strict docs with CJDoc 0.7.2. The generated docs.json output still matches the checked-in file byte-for-byte; the docs-report records the same SHA-256 and complete symbol/parameter coverage."
+      "command": "scripts/check-code (two current-source runs, strict documentation stage, pinned CJDoc 0.7.2)",
+      "exit_code": 1,
+      "status": "FAIL_OUT_OF_MEMORY",
+      "current_report": "build/check-docs.json",
+      "package_checks": "All per-package coverage checks and renders passed; the combined strict check failed in both runs.",
+      "combined_check_attempts": [
+        {
+          "exit_code": 1,
+          "result": "Failed allocation of 13,779,556 bytes."
+        },
+        {
+          "exit_code": 1,
+          "result": "Failed allocation of 9,186,376 bytes."
+        }
+      ],
+      "historical_report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "historical_report_note": "Records an earlier strict-doc pass on unchanged public API inputs; it does not show that either current combined run passed."
     },
     {
       "id": "repository-check",
@@ -154,7 +186,7 @@
         "M12-002 platform-support source mismatch",
         "M7 task-graph expectation drift"
       ],
-      "note": "Re-run on exact source revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87; it still failed in the initial tooling unittest stage. The strict docs check passed with the unchanged generated docs.json. Separate Cangjie, resource-profile, and documentation checks were run independently."
+      "note": "Re-run on exact source revision 5d6b2c7358e08169ede6198b472b37d773e017d; it still failed in the initial tooling unittest stage. The strict combined documentation check also failed twice from allocation errors; per-package checks passed. Separate Cangjie, resource-profile, and documentation checks were run independently."
     }
   ],
   "task_gate": {
@@ -167,7 +199,7 @@
         "detail": "M10-003 dependency is not COMPLETE: M10-002"
       }
     ],
-    "note": "The task validator was rerun against source revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87. M10-002 declares M9-001, which is COMPLETE; the current finding is downstream M10-003 depending on BLOCKED M10-002. M10-004 is also marked COMPLETE while M10-003 remains BLOCKED. M10-003/#175 and M10-004 were not modified."
+    "note": "The task validator was rerun against source revision 5d6b2c7358e08169ede6198b472b37d773e017d. M10-002 declares M9-001, which is COMPLETE; the current finding is downstream M10-003 depending on BLOCKED M10-002. M10-004 is also marked COMPLETE while M10-003 remains BLOCKED. M10-003/#175 and M10-004 were not modified."
   },
   "github_ci": {
     "initial_clean_build": {
@@ -249,7 +281,7 @@
         }
       ]
     },
-    "final_head_ci": {
+    "previous_pushed_head_ci": {
       "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
       "status": "PASS",
       "runs": [
@@ -315,18 +347,38 @@
         }
       ],
       "note": "All 10 GitHub Actions workflows completed successfully on the exact pushed source revision."
+    },
+    "current_candidate_ci": {
+      "source_revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+      "status": "PENDING_PUSH",
+      "runs": [],
+      "note": "The source commit has not been pushed yet, so no CI runs exist for this candidate. The previous pushed source revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed all 10 workflows."
     }
   },
   "review": {
-    "reviewed_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
-    "baseline_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e",
-    "result": "NO_FINDINGS",
-    "method": "Independent read-only reviewer subagent; exact source and test diff inspected, no build or tests run.",
-    "findings": []
+    "reviewed_revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+    "baseline_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+    "result": "TWO_FINDINGS_FIXED_NO_NEW_FINDINGS",
+    "method": "Independent read-only subagents Q4PermitReview and Q4EvidenceBindingReview inspected the exact fixed source, test, and task-manifest diff. Neither ran builds or tests; both reported no new findings.",
+    "findings": [
+      {
+        "severity": "P2",
+        "file": "src/internal/http2/write_scheduler.cj",
+        "finding": "The tryReserveSend fast path did not retain the caller OperationContext on its flow-control permit. After a peer SETTINGS shrink, the background writer emitted backpressure events without the caller's observation identifiers.",
+        "resolution": "When the caller context has an event sink, associate it with the fast-path permit before transferring the buffer lease. This matches reserveSend's fallback behavior.",
+        "regression_test": "q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall"
+      },
+      {
+        "severity": "P2",
+        "file": "tools/tasks/M10-002.json",
+        "finding": "The HTTP resource-budget test file was missing from the M10-002 allowed_paths and source_paths inventories.",
+        "resolution": "Added src/internal/http_resource_budget_test.cj to both inventories."
+      }
+    ]
   },
   "pr_description": {
     "status": "NOT_UPDATED",
-    "reviewed_head": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+    "reviewed_head": "5d6b2c7358e08169ede6198b472b37d773e017d",
     "body_status": "STALE",
     "body_revision_claim": "7915e84f89182eac40e0f361fcf4c58b8818732e",
     "reason": "The public PR page is readable, but GitHub CLI authentication is unavailable and xd://github exposes no PR-edit operation. A previous GitButler description sync returned Failed to get pull request.",
@@ -352,7 +404,7 @@
       "errors": 0,
       "failed": 0
     },
-    "interpretation": "The final complete native run on revision e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed 1079/1107 with 28 skips. An earlier full run had an intermittent pool-fairness timeout; its isolated case passed. A prior candidate CPU-affinity profile failed the GOAWAY activeStreamCount assertion (214/215) before an immediate identical retry passed 215/215. On the current revision, the CPU profile failed once in queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (214/215) before the identical retry passed 215/215. These remain stability risks, not unconditional passes."
+    "interpretation": "The latest complete current-source run on 5d6b2c7358e08169ede6198b472b37d773e017d passed 1,080/1,108 with 28 skips and no errors or failures. All four HTTP/2 resource profiles passed 216/216 on the first attempt. Earlier full-suite pool-fairness and CPU-affinity failures remain historical stability risks; their isolated/retry outcomes are recorded above."
   },
   "noncanonical_attempts": [
     {
@@ -371,11 +423,11 @@
     "skipped": 28,
     "errors": 3,
     "failed": 0,
-    "result": "Three new scheduler cases exhausted the test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected; the final current-source full run on e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed 1079/1107 with zero errors."
+    "result": "Three scheduler cases initially exhausted their test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected. The subsequent e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 full run passed 1,079/1,107, and the latest 5d6b2c7358e08169ede6198b472b37d773e017d run passed 1,080/1,108."
   },
   "decision": {
     "task_status": "BLOCKED",
-    "pr_216": "Remain OPEN and DRAFT; do not mark ready while repository-check and task-graph blockers remain. The PR description is still stale because no authenticated edit route is available.",
+    "pr_216": "Remain OPEN and DRAFT. The current candidate is blocked by scripts/check, the combined strict-documentation OOM, and the downstream task-graph validator; do not mark ready. The PR description is stale and could not be updated through available authenticated routes.",
     "issue_174": "Remains open and untouched.",
     "m10_003_issue_175": "Not started and untouched."
   }
