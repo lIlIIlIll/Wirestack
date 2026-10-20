@@ -812,6 +812,83 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func classicConnectWithoutSchemeUsesTlsTransportOwner(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicClassicConnectOwnerHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .build()
+        var pending: ?Future<HttpUpgradeResult> = None<Future<HttpUpgradeResult>>
+        try {
+            let future = spawn {
+                client.upgrade(HttpRequest(
+                    HttpMethod("CONNECT"),
+                    HttpUrl.parse("https://example.com:${server.localEndpoint.port}")
+                ))
+            }
+            pending = Some(future)
+            @Expect(handler.waitUntilStarted(), true)
+
+            let expectedOrigin = "https://example.com:${server.localEndpoint.port}"
+            let ownerDeadline = Deadline.after(3 * Duration.second)
+            var attributed = false
+            while (!attributed && !ownerDeadline.isExpired()) {
+                for (owner in server.resourceSnapshot().owners) {
+                    if (owner.origin == expectedOrigin && owner.requests == 1 && owner.streams == 1) {
+                        attributed = true
+                    }
+                }
+                if (!attributed) { sleep(Duration.millisecond) }
+            }
+            @Expect(attributed)
+
+            handler.release()
+            let result = future.get(5 * Duration.second)
+            pending = None<Future<HttpUpgradeResult>>
+            match (result) {
+                case HttpUpgradeResult.Rejected(response) =>
+                    @Expect(response.status, 403)
+                    response.close()
+                case HttpUpgradeResult.Connected(connection) =>
+                    connection.close()
+                    @Fail("classic CONNECT should be rejected by the test handler")
+            }
+        } finally {
+            handler.release()
+            client.close()
+            if (let Some(future) <- pending) {
+                try {
+                    match (future.get(2 * Duration.second)) {
+                        case HttpUpgradeResult.Connected(value) => value.close()
+                        case HttpUpgradeResult.Rejected(value) => value.close()
+                    }
+                } catch (_: Exception) {}
+            }
+            clientTls.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                serving.get(5 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
+    @TestCase
     func http2PushAtTheStreamLimitDoesNotBlockItsParent(): Unit {
         let certificate = publicTlsTestCertificateDer()
         let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
@@ -1593,6 +1670,42 @@ private class PublicHttp2BudgetOwnerHandler <: HttpServerHandler {
         receivedBytes.store(body.size)
         HttpServerResponse(HttpResponse(
             201, "Created", ResponseBody(RequestBody.string("ok").open())
+        ))
+    }
+}
+private class PublicClassicConnectOwnerHandler <: HttpServerHandler {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var started = false
+    private var released = false
+
+    func waitUntilStarted(): Bool {
+        let deadline = Deadline.after(5 * Duration.second)
+        synchronized(mutex) {
+            while (!started && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+            started
+        }
+    }
+
+    func release(): Unit {
+        synchronized(mutex) { released = true; changed.notifyAll() }
+    }
+
+    public func handle(request: HttpServerRequest, _: OperationContext): HttpServerResponse {
+        @Expect(request.version, HttpVersion.Http2)
+        @Expect(request.method, HttpMethod("CONNECT"))
+        let deadline = Deadline.after(5 * Duration.second)
+        synchronized(mutex) {
+            started = true
+            changed.notifyAll()
+            while (!released && !deadline.isExpired()) {
+                changed.wait(timeout: deadline.remaining())
+            }
+        }
+        HttpServerResponse(HttpResponse(
+            403, "Forbidden", ResponseBody(RequestBody.string("rejected").open())
         ))
     }
 }
