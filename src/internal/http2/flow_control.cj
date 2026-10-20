@@ -101,6 +101,9 @@ public class Http2FlowController {
     public prop activeStreamCount: Int64 { get() { synchronized(mutex) { streams.size } } }
     public prop pendingPermitCount: Int64 { get() { synchronized(mutex) { permits.size } } }
     public prop flowControlStalls: Int64 { get() { synchronized(mutex) { sendStallCount } } }
+    internal prop maximumOutboundDataPayload: Int64 {
+        get() { synchronized(mutex) { minFlow(peerMaxFrameSize, Int64(limits.maxFrameSize)) } }
+    }
     public prop bufferedReceiveBytes: Int64 {
         get() {
             synchronized(mutex) {
@@ -186,15 +189,21 @@ public class Http2FlowController {
             streams.add(Http2FlowStream(streamId, sendInitialStreamWindow, receiveInitialStreamWindow))
         }
     }
+    internal func streamTerminationToken(streamId: Http2StreamId): CancellationToken {
+        synchronized(mutex) {
+            requireFlowOpenLocked()
+            requireFlowStreamLocked(streamId).terminationToken
+        }
+    }
 
     /**
      * Removes one stream, cancels its unsent permits, and returns connection
      * credit for discarded inbound bytes. Stream credit is not updated after close.
      */
     public func closeStream(streamId: Http2StreamId): Array<Http2Frame> {
-        let discarded = synchronized(mutex) {
+        let (discarded, terminationSource) = synchronized(mutex) {
             let index = findFlowStreamIndexLocked(streamId)
-            if (index < 0) { 0 }
+            if (index < 0) { (0, None<CancellationSource>) }
             else {
                 let stream = streams.remove(at: index)
                 cancelStreamPermitsLocked(streamId)
@@ -204,25 +213,33 @@ public class Http2FlowController {
                 pendingConnectionReceiveCredit = 0
                 receiveConnectionWindow += returned
                 changed.notifyAll()
-                returned
+                (returned, Some(stream.terminationSource))
             }
         }
+        if (let Some(source) <- terminationSource) { let _ = source.cancel() }
         if (discarded == 0) { [] }
         else { [encodeHttp2WindowUpdate(Http2StreamId(0u32), UInt32(discarded), limits: limits)] }
     }
 
     /** Idempotently releases every waiter and all bounded flow state. */
     public func close(): Unit {
-        synchronized(mutex) {
-            if (closed) { return }
-            closed = true
-            for (permit in permits) { permit.current = Http2SendPermitState.Cancelled }
-            permits.clear()
-            streams.clear()
-            reservedConnectionBytes = 0
-            pendingConnectionReceiveCredit = 0
-            changed.notifyAll()
+        let terminationSources = synchronized(mutex) {
+            if (closed) {
+                Array<CancellationSource>()
+            } else {
+                closed = true
+                let sources = ArrayList<CancellationSource>()
+                for (stream in streams) { sources.add(stream.terminationSource) }
+                for (permit in permits) { permit.current = Http2SendPermitState.Cancelled }
+                permits.clear()
+                streams.clear()
+                reservedConnectionBytes = 0
+                pendingConnectionReceiveCredit = 0
+                changed.notifyAll()
+                sources.toArray()
+            }
         }
+        for (source in terminationSources) { let _ = source.cancel() }
     }
 
     public func snapshot(streamId: Http2StreamId): Http2FlowSnapshot {
@@ -698,6 +715,8 @@ private class Http2FlowStream {
     var pendingReceiveCredit: Int64 = 0
     var lastSendGrantOrder: Int64 = 0
 
+    let terminationSource = CancellationSource()
+    prop terminationToken: CancellationToken { get() { terminationSource.token } }
     init(id: Http2StreamId, sendWindow: Int64, receiveWindow: Int64) {
         this.id = id
         this.sendWindow = sendWindow
