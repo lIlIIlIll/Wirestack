@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+  "revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
   "platform": "linux-x86_64-glibc",
   "toolchain": {
     "cangjie": "1.1.3",
@@ -33,12 +33,12 @@
         "src/internal/http2/write_scheduler_test.cj",
         "src/internal/http2/server_mapping_test.cj"
       ],
-      "note": "The full native run on e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 passed. An earlier full run timed out in Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill; its isolated case passed. The pool case is outside the Q4 source changes."
+      "note": "The latest full native run on 5d6b2c7358e08169ede6198b472b37d773e017d passed 1,080/1,108 with 28 skips. An earlier full run timed out in Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill; its isolated case passed. That pool case is outside the Q4 source changes."
     },
     {
       "id": "q4-buffer-before-flow-permit",
       "status": "PASS_CURRENT_FULL_SUITE",
-      "criterion": "Outbound DATA admission limits the requested frame to current stream flow credit before waiting for a managed-buffer lease; a blocked buffer wait holds no flow permit, credit is rechecked after acquisition, and a shrunk-credit lease is released before retry. If the configured route/origin cap cannot satisfy the 10-byte minimum (9-byte frame header plus at least one DATA byte), reject structurally before cancellation registration, waiter creation, or owner allocation; exact 10-byte capacity succeeds.",
+      "criterion": "Outbound DATA admission caps the requested frame to current stream flow credit before waiting for a managed-buffer lease; a blocked buffer wait holds no flow permit, credit is rechecked after acquisition, and a shrunk-credit lease is released before retry. A fast-path permit retains the caller OperationContext for backpressure events after a SETTINGS shrink. If the configured route/origin cap cannot satisfy the 10-byte minimum, reject before cancellation registration, waiter creation, or owner allocation; exact 10-byte capacity succeeds.",
       "coverage": [
         "blockedOutboundDataBufferWaitDoesNotHoldFlowPermit",
         "blockedFlowPermitWaitDoesNotRetainManagedBufferLease",
@@ -52,7 +52,8 @@
         "partialFlowAdmissionLeavesUnsentServerBytesStaged",
         "dataLeaseIsSizedByCurrentFlowCreditBeforeOwnerWait",
         "pendingDataBufferAdmissionRechecksShrunkFlowCredit",
-        "impossibleDataBufferMinimumDoesNotRegisterWaiter"
+        "impossibleDataBufferMinimumDoesNotRegisterWaiter",
+        "q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall"
       ]
     },
     {
@@ -80,31 +81,32 @@
     },
     {
       "id": "resource-limited-regression",
-      "status": "PASS_ALL_PROFILES_WITH_SINGLE_CPU_RETRY",
+      "status": "PASS_ALL_PROFILES",
       "criterion": "Native HTTP/2 regression scenarios pass with constrained file descriptors, data/address space, and one CPU; deterministic test refusal is not represented as an OOM kill.",
       "profiles": [
-        "RLIMIT_NOFILE=64: 215 passed, 0 skipped, 0 errors, 0 failed",
-        "RLIMIT_DATA=1 GiB: 215 passed, 0 skipped, 0 errors, 0 failed",
-        "RLIMIT_AS=4 GiB: 215 passed, 0 skipped, 0 errors, 0 failed",
-        "CPU affinity=0: first attempt 214 passed/1 failed in queuedHalfCloseCancellationDoesNotWaitForConnectionWriter (same-direction operation already active / transport direction closed); immediate identical retry passed 215/215, 0 skipped, 0 errors, 0 failed"
+        "RLIMIT_NOFILE=64: 216 passed, 0 skipped, 0 errors, 0 failed",
+        "RLIMIT_DATA=1 GiB: 216 passed, 0 skipped, 0 errors, 0 failed",
+        "RLIMIT_AS=4 GiB: 216 passed, 0 skipped, 0 errors, 0 failed",
+        "CPU affinity=0: 216 passed, 0 skipped, 0 errors, 0 failed on the first attempt"
       ]
     },
     {
       "id": "current-toolchain-build-test-docs",
-      "status": "PASS_CURRENT_RUN",
-      "criterion": "Current source passes the pinned SDK check/build, full native regression, and strict generated documentation checks.",
+      "status": "BLOCKED_DOCS_OOM_AND_REPO_GATES",
+      "criterion": "Current source passes pinned SDK check/build, resolver build, and full native regression; current strict generated documentation and repository-wide/task gates remain blocked.",
       "coverage": [
         "cjpm check",
         "cjpm build",
         "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
         "scripts/check-code (includes strict docs with pinned CJDoc 0.7.2)"
       ],
-      "note": "The current-source scripts/check-code gate passed, including 1,079/1,107 full native cases (28 skipped) and strict docs with 1,873/1,873 API symbols and 950/950 parameters. Generated and checked-in docs hash to c0b3f311e670e8c983e280b1b312ab0b1d2c22df9cee6a44f188bbeb9272348c. The current CPU-affinity profile had one 214/215 failure in queuedHalfCloseCancellationDoesNotWaitForConnectionWriter before identical retry passed 215/215; prior GOAWAY and pool-fairness flakes remain recorded. scripts/check and the task-graph validator remain blocked; exact results are in verification.json. No installed-consumer check is an M10-002 acceptance criterion."
+      "note": "On 5d6b2c7358e08169ede6198b472b37d773e017d, cjpm check/build, scripts/build-linux-resolver --quiet, and the full native suite passed (1,080/1,108, 28 skipped). All four HTTP/2 resource profiles passed 216/216 on the first attempt. Both current scripts/check-code combined CJDoc 0.7.2 runs failed with allocation errors after per-package coverage checks and renders passed; docs-report.json records an earlier pass, not these runs. scripts/check failed in its tooling tests (25 failures, 16 errors, 4 skipped), and the task validator returned INVALID because downstream M10-003 depends on BLOCKED M10-002. No installed-consumer check is an M10-002 acceptance criterion."
     }
   ],
   "review": {
-    "revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
-    "result": "NO_FINDINGS"
+    "revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+    "result": "TWO_FINDINGS_FIXED_NO_NEW_FINDINGS",
+    "reviewers": ["Q4PermitReview", "Q4EvidenceBindingReview"]
   },
   "evidence_policy": "This matrix is bound to the committed source revision above. verification.json records exact acceptance commands, exit codes, outcomes, toolchain, platform, and current blockers. Historical SDK 1.3 smoke evidence is not used as current acceptance evidence."
 }
