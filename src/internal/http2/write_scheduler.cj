@@ -282,6 +282,35 @@ public class Http2WriteScheduler {
         } else { None<internal.HttpResourceLease> }
     }
 
+    private func waitForStreamBuffer(
+        flow: Http2FlowController,
+        streamId: Http2StreamId,
+        bytes: UInt64,
+        context: OperationContext
+    ): ?internal.HttpResourceLease {
+        let terminationToken = flow.streamTerminationToken(streamId)
+        let linkedCancellation = CancellationSource()
+        let callerRegistration = context.cancellation.register {
+            => let _ = linkedCancellation.cancel()
+        }
+        try {
+            let streamRegistration = terminationToken.register {
+                => let _ = linkedCancellation.cancel()
+            }
+            try {
+                waitForQueuedBuffer(
+                    bytes,
+                    false,
+                    Int64(streamId.value),
+                    context.withCancellation(linkedCancellation.token)
+                )
+            } finally {
+                streamRegistration.unregister()
+            }
+        } finally {
+            callerRegistration.unregister()
+        }
+    }
     private func retainBufferLease(
         lease: ?internal.HttpResourceLease
     ): ?internal.HttpResourceLease {
@@ -428,15 +457,16 @@ public class Http2WriteScheduler {
         if (source.isEmpty()) {
             throw IllegalArgumentException("HTTP/2 DATA source cannot be empty")
         }
-        var requested = source.length
+        let maximumDataPayload = flow.maximumOutboundDataPayload
+        var requested = if (source.length < maximumDataPayload) { source.length } else { maximumDataPayload }
         if (resourceBudget.isNone()) {
             let permit = flow.reserveSend(streamId, requested, context: context)
             return enqueueDataWithPermit(streamId, source, permit, None<internal.HttpResourceLease>, context)
         }
         while (requested > 0) {
             checkWriterContext(context)
-            let bufferLease = waitForQueuedBuffer(
-                UInt64(requested) + 9u64, false, Int64(streamId.value), context
+            let bufferLease = waitForStreamBuffer(
+                flow, streamId, UInt64(requested) + 9u64, context
             ).getOrThrow()
             var leaseTransferred = false
             try {

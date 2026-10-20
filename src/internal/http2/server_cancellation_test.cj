@@ -133,7 +133,7 @@ class Http2ServerCancellationTest {
             let handler = HeldCancellationHandler()
             let parent = CancellationSource()
             let clientCancellation = CancellationSource()
-            let server = Http2ServerConnection(serverTransport, handler,
+            let server = Http2ServerConnection(serverTransport, handler, "http",
                 resourceBudget: Some(budget), resourceOwner: Some(owner))
             let serving = spawn { server.serve(context: OperationContext(cancellation: parent.token)) }
             let client = Http2ClientConnection.connect(clientTransport)
@@ -187,7 +187,7 @@ class Http2ServerCancellationTest {
         let owner = internal.HttpResourceOwnerKey("https://example.test:443", "direct")
         let budget = cancellationTestBudget()
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 65536)
-        let server = Http2ServerConnection(serverTransport, OrdinaryCancellationHandler(),
+        let server = Http2ServerConnection(serverTransport, OrdinaryCancellationHandler(), "http",
             resourceBudget: Some(budget), resourceOwner: Some(owner))
         let serving = spawn { server.serve() }
         let client = Http2ClientConnection.connect(clientTransport)
