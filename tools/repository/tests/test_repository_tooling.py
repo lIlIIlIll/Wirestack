@@ -161,7 +161,7 @@ class RepositoryToolingTests(unittest.TestCase):
             tooling.validate_repository_tasks(self.root)
         self.assertEqual("DEPENDENCY_MISSING", caught.exception.code)
 
-    def test_incomplete_unrelated_dependency_does_not_block_selected_task(self) -> None:
+    def test_selected_task_scopes_unrelated_incomplete_dependency(self) -> None:
         self.write_planning({
             "TEST-001": "READY",
             "BASE-001": "COMPLETE",
@@ -172,10 +172,41 @@ class RepositoryToolingTests(unittest.TestCase):
         self.write_manifest(self.manifest("OTHER-001", ["BLOCK-001"]))
 
         self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root, "TEST-001"))
-        self.assertEqual(2, len(tooling.validate_repository_tasks(self.root)))
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root)
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        all_evidence = tooling.verify(self.root, None)
+        self.assertEqual("FAIL", all_evidence["status"])
+        self.assertEqual([], all_evidence["tasks"])
+        self.assertEqual(
+            "DEPENDENCY_INCOMPLETE",
+            all_evidence["issues"][0]["code"],
+        )
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_repository_tasks(self.root, "OTHER-001")
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_fast_and_full_checks_reject_unrelated_incomplete_tasks(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["BASE-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+
+        with mock.patch.object(tooling, "run_command") as run_command:
+            for mode in ("fast", "full"):
+                report = tooling.check(self.root, mode, "TEST-001")
+                self.assertIsNone(report["task_id"])
+                self.assertEqual("INVALID", report["status"])
+                self.assertEqual([], report["commands"])
+                self.assertEqual(
+                    "DEPENDENCY_INCOMPLETE",
+                    report["issues"][0]["code"],
+                )
+                run_command.assert_not_called()
 
     def test_selected_task_rejects_incomplete_transitive_dependency(self) -> None:
         self.write_planning({

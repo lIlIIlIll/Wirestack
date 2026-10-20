@@ -1,6 +1,6 @@
 # Use the repository control plane
 
-Status: **COMPLETE**
+Status: **BLOCKED**
 
 P1-012 adds bounded diagnostics and validation commands for maintainers, CI,
 and coding agents. The commands use one task contract and one result model, so
@@ -83,10 +83,14 @@ Task manifests live at `tools/tasks/<TASK-ID>.json` and use
 - source paths whose SHA-256 values bind retained evidence to the code.
 
 Dependency IDs must exist in the backlog and status, and all manifests must
-form an acyclic graph. A repository-wide `validate-tasks` run checks this
-structure but does not require every task to be ready. A task-specific check
-also requires every transitive dependency of the selected task to be COMPLETE;
-unrelated blocked tasks do not invalidate that selection.
+form an acyclic graph. `validate-tasks`, `check-fast`, `check-full`, and
+`verify-evidence --all` are repository-wide gates: any incomplete declared
+dependency makes them fail before acceptance commands or evidence are
+processed. An optional task ID does not narrow a global fast/full check.
+
+A task-specific `check-task`, `check-long`, or `verify-evidence TASK` checks
+only that task's transitive dependency closure; unrelated blocked tasks do not
+invalidate the selected task. Structural manifest validation remains global.
 
 ## Stable exit codes
 
@@ -102,24 +106,40 @@ unrelated blocked tasks do not invalidate that selection.
 
 ## Evidence boundary
 
-The focused recheck ran `scripts/check-task P1-012 --json` and passed. The
-updated plan validates 17 paths, 13 scenarios, and 11 tests; all 39 repository
-tooling tests pass. The `validate-tasks` CLI also passes with blocked tasks
-outside a selected dependency closure. The regression records the original
-M12-003 INVALID result and its post-fix transition to task execution in
-[`dependency-scope-reproduction.json`](dependency-scope-reproduction.json).
+The current `scripts/check-task P1-012 --json` passes: the plan has 18 paths,
+14 scenarios, and 12 tests; all 40 repository-tooling tests pass. The exact
+task report and plan validation are retained in
+[`task-check.json`](task-check.json) and
+[`test-plan-validation.json`](test-plan-validation.json).
 
-The post-fix M12-003 acceptance commands ran: 47 fault-contract tests passed
-with one environment-gated skip, while its current-source evidence verifier
+Repository-wide readiness is BLOCKED because M10-004 depends on incomplete
+M10-003. `validate-tasks` and global fast/full checks return INVALID (exit 2)
+before selecting or executing commands; `verify-evidence --all` returns FAIL
+(exit 1) on the same dependency. The reports are linked from
+[`global-readiness.json`](global-readiness.json). P1-012 remains BLOCKED; no
+current PASS evidence seal is claimed. The active
+[`evidence.json`](evidence.json) records BLOCKED, and
+[`evidence-unqualified-2026-10-19.json`](evidence-unqualified-2026-10-19.json)
+records provenance for the former PASS index, bound to unpublished revision
+`8beeed24620452e0b8101c0375e1494b73e0de6e`. The original index remains in
+earlier PR history and is not current evidence.
+
+A selected `verify-evidence P1-012` also returns FAIL with
+`ACCEPTANCE_NOT_PASS`; the BLOCKED marker cannot be treated as a current seal.
+
+The M12-003 reproduction remains historical: 47 fault-contract tests passed
+with one environment-gated skip, while its source-bound evidence verifier
 failed on drift in `tools/gates/m12_003_resources.py`; M12-003 remains BLOCKED.
-The deliberately blocked M10-004 selection still returns INVALID for its
-incomplete M10-003 dependency.
+The deliberately blocked M10-004 selection also rejects its incomplete
+M10-003 dependency.
 
-[`full-check.json`](full-check.json) is the unchanged historical 2026-09-01
-PASS receipt. A current `scripts/check-full` run is recorded separately in
-[`full-check-current.json`](full-check-current.json): 584 tests, 25 failures,
-16 errors, and 4 skips, caused by unrelated stale or missing qualification
-evidence. No current repository-wide full PASS is claimed.
+[`full-check.json`](full-check.json) is the unchanged historical 2026-09-01 PASS receipt.
+[`full-check-pre-strict-global-readiness.json`](full-check-pre-strict-global-readiness.json)
+summarizes an earlier pre-fix run (584 tests, 25 failures, 16 errors, 4 skips);
+the original report remains in earlier PR history, not current qualification.
+The current full check is
+[`full-check-current.json`](full-check-current.json): it returns INVALID before
+delegating to `scripts/check`. No current repository-wide full PASS is claimed.
 
 P1-012 did not run the one-hour SSE profile, the 24-hour soak, or another long
 profile. It did not modify runtime, std, stdx, or an SDK, and did not build an

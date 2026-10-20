@@ -251,23 +251,28 @@ def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[
 
     for task_id in sorted(tasks):
         visit(task_id)
+    status_scope = set(tasks)
     if requested is not None:
-        checked: set[str] = set()
+        status_scope = set()
+        pending = [requested]
+        while pending:
+            task_id = pending.pop()
+            if task_id in status_scope:
+                continue
+            status_scope.add(task_id)
+            pending.extend(
+                dependency
+                for dependency in tasks[task_id]["dependencies"]
+                if dependency in tasks
+            )
+    for task_id in sorted(status_scope):
+        for dependency in tasks[task_id]["dependencies"]:
+            if statuses[dependency] != "COMPLETE":
+                raise ContractError(
+                    "DEPENDENCY_INCOMPLETE",
+                    f"{task_id} dependency is not COMPLETE: {dependency}",
+                )
 
-        def require_complete_dependencies(task_id: str) -> None:
-            if task_id in checked:
-                return
-            checked.add(task_id)
-            for dependency in tasks[task_id]["dependencies"]:
-                if statuses[dependency] != "COMPLETE":
-                    raise ContractError(
-                        "DEPENDENCY_INCOMPLETE",
-                        f"{task_id} dependency is not COMPLETE: {dependency}",
-                    )
-                if dependency in tasks:
-                    require_complete_dependencies(dependency)
-
-        require_complete_dependencies(requested)
     return tasks
 
 
@@ -478,11 +483,12 @@ def run_command(root: Path, command: Mapping[str, Any], artifact_dir: Path) -> d
 
 
 def check(root: Path, mode: str, task_id: str | None = None) -> dict[str, Any]:
+    scope = task_id if mode in {"task", "long"} else None
     try:
-        tasks = validate_repository_tasks(root, task_id)
+        tasks = validate_repository_tasks(root, scope)
     except ContractError as error:
         return {"schema_version": 1, "kind": "repository-check", "mode": mode,
-                "task_id": task_id, "status": "INVALID",
+                "task_id": scope, "status": "INVALID",
                 "issues": [{"code": error.code, "detail": error.detail}], "commands": []}
     if mode == "full":
         selected = [{"id": "scripts-check", "argv": ["scripts/check"],
@@ -490,17 +496,17 @@ def check(root: Path, mode: str, task_id: str | None = None) -> dict[str, Any]:
     elif mode == "fast":
         selected = [command for task in tasks.values() for command in task["acceptance_commands"] if command["gate"] == "fast"]
     else:
-        assert task_id is not None
+        assert scope is not None
         gate = "long" if mode == "long" else "task"
-        selected = [command for command in tasks[task_id]["acceptance_commands"] if command["gate"] == gate]
+        selected = [command for command in tasks[scope]["acceptance_commands"] if command["gate"] == gate]
     if not selected:
         return {"schema_version": 1, "kind": "repository-check", "mode": mode,
-                "task_id": task_id, "status": "SKIPPED", "issues": [], "commands": []}
-    artifact_dir = root / "build/repository-tooling" / (task_id or mode)
+                "task_id": scope, "status": "SKIPPED", "issues": [], "commands": []}
+    artifact_dir = root / "build/repository-tooling" / (scope or mode)
     results = [run_command(root, command, artifact_dir) for command in selected]
     status = "PASS" if all(result["status"] == "PASS" for result in results) else "FAIL"
     return {"schema_version": 1, "kind": "repository-check", "mode": mode,
-            "task_id": task_id, "status": status, "issues": [], "commands": results}
+            "task_id": scope, "status": status, "issues": [], "commands": results}
 
 
 def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str, Any]:
