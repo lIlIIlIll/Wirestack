@@ -168,17 +168,33 @@ class Http2ServerMappingTest {
         @Expect(isNeverIndexedServer(plan.initialHeaders[2].mode))
         @Expect(!plan.endStreamOnHeaders)
 
+        let (writerTransport, peerTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let writer = Http2WriteScheduler(writerTransport)
         let body = plan.openBody()
         let data = body.next()
         @Expect(isServerData(data.kind))
-        @Expect(data.frame.getOrThrow().payload, "abc".toArray())
+        let source = data.source.getOrThrow()
+        @Expect(source.length, 3)
+        @Expect(source.bytes[source.offset], b'a')
+        @Expect(source.bytes[source.offset + 1], b'b')
+        @Expect(source.bytes[source.offset + 2], b'c')
         expectIllegalServer({ => let _ = body.next() })
-        @Expect(data.beginData())
+        @Expect(flow.pendingPermitCount, 0)
+        @Expect(flow.snapshot(id).reservedSendBytes, 0)
+
+        let ticket = data.enqueueData(writer, OperationContext.background())
+        @Expect(flow.snapshot(id).sendWindow, 65535)
+        @Expect(flow.snapshot(id).reservedSendBytes, 3)
         let terminal = body.next()
         @Expect(isServerTrailers(terminal.kind))
         expectServerField(terminal.trailerFields, 0, "digest", "done")
         @Expect(body.isClosed())
+        writer.close()
+        @Expect(isServerWriterClosed(writer.run()))
+        @Expect(isServerWriteWritten(ticket.wait()))
         @Expect(flow.snapshot(id).sendWindow, 65532)
+        @Expect(flow.snapshot(id).reservedSendBytes, 0)
+        peerTransport.abort()
     }
 
     @TestCase
@@ -193,14 +209,78 @@ class Http2ServerMappingTest {
             id, HttpMethod("GET"), Http2ServerResponse(response), flow,
             limits: HttpLimits(maxBodyBytes: 2)
         )
+        let (writerTransport, peerTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let writer = Http2WriteScheduler(writerTransport)
         let body = plan.openBody()
         let first = body.next()
-        @Expect(first.frame.getOrThrow().payload, "ab".toArray())
-        @Expect(first.beginData())
+        let firstSource = first.source.getOrThrow()
+        @Expect(firstSource.length, 2)
+        @Expect(firstSource.bytes[firstSource.offset], b'a')
+        @Expect(firstSource.bytes[firstSource.offset + 1], b'b')
+        let firstTicket = first.enqueueData(writer, OperationContext.background())
+        @Expect(flow.snapshot(id).reservedSendBytes, 2)
+
         let second = body.next()
-        @Expect(second.frame.getOrThrow().payload, "cd".toArray())
-        @Expect(second.beginData())
+        let secondSource = second.source.getOrThrow()
+        @Expect(secondSource.length, 2)
+        @Expect(secondSource.bytes[secondSource.offset], b'c')
+        @Expect(secondSource.bytes[secondSource.offset + 1], b'd')
+        let secondTicket = second.enqueueData(writer, OperationContext.background())
+        @Expect(flow.snapshot(id).reservedSendBytes, 4)
         @Expect(isServerEndData(body.next().kind))
+        @Expect(body.isClosed())
+
+        writer.close()
+        @Expect(isServerWriterClosed(writer.run()))
+        @Expect(isServerWriteWritten(firstTicket.wait()))
+        @Expect(isServerWriteWritten(secondTicket.wait()))
+        @Expect(flow.snapshot(id).sendWindow, 65531)
+        @Expect(flow.snapshot(id).reservedSendBytes, 0)
+        peerTransport.abort()
+    }
+
+    @TestCase
+    func partialFlowAdmissionLeavesUnsentServerBytesStaged(): Unit {
+        let flow = Http2FlowController()
+        flow.applyPeerSettings(Http2SettingsUpdate(
+            Http2SettingsSnapshot(4096u32, true, 100u32, 2u32, 16384u32, 65536u32),
+            0,
+            http2SettingsAck()
+        ))
+        let id = Http2StreamId(1u32)
+        flow.openStream(id)
+        let response = HttpResponse(
+            200, "OK", ResponseBody(ServerStreamingSegments("abcd".toArray(), 4))
+        )
+        let plan = mapHttp2ServerResponse(
+            id, HttpMethod("GET"), Http2ServerResponse(response), flow,
+            limits: HttpLimits(maxBodyBytes: 2)
+        )
+        let (writerTransport, peerTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let writer = Http2WriteScheduler(writerTransport)
+        let body = plan.openBody()
+        let first = body.next()
+        let firstSource = first.source.getOrThrow()
+        @Expect(firstSource.length, 4)
+        @Expect(firstSource.bytes[firstSource.offset], b'a')
+        @Expect(firstSource.bytes[firstSource.offset + 1], b'b')
+        @Expect(firstSource.bytes[firstSource.offset + 2], b'c')
+        @Expect(firstSource.bytes[firstSource.offset + 3], b'd')
+        let ticket = first.enqueueData(writer, OperationContext.background())
+        @Expect(flow.snapshot(id).reservedSendBytes, 2)
+        let remainder = body.next().source.getOrThrow()
+        @Expect(remainder.length, 2)
+        @Expect(remainder.bytes[remainder.offset], b'c')
+        @Expect(remainder.bytes[remainder.offset + 1], b'd')
+        @Expect(body.isClosed(), false)
+        @Expect(ticket.cancel())
+        body.close()
+        @Expect(flow.snapshot(id).sendWindow, 2)
+        @Expect(flow.snapshot(id).reservedSendBytes, 0)
+        writer.close()
+        @Expect(isServerWriterClosed(writer.run()))
+        @Expect(isServerWriteCancelled(ticket.wait()))
+        peerTransport.abort()
     }
 
     @TestCase
@@ -429,6 +509,27 @@ private func sameServerCode(left: Http2MessageErrorCode, right: Http2MessageErro
         case _ => false
     }
 }
+private func isServerWriterClosed(value: Http2WriteSchedulerState): Bool {
+    match (value) {
+        case Http2WriteSchedulerState.Closed => true
+        case _ => false
+    }
+}
+
+private func isServerWriteWritten(value: Http2WriteState): Bool {
+    match (value) {
+        case Http2WriteState.Written => true
+        case _ => false
+    }
+}
+
+private func isServerWriteCancelled(value: Http2WriteState): Bool {
+    match (value) {
+        case Http2WriteState.Cancelled => true
+        case _ => false
+    }
+}
+
 
 private func isServerStreamScope(value: Http2ErrorScope): Bool {
     match (value) { case Http2ErrorScope.Stream(_) => true; case _ => false }
