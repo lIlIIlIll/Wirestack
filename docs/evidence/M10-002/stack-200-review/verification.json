@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "f05ee90d1f32dce35c6cd5b9799001d9d1f19233",
+  "status": "BLOCKED",
+  "acceptance_status": "BLOCKED",
+  "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.1.3",
+    "cjpm": "1.1.3",
+    "cjdoc": "0.7.2"
+  },
+  "checks": [
+    {
+      "id": "architecture-guard",
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "architecture guard: PASS"
+    },
+    {
+      "id": "network-capability-contract",
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "Contract check PASS; source_task M9-003; native NOT_RUN. This is not native platform qualification."
+    },
+    {
+      "id": "cjpm-check",
+      "command": "cjpm check",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "cjpm check success"
+    },
+    {
+      "id": "cjpm-build",
+      "command": "cjpm build",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "cjpm build success; compiler emitted unreachable-block warnings, with no build errors."
+    },
+    {
+      "id": "full-native-regression",
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 1099,
+      "passed": 1071,
+      "skipped": 28,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-nofile-64",
+      "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 210,
+      "passed": 210,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-data-1g",
+      "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 210,
+      "passed": 210,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-as-4g",
+      "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 210,
+      "passed": 210,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-single-cpu",
+      "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 210,
+      "passed": 210,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "documentation-check",
+      "command": "env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "exit_code": 0,
+      "status": "PASS",
+      "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "docs_sha256": "ca388be4388b4f8c1be35dbe65f6cf2a6ffddf3f63f60ba5802154ab71cd4b29",
+      "api_symbols_covered": 1873,
+      "api_symbols_total": 1873,
+      "parameters_covered": 950,
+      "parameters_total": 950,
+      "package_layers_at_full_coverage": 7
+    },
+    {
+      "id": "repository-check",
+      "command": "scripts/check",
+      "exit_code": 1,
+      "status": "FAIL",
+      "tests_total": 584,
+      "failures": 25,
+      "errors": 16,
+      "skipped": 4,
+      "failure_families": [
+        "stale AWS-LC advisory disposition in provider validation",
+        "M3-031 desktop-provider fixture and expected error-code mismatches",
+        "M7-030 release/evidence-digest errors",
+        "M12-002 platform-support source mismatch",
+        "M7 task-graph expectation drift"
+      ],
+      "note": "scripts/check stopped in its initial tooling unittest stage; the separately listed Cangjie, resource-profile, and documentation checks were run independently."
+    }
+  ],
+  "task_gate": {
+    "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json --output <task-tmp>/check-task-source-commit.json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "issues": [
+      {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "M10-004 dependency is not COMPLETE: M10-003"
+      }
+    ],
+    "note": "This is a global task-graph inconsistency. M10-002 declares M9-001 as its dependency; M10-003/#175 was not modified."
+  },
+  "full_suite_stability": {
+    "earlier_run": {
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 1,
+      "total": 1099,
+      "passed": 1070,
+      "skipped": 28,
+      "errors": 1,
+      "failed": 0,
+      "error": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill timed out awaiting cross-origin refill; stderr reported HTTP/2 connection pool closed."
+    },
+    "isolated_case": {
+      "command": "cjpm test --filter='Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill' --parallel 1 --no-progress --no-color src/internal/http1",
+      "exit_code": 0,
+      "total": 170,
+      "passed": 1,
+      "skipped": 169,
+      "errors": 0,
+      "failed": 0
+    },
+    "interpretation": "The latest complete native run passed. The earlier intermittent pool-fairness failure is in M10-003 scope and was not changed here; retain it as a stability risk, not as a pass."
+  },
+  "noncanonical_attempts": [
+    {
+      "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2 with an extra cjHeapSize=1GB override",
+      "exit_code": 134,
+      "status": "FAILED_BEFORE_TESTS",
+      "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The manifest-equivalent run with the default heap passed 210/210; this noncanonical attempt is not counted as an acceptance result."
+    }
+  ],
+  "decision": {
+    "task_status": "BLOCKED",
+    "pr_216": "Remain OPEN and DRAFT; do not mark ready while repository-check and task-graph blockers remain.",
+    "issue_174": "Remains open and untouched.",
+    "m10_003_issue_175": "Not started and untouched."
+  }
+}
