@@ -61,18 +61,28 @@ The earlier alpha-toolchain run remains historical smoke evidence. The pinned SD
 
 ### Current-source follow-up
 
-The supplemental replay adds finding 6: when an HTTP/1 final response arrives
-after the `100-continue` wait deadline and has been consumed, the client must
-return that response without sending the request body. The pinned SDK focused
-replay and full HTTP package suite both passed on the fixed source.
+The supplemental replay addresses finding 6: when an HTTP/1 final response
+arrives after the `100-continue` wait deadline but within the response-header
+budget, the client returns that response and sends no request-body bytes.
+The replacement regression passed 1/171 tests on source
+`18a2b9a79b0b8886db8bfae3fdd48184ff45d23c`.
 
-The strict documentation check passed after setting the CJDoc heap to 1 GiB;
-the task manifest now records that command. The M10-001 task gate itself
-returned `INVALID` before running commands because M10-004 depends on BLOCKED
-M10-003. This follow-up therefore does not claim full current task acceptance.
-The earlier full-suite failure remains unexplained and is not erased by the
-later passing run. The original M10-001 COMPLETE status remains based on its
-historical acceptance evidence.
+The latest full HTTP package run on that source exited 1: 531 passed, 6 skipped,
+and 1 error (538 total). The error is a timeout in
+`Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill`,
+owned by the M10-003 connection-pool fairness work. A prior run at
+`97cac410c727b301e1f85a0b8e61595980292287` passed 532/538, but it does not
+supersede this later failure. The earlier
+`HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission`
+full-suite failure at `935351da4880f2d4e1be963100ca19146ea8b6f5` also remains
+unexplained.
+
+The strict documentation check at source `97cac410c727b301e1f85a0b8e61595980292287`
+passed after setting the CJDoc heap to 1 GiB; the task manifest records that
+command.
+The M10-001 task gate returned `INVALID` because M10-004 depends on BLOCKED M10-003.
+This follow-up does not claim full current task acceptance. The original
+M10-001 COMPLETE status remains based on its historical acceptance evidence.
 
 Exact commands and results are in
 [review-deadline-regressions.md](review-deadline-regressions.md) and the

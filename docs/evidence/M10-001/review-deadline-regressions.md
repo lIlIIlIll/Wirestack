@@ -167,20 +167,31 @@ The M10-002 Stack #200 follow-up report records an earlier full `src/http` failu
 
 ## Current-source follow-up: late final response after `100-continue`
 
-The new regression `Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody` uses a fake transport that returns a final HTTP 417 after the `100-continue` wait has expired. It asserts that no request-body bytes are written and that the returned failure retains the structured deadline category, code, and `HttpHeaders` phase.
+The original follow-up test at `97cac410c727b301e1f85a0b8e61595980292287`
+asserted that a final HTTP 417 arriving after the short `100-continue` wait
+should fail with a deadline error. Review showed that this consumed response
+must instead be returned when it arrives within the longer response-header
+budget. The replacement regression,
+`Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody`,
+asserts status 417 and zero request-body bytes. The implementation is
+`18a2b9a79b0b8886db8bfae3fdd48184ff45d23c`.
 
-All commands used pinned Cangjie/CJPM 1.1.3 via `<qualified-wrapper>`, with `TMPDIR`, `TMP`, and `TEMP` set to `<task-tmp>` and `DISABLE_ZOXIDE=1`. The fixed source was `97cac410c727b301e1f85a0b8e61595980292287`.
+All commands used pinned Cangjie/CJPM 1.1.3 via `<qualified-wrapper>`, with
+`TMPDIR`, `TMP`, and `TEMP` set to `<task-tmp>` and `DISABLE_ZOXIDE=1`.
 
-Focused HTTP regressions:
+Focused regression:
 
 ```sh
 <qualified-wrapper> --sdk-root <qualified-sdk> --cwd <repo> -- \
-  cjpm test src/internal/http1 src/internal/http2 src/http \
-  --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineDoesNotSendRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls \
-  --no-color --no-progress
+  cjpm test --no-progress --no-color \
+  --filter=Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody \
+  src/internal/http1
 ```
 
-Exit 0. `TOTAL 538`, `PASSED 10`, `SKIPPED 528`, `ERROR 0`, `FAILED 0`.
+Exit 0. `TOTAL 171`, `PASSED 1`, `SKIPPED 170`, `ERROR 0`, `FAILED 0`.
+
+Current-source architecture guard, network capability contract, `cjpm check`,
+and `cjpm build` each exited 0 on `18a2b9a79b0b8886db8bfae3fdd48184ff45d23c`.
 
 Full HTTP package suite:
 
@@ -190,24 +201,24 @@ Full HTTP package suite:
   src/internal/http1 src/internal/http2 src/http
 ```
 
-Exit 0. `TOTAL 538`, `PASSED 532`, `SKIPPED 6`, `ERROR 0`, `FAILED 0`.
+Exit 1. `TOTAL 538`, `PASSED 531`, `SKIPPED 6`, `ERROR 1`, `FAILED 0`.
+`Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill`
+raised `TimeoutException` at `src/internal/http1/http2_connection_pool_test.cj:456`.
+This is a current full-suite blocker; its cause is not established.
 
-The current-source architecture guard, network capability check, `cjpm check`,
-and `cjpm build` each exited 0.
+The previous run at `97cac410c727b301e1f85a0b8e61595980292287` passed 532/538,
+but its then-current finding-6 test asserted the incorrect timeout behavior;
+that result does not validate the corrected late-response contract. An earlier
+full-suite run at `935351da4880f2d4e1be963100ca19146ea8b6f5` separately failed at
+`HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission`;
+the isolated case passed, and the cause remains unexplained.
 
-`scripts/check-docs --json` exited 1 under the default heap: all seven package
-checks passed, but the combined CJDoc process failed to allocate 9,186,376
-bytes. The retry with the validated heap setting passed:
+Documentation checks were run at `97cac410c727b301e1f85a0b8e61595980292287`:
+`scripts/check-docs --json` exited 1 after all seven package checks passed,
+because combined CJDoc could not allocate 9,186,376 bytes. The retry
+`env cjHeapSize=1GB scripts/check-docs --json` exited 0; all seven package
+layers passed with 1,873/1,873 API symbols and 950/950 parameters.
 
-```sh
-env cjHeapSize=1GB scripts/check-docs --json
-```
-
-Exit 0. All seven package layers and the combined report passed; the combined
-coverage is 1,873/1,873 API symbols and 950/950 parameters. The M10-001 task
-manifest now uses this `env cjHeapSize=1GB` command.
-
-The isolated current-source task-gate preflight returned `INVALID` (exit 2)
-before executing commands: M10-004 depends on BLOCKED M10-003. This is a
-dependency blocker, not a passing task acceptance. The earlier full-suite
-failure of `HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission` remains unexplained despite the later passing full HTTP run.
+The task-gate preflight on `18a2b9a79b0b8886db8bfae3fdd48184ff45d23c` returned
+`INVALID` (exit 2) before executing commands: M10-004 is not COMPLETE because
+M10-003 is BLOCKED. This is a dependency blocker, not a passing task acceptance.
