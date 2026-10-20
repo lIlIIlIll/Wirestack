@@ -13,7 +13,7 @@ class Http2ObservabilityTest {
     @TestCase
     func independentStreamsRetainCorrelationAndThrowingReentrantHookCannotChangeBodies(): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 65536)
-        let server = Http2ServerConnection(serverTransport, ObservationHandler())
+        let server = Http2ServerConnection(serverTransport, ObservationHandler(), "http")
         let serving = spawn { server.serve() }
         let client = Http2ClientConnection.connect(clientTransport)
         let sink = ReentrantH2Sink(client)
@@ -75,7 +75,7 @@ class Http2ObservabilityTest {
         for (cancel in [false, true]) {
             let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 65536)
             let body = HeldObservationBody()
-            let server = Http2ServerConnection(serverTransport, HeldObservationHandler(body))
+            let server = Http2ServerConnection(serverTransport, HeldObservationHandler(body), "http")
             let serving = spawn { server.serve() }
             let client = Http2ClientConnection.connect(clientTransport)
             let events = api.NetworkEventBuffer(capacity: 64)
