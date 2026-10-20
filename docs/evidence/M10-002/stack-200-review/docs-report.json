@@ -26,7 +26,7 @@
     },
     "coverageSha256": "68b89ff2ca49e00ff6959f9c7faaf2fd75c8d50d31bc7fe0df3f0fc1a223918d",
     "declarations": 3291,
-    "docsSha256": "1fde2a6cc279ae78347a2013f698fc97303c41e5400e5825a871f0834e1b86c1",
+    "docsSha256": "5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099",
     "markdownSha256": "71f281343a280a5872fa5b5f64a0a8661fe398c481f80034524beaa6941b3d78",
     "package": "combined",
     "status": "PASS"
@@ -434,7 +434,7 @@
     }
   ],
   "expectedCjdoc": "0.7.2",
-  "generatedAtUtc": "2026-10-20T09:01:02.799861Z",
+  "generatedAtUtc": "2026-10-20T14:55:29.108817Z",
   "issues": [],
   "layers": [
     {
@@ -454,7 +454,7 @@
       },
       "coverageSha256": "2e1d905d6a96ddd4d4e57f3750f4dad5802d7abbd42f49b573e4acddd537704e",
       "declarations": 918,
-      "docsSha256": "dda0b3bb852aff893c2d4a0c97597d52a32bc73d05ac07d97e83e70378a3b83b",
+      "docsSha256": "2196a8fe3eb70d5e7948aefde2ef6e33ed842a44169498793f1efebadf103d5a",
       "markdownSha256": "3055a19762b460c1f977ca0ed29a1154c7af8cda9d232351ef2bba0e2b409b45",
       "package": "wirestack",
       "status": "PASS"
@@ -476,7 +476,7 @@
       },
       "coverageSha256": "688d4d5c140b25266c8ecb3a9c172e7d6c890b9af5dd388f43707348edaa4f3d",
       "declarations": 2141,
-      "docsSha256": "d55506d74524c2cdb6ef4b4e0bcff74b76611a316f0472df5ac1d5b02aa04434",
+      "docsSha256": "45b3ad5977e448c4705af6a86292a7eb9880704b0830e00dada2a640df90cebe",
       "markdownSha256": "b90982339ea708b7f7715aac927745b2581b6855195119690f6e0f5582139392",
       "package": "wirestack.http",
       "status": "PASS"
@@ -498,7 +498,7 @@
       },
       "coverageSha256": "fcfb2729ccedaaefcb963fcde630981e4740556154cdfbde23804423bcbbc43f",
       "declarations": 1124,
-      "docsSha256": "ae6b60a68daa3c05ffb7b62203aaa1ab73a2ac028ef738601e4d4b202f305e8c",
+      "docsSha256": "59883f969b4685b1152c25a71b84afe790c14a4c152eecab565227bc98317dcd",
       "markdownSha256": "f11ae8b6080dd249c5c33562a00732f7bbd35c67e423c0bcfc39ae9935b07646",
       "package": "wirestack.tls",
       "status": "PASS"
@@ -520,7 +520,7 @@
       },
       "coverageSha256": "5e2af384031156d27fce5a6cba9ca668fc8e95257da0461e5d4053a9d686dc89",
       "declarations": 1468,
-      "docsSha256": "e85f982a34f7be256bb2e0013cbe192fc6151ab3295a41ccacdeb82f7873671e",
+      "docsSha256": "6e9faf004369844943e7452497ecc68deb5c240f4c54c5eee1ebb9b1c9c39366",
       "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe",
       "package": "wirestack.net",
       "status": "PASS"
@@ -542,7 +542,7 @@
       },
       "coverageSha256": "3097798f4c1c5a5d6c56e403767e67ab878bfabbc1c3cc8ba27cbc5e63a81d78",
       "declarations": 974,
-      "docsSha256": "588f687e700073d5515476b01788f25b5415ad8419a22892ea198899d72d91c9",
+      "docsSha256": "786e6f6cec0a2452b4c1b46a5735643fdcfdb5a50121cbca575018dcaa69251f",
       "markdownSha256": "e3f09de1dd065e115a0bbcfd70e65b0f833ee1a4f601952faa7b27c290a81627",
       "package": "wirestack.observability",
       "status": "PASS"
@@ -564,7 +564,7 @@
       },
       "coverageSha256": "96ac207d20529e61c33323fc12bde587d70997dcd4074bce98c082ec2820e2a0",
       "declarations": 1091,
-      "docsSha256": "6b892ed118e9c02db838a41ea58e1d9adbb0e79828ec3efb9b62eaf3fe5359ef",
+      "docsSha256": "eb4a65d71f38b27478aacf6df7adf3f2eed34ac98a892a509cbd68508869ba32",
       "markdownSha256": "e828ab3c79c4429ba686d7eb7a47545d9cd25cda78c9354192e02d49e7e94f93",
       "package": "wirestack.sse",
       "status": "PASS"
@@ -586,7 +586,7 @@
       },
       "coverageSha256": "84f338990b3ddaae3c8ec424fcf6e6791b6d10cb7b86dbb681528abb219c7775",
       "declarations": 1083,
-      "docsSha256": "3497dc15428a14c926b0a25436659f82ea692c075dbc8540424be32ceb17b237",
+      "docsSha256": "61ad4ca5d033e320f04cd8b46ae350e414596462f750f8c63ed2ef3a390d83c1",
       "markdownSha256": "ef01e2f67c8b6dced3ecf96550cd8eb9ae69590f08e3a3409161c23e008bf71b",
       "package": "wirestack.gzip",
       "status": "PASS"
@@ -625,7 +625,7 @@
     "src/http/resolver.cj": "690401d0bea5ac825ee9669a0c19a0814ed7de4b1369fcdc2dff6035135cd177",
     "src/http/resource_budget.cj": "0126e7e2cdcdef300bd0a8fa4bd219477177383af399f055d52c5345104917d8",
     "src/http/retry.cj": "79e470d226695119c987cb490afb8ee92e1e3abb02333af5e1af7473782b0957",
-    "src/http/server.cj": "f14c94fa44f38c64f9938a5489547e56d5ba413eea9fd2de80bc83a1105b1d20",
+    "src/http/server.cj": "bfd2b4849d1109d87417524eebc792af0426b02231e23f23cefecb66efa8d8bb",
     "src/http/tls.cj": "b232989ad8c4e73d4480dcae4ce40aae55fbedf9ce13b5922cc61b8a6e8a1e62",
     "src/http/upgrade.cj": "3bf29c0ad5b9fd19f5b2d994d36abcf76cbcc7d22d46c18991378aab705e0f73",
     "src/http/websocket.cj": "a3c3dd52b656fbaa6af25a5eec6403868441576bf7929e50841c04a462373c5e",
