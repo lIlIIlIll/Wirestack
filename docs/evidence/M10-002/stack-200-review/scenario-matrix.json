@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "f05ee90d1f32dce35c6cd5b9799001d9d1f19233",
+  "revision": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
   "platform": "linux-x86_64-glibc",
   "toolchain": {
     "cangjie": "1.1.3",
