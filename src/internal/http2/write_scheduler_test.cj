@@ -699,6 +699,119 @@ class Http2WriteSchedulerTest {
         }
     }
 
+
+
+    @TestCase
+    func dataLeaseIsSizedByCurrentFlowCreditBeforeOwnerWait(): Unit {
+        let streamId = Http2StreamId(1u32)
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = schedulerResourceBudget(
+            81962u64, 34u64, maximumManagedBufferBytesPerOrigin: 9000u64
+        )
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
+        )
+        let flow = Http2FlowController()
+        flow.applyPeerSettings(Http2SettingsUpdate(
+            Http2SettingsSnapshot(4096u32, true, 100u32, 8192u32, 16384u32, 65536u32),
+            0,
+            http2SettingsAck()
+        ))
+        flow.openStream(streamId)
+        let source = Array<Byte>(16384, repeat: 7u8)
+        let context = OperationContext(
+            deadline: Some(Deadline.after(2 * Duration.second))
+        )
+        let (ticket, admitted) = scheduler.enqueueDataWaiting(
+            flow, streamId, ByteSpan(source), context
+        )
+        var completedNormally = false
+        try {
+            @Expect(admitted, 8192)
+            @Expect(flow.pendingPermitCount, 1)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 8192)
+            @Expect(flow.sendConnectionAvailable, 57343)
+            @Expect(budget.snapshot().managedBufferBytes, 8201u64)
+            @Expect(ticket.cancel())
+            @Expect(flow.pendingPermitCount, 0)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+            @Expect(flow.sendConnectionAvailable, 65535)
+            @Expect(budget.snapshot().managedBufferBytes, 0u64)
+            scheduler.close()
+            @Expect(isSchedulerTestClosed(scheduler.run()))
+            completedNormally = true
+        } finally {
+            if (!completedNormally) { scheduler.abort() }
+        }
+    }
+    @TestCase
+    func pendingDataBufferAdmissionRechecksShrunkFlowCredit(): Unit {
+        let streamId = Http2StreamId(1u32)
+        let owner = internal.HttpResourceOwnerKey("https://example.com:443", "direct")
+        let budget = schedulerResourceBudget(
+            81962u64, 34u64, maximumManagedBufferBytesPerOrigin: 9000u64
+        )
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
+        )
+        let blocker = scheduler.enqueue(Http2Frame(
+            Http2FrameHeader(8982u32, Http2FrameType.Data, Http2Flags(), streamId),
+            Array<Byte>(8982, repeat: 1u8)
+        ))
+        let flow = Http2FlowController()
+        flow.applyPeerSettings(Http2SettingsUpdate(
+            Http2SettingsSnapshot(4096u32, true, 100u32, 16384u32, 16384u32, 65536u32),
+            0,
+            http2SettingsAck()
+        ))
+        flow.openStream(streamId)
+        let source = Array<Byte>(16384, repeat: 7u8)
+        let context = OperationContext(
+            deadline: Some(Deadline.after(2 * Duration.second))
+        )
+        let waiting = spawn {
+            scheduler.enqueueDataWaiting(flow, streamId, ByteSpan(source), context)
+        }
+        var completedNormally = false
+        try {
+            @Expect(waitForSchedulerAdmissionWaiters(budget, 1, Duration.second))
+            @Expect(budget.snapshot().managedBufferBytes, 8991u64)
+            @Expect(flow.pendingPermitCount, 0)
+            @Expect(flow.snapshot(streamId).sendWindow, 16384)
+
+            flow.applyPeerSettings(Http2SettingsUpdate(
+                Http2SettingsSnapshot(4096u32, true, 100u32, 8192u32, 16384u32, 65536u32),
+                0,
+                http2SettingsAck()
+            ))
+            @Expect(flow.snapshot(streamId).sendWindow, 8192)
+            @Expect(blocker.cancel())
+            let (ticket, admitted) = waiting.get(2 * Duration.second)
+
+            @Expect(admitted, 8192)
+            @Expect(flow.pendingPermitCount, 1)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 8192)
+            @Expect(flow.sendConnectionAvailable, 57343)
+            @Expect(budget.snapshot().managedBufferBytes, 8201u64)
+            @Expect(scheduler.pendingBytes, 8201u64)
+            @Expect(ticket.cancel())
+            @Expect(flow.pendingPermitCount, 0)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+            @Expect(flow.sendConnectionAvailable, 65535)
+            @Expect(budget.snapshot().managedBufferBytes, 0u64)
+            @Expect(scheduler.pendingWrites, 0)
+            @Expect(scheduler.pendingBytes, 0u64)
+            scheduler.close()
+            @Expect(isSchedulerTestClosed(scheduler.run()))
+            completedNormally = true
+        } finally {
+            if (!completedNormally) {
+                let _ = blocker.cancel()
+                scheduler.abort()
+                try { let _ = waiting.get(2 * Duration.second) } catch (_: Exception) {}
+            }
+        }
+    }
     @TestCase
     func dataSourceIsSlicedBeforeWaitingForOwnerBufferLease(): Unit {
         let streamId = Http2StreamId(1u32)
