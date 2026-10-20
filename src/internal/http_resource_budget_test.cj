@@ -111,6 +111,37 @@ class HttpResourceBudgetTest {
     }
 
     @TestCase
+    func impossibleDataBufferMinimumDoesNotRegisterWaiter(): Unit {
+        let owner = HttpResourceOwnerKey("https://bounded.example:443", "direct")
+        let routeLimited = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65545u64, 0u64, 2,
+            maximumManagedBufferBytesPerRoute: 9u64,
+            maximumManagedBufferBytesPerOrigin: 10u64
+        ))
+        expectImpossibleDataBufferMinimum(routeLimited, owner)
+
+        let originLimited = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65545u64, 0u64, 2,
+            maximumManagedBufferBytesPerRoute: 10u64,
+            maximumManagedBufferBytesPerOrigin: 9u64
+        ))
+        expectImpossibleDataBufferMinimum(originLimited, owner)
+
+        let exactLimit = HttpResourceBudget(HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 65545u64, 0u64, 2,
+            maximumManagedBufferBytesPerRoute: 10u64,
+            maximumManagedBufferBytesPerOrigin: 10u64
+        ))
+        let (lease, bytes) = exactLimit.acquireManagedDataBufferUpTo(
+            owner, 10u64, 10u64, OperationContext.background()
+        )
+        @Expect(bytes, 10u64)
+        @Expect(exactLimit.snapshot().highWaterAdmissionWaiters, 0)
+        lease.close()
+        @Expect(exactLimit.snapshot().managedBufferBytes, 0u64)
+    }
+
+    @TestCase
     func retainedReceivedBufferCanMoveToTheLateStreamAuthority(): Unit {
         let budget = HttpResourceBudget(HttpResourceBudgetPolicy(
             1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 4,
@@ -520,6 +551,38 @@ private func waitForBudgetWaiters(
         if (expiresAt - MonoTime.now() <= Duration.Zero) { return false }
     }
     false
+}
+
+private func expectImpossibleDataBufferMinimum(
+    budget: HttpResourceBudget,
+    owner: HttpResourceOwnerKey
+): Unit {
+    let rejectedBefore = budget.snapshot().rejectedOperations
+    var resourceRejected = false
+    var timedOut = false
+    try {
+        let (lease, _) = budget.acquireManagedDataBufferUpTo(
+            owner,
+            10u64,
+            10u64,
+            OperationContext(deadline: Some(Deadline.after(50 * Duration.millisecond)))
+        )
+        lease.close()
+    } catch (error: NetworkException) {
+        match (error.code) {
+            case NetworkErrorCode.ResourceExhausted => resourceRejected = true
+            case NetworkErrorCode.TimedOut => timedOut = true
+            case _ => ()
+        }
+    }
+    @Expect(resourceRejected)
+    @Expect(!timedOut)
+    let after = budget.snapshot()
+    @Expect(after.admissionWaiters, 0)
+    @Expect(after.highWaterAdmissionWaiters, 0)
+    @Expect(after.rejectedOperations, rejectedBefore + 1)
+    @Expect(after.managedBufferBytes, 0u64)
+    @Expect(after.owners.size, 0)
 }
 
 private func expectResourceWaiterExhaustion(action: () -> Unit): Unit {
