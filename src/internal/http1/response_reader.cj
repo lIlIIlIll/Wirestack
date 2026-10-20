@@ -134,8 +134,11 @@ public func exchangeHttp1ExpectContinue(
         } else {
             continueContext
         }
+        // Bytes may arrive after the shorter continue wait but within the full response-header budget.
         let parsed = try {
-            observedHttp1ReadHead(reader, waitContext)
+            observedHttp1ReadHead(
+                reader, waitContext, completionContext: Some(responseHeadersBudget)
+            )
         } catch (error: Http1LateReadCompletionException) {
             // The response bytes were consumed; this is not an empty continue wait.
             throw error
@@ -605,10 +608,14 @@ protected func headerContainsToken(headers: HttpHeaders, name: String, token: St
     false
 }
 
-private func observedHttp1ReadHead(reader: Http1ResponseSequenceReader, context: OperationContext): Http1ParsedResponseHead {
+private func observedHttp1ReadHead(
+    reader: Http1ResponseSequenceReader,
+    context: OperationContext,
+    completionContext!: ?OperationContext = None<OperationContext>
+): Http1ParsedResponseHead {
     emitHttpStage(context, true)
     try {
-        let parsed = reader.readNext(context)
+        let parsed = reader.readNext(context, completionContext: completionContext)
         emitHttpStage(context, false)
         parsed
     } catch (error: Exception) {
@@ -645,7 +652,10 @@ private class Http1ResponseSequenceReader {
         parser = Http1ResponseHeadParser(requestMethod, limits: limits)
     }
 
-    func readNext(context: OperationContext): Http1ParsedResponseHead {
+    func readNext(
+        context: OperationContext,
+        completionContext!: ?OperationContext = None<OperationContext>
+    ): Http1ParsedResponseHead {
         while (true) {
             if (!input.isEmpty()) {
                 let current = input
@@ -657,7 +667,8 @@ private class Http1ResponseSequenceReader {
                 }
             }
             match (readHttp1Transport(
-                transport, MutableByteSpan(readBuffer), context, NetworkPhase.HttpHeaders
+                transport, MutableByteSpan(readBuffer), context, NetworkPhase.HttpHeaders,
+                completionContext: completionContext
             )) {
                 case ReadResult.Data(count) =>
                     if (count <= 0 || count > readBuffer.size) {
@@ -983,16 +994,21 @@ private func readHttp1Transport(
     transport: DuplexTransport,
     destination: MutableByteSpan,
     context: OperationContext,
-    phase: NetworkPhase
+    phase: NetworkPhase,
+    completionContext!: ?OperationContext = None<OperationContext>
 ): ReadResult {
     let result = readHttp1TransportResult(transport, destination, context, phase)
-    if (context.isCancellationRequested()) {
-        checkHttp1ReadContext(context, phase)
+    let completion = match (completionContext) {
+        case Some(value) => value
+        case None => context
     }
-    if (context.isDeadlineExceeded()) {
+    if (completion.isCancellationRequested()) {
+        checkHttp1ReadContext(completion, phase)
+    }
+    if (completion.isDeadlineExceeded()) {
         match (result) {
             case ReadResult.Data(_) => throw Http1LateReadCompletionException(phase)
-            case ReadResult.EndOfStream => checkHttp1ReadContext(context, phase)
+            case ReadResult.EndOfStream => checkHttp1ReadContext(completion, phase)
         }
     }
     result
