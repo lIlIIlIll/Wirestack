@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "f05ee90d1f32dce35c6cd5b9799001d9d1f19233",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.1.3",
+    "cjpm": "1.1.3"
+  },
+  "status": "BLOCKED",
+  "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
+  "acceptance_scenarios": [
+    {
+      "id": "owner-budget-and-snapshot",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "Instance, route, origin, connection, request, stream, and managed-buffer limits use real owners, and snapshots separate active, reserved, and managed-buffer counts.",
+      "coverage": [
+        "src/http/facade_test.cj",
+        "src/internal/http_resource_budget.cj",
+        "src/internal/http1/pool_key_test.cj",
+        "src/internal/http2/observability_test.cj",
+        "src/internal/http2/server_mapping_test.cj"
+      ]
+    },
+    {
+      "id": "bounded-fair-admission",
+      "status": "PASS_CURRENT_RUN_WITH_PRIOR_INTERMITTENT_FAILURE",
+      "criterion": "Capacity waits are bounded by OperationContext, fair across owners, and do not retain unrelated resources while blocked.",
+      "coverage": [
+        "src/internal/http1/pool_admission.cj",
+        "src/internal/http1/connection_pool.cj",
+        "src/internal/http2/write_scheduler_test.cj",
+        "src/internal/http2/server_mapping_test.cj"
+      ],
+      "note": "The final full native run passed. An earlier full run on this source candidate had one timeout in Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill; the isolated case passed. The pool case is outside the Q4 source changes."
+    },
+    {
+      "id": "q4-buffer-before-flow-permit",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "Outbound DATA waits for an exact managed-buffer lease before obtaining flow-control credit; a blocked flow wait retains no managed-buffer lease; credit shrink retries with the exact currently admissible byte count.",
+      "coverage": [
+        "blockedOutboundDataBufferWaitDoesNotHoldFlowPermit",
+        "blockedFlowPermitWaitDoesNotRetainManagedBufferLease",
+        "cancelledOutboundDataBufferWaitReleasesAllAdmissionState",
+        "deadlineOutboundDataBufferWaitReleasesAllAdmissionState",
+        "fullWriteQueueReleasesOutboundDataPermitAndBufferLease",
+        "shrunkFlowCreditReleasesOversizedLeaseAndRetriesExactDataSize",
+        "partialFlowAdmissionLeavesUnsentServerBytesStaged"
+      ]
+    },
+    {
+      "id": "exact-once-lifecycle-cleanup",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "Cancellation, deadline, factory failure, RST, GOAWAY, body close, and shutdown release ownership once and return snapshots to the expected steady state.",
+      "coverage": [
+        "src/internal/http2/server_cancellation_test.cj",
+        "src/internal/http2/server_push_lifecycle_test.cj",
+        "src/internal/http2/client_connection_test.cj",
+        "src/internal/http2/server_mapping_test.cj",
+        "src/internal/http1/client_pipeline_test.cj",
+        "src/internal/http1/http2_connection_pool_test.cj"
+      ]
+    },
+    {
+      "id": "control-progress-under-data-stall",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "HTTP/2 control frames continue to make progress while DATA is flow-control stalled, without violating bounded queue or control-reserve limits.",
+      "coverage": [
+        "src/internal/http2/write_scheduler_test.cj",
+        "src/internal/http2/flow_control_test.cj",
+        "src/internal/http2/client_connection_test.cj"
+      ]
+    },
+    {
+      "id": "resource-limited-regression",
+      "status": "PASS_ALL_PROFILES",
+      "criterion": "Native HTTP/2 regression scenarios pass with constrained file descriptors, data/address space, and one CPU; deterministic test refusal is not represented as an OOM kill.",
+      "profiles": [
+        "RLIMIT_NOFILE=64: 210 passed, 0 skipped, 0 errors, 0 failed",
+        "RLIMIT_DATA=1 GiB: 210 passed, 0 skipped, 0 errors, 0 failed",
+        "RLIMIT_AS=4 GiB: 210 passed, 0 skipped, 0 errors, 0 failed",
+        "CPU affinity=0: 210 passed, 0 skipped, 0 errors, 0 failed"
+      ]
+    },
+    {
+      "id": "current-toolchain-build-test-docs",
+      "status": "PASS_CURRENT_RUN",
+      "criterion": "Current source passes the pinned SDK check/build, full native regression, and strict generated documentation checks.",
+      "coverage": [
+        "cjpm check",
+        "cjpm build",
+        "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+        "scripts/check-docs --json"
+      ],
+      "note": "The separate repository-wide scripts/check and task-graph validator remain blocked; see verification.json. No installed-consumer check is an M10-002 acceptance criterion."
+    }
+  ],
+  "evidence_policy": "This matrix is bound to the committed source revision above. verification.json records exact acceptance commands, exit codes, outcomes, toolchain, platform, and current blockers. Historical SDK 1.3 smoke evidence is not used as current acceptance evidence."
+}
