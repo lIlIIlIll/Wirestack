@@ -3,8 +3,8 @@
   "source_task": "M10-001",
   "status": "PASS",
   "acceptance_status": "PASS_FOCUSED_ONLY",
-  "revision": "18a2b9a79b0b8886db8bfae3fdd48184ff45d23c",
-  "scope": "Stack #200 T1-T5 and corrected finding 6 current-source follow-up. This report does not replace or requalify the original M10-001 acceptance.",
+  "revision": "3e65a74dfa1db865c78a3cce91c547eb02a110fb",
+  "scope": "Stack #200 T1-T5, corrected finding 6, and added HTTP/1 deadline/proxy-cancellation follow-up. This report does not replace or requalify the original M10-001 acceptance.",
   "platform": "linux-x86_64-glibc",
   "toolchain": {
     "cangjie": "1.1.3",
@@ -171,6 +171,36 @@
       "failed": 0,
       "result": "HTTP 417 returned and request-body bytes remained zero."
     }
+    ,
+    {
+      "id": "review-deadline-boundaries-and-proxy-cancellation",
+      "revision": "3e65a74dfa1db865c78a3cce91c547eb02a110fb",
+      "command": "\"$HOME/.codex/scripts/codex_cangjie_env\" --cwd <repo> -- cjpm test src/internal/http1 src/internal/http2 src/http --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.prefixBytesReturnedAfterStreamIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.emptyReadRechecksDeadlineAfterTransportStateCheck,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http1LiteralProxyLateSuccessReviewTest.cancellationWhileLiteralProxyDialingIsPreservedIfAbortFails,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls --no-color --no-progress",
+      "environment": {
+        "TMPDIR": "<task-tmp>",
+        "TMP": "<task-tmp>",
+        "TEMP": "<task-tmp>",
+        "DISABLE_ZOXIDE": "1",
+        "WIRESTACK_AWS_LC_SOURCE": "<task-tmp>/aws-lc-5.5.0"
+      },
+      "toolchain": {
+        "cangjie": "1.3.0-alpha.20261020001052",
+        "cjpm": "1.3.0-alpha.07"
+      },
+      "provider_source": {
+        "provider": "aws-lc-5.5.0",
+        "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+        "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+      },
+      "exit_code": 0,
+      "total": 558,
+      "passed": 13,
+      "skipped": 545,
+      "errors": 0,
+      "failed": 0,
+      "scope": "FOCUSED_SMOKE_ONLY",
+      "baseline_reproduction": "NOT_OBTAINED: the initial test invocation stopped in the native-provider pre-test hook before compilation because the default ignored checkout was empty."
+    }
   ],
   "full_suite_failure_assessment": {
     "classification": "The corrected finding-6 regression passes on current source, but the current full HTTP suite errors in the M10-003 H2 pool-fairness scenario; an earlier unrelated admission failure remains unexplained.",
@@ -288,5 +318,5 @@
     }
   ],
   "github_check_note": "At exact candidate source revision 6223022ef3943437596ad9fedcd8571b975a382e, all listed applicable GitHub checks passed. The latest-main documentation deployment was skipped by its workflow.",
-  "task_boundary": "The original M10-001 task remains COMPLETE under its historical acceptance evidence. This supplemental report records six focused fixes and current-source verification, but the current task-gate preflight is INVALID because M10-004 depends on BLOCKED M10-003. No other platform or release qualification is claimed."
+  "task_boundary": "The original M10-001 task remains COMPLETE under its historical acceptance evidence. This supplemental report records the prior focused fixes, corrected finding 6, and added deadline/proxy regressions at 3e65a74dfa1db865c78a3cce91c547eb02a110fb. The 13-case focused replay passed on Cangjie 1.3.0-alpha.20261020001052/CJPM 1.3.0-alpha.07; no full current task acceptance or other platform qualification is claimed. The existing task-gate preflight receipt is INVALID because M10-004 depends on BLOCKED M10-003."
 }

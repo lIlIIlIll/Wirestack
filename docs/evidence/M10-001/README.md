@@ -89,6 +89,18 @@ Exact commands and results are in
 revision-bound report at
 [review-regressions.json](stack-200-review/review-regressions.json).
 
+### Additional review regressions — source `3e65a74dfa1db865c78a3cce91c547eb02a110fb`
+
+The added HTTP/1 prefixed-read and empty-destination deadline checks, proxy-dial
+cancellation with a throwing abort cleanup, and strengthened request-write
+budget boundary pass in a 13-case focused replay. The run used the available
+Cangjie 1.3.0-alpha.20261020001052 / CJPM 1.3.0-alpha.07 toolchain and the
+accepted AWS-LC 5.5.0 commit. This is focused smoke evidence only; no full
+M10-001 acceptance or task-gate pass is claimed. The exact command, counts, and
+baseline-reproduction limit are recorded in
+[`review-deadline-regressions.md`](review-deadline-regressions.md) and
+[`review-regressions.json`](stack-200-review/review-regressions.json).
+
 ## Workspace snapshot (initial task capture; historical)
 
 - GitButler workspace view: `gitbutler/workspace`; the M10-001 changes remain uncommitted in the workspace, and the named `m10-001-unified-deadline` branch has no task commits. HEAD: `b2ab351ab3ee`; merge base with `main`: `00d6864f5d`.
