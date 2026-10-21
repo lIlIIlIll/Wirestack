@@ -222,3 +222,38 @@ layers passed with 1,873/1,873 API symbols and 950/950 parameters.
 The task-gate preflight on `18a2b9a79b0b8886db8bfae3fdd48184ff45d23c` returned
 `INVALID` (exit 2) before executing commands: M10-004 is not COMPLETE because
 M10-003 is BLOCKED. This is a dependency blocker, not a passing task acceptance.
+
+## Additional review regressions at source `3e65a74dfa1db865c78a3cce91c547eb02a110fb`
+
+The review follow-up now checks three missing boundaries:
+
+- `Http1PrefixedTransport.readSome` rejects buffered prefix bytes after the
+  `StageStarted` event advances the stream-idle clock, and rejects an empty read
+  when the delegate state check crosses the deadline.
+- A literal-proxy dial that is cancelled while connecting retains the
+  structured `Cancelled / TcpConnect` result even when abort cleanup throws.
+- The request-write budget case completes its 5 ms head inside a 6 ms cap, then
+  rejects a 2 ms body rather than restarting the cap.
+
+The focused replay passed 13 cases across HTTP/1, HTTP/2 and HTTP:
+
+```sh
+TMPDIR=<task-tmp> TMP=<task-tmp> TEMP=<task-tmp> DISABLE_ZOXIDE=1 \
+WIRESTACK_AWS_LC_SOURCE=<task-tmp>/aws-lc-5.5.0 \
+  "${HOME}/.codex/scripts/codex_cangjie_env" --cwd <repo> -- \
+  cjpm test src/internal/http1 src/internal/http2 src/http \
+  --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.prefixBytesReturnedAfterStreamIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.emptyReadRechecksDeadlineAfterTransportStateCheck,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http1LiteralProxyLateSuccessReviewTest.cancellationWhileLiteralProxyDialingIsPreservedIfAbortFails,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls \
+  --no-color --no-progress
+```
+
+Exit 0. `TOTAL 558`, `PASSED 13`, `SKIPPED 545`, `ERROR 0`, `FAILED 0`.
+Toolchain: Cangjie 1.3.0-alpha.20261020001052, CJPM 1.3.0-alpha.07.
+The provider override was verified as AWS-LC 5.5.0 commit
+`991e67ff4cf04df4dd89e407f8b920c6936cb56a`, tree
+`ae54cd9455f9630451d505855afe808a9f028b25`.
+
+The attempted pre-fix replay could not reach compilation because the default
+ignored provider checkout was empty. After materializing the exact pinned
+provider in task-owned temporary storage, the focused replay above passed on
+the fixed source. No failing-before assertion is claimed. This replay does not
+run the full HTTP suite, `scripts/check`, or the M10-001 task gate.
