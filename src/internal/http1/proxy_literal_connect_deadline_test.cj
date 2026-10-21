@@ -183,7 +183,7 @@ class Http1LiteralProxyLateSuccessReviewTest {
             [proxyAddress], HostName("proxy.test"), ResolverSource.Static
         ))
         let clock = ProxyReviewManualClock()
-        let factory = ProxyReviewDialTransportFactory(clock, lateSuccess: true)
+        let factory = ProxyReviewDialTransportFactory(clock, lateSuccess: true, abortThrows: true)
         let events = ProxyReviewEventSink()
         let client = Http1ForwardProxyClient(
             Http1ProxyEndpoint.address(proxyAddress, 3128, "proxy.test:3128"), resolver, factory
@@ -219,7 +219,55 @@ class Http1LiteralProxyLateSuccessReviewTest {
             client.close()
         }
     }
-}
+    @TestCase
+    func cancellationWhileLiteralProxyDialingIsPreservedIfAbortFails(): Unit {
+        let proxyAddress = IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 9u8])
+        let resolver = StaticResolver(ResolveResult(
+            [proxyAddress], HostName("proxy.test"), ResolverSource.Static
+        ))
+        let clock = ProxyReviewManualClock()
+        let cancellation = api.CancellationSource()
+        let factory = ProxyReviewDialTransportFactory(
+            clock,
+            cancelDuringConnect: Some(cancellation),
+            abortThrows: true
+        )
+        let events = ProxyReviewEventSink()
+        let client = Http1ForwardProxyClient(
+            Http1ProxyEndpoint.address(proxyAddress, 3128, "proxy.test:3128"), resolver, factory
+        )
+        let context = OperationContext(
+            deadline: Some(Deadline.after(2 * Duration.second, clock: clock)),
+            cancellation: cancellation.token,
+            timeoutPolicy: OperationTimeoutPolicy(tcpConnect: Some(50 * Duration.millisecond)),
+            eventSink: Some<api.NetworkEventSink>(events)
+        )
+        try {
+            let error = @AssertThrows[api.NetworkException](client.execute(
+                HttpRequest.get("http://origin.test/path"), context: context
+            ))
+            match (error.category) {
+                case api.NetworkErrorCategory.Cancelled => ()
+                case _ => @Fail("proxy dial cancellation was masked by transport cleanup")
+            }
+            match (error.code) {
+                case api.NetworkErrorCode.Cancelled => ()
+                case _ => @Fail("proxy dial cancellation lost its stable code")
+            }
+            match (error.phase) {
+                case api.NetworkPhase.TcpConnect => ()
+                case _ => @Fail("proxy dial cancellation lost its TCP-connect phase")
+            }
+            @Expect(factory.calls, 1)
+            @Expect(!factory.deadlineExpired)
+            @Expect(factory.writeCalls, 0)
+            @Expect(factory.abortCalls, 1)
+            @Expect(events.successfulTcpConnected, 0)
+        } finally {
+            client.close()
+        }
+    }
+    }
 
 private class ProxyReviewManualClock <: MonotonicClock {
     private var current = MonoTime.now()
@@ -231,6 +279,8 @@ private class ProxyReviewDialTransportFactory <: TransportFactory {
     private let clock: ProxyReviewManualClock
     private let advanceClock: Bool
     private let lateSuccess: Bool
+    private let cancelDuringConnect: ?api.CancellationSource
+    private let abortThrows: Bool
     private let lateTransport: ProxyReviewLateResponseTransport
     private var connectCalls: Int64 = 0
     private var capturedDeadlineRemaining = None<Duration>
@@ -239,12 +289,16 @@ private class ProxyReviewDialTransportFactory <: TransportFactory {
     init(
         clock: ProxyReviewManualClock,
         advanceClock!: Bool = true,
-        lateSuccess!: Bool = false
+        lateSuccess!: Bool = false,
+        cancelDuringConnect!: ?api.CancellationSource = None<api.CancellationSource>,
+        abortThrows!: Bool = false
     ) {
         this.clock = clock
         this.advanceClock = advanceClock
         this.lateSuccess = lateSuccess
-        lateTransport = ProxyReviewLateResponseTransport()
+        this.cancelDuringConnect = cancelDuringConnect
+        this.abortThrows = abortThrows
+        lateTransport = ProxyReviewLateResponseTransport(abortThrows: abortThrows)
     }
 
     prop calls: Int64 { get() { connectCalls } }
@@ -259,6 +313,11 @@ private class ProxyReviewDialTransportFactory <: TransportFactory {
         match (context.deadline) {
             case Some(deadline) => capturedDeadlineRemaining = Some(deadline.remaining())
             case None => ()
+        }
+        if (let Some(source) <- cancelDuringConnect) {
+            source.cancel()
+            didExpireDeadline = context.isDeadlineExceeded()
+            return lateTransport
         }
         if (advanceClock) { clock.advance(51 * Duration.millisecond) }
         didExpireDeadline = context.isDeadlineExceeded()
@@ -281,7 +340,10 @@ private class ProxyReviewLateResponseTransport <: DuplexTransport {
     private let aborts = AtomicInt64(0)
     private var wireOffset: Int64 = 0
 
-    init() {
+    private let abortThrows: Bool
+
+    init(abortThrows!: Bool = false) {
+        this.abortThrows = abortThrows
         responseWire = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n".toArray()
     }
 
@@ -313,7 +375,8 @@ private class ProxyReviewLateResponseTransport <: DuplexTransport {
     public func abort(reason!: ?api.AbortReason): Unit {
         let _ = reason
         aborts.fetchAdd(1)
-    }
+        if (abortThrows) { throw Exception("proxy transport abort failed") }
+}
 }
 
 private class ProxyReviewEventSink <: api.NetworkEventSink {

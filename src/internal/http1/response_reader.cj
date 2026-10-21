@@ -395,7 +395,9 @@ internal class Http1PrefixedTransport <: DuplexTransport {
                 "CONNECT tunnel read deadline exceeded", retryability: Retryability.Temporary
             )
         }
-        if (delegate.isClosed()) { throw closedUpgradeTransport() }
+        let delegateClosed = delegate.isClosed()
+        checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+        if (delegateClosed) { throw closedUpgradeTransport() }
         synchronized(mutex) {
             if (terminal) { throw closedUpgradeTransport() }
             if (readActive) {
@@ -407,7 +409,11 @@ internal class Http1PrefixedTransport <: DuplexTransport {
             readActive = true
         }
         try {
-            if (destination.isEmpty()) { return ReadResult.Data(0) }
+            checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+            if (destination.isEmpty()) {
+                checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                return ReadResult.Data(0)
+            }
             let count = synchronized(mutex) {
                 let available = prefix.size - offset
                 let copied = min(destination.length, available)
@@ -419,12 +425,10 @@ internal class Http1PrefixedTransport <: DuplexTransport {
             }
             emitHttpStage(readContext, true)
             try {
+                checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
                 let result = if (count > 0) { ReadResult.Data(count) }
-                    else {
-                        let delegated = delegate.readSome(destination, context: readContext)
-                        checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
-                        delegated
-                    }
+                    else { delegate.readSome(destination, context: readContext) }
+                checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
                 emitHttpStage(readContext, false)
                 result
             } catch (error: Exception) {
