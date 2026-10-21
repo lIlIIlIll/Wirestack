@@ -467,8 +467,8 @@
     "body_status": "CURRENT",
     "base_branch": "fix/M10-001-terminal-deadline-checks",
     "draft": true,
-    "reason": "Refreshed through the authenticated GitHub PR-edit route with current-source results, exact-head CI evidence, and final all-draft review outcomes.",
-    "next_action": "Keep #216 open and draft while the repository and task gates remain blocked; the all-draft re-review reported no findings."
+    "reason": "Refreshed through authenticated GitHub CLI with current repository and task-gate results, current blocker ownership, exact evidence links, and explicit separation of #216 from the shared validator in #220.",
+    "next_action": "Keep #216 OPEN and DRAFT while repository and task-gate blockers remain. M10-003/#175 remains open and not ready."
   },
   "full_suite_stability": {
     "earlier_run": {
@@ -513,8 +513,8 @@
   },
   "decision": {
     "task_status": "BLOCKED",
-    "pr_216": "Remain OPEN and DRAFT. The current source checks and all 10 GitHub workflows passed on exact published head e4e2bcb6001c622cbe655e59a176b6aaa272a2f9, whose source fix is e72bbb3c8a10670b716dcf263cdafff052102b84. Do not mark ready while scripts/check and the task validator still fail. The PR description is refreshed; the all-draft re-review remains pending.",
+    "pr_216": "Remain OPEN and DRAFT. Q4 source is e72bbb3c8a10670b716dcf263cdafff052102b84. All 10 workflows passed on source-bearing head 02699b42892e2a2b0b67042b60552fc742422f54; evidence-only PR-head checks are reported in the PR description. Refreshed scripts/check and task-gate blockers remain; do not mark ready.",
     "issue_174": "Remains open and untouched.",
-    "m10_003_issue_175": "Not started and untouched."
+    "m10_003_issue_175": "Remains open, not ready, and not started or modified because M10-002 remains BLOCKED."
   }
 }
