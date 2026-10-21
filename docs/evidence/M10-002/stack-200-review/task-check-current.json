@@ -1,0 +1,14 @@
+{
+  "commands": [],
+  "issues": [
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "P1-013 dependency is not COMPLETE: P1-012"
+    }
+  ],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "INVALID",
+  "task_id": "M10-002"
+}
