@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "kind": "M10-002-repository-check-diagnostic",
+  "task_id": "M10-002",
+  "candidate_revision": "b872f1b8304a16a769a517efa8cdf566e20ff963",
+  "source_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+  "platform": "linux-x86_64-glibc",
+  "command": "DISABLE_ZOXIDE=1 python3 -m unittest tools.tests.test_tls_provider_poc tools.tests.test_m3_031_desktop_tls_adoption tools.tests.test_m7_030_linux_release tools.tests.test_m12_002_platform tools.tests.test_m7_linux_task_graph -v",
+  "exit_code": 1,
+  "status": "FAIL",
+  "tests_run": 122,
+  "failures": 25,
+  "errors": 16,
+  "skipped": 0,
+  "scope": "Targeted diagnostic of the five owner families reported by scripts/check; this does not replace or claim a scripts/check PASS.",
+  "findings": [
+    {
+      "owner": "TLS provider validation",
+      "observed": "The current AWS-LC advisory disposition is stale. Many provider-negative tests stop at this earlier validation error instead of reaching their intended assertion. No advisory status or approval data was changed."
+    },
+    {
+      "owner": "M3-031 desktop-provider fixtures",
+      "observed": "Four negative-test assertions expected PLATFORM, LICENSE_BUNDLE, or STALE_REVISION, but the current fixtures fail earlier with RAW_RESULT. Two exact-native-result subtests also stop at the stale AWS-LC advisory check."
+    },
+    {
+      "owner": "M7-030 release/evidence digest tests",
+      "observed": "Release-builder cases fail to read the expected repository artifact dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz. No release artifact was generated or fabricated."
+    },
+    {
+      "owner": "M12-002 platform evidence",
+      "observed": "The SDK-closure mutation test expected SDK closure differs but validation stops first with platform support source changed. No platform evidence was refreshed."
+    },
+    {
+      "owner": "M7 task graph",
+      "observed": "The current graph test rejects M10-004 COMPLETE while M10-003 is BLOCKED. The task status was not changed."
+    }
+  ],
+  "decision": "M10-002 repository-wide validation remains BLOCKED. These failures belong to other evidence/task owners or the global task graph and were not altered on the M10-002 branch."
+}
