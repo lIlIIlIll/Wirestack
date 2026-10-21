@@ -158,6 +158,18 @@
       "result": "INVALID",
       "commands_executed": 0,
       "blocker": "DEPENDENCY_INCOMPLETE: M10-004 dependency is not COMPLETE: M10-003."
+    },
+    {
+      "id": "late-final-response-exact-head",
+      "revision": "9df0baf02c69e6bc9eb8fc57fa2548ecc9339dfa",
+      "command": "cjpm test --filter='Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody' --parallel 1 --no-progress --no-color src/internal/http1",
+      "exit_code": 0,
+      "total": 171,
+      "passed": 1,
+      "skipped": 170,
+      "errors": 0,
+      "failed": 0,
+      "result": "HTTP 417 returned and request-body bytes remained zero."
     }
   ],
   "full_suite_failure_assessment": {
