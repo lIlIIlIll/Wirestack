@@ -36,6 +36,27 @@ class M7032PublicApiContractTests(unittest.TestCase):
             shutil.copytree(ROOT / "src", root / "src")
             relative_root = Path(os.path.relpath(root, Path.cwd()))
 
+            historical_inventory_path = root / api_inventory.HISTORICAL_INVENTORY
+            historical_report_path = root / api_inventory.HISTORICAL_REPORT
+            for destination, source in (
+                (historical_inventory_path, ROOT / api_inventory.HISTORICAL_INVENTORY),
+                (historical_report_path, ROOT / api_inventory.HISTORICAL_REPORT),
+            ):
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
+            original_historical_inventory = historical_inventory_path.read_bytes()
+            original_historical_report = historical_report_path.read_bytes()
+
+            with self.assertRaisesRegex(
+                api_inventory.PublicApiInventoryError,
+                "sealed historical M7-032 API artifacts",
+            ):
+                api_inventory.reject_sealed_write_paths(
+                    root,
+                    ROOT / api_inventory.HISTORICAL_INVENTORY,
+                    ROOT / api_inventory.HISTORICAL_REPORT,
+                )
+
             m7_inventory_path = root / api_inventory.DEFAULT_INVENTORY
             m7_report_path = root / api_inventory.DEFAULT_REPORT
             m11_inventory_relative = Path(
@@ -56,6 +77,14 @@ class M7032PublicApiContractTests(unittest.TestCase):
             self.assertEqual("PASS", m7_report["status"])
             original_m7_inventory = m7_inventory_path.read_bytes()
             original_m7_report = m7_report_path.read_bytes()
+            self.assertEqual(
+                original_historical_inventory,
+                historical_inventory_path.read_bytes(),
+            )
+            self.assertEqual(
+                original_historical_report,
+                historical_report_path.read_bytes(),
+            )
 
             output = io.StringIO()
             with redirect_stdout(output):
@@ -75,6 +104,30 @@ class M7032PublicApiContractTests(unittest.TestCase):
                 original_m7_inventory, m7_inventory_path.read_bytes()
             )
             self.assertEqual(original_m7_report, m7_report_path.read_bytes())
+
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = api_inventory.main([
+                    "--root", str(relative_root),
+                    "--inventory", str(api_inventory.HISTORICAL_INVENTORY),
+                    "--report", str(api_inventory.HISTORICAL_REPORT),
+                    "--write", "--json",
+                ])
+            self.assertEqual(1, result)
+            protected_write_failure = json.loads(output.getvalue())
+            self.assertEqual("FAIL", protected_write_failure["status"])
+            self.assertIn(
+                "sealed historical M7-032 API artifacts",
+                protected_write_failure["error"],
+            )
+            self.assertEqual(
+                original_historical_inventory,
+                historical_inventory_path.read_bytes(),
+            )
+            self.assertEqual(
+                original_historical_report,
+                historical_report_path.read_bytes(),
+            )
             original_m11_inventory = m11_inventory_path.read_bytes()
             original_m11_report = m11_report_path.read_bytes()
             for inventory_path, report_path in (

@@ -22,8 +22,18 @@ ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "M7-032"
 SCHEMA_VERSION = 1
 PROFILE = "linux-x86_64-glibc"
-DEFAULT_INVENTORY = Path("docs/api/baselines/wirestack-linux-pre1-m7-032.json")
-DEFAULT_REPORT = Path("docs/evidence/M7-032/linux_x86_64/public-api.json")
+HISTORICAL_INVENTORY = Path("docs/api/baselines/wirestack-linux-pre1-m7-032.json")
+HISTORICAL_REPORT = Path("docs/evidence/M7-032/linux_x86_64/public-api.json")
+DEFAULT_INVENTORY = Path(
+    "docs/evidence/M7-032/current-source/linux_x86_64/public-api-inventory.json"
+)
+DEFAULT_REPORT = Path(
+    "docs/evidence/M7-032/current-source/linux_x86_64/public-api.json"
+)
+PROTECTED_HISTORICAL_PATHS = frozenset({
+    HISTORICAL_INVENTORY,
+    HISTORICAL_REPORT,
+})
 PUBLIC_PACKAGES = frozenset(api_scan.PUBLIC_PACKAGES)
 
 
@@ -122,6 +132,21 @@ def resolve_evidence_path(root: Path, path: Path | None, default: Path) -> Path:
     return selected if selected.is_absolute() else root / selected
 
 
+def reject_sealed_write_paths(
+    root: Path, inventory_path: Path, report_path: Path
+) -> None:
+    protected_paths = {
+        (candidate_root / relative_path).resolve()
+        for candidate_root in {root.resolve(), ROOT.resolve()}
+        for relative_path in PROTECTED_HISTORICAL_PATHS
+    }
+    require(
+        inventory_path.resolve() not in protected_paths
+        and report_path.resolve() not in protected_paths,
+        "refusing to overwrite sealed historical M7-032 API artifacts",
+    )
+
+
 def validate(
     root: Path = ROOT,
     inventory_path: Path | None = None,
@@ -169,6 +194,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         report_path = resolve_evidence_path(
             root, args.report, DEFAULT_REPORT
         )
+        if args.write:
+            reject_sealed_write_paths(root, inventory_path, report_path)
         inventory = build_inventory(root)
         if args.write:
             write_json(inventory_path, inventory)

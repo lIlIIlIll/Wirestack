@@ -7,8 +7,8 @@
     {
       "issues": [
         {
-          "code": "ACCEPTANCE_NOT_PASS",
-          "detail": "evidence acceptance_status is not PASS"
+          "code": "UNKNOWN_SCHEMA",
+          "detail": "unsupported evidence schema"
         }
       ],
       "status": "FAIL",

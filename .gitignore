@@ -28,6 +28,7 @@ __pycache__/
 !docs/evidence/M7-022/linux_x86_64/*.json
 !docs/evidence/M7-032/*.json
 !docs/evidence/M7-032/linux_x86_64/*.json
+!docs/evidence/M7-032/current-source/linux_x86_64/*.json
 !docs/evidence/M7-033/*.json
 !docs/evidence/M7-033/ci-bounded-doc-ir/*.json
 !tools/docs/cjdoc-0.7.2-bounded-doc-ir.patch
