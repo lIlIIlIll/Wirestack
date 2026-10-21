@@ -104,7 +104,7 @@
         "scripts/check",
         "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json"
       ],
-      "note": "On source revision e72bbb3c8a10670b716dcf263cdafff052102b84, cjpm check/build, the full native suite (1,082/1,110; 28 skipped), strict docs (1,873/1,873 symbols; 950/950 parameters), and all four HTTP/2 profiles (218/218) passed. All 10 GitHub workflows passed on exact published PR head e6590ee111449977fb732edaf42164ffb7c265a3. scripts/check failed with 25 failures, 16 errors, and 4 skipped in its initial tooling stage; the task validator returned INVALID because downstream M10-003 depends on blocked M10-002. No installed-consumer or native capability qualification is claimed."
+      "note": "On source revision e72bbb3c8a10670b716dcf263cdafff052102b84, cjpm check/build, the full native suite (1,082/1,110; 28 skipped), strict docs (1,873/1,873 symbols; 950/950 parameters), and all four HTTP/2 profiles (218/218) passed. `scripts/check` failed with 25 failures, 16 errors, and 4 skips in the initial tooling stage; the targeted reproduction at evidence head b872f1b8304a16a769a517efa8cdf566e20ff963 ran 122 tests and reproduced 25 failures and 16 errors. The published #216 validator is INVALID on global M10-004 → M10-003 readiness. The scoped validator from #220 also returns INVALID/DEPENDENCY_INCOMPLETE on M10-002 → M9-001 → P1-015 → P1-013 → P1-012 because it sees P1-012 as not COMPLETE despite both P1-012 and P1-013 being labelled COMPLETE in the planning status; zero M10-002 commands ran. Current PR-head workflows passed except `Deploy latest main documentation` was skipped. No installed-consumer or native capability qualification is claimed."
     }
   ],
   "review": {

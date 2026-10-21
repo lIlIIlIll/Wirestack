@@ -183,6 +183,7 @@
       "note": "Re-run after the P1-012 CLI regression update. The gate still fails in the initial tooling unittest stage before scripts/check-code; the same five unrelated owner families remain. No stale security disposition, historical artifact, task-status, or foreign-task fixture was rewritten."
     }
   ],
+  "repository_check_diagnostic": "docs/evidence/M10-002/stack-200-review/repository-check-diagnostic.json",
   "task_gate": {
     "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current.json",
     "exit_code": 2,
@@ -195,7 +196,7 @@
       }
     ],
     "shared_validator_revision": "e33894a6f1fab9fdb257104c580ba92b3076a5d9",
-    "note": "The scoped-readiness check was run in the combined workspace with P1-012 revision e33894a6f1fab9fdb257104c580ba92b3076a5d9. It no longer rejects M10-002 for the unrelated downstream M10-004 -> M10-003 edge; it correctly rejects the selected transitive closure M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012 because P1-012 remains BLOCKED by repository-wide readiness. No M10-002 acceptance command ran. The shared-validator change is in draft PR #220 and is not integrated into published PR #216; no task-gate PASS is claimed."
+    "note": "The scoped-readiness check was run in the combined workspace with P1-012 revision e33894a6f1fab9fdb257104c580ba92b3076a5d9. The published #216 validator preflights the unrelated global M10-004 -> M10-003 edge; the scoped validator avoids that rejection but returns DEPENDENCY_INCOMPLETE on M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012 because it sees P1-012 as not COMPLETE, despite docs/planning/status.md listing P1-012 and P1-013 as COMPLETE. This task-status/gate mismatch and global readiness edge require reconciliation by their owners. No M10-002 acceptance command ran. The shared-validator change is in draft PR #220 and is not integrated into published PR #216; no task-gate PASS is claimed."
   },
   "github_ci": {
     "initial_clean_build": {
