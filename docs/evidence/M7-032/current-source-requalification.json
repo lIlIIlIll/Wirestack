@@ -41,10 +41,10 @@
     "status": "FAIL",
     "commands_executed": 8,
     "ownership_and_fault_injection_tests": {
-      "tests_run": 110,
       "failures": 1,
       "status": "FAIL",
-      "failure": "test_evolution_status_matches_readiness_classification: M10-004 is COMPLETE while M10-003 is BLOCKED"
+      "failure": "test_evolution_status_matches_readiness_classification: M10-004 is COMPLETE while M10-003 is BLOCKED",
+      "test_count_note": "The total is not retained in the committed task-gate receipt; no count is claimed."
     },
     "architecture_guard": "PASS",
     "current_api_inventory": "PASS",
@@ -74,6 +74,7 @@
   },
   "non_claims": [
     "The current API inventory PASS is not full M7-032 task acceptance.",
+    "The current-source API pair is an unsealed requalification output and is not included in task source_paths or required_evidence.",
     "No current-source clean-consumer, Cangjie, full repository-check, or release qualification PASS is claimed."
   ]
 }

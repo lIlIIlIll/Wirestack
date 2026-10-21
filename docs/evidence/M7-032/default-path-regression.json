@@ -59,7 +59,7 @@
     "commands_executed": 8,
     "ownership_and_fault_injection_tests": {
       "status": "FAIL",
-      "tests_run": 110,
+      "test_count_note": "The raw task-gate total is not retained in this report; no count is claimed.",
       "failures": 1,
       "failure": "test_evolution_status_matches_readiness_classification: M10-004 is COMPLETE while M10-003 is BLOCKED"
     },

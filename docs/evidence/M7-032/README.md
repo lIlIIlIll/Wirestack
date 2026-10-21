@@ -49,6 +49,12 @@ must be supplied together. The
 root routing, historical-artifact protection, M11 pair routing, one-sided
 override rejection, and stale-report rejection.
 
+The current-source pair is intentionally a requalification output, not M7-032
+task evidence. It is absent from this task's `source_paths` and
+`required_evidence`, and the archived schema-v1 seal does not cover it.
+Current-source requalification remains BLOCKED, so this generated pair is not a
+sealed current acceptance result.
+
 ## Current verification and requalification limits
 
 The focused API regression suite passes 3/3. The updated test plan validates
@@ -62,14 +68,17 @@ The report records 363 declarations, 114 resolved aliases, and zero internal
 aliases. The generated current-source pair is separate from the sealed
 243-declaration M7 report.
 
-The latest
-[`isolated-pr-head-task-check.json`](isolated-pr-head-task-check.json) records
-the task gate run from the isolated remediation worktree. It is not the
-historical `task-check.json` receipt or a revision-bound qualification.
+The [`isolated-pr-head-task-check.json`](isolated-pr-head-task-check.json) file
+records the task gate run from the isolated remediation worktree. Its
+`architecture-guard.stdout_excerpt` is normalized: the absolute checkout root
+was replaced with `<repo-root>`, and the raw stdout log is not committed. This
+file is not the historical `task-check.json` receipt or a revision-bound
+qualification.
 
 - Test-plan validation: PASS, 11/10/7.
-- Ownership/fault-injection suite: FAIL, 110 tests with one existing
-  M10-004/M10-003 status-consistency assertion.
+- Ownership/fault-injection suite: FAIL; it reports the existing
+  M10-004/M10-003 status-consistency assertion. The retained receipt omits the
+  total test count, so no count is claimed.
 - Architecture guard and current-source API inventory: PASS.
 - Clean consumer: FAIL; offline AWS-LC provider preparation cannot resolve
   `HEAD`.

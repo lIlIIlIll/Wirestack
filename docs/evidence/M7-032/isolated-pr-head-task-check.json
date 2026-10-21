@@ -1,4 +1,11 @@
 {
+  "normalized": true,
+  "normalization": {
+    "field": "commands[architecture-guard].stdout_excerpt (JSON root property)",
+    "from": "absolute checkout root",
+    "to": "<repo-root>",
+    "raw_log_committed": false
+  },
   "commands": [
     {
       "argv": [
