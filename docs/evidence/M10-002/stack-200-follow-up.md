@@ -63,6 +63,9 @@ failures and 16 errors (exit 1). The exact symptoms are recorded in
 [`repository-check-diagnostic.json`](stack-200-review/repository-check-diagnostic.json).
 No foreign advisory, platform, release, or task-status evidence was altered;
 this does not claim a `scripts/check` PASS.
+Detailed root causes and owner boundaries, including the task-gate closure, are in
+[`blocker-root-causes.md`](stack-200-review/blocker-root-causes.md). The scratch
+repair simulation is diagnostic only; it does not clear either acceptance gate.
 
 The earlier clean-build run `39448838666` failed source-tree mutation rejection at `b031cfd545e375b3a13f747c8eafe616bee5309e`: checked-in `docs.json` differed from the exact CI-pinned CJDoc output. The output was regenerated and committed at `2eb92251a0a600c974dc6c59b2313c806e660e5e`. All 10 workflows passed on later heads `e82743ee2bfa16ee6160d3e0236d340cf2ad0b87` and `f4034849f9d74c3301ccd0a1f3527909d057886f`. On exact source-bearing PR head `e6590ee111449977fb732edaf42164ffb7c265a3`, all 10 workflows passed, including Clean Cangjie Build and M7-033 Developer Documentation. The current strict local documentation check also passed on source revision `e72bbb3c8a10670b716dcf263cdafff052102b84`; earlier combined-check allocation failures are historical and do not supersede this direct pass.
 
