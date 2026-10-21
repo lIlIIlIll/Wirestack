@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "kind": "M7-032-current-source-requalification",
+  "task_id": "M7-032",
+  "candidate_revision": "e76c3ba4301472fd2272aed3a96e7dc64dac5bf6",
+  "candidate_tree": "88e6ad665cf134547df809e222019f0c1a24dbbf",
+  "platform": "linux-x86_64-glibc",
+  "current_requalification_status": "BLOCKED",
+  "sdk": {
+    "reference": "docs/references/m7-033-ci-toolchain.json",
+    "archive": "cangjie-sdk-linux-x64-1.1.3.tar.gz",
+    "archive_sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a",
+    "cjc": "1.1.3",
+    "cjpm": "1.1.3",
+    "selection": "Fresh extraction of the pinned archive; the shared installed SDK was not reused."
+  },
+  "red_reproduction": {
+    "base_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+    "command": "DISABLE_ZOXIDE=1 python3 tools/m7_032_public_api_inventory.py --root . --write --json",
+    "exit_code": 0,
+    "cli_status": "PASS",
+    "task_id": "M7-032",
+    "declarations": 363,
+    "m7_inventory_sha256_before_after": "82d21d2aed88441d74218dae66546fbf3947d9a8516bef684a81afbe86ee4fb7",
+    "m7_report_sha256_before_after": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66",
+    "m11_inventory_sha256_before": "fc6feefc4350ac44d46fe5f8971cb29beea924d250811ea7bfdc10aea2e39f48",
+    "m11_inventory_sha256_after": "cf2c0ea4eafa76b579b8d39f53c7d97baf208d50eaa3a985d4624857dee5d98d",
+    "m11_report_sha256_before": "8539296c0609a70e4851714f3e9c96c50c3a15b8043188fa1514a40ba4aa613a",
+    "m11_report_sha256_after": "2511547f0d667520e8d6a5d2d275ba8d3f682cdae1abf2dcde6a04bc2055503b",
+    "finding": "The pre-fix M7 command returned PASS while leaving the M7 pair unchanged and changing the M11-003 pair."
+  },
+  "fixed_cli_smoke": {
+    "root": "<scratch>/m7-fixture",
+    "default_pair_command": "DISABLE_ZOXIDE=1 python3 tools/m7_032_public_api_inventory.py --root <scratch>/m7-fixture --write --json",
+    "default_pair_exit_code": 0,
+    "default_pair_status": "PASS",
+    "declarations": 363,
+    "m7_inventory_sha256": "cf2c0ea4eafa76b579b8d39f53c7d97baf208d50eaa3a985d4624857dee5d98d",
+    "m7_report_sha256": "ea9b5dd95ae698156db27cd21f481af84fd0dd62680605f1785aabee2631fc70",
+    "explicit_m11_pair_command": "DISABLE_ZOXIDE=1 python3 tools/m7_032_public_api_inventory.py --root <scratch>/m7-fixture --inventory docs/api/baselines/wirestack-linux-pre1-m11-003.json --report docs/evidence/M11-003/public-api.json --write --json",
+    "explicit_m11_pair_exit_code": 0,
+    "explicit_m11_pair_status": "PASS",
+    "m7_pair_unchanged_by_explicit_m11_write": true
+  },
+  "focused_regression": {
+    "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> DISABLE_ZOXIDE=1 python3 -m unittest tools.tests.test_m7_032_public_api_contract -v",
+    "exit_code": 0,
+    "tests_run": 3,
+    "failures": 0,
+    "status": "PASS"
+  },
+  "task_gate": {
+    "invocation": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> DISABLE_ZOXIDE=1 $HOME/.codex/scripts/codex_cangjie_env --sdk-root <scratch>/sdk-archive/cangjie --root-level --cwd <repo> -- scripts/check-task M7-032 --json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "manifest_commands_executed": 0,
+    "issue": {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "M10-004 dependency is not COMPLETE: M10-003"
+    },
+    "report": "docs/evidence/M7-032/isolated-pr-head-task-check.json"
+  },
+  "direct_acceptance_commands": {
+    "test_plan": {
+      "command": "DISABLE_ZOXIDE=1 python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-032/test-plan.md --json",
+      "exit_code": 0,
+      "status": "PASS",
+      "paths": 11,
+      "scenarios": 10,
+      "tests": 7
+    },
+    "python_acceptance_suite": {
+      "command": "DISABLE_ZOXIDE=1 python3 -m unittest tools.tests.test_m7_032_public_api_contract tools.tests.test_architecture_guard tools.tests.test_m7_linux_task_graph tools.repository.tests.test_repository_tooling -v",
+      "exit_code": 1,
+      "status": "FAIL",
+      "tests_run": 106,
+      "failures": 1,
+      "failure": "test_evolution_status_matches_readiness_classification: M10-004 is COMPLETE while dependency M10-003 is BLOCKED."
+    },
+    "architecture_guard": {
+      "command": "DISABLE_ZOXIDE=1 scripts/architecture-guard --format json",
+      "exit_code": 0,
+      "status": "PASS",
+      "violations": 0
+    },
+    "public_api_inventory": {
+      "command": "DISABLE_ZOXIDE=1 scripts/check-m7-032-public-api --json",
+      "exit_code": 1,
+      "status": "FAIL",
+      "error": "committed public API inventory is stale",
+      "historical_m7_declarations": 243,
+      "current_source_declarations": 363,
+      "baseline_regenerated": false
+    },
+    "clean_consumer": {
+      "command": "DISABLE_ZOXIDE=1 scripts/check-m7-032-clean-consumer --json",
+      "exit_code": 1,
+      "status": "FAIL",
+      "code": "COMMAND_FAILED",
+      "detail": "Offline TLS-provider preparation failed at <repo>/.local/tls-provider/source/aws-lc-5.5.0 rev-parse HEAD (exit 128; HEAD is unknown/ambiguous)."
+    },
+    "cjpm_check": {
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> DISABLE_ZOXIDE=1 $HOME/.codex/scripts/codex_cangjie_env --sdk-root <scratch>/sdk-archive/cangjie --root-level --cwd <repo> -- cjpm check",
+      "status": "TIMEOUT",
+      "timeout_seconds": 600,
+      "exit_code": null,
+      "diagnostic_output_captured": false
+    },
+    "cjpm_build": {
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> DISABLE_ZOXIDE=1 $HOME/.codex/scripts/codex_cangjie_env --sdk-root <scratch>/sdk-archive/cangjie --root-level --cwd <repo> -- cjpm build",
+      "exit_code": 1,
+      "status": "FAIL",
+      "code": "adapter-build-failed",
+      "phase": "pre-build",
+      "detail": "TLS-provider preparation could not resolve HEAD in the configured AWS-LC source directory."
+    },
+    "cjpm_tests": {
+      "command": "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> DISABLE_ZOXIDE=1 $HOME/.codex/scripts/codex_cangjie_env --sdk-root <scratch>/sdk-archive/cangjie --root-level --cwd <repo> -- cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 1,
+      "status": "FAIL",
+      "code": "adapter-build-failed",
+      "phase": "pre-test",
+      "detail": "TLS-provider preparation could not resolve HEAD in the configured AWS-LC source directory."
+    }
+  },
+  "baseline_policy": "The historical 243-declaration M7 baseline and evidence were not regenerated or overwritten."
+}

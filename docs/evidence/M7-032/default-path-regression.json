@@ -133,6 +133,14 @@
       }
     }
   },
+  "isolated_pr_head_requalification": {
+    "report": "current-source-requalification.json",
+    "status": "BLOCKED",
+    "task_gate_status": "INVALID",
+    "task_gate_exit_code": 2,
+    "manifest_commands_executed": 0,
+    "blocker": "DEPENDENCY_INCOMPLETE: M10-004 dependency is not COMPLETE: M10-003"
+  },
   "current_evidence_verification": {
     "command": "scripts/verify-evidence M7-032 --json --output docs/evidence/M7-032/current-evidence-verification.json",
     "exit_code": 1,

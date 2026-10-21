@@ -47,26 +47,43 @@ repair.
 
 The focused validator suite passes 3/3; the M7-032 test plan validates with 11
 paths, 10 scenarios, and 7 tests; the architecture guard passes with zero
-violations. These checks cover the paired-path and relative-root repair only.
+violations.
 
-The normalized [composite-workspace task-check summary](current-task-check.json)
-records `scripts/check-task M7-032` exiting 1 after
-executing all eight commands. The combined Python suite ran 109 tests and
-failed one status-consistency assertion: M10-004 is COMPLETE while its M10-003
-dependency is BLOCKED. The architecture guard passed. The historical M7 API
-inventory rejected current source (243 declarations in the M7 snapshot versus
-363 now); it was not regenerated. The clean-consumer command failed because
-the pinned AWS-LC source is absent in offline mode. `cjpm check`, `cjpm build`,
-and `cjpm test` could not execute because `cjpm` is unavailable.
+[`current-source-requalification.json`](current-source-requalification.json)
+records the baseline red reproduction and fixed CLI smoke. On base revision
+`d496a242fec98cc3271f8f71b5a79a3aba60feea`, the pre-fix M7 command returned
+PASS while leaving both M7 artifacts unchanged and rewriting the M11-003
+inventory/report pair. On the fixed code tree at PR head
+`e76c3ba4301472fd2272aed3a96e7dc64dac5bf6`, both the default M7 pair and an
+explicit M11-003 pair passed in isolated roots; writing the M11 pair left the
+M7 pair unchanged.
 
-The explicit M11-003 inventory/report pair also differs from current source:
-the current `HttpCancellationHandles.retainCancellation` declaration is absent
-from the M11-003 baseline. That owner baseline remains unchanged pending its
-own task evidence. Neither historical snapshot is treated as a current-source
-PASS.
+The latest isolated PR-head `scripts/check-task M7-032` invocation used the
+pinned Linux SDK archive (SHA-256 recorded in the report) and returned
+`INVALID`/exit 2 before executing any manifest command. Global readiness still
+rejects the unrelated `M10-004 → M10-003` edge. The detailed receipt is
+[`isolated-pr-head-task-check.json`](isolated-pr-head-task-check.json). No
+current-source task-gate PASS is claimed.
 
-Current native consumer and Cangjie acceptance are not claimed. The previous
-task report and seal are historical, not proof for this validator repair.
+Direct diagnostics do not override that task-gate result. Plan validation
+passed (11 paths, 10 scenarios, 7 tests), and the architecture guard passed
+with zero violations. The combined Python suite ran 106 tests and failed one
+status-consistency assertion (`M10-004` is COMPLETE while `M10-003` is
+BLOCKED). The historical M7 API inventory is stale against current source
+(243 declarations versus 363); it was not regenerated. The clean consumer
+failed in offline provider preparation because the configured AWS-LC source
+could not resolve `HEAD`. `cjpm check` timed out after 600 seconds without a
+captured diagnostic; `cjpm build` and `cjpm test` failed in provider
+pre-build/pre-test for the same `HEAD` resolution error.
+
+The earlier
+[`current-task-check.json`](current-task-check.json) remains a separate
+composite-workspace run with M7-032 and P1-012 patches applied; it is not the
+current isolated PR-head gate. Its former `cjpm unavailable` result is not
+current toolchain evidence. The M11-003 baseline was not regenerated.
+
+Current native consumer and full Cangjie acceptance are not claimed. The
+canonical `evidence.json` remains BLOCKED; no current-source PASS seal exists.
 
 ## Release evidence boundary
 
