@@ -180,20 +180,22 @@
         "M12-002 platform-support source mismatch",
         "M7 task-graph expectation drift"
       ],
-      "note": "Run on the current M10-002 source. The gate fails in the initial tooling unittest stage, before scripts/check-code. The standalone current-source documentation check passed. The failing families are outside the M10-002 source/test changes and are not modified here."
+      "note": "Re-run after the P1-012 CLI regression update. The gate still fails in the initial tooling unittest stage before scripts/check-code; the same five unrelated owner families remain. No stale security disposition, historical artifact, task-status, or foreign-task fixture was rewritten."
     }
   ],
   "task_gate": {
-    "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json",
+    "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current.json",
     "exit_code": 2,
     "status": "INVALID",
+    "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json",
     "issues": [
       {
         "code": "DEPENDENCY_INCOMPLETE",
-        "detail": "M10-003 dependency is not COMPLETE: M10-002"
+        "detail": "P1-013 dependency is not COMPLETE: P1-012"
       }
     ],
-    "note": "On source revision e72bbb3c8a10670b716dcf263cdafff052102b84, M10-002 declares M9-001 as its dependency and M9-001 is COMPLETE; the validator rejects the downstream M10-003 dependency because M10-002 remains BLOCKED. M10-004 is also marked COMPLETE while M10-003 is BLOCKED. M10-003/#175 and M10-004 were not modified."
+    "shared_validator_revision": "e33894a6f1fab9fdb257104c580ba92b3076a5d9",
+    "note": "The scoped-readiness check was run in the combined workspace with P1-012 revision e33894a6f1fab9fdb257104c580ba92b3076a5d9. It no longer rejects M10-002 for the unrelated downstream M10-004 -> M10-003 edge; it correctly rejects the selected transitive closure M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012 because P1-012 remains BLOCKED by repository-wide readiness. No M10-002 acceptance command ran. The shared-validator change is in draft PR #220 and is not integrated into published PR #216; no task-gate PASS is claimed."
   },
   "github_ci": {
     "initial_clean_build": {
