@@ -344,71 +344,71 @@
     },
     "current_candidate_ci": {
       "source_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
-      "head_sha": "e4e2bcb6001c622cbe655e59a176b6aaa272a2f9",
+      "head_sha": "e6590ee111449977fb732edaf42164ffb7c265a3",
       "status": "PASS",
       "runs": [
         {
-          "run_id": 39533626681,
-          "workflow": "Architecture Guard",
-          "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626681"
-        },
-        {
-          "run_id": 39533626729,
+          "run_id": 39536638119,
           "workflow": "NET-02 Full Duplex and Race Harness",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626729"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638119"
         },
         {
-          "run_id": 39533626687,
+          "run_id": 39536638097,
           "workflow": "Gate Harness",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626687"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638097"
         },
         {
-          "run_id": 39533626748,
-          "workflow": "Threat Model",
-          "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626748"
-        },
-        {
-          "run_id": 39533626706,
-          "workflow": "NET-01 Close Wakeup Harness",
-          "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626706"
-        },
-        {
-          "run_id": 39533626754,
+          "run_id": 39536638069,
           "workflow": "NET-03 Absolute Deadline Harness",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626754"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638069"
         },
         {
-          "run_id": 39533626765,
+          "run_id": 39536638115,
           "workflow": "DNS Carrier Thread Harness",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626765"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638115"
         },
         {
-          "run_id": 39533626703,
-          "workflow": "Clean Cangjie Build",
+          "run_id": 39536638085,
+          "workflow": "Threat Model",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626703"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638085"
         },
         {
-          "run_id": 39533626808,
+          "run_id": 39536638090,
+          "workflow": "NET-01 Close Wakeup Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638090"
+        },
+        {
+          "run_id": 39536638086,
+          "workflow": "Architecture Guard",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638086"
+        },
+        {
+          "run_id": 39536638095,
           "workflow": "M7-033 Developer Documentation",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533626808"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638095"
         },
         {
-          "run_id": 39533622988,
+          "run_id": 39536638059,
+          "workflow": "Clean Cangjie Build",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638059"
+        },
+        {
+          "run_id": 39536634268,
           "workflow": "PR #216",
           "status": "PASS",
-          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39533622988"
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536634268"
         }
       ],
-      "note": "All 10 workflows passed on exact published PR head e4e2bcb6001c622cbe655e59a176b6aaa272a2f9. This head includes source commit e72bbb3c8a10670b716dcf263cdafff052102b84 and the refreshed acceptance evidence commit."
+      "note": "All 10 workflows passed on exact published PR head e6590ee111449977fb732edaf42164ffb7c265a3. This head includes source commit e72bbb3c8a10670b716dcf263cdafff052102b84 and the refreshed acceptance evidence commit."
     }
   },
   "review": {
@@ -432,15 +432,41 @@
       }
     ]
   },
+  "all_draft_review": {
+    "status": "NO_FINDINGS",
+    "reviews": [
+      {
+        "pr": 215,
+        "head_sha": "2a04a1c1fa2fc2bdc8d6433aac6f253004b4f81d",
+        "result": "NO_FINDINGS"
+      },
+      {
+        "pr": 216,
+        "head_sha": "e6590ee111449977fb732edaf42164ffb7c265a3",
+        "result": "NO_FINDINGS"
+      },
+      {
+        "pr": 220,
+        "head_sha": "a1dd89c4364de272d4ff79e3332ed9e6bb340475",
+        "result": "NO_FINDINGS"
+      },
+      {
+        "pr": 221,
+        "head_sha": "e76c3ba4301472fd2272aed3a96e7dc64dac5bf6",
+        "result": "NO_FINDINGS"
+      }
+    ],
+    "method": "Four independent read-only subagents reviewed the exact heads of all open draft PRs. No new findings were reported."
+  },
   "pr_description": {
     "status": "UPDATED",
-    "reviewed_head": "e4e2bcb6001c622cbe655e59a176b6aaa272a2f9",
+    "reviewed_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
     "head_source_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
     "body_status": "CURRENT",
     "base_branch": "fix/M10-001-terminal-deadline-checks",
     "draft": true,
-    "reason": "Refreshed through the authenticated GitHub PR-edit route after publishing the current stack; verified the body, source revision, base branch, and draft state.",
-    "next_action": "Keep #216 open and draft while repository/task gates remain blocked; complete the all-draft re-review."
+    "reason": "Refreshed through the authenticated GitHub PR-edit route with current-source results, exact-head CI evidence, and final all-draft review outcomes.",
+    "next_action": "Keep #216 open and draft while the repository and task gates remain blocked; the all-draft re-review reported no findings."
   },
   "full_suite_stability": {
     "earlier_run": {
