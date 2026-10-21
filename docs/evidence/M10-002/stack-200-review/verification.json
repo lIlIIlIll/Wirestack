@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+  "revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
   "status": "BLOCKED",
   "acceptance_status": "BLOCKED",
   "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
@@ -41,19 +41,12 @@
       "result": "cjpm build success; compiler emitted unreachable-block warnings, with no build errors."
     },
     {
-      "id": "linux-resolver-build",
-      "command": "scripts/build-linux-resolver --quiet",
-      "exit_code": 0,
-      "status": "PASS",
-      "result": "Linux resolver build completed successfully."
-    },
-    {
       "id": "full-native-regression",
       "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
       "exit_code": 0,
       "status": "PASS",
-      "total": 1108,
-      "passed": 1080,
+      "total": 1110,
+      "passed": 1082,
       "skipped": 28,
       "errors": 0,
       "failed": 0
@@ -111,8 +104,8 @@
       "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 216,
-      "passed": 216,
+      "total": 218,
+      "passed": 218,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -122,8 +115,8 @@
       "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 216,
-      "passed": 216,
+      "total": 218,
+      "passed": 218,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -133,8 +126,8 @@
       "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
       "exit_code": 0,
       "status": "PASS",
-      "total": 216,
-      "passed": 216,
+      "total": 218,
+      "passed": 218,
       "skipped": 0,
       "errors": 0,
       "failed": 0
@@ -144,31 +137,32 @@
       "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
       "exit_code": 0,
       "status": "PASS",
-      "total": 216,
-      "passed": 216,
+      "total": 218,
+      "passed": 218,
       "skipped": 0,
       "errors": 0,
       "failed": 0
     },
     {
       "id": "documentation-check",
-      "command": "scripts/check-code (two current-source runs, strict documentation stage, pinned CJDoc 0.7.2)",
-      "exit_code": 1,
-      "status": "FAIL_OUT_OF_MEMORY",
-      "current_report": "build/check-docs.json",
-      "package_checks": "All per-package coverage checks and renders passed; the combined strict check failed in both runs.",
-      "combined_check_attempts": [
-        {
-          "exit_code": 1,
-          "result": "Failed allocation of 13,779,556 bytes."
+      "command": "env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "exit_code": 0,
+      "status": "PASS",
+      "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "cjdoc": "0.7.2",
+      "combined": {
+        "status": "PASS",
+        "symbols": {
+          "documented": 1873,
+          "total": 1873
         },
-        {
-          "exit_code": 1,
-          "result": "Failed allocation of 9,186,376 bytes."
-        }
-      ],
-      "historical_report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
-      "historical_report_note": "Records an earlier strict-doc pass on unchanged public API inputs; it does not show that either current combined run passed."
+        "parameters": {
+          "documented": 950,
+          "total": 950
+        },
+        "docs_sha256": "5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099"
+      },
+      "note": "All seven layers and the combined API report passed. The check produced a reserialized docs.json; that generated format-only worktree change was restored because the public API is unchanged."
     },
     {
       "id": "repository-check",
@@ -186,7 +180,7 @@
         "M12-002 platform-support source mismatch",
         "M7 task-graph expectation drift"
       ],
-      "note": "Re-run on exact source revision 5d6b2c7358e08169ede6198b472b37d773e017d; it still failed in the initial tooling unittest stage. The strict combined documentation check also failed twice from allocation errors; per-package checks passed. Separate Cangjie, resource-profile, and documentation checks were run independently."
+      "note": "Run on the current M10-002 source. The gate fails in the initial tooling unittest stage, before scripts/check-code. The standalone current-source documentation check passed. The failing families are outside the M10-002 source/test changes and are not modified here."
     }
   ],
   "task_gate": {
@@ -199,7 +193,7 @@
         "detail": "M10-003 dependency is not COMPLETE: M10-002"
       }
     ],
-    "note": "The task validator was rerun against source revision 5d6b2c7358e08169ede6198b472b37d773e017d. M10-002 declares M9-001, which is COMPLETE; the current finding is downstream M10-003 depending on BLOCKED M10-002. M10-004 is also marked COMPLETE while M10-003 remains BLOCKED. M10-003/#175 and M10-004 were not modified."
+    "note": "On source revision e72bbb3c8a10670b716dcf263cdafff052102b84, M10-002 declares M9-001 as its dependency and M9-001 is COMPLETE; the validator rejects the downstream M10-003 dependency because M10-002 remains BLOCKED. M10-004 is also marked COMPLETE while M10-003 is BLOCKED. M10-003/#175 and M10-004 were not modified."
   },
   "github_ci": {
     "initial_clean_build": {
@@ -466,7 +460,7 @@
       "errors": 0,
       "failed": 0
     },
-    "interpretation": "The latest complete current-source run on 5d6b2c7358e08169ede6198b472b37d773e017d passed 1,080/1,108 with 28 skips and no errors or failures. All four HTTP/2 resource profiles passed 216/216 on the first attempt. Earlier full-suite pool-fairness and CPU-affinity failures remain historical stability risks; their isolated/retry outcomes are recorded above."
+    "interpretation": "The current complete native run on e72bbb3c8a10670b716dcf263cdafff052102b84 passed 1,082/1,110 with 28 skips and no errors or failures. All four HTTP/2 resource profiles passed 218/218 on the first attempt. Earlier full-suite pool-fairness and CPU-affinity failures remain historical stability risks; the isolated/retry outcomes are recorded above."
   },
   "noncanonical_attempts": [
     {
@@ -485,7 +479,7 @@
     "skipped": 28,
     "errors": 3,
     "failed": 0,
-    "result": "Three scheduler cases initially exhausted their test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected. The subsequent e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 full run passed 1,079/1,107, and the latest 5d6b2c7358e08169ede6198b472b37d773e017d run passed 1,080/1,108."
+    "result": "Three scheduler cases initially exhausted their test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected. The subsequent e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 run passed 1,079/1,107, the 5d6b2c7358e08169ede6198b472b37d773e017d run passed 1,080/1,108, and the current e72bbb3c8a10670b716dcf263cdafff052102b84 run passed 1,082/1,110."
   },
   "decision": {
     "task_status": "BLOCKED",
