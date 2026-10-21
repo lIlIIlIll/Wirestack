@@ -55,7 +55,14 @@ The re-review did not clear the repository/tooling or task-dependency blockers.
 | HTTP/2 resource profiles | `RLIMIT_NOFILE=64`, `RLIMIT_DATA=1 GiB`, `RLIMIT_AS=4 GiB`, and CPU affinity 0 each passed 218/218 with no skips, errors, or failures on the first attempt. |
 | Strict generated documentation | `env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json` — PASS; 1,873/1,873 symbols and 950/950 parameters documented. |
 | `scripts/check` | Exit 1 in the initial tooling unittest stage: 584 tests, 25 failures, 16 errors, 4 skipped. Re-run after the P1-012 CLI regression; the same five families remain: stale AWS-LC advisory, M3-031 provider fixtures/error codes, M7-030 release/evidence digests, M12-002 platform-support source, and M7 task-graph expectations. |
-| M10-002 task gate | `scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current.json` — exit 2, `INVALID / DEPENDENCY_INCOMPLETE`; with P1-012 validator revision `e33894a6f1fab9fdb257104c580ba92b3076a5d9`, the selected closure reaches `P1-013 -> P1-012`, whose status remains BLOCKED by global M10-004 → M10-003 readiness. Zero M10-002 commands ran. The shared validator is in draft #220 and not integrated into #216. |
+| M10-002 task gate | Published #216 validator: exit 2, `INVALID` on global M10-004 → M10-003 readiness. In the combined workspace with P1-012 scoped-validator revision `e33894a6f1fab9fdb257104c580ba92b3076a5d9`, the gate still exits 2 with `DEPENDENCY_INCOMPLETE` on `M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012`; it rejects P1-012 as not COMPLETE even though `docs/planning/status.md` lists P1-012 and P1-013 as COMPLETE. Zero M10-002 acceptance commands ran. The status/gate discrepancy and global edge require reconciliation by their owners; the shared validator remains in draft #220 and is not integrated into #216. |
+
+Targeted diagnostics for the five reported owner families at PR head
+`b872f1b8304a16a769a517efa8cdf566e20ff963` ran 122 tests and reproduced 25
+failures and 16 errors (exit 1). The exact symptoms are recorded in
+[`repository-check-diagnostic.json`](stack-200-review/repository-check-diagnostic.json).
+No foreign advisory, platform, release, or task-status evidence was altered;
+this does not claim a `scripts/check` PASS.
 
 The earlier clean-build run `39448838666` failed source-tree mutation rejection at `b031cfd545e375b3a13f747c8eafe616bee5309e`: checked-in `docs.json` differed from the exact CI-pinned CJDoc output. The output was regenerated and committed at `2eb92251a0a600c974dc6c59b2313c806e660e5e`. All 10 workflows passed on later heads `e82743ee2bfa16ee6160d3e0236d340cf2ad0b87` and `f4034849f9d74c3301ccd0a1f3527909d057886f`. On exact source-bearing PR head `e6590ee111449977fb732edaf42164ffb7c265a3`, all 10 workflows passed, including Clean Cangjie Build and M7-033 Developer Documentation. The current strict local documentation check also passed on source revision `e72bbb3c8a10670b716dcf263cdafff052102b84`; earlier combined-check allocation failures are historical and do not supersede this direct pass.
 
