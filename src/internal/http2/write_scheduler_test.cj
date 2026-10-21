@@ -895,34 +895,129 @@ class Http2WriteSchedulerTest {
     }
     @TestCase
     func dataSourceIsSlicedBeforeWaitingForOwnerBufferLease(): Unit {
-        let streamId = Http2StreamId(1u32)
+        let streamId = Http2StreamId(3u32)
+        let blockerStreamId = Http2StreamId(1u32)
         let owner = internal.HttpResourceOwnerKey("https://example.com", "direct")
         let budget = schedulerResourceBudget(
-            81962u64, 34u64, maximumManagedBufferBytesPerOrigin: 20480u64
+            100000u64, 34u64, maximumManagedBufferBytesPerOrigin: 34431u64
         )
         let scheduler = Http2WriteScheduler(
             RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
         )
+        let firstBlocker = scheduler.enqueue(Http2Frame(
+            Http2FrameHeader(16384u32, Http2FrameType.Data, Http2Flags(), blockerStreamId),
+            Array<Byte>(16384, repeat: 1u8)
+        ))
+        let secondBlocker = scheduler.enqueue(Http2Frame(
+            Http2FrameHeader(16384u32, Http2FrameType.Data, Http2Flags(), blockerStreamId),
+            Array<Byte>(16384, repeat: 2u8)
+        ))
+        let thirdBlocker = scheduler.enqueue(Http2Frame(
+            Http2FrameHeader(1627u32, Http2FrameType.Data, Http2Flags(), blockerStreamId),
+            Array<Byte>(1627, repeat: 3u8)
+        ))
         let flow = Http2FlowController()
         flow.openStream(streamId)
         let source = Array<Byte>(32768, repeat: 7u8)
         let context = OperationContext(deadline: Some(Deadline.after(2 * Duration.second)))
-        let (ticket, admitted) = scheduler.enqueueDataWaiting(
-            flow, streamId, ByteSpan(source), context
-        )
+        let waiting = spawn {
+            scheduler.enqueueDataWaiting(flow, streamId, ByteSpan(source), context)
+        }
+        var completedNormally = false
+        try {
+            @Expect(waitForSchedulerAdmissionWaiters(budget, 1, Duration.second))
+            @Expect(budget.snapshot().managedBufferBytes, 34422u64)
+            @Expect(flow.pendingPermitCount, 0)
 
-        @Expect(admitted, 16384)
-        @Expect(budget.snapshot().managedBufferBytes, 16393u64)
-        @Expect(scheduler.pendingBytes, 16393u64)
-        @Expect(flow.pendingPermitCount, 1)
-        @Expect(flow.snapshot(streamId).reservedSendBytes, 16384)
-        @Expect(ticket.cancel())
-        @Expect(flow.pendingPermitCount, 0)
-        @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
-        @Expect(flow.sendConnectionAvailable, 65535)
-        @Expect(budget.snapshot().managedBufferBytes, 0u64)
-        scheduler.close()
-        @Expect(isSchedulerTestClosed(scheduler.run()))
+            @Expect(firstBlocker.cancel())
+            let (ticket, admitted) = waiting.get(2 * Duration.second)
+            @Expect(admitted, 16384)
+            @Expect(budget.snapshot().managedBufferBytes, 34422u64)
+            @Expect(scheduler.pendingBytes, 34422u64)
+            @Expect(flow.pendingPermitCount, 1)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 16384)
+
+            @Expect(ticket.cancel())
+            @Expect(flow.pendingPermitCount, 0)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+            @Expect(budget.snapshot().managedBufferBytes, 18029u64)
+            @Expect(secondBlocker.cancel())
+            @Expect(budget.snapshot().managedBufferBytes, 1636u64)
+            @Expect(thirdBlocker.cancel())
+            @Expect(budget.snapshot().managedBufferBytes, 0u64)
+            scheduler.close()
+            @Expect(isSchedulerTestClosed(scheduler.run()))
+            completedNormally = true
+        } finally {
+            if (!completedNormally) {
+                flow.close()
+                let _ = firstBlocker.cancel()
+                let _ = secondBlocker.cancel()
+                let _ = thirdBlocker.cancel()
+                scheduler.abort()
+                try { let _ = waiting.get(2 * Duration.second) } catch (_: Exception) {}
+            }
+            flow.close()
+        }
+    }
+
+    @TestCase
+    func zeroFlowCreditDoesNotHoldADataBufferWhileWaitingForPermit(): Unit {
+        let streamId = Http2StreamId(1u32)
+        let owner = internal.HttpResourceOwnerKey("https://example.com", "direct")
+        let budget = schedulerResourceBudget(81962u64, 34u64)
+        let scheduler = Http2WriteScheduler(
+            RecordingSchedulerTransport(), resourceBudget: Some(budget), resourceOwner: Some(owner)
+        )
+        let flow = Http2FlowController()
+        flow.applyPeerSettings(Http2SettingsUpdate(
+            Http2SettingsSnapshot(4096u32, true, 100u32, 0u32, 16384u32, 65536u32),
+            0,
+            Http2Frame(Http2FrameHeader(
+                0u32, Http2FrameType.Settings, Http2Flags(raw: 0x01u8), Http2StreamId(0u32)
+            ), [])
+        ))
+        flow.openStream(streamId)
+        let source = Array<Byte>(32768, repeat: 7u8)
+        let context = OperationContext(deadline: Some(Deadline.after(2 * Duration.second)))
+        let waiting = spawn {
+            scheduler.enqueueDataWaiting(flow, streamId, ByteSpan(source), context)
+        }
+        var completedNormally = false
+        try {
+            @Expect(waitForSchedulerFlowStalls(flow, 1, Duration.second))
+            @Expect(flow.pendingPermitCount, 0)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+            @Expect(budget.snapshot().managedBufferBytes, 0u64)
+            @Expect(budget.snapshot().highWaterManagedBufferBytes, 0u64)
+            @Expect(scheduler.pendingQueueReservations, 0)
+
+            flow.applyPeerSettings(Http2SettingsUpdate(
+                Http2SettingsSnapshot(4096u32, true, 100u32, 1u32, 16384u32, 65536u32),
+                0,
+                Http2Frame(Http2FrameHeader(
+                    0u32, Http2FrameType.Settings, Http2Flags(raw: 0x01u8), Http2StreamId(0u32)
+                ), [])
+            ))
+            let (ticket, admitted) = waiting.get(2 * Duration.second)
+            @Expect(admitted, 1)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 1)
+            @Expect(budget.snapshot().managedBufferBytes, 10u64)
+            @Expect(ticket.cancel())
+            @Expect(flow.pendingPermitCount, 0)
+            @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+            @Expect(budget.snapshot().managedBufferBytes, 0u64)
+            scheduler.close()
+            @Expect(isSchedulerTestClosed(scheduler.run()))
+            completedNormally = true
+        } finally {
+            if (!completedNormally) {
+                flow.close()
+                scheduler.abort()
+                try { let _ = waiting.get(2 * Duration.second) } catch (_: Exception) {}
+            }
+            flow.close()
+        }
     }
 
     @TestCase
