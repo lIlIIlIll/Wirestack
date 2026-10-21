@@ -465,38 +465,40 @@ public class Http2WriteScheduler {
         while (requested > 0) {
             checkWriterContext(context)
             let availableBeforeBuffer = flow.availableSendCredit(streamId, requested)
-            if (availableBeforeBuffer > 0 && availableBeforeBuffer < requested) {
-                requested = availableBeforeBuffer
-            }
-            let (bufferLease, bufferBytes) = waitForStreamBuffer(
-                flow, streamId, UInt64(requested) + 9u64, context
-            )
-            var leaseTransferred = false
-            try {
-                let leasedPayload = Int64(bufferBytes - 9u64)
-                if (leasedPayload < requested) {
-                    requested = leasedPayload
-                    continue
+            if (availableBeforeBuffer > 0) {
+                if (availableBeforeBuffer < requested) {
+                    requested = availableBeforeBuffer
                 }
-                let availableAfterBuffer = flow.availableSendCredit(streamId, requested)
-                if (availableAfterBuffer > 0 && availableAfterBuffer < requested) {
-                    requested = availableAfterBuffer
-                    continue
-                }
-                if (let Some(permit) <- flow.tryReserveSend(streamId, requested)) {
-                    if (permit.amount < requested) {
-                        requested = permit.amount
-                        let _ = permit.cancel()
+                let (bufferLease, bufferBytes) = waitForStreamBuffer(
+                    flow, streamId, UInt64(requested) + 9u64, context
+                )
+                var leaseTransferred = false
+                try {
+                    let leasedPayload = Int64(bufferBytes - 9u64)
+                    if (leasedPayload < requested) {
+                        requested = leasedPayload
                         continue
                     }
-                    if (context.eventSink.isSome()) { permit.observationContext = Some(context) }
-                    leaseTransferred = true
-                    return enqueueDataWithPermit(
-                        streamId, source, permit, Some(bufferLease), context
-                    )
+                    let availableAfterBuffer = flow.availableSendCredit(streamId, requested)
+                    if (availableAfterBuffer > 0 && availableAfterBuffer < requested) {
+                        requested = availableAfterBuffer
+                        continue
+                    }
+                    if (let Some(permit) <- flow.tryReserveSend(streamId, requested)) {
+                        if (permit.amount < requested) {
+                            requested = permit.amount
+                            let _ = permit.cancel()
+                            continue
+                        }
+                        if (context.eventSink.isSome()) { permit.observationContext = Some(context) }
+                        leaseTransferred = true
+                        return enqueueDataWithPermit(
+                            streamId, source, permit, Some(bufferLease), context
+                        )
+                    }
+                } finally {
+                    if (!leaseTransferred) { releaseBufferLease(Some(bufferLease)) }
                 }
-            } finally {
-                if (!leaseTransferred) { releaseBufferLease(Some(bufferLease)) }
             }
 
             let permit = flow.reserveSend(streamId, requested, context: context)
