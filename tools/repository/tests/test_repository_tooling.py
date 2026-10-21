@@ -221,6 +221,55 @@ class RepositoryToolingTests(unittest.TestCase):
             tooling.validate_repository_tasks(self.root, "TEST-001")
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
 
+    def test_task_cli_executes_selected_command_with_unrelated_blocked_dependency(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        selected = self.manifest("TEST-001", ["BASE-001"])
+        selected["acceptance_commands"][0]["argv"] = [
+            "python3", "-c", "print('selected-task-ran')"
+        ]
+        unrelated = self.manifest("OTHER-001", ["BLOCKED-001"])
+        unrelated["required_evidence"] = [
+            "docs/evidence/OTHER-001/evidence.json"
+        ]
+        unrelated["acceptance_commands"][0]["argv"] = [
+            "python3", "-c",
+            "from pathlib import Path; Path('unrelated-task-ran').write_text('bad')",
+        ]
+        self.write_manifest(selected)
+        self.write_manifest(unrelated)
+
+        repository_root = Path(__file__).resolve().parents[3]
+        script = repository_root / "tools/repository/repository_tooling.py"
+        receipt = self.root / "task-receipt.json"
+        completed = subprocess.run(
+            [
+                "python3", str(script), "--root", str(self.root),
+                "check", "task", "TEST-001", "--json", "--output", str(receipt),
+            ],
+            cwd=repository_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        report = json.loads(receipt.read_text(encoding="utf-8"))
+        self.assertEqual("PASS", report["status"])
+        self.assertEqual(["unit"], [command["id"] for command in report["commands"]])
+        self.assertEqual("PASS", report["commands"][0]["status"])
+        stdout_path = self.root / report["commands"][0]["stdout_path"]
+        self.assertEqual(
+            "selected-task-ran\n", stdout_path.read_text(encoding="utf-8")
+        )
+        self.assertFalse((self.root / "unrelated-task-ran").exists())
+
     def test_dependency_cycle_is_rejected(self) -> None:
         self.write_planning({"TEST-001": "COMPLETE", "TEST-002": "COMPLETE"})
         first = self.manifest("TEST-001", ["TEST-002"])

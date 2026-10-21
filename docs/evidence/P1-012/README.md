@@ -107,7 +107,7 @@ invalidate the selected task. Structural manifest validation remains global.
 ## Evidence boundary
 
 The current `scripts/check-task P1-012 --json` passes: the plan has 18 paths,
-14 scenarios, and 12 tests; all 40 repository-tooling tests pass. The exact
+15 scenarios, and 13 tests; all 41 repository-tooling tests pass. The exact
 task report and plan validation are retained in
 [`task-check.json`](task-check.json) and
 [`test-plan-validation.json`](test-plan-validation.json).
