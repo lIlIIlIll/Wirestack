@@ -25,7 +25,7 @@
     },
     "repository_tooling_tests": {
       "status": "PASS",
-      "tests_run": 39,
+      "tests_run": 39
     },
     "capture_note": "Historical result captured at c1d908a5d1f3a53f8b6e038cc0eacd2bb1e9e50a; docs/evidence/P1-012/task-check.json was later refreshed at e33894a6f1fab9fdb257104c580ba92b3076a5d9 and records 18 paths, 15 scenarios, 13 tests, and 41 repository-tooling tests."
   },
