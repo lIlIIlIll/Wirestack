@@ -43,7 +43,8 @@
         "scanner_digest binds the scanner implementation, and helper_sources binds the imported helpers",
         "verify_consumers requires exactly stable-native and candidate-native for cli, decoded, streams, service and trust with the ten compiled optional archives",
         "--consumer takes a strict <profile>/<app>=<path> identity and is required for every declared coordinate",
-        "install_selected_archive replaces any previous attempt's work/install and work/wirestack and returns the tree it extracted, and verify rebinds the reported payload to the selected archive, so a repeated capture cannot scan or validate a stale installation"
+        "install_selected_archive replaces any previous attempt's work/install and work/wirestack and returns the tree it extracted, and verify rebinds the reported payload to the selected archive, so a repeated capture cannot scan or validate a stale installation",
+        "the deployment collector compares a retained profile's production key set with release.production_sources(ROOT) before comparing bytes, so a profile cannot qualify by dropping or substituting a source"
       ]
     },
     "D3": {
