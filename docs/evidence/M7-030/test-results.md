@@ -108,7 +108,7 @@ Two of the six acceptance commands are red and one cannot be evaluated:
 | Command | Current result |
 |---|---|
 | `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
-| `signing-update-fault-injection` | PASS; `python3 -m unittest tools.tests.test_m7_030_linux_release -v`. |
+| `signing-update-fault-injection` | PASS; 19/19 `python3 -m unittest tools.tests.test_m7_030_linux_release` in the worktree and in a clean `git archive` export that has no `dist/` directory. |
 | `supply-chain-inputs` | FAIL exit 1, `generator fingerprint is stale`: recorded `42e064cf…` versus current `b7a15290…`. M11-002 (`0a3161e5`) changed `tools/m7_025_linux_supply_chain.py` after the M7-025 evidence was frozen; regenerating that bundle is M7-025 work. |
 | `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
 | `local-signing-update-rehearsal` | PASS as `REHEARSAL` with `verified-existing-artifact`, but `productionAttestation` now records `{"decision": "FAIL", "detail": "HOSTED_REPORT_SUBJECT"}` instead of the inherited historical PASS. |
@@ -141,6 +141,41 @@ rehearsal and hosted verdicts are unchanged in kind. Neither file is updated
 here; both keep the bytes committed on 2026-08-30, which is what the historical
 record documents. A future passing run should regenerate them deliberately
 rather than let a failing acceptance run overwrite the record.
+
+## Unit-test isolation (2026-10-22)
+
+The fault-injection suite originally read the ignored `dist/m7-021` staging
+archive, so its verdict depended on an ambient build product: on a clean
+checkout of the branch head 10 of 19 tests failed with `FROZEN_ASSET_MISSING`
+or `ARTIFACT_STALE`. The suite is now hermetic. A `frozen_fixture` context
+manager materialises a tiny deterministic `wirestack-0.1.0` archive in a
+temporary directory, copies the committed M7-025 documents beside it, rewrites
+the copied `bundle.json` so its artifact entry names that payload, and pins
+`ARTIFACT`, `SUPPLY_CHAIN`, `SBOM`, `FROZEN_ARTIFACT_BYTES`,
+`FROZEN_ARTIFACT_SHA256` and the workflow text for the duration of the block
+with `unittest.mock.patch.object`. Production constants are never rewritten:
+the committed `FROZEN_ARTIFACT_NAME`, tag, 2,499,451 bytes and `c0988f62…`
+digest keep their real values, and the unpatched suite cross-checks them
+against both the committed M7-025 bundle and the committed
+`frozen-artifact.json` retrieval receipt.
+
+The negative tests keep their teeth independently of the fixture: a renamed
+copy still trips `FROZEN_ASSET_NAME`, a one-byte-short copy trips
+`FROZEN_ASSET_SIZE`, a same-length single-bit flip trips `FROZEN_ASSET_DIGEST`,
+an absent staging path trips `FROZEN_ASSET_MISSING` for both
+`build_release_manifest` and `fetch_frozen_artifact`, and a failed `gh release
+download` trips `FROZEN_ASSET_DOWNLOAD` without leaving the asset behind.
+Replacing `verify_frozen_artifact` with a permissive stub fails those tests, so
+they observe the check rather than the fixture.
+
+Supporting the injection required resolving path defaults at call time in
+`tools/m7_030_linux_release.py`: `build_release_manifest`,
+`verify_frozen_artifact`, `fetch_frozen_artifact`, `create_offline_bundle`,
+`verify_offline_bundle` and `inspect_workflow` now take `None` and fall back to
+the module attribute, and a new `workflow_text()` seam supplies the default
+workflow source. Behaviour with no arguments is unchanged, and
+`scripts/check-m7-030-release` still fetches and verifies the exact pinned draft
+asset, so the local release contract remains as strict as before.
 
 ## Gates not run
 

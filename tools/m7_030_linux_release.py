@@ -131,14 +131,16 @@ def _strict_digest(value: Any, field: str) -> str:
 
 
 def build_release_manifest(
-    artifact: Path = ARTIFACT,
-    supply_chain: Path = SUPPLY_CHAIN,
+    artifact: Path | None = None,
+    supply_chain: Path | None = None,
     *,
     task_id: str = TASK_ID,
     workflow: str = WORKFLOW,
     qualified_inputs: Sequence[Path] = (),
     root: Path = ROOT,
 ) -> dict[str, Any]:
+    artifact = ARTIFACT if artifact is None else artifact
+    supply_chain = SUPPLY_CHAIN if supply_chain is None else supply_chain
     _require_frozen_prerequisite(artifact)
     provider = load_json(supply_chain / "provider-manifest.json")
     fingerprint = load_json(supply_chain / "build-fingerprint.json")
@@ -316,8 +318,9 @@ def _run(argv: Sequence[str], *, input_bytes: bytes | None = None) -> subprocess
     return result
 
 
-def verify_frozen_artifact(path: Path = ARTIFACT) -> dict[str, Any]:
+def verify_frozen_artifact(path: Path | None = None) -> dict[str, Any]:
     """Accept only the exact unpublished M7-030 staging asset bytes."""
+    path = ARTIFACT if path is None else path
     require(path.name == FROZEN_ARTIFACT_NAME, "FROZEN_ASSET_NAME", path.name)
     require(path.is_file(), "FROZEN_ASSET_MISSING", path.name)
     try:
@@ -357,11 +360,12 @@ def _run_download(argv: Sequence[str]) -> subprocess.CompletedProcess[bytes]:
 
 
 def fetch_frozen_artifact(
-    target: Path = ARTIFACT,
+    target: Path | None = None,
     *,
     runner: Callable[[Sequence[str]], subprocess.CompletedProcess[bytes]] | None = None,
 ) -> dict[str, Any]:
     """Stage the frozen asset from its single draft Release, verified byte for byte."""
+    target = ARTIFACT if target is None else target
     require(target.name == FROZEN_ARTIFACT_NAME, "FROZEN_ASSET_NAME", target.name)
     if target.exists():
         return {**verify_frozen_artifact(target), "mode": "verified-existing-artifact"}
@@ -452,10 +456,12 @@ def create_offline_bundle(
     trusted_public_key: Path,
     output: Path,
     *,
-    artifact: Path = ARTIFACT,
-    supply_chain: Path = SUPPLY_CHAIN,
+    artifact: Path | None = None,
+    supply_chain: Path | None = None,
     allow_temporary_key: bool = False,
 ) -> dict[str, Any]:
+    artifact = ARTIFACT if artifact is None else artifact
+    supply_chain = SUPPLY_CHAIN if supply_chain is None else supply_chain
     public = public_key(private_key) if allow_temporary_key else validate_signing_key(
         private_key, trusted_public_key, output
     )
@@ -493,9 +499,11 @@ def verify_offline_bundle(
     output: Path,
     public_key_path: Path,
     *,
-    artifact: Path = ARTIFACT,
-    sbom: Path = SBOM,
+    artifact: Path | None = None,
+    sbom: Path | None = None,
 ) -> dict[str, Any]:
+    artifact = ARTIFACT if artifact is None else artifact
+    sbom = SBOM if sbom is None else sbom
     public = public_key_path.read_bytes().strip() + b"\n"
     require(public.startswith(b"ssh-ed25519 "), "SIGNING_KEY_TYPE", "trusted key")
     manifest = load_json(output / "release-manifest.json")
@@ -755,8 +763,13 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
     }
 
 
-def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
-    text = path.read_text(encoding="utf-8")
+def workflow_text() -> str:
+    """Return the signer workflow source used by the default inspection."""
+    return (ROOT / WORKFLOW).read_text(encoding="utf-8")
+
+
+def inspect_workflow(path: Path | None = None) -> dict[str, Any]:
+    text = workflow_text() if path is None else path.read_text(encoding="utf-8")
     require(text.count("runs-on: ubuntu-latest") == 2,
             "WORKFLOW_RUNNER", "two GitHub-hosted Linux jobs required")
     require("permissions: {}" in text, "WORKFLOW_PERMISSION", "default token permissions disabled")
