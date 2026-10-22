@@ -147,6 +147,12 @@ repository-tooling tests and a plan of 17 paths, 13 scenarios, 11 tests.
 Only the latter matches the retained [`task-check.json`](task-check.json) and
 [`test-plan-validation.json`](test-plan-validation.json).
 
+Independent security re-review confirmed the dependency-scope behavior and
+seven-edge impact calculation, and found no code bypass. It identified stale
+counts in `global-readiness.json` (18/17/15 and 44 repository-tooling tests);
+the current report now matches the task receipts at 19/18/16 and 45. No
+repository-wide gate or M12-003 acceptance status is promoted.
+
 No M12-003 execution receipt is retained on this branch. The only M12-003
 record here is the closure rejection: on the current tree the selected
 M12-003 closure reaches BLOCKED P1-012 through P1-013, so
