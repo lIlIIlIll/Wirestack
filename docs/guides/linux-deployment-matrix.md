@@ -56,7 +56,7 @@ python3 tools/m12_002_platform.py \
   --image-provenance "$PROVENANCE" --output "$OUTPUT"
 ```
 
-`INSTALLED_TREE` is the relocated tree produced by a stable source capture. `FIXTURES` contains its certificate DER, key DER and untrusted DER files. Use a new output directory. The tool compares the original executable digests before execution, validates the installed payload and Linux SDK closure, runs all 47 checks, creates a separate installed-tree copy, rebuilds the consumers and runs all 47 checks again. It preserves compiler and command diagnostics on failure.
+`INSTALLED_TREE` is the relocated tree produced by a stable source capture. `FIXTURES` contains its certificate DER, key DER and untrusted DER files. Use a new output directory. `HOST_KERNEL` is the kernel of the qualifying source host, and the verifier requires it to equal the kernel recorded by the stable source report; it exists only to prove the guest kernel is a different kernel than the host that built the payload. The tool compares the original executable digests before execution, validates the installed payload and Linux SDK closure, runs all 47 checks, creates a separate installed-tree copy, rebuilds the consumers and runs all 47 checks again. It preserves compiler and command diagnostics on failure.
 
 For the controlled glibc profile, run `tools/m12_002_glibc_namespace.py` through `sudo unshare --mount --propagation private` inside that owned VM. Provide the selected runtime directory and its provenance, an unprivileged UID/GID and the acceptance command after `--`. The helper rejects shared mounts, host/non-KVM use, undeclared runtime files and changed runtime digests. The namespace disappears when the command exits.
 

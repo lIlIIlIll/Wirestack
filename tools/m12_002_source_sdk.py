@@ -335,10 +335,10 @@ def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path) -> Non
     verify_tls_fixtures(report)
     verify_command_inventory(report['commands'], evidence)
     verify_ca_checks(report, evidence)
+    commands = {command['id']: command for command in report['commands']}
     for name in consumers.APP_NAMES:
-        consumers.validate_checks(evidence_log({'path': f'{name}-acceptance.stdout.log', 'digest': next(
-            command['stdout']['digest'] for command in report['commands'] if command['id'] == name + '-acceptance')},
-            evidence, name + '-acceptance').read_text(), name)
+        command_id = name + '-acceptance'
+        consumers.validate_checks(evidence_log(commands[command_id]['stdout'], evidence, command_id).read_text(), name)
     verify_consumer_sources(report)
 
 

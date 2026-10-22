@@ -180,6 +180,8 @@ def verify_report(report: dict, evidence: Path, stable: dict) -> None:
     observed = observed_platform(report, evidence)
     for field, value in observed.items():
         require(report[field] == value, 'native platform claim differs from its captured output: ' + field)
+    require(report['host_kernel'] == stable['kernel'],
+        'host identity is not the kernel observed by the source qualification')
     require(report['kernel'] != report['host_kernel'] and report['virtualization'] == 'kvm',
         'container/shared-kernel output is not independent native VM evidence')
     require(report['sdk_files'].keys() == linux_sdk_files(stable['sdk_files']).keys(),
@@ -198,7 +200,7 @@ def verify_report(report: dict, evidence: Path, stable: dict) -> None:
         require(report['same_binary'][name]['digest'] == stable['consumers'][name]['binary_digest'],
             'same-binary proof accidentally substituted a rebuild')
         for stage in ('same-binary', 'rebuilt'):
-            consumers.validate_checks((evidence / f'{stage}-{name}.stdout.log').read_text(), name)
+            consumers.validate_checks(command_output(report, evidence, f'{stage}-{name}'), name)
     for name, entry in report['support_sources'].items():
         require(text_evidence_digest(ROOT / name).to_json() == entry, 'platform support source changed')
     for name, entry in report['sdk_files'].items():
@@ -275,6 +277,8 @@ def main() -> int:
     require(all((args.sdk_root, args.tree, args.fixtures, args.host_kernel,
         args.image_provenance, args.output)), 'native capture requires all installed input paths')
     output = args.output.resolve()
+    require(args.host_kernel == stable['kernel'],
+        'host identity is not the kernel observed by the source qualification')
     output.mkdir(parents=True, exist_ok=False)
     capture = Capture(args.sdk_root.resolve(), args.tree.resolve(), output)
     report = {'schema_version': 1, 'task_id': 'M12-002', 'status': 'RUNNING',

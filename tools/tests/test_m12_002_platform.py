@@ -41,6 +41,12 @@ class NativePlatformEvidenceTests(unittest.TestCase):
     def test_shared_kernel_cannot_claim_old_kernel(self):
         self.reject('kernel', self.report['host_kernel'], 'claim differs from its captured output: kernel')
 
+    def test_unqualified_host_cannot_stand_in_for_the_measured_host(self):
+        changed = copy.deepcopy(self.report)
+        changed['host_kernel'] = '6.8.0-31-generic'
+        with self.assertRaisesRegex(ValueError, 'host identity is not the kernel observed by the source qualification'):
+            verify_report(changed, self.evidence, self.stable)
+
     def test_avx_enabled_vm_cannot_claim_weaker_cpu(self):
         self.reject('cpu_flags', self.report['cpu_flags'] + ['avx'], 'claim differs from its captured output: cpu_flags')
 
