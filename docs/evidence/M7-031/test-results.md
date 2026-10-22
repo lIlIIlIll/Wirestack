@@ -54,21 +54,23 @@ failure, not a source or assertion failure.
 
 `tools/m7_031_linux_candidate.py` now exposes
 `unmet_dependencies(root)`, and `validate_dependency_status` reports the first
-unmet declared dependency through it. The unit suite reads that helper in
-`setUpClass`: while a prerequisite is not `COMPLETE` the fifteen candidate cases
-are skipped with the task ID, instead of raising from `setUpClass` and turning
-repository-wide discovery into an error. The four
+unmet declared dependency through it. In `setUpClass`, the unit suite reads
+the same helper and raises `unittest.SkipTest` when a prerequisite is not
+`COMPLETE`. Here unittest reports the whole `M7031LinuxCandidateTests` class
+as one skip event; its fifteen candidate methods do not run. This avoids the
+previous collection error while preserving the blocked prerequisite. The four
 `M7031DependencyReadinessTests` cases run unconditionally on temporary
 `status.md` fixtures.
 
 | Command | Result |
 |---|---|
 | `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-031/test-plan.md --json` | PASS; 21 paths, 13 scenarios and 11 planned tests. |
-| `python3 -m unittest tools.tests.test_m7_031_linux_candidate -v` | PASS (1 skip); the four readiness cases pass and `M7031LinuxCandidateTests` reports `skipped 'M7-031 prerequisites are not COMPLETE: M7-030'`. |
-| `python3 -m unittest tools.tests.test_m7_linux_task_graph -v` | FAIL; 5/6 tests. `test_evolution_status_matches_readiness_classification` reports `AssertionError: 'COMPLETE' != 'BLOCKED'` for `M10-004`, whose declared dependency M10-003 is BLOCKED. The identical failure occurs on the unmodified base commit `d496a242`, because that edge is M10-003/M10-004, so it is not caused by this branch and the assertion is not weakened here. |
+| `python3 -m unittest tools.tests.test_m7_031_linux_candidate -v` | PASS; 4 readiness tests pass and the candidate class is skipped with `M7-031 prerequisites are not COMPLETE: M7-030`. |
+| `python3 -m unittest discover -s tools/tests -p 'test_m7_031_linux_candidate.py' -v` | PASS; the same four readiness tests run; candidate class is skipped, no discovery error. |
+| `python3 -m unittest tools.tests.test_m7_linux_task_graph -v` | FAIL; 5/6 tests. `test_evolution_status_matches_readiness_classification` reports `AssertionError: 'COMPLETE' != 'BLOCKED'` for M10-004, whose dependency M10-003 is BLOCKED. The same failure was observed on base `d496a242`; this branch does not weaken that invariant or alter M10-004's separate status task. |
 | `scripts/check-m7-031-release` | FAIL; `M7-031 candidate: FAIL: DEPENDENCY_INCOMPLETE: M7-030`. |
-| `scripts/verify-evidence M7-031 --json` | FAIL; `{"issues":[{"code":"DEPENDENCY_INCOMPLETE","detail":"M7-031 dependency is not COMPLETE: M7-030"}],"status":"FAIL"}`. |
-| `scripts/check-task M7-031 --json` | INVALID; the requested task's closure contains the unmet `M7-030` dependency, so no acceptance command runs. |
+| `scripts/verify-evidence M7-031 --json --output docs/evidence/M7-031/evidence-check-current.json` | FAIL; `DEPENDENCY_INCOMPLETE: M7-031 dependency is not COMPLETE: M7-030`; current report retained. |
+| `scripts/check-task M7-031 --json --output docs/evidence/M7-031/task-check-current.json` | INVALID; dependency closure rejects M7-030 before execution; zero commands. |
 
 `docs/evidence/M7-031/evidence.json` and `docs/evidence/M7-031/task-check.json`
 are the 2026-08-30 seals and are retained byte-identically as history. They are

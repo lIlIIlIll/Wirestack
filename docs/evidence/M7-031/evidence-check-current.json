@@ -1,0 +1,12 @@
+{
+  "issues": [
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "M7-031 dependency is not COMPLETE: M7-030"
+    }
+  ],
+  "kind": "evidence-freshness",
+  "schema_version": 1,
+  "status": "FAIL",
+  "tasks": []
+}

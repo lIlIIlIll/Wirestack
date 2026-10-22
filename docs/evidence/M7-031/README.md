@@ -45,6 +45,10 @@ old pass.
   acceptance result. They are not resealed on this branch because
   `seal_evidence` refuses a non-`PASS` acceptance status and no current PASS is
   claimed.
+- [`task-check-current.json`](task-check-current.json) records the current
+  `INVALID` task gate with zero commands because M7-030 is BLOCKED;
+  [`evidence-check-current.json`](evidence-check-current.json) records the
+  corresponding current evidence-freshness failure. Neither is a PASS seal.
 
 ## Reused long-running evidence
 
