@@ -11,6 +11,7 @@
   "method": "Read the current verifiers, their committed reports and the retained inputs, observed the absent guards on the baseline revision, then ran the hardened verifier suites and the four declared acceptance commands in a clone of that revision. No capture was rerun: the selected archive, the second support-statement SDK and the native KVM image are absent from this host.",
   "remediated_roots": {
     "D1": {
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/233",
       "finding": "source capture/resume trusted an incomplete record",
       "paths": [
         "tools/m12_002_source_sdk.py",
@@ -29,6 +30,7 @@
       ]
     },
     "D2": {
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/234",
       "finding": "binary matrix and scan inputs did not form a complete evidence chain",
       "paths": [
         "tools/m12_002_binary.py",
@@ -43,6 +45,7 @@
       ]
     },
     "D3": {
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/235",
       "finding": "native-platform PASS did not prove the claimed platform or an actual rebuild",
       "paths": [
         "tools/m12_002_platform.py",
