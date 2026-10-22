@@ -124,14 +124,17 @@ reports `status: FAIL` with exactly the two failing commands above and
 
 Marking this task BLOCKED also propagates to M7-031, which lists M7-030 as a
 dependency and whose `validate_dependency_status` requires
-`| M7-030 | COMPLETE |` in `docs/planning/status.md`. `scripts/check-m7-031-release`
-therefore reports `DEPENDENCY_INCOMPLETE: M7-030` and
-`python3 -m unittest tools.tests.test_m7_031_linux_candidate` raises from
-`setUpClass` (`Ran 0 tests`) where the base commit ran 15 tests OK. That gate
-already failed on the base commit with
-`DIGEST_INVALID: M7-030 artifact signed payload`, so M7-031's COMPLETE record
-was not supported by its own gate before this change. M7-031's row, tooling and
-evidence stay untouched here because they are outside this task's
+`| M7-030 | COMPLETE |` in `docs/planning/status.md`. The
+`scripts/check-m7-031-release` gate therefore reports
+`DEPENDENCY_INCOMPLETE: M7-030`. The unittest discovery failure was fixed
+separately in draft PR #239: `python3 -m unittest
+tools.tests.test_m7_031_linux_candidate -v` passes four dependency-readiness
+tests and skips `M7031LinuxCandidateTests` with
+`M7-031 prerequisites are not COMPLETE: M7-030`; its fifteen candidate
+methods do not run. The underlying gate already failed on the base commit
+with `DIGEST_INVALID: M7-030 artifact signed payload`, so M7-031's COMPLETE
+record was not supported by its own gate before this change. M7-031's row,
+tooling and evidence stay untouched here because they are outside this task's
 `allowed_paths`.
 
 Running the gate rewrites two committed reports as a side effect:
