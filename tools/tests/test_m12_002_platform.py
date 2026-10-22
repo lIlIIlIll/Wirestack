@@ -5,8 +5,8 @@ from pathlib import Path
 import tempfile
 import unittest
 from tools.m12_002_platform import (COMMAND_IDS, ROOT, SOURCE_LAYOUTS, SUPPORT_FILES,
-    observed_platform, transferred_path, validate_transferred_sources, verify_report,
-    verify_commands)
+    evidence_log, observed_platform, transferred_path, validate_transferred_sources, verify_command_contract,
+    verify_commands, verify_report)
 from tools.evidence_digest import artifact_byte_digest_bytes, text_evidence_digest
 
 
@@ -152,16 +152,82 @@ class ObservedPlatformTests(unittest.TestCase):
             report = {'commands': []}
             for name, body in (('kernel', '5.15.0-198-generic\n'), ('glibc', 'glibc 2.44\n'),
                                ('virtualization', 'kvm\n'), ('cpu', '{}\n')):
-                (evidence / (name + '.log')).write_text(body)
-                report['commands'].append({'id': name, 'stdout': {'path': name + '.log'}})
+                (evidence / (name + '.stdout.log')).write_text(body)
+                report['commands'].append({'id': name, 'stdout': {'path': name + '.stdout.log'}})
             with self.assertRaisesRegex(ValueError, 'CPU inventory is not a populated lscpu object'):
                 observed_platform(report, evidence)
-            (evidence / 'cpu.log').write_text(json.dumps({'lscpu': [{'field': 'Model name'}]}))
+            (evidence / 'cpu.stdout.log').write_text(json.dumps({'lscpu': [{'field': 'Model name'}]}))
             with self.assertRaisesRegex(ValueError, 'malformed item'):
                 observed_platform(report, evidence)
-            (evidence / 'cpu.log').write_text(json.dumps({'lscpu': [{'field': 'Model name', 'data': 'Westmere'}]}))
+            (evidence / 'cpu.stdout.log').write_text(json.dumps(
+                {'lscpu': [{'field': 'Model name', 'data': 'Westmere'}]}))
             with self.assertRaisesRegex(ValueError, 'lacks a model or flags'):
                 observed_platform(report, evidence)
+
+    def test_log_must_belong_to_the_command_that_claims_it(self):
+        with tempfile.TemporaryDirectory(prefix='m12-platform-') as directory:
+            evidence = Path(directory)
+            (evidence / 'kernel.stdout.log').write_text('5.15.0-198-generic\n')
+            with self.assertRaisesRegex(ValueError, 'evidence is not its own retained log: glibc'):
+                evidence_log({'id': 'glibc', 'stdout': {'path': 'kernel.stdout.log'}}, evidence, 'stdout')
+
+    def test_log_path_may_not_escape_the_evidence_tree(self):
+        with tempfile.TemporaryDirectory(prefix='m12-platform-') as directory:
+            evidence = Path(directory)
+            with self.assertRaisesRegex(ValueError, 'evidence path escapes its evidence tree: kernel'):
+                evidence_log({'id': 'kernel', 'stdout': {'path': '../../../etc/passwd'}}, evidence, 'stdout')
+
+
+class CommandContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        evidence = ROOT / 'docs/evidence/M12-002/platform/westmere-glibc244'
+        cls.commands = {command['id']: command
+            for command in json.loads((evidence / 'report.json').read_text())['commands']}
+
+    def verify(self, name, **changes):
+        command = copy.deepcopy(self.commands[name])
+        command.update(changes)
+        verify_command_contract(command)
+
+    def test_every_real_native_command_matches_its_contract(self):
+        for name, command in self.commands.items():
+            with self.subTest(name=name):
+                verify_command_contract(command)
+
+    def test_vm_binary_cannot_be_replaced_by_a_host_binary(self):
+        name = 'same-binary-cli'
+        argv = list(self.commands[name]['argv'])
+        argv[0] = '/usr/bin/main'
+        with self.assertRaisesRegex(ValueError, 'command shape changed: ' + name):
+            self.verify(name, argv=argv)
+
+    def test_clean_cannot_be_relabelled_as_a_build(self):
+        with self.assertRaisesRegex(ValueError, 'command shape changed: clean-cli'):
+            self.verify('clean-cli', argv=['<sdk>/tools/bin/cjpm', 'build'])
+
+    def test_rebuilt_tree_must_live_under_the_rebuild_root(self):
+        with self.assertRaisesRegex(ValueError, 'working directory changed: rebuilt-cli'):
+            self.verify('rebuilt-cli', cwd='<installed-tree>/consumers/cli/target/release/bin')
+
+    def test_kernel_probe_must_run_the_recorded_command(self):
+        with self.assertRaisesRegex(ValueError, 'command shape changed: kernel'):
+            self.verify('kernel', argv=['cat', '/proc/version'])
+
+    def test_self_check_must_pass_the_declared_fixtures(self):
+        name = 'same-binary-streams'
+        argv = list(self.commands[name]['argv'])
+        argv[3] = '<support>/fixtures/other.der'
+        with self.assertRaisesRegex(ValueError, 'command shape changed: ' + name):
+            self.verify(name, argv=argv)
+
+    def test_cli_port_must_be_a_real_port_but_may_differ(self):
+        name = 'same-binary-cli'
+        argv = list(self.commands[name]['argv'])
+        verify_command_contract({**self.commands[name], 'argv': argv[:-1] + ['51234']})
+        argv[-1] = 'port'
+        with self.assertRaisesRegex(ValueError, 'command shape changed: ' + name):
+            self.verify(name, argv=argv)
 
 
 if __name__ == '__main__':

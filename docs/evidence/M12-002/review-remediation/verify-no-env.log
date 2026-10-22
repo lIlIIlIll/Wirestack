@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<repo>/tools/m12_002_deployment.py", line 149, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo>/tools/m12_002_deployment.py", line 140, in main
+    verify_snapshot(EVIDENCE / 'verification.json')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_deployment.py", line 84, in verify_snapshot
+    inputs = current_inputs(binary_report)
+  File "<repo>/tools/m12_002_deployment.py", line 41, in current_inputs
+    selected = selected_sdks()
+  File "<repo>/tools/m12_002_deployment.py", line 35, in selected_sdks
+    require(bool(value), f'WIRESTACK_{name.upper()}_SDK_ROOT must select the exact SDK to verify')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_deployment.py", line 28, in require
+    raise ValueError(message)
+ValueError: WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify

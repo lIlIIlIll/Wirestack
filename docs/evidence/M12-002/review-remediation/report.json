@@ -7,8 +7,8 @@
   "completion_claim": false,
   "release_qualification": "NOT_QUALIFIED",
   "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
-  "recorded_at_utc": "2026-10-22T00:00:00Z",
-  "method": "Read the current verifiers, their committed reports and the retained inputs, then executed the hardened verifier suites and the declared acceptance commands in a fresh clone at the baseline revision. No capture was rerun: the selected archive, the second support-statement SDK and the native KVM image are absent from this host.",
+  "recorded_at_utc": "2026-10-22T12:00:00Z",
+  "method": "Read the current verifiers, their committed reports and the retained inputs, observed the absent guards on the baseline revision, then ran the hardened verifier suites and the four declared acceptance commands in a clone of that revision. No capture was rerun: the selected archive, the second support-statement SDK and the native KVM image are absent from this host.",
   "remediated_roots": {
     "D1": {
       "finding": "source capture/resume trusted an incomplete record",
@@ -55,8 +55,13 @@
   "observed_acceptance": {
     "python3 -m unittest tools.tests.test_m12_002_source_sdk tools.tests.test_m12_002_binary tools.tests.test_m12_002_platform": {
       "exit_code": 0,
-      "result": "71 tests OK, 1 skipped (SourceSdkEvidenceTests requires WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT)",
+      "result": "Ran 131 tests in 1.791s, OK (skipped=1); SourceSdkEvidenceTests skips without WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT",
       "log": "docs/evidence/M12-002/review-remediation/unit-tests.log"
+    },
+    "WIRESTACK_SOURCE_SDK_REPORT/WIRESTACK_SOURCE_SDK_ROOT python3 -m unittest tools.tests.test_m12_002_source_sdk": {
+      "exit_code": 0,
+      "result": "Ran 65 tests in 4.909s, OK against the retained stable-native report and the installed sts 1.1.3 tree",
+      "log": "docs/evidence/M12-002/review-remediation/source-sdk-tests.log"
     },
     "python3 tools/architecture_guard.py --root . --format text": {
       "exit_code": 0,
@@ -67,28 +72,37 @@
       "exit_code": 1,
       "result": "{\"error\": \"committed public API inventory is stale\", \"status\": \"FAIL\", \"taskId\": \"M7-032\"}",
       "log": "docs/evidence/M12-002/review-remediation/public-api.log",
-      "note": "Owned by M7-032; it fails because the committed public API inventory predates this revision."
+      "note": "Owned by M7-032 in this remediation stack; the committed public API inventory predates this revision. Not caused by and not fixable from M12-002."
     },
     "python3 tools/m12_002_deployment.py contracts": {
       "exit_code": 1,
       "without_sdk_environment": "ValueError: WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify",
-      "with_sdk_environment": "Exit 1: Ran 75 tests, 3 failures in SourceSdkEvidenceTests because the selected archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is absent; the archive binding is checked before the reconstructed SDK closure and command inventory.",
+      "with_sdk_environment": "exit 0: Ran 135 tests in 6.193s, OK when WIRESTACK_STABLE_SDK_ROOT and WIRESTACK_CANDIDATE_SDK_ROOT both select the installed sts 1.1.3 tree",
       "logs": {
         "without_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-no-env.log",
         "with_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-with-env.log"
-      }
+      },
+      "note": "Without both selections the command exits 1 before running any contract. Selecting the installed sts 1.1.3 tree for both variables exercises the contract suite only; it is not a second-version claim, and the candidate-native profile remains uncaptured."
     },
     "python3 tools/m12_002_deployment.py verify": {
       "exit_code": 1,
-      "result": "DigestError: cannot read binary artifact: docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",
-      "log": "docs/evidence/M12-002/review-remediation/verify.log"
+      "without_sdk_environment": "ValueError: WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify",
+      "with_sdk_environment": "DigestError: cannot read binary artifact: <repo>/docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",
+      "logs": {
+        "without_sdk_environment": "docs/evidence/M12-002/review-remediation/verify-no-env.log",
+        "with_sdk_environment": "docs/evidence/M12-002/review-remediation/verify.log"
+      },
+      "note": "The selected development archive is not tracked and is absent from this clone, so no deployment snapshot can be verified."
     }
   },
   "rejected_stale_records": {
     "docs/evidence/M12-002/source-sdk/stable-native/report.json": "The record lacks helper_sources and its sdk_files closure omits tools/lib, so the hardened verifier rejects it until the profile is recaptured.",
     "docs/evidence/M12-002/source-sdk/candidate-native/report.json": "Same missing helper and tools/lib bindings; additionally the candidate SDK identity is not available.",
     "docs/evidence/M12-002/binary/report.json": "The record has no helper_sources, no per-scan scanner digest, no installed consumer identity inventory and an ABI matrix without coordinate validation.",
-    "docs/evidence/M12-002/platform/westmere-glibc244/report.json": "The record has no transferred_sources inventory, so the transferred consumer sources cannot be shown to match the source qualification before rebuild."
+    "docs/evidence/M12-002/platform/westmere-glibc244/report.json": "The record has no transferred_sources inventory, so the transferred consumer sources cannot be shown to match the source qualification before rebuild.",
+    "retained source-sdk stable-native": "verify_command_inventory accepts the retained 39-command inventory and CA diagnostics, but verify_helper_sources rejects it: 'evidence helper inventory changed; recapture required' because the committed report records an empty helper_sources map.",
+    "retained binary report": "verify_command_inventory rejects it with 'scanner command bases are not unique' and verify_scan_verdicts with 'command evidence is missing: archive-0-headers'; the record predates the per-scan scanner command scheme and carries no consumer identities.",
+    "retained platform westmere-glibc244": "verify_commands accepts all 25 bound commands and observed_platform re-derives 'Westmere E56xx/L56xx/X56xx (Nehalem-C)' from the captured lscpu output, but the record still has no transferred_sources inventory."
   },
   "missing_inputs": [
     {
@@ -110,5 +124,11 @@
     "tools/m12_002_platform.py capture and --verify",
     "tools/m12_002_deployment.py collect",
     "scripts/check-task M12-002"
-  ]
+  ],
+  "red_green": {
+    "target": "docs/evidence/M12-002/review-remediation/verifier-defects-on-baseline.log",
+    "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+    "observed": "On the unmodified baseline every D1/D2/D3 guard is absent: no scan_fields or verify_consumers, a duplicate ABI coordinate is accepted, no scanner/helper binding in the binary report, no verify_helper_sources or command-inventory gate, and no transferred_sources in the platform report.",
+    "green": "The same checks raise on the hardened verifiers: tools/tests/test_m12_002_source_sdk.py, tools/tests/test_m12_002_binary.py and tools/tests/test_m12_002_platform.py assert each rejection and pass in this revision."
+  }
 }

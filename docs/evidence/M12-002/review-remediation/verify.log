@@ -21,7 +21,7 @@ Traceback (most recent call last):
   File "<repo>/tools/m12_002_deployment.py", line 46, in current_inputs
     verify_source(report, ARCHIVE, sdk, path.parent)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<repo>/tools/m12_002_source_sdk.py", line 136, in verify_report
+  File "<repo>/tools/m12_002_source_sdk.py", line 326, in verify_report
     if not artifact_byte_sha256_equal(report['archive_digest'], artifact_byte_digest(archive).to_json()):
                                                                 ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
   File "<repo>/tools/evidence_digest.py", line 129, in artifact_byte_digest

@@ -67,10 +67,75 @@ def validate_transferred_sources(tree: Path, stable: dict) -> dict:
     return recorded
 
 
+def evidence_log(command: dict, evidence: Path, stream: str) -> Path:
+    """A report may only read the log it retained for itself, named after its own command."""
+    entry = command[stream]
+    relative = entry.get('path')
+    require(isinstance(relative, str) and relative and not Path(relative).is_absolute()
+        and '..' not in Path(relative).parts,
+        'native command evidence path escapes its evidence tree: ' + command['id'])
+    require(Path(relative).name == f'{command["id"]}.{stream}.log',
+        'native command evidence is not its own retained log: ' + command['id'])
+    path = evidence / relative
+    require(path.is_file(), 'native command evidence is missing: ' + command['id'])
+    return path
+
+
 def command_output(report: dict, evidence: Path, name: str) -> str:
     command = next((item for item in report['commands'] if item['id'] == name), None)
     require(command is not None, 'native command is missing: ' + name)
-    return (evidence / command['stdout']['path']).read_text()
+    return evidence_log(command, evidence, 'stdout').read_text()
+
+
+FIXED_COMMANDS = {'kernel': ['uname', '-r'], 'glibc': ['getconf', 'GNU_LIBC_VERSION'],
+    'virtualization': ['systemd-detect-virt'], 'cpu': ['lscpu', '-J'],
+    'os-release': ['cat', '/etc/os-release'], 'compiler': ['<sdk>/bin/cjc', '--version'],
+    'cjpm': ['<sdk>/tools/bin/cjpm', '--version'], 'native-cc': ['cc', '--version'],
+    'native-ld': ['ld', '--version']}
+FIXTURES = ('certificate.der', 'key.der', 'untrusted.der')
+PORT = '[1-9][0-9]{0,4}'
+SELF = '<self>/main'
+INSTALLED = '<installed-tree>/consumers/{}/target/release/bin'
+REBUILT_DIR = 'rebuilt-installed-tree/consumers/{}'
+REBUILT = REBUILT_DIR + '/target/release/bin'
+
+
+def command_contract(name: str) -> tuple[tuple[str, str], list[str]]:
+    """The one invocation shape that can produce each recorded native scenario."""
+    if name in FIXED_COMMANDS:
+        return ('exact', '<evidence>'), FIXED_COMMANDS[name]
+    for stage, template, match in (('same-binary', INSTALLED, 'exact'), ('rebuilt', REBUILT, 'endswith')):
+        suffix = name.removeprefix(stage + '-')
+        if name.startswith(stage + '-') and suffix in consumers.APP_NAMES:
+            argv = [SELF, 'self-check', *(f'<support>/fixtures/{item}' for item in FIXTURES)]
+            if suffix == 'cli':
+                argv.append(PORT)
+            return (match, template.format(suffix)), argv
+    for stage in ('clean', 'build'):
+        app = name.removeprefix(stage + '-')
+        if name.startswith(stage + '-') and app in consumers.APP_NAMES:
+            return ('endswith', REBUILT_DIR.format(app)), ['<sdk>/tools/bin/cjpm', stage]
+    raise ValueError('native command has no declared contract: ' + name)
+
+
+def matches(actual, expected, cwd: str) -> bool:
+    if expected == SELF:
+        return actual == cwd + '/main'
+    if expected == PORT:
+        return isinstance(actual, str) and re.fullmatch(PORT, actual) is not None
+    return actual == expected
+
+
+def verify_command_contract(command: dict) -> None:
+    (match, cwd), argv = command_contract(command['id'])
+    actual_cwd = command.get('cwd')
+    conformant = isinstance(actual_cwd, str) and (actual_cwd == cwd if match == 'exact'
+        else actual_cwd.endswith(cwd))
+    require(conformant, 'native command working directory changed: ' + command['id'])
+    recorded = command.get('argv')
+    require(isinstance(recorded, list) and len(recorded) == len(argv)
+        and all(matches(value, shape, actual_cwd) for value, shape in zip(recorded, argv)),
+        'native command shape changed: ' + command['id'])
 
 
 def observed_platform(report: dict, evidence: Path) -> dict:
@@ -100,9 +165,11 @@ def verify_commands(report: dict, evidence: Path) -> None:
         + ' extra=' + repr(sorted(set(ids) - COMMAND_IDS)))
     for command in report['commands']:
         require(command['exit_code'] == 0 and not command['timed_out'], 'native command failed: ' + command['id'])
+        verify_command_contract(command)
         for stream in ('stdout', 'stderr'):
             item = command[stream]
-            require(text_evidence_digest(evidence / item['path']).to_json() == item['digest'],
+            path = evidence_log(command, evidence, stream)
+            require(text_evidence_digest(path).to_json() == item['digest'],
                 'native raw log changed: ' + command['id'])
 
 

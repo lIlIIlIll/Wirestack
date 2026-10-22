@@ -1,31 +1,5 @@
-test_ca_check_without_its_native_failure_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_ca_check_without_its_native_failure_is_rejected) ... ok
-test_changed_retained_log_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_changed_retained_log_is_rejected) ... ok
-test_complete_inventory_is_accepted (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_complete_inventory_is_accepted) ... ok
-test_duplicated_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_duplicated_command_is_rejected) ... ok
-test_omitted_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_omitted_command_is_rejected) ... ok
-test_reclassified_ca_expectation_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_reclassified_ca_expectation_is_rejected) ... ok
-test_timed_out_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_timed_out_command_is_rejected) ... ok
-test_changed_consumer_source_digest_is_rejected (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_changed_consumer_source_digest_is_rejected) ... ok
-test_complete_recorded_inventory_is_accepted (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_complete_recorded_inventory_is_accepted) ... ok
-test_inventory_contains_every_app_file_and_sdk_fixture (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_inventory_contains_every_app_file_and_sdk_fixture) ... ok
-test_missing_or_extra_consumer_source_is_rejected (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_missing_or_extra_consumer_source_is_rejected) ... ok
-test_changed_helper_is_rejected (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_changed_helper_is_rejected) ... ok
-test_every_imported_helper_is_bound (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_every_imported_helper_is_bound) ... ok
-test_missing_helper_is_rejected (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_missing_helper_is_rejected) ... ok
-test_unbound_helper_report_is_rejected (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_unbound_helper_report_is_rejected) ... ok
-test_missing_compiler_is_reported_instead_of_fabricated (tools.tests.test_m12_002_source_sdk.NativeCompilerTests.test_missing_compiler_is_reported_instead_of_fabricated) ... ok
-test_present_compiler_resolves_to_an_executable (tools.tests.test_m12_002_source_sdk.NativeCompilerTests.test_present_compiler_resolves_to_an_executable) ... ok
-test_added_consumer_source_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_added_consumer_source_is_rejected) ... ok
-test_changed_build_options_are_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_build_options_are_rejected) ... ok
-test_changed_capture_runner_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_capture_runner_is_rejected) ... ok
-test_changed_consumer_source_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_consumer_source_is_rejected) ... ok
-test_changed_native_compiler_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_native_compiler_is_rejected) ... ok
-test_matching_retained_inputs_are_accepted (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_matching_retained_inputs_are_accepted) ... ok
-test_unbound_native_compiler_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_unbound_native_compiler_is_rejected) ... ok
-test_retained_binary_must_still_match (tools.tests.test_m12_002_source_sdk.RetainedBinaryTests.test_retained_binary_must_still_match) ... ok
-setUpClass (tools.tests.test_m12_002_source_sdk.SourceSdkEvidenceTests) ... skipped 'Set WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT to real captured evidence'
-
+.................................................................
 ----------------------------------------------------------------------
-Ran 25 tests in 0.096s
+Ran 65 tests in 4.909s
 
-OK (skipped=1)
+OK

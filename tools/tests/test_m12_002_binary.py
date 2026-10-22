@@ -6,9 +6,10 @@ import subprocess
 import tempfile
 import unittest
 from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
-from tools.m12_002_binary import (dynamic_fields, scan_fields, validate_abi_matrix,
-    verify_consumers, verify_scan_verdicts, versions, CONSUMER_APPS, CONSUMER_PROFILES,
-    OPTIONAL_MODULES, consumer_identity)
+from tools.m12_002_binary import (CONSUMER_APPS, CONSUMER_PROFILES, OPTIONAL_MODULES,
+    TRUNCATED_ISA, consumer_identity, dynamic_fields, gating_command_ids, isa_presence,
+    scan_fields, validate_abi_matrix, verify_abi_matrix, verify_command_inventory,
+    verify_consumers, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
 
 
 @unittest.skipUnless(shutil.which('gcc') and shutil.which('readelf'), 'native ELF tools required')
@@ -113,6 +114,137 @@ class AbiMatrixCoordinateTests(unittest.TestCase):
             validate_abi_matrix(rows, 2)
 
 
+class AbiCellTypeTests(unittest.TestCase):
+    @staticmethod
+    def row(built, runtime):
+        return {'built_sdk': built, 'runtime_sdk': runtime, 'abi_result': 'PASS',
+                'semantic_result': 'PASS'}
+
+    def test_boolean_cell_cannot_pose_as_an_sdk_index(self):
+        rows = [self.row(0, 0), self.row(0, 1), self.row(True, 0), self.row(1, 1)]
+        with self.assertRaisesRegex(ValueError, 'ABI matrix cell is not an SDK index'):
+            validate_abi_matrix(rows, 2)
+
+    def test_missing_coordinate_is_rejected(self):
+        rows = [self.row(0, 0), self.row(0, 1), self.row(1, 0), {'built_sdk': 1}]
+        with self.assertRaisesRegex(ValueError, 'ABI matrix cell is not an SDK index'):
+            validate_abi_matrix(rows, 2)
+
+
+def behavior_text():
+    """A successful same-process probe transcript, matching the real probe vocabulary."""
+    checks = ''.join(f'CHECK {name} PASS\n' for name in sorted(CHECKS))
+    return (checks
+        + 'IDENTITY wirestack aws-lc 5.5.0 0123abcd\n'
+        + 'IDENTITY independent_tls OpenSSL 3.0 isolation=deepbind libc=shared '
+          'verified_peer=example.test bytes=8\n'
+        + 'BOUNDARY symbols SSL_connect global=0x1 isolated=0x2 owners_distinct=1 '
+          'independent_owner=/opt/libssl.so\n'
+        + 'BOUNDARY unisolated_openssl UNSUPPORTED resolved_identity=AWS-LC\n'
+        + 'BOUNDARY crypto OpenSSL_version global=0x1 independent=0x2 owners_distinct=1 '
+          'independent_owner=/opt/libcrypto.so\n'
+        + 'BOUNDARY libc pthread_getspecific global=0x1 independent=0x1 owner_shared=1 '
+          'pthread_create_shared=1 pthread_key_create_shared=1\n')
+
+
+class AbiEvidenceBindingTests(unittest.TestCase):
+    """A matrix row may only attest the run recorded under its own command ID."""
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-abi-tests-')
+        self.root = Path(self.directory.name)
+        (self.root / 'docs/evidence/M12-002/binary').mkdir(parents=True)
+        self.runtime = '/sdk/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so'
+        self.binaries = []
+        for index in range(2):
+            binary = self.root / f'coexist-{index}'
+            binary.write_bytes(f'coexist-{index}'.encode())
+            self.binaries.append(binary)
+        self.report = {'commands': [], 'abi_matrix': [], 'scans': {}}
+        for index, binary in enumerate(self.binaries):
+            self.report['scans'][f'coexist-{index}'] = {
+                'path': str(binary), 'digest': artifact_byte_digest(binary).to_json()}
+        for built in range(2):
+            for runtime in range(2):
+                self.cell(built, runtime)
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def log(self, name, stream, text):
+        path = self.root / f'docs/evidence/M12-002/binary/{name}.{stream}.log'
+        path.write_text(text)
+        return {'path': str(path.relative_to(self.root)), 'digest': text_evidence_digest(path).to_json()}
+
+    def cell(self, built, runtime):
+        name = f'abi-{built}-to-{runtime}'
+        loading = f'calling init: {self.runtime}\n'
+        self.report['commands'].append({'id': name, 'argv': ['wrap', name], 'cwd': '/work',
+            'exit_code': 0, 'timed_out': False,
+            'stdout': self.log(name, 'stdout', behavior_text()),
+            'stderr': self.log(name, 'stderr', loading)})
+        self.report['abi_matrix'].append({'built_sdk': built, 'runtime_sdk': runtime,
+            'binary_digest': self.report['scans'][f'coexist-{built}']['digest'],
+            'command': name, 'abi_result': 'PASS', 'semantic_result': 'PASS',
+            'runtime_loaded_library': self.runtime,
+            'runtime_loading_proof': self.report['commands'][-1]['stderr']})
+
+    def test_bound_evidence_is_accepted(self):
+        verify_abi_matrix(self.report, self.root)
+
+    def test_row_cannot_claim_another_cell_command(self):
+        self.report['abi_matrix'][0]['command'] = 'abi-1-to-1'
+        self.report['abi_matrix'][3]['command'] = 'abi-0-to-0'
+        with self.assertRaisesRegex(ValueError, 'ABI row is not bound to its own command: abi-1-to-1'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_two_rows_cannot_share_one_command(self):
+        self.report['abi_matrix'][1]['command'] = 'abi-0-to-0'
+        with self.assertRaisesRegex(ValueError, 'ABI matrix rows do not name distinct commands'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_missing_cell_command_is_rejected(self):
+        self.report['commands'] = [c for c in self.report['commands'] if c['id'] != 'abi-1-to-0']
+        with self.assertRaisesRegex(ValueError, 'ABI command inventory does not match the recorded matrix'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_behavior_is_rederived_from_the_retained_stdout(self):
+        path = self.root / self.report['commands'][0]['stdout']['path']
+        path.write_text(path.read_text().replace('CHECK wirestack_verified_tls PASS\n', ''))
+        self.report['commands'][0]['stdout']['digest'] = text_evidence_digest(path).to_json()
+        with self.assertRaisesRegex(ValueError, 'same-process behavior checks missing or duplicated'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_substituted_loading_proof_is_rejected(self):
+        self.report['abi_matrix'][1]['runtime_loading_proof'] = self.report['commands'][0]['stderr']
+        with self.assertRaisesRegex(ValueError, 'ABI row loading proof is not its own command log'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_claimed_runtime_must_appear_in_the_loader_trace(self):
+        self.report['abi_matrix'][2]['runtime_loaded_library'] = '/other/libcangjie-runtime.so'
+        with self.assertRaisesRegex(ValueError, 'ABI row did not load its recorded runtime'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_failed_cell_command_is_rejected(self):
+        self.report['commands'][0]['exit_code'] = 1
+        with self.assertRaisesRegex(ValueError, 'ABI qualification command did not succeed: abi-0-to-0'):
+            verify_abi_matrix(self.report, self.root)
+
+    def test_row_must_execute_its_own_built_binary(self):
+        self.report['scans']['coexist-0']['digest'] = self.report['scans']['coexist-1']['digest']
+        with self.assertRaisesRegex(ValueError, 'ABI row executed a binary other than its built artifact'):
+            verify_abi_matrix(self.report, self.root)
+
+
+class TruncatedDisassemblyTests(unittest.TestCase):
+    def test_truncated_disassembly_cannot_claim_mnemonic_counts(self):
+        self.assertEqual(isa_presence(TRUNCATED + 'abc\n'), TRUNCATED_ISA)
+
+    def test_complete_disassembly_counts_mnemonics(self):
+        self.assertEqual(isa_presence('  401000:\tvmovdqa %xmm0,%xmm1\n  401004:\taesenc %xmm0,%xmm1\n')
+                         ['avx_mnemonics'], 1)
+
+
 class ConsumerDeclarationTests(unittest.TestCase):
     def test_every_declared_profile_and_app_parses(self):
         for profile in CONSUMER_PROFILES:
@@ -149,11 +281,11 @@ class ConsumerEvidenceTests(unittest.TestCase):
                                                  'digest': artifact_byte_digest(path).to_json()}
                  for index, (_, _, path) in enumerate(consumers)}
         archives = {}
-        for index, (_, _, path) in enumerate(consumers):
+        for profile, app, path in consumers:
             for module in OPTIONAL_MODULES:
-                archive = path.with_name(f'{module}.a')
+                archive = path.with_name(f'{profile}-{app}-{module}.a')
                 archive.write_bytes(module.encode())
-                label = f'optional-consumer-{index}-{module}'
+                label = f'optional-{profile}-{app}-{module}'
                 archives[label] = str(archive)
                 scans[label] = {'path': str(archive), 'digest': artifact_byte_digest(archive).to_json()}
         return {'consumers': {profile + '/' + app: str(path)
@@ -176,6 +308,25 @@ class ConsumerEvidenceTests(unittest.TestCase):
         report = self.report(self.consumers)
         report['consumers'].pop('stable-native/cli')
         with self.assertRaisesRegex(ValueError, 'installed consumer inventory changed'):
+            verify_consumers(report, self.consumers, {})
+
+    def test_misbound_optional_archive_identity_is_rejected(self):
+        report = self.report(self.consumers)
+        renamed = {}
+        for label, path in report['compiled_optional_modules'].items():
+            profile = 'candidate-native' if label.startswith('optional-stable-native') else 'stable-native'
+            replacement = label.replace(label.split('-')[1], profile, 1)
+            renamed[replacement] = path
+            report['scans'][replacement] = report['scans'].pop(label)
+        report['compiled_optional_modules'] = renamed
+        with self.assertRaisesRegex(ValueError, 'compiled optional archive inventory is incomplete'):
+            verify_consumers(report, self.consumers, {})
+
+    def test_optional_archive_bytes_must_match_their_identity(self):
+        report = self.report(self.consumers)
+        label = 'optional-stable-native/cli-gzip'.replace('/', '-')
+        Path(report['compiled_optional_modules'][label]).write_bytes(b'substituted')
+        with self.assertRaisesRegex(ValueError, 'compiled optional archive changed: ' + label):
             verify_consumers(report, self.consumers, {})
 
     def test_missing_declared_optional_archive_is_rejected(self):
@@ -227,15 +378,14 @@ class ScanVerdictTests(unittest.TestCase):
             log = self.root / f'docs/evidence/M12-002/binary/{label}-{suffix}.stdout.log'
             log.write_text(result.stdout)
             self.report['commands'].append({'id': f'{label}-{suffix}', 'exit_code': result.returncode,
-                'timed_out': False,
+                'timed_out': False, 'argv': [*argv, str(path)], 'cwd': str(self.root),
                 'stdout': {'path': str(log.relative_to(self.root)), 'digest': text_evidence_digest(log).to_json()},
                 'stderr': {'path': str(log.relative_to(self.root)), 'digest': text_evidence_digest(log).to_json()}})
             output[suffix] = result.stdout
-        counts = {'avx_mnemonics': 0, 'aes_mnemonics': 0, 'pclmul_mnemonics': 0}
         return {'path': str(path), 'digest': artifact_byte_digest(path).to_json(),
                 'symbol_inventory_command': label + '-symbols',
                 **scan_fields(output['headers'], output['dynamic'], output['versions'],
-                    output['notes'], output['symbols'], counts)}
+                    output['notes'], output['symbols'], isa_presence(output['disassembly']))}
 
     def test_real_scanner_output_satisfies_the_recorded_verdicts(self):
         verify_scan_verdicts(self.report, self.root)

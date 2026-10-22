@@ -29,6 +29,7 @@ CONSUMER_PROFILES = ('stable-native', 'candidate-native')
 CONSUMER_APPS = ('cli', 'decoded', 'streams', 'service', 'trust')
 OPTIONAL_MODULES = ('gzip', 'sse', 'observability')
 TRUNCATED = 'Complete disassembly retained in private scratch; raw output binding: '
+TRUNCATED_ISA = 'UNAVAILABLE_TRUNCATED_DISASSEMBLY'
 
 
 def sdk_files(sdk: Path) -> list[Path]:
@@ -92,6 +93,11 @@ def validate_abi_matrix(rows: list[dict], sdk_count: int) -> None:
     """Reject an incomplete qualification matrix or any failed cross-SDK/runtime cell."""
     if len(rows) != sdk_count * sdk_count:
         raise ValueError('ABI matrix is incomplete')
+    for row in rows:
+        for field in ('built_sdk', 'runtime_sdk'):
+            # JSON booleans are ints in Python; an SDK index is a real integer or nothing.
+            if type(row.get(field)) is not int:
+                raise ValueError('ABI matrix cell is not an SDK index: ' + field)
     coordinates = [(row['built_sdk'], row['runtime_sdk']) for row in rows]
     expected = {(built, runtime) for built in range(sdk_count) for runtime in range(sdk_count)}
     if len(set(coordinates)) != len(coordinates) or set(coordinates) != expected:
@@ -102,8 +108,23 @@ def validate_abi_matrix(rows: list[dict], sdk_count: int) -> None:
                 + ' runtime_sdk=' + str(row['runtime_sdk']))
 
 
+def isa_presence(disassembly: str) -> dict | str:
+    """ISA mnemonics are only observable from a complete disassembly that is still retained."""
+    if TRUNCATED in disassembly:
+        return TRUNCATED_ISA
+    counts = {'avx_mnemonics': 0, 'aes_mnemonics': 0, 'pclmul_mnemonics': 0}
+    for line in disassembly.splitlines():
+        match = re.match(r'\s*[0-9a-f]+:\s+(\w+)', line)
+        if match:
+            op = match[1]
+            counts['avx_mnemonics'] += int(op.startswith('v') and op not in ('verr', 'verw'))
+            counts['aes_mnemonics'] += int('aes' in op)
+            counts['pclmul_mnemonics'] += int('pclmul' in op)
+    return counts
+
+
 def scan_fields(header: str, dynamic: str, symbol_versions: str, notes: str, symbols: str,
-                isa_counts: dict) -> dict:
+                isa_counts: dict | str) -> dict:
     """The single derivation of every ELF verdict, shared by capture and verification."""
     return {'machines': sorted(set(re.findall(r'Machine:\s+(.+)', header))),
             'elf_class': sorted(set(re.findall(r'Class:\s+(\S+)', header))),
@@ -118,6 +139,23 @@ def scan_fields(header: str, dynamic: str, symbol_versions: str, notes: str, sym
                 re.findall(r'\b(?:SSL|OPENSSL|CRYPTO|EVP|X509)_[A-Za-z0-9_]+\b', symbols)))}
 
 
+SCAN_SUFFIXES = ('headers', 'dynamic', 'versions', 'notes', 'symbols', 'disassembly')
+SCAN_ARGV = {'headers': ['readelf', '-hW'], 'dynamic': ['readelf', '-dW'],
+             'versions': ['readelf', '-VW'], 'notes': ['readelf', '-nW'],
+             'symbols': ['nm', '-g', '--defined-only'],
+             'disassembly': ['objdump', '-d', '--no-show-raw-insn']}
+TOOL_PROGRAMS = ('gcc', 'g++', 'ar', 'as', 'ld', 'readelf', 'objdump', 'nm', 'openssl')
+
+
+def evidence_path(entry: dict, root: Path, command_id: str) -> Path:
+    """Resolve a retained log beneath the evidence root; a report may not read elsewhere."""
+    relative = entry.get('path')
+    if not isinstance(relative, str) or not relative or Path(relative).is_absolute() \
+            or '..' in Path(relative).parts:
+        raise ValueError('command evidence path escapes its evidence tree: ' + command_id)
+    return root / relative
+
+
 def bound_command(report: dict, command_id: str, root: Path = ROOT) -> tuple[dict, dict]:
     matches = [command for command in report['commands'] if command['id'] == command_id]
     if len(matches) != 1:
@@ -126,11 +164,42 @@ def bound_command(report: dict, command_id: str, root: Path = ROOT) -> tuple[dic
     text = {}
     for stream in ('stdout', 'stderr'):
         entry = command[stream]
-        path = root / entry['path']
+        path = evidence_path(entry, root, command_id)
+        if not path.is_file():
+            raise ValueError('command evidence is missing: ' + command_id)
         if not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(path).to_json()):
             raise ValueError('scan diagnostic log changed: ' + command_id)
         text[stream] = path.read_text()
     return command, text
+
+
+def gating_command_ids(report: dict, sdk_count: int) -> set[str]:
+    """Everything a PASS verdict stands on, derived from the declared inputs and scans."""
+    ids = {'tool-' + name.replace('+', 'p') for name in TOOL_PROGRAMS}
+    ids |= {'backend-' + program for program in ('cc1', 'cc1plus')}
+    ids |= {'boundary-tests', 'certificate', 'certificate-der', 'key-der', 'external-tls-closure'}
+    for index in range(sdk_count):
+        ids |= {f'fixture-{index}-compile', f'fixture-{index}-archive',
+                f'sdk-{index}-compiler-version', f'sdk-{index}-cjpm-version',
+                f'coexist-{index}-build', f'closure-{index}-compiler',
+                f'closure-{index}-runtime', f'closure-{index}-coexist'}
+        ids |= {f'abi-{index}-to-{runtime}' for runtime in range(sdk_count)}
+    bases = [scan['symbol_inventory_command'].removesuffix('-symbols') for scan in report['scans'].values()]
+    if len(set(bases)) != len(bases):
+        raise ValueError('scanner command bases are not unique')
+    ids |= {base + '-' + suffix for base in bases for suffix in SCAN_SUFFIXES}
+    return ids
+
+
+def verify_command_inventory(report: dict, sdk_count: int) -> None:
+    """Every gating step is recorded exactly once, and nothing unexplainable is recorded."""
+    ids = [command['id'] for command in report['commands']]
+    if len(ids) != len(set(ids)):
+        raise ValueError('native command inventory contains duplicates')
+    expected = gating_command_ids(report, sdk_count)
+    if set(ids) != expected:
+        raise ValueError('native command inventory is incomplete; missing='
+            + repr(sorted(expected - set(ids))) + ' extra=' + repr(sorted(set(ids) - expected)))
 
 
 def verify_scan_verdicts(report: dict, root: Path = ROOT) -> None:
@@ -138,33 +207,23 @@ def verify_scan_verdicts(report: dict, root: Path = ROOT) -> None:
     for name, scan in report['scans'].items():
         base = scan['symbol_inventory_command'].removesuffix('-symbols')
         chain = {}
-        for suffix in ('headers', 'dynamic', 'versions', 'notes', 'symbols', 'disassembly'):
+        for suffix in SCAN_SUFFIXES:
             command, text = bound_command(report, base + '-' + suffix, root)
+            # The recorded invocation must be the scanner on the very input the verdict describes.
+            if command.get('argv') != [*SCAN_ARGV[suffix], scan['path']]:
+                raise ValueError('scan command does not scan its recorded input: ' + base + '-' + suffix)
             if command.get('timed_out'):
                 raise ValueError('scan diagnostic timed out: ' + name + '-' + suffix)
             allowed = (0, 1) if suffix == 'symbols' else (0,)
             if command['exit_code'] not in allowed:
                 raise ValueError('scan command did not complete: ' + name + '-' + suffix)
             chain[suffix] = text
-        disassembly = chain['disassembly']['stdout']
-        truncated = TRUNCATED in disassembly
-        counted = scan['raw_isa_presence']
-        if not truncated:
-            counted = {'avx_mnemonics': 0, 'aes_mnemonics': 0, 'pclmul_mnemonics': 0}
-            for line in disassembly.splitlines():
-                match = re.match(r'\s*[0-9a-f]+:\s+(\w+)', line)
-                if match:
-                    op = match[1]
-                    counted['avx_mnemonics'] += int(op.startswith('v') and op not in ('verr', 'verw'))
-                    counted['aes_mnemonics'] += int('aes' in op)
-                    counted['pclmul_mnemonics'] += int('pclmul' in op)
-        else:
-            if not isinstance(counted, dict) or set(counted) != {'avx_mnemonics', 'aes_mnemonics', 'pclmul_mnemonics'}:
-                raise ValueError('scan records a malformed ISA observation: ' + name)
-            if any(not isinstance(value, int) or value < 0 for value in counted.values()):
-                raise ValueError('scan records a malformed ISA observation: ' + name)
+        # A truncated disassembly cannot prove its own mnemonic counts; only a complete one can.
+        counted = isa_presence(chain['disassembly']['stdout'])
         expected = scan_fields(chain['headers']['stdout'], chain['dynamic']['stdout'],
             chain['versions']['stdout'], chain['notes']['stdout'], chain['symbols']['stdout'], counted)
+        if scan.get('raw_isa_presence') != counted:
+            raise ValueError('scan ISA observation is not backed by a complete disassembly: ' + name)
         for field, value in expected.items():
             if scan.get(field) != value:
                 raise ValueError('scan verdict differs from its captured output: ' + name + '/' + field)
@@ -253,15 +312,7 @@ class Capture:
         notes = self.run(label+'-notes', ['readelf', '-nW', str(path)])
         symbols = self.run(label+'-symbols', ['nm', '-g', '--defined-only', str(path)], allow_failure=True)
         self.run(label+'-disassembly', ['objdump', '-d', '--no-show-raw-insn', str(path)])
-        isa_counts = {'avx_mnemonics': 0, 'aes_mnemonics': 0, 'pclmul_mnemonics': 0}
-        with (self.work / f'{self.prefix}{label}-disassembly.stdout.raw').open() as stream:
-            for line in stream:
-                match = re.match(r'\s*[0-9a-f]+:\s+(\w+)', line)
-                if match:
-                    op = match[1]
-                    isa_counts['avx_mnemonics'] += int(op.startswith('v') and op not in ('verr', 'verw'))
-                    isa_counts['aes_mnemonics'] += int('aes' in op)
-                    isa_counts['pclmul_mnemonics'] += int('pclmul' in op)
+        isa_counts = isa_presence((self.work / f'{self.prefix}{label}-disassembly.stdout.raw').read_text(errors='replace'))
         return {'path': self.normalize(str(path)), 'digest': digest,
                 'scanner': scanner_digest(), **scan_fields(header, dynamic, symbol_versions,
                     notes, symbols, isa_counts),
@@ -300,7 +351,8 @@ def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
         if not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(path.resolve()).to_json()):
             raise ValueError('installed consumer changed: ' + profile + '/' + app)
     archives = report.get('compiled_optional_modules', {})
-    expected_archives = {f'optional-consumer-{index}-{module}' for index in range(len(consumers))
+    # Archive labels carry the consumer identity, so a reordered capture cannot pass by position.
+    expected_archives = {f'optional-{profile}-{app}-{module}' for profile, app, _ in consumers
         for module in OPTIONAL_MODULES}
     if set(archives) != expected_archives:
         raise ValueError('compiled optional archive inventory is incomplete')
@@ -313,6 +365,32 @@ def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
         scan = report['scans'].get(label)
         if scan is None or not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(Path(resolved)).to_json()):
             raise ValueError('compiled optional archive changed: ' + label)
+
+
+def verify_abi_matrix(report: dict, root: Path = ROOT) -> None:
+    """Each cross-SDK row is bound to one command whose retained output proves the cell ran."""
+    rows = {row['command']: row for row in report['abi_matrix']}
+    if len(rows) != len(report['abi_matrix']):
+        raise ValueError('ABI matrix rows do not name distinct commands')
+    recorded = [command['id'] for command in report['commands'] if command['id'].startswith('abi-')]
+    if len(recorded) != len(set(recorded)) or set(recorded) != set(rows):
+        raise ValueError('ABI command inventory does not match the recorded matrix')
+    for command_id, row in rows.items():
+        if command_id != f'abi-{row["built_sdk"]}-to-{row["runtime_sdk"]}':
+            raise ValueError('ABI row is not bound to its own command: ' + command_id)
+        command, text = bound_command(report, command_id, root)
+        if command['exit_code'] != 0 or command.get('timed_out'):
+            raise ValueError('ABI qualification command did not succeed: ' + command_id)
+        # The behavior proof is re-derived from the retained stdout, never from the verdict field.
+        validate_behavior(text['stdout'])
+        if row.get('runtime_loading_proof') != command['stderr']:
+            raise ValueError('ABI row loading proof is not its own command log: ' + command_id)
+        library = row.get('runtime_loaded_library')
+        if not library or library not in re.findall(r'calling init:\s+(\S+)', text['stderr']):
+            raise ValueError('ABI row did not load its recorded runtime: ' + command_id)
+        built = report['scans'].get('coexist-' + str(row['built_sdk']))
+        if built is None or not artifact_byte_sha256_equal(row['binary_digest'], built['digest']):
+            raise ValueError('ABI row executed a binary other than its built artifact: ' + command_id)
 
 
 def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: Path,
@@ -362,10 +440,12 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
             raise ValueError('scanned binary/archive/library changed; recapture required')
         if not text_evidence_sha256_equal(scan.get('scanner', {}), scanner_digest()):
             raise ValueError('scan verdicts predate the current scanner; recapture required')
+    verify_command_inventory(report, len(sdks))
     for record in report['commands']:
         for key in ('stdout', 'stderr'):
-            path = ROOT / record[key]['path']
-            if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(path).to_json()):
+            path = evidence_path(record[key], ROOT, record['id'])
+            if not path.is_file() or not text_evidence_sha256_equal(
+                    record[key]['digest'], text_evidence_digest(path).to_json()):
                 raise ValueError('diagnostic log changed')
         if record.get('timed_out'):
             raise ValueError('gating command timed out: ' + record['id'])
@@ -373,6 +453,7 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
         if not expected_failure and record['exit_code'] != 0:
             raise ValueError('gating command failed: ' + record['id'])
     verify_scan_verdicts(report)
+    verify_abi_matrix(report)
     verify_consumers(report, list(consumers), replacements)
 
 
@@ -551,13 +632,13 @@ def main() -> int:
         for i, (profile, app, binary) in enumerate(installed_consumers):
             report['scans'][f'installed-consumer-{i}'] = capture.scan(f'installed-consumer-{i}', binary.resolve())
         report['compiled_optional_modules'] = {}
-        for i, (profile, app, binary) in enumerate(installed_consumers):
+        for profile, app, binary in installed_consumers:
             module_root = binary.resolve().parent.parent / 'wirestack'
-            for module in ('gzip', 'sse', 'observability'):
+            for module in OPTIONAL_MODULES:
                 archive = module_root / f'libwirestack.{module}.a'
                 if not archive.is_file():
                     raise ValueError(f'compiled optional module missing: {archive}')
-                label = f'optional-consumer-{i}-{module}'
+                label = f'optional-{profile}-{app}-{module}'
                 report['scans'][label] = capture.scan(label, archive)
                 report['compiled_optional_modules'][label] = capture.normalize(str(archive))
         report['sdk_upstream_build_flags'] = 'UNKNOWN: SDK compiler version and ELF notes do not bind upstream build flags'

@@ -7,10 +7,11 @@ import shutil
 import tempfile
 import unittest
 
-from tools.m12_002_source_sdk import (EXPECTED_COMMANDS, HELPER_SOURCES, ROOT,
-    consumer_source_digests, helper_sources, native_compiler, validate_resume,
-    verify_command_inventory, verify_consumer_sources, verify_helper_sources,
-    verify_report, verify_retained_binary, verify_retained_commands)
+from tools.m12_002_source_sdk import (CA_CHECKS, CA_DIAGNOSTICS, COMMAND_CONTRACTS,
+    EXPECTED_COMMANDS, HELPER_SOURCES, PORT, ROOT, TLS_FIXTURE_FILES, consumer_source_digests, helper_sources,
+    native_compiler, validate_resume, verify_ca_checks, verify_command_inventory,
+    verify_consumer_sources, verify_helper_sources, verify_report, verify_retained_binary,
+    verify_retained_commands, verify_tls_fixtures)
 from tools.evidence_digest import (artifact_byte_digest, artifact_byte_digest_bytes,
     text_evidence_digest)
 
@@ -23,10 +24,16 @@ def artifact_digest(seed):
     return {'domain': 'artifact-bytes-v1', 'sha256': seed * 64}
 
 
+def fixture_digests():
+    return {name: artifact_digest(format(index, 'x')) for index, name in enumerate(TLS_FIXTURE_FILES)}
+
+
 class ResumeDriftTests(unittest.TestCase):
     def report(self):
         return {'runner_digest': text_digest('a'),
                 'native_cc_digest': artifact_digest('d'),
+                'helper_sources': {name: text_digest('e') for name in HELPER_SOURCES},
+                'tls_fixtures': fixture_digests(),
                 'build_options': {'environment': {'CFLAGS': '', 'CXXFLAGS': '', 'LDFLAGS': '', 'CJC_FLAGS': ''}},
                 'consumer_sources': {'examples/linux/m11_004/cli/src/main.cj': text_digest('b')}}
 
@@ -67,12 +74,65 @@ class ResumeDriftTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'consumer sources'):
             validate_resume(previous, current)
 
+    def test_changed_helper_closure_is_rejected(self):
+        previous = self.report()
+        current = self.report()
+        current['helper_sources']['tools/evidence_digest.py'] = text_digest('c')
+        with self.assertRaisesRegex(ValueError, 'changed evidence helper closure'):
+            validate_resume(previous, current)
+
+    def test_unbound_helper_closure_cannot_resume(self):
+        previous = self.report()
+        del previous['helper_sources']
+        with self.assertRaisesRegex(ValueError, 'changed evidence helper closure'):
+            validate_resume(previous, self.report())
+
+    def test_changed_tls_fixture_is_rejected(self):
+        previous = self.report()
+        current = self.report()
+        current['tls_fixtures']['certificate.der'] = artifact_digest('8')
+        with self.assertRaisesRegex(ValueError, 'changed retained TLS fixture material'):
+            validate_resume(previous, current)
+
+    def test_unbound_tls_fixture_cannot_resume(self):
+        previous = self.report()
+        del previous['tls_fixtures']
+        with self.assertRaisesRegex(ValueError, 'changed retained TLS fixture material'):
+            validate_resume(previous, self.report())
+
     def test_added_consumer_source_is_rejected(self):
         previous = self.report()
         current = self.report()
         current['consumer_sources']['examples/linux/m11_004/decoded/src/main.cj'] = text_digest('c')
         with self.assertRaisesRegex(ValueError, 'consumer sources'):
             validate_resume(previous, current)
+
+
+class TlsFixtureBindingTests(unittest.TestCase):
+    def test_complete_fixture_inventory_is_accepted(self):
+        verify_tls_fixtures({'tls_fixtures': fixture_digests()})
+
+    def test_missing_fixture_is_rejected(self):
+        recorded = fixture_digests()
+        del recorded['key.der']
+        with self.assertRaisesRegex(ValueError, 'TLS fixture inventory is incomplete'):
+            verify_tls_fixtures({'tls_fixtures': recorded})
+
+    def test_unbound_fixture_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'TLS fixture inventory is incomplete'):
+            verify_tls_fixtures({})
+
+    def test_one_file_cannot_stand_in_for_every_fixture(self):
+        recorded = fixture_digests()
+        recorded['untrusted.der'] = recorded['certificate.der']
+        with self.assertRaisesRegex(ValueError, 'TLS fixtures are not distinct'):
+            verify_tls_fixtures({'tls_fixtures': recorded})
+
+    def test_fixture_must_carry_a_byte_digest(self):
+        recorded = fixture_digests()
+        recorded['certificate.pem'] = text_digest('c')
+        with self.assertRaisesRegex(ValueError, 'not byte-bound: certificate.pem'):
+            verify_tls_fixtures({'tls_fixtures': recorded})
 
 
 class HelperBindingTests(unittest.TestCase):
@@ -100,26 +160,40 @@ class HelperBindingTests(unittest.TestCase):
             verify_helper_sources({'helper_sources': {}})
 
 
+def contract_argv(name):
+    """The declared invocation for one command, with its ephemeral port resolved."""
+    cwd, argv = COMMAND_CONTRACTS[name][0]
+    return cwd, [value.replace(PORT, '44595') for value in argv]
+
+
 class CommandInventoryTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory(prefix='m12-source-commands-')
         self.evidence = Path(self.directory.name)
         self.commands = []
         for name, expected in EXPECTED_COMMANDS.items():
+            cwd, argv = contract_argv(name)
             logs = {stream: self.evidence / f'{name}.{stream}.log' for stream in ('stdout', 'stderr')}
-            for stream, log in logs.items():
-                log.write_text(name + '\n' if stream == 'stdout' else '')
-            self.commands.append({'id': name, 'exit_code': expected,
+            logs['stdout'].write_text(CA_DIAGNOSTICS.get(name, name) + '\n')
+            logs['stderr'].write_text('')
+            self.commands.append({'id': name, 'argv': argv, 'cwd': cwd, 'exit_code': expected,
                 'expected_exit_code': expected, 'timed_out': False,
                 **{stream: {'path': log.name, 'digest': text_evidence_digest(log).to_json()}
                    for stream, log in logs.items()}})
+        self.report = {'commands': self.commands,
+            'ca_checks': {name: {'status': 'PASS', 'expected_exit': EXPECTED_COMMANDS[name],
+                'diagnostic': CA_DIAGNOSTICS[name]} for name in CA_CHECKS}}
 
     def tearDown(self):
         self.directory.cleanup()
 
+    def changed(self):
+        return copy.deepcopy(self.commands)
+
     def test_complete_inventory_is_accepted(self):
         verify_command_inventory(self.commands, self.evidence)
         verify_retained_commands(self.commands, self.evidence)
+        verify_ca_checks(self.report, self.evidence)
 
     def test_omitted_command_is_rejected(self):
         with self.assertRaisesRegex(ValueError, 'command inventory is incomplete'):
@@ -130,19 +204,19 @@ class CommandInventoryTests(unittest.TestCase):
             verify_command_inventory(self.commands + [self.commands[0]], self.evidence)
 
     def test_reclassified_ca_expectation_is_rejected(self):
-        changed = copy.deepcopy(self.commands)
+        changed = self.changed()
         next(c for c in changed if c['id'] == 'missing-explicit-ca')['expected_exit_code'] = 0
         with self.assertRaisesRegex(ValueError, 'command expectation reclassified: missing-explicit-ca'):
             verify_command_inventory(changed, self.evidence)
 
     def test_ca_check_without_its_native_failure_is_rejected(self):
-        changed = copy.deepcopy(self.commands)
+        changed = self.changed()
         next(c for c in changed if c['id'] == 'system-ca-missing')['exit_code'] = 0
         with self.assertRaisesRegex(ValueError, 'command did not satisfy its native outcome: system-ca-missing'):
             verify_command_inventory(changed, self.evidence)
 
     def test_timed_out_command_is_rejected(self):
-        changed = copy.deepcopy(self.commands)
+        changed = self.changed()
         changed[0]['timed_out'] = True
         with self.assertRaisesRegex(ValueError, 'command timed out: cjc'):
             verify_command_inventory(changed, self.evidence)
@@ -153,6 +227,114 @@ class CommandInventoryTests(unittest.TestCase):
             verify_command_inventory(self.commands, self.evidence)
         with self.assertRaisesRegex(ValueError, 'retained command log changed: cjc'):
             verify_retained_commands(self.commands, self.evidence)
+
+
+class CommandContractTests(CommandInventoryTests):
+    """A verdict is bound to the invocation it claims, not merely to a command identifier."""
+
+    def test_every_declared_command_has_a_contract(self):
+        self.assertEqual(set(COMMAND_CONTRACTS), set(EXPECTED_COMMANDS))
+
+    def test_relocated_consumer_must_not_run_from_the_hidden_tree(self):
+        changed = self.changed()
+        command = next(c for c in changed if c['id'] == 'cli-acceptance')
+        command['cwd'] = '<scratch>/original/consumers/cli'
+        with self.assertRaisesRegex(ValueError, 'command shape changed: cli-acceptance'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_negated_trust_scenario_must_pass_its_own_ca_file(self):
+        changed = self.changed()
+        command = next(c for c in changed if c['id'] == 'incorrect-explicit-ca')
+        command['argv'][-1] = '<scratch>/certificate.der'
+        with self.assertRaisesRegex(ValueError, 'command shape changed: incorrect-explicit-ca'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_system_ca_scenario_must_mount_its_own_store(self):
+        changed = self.changed()
+        argv = next(c for c in changed if c['id'] == 'system-ca-missing')['argv']
+        start = argv.index('--tmpfs', argv.index('/etc/ssl') - 1)
+        argv[start:start + 4] = ['--tmpfs', '/etc/ssl', '--ro-bind', '<scratch>/certificate.pem',
+            '/etc/ssl/certs/ca-certificates.crt', '--dir', '/etc/ssl/certs']
+        with self.assertRaisesRegex(ValueError, 'command shape changed: system-ca-missing'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_hidden_probe_must_hide_the_checkout(self):
+        changed = self.changed()
+        next(c for c in changed if c['id'] == 'checkout-hidden')['argv'].remove('--tmpfs')
+        with self.assertRaisesRegex(ValueError, 'command shape changed: checkout-hidden'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_missing_invocation_is_rejected(self):
+        changed = self.changed()
+        del next(c for c in changed if c['id'] == 'cli-help')['argv']
+        with self.assertRaisesRegex(ValueError, 'command shape changed: cli-help'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_evidence_path_outside_the_tree_is_rejected(self):
+        changed = self.changed()
+        next(c for c in changed if c['id'] == 'cjc')['stdout']['path'] = '../../etc/passwd'
+        with self.assertRaisesRegex(ValueError, 'command evidence path escapes its evidence tree: cjc'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_absolute_evidence_path_is_rejected(self):
+        changed = self.changed()
+        next(c for c in changed if c['id'] == 'cjc')['stdout']['path'] = '/etc/hostname'
+        with self.assertRaisesRegex(ValueError, 'command evidence path escapes its evidence tree: cjc'):
+            verify_command_inventory(changed, self.evidence)
+
+
+class CaDiagnosticTests(CommandInventoryTests):
+    """A negative CA scenario is only evidence while its own output still proves the refusal."""
+
+    def rewrite(self, name, text):
+        log = self.evidence / f'{name}.stdout.log'
+        log.write_text(text)
+        entry = next(c for c in self.commands if c['id'] == name)['stdout']
+        entry['digest'] = text_evidence_digest(log).to_json()
+
+    def test_wrong_negative_diagnostic_is_rejected(self):
+        for name, diagnostic in (('missing-explicit-ca', 'ERROR trust_unavailable'),
+                                 ('incorrect-explicit-ca', 'ERROR ca_file_missing'),
+                                 ('system-ca-missing', 'ERROR ca_file_missing')):
+            with self.subTest(name=name):
+                original = (self.evidence / f'{name}.stdout.log').read_text()
+                self.rewrite(name, diagnostic + '\n')
+                with self.assertRaisesRegex(ValueError, 'CA scenario output does not match its diagnostic: ' + name):
+                    verify_ca_checks(self.report, self.evidence)
+                self.rewrite(name, original)
+
+    def test_success_scenario_that_merely_exits_zero_is_rejected(self):
+        self.rewrite('system-ca-installed', 'ERROR certificate_untrusted phase=tls_handshake\n')
+        with self.assertRaisesRegex(ValueError, 'CA scenario output does not match its diagnostic: system-ca-installed'):
+            verify_ca_checks(self.report, self.evidence)
+
+    def test_diagnostic_on_stderr_is_rejected(self):
+        entry = next(c for c in self.commands if c['id'] == 'explicit-ca')['stderr']
+        log = self.evidence / entry['path']
+        log.write_text('ERROR ca_file_missing\n')
+        entry['digest'] = text_evidence_digest(log).to_json()
+        with self.assertRaisesRegex(ValueError, 'CA scenario reported diagnostics on stderr: explicit-ca'):
+            verify_ca_checks(self.report, self.evidence)
+
+    def test_reclassified_ca_claim_is_rejected(self):
+        report = copy.deepcopy(self.report)
+        report['ca_checks']['system-ca-missing']['diagnostic'] = 'ERROR ca_file_missing'
+        with self.assertRaisesRegex(ValueError, 'CA scenario diagnostic changed: system-ca-missing'):
+            verify_ca_checks(report, self.evidence)
+        report = copy.deepcopy(self.report)
+        report['ca_checks']['system-ca-missing']['expected_exit'] = 0
+        with self.assertRaisesRegex(ValueError, 'CA scenario expectation changed: system-ca-missing'):
+            verify_ca_checks(report, self.evidence)
+
+    def test_incomplete_or_failed_ca_inventory_is_rejected(self):
+        report = copy.deepcopy(self.report)
+        del report['ca_checks']['missing-explicit-ca']
+        with self.assertRaisesRegex(ValueError, 'CA evidence inventory is incomplete'):
+            verify_ca_checks(report, self.evidence)
+        report = copy.deepcopy(self.report)
+        report['ca_checks']['explicit-ca']['status'] = 'FAIL'
+        with self.assertRaisesRegex(ValueError, 'CA scenario is not recorded as passed: explicit-ca'):
+            verify_ca_checks(report, self.evidence)
 
 
 class RetainedBinaryTests(unittest.TestCase):
@@ -226,30 +408,41 @@ class SourceSdkEvidenceTests(unittest.TestCase):
             raise unittest.SkipTest('Set WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT to real captured evidence')
         cls.path = Path(report)
         cls.sdk = Path(sdk).resolve()
-        cls.archive = ROOT / 'docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz'
         cls.report = json.loads(cls.path.read_text())
+        # The binding under test is the SDK one, so supply any real file whose digest the report
+        # carries; the captured archive itself is not retained in a source checkout.
+        cls.directory = tempfile.TemporaryDirectory(prefix='m12-source-archive-')
+        cls.addClassCleanup(cls.directory.cleanup)
+        cls.archive = Path(cls.directory.name) / 'wirestack-baseline.tar.gz'
+        cls.archive.write_bytes(b'synthetic archive standing in for the accepted release')
+        cls.archive_digest = artifact_byte_digest(cls.archive).to_json()
+
+    def candidate(self):
+        changed = copy.deepcopy(self.report)
+        changed['archive_digest'] = self.archive_digest
+        return changed
 
     def test_changed_archive_cannot_reuse_report(self):
-        changed = copy.deepcopy(self.report)
+        changed = self.candidate()
         changed['archive_digest'] = artifact_byte_digest_bytes(b'different artifact').to_json()
         with self.assertRaisesRegex(ValueError, 'archive binding changed'):
             verify_report(changed, self.archive, self.sdk, self.path.parent)
 
     def test_new_compiler_cannot_reuse_report(self):
-        changed = copy.deepcopy(self.report)
+        changed = self.candidate()
         changed['sdk_files']['bin/cjc'] = artifact_byte_digest_bytes(b'different compiler').to_json()
         with self.assertRaisesRegex(ValueError, 'SDK compiler/runtime/import binding changed'):
             verify_report(changed, self.archive, self.sdk, self.path.parent)
 
     def test_new_runtime_cannot_reuse_report(self):
-        changed = copy.deepcopy(self.report)
+        changed = self.candidate()
         runtime = next(k for k in changed['sdk_files'] if k.endswith('libcangjie-runtime.so'))
         changed['sdk_files'][runtime] = artifact_byte_digest_bytes(b'different runtime').to_json()
         with self.assertRaisesRegex(ValueError, 'SDK compiler/runtime/import binding changed'):
             verify_report(changed, self.archive, self.sdk, self.path.parent)
 
     def test_build_success_is_not_binary_cross_sdk_support(self):
-        changed = copy.deepcopy(self.report)
+        changed = self.candidate()
         changed['binary_cross_sdk'] = 'PASS'
         with self.assertRaisesRegex(ValueError, 'source-only compatibility proof'):
             verify_report(changed, self.archive, self.sdk, self.path.parent)
