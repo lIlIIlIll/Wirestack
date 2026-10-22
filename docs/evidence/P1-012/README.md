@@ -115,8 +115,9 @@ task report and plan validation are retained in
 Repository-wide readiness is BLOCKED because M10-004 depends on incomplete
 M10-003. A separate draft change (PR #230) records M10-004 as BLOCKED instead
 of COMPLETE and claims no acceptance; that correction resolves the misleading
-status record but does not complete M10-003. `validate-tasks` and global fast/full checks return INVALID (exit 2)
-before selecting or executing commands; `verify-evidence --all` returns FAIL
+status record but does not complete M10-003. `validate-tasks` and global
+fast/full checks return INVALID (exit 2) before selecting or executing
+commands; `verify-evidence --all` returns FAIL
 (exit 1) on the same dependency. The reports are linked from
 [`global-readiness.json`](global-readiness.json). P1-012 remains BLOCKED; no
 current PASS evidence seal is claimed. The active
