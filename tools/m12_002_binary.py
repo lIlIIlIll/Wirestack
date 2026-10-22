@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from tools.evidence_digest import (artifact_byte_digest, text_evidence_digest,
-    artifact_byte_sha256_equal, text_evidence_sha256_equal)
+    artifact_byte_sha256_equal, schema_text_sha256_equal, text_evidence_sha256_equal)
 from tools import m7_021_linux_release as release
 
 CHECKS = {'independent_cangjie_native', 'wirestack_verified_tls',
@@ -319,6 +319,25 @@ class Capture:
                 'symbol_inventory_command': self.prefix+label+'-symbols'}
 
 
+def install_selected_archive(archive: Path, work: Path) -> Path:
+    """Install the selected archive, never letting a previous attempt's tree stand in for it."""
+    installed = work / 'wirestack'
+    for stale in (work / 'install', installed):
+        if stale.is_symlink() or stale.is_file():
+            stale.unlink()
+        elif stale.exists():
+            shutil.rmtree(stale)
+    release.extract_archive(archive.resolve(), work / 'install').rename(installed)
+    return installed
+
+
+def bind_installed_payload(report: dict, archive: Path) -> None:
+    """The report's installed payload is the selected archive's own payload, not a prior one."""
+    _, manifest = release.read_verified_payload(archive)
+    if not schema_text_sha256_equal(report.get('payload_sha256'), manifest['payload_sha256']):
+        raise ValueError('installed payload is not the selected archive; recapture required')
+
+
 def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
                      replacements: dict) -> None:
     """Require the complete profile/app identity set and its compiled optional archives."""
@@ -400,6 +419,7 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
     validate_abi_matrix(report['abi_matrix'], len(sdks))
     if not artifact_byte_sha256_equal(report['archive_digest'], artifact_byte_digest(archive).to_json()):
         raise ValueError('archive changed; recapture required')
+    bind_installed_payload(report, archive)
     current = {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json() for p in fixture.rglob('*')
                if p.is_file() and p.suffix in ('.cj', '.c', '.toml')}
     current['tools/m12_002_binary.py'] = text_evidence_digest(Path(__file__)).to_json()
@@ -540,9 +560,7 @@ def main() -> int:
             report['native_tool_inputs'][capture.normalize(str(backend))] = artifact_byte_digest(backend).to_json()
             report['native_compiler_backends'][program] = capture.normalize(str(backend))
         capture.run('boundary-tests', [sys.executable, '-m', 'unittest', 'tools.tests.test_m12_002_binary'], ROOT)
-        extracted = release.extract_archive(args.archive.resolve(), work / 'install')
-        installed = work / 'wirestack'
-        if not installed.exists(): extracted.rename(installed)
+        installed = install_selected_archive(args.archive, work)
         production = {str(p.relative_to(installed)): text_evidence_digest(p).to_json() for p in release.production_sources(installed)}
         if production.keys() != report['production_inputs'].keys() or any(not text_evidence_sha256_equal(production[k], report['production_inputs'][k]) for k in production):
             raise ValueError('selected archive source differs from current production inputs')

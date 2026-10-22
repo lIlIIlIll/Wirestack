@@ -1,15 +1,17 @@
 """Behavioral ELF checks use real linked objects, not fabricated readelf output."""
+import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import unittest
+from tools import m7_021_linux_release as release
 from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
 from tools.m12_002_binary import (CONSUMER_APPS, CONSUMER_PROFILES, OPTIONAL_MODULES,
-    TRUNCATED_ISA, consumer_identity, dynamic_fields, gating_command_ids, isa_presence,
-    scan_fields, validate_abi_matrix, verify_abi_matrix, verify_command_inventory,
-    verify_consumers, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
+    TRUNCATED_ISA, bind_installed_payload, consumer_identity, dynamic_fields, gating_command_ids,
+    install_selected_archive, isa_presence, scan_fields, validate_abi_matrix, verify_abi_matrix,
+    verify_command_inventory, verify_consumers, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
 
 
 @unittest.skipUnless(shutil.which('gcc') and shutil.which('readelf'), 'native ELF tools required')
@@ -423,6 +425,58 @@ class ScanVerdictTests(unittest.TestCase):
         self.report['scans']['linked'] = self.scan('linked', binary)
         with self.assertRaisesRegex(ValueError, 'absolute loader path: linked'):
             verify_scan_verdicts(self.report, self.root)
+
+
+class RepeatedCaptureInstallationTests(unittest.TestCase):
+    """A repeated capture scans the archive it selected, not the previous attempt's tree."""
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-install-tests-')
+        self.work = Path(self.directory.name)
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def archive(self, name: str, marker: str) -> Path:
+        files = {'src/wirestack/probe.cj': f'package wirestack.probe\n// {marker}\n'.encode()}
+        entries = [{'path': path, 'bytes': len(data), 'sha256': release.artifact_payload_sha256(data)}
+                   for path, data in sorted(files.items())]
+        fingerprint = release.evidence_digest.text_evidence_bytes_sha256(release.canonical_json(entries))
+        manifest = {'schema_version': 2, 'package': 'wirestack', 'version': release.VERSION,
+                    'payload': entries, 'payload_sha256': fingerprint,
+                    'artifactBuildFingerprint': fingerprint}
+        payload = {**files, 'release-manifest.json': release.canonical_json(manifest)}
+        path = self.work / name
+        release.write_reproducible_archive(path, payload)
+        return path
+
+    def test_second_capture_replaces_the_previous_installation(self):
+        first = self.archive('first.tar.gz', 'first')
+        second = self.archive('second.tar.gz', 'second')
+        installed = install_selected_archive(first, self.work)
+        self.assertIn('first', (installed / 'src/wirestack/probe.cj').read_text())
+        self.assertEqual(install_selected_archive(second, self.work), installed)
+        self.assertIn('second', (installed / 'src/wirestack/probe.cj').read_text())
+        _, manifest = release.read_verified_payload(second)
+        self.assertEqual(json.loads((installed / 'release-manifest.json').read_text())['payload_sha256'],
+                         manifest['payload_sha256'])
+
+    def test_leftover_installation_cannot_survive_a_new_capture(self):
+        archive = self.archive('selected.tar.gz', 'selected')
+        stale = self.work / 'wirestack'
+        (stale / 'src').mkdir(parents=True)
+        (stale / 'src/stale.cj').write_text('package wirestack.stale\n')
+        installed = install_selected_archive(archive, self.work)
+        self.assertFalse((installed / 'src/stale.cj').exists())
+        self.assertIn('selected', (installed / 'src/wirestack/probe.cj').read_text())
+
+    def test_report_payload_must_be_the_selected_archive(self):
+        first = self.archive('first.tar.gz', 'first')
+        second = self.archive('second.tar.gz', 'second')
+        _, manifest = release.read_verified_payload(first)
+        bind_installed_payload({'payload_sha256': manifest['payload_sha256']}, first)
+        with self.assertRaisesRegex(ValueError, 'installed payload is not the selected archive'):
+            bind_installed_payload({'payload_sha256': manifest['payload_sha256']}, second)
 
 
 if __name__ == '__main__':

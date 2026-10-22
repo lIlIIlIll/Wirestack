@@ -41,7 +41,8 @@
         "scan_fields is the single derivation shared by capture and verification, so every ELF, loader, version and ISA verdict is recomputed from the bound scanner output",
         "scanner_digest binds the scanner implementation, and helper_sources binds the imported helpers",
         "verify_consumers requires exactly stable-native and candidate-native for cli, decoded, streams, service and trust with the ten compiled optional archives",
-        "--consumer takes a strict <profile>/<app>=<path> identity and is required for every declared coordinate"
+        "--consumer takes a strict <profile>/<app>=<path> identity and is required for every declared coordinate",
+        "install_selected_archive replaces any previous attempt's work/install and work/wirestack and returns the tree it extracted, and verify rebinds the reported payload to the selected archive, so a repeated capture cannot scan or validate a stale installation"
       ]
     },
     "D3": {
@@ -63,12 +64,12 @@
   "observed_acceptance": {
     "python3 -m unittest tools.tests.test_m12_002_source_sdk tools.tests.test_m12_002_binary tools.tests.test_m12_002_platform": {
       "exit_code": 0,
-      "result": "Ran 132 tests in 1.392s, OK (skipped=1) on the committed head; SourceSdkEvidenceTests skips without WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT",
+      "result": "Ran 135 tests in 1.551s, OK (skipped=1) on this revision; SourceSdkEvidenceTests skips without WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT",
       "log": "docs/evidence/M12-002/review-remediation/unit-tests.log"
     },
     "WIRESTACK_SOURCE_SDK_REPORT/WIRESTACK_SOURCE_SDK_ROOT python3 -m unittest tools.tests.test_m12_002_source_sdk": {
       "exit_code": 0,
-      "result": "Ran 65 tests in 4.628s, OK on the committed head against the retained stable-native report and the installed sts 1.1.3 tree",
+      "result": "Ran 65 tests in 5.154s, OK on this revision against the retained stable-native report and the installed sts 1.1.3 tree",
       "log": "docs/evidence/M12-002/review-remediation/source-sdk-tests.log"
     },
     "python3 tools/architecture_guard.py --root . --format text": {
@@ -85,7 +86,7 @@
     "python3 tools/m12_002_deployment.py contracts": {
       "exit_code": 0,
       "without_sdk_environment": "ValueError: WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify",
-      "with_sdk_environment": "exit 0: Ran 136 tests in 5.609s, OK when WIRESTACK_STABLE_SDK_ROOT and WIRESTACK_CANDIDATE_SDK_ROOT both select the installed sts 1.1.3 tree",
+      "with_sdk_environment": "exit 0: Ran 139 tests in 8.049s, OK when WIRESTACK_STABLE_SDK_ROOT and WIRESTACK_CANDIDATE_SDK_ROOT both select the installed sts 1.1.3 tree",
       "logs": {
         "without_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-no-env.log",
         "with_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-with-env.log"
@@ -143,7 +144,14 @@
     "target": "docs/evidence/M12-002/review-remediation/verifier-defects-on-baseline.log",
     "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
     "observed": "On the unmodified baseline every D1/D2/D3 guard is absent: no scan_fields or verify_consumers, a duplicate ABI coordinate is accepted, no scanner/helper binding in the binary report, no verify_helper_sources or command-inventory gate, and no transferred_sources in the platform report.",
-    "green": "The same checks raise on the hardened verifiers: tools/tests/test_m12_002_source_sdk.py, tools/tests/test_m12_002_binary.py and tools/tests/test_m12_002_platform.py assert each rejection and pass in this revision."
+    "green": "The same checks raise on the hardened verifiers: tools/tests/test_m12_002_source_sdk.py, tools/tests/test_m12_002_binary.py and tools/tests/test_m12_002_platform.py assert each rejection and pass in this revision.",
+    "repeated_capture": {
+      "target": "docs/evidence/M12-002/review-remediation/repeated-capture.log",
+      "finding": "https://github.com/lIlIIlIll/Wirestack/pull/209#issuecomment-6256888222",
+      "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+      "observed": "The baseline lines keep an existing work/wirestack, so after a first capture a second selected archive is extracted but the previous tree stays installed: the reproduction reports scanned source marker=first and a STALE installed manifest against the second archive.",
+      "green": "install_selected_archive removes the previous tree and installs the selected archive, and verify refuses a report whose payload_sha256 is not the selected archive's; the same reproduction reports marker=second and PASS, and RepeatedCaptureInstallationTests asserts both rejections."
+    }
   },
   "gate": {
     "command": "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/task-gate.json",
