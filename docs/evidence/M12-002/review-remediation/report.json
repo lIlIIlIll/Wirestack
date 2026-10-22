@@ -103,7 +103,7 @@
       "exit_code": 2,
       "result": "exit 2: {\"status\": \"INVALID\", \"issues\": [{\"code\": \"DEPENDENCY_INCOMPLETE\", \"detail\": \"M10-004 dependency is not COMPLETE: M10-003\"}]}",
       "log": "docs/evidence/M12-002/review-remediation/task-gate.log",
-      "note": "The gate refuses to start because the task-scope dependency closure is still global; that is P1-012, not an M12-002 verdict. Recorded as observed, not weakened.",
+      "note": "The gate refuses to start because the repository-wide dependency closure includes an unfinished unrelated task. That scope defect belongs to P1-012; the refusal is recorded as observed and is not an M12-002 verdict.",
       "output": "docs/evidence/M12-002/review-remediation/task-gate.json"
     }
   },
@@ -134,13 +134,23 @@
     "tools/m12_002_source_sdk.py capture for either profile",
     "tools/m12_002_binary.py capture and --verify",
     "tools/m12_002_platform.py capture and --verify",
-    "tools/m12_002_deployment.py collect",
-    "scripts/check-task M12-002"
+    "tools/m12_002_deployment.py collect"
   ],
   "red_green": {
     "target": "docs/evidence/M12-002/review-remediation/verifier-defects-on-baseline.log",
     "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
     "observed": "On the unmodified baseline every D1/D2/D3 guard is absent: no scan_fields or verify_consumers, a duplicate ABI coordinate is accepted, no scanner/helper binding in the binary report, no verify_helper_sources or command-inventory gate, and no transferred_sources in the platform report.",
     "green": "The same checks raise on the hardened verifiers: tools/tests/test_m12_002_source_sdk.py, tools/tests/test_m12_002_binary.py and tools/tests/test_m12_002_platform.py assert each rejection and pass in this revision."
+  },
+  "gate": {
+    "command": "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/task-gate.json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "reason": "DEPENDENCY_INCOMPLETE: M10-004 dependency is not COMPLETE: M10-003",
+    "owner": "P1-012 restricts dependency-status checks to the requested task closure; until that fix lands the gate refuses every task whose repository-wide closure includes an unfinished unrelated task.",
+    "evidence": [
+      "docs/evidence/M12-002/review-remediation/task-gate.log",
+      "docs/evidence/M12-002/review-remediation/task-gate.json"
+    ]
   }
 }
