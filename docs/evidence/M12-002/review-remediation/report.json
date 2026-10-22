@@ -15,7 +15,9 @@
       "finding": "source capture/resume trusted an incomplete record",
       "paths": [
         "tools/m12_002_source_sdk.py",
-        "tools/tests/test_m12_002_source_sdk.py"
+        "tools/tests/test_m12_002_source_sdk.py",
+        "tools/m12_002_deployment.py",
+        "tools/tests/test_m12_002_deployment.py"
       ],
       "changes": [
         "sdk_binding also binds tools/lib, so the compiler, runtime and import/tool closure is complete",
@@ -35,7 +37,9 @@
       "finding": "binary matrix and scan inputs did not form a complete evidence chain",
       "paths": [
         "tools/m12_002_binary.py",
-        "tools/tests/test_m12_002_binary.py"
+        "tools/tests/test_m12_002_binary.py",
+        "tools/m12_002_deployment.py",
+        "tools/tests/test_m12_002_deployment.py"
       ],
       "changes": [
         "validate_abi_matrix requires the complete built/runtime Cartesian product exactly once in addition to passing cells",
