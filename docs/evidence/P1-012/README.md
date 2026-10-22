@@ -86,7 +86,9 @@ Dependency IDs must exist in the backlog and status, and all manifests must
 form an acyclic graph. `validate-tasks`, `check-fast`, `check-full`, and
 `verify-evidence --all` are repository-wide gates: any incomplete declared
 dependency makes them fail before acceptance commands or evidence are
-processed. An optional task ID does not narrow a global fast/full check.
+processed. An optional task ID does not narrow a global fast/full check: the
+ID is still validated, so an unknown ID returns `TASK_MISSING`, but dependency
+completeness stays repository-wide.
 
 A task-specific `check-task`, `check-long`, or `verify-evidence TASK` checks
 only that task's transitive dependency closure; unrelated blocked tasks do not
@@ -106,11 +108,18 @@ invalidate the selected task. Structural manifest validation remains global.
 
 ## Evidence boundary
 
-The current `scripts/check-task P1-012 --json` passes: the plan has 18 paths,
-17 scenarios, and 15 tests; all 44 repository-tooling tests pass. The exact
+The current `scripts/check-task P1-012 --json` passes: the plan has 19 paths,
+18 scenarios, and 16 tests; all 45 repository-tooling tests pass. The exact
 task report and plan validation are retained in
 [`task-check.json`](task-check.json) and
 [`test-plan-validation.json`](test-plan-validation.json).
+
+Direct CLI receipts verify both global modes: `fast` and `full` reject unknown
+`BOGUS-999` with `TASK_MISSING`, while known `P1-012` still encounters the
+repository-wide `M10-004 -> M10-003` dependency blocker. Each exits 2 before
+acceptance commands; see [fast](unknown-fast-cli.json),
+[full](unknown-full-cli.json), [known fast](known-fast-global-cli.json), and
+[known full](known-full-global-cli.json).
 
 Repository-wide readiness is BLOCKED because M10-004 depends on incomplete
 M10-003. A separate draft change (PR #230) records M10-004 as BLOCKED instead
@@ -134,17 +143,18 @@ A selected `verify-evidence P1-012` also returns FAIL with
 separates the two revisions it cites. `historical_after_c1d908a5` records the
 values that `c1d908a5d1f3a53f8b6e038cc0eacd2bb1e9e50a` produced: 39
 repository-tooling tests and a plan of 17 paths, 13 scenarios, 11 tests.
-`final_revision` records the refreshed head values: 44 tests and 18/17/15.
+`final_revision` records the refreshed head values: 45 tests and 19/18/16.
 Only the latter matches the retained [`task-check.json`](task-check.json) and
 [`test-plan-validation.json`](test-plan-validation.json).
 
-The M12-003 after-receipt [`m12-003-after.json`](m12-003-after.json) is
-historical: at that revision 47 fault-contract tests passed with one
-environment-gated skip, while its source-bound evidence verifier failed on
-drift in `tools/gates/m12_003_resources.py`. On the current tree the selected
+No M12-003 execution receipt is retained on this branch. The only M12-003
+record here is the closure rejection: on the current tree the selected
 M12-003 closure reaches BLOCKED P1-012 through P1-013, so
-[`m12-003-current.json`](m12-003-current.json) returns INVALID with
-`P1-013 dependency is not COMPLETE: P1-012`; M12-003 remains BLOCKED. The
+[`m12-003-current.json`](m12-003-current.json) is the `--output` capture of
+`check task M12-003 --json` returning INVALID with
+`P1-013 dependency is not COMPLETE: P1-012` and zero commands. M12-003
+remains BLOCKED, and no test count or source-drift verdict is claimed from
+this branch. The
 deliberately blocked M10-004 selection in
 [`blocked-dependency-smoke.json`](blocked-dependency-smoke.json) rejects its own
 incomplete M10-003 dependency.
@@ -158,9 +168,15 @@ earlier `M10-003` edge. Reclassifying those rows belongs to their own tasks;
 this branch changes only P1-012.
 
 [`historical/validate-tasks-c1d908a5.json`](historical/validate-tasks-c1d908a5.json)
-is the byte-exact `validate-tasks` PASS from `c1d908a5`, before the M10-004
-status correction. It is retained as history and referenced by no acceptance
-command; see [`historical/README.md`](historical/README.md).
+is the byte-exact `validate-tasks` PASS from `c1d908a5`. It cannot be
+reproduced at head because that earlier revision recorded `P1-012 COMPLETE`
+while this branch records it BLOCKED; `M10-004` is COMPLETE at `c1d908a5`, at
+`origin/main`, and at head, so it is not the cause. At head the global
+validator rejects seven edges, and completing `M10-003` alone leaves three
+(`M11-004 -> M11-001`, `P1-013 -> P1-012`, `P1-014 -> P1-012`) until every
+depended-upon row is COMPLETE. It is retained as history and referenced by no
+acceptance command; see [`historical/README.md`](historical/README.md), which
+also covers the relocated historical `test-results` and `freshness` receipts.
 
 [`full-check.json`](full-check.json) is the unchanged historical 2026-09-01 PASS receipt.
 [`full-check-pre-strict-global-readiness.json`](full-check-pre-strict-global-readiness.json)

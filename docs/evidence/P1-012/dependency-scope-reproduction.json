@@ -17,6 +17,7 @@
       "code": "DEPENDENCY_INCOMPLETE",
       "detail": "P1-013 dependency is not COMPLETE: P1-012"
     },
+    "note": "The report at the recorded path is produced by this exact command. No other M12-003 receipt is retained on this branch: an earlier M12-003 execution record was synthesized rather than captured and has been removed.",
     "status": "INVALID"
   },
   "final_revision": {
@@ -26,15 +27,69 @@
     "report": "docs/evidence/P1-012/task-check.json",
     "repository_tooling_tests": {
       "status": "PASS",
-      "tests_run": 44
+      "tests_run": 45
     },
     "status": "PASS",
     "test_plan": {
-      "paths": 18,
-      "scenarios": 17,
+      "paths": 19,
+      "scenarios": 18,
       "status": "PASS",
-      "tests": 15
+      "tests": 16
     }
+  },
+  "explicit_task_id_cli": {
+    "checks": [
+      {
+        "command": "python3 tools/repository/repository_tooling.py --root . check fast BOGUS-999 --json --output docs/evidence/P1-012/unknown-fast-cli.json",
+        "exit_status": 2,
+        "issue": {
+          "code": "TASK_MISSING",
+          "detail": "task manifest is missing: BOGUS-999"
+        },
+        "mode": "fast",
+        "report": "docs/evidence/P1-012/unknown-fast-cli.json",
+        "status": "INVALID",
+        "task_id": null
+      },
+      {
+        "command": "python3 tools/repository/repository_tooling.py --root . check full BOGUS-999 --json --output docs/evidence/P1-012/unknown-full-cli.json",
+        "exit_status": 2,
+        "issue": {
+          "code": "TASK_MISSING",
+          "detail": "task manifest is missing: BOGUS-999"
+        },
+        "mode": "full",
+        "report": "docs/evidence/P1-012/unknown-full-cli.json",
+        "status": "INVALID",
+        "task_id": null
+      },
+      {
+        "command": "python3 tools/repository/repository_tooling.py --root . check fast P1-012 --json --output docs/evidence/P1-012/known-fast-global-cli.json",
+        "exit_status": 2,
+        "issue": {
+          "code": "DEPENDENCY_INCOMPLETE",
+          "detail": "M10-004 dependency is not COMPLETE: M10-003"
+        },
+        "mode": "fast",
+        "report": "docs/evidence/P1-012/known-fast-global-cli.json",
+        "status": "INVALID",
+        "task_id": null
+      },
+      {
+        "command": "python3 tools/repository/repository_tooling.py --root . check full P1-012 --json --output docs/evidence/P1-012/known-full-global-cli.json",
+        "exit_status": 2,
+        "issue": {
+          "code": "DEPENDENCY_INCOMPLETE",
+          "detail": "M10-004 dependency is not COMPLETE: M10-003"
+        },
+        "mode": "full",
+        "report": "docs/evidence/P1-012/known-full-global-cli.json",
+        "status": "INVALID",
+        "task_id": null
+      }
+    ],
+    "interpretation": "An unknown explicit ID is rejected as TASK_MISSING; a known explicit ID leaves repository-wide dependency checking strict. No acceptance command ran.",
+    "schema_version": 1
   },
   "finding": "PR #212 review comment: M12-003 was rejected by an unrelated M10-004 dependency",
   "historical_after_c1d908a5": {
@@ -55,14 +110,6 @@
     }
   },
   "kind": "dependency-scope-regression",
-  "requested_task_execution": {
-    "command": "scripts/check-task M12-003 --json --output docs/evidence/P1-012/m12-003-after.json",
-    "evidence_command": "bound-native-fault-evidence",
-    "exit_status": 1,
-    "interpretation": "The unrelated dependency no longer blocks execution; current source-bound M12-003 evidence is stale, so M12-003 remains BLOCKED.",
-    "reason": "bound input changed: tools/gates/m12_003_resources.py",
-    "status": "FAIL"
-  },
   "schema_version": 1,
   "still_fail_closed": {
     "command": "scripts/check-task M10-004 --json --output docs/evidence/P1-012/blocked-dependency-smoke.json",

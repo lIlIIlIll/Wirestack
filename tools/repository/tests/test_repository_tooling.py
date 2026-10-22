@@ -211,6 +211,57 @@ class RepositoryToolingTests(unittest.TestCase):
             "SKIPPED", tooling.check(self.root, "long", "TEST-001")["status"]
         )
 
+    def test_global_check_preserves_explicit_task_id_validation(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["BASE-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+
+        repository_root = Path(__file__).resolve().parents[3]
+        script = repository_root / "tools/repository/repository_tooling.py"
+        for mode in ("fast", "full"):
+            report = tooling.check(self.root, mode, "BOGUS-999")
+            self.assertIsNone(report["task_id"])
+            self.assertEqual("INVALID", report["status"])
+            self.assertEqual([], report["commands"])
+            self.assertEqual("TASK_MISSING", report["issues"][0]["code"])
+            self.assertIn("BOGUS-999", report["issues"][0]["detail"])
+
+        cli_cases = (
+            ("fast", "BOGUS-999", "TASK_MISSING"),
+            ("full", "BOGUS-999", "TASK_MISSING"),
+            ("fast", "TEST-001", "DEPENDENCY_INCOMPLETE"),
+            ("full", "TEST-001", "DEPENDENCY_INCOMPLETE"),
+        )
+        for mode, task_id, expected_issue in cli_cases:
+            with self.subTest(mode=mode, task_id=task_id):
+                receipt = self.root / f"{mode}-{task_id.lower()}.json"
+                completed = subprocess.run(
+                    [
+                        "python3", str(script), "--root", str(self.root),
+                        "check", mode, task_id, "--json", "--output", str(receipt),
+                    ],
+                    cwd=repository_root,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=30,
+                    check=False,
+                )
+                self.assertEqual(2, completed.returncode, completed.stderr)
+                report = json.loads(receipt.read_text(encoding="utf-8"))
+                self.assertEqual(mode, report["mode"])
+                self.assertIsNone(report["task_id"])
+                self.assertEqual("INVALID", report["status"])
+                self.assertEqual([], report["commands"])
+                self.assertEqual(expected_issue, report["issues"][0]["code"])
+                expected_detail = "BOGUS-999" if expected_issue == "TASK_MISSING" else "BLOCKED-001"
+                self.assertIn(expected_detail, report["issues"][0]["detail"])
+
     def test_selected_task_rejects_incomplete_transitive_dependency(self) -> None:
         self.write_planning({
             "TEST-001": "READY",

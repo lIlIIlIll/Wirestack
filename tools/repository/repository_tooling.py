@@ -222,7 +222,8 @@ def load_tasks(root: Path) -> dict[str, dict[str, Any]]:
     return tasks
 
 
-def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[str, dict[str, Any]]:
+def validate_repository_tasks(root: Path, requested: str | None = None,
+                              *, narrow_dependencies: bool = True) -> dict[str, dict[str, Any]]:
     tasks = load_tasks(root)
     if requested is not None and requested not in tasks:
         raise ContractError("TASK_MISSING", f"task manifest is missing: {requested}")
@@ -252,7 +253,7 @@ def validate_repository_tasks(root: Path, requested: str | None = None) -> dict[
     for task_id in sorted(tasks):
         visit(task_id)
     status_scope = set(tasks)
-    if requested is not None:
+    if requested is not None and narrow_dependencies:
         status_scope = set()
         pending = [requested]
         while pending:
@@ -483,9 +484,10 @@ def run_command(root: Path, command: Mapping[str, Any], artifact_dir: Path) -> d
 
 
 def check(root: Path, mode: str, task_id: str | None = None) -> dict[str, Any]:
-    scope = task_id if mode in {"task", "long"} else None
+    narrow = mode in {"task", "long"}
+    scope = task_id if narrow else None
     try:
-        tasks = validate_repository_tasks(root, scope)
+        tasks = validate_repository_tasks(root, task_id, narrow_dependencies=narrow)
     except ContractError as error:
         return {"schema_version": 1, "kind": "repository-check", "mode": mode,
                 "task_id": scope, "status": "INVALID",

@@ -1,8 +1,8 @@
 {
   "counts": {
-    "paths": 18,
-    "scenarios": 17,
-    "tests": 15
+    "paths": 19,
+    "scenarios": 18,
+    "tests": 16
   },
   "issues": [],
   "kind": "test-plan-validation",
