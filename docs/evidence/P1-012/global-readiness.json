@@ -16,8 +16,8 @@
     {
       "counts": {
         "paths": 18,
-        "scenarios": 15,
-        "tests": 13
+        "scenarios": 17,
+        "tests": 15
       },
       "exit_code": 0,
       "id": "test-plan-validation",
@@ -25,7 +25,7 @@
       "status": "PASS"
     },
     {
-      "count": 41,
+      "count": 44,
       "exit_code": 0,
       "id": "repository-tooling-tests",
       "status": "PASS"

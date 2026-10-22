@@ -107,7 +107,7 @@ invalidate the selected task. Structural manifest validation remains global.
 ## Evidence boundary
 
 The current `scripts/check-task P1-012 --json` passes: the plan has 18 paths,
-15 scenarios, and 13 tests; all 41 repository-tooling tests pass. The exact
+17 scenarios, and 15 tests; all 44 repository-tooling tests pass. The exact
 task report and plan validation are retained in
 [`task-check.json`](task-check.json) and
 [`test-plan-validation.json`](test-plan-validation.json).
@@ -127,11 +127,18 @@ earlier PR history and is not current evidence.
 A selected `verify-evidence P1-012` also returns FAIL with
 `ACCEPTANCE_NOT_PASS`; the BLOCKED marker cannot be treated as a current seal.
 
-The M12-003 reproduction remains historical: 47 fault-contract tests passed
-with one environment-gated skip, while its source-bound evidence verifier
-failed on drift in `tools/gates/m12_003_resources.py`; M12-003 remains BLOCKED.
-The deliberately blocked M10-004 selection also rejects its incomplete
-M10-003 dependency.
+The M12-003 reproduction in
+[`dependency-scope-reproduction.json`](dependency-scope-reproduction.json) and
+[`m12-003-after.json`](m12-003-after.json) is historical: at that revision 47
+fault-contract tests passed with one environment-gated skip, while its
+source-bound evidence verifier failed on drift in
+`tools/gates/m12_003_resources.py`. On the current tree the selected M12-003
+closure reaches BLOCKED P1-012 through P1-013, so
+[`m12-003-current.json`](m12-003-current.json) returns INVALID with
+`P1-013 dependency is not COMPLETE: P1-012`; M12-003 remains BLOCKED. The
+deliberately blocked M10-004 selection in
+[`blocked-dependency-smoke.json`](blocked-dependency-smoke.json) rejects its own
+incomplete M10-003 dependency.
 
 [`full-check.json`](full-check.json) is the unchanged historical 2026-09-01 PASS receipt.
 [`full-check-pre-strict-global-readiness.json`](full-check-pre-strict-global-readiness.json)

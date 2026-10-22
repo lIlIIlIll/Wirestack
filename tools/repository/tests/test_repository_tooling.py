@@ -207,6 +207,9 @@ class RepositoryToolingTests(unittest.TestCase):
                     report["issues"][0]["code"],
                 )
                 run_command.assert_not_called()
+        self.assertEqual(
+            "SKIPPED", tooling.check(self.root, "long", "TEST-001")["status"]
+        )
 
     def test_selected_task_rejects_incomplete_transitive_dependency(self) -> None:
         self.write_planning({
@@ -220,6 +223,56 @@ class RepositoryToolingTests(unittest.TestCase):
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_repository_tasks(self.root, "TEST-001")
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_selected_task_accepts_complete_dependency_without_manifest(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "PLAN-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+
+        self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root, "TEST-001"))
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root)
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_selected_task_rejects_incomplete_plan_only_transitive_leaf(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "MID-001": "COMPLETE",
+            "LEAF-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["MID-001"]))
+        self.write_manifest(self.manifest("MID-001", ["LEAF-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        self.assertIn("LEAF-001", caught.exception.detail)
+
+    def test_selected_task_evidence_passes_while_unrelated_task_blocks_global(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+        self.evidence()
+
+        selected = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("PASS", selected["status"])
+        self.assertEqual([], selected["issues"])
+
+        global_report = tooling.verify(self.root, None)
+        self.assertEqual("FAIL", global_report["status"])
+        self.assertEqual([], global_report["tasks"])
+        self.assertEqual(
+            "DEPENDENCY_INCOMPLETE", global_report["issues"][0]["code"]
+        )
 
     def test_task_cli_executes_selected_command_with_unrelated_blocked_dependency(self) -> None:
         self.write_planning({
