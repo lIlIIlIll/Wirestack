@@ -25,9 +25,10 @@
       "status": "INVALID"
     },
     {
-      "command": "python3 tools/repository/repository_tooling.py --root . validate-tasks --json",
+      "command": "python3 tools/repository/repository_tooling.py --root . validate-tasks --json --output docs/evidence/M10-004/dependency-status-validate-tasks.json",
       "detail": "M10-004 dependency is not COMPLETE: M10-003",
       "exit_code": 2,
+      "report": "docs/evidence/M10-004/dependency-status-validate-tasks.json",
       "status": "INVALID"
     }
   ],
