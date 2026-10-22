@@ -134,6 +134,14 @@ was not supported by its own gate before this change. M7-031's row, tooling and
 evidence stay untouched here because they are outside this task's
 `allowed_paths`.
 
+Running the gate rewrites two committed reports as a side effect:
+`local-rehearsal.json` and `hosted-validation.json` are regenerated in place, so
+after a run the working tree shows those two files modified even though the
+rehearsal and hosted verdicts are unchanged in kind. Neither file is updated
+here; both keep the bytes committed on 2026-08-30, which is what the historical
+record documents. A future passing run should regenerate them deliberately
+rather than let a failing acceptance run overwrite the record.
+
 ## Gates not run
 
 - The one-hour SSE profile was not run.
