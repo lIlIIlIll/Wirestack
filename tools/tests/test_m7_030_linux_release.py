@@ -454,6 +454,109 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual("TEXT_UTF8", report["code"])
             self.assertEqual(report, json.loads(stdout.getvalue()))
 
+    def test_frozen_asset_prerequisite_rejects_missing_and_wrong_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            missing = root / release.FROZEN_ARTIFACT_NAME
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
+                release.verify_frozen_artifact(missing)
+            wrong_name = root / "wirestack-0.1.0-linux-x86_64-musl.tar.gz"
+            wrong_name.write_bytes(release.ARTIFACT.read_bytes())
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_NAME"):
+                release.verify_frozen_artifact(wrong_name)
+            sized = root / release.FROZEN_ARTIFACT_NAME
+            sized.write_bytes(release.ARTIFACT.read_bytes()[:-1])
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_SIZE"):
+                release.verify_frozen_artifact(sized)
+            original = release.ARTIFACT.read_bytes()
+            sized.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+            self.assertEqual(release.FROZEN_ARTIFACT_BYTES, sized.stat().st_size)
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DIGEST"):
+                release.verify_frozen_artifact(sized)
+            sized.write_bytes(original)
+            verified = release.verify_frozen_artifact(sized)
+            self.assertEqual("PASS", verified["decision"])
+            self.assertEqual(release.FROZEN_ARTIFACT_SHA256, verified["sha256"])
+            self.assertEqual(release.FROZEN_ARTIFACT_TAG, verified["tag"])
+
+    def test_clean_checkout_without_frozen_asset_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            absent = Path(directory) / "dist/m7-021" / release.FROZEN_ARTIFACT_NAME
+            self.assertFalse(absent.exists())
+            with unittest.mock.patch.object(release, "ARTIFACT", absent):
+                with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
+                    release.build_release_manifest(absent)
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DOWNLOAD"):
+                release.fetch_frozen_artifact(
+                    absent, runner=lambda argv: release.subprocess.CompletedProcess(
+                        argv, 1, b"", b"release not found"),
+                )
+            self.assertFalse(absent.exists())
+
+    def test_frozen_artifact_retrieval_uses_exact_asset_and_verifies_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "dist/m7-021" / release.FROZEN_ARTIFACT_NAME
+            commands: list[list[str]] = []
+
+            def good(argv):
+                commands.append(list(argv))
+                directory_argument = Path(argv[argv.index("--dir") + 1])
+                directory_argument.mkdir(parents=True, exist_ok=True)
+                (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
+                    release.ARTIFACT.read_bytes()
+                )
+                return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+
+            staged = release.fetch_frozen_artifact(target, runner=good)
+            self.assertEqual("downloaded-and-verified-frozen-artifact", staged["mode"])
+            self.assertEqual(release.FROZEN_ARTIFACT_SHA256, staged["sha256"])
+            self.assertEqual(release.ARTIFACT.read_bytes(), target.read_bytes())
+            self.assertEqual(
+                [
+                    "gh", "release", "download", release.FROZEN_ARTIFACT_TAG,
+                    "--repo", release.REPOSITORY,
+                    "--pattern", release.FROZEN_ARTIFACT_NAME, "--dir",
+                ],
+                commands[0][: len(commands[0]) - 1],
+            )
+            self.assertNotIn("--latest", commands[0])
+            again = release.fetch_frozen_artifact(target, runner=good)
+            self.assertEqual("verified-existing-artifact", again["mode"])
+            self.assertEqual(1, len(commands))
+
+            tampered = root / "second" / release.FROZEN_ARTIFACT_NAME
+
+            def beyond(argv):
+                directory_argument = Path(argv[argv.index("--dir") + 1])
+                directory_argument.mkdir(parents=True, exist_ok=True)
+                original = release.ARTIFACT.read_bytes()
+                (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
+                    original[:-1] + bytes([original[-1] ^ 1])
+                )
+                return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DIGEST"):
+                release.fetch_frozen_artifact(tampered, runner=beyond)
+            self.assertFalse(tampered.exists())
+
+            def irrelevant(argv):
+                directory_argument = Path(argv[argv.index("--dir") + 1])
+                directory_argument.mkdir(parents=True, exist_ok=True)
+                (directory_argument / "other.tar.gz").write_bytes(b"x")
+                return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
+                release.fetch_frozen_artifact(root / "third" / release.FROZEN_ARTIFACT_NAME,
+                                              runner=irrelevant)
+
+            def failed(argv):
+                return release.subprocess.CompletedProcess(argv, 1, b"", b"not found")
+
+            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DOWNLOAD"):
+                release.fetch_frozen_artifact(root / "fourth" / release.FROZEN_ARTIFACT_NAME,
+                                              runner=failed)
+
     def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             report = release.local_rehearsal(Path(directory))

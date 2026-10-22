@@ -94,6 +94,46 @@ verified subjects. `task-check.json` binds the six acceptance commands.
 `scripts/verify-evidence M7-030 --json` returns PASS with two indexed reports,
 23 source digests and no stale path.
 
+## Current acceptance state (2026-10-22)
+
+The results above are the 2026-08-30 record and are unchanged history. On the
+current tree the frozen-artifact prerequisite now runs before any manifest,
+signing or update work: `scripts/check-m7-030-release` first stages
+`frozen-artifact.json` and the rehearsal refuses the run when the asset name,
+2,499,451-byte length or `c0988f62…` SHA-256 differs, or when the pinned draft
+Release cannot supply it.
+
+Two of the six acceptance commands are red and one cannot be evaluated:
+
+| Command | Current result |
+|---|---|
+| `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
+| `signing-update-fault-injection` | PASS; `python3 -m unittest tools.tests.test_m7_030_linux_release -v`. |
+| `supply-chain-inputs` | FAIL exit 1, `generator fingerprint is stale`: recorded `42e064cf…` versus current `b7a15290…`. M11-002 (`0a3161e5`) changed `tools/m7_025_linux_supply_chain.py` after the M7-025 evidence was frozen; regenerating that bundle is M7-025 work. |
+| `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
+| `local-signing-update-rehearsal` | PASS as `REHEARSAL` with `verified-existing-artifact`, but `productionAttestation` now records `{"decision": "FAIL", "detail": "HOSTED_REPORT_SUBJECT"}` instead of the inherited historical PASS. |
+| `github-hosted-attestations` | FAIL exit 1, `HOSTED_REPORT_SUBJECT`: the committed report predates the required `signedPayloadSha256` subject field, and the workflow is retired with M8-007 as the active signer. |
+
+`scripts/check-task M7-030 --json` cannot produce a receipt: the repository-wide
+readiness check reports `DEPENDENCY_INCOMPLETE` on the unrelated
+`M10-004 → M10-003` edge until P1-012 scopes dependency validation to the
+requested task closure. M7-030's own dependencies M7-022, M7-025 and M7-029 are
+COMPLETE. On the stacked branch the scoped run does produce a receipt and
+reports `status: FAIL` with exactly the two failing commands above and
+`issues: []`.
+
+Marking this task BLOCKED also propagates to M7-031, which lists M7-030 as a
+dependency and whose `validate_dependency_status` requires
+`| M7-030 | COMPLETE |` in `docs/planning/status.md`. `scripts/check-m7-031-release`
+therefore reports `DEPENDENCY_INCOMPLETE: M7-030` and
+`python3 -m unittest tools.tests.test_m7_031_linux_candidate` raises from
+`setUpClass` (`Ran 0 tests`) where the base commit ran 15 tests OK. That gate
+already failed on the base commit with
+`DIGEST_INVALID: M7-030 artifact signed payload`, so M7-031's COMPLETE record
+was not supported by its own gate before this change. M7-031's row, tooling and
+evidence stay untouched here because they are outside this task's
+`allowed_paths`.
+
 ## Gates not run
 
 - The one-hour SSE profile was not run.
