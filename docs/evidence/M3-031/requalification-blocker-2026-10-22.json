@@ -1,0 +1,26 @@
+{
+  "checked_commit": "5550cd4a19a1bfcc527fd42a7bb7cd083e2aa42f",
+  "command": ["scripts/check-m3-031-desktop-tls-adoption"],
+  "command_exit_code": 1,
+  "generated_at_utc": "2026-10-22T09:48:12Z",
+  "hosted_run": {
+    "revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+    "run_id": 33461712135,
+    "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135"
+  },
+  "kind": "source-requalification-blocker",
+  "mismatch": {
+    "current_sha256": "bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e",
+    "hosted_sha256": "600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429",
+    "path": "tools/tls_provider_poc/providers.json"
+  },
+  "next_action": "Rerun both native Windows and macOS provider jobs at an exact revision containing the reviewed provider input; do not promote the retained historical PASS results.",
+  "observed_result": {
+    "code": "STALE_SOURCE",
+    "detail": "hosted provider inputs differ from retained run",
+    "status": "FAIL"
+  },
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "task_id": "M3-031"
+}

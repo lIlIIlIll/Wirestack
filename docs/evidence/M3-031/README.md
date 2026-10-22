@@ -2,7 +2,7 @@
 
 ## Status
 
-COMPLETE
+BLOCKED
 
 ## Scope
 
@@ -19,7 +19,10 @@ This task does not implement Windows system trust, macOS system trust, Windows
 key handles or Apple Keychain/SecKey. It does not change any mobile task or
 claim mobile device support.
 
-## Required evidence
+## Retained evidence
+
+The following files preserve the historical acceptance run and its exact
+artifacts:
 
 - `core-prerequisite-audit.json`
 - `windows-x86_64/provider-result.json`
@@ -33,42 +36,37 @@ claim mobile device support.
 - `task-check.json`
 - `evidence.json`
 
-## Acceptance result
+`hosted-run.json`, `desktop-provider-matrix.json`, `task-check.json`, and
+`evidence.json` record the historical PASS at revision
+`6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`. Their PASS fields do not establish
+current M3-031 acceptance.
 
-GitHub Actions run
+`requalification-blocker-2026-10-22.json` records the current source-bound gate
+failure.
+
+## Current status and blocker
+
+The historical GitHub Actions run
 [`33461712135`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135)
-executed both jobs at repository revision
-`6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`:
+passed both native jobs at revision
+`6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`. Windows Server 2025 x86_64 and
+macOS 15 arm64 each passed all 18 schema-v11 capabilities with AWS-LC 5.5.0.
+Those results remain valid for the provider inputs they tested.
 
-- `windows-aws-lc` passed on Windows Server 2025 x86_64, image
-  `win25-vs2026` version `20260824.214.3`.
-- `macos-aws-lc` passed on macOS 15 arm64, image `macos15` version
-  `20260727.0256.1`.
-- Both native jobs built pinned AWS-LC 5.5.0 from commit
-  `991e67ff4cf04df4dd89e407f8b920c6936cb56a`, executed the schema-v11 PoC,
-  passed all 18 capabilities, completed two external-signing handshakes,
-  proved TLS 1.2 and TLS 1.3 session resumption, and completed 10,000 cleanup
-  cycles.
-- Both binaries used vendored static provider archives and reported no system
-  TLS dependency or runtime TLS-loader string.
-- Both hosted provider license bundles are retained verbatim. Validation checks
-  the manifest digest, source identity, path confinement, file count, total
-  bytes, and every listed file digest before accepting either provider result.
-- All nine retained M3-030 reports are validated against report-specific
-  invariants. A fresh digest cannot hide a missing ABI function, changed
-  provider selection, release/SBOM mismatch, or a skipped task command.
+M0-016 advisory review PR #236 changes the current
+`tools/tls_provider_poc/providers.json` input. The historical run binds SHA-256
+`600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429`; the
+current file at the reviewed M0-016 commit binds
+`bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e`.
+ADR-0007 requires both native provider jobs to be rerun when a provider source
+input changes.
 
-The local task gate passed all four commands. The Python suites passed 108 tests.
-The focused Cangjie Core suites passed 71 tests with zero skipped, failed or
-errored cases. The complete machine-readable command report is
-[`task-check.json`](task-check.json).
-
-Run `33461712135` repeated both native jobs after the final M3-031 dependency
-status and complete desktop-acceptance contract review remediation. The
-committed hosted report binds that exact revision to the PoC source, provider
-pins, validator digests, final binary digests, artifact digests and job
-identities. Earlier schemas and pre-byte-preservation results remain listed
-only as superseded history.
+Current command `scripts/check-m3-031-desktop-tls-adoption` exits 1 with
+`STALE_SOURCE: hosted provider inputs differ from retained run`. The complete
+observed result is recorded in
+[`requalification-blocker-2026-10-22.json`](requalification-blocker-2026-10-22.json).
+No fresh Windows or macOS hosted job was launched; the retained PASS results
+are not promoted to current acceptance.
 
 ## Boundaries and remaining work
 
@@ -80,8 +78,8 @@ only as superseded history.
 - No iOS device, Android device, HarmonyOS device, one-hour profile or 86,400
   second soak was run. None is an M3-031 acceptance command.
 
-## Repository-wide gate
+## Current verification
 
-The final task report and repository check are regenerated only after all
-review-remediation commits are present. Long-duration profiles are not part of
-M3-031 and are not implicitly launched by the development gate.
+The stored `task-check.json` describes the historical run only. The current
+M3-031 task gate is blocked at hosted-input validation until both native
+provider jobs are rerun against the reviewed source revision.
