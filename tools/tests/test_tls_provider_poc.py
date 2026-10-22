@@ -6,6 +6,7 @@ import copy
 import datetime as dt
 import importlib.util
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -266,9 +267,47 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_canonical_spec_and_matrix_reject_stale_license_digests(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
-        with self.assertRaisesRegex(
-                validator.ValidationError, "provider license file digest mismatch"):
-            validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        # The committed matrix promotes no cell: every desktop cell is BLOCKED
+        # because its retained result binds a superseded security-update object.
+        self.assertEqual(
+            set(), {cell["status"] for cell in self.matrix["cells"]} & {"PASS", "PARTIAL"})
+        validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        # Promoting a superseded retained result must still fail closed, so the
+        # block is enforced by validation rather than by the matrix edit alone.
+        stale = copy.deepcopy(self.matrix)
+        cell = next(item for item in stale["cells"]
+                    if (item["provider"], item["platform"]) ==
+                    ("aws-lc", "linux-glibc-x86_64"))
+        cell.update({
+            "status": "PASS",
+            "result": "docs/evidence/M0-016/results/linux-glibc-x86_64/aws-lc.json",
+            "sha256": "95b03d7f262b99823b78a583c6fcadf813d381026a04351965fae3c251a07a50",
+            "license_bundle": {
+                "manifest": ("docs/evidence/M0-016/license-bundles/"
+                             "linux-glibc-x86_64/aws-lc/manifest.json"),
+                "sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
+            },
+        })
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "security-update disposition mismatch"):
+            validator.validate_retained_results(stale, self.spec, ROOT)
+        # A retained license payload that drifts from its manifest must still
+        # be rejected on the license digest itself.
+        result_path = ROOT / cell["result"]
+        result = json.loads(result_path.read_text())
+        source_bundle = ROOT / cell["license_bundle"]["manifest"]
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "license-bundle"
+            shutil.copytree(source_bundle.parent, bundle)
+            manifest = bundle / "manifest.json"
+            first = json.loads(manifest.read_text())["files"][0]["path"]
+            target = bundle / "files" / first
+            raw = bytearray(target.read_bytes())
+            raw[0] = ord("X") if raw[0] != ord("X") else ord("Y")
+            target.write_bytes(bytes(raw))
+            with self.assertRaisesRegex(
+                    validator.ValidationError, "provider license file digest mismatch"):
+                validator.validate_license_bundle(result_path, result, manifest)
         for provider in self.spec["providers"]:
             workflow = provider["security_update"]["update_workflow"]
             self.assertTrue((ROOT / workflow).is_file())

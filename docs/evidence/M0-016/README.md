@@ -2,11 +2,29 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
-desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl,
-Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+M0-016 is **BLOCKED** at the full cross-platform task level and no desktop cell
+is currently promotable either. The 2026-10-22 advisory review replaced every
+provider `security_update` object, so all 12 retained desktop results bind a
+superseded disposition and
+`docs/evidence/M0-016/platform-matrix.json` records them as `BLOCKED`.
+`validate_retained_results` still rejects any attempt to promote one of those
+results. A desktop cell returns to PASS or PARTIAL only by rerunning the hosted
+workflow against the requalified pin. The primary sources, per-file advisory
+section counts, review basis, and the superseded cell list are recorded in
+[`advisory-review-2026-10-22.json`](advisory-review-2026-10-22.json).
+
+The reviewed dispositions are:
+
+| Provider | Pin | Disposition | Basis |
+|---|---|---|---|
+| AWS-LC | 5.5.0 `991e67f` | `not-affected` | The patched tags `v1.69.0` (`37d8646`) and `v1.71.0` (`4738958`) are both strict ancestors of the pin; `v1.71.0...v5.5.0` is ahead 195, behind 0, so every advisory fix is contained. |
+| Mbed TLS | 4.2.0 | `affected` | `CVE-2025-66442` affects "All versions of Mbed TLS and TF-PSA-Crypto" and upstream states "No fix is available at this time". |
+| OpenSSL control | 3.6.4 | `affected` | 13 reviewed advisories have no 3.6-line fix before 3.6.5. |
+
+Android, iOS, and HarmonyOS or OpenHarmony still lack native-device evidence;
+cross-compilation does not satisfy those cells. The AWS-LC ancestry proof is
+recorded because `v5.5.0` and `v1.69.0`/`v1.71.0` are different tag schemes and
+their version numbers are not comparable directly.
 
 Schema v11 retains all prior native evidence plus the exact successful NASM
 identity for a Windows AWS-LC build. Its workflow fallback is pinned to
@@ -52,7 +70,14 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v11 desktop runs
+## Superseded schema-v11 desktop runs
+
+These runs were valid when captured. The 2026-10-22 advisory review replaced the
+provider `security_update` objects, so every result below now mismatches its pin
+and the matrix marks the corresponding cell `BLOCKED`. The `Status` column
+records the outcome observed at capture time, not a current task outcome.
+Rerunning both hosted workflows against the requalified pin is what restores a
+desktop PASS or PARTIAL.
 
 [TLS Provider PoC run
 33455645644](https://github.com/lIlIIlIll/Wirestack/actions/runs/33455645644)
@@ -111,10 +136,14 @@ repository root:
 
     python3 -m unittest tools.tests.test_tls_provider_poc
 
-Matrix validation rehashes every retained result, license manifest, and license
-file. Missing files, path escape, digest drift, unsupported schema, stale
-execution revision, skipped diagnostics presented as PASS, or incomplete
-capabilities presented as PASS all fail validation.
+Matrix validation checks the contract and every retained cell. A cell that
+still claims PASS or PARTIAL rehashes its retained result, license manifest,
+and license files, and rejects missing files, path escape, digest drift,
+unsupported schema, stale execution revision, skipped diagnostics presented as
+PASS, an incomplete capability set presented as PASS, and a retained result
+whose bound `security_update` object no longer matches the reviewed
+disposition. Because every desktop cell is currently `BLOCKED`, the retained
+results are checked only when a cell re-promotes them.
 
 ## Evidence rules
 
