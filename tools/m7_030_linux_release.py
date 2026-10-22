@@ -33,8 +33,11 @@ REPOSITORY = "lIlIIlIll/Wirestack"
 WORKFLOW = ".github/workflows/linux-release-attestation.yml"
 SIGNER_WORKFLOW_IDENTITY = f"{REPOSITORY}/{WORKFLOW}"
 ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+FROZEN_ARTIFACT_NAME = "wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
 FROZEN_ARTIFACT_TAG = "m7-030-frozen-artifact-c0988f62"
+FROZEN_ARTIFACT_BYTES = 2_499_451
 FROZEN_ARTIFACT_SHA256 = "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+FROZEN_ARTIFACT_TIMEOUT_SECONDS = 180
 SUPPLY_CHAIN = ROOT / "docs/evidence/M7-025/linux_x86_64"
 SBOM = SUPPLY_CHAIN / "sbom.spdx.json"
 PROVIDER_MANIFEST = SUPPLY_CHAIN / "provider-manifest.json"
@@ -136,6 +139,7 @@ def build_release_manifest(
     qualified_inputs: Sequence[Path] = (),
     root: Path = ROOT,
 ) -> dict[str, Any]:
+    _require_frozen_prerequisite(artifact)
     provider = load_json(supply_chain / "provider-manifest.json")
     fingerprint = load_json(supply_chain / "build-fingerprint.json")
     bundle = load_json(supply_chain / "bundle.json")
@@ -310,6 +314,72 @@ def _run(argv: Sequence[str], *, input_bytes: bytes | None = None) -> subprocess
     require(len(result.stdout) <= 1024 * 1024 and len(result.stderr) <= 1024 * 1024,
             "COMMAND_OUTPUT_BOUND", Path(argv[0]).name)
     return result
+
+
+def verify_frozen_artifact(path: Path = ARTIFACT) -> dict[str, Any]:
+    """Accept only the exact unpublished M7-030 staging asset bytes."""
+    require(path.name == FROZEN_ARTIFACT_NAME, "FROZEN_ASSET_NAME", path.name)
+    require(path.is_file(), "FROZEN_ASSET_MISSING", path.name)
+    try:
+        size = path.stat().st_size
+        actual = evidence_digest.artifact_byte_sha256(path)
+    except OSError as error:
+        raise ReleaseError("FROZEN_ASSET_MISSING", path.name) from error
+    require(size == FROZEN_ARTIFACT_BYTES, "FROZEN_ASSET_SIZE", str(size))
+    require(evidence_digest.schema_artifact_sha256_equal(actual, FROZEN_ARTIFACT_SHA256),
+            "FROZEN_ASSET_DIGEST", actual)
+    return {
+        "decision": "PASS",
+        "taskId": TASK_ID,
+        "name": path.name,
+        "bytes": size,
+        "tag": FROZEN_ARTIFACT_TAG,
+        "repository": REPOSITORY,
+        "sha256": FROZEN_ARTIFACT_SHA256,
+    }
+
+
+def _download_command(directory: Path) -> list[str]:
+    return [
+        "gh", "release", "download", FROZEN_ARTIFACT_TAG, "--repo", REPOSITORY,
+        "--pattern", FROZEN_ARTIFACT_NAME, "--dir", str(directory),
+    ]
+
+
+def _run_download(argv: Sequence[str]) -> subprocess.CompletedProcess[bytes]:
+    try:
+        return subprocess.run(
+            argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            timeout=FROZEN_ARTIFACT_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ReleaseError("FROZEN_ASSET_DOWNLOAD", Path(argv[0]).name) from error
+
+
+def fetch_frozen_artifact(
+    target: Path = ARTIFACT,
+    *,
+    runner: Callable[[Sequence[str]], subprocess.CompletedProcess[bytes]] | None = None,
+) -> dict[str, Any]:
+    """Stage the frozen asset from its single draft Release, verified byte for byte."""
+    require(target.name == FROZEN_ARTIFACT_NAME, "FROZEN_ASSET_NAME", target.name)
+    if target.exists():
+        return {**verify_frozen_artifact(target), "mode": "verified-existing-artifact"}
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".m7-030-download-", dir=target.parent) as temporary:
+        directory = Path(temporary)
+        completed = (runner or _run_download)(_download_command(directory))
+        require(completed.returncode == 0,
+                "FROZEN_ASSET_DOWNLOAD", f"{FROZEN_ARTIFACT_TAG} exit {completed.returncode}")
+        detail = verify_frozen_artifact(directory / FROZEN_ARTIFACT_NAME)
+        (directory / FROZEN_ARTIFACT_NAME).replace(target)
+    return {**detail, "mode": "downloaded-and-verified-frozen-artifact"}
+
+
+def _require_frozen_prerequisite(artifact: Path) -> None:
+    """Fail closed before any local signing/update gate consumes the M7-030 artifact."""
+    if artifact == ARTIFACT:
+        verify_frozen_artifact(artifact)
 
 
 def public_key(private_key: Path) -> bytes:
@@ -915,6 +985,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
     manifest = subparsers.add_parser("manifest")
     manifest.add_argument("--output", type=Path, required=True)
+    fetch = subparsers.add_parser("fetch-frozen-artifact")
+    fetch.add_argument("--output", type=Path)
     rehearsal = subparsers.add_parser("rehearse")
     rehearsal.add_argument("--work-dir", type=Path, default=ROOT / "build/m7-030")
     rehearsal.add_argument("--output", type=Path, required=True)
@@ -940,6 +1012,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "manifest":
             atomic_json(args.output, build_release_manifest())
             result = {"decision": "PASS", "output": args.output.as_posix()}
+        elif args.command == "fetch-frozen-artifact":
+            result = fetch_frozen_artifact()
+            if args.output:
+                atomic_json(args.output, result)
         elif args.command == "rehearse":
             args.work_dir.mkdir(parents=True, exist_ok=True)
             result = local_rehearsal(args.work_dir)
