@@ -22,13 +22,54 @@ from tools import m11_004_installed_consumers as consumers
 from tools.evidence_digest import (artifact_byte_digest, text_evidence_digest,
     artifact_byte_sha256_equal, text_evidence_sha256_equal)
 
+# Implementation closure: the runner plus every imported helper that shapes the captured
+# verdict. Their bytes are part of the binding, so a changed helper invalidates old evidence.
+HELPER_SOURCES = ('tools/m12_002_source_sdk.py', 'tools/m7_021_linux_release.py',
+    'tools/m11_004_installed_consumers.py', 'tools/m11_003_native_websocket.py',
+    'tools/evidence_digest.py')
+# The complete source-compatibility command inventory. A report that omits, duplicates or
+# reclassifies any of these cannot describe the accepted contract.
+EXPECTED_COMMANDS = {
+    'cjc': 0, 'cjpm': 0, 'native-cc': 0, 'fixture-openssl': 0, 'checkout-hidden': 0,
+    'cli-build': 0, 'decoded-build': 0, 'streams-build': 0, 'service-build': 0, 'trust-build': 0,
+    'certificate': 0, 'certificate-der': 0, 'untrusted': 0, 'untrusted-der': 0, 'key-der': 0,
+    'cli-help': 0, 'cli-dependencies': 0, 'cli-acceptance': 0,
+    'decoded-help': 0, 'decoded-dependencies': 0, 'decoded-acceptance': 0,
+    'streams-help': 0, 'streams-dependencies': 0, 'streams-acceptance': 0,
+    'service-help': 0, 'service-dependencies': 0, 'service-acceptance': 0,
+    'service-operational': 0, 'cli-download': 0, 'decoded-download': 0,
+    'explicit-ca': 0, 'missing-explicit-ca': 1, 'incorrect-explicit-ca': 1,
+    'system-ca-installed': 0, 'system-ca-missing': 1, 'system-ca-incorrect': 1,
+    'streams-operational': 0, 'sse-operational': 0, 'wss-operational': 0}
+CA_CHECKS = ('explicit-ca', 'missing-explicit-ca', 'incorrect-explicit-ca',
+    'system-ca-installed', 'system-ca-missing', 'system-ca-incorrect')
+TLS_FIXTURE_FILES = ('certificate.key', 'certificate.pem', 'certificate.der',
+    'untrusted.key', 'untrusted.pem', 'untrusted.der', 'key.der')
+
+
+def helper_sources() -> dict:
+    """Bind the capture runner and every imported helper implementation by typed digest."""
+    return {name: text_evidence_digest(ROOT / name).to_json() for name in HELPER_SOURCES}
+
+
+def native_compiler() -> Path:
+    """Resolve the host C compiler without fabricating a path for a missing tool."""
+    selected = shutil.which('cc')
+    if not selected:
+        raise ValueError('native C compiler cc is unavailable; the capture cannot bind build inputs')
+    return Path(selected).resolve()
+
+
+def native_compiler_digest() -> dict:
+    return artifact_byte_digest(native_compiler()).to_json()
+
 
 def sdk_binding(sdk: Path) -> dict:
-    """Bind the compiler, CJPM, runtime, standard archives and import metadata."""
+    """Bind the compiler, CJPM, runtime, tool libraries, standard archives and import metadata."""
     files = {str(path.relative_to(sdk)): artifact_byte_digest(path).to_json()
-        for folder in ('bin', 'tools/bin', 'runtime', 'lib', 'modules')
+        for folder in ('bin', 'tools/bin', 'runtime', 'lib', 'modules', 'tools/lib')
         for path in sorted((sdk / folder).rglob('*'))
-        if path.is_file() and (folder in ('runtime', 'modules') or path.name in ('cjc', 'cjpm') or path.suffix in ('.a', '.so'))}
+        if path.is_file() and (folder in ('runtime', 'modules', 'tools/lib') or path.name in ('cjc', 'cjpm') or path.suffix in ('.a', '.so'))}
     for name, folder in (('cjc', 'bin'), ('cjpm', 'tools/bin')):
         if not (sdk / folder / name).is_file():
             raise ValueError('SDK is missing compiler or CJPM')
@@ -56,6 +97,39 @@ def verify_consumer_sources(report: dict) -> None:
             raise ValueError('consumer source changed')
 
 
+def verify_helper_sources(report: dict) -> None:
+    expected = helper_sources()
+    recorded = report.get('helper_sources')
+    if not isinstance(recorded, dict) or recorded.keys() != expected.keys():
+        raise ValueError('evidence helper inventory changed; recapture required')
+    for name, digest in expected.items():
+        if not text_evidence_sha256_equal(recorded[name], digest):
+            raise ValueError('evidence helper changed: ' + name)
+
+
+def verify_command_inventory(commands: list[dict], evidence: Path) -> None:
+    """Require the complete, unique source-compatibility command set with its native outcome."""
+    ids = [command['id'] for command in commands]
+    if len(ids) != len(set(ids)):
+        raise ValueError('source compatibility command inventory contains duplicates')
+    if set(ids) != set(EXPECTED_COMMANDS):
+        missing = sorted(set(EXPECTED_COMMANDS) - set(ids))
+        extra = sorted(set(ids) - set(EXPECTED_COMMANDS))
+        raise ValueError('source compatibility command inventory is incomplete; missing=' + repr(missing) + ' extra=' + repr(extra))
+    for command in commands:
+        expected = EXPECTED_COMMANDS[command['id']]
+        if command.get('timed_out'):
+            raise ValueError('command timed out: ' + command['id'])
+        if command['expected_exit_code'] != expected:
+            raise ValueError('command expectation reclassified: ' + command['id'])
+        if command['exit_code'] != expected:
+            raise ValueError('command did not satisfy its native outcome: ' + command['id'])
+        for stream in ('stdout', 'stderr'):
+            entry = command[stream]
+            if not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(evidence / entry['path']).to_json()):
+                raise ValueError('command evidence changed: ' + command['id'])
+
+
 def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path) -> None:
     if report.get('status') != 'PASS' or report.get('binary_cross_sdk') != 'NOT_CLAIMED':
         raise ValueError('report is not a successful source-only compatibility proof')
@@ -67,16 +141,31 @@ def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path) -> Non
         raise ValueError('SDK compiler/runtime/import binding changed; recompile and rerun consumers')
     if not text_evidence_sha256_equal(report['runner_digest'], text_evidence_digest(Path(__file__)).to_json()):
         raise ValueError('capture runner changed')
-    for command in report['commands']:
-        if command['exit_code'] != command['expected_exit_code'] or command['timed_out']:
-            raise ValueError('command did not satisfy its native outcome')
-        for stream in ('stdout', 'stderr'):
-            entry = command[stream]
-            if not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(evidence / entry['path']).to_json()):
-                raise ValueError('command evidence changed')
+    verify_helper_sources(report)
+    verify_command_inventory(report['commands'], evidence)
     for name in consumers.APP_NAMES:
         consumers.validate_checks((evidence / f'{name}-acceptance.stdout.log').read_text(), name)
     verify_consumer_sources(report)
+
+
+def verify_retained_commands(commands: list[dict], evidence: Path) -> None:
+    """Reject retained results whose recorded logs no longer match this evidence tree."""
+    for command in commands:
+        if command.get('timed_out') or command['exit_code'] != command['expected_exit_code']:
+            raise ValueError('retained command is not a success: ' + command['id'])
+        for stream in ('stdout', 'stderr'):
+            entry = command[stream]
+            path = evidence / entry['path']
+            if not path.is_file() or not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(path).to_json()):
+                raise ValueError('retained command log changed: ' + command['id'])
+
+
+def verify_retained_binary(recorded: dict, binary: Path) -> None:
+    """A retained consumer result only stands while its installed executable is unchanged."""
+    if not binary.is_file():
+        raise ValueError('retained consumer binary is missing; rerun the capture')
+    if not artifact_byte_sha256_equal(recorded.get('binary_digest'), artifact_byte_digest(binary).to_json()):
+        raise ValueError('retained consumer binary changed; rerun the capture')
 
 
 def validate_resume(previous: dict, report: dict) -> None:
@@ -204,7 +293,8 @@ def capture(args) -> dict:
     previous = None
     try:
         report['sdk_files'] = sdk_binding(sdk)
-        report['native_cc_digest'] = artifact_byte_digest(Path(shutil.which('cc'))).to_json()
+        report['native_cc_digest'] = native_compiler_digest()
+        report['helper_sources'] = helper_sources()
         report['build_options'] = {'command': ['cjpm', 'build'], 'consumer_compile_option': '', 'consumer_link_option': '', 'cpu_override': 'none',
             'environment': {key: run.normalize(run.env.get(key, '')) for key in ('CFLAGS', 'CXXFLAGS', 'LDFLAGS', 'CJC_FLAGS')}}
         historical = json.loads(args.qualification.read_text())
@@ -219,9 +309,17 @@ def capture(args) -> dict:
             validate_resume(previous, report)
             if not previous.get('relocation', {}).get('whole_tree_moved'):
                 raise ValueError('cannot resume a capture that did not complete relocation')
+            # A retained success only stands while its own evidence and installed binaries
+            # are still exactly what they claimed; otherwise the capture must not reuse it.
+            verify_retained_commands(previous['commands'], output)
+            missing = [name for name in TLS_FIXTURE_FILES if not (work / name).is_file()]
+            if missing:
+                raise ValueError('retained TLS fixture material is missing; rerun the capture: ' + ', '.join(missing))
             for key in ("toolchain", "production_sources", "native_archives", "payload_sha256", "installed_manifest", "relocation", "consumers", "proxy_observations"):
                 if key in previous:
                     report[key] = previous[key]
+            for name, record in report['consumers'].items():
+                verify_retained_binary(record, work / 'relocated/consumers' / name / 'target/release/bin/main')
             retained = [c for c in previous["commands"] if c["id"] != "service-operational" and c["exit_code"] == c["expected_exit_code"]]
             run.commands.extend(retained)
             report["resumed_from"] = text_evidence_digest(output / "report.json").to_json()

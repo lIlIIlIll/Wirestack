@@ -3,11 +3,16 @@ import copy
 import json
 import os
 from pathlib import Path
+import shutil
+import tempfile
 import unittest
 
-from tools.m12_002_source_sdk import (ROOT, consumer_source_digests, validate_resume,
-    verify_consumer_sources, verify_report)
-from tools.evidence_digest import artifact_byte_digest_bytes
+from tools.m12_002_source_sdk import (EXPECTED_COMMANDS, HELPER_SOURCES, ROOT,
+    consumer_source_digests, helper_sources, native_compiler, validate_resume,
+    verify_command_inventory, verify_consumer_sources, verify_helper_sources,
+    verify_report, verify_retained_binary, verify_retained_commands)
+from tools.evidence_digest import (artifact_byte_digest, artifact_byte_digest_bytes,
+    text_evidence_digest)
 
 
 def text_digest(seed):
@@ -68,6 +73,116 @@ class ResumeDriftTests(unittest.TestCase):
         current['consumer_sources']['examples/linux/m11_004/decoded/src/main.cj'] = text_digest('c')
         with self.assertRaisesRegex(ValueError, 'consumer sources'):
             validate_resume(previous, current)
+
+
+class HelperBindingTests(unittest.TestCase):
+    """The verdict depends on imported helpers, so their bytes must be part of the report."""
+
+    def test_every_imported_helper_is_bound(self):
+        recorded = helper_sources()
+        self.assertEqual(recorded.keys(), set(HELPER_SOURCES))
+        verify_helper_sources({'helper_sources': recorded})
+
+    def test_missing_helper_is_rejected(self):
+        recorded = dict(helper_sources())
+        del recorded['tools/m11_004_installed_consumers.py']
+        with self.assertRaisesRegex(ValueError, 'evidence helper inventory changed'):
+            verify_helper_sources({'helper_sources': recorded})
+
+    def test_changed_helper_is_rejected(self):
+        recorded = dict(helper_sources())
+        recorded['tools/evidence_digest.py'] = text_digest('f')
+        with self.assertRaisesRegex(ValueError, 'evidence helper changed: tools/evidence_digest.py'):
+            verify_helper_sources({'helper_sources': recorded})
+
+    def test_unbound_helper_report_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'evidence helper inventory changed'):
+            verify_helper_sources({'helper_sources': {}})
+
+
+class CommandInventoryTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-source-commands-')
+        self.evidence = Path(self.directory.name)
+        self.commands = []
+        for name, expected in EXPECTED_COMMANDS.items():
+            logs = {stream: self.evidence / f'{name}.{stream}.log' for stream in ('stdout', 'stderr')}
+            for stream, log in logs.items():
+                log.write_text(name + '\n' if stream == 'stdout' else '')
+            self.commands.append({'id': name, 'exit_code': expected,
+                'expected_exit_code': expected, 'timed_out': False,
+                **{stream: {'path': log.name, 'digest': text_evidence_digest(log).to_json()}
+                   for stream, log in logs.items()}})
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_complete_inventory_is_accepted(self):
+        verify_command_inventory(self.commands, self.evidence)
+        verify_retained_commands(self.commands, self.evidence)
+
+    def test_omitted_command_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'command inventory is incomplete'):
+            verify_command_inventory(self.commands[1:], self.evidence)
+
+    def test_duplicated_command_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'command inventory contains duplicates'):
+            verify_command_inventory(self.commands + [self.commands[0]], self.evidence)
+
+    def test_reclassified_ca_expectation_is_rejected(self):
+        changed = copy.deepcopy(self.commands)
+        next(c for c in changed if c['id'] == 'missing-explicit-ca')['expected_exit_code'] = 0
+        with self.assertRaisesRegex(ValueError, 'command expectation reclassified: missing-explicit-ca'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_ca_check_without_its_native_failure_is_rejected(self):
+        changed = copy.deepcopy(self.commands)
+        next(c for c in changed if c['id'] == 'system-ca-missing')['exit_code'] = 0
+        with self.assertRaisesRegex(ValueError, 'command did not satisfy its native outcome: system-ca-missing'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_timed_out_command_is_rejected(self):
+        changed = copy.deepcopy(self.commands)
+        changed[0]['timed_out'] = True
+        with self.assertRaisesRegex(ValueError, 'command timed out: cjc'):
+            verify_command_inventory(changed, self.evidence)
+
+    def test_changed_retained_log_is_rejected(self):
+        (self.evidence / 'cjc.stdout.log').write_text('changed\n')
+        with self.assertRaisesRegex(ValueError, 'command evidence changed: cjc'):
+            verify_command_inventory(self.commands, self.evidence)
+        with self.assertRaisesRegex(ValueError, 'retained command log changed: cjc'):
+            verify_retained_commands(self.commands, self.evidence)
+
+
+class RetainedBinaryTests(unittest.TestCase):
+    def test_retained_binary_must_still_match(self):
+        with tempfile.TemporaryDirectory(prefix='m12-retained-') as directory:
+            binary = Path(directory) / 'main'
+            binary.write_bytes(b'built consumer')
+            verify_retained_binary({'binary_digest': artifact_byte_digest(binary).to_json()}, binary)
+            binary.write_bytes(b'changed consumer')
+            with self.assertRaisesRegex(ValueError, 'retained consumer binary changed'):
+                verify_retained_binary({'binary_digest': artifact_byte_digest_bytes(b'built consumer').to_json()}, binary)
+            binary.unlink()
+            with self.assertRaisesRegex(ValueError, 'retained consumer binary is missing'):
+                verify_retained_binary({}, binary)
+
+
+class NativeCompilerTests(unittest.TestCase):
+    def test_missing_compiler_is_reported_instead_of_fabricated(self):
+        original = shutil.which
+        shutil.which = lambda name, *args: None if name == 'cc' else original(name, *args)
+        try:
+            with self.assertRaisesRegex(ValueError, 'native C compiler cc is unavailable'):
+                native_compiler()
+        finally:
+            shutil.which = original
+
+    def test_present_compiler_resolves_to_an_executable(self):
+        if not shutil.which('cc'):
+            self.skipTest('host C compiler unavailable')
+        self.assertTrue(native_compiler().is_file())
 
 
 class ConsumerSourceInventoryTests(unittest.TestCase):

@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "<repo>/tools/evidence_digest.py", line 125, in artifact_byte_digest
+    with path.open("rb") as stream:
+         ~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '<repo>/docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<repo>/tools/m12_002_deployment.py", line 149, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo>/tools/m12_002_deployment.py", line 140, in main
+    verify_snapshot(EVIDENCE / 'verification.json')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_deployment.py", line 84, in verify_snapshot
+    inputs = current_inputs(binary_report)
+  File "<repo>/tools/m12_002_deployment.py", line 46, in current_inputs
+    verify_source(report, ARCHIVE, sdk, path.parent)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_source_sdk.py", line 136, in verify_report
+    if not artifact_byte_sha256_equal(report['archive_digest'], artifact_byte_digest(archive).to_json()):
+                                                                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "<repo>/tools/evidence_digest.py", line 129, in artifact_byte_digest
+    raise DigestError("DIGEST_READ", f"cannot read binary artifact: {path}") from error
+tools.evidence_digest.DigestError: cannot read binary artifact: <repo>/docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz

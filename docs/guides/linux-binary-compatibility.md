@@ -16,7 +16,7 @@ python3 tools/m12_002_binary.py \
   --openssl-crypto-library /usr/lib/libcrypto.so.3
 ```
 
-`--consumer <installed-executable>` adds ELF scans of independently built installed applications. `--verify` checks the selected archive, production sources, fixture sources, capture tool, native tool binaries, SDK compiler/runtime libraries and retained command logs against the report's typed digest bindings. Any changed input requires a fresh capture. A compiler version string alone is not a binding. SDK source qualification snapshots do not qualify replacement compiler or runtime bits.
+`--consumer <profile>/<app>=<installed-executable>` adds ELF scans of independently built installed applications. Repeat it for every `stable-native` and `candidate-native` application (`cli`, `decoded`, `streams`, `service`, `trust`); capture and `--verify` both reject a missing, duplicated or undeclared identity. `--verify` checks the selected archive, production sources, fixture sources, capture tool, native tool binaries, SDK compiler/runtime libraries, every scanned ELF verdict and retained command logs against the report's typed digest bindings. Any changed input requires a fresh capture. A compiler version string alone is not a binding. SDK source qualification snapshots do not qualify replacement compiler or runtime bits.
 
 Capture aborts if any built-SDK/runtime cell fails, and `--verify` requires the complete matrix to contain only passing cells; the report's top-level `PASS` alone is not matrix acceptance. The deployment `collect` and `verify` commands check the binary report that the snapshot records (the supplied `--binary-report`), so an alternate report must satisfy the same archive, SDK matrix, fixture, scan, log and behavior bindings.
 

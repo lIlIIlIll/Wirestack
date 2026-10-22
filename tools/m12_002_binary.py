@@ -21,12 +21,38 @@ from tools import m7_021_linux_release as release
 CHECKS = {'independent_cangjie_native', 'wirestack_verified_tls',
           'independent_verified_tls', 'wirestack_after_independent_cleanup', 'same_process_identity_preserved'}
 VERSION = re.compile(r'\b(?:GLIBC|GLIBCXX|CXXABI)_[0-9]+(?:\.[0-9]+)*\b')
+SCANNER = Path(__file__).resolve()
+HELPER_SOURCES = ('tools/m12_002_binary.py', 'tools/tests/test_m12_002_binary.py',
+    'tools/m7_021_linux_release.py', 'tools/m11_004_installed_consumers.py',
+    'tools/m11_003_native_websocket.py', 'tools/evidence_digest.py')
+CONSUMER_PROFILES = ('stable-native', 'candidate-native')
+CONSUMER_APPS = ('cli', 'decoded', 'streams', 'service', 'trust')
+OPTIONAL_MODULES = ('gzip', 'sse', 'observability')
+TRUNCATED = 'Complete disassembly retained in private scratch; raw output binding: '
+
 
 def sdk_files(sdk: Path) -> list[Path]:
-    directories = ('runtime/lib/linux_x86_64_cjnative', 'lib/linux_x86_64_cjnative', 'tools/lib')
+    directories = ('runtime/lib/linux_x86_64_cjnative', 'lib/linux_x86_64_cjnative', 'tools/lib', 'modules')
     return sorted(set([p for p in [sdk/'bin/cjc', sdk/'tools/bin/cjpm', sdk/'lib/libstdFFI.so',
         *[p for directory in directories for p in (sdk/directory).rglob('*')
-          if p.is_file() and ('.so' in p.name or p.suffix == '.a')]] if p.exists()]))
+          if p.is_file() and ('.so' in p.name or p.suffix in ('.a', '.cjo', '.bc'))]] if p.exists()]))
+
+
+def scanner_digest() -> dict:
+    return text_evidence_digest(SCANNER).to_json()
+
+
+def helper_sources() -> dict:
+    return {name: text_evidence_digest(ROOT / name).to_json() for name in HELPER_SOURCES}
+
+
+def consumer_identity(value: str) -> tuple[str, str, Path]:
+    """Parse the strict `<profile>/<app>=<installed executable>` consumer declaration."""
+    identity, separator, path = value.partition('=')
+    profile, slash, app = identity.partition('/')
+    if not separator or not slash or not path or profile not in CONSUMER_PROFILES or app not in CONSUMER_APPS:
+        raise ValueError('consumer must be <profile>/<app>=<path> with a declared profile and app: ' + value)
+    return profile, app, Path(path)
 
 def dynamic_fields(text: str) -> dict:
     fields = {name.lower(): re.findall(r'\(' + name + r'\).*?\[(.*?)\]', text)
@@ -66,10 +92,84 @@ def validate_abi_matrix(rows: list[dict], sdk_count: int) -> None:
     """Reject an incomplete qualification matrix or any failed cross-SDK/runtime cell."""
     if len(rows) != sdk_count * sdk_count:
         raise ValueError('ABI matrix is incomplete')
+    coordinates = [(row['built_sdk'], row['runtime_sdk']) for row in rows]
+    expected = {(built, runtime) for built in range(sdk_count) for runtime in range(sdk_count)}
+    if len(set(coordinates)) != len(coordinates) or set(coordinates) != expected:
+        raise ValueError('ABI matrix does not cover each built/runtime coordinate exactly once')
     for row in rows:
         if row['abi_result'] != 'PASS' or row['semantic_result'] != 'PASS':
             raise ValueError('cross-SDK native behavior failed: built_sdk=' + str(row['built_sdk'])
                 + ' runtime_sdk=' + str(row['runtime_sdk']))
+
+
+def scan_fields(header: str, dynamic: str, symbol_versions: str, notes: str, symbols: str,
+                isa_counts: dict) -> dict:
+    """The single derivation of every ELF verdict, shared by capture and verification."""
+    return {'machines': sorted(set(re.findall(r'Machine:\s+(.+)', header))),
+            'elf_class': sorted(set(re.findall(r'Class:\s+(\S+)', header))),
+            **dynamic_fields(dynamic), 'symbol_versions': versions(symbol_versions),
+            'gnu_property_notes': [x.strip() for x in notes.splitlines() if 'x86' in x or 'ISA' in x],
+            'required_symbol_versions': versions(symbol_versions.split('Version needs section', 1)[1])
+                if 'Version needs section' in symbol_versions else [],
+            'symbol_versions_role': 'symbol_versions includes definitions; '
+                'required_symbol_versions records loader requirements only',
+            'raw_isa_presence': isa_counts, 'minimum_cpu': 'NOT_INFERRED_FROM_DISASSEMBLY',
+            'unprefixed_tls_defined_symbols': sorted(set(
+                re.findall(r'\b(?:SSL|OPENSSL|CRYPTO|EVP|X509)_[A-Za-z0-9_]+\b', symbols)))}
+
+
+def bound_command(report: dict, command_id: str, root: Path = ROOT) -> tuple[dict, dict]:
+    matches = [command for command in report['commands'] if command['id'] == command_id]
+    if len(matches) != 1:
+        raise ValueError('native command is not recorded exactly once: ' + command_id)
+    command = matches[0]
+    text = {}
+    for stream in ('stdout', 'stderr'):
+        entry = command[stream]
+        path = root / entry['path']
+        if not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(path).to_json()):
+            raise ValueError('scan diagnostic log changed: ' + command_id)
+        text[stream] = path.read_text()
+    return command, text
+
+
+def verify_scan_verdicts(report: dict, root: Path = ROOT) -> None:
+    """Recompute every derived ELF/loader verdict from the bound scanner output."""
+    for name, scan in report['scans'].items():
+        base = scan['symbol_inventory_command'].removesuffix('-symbols')
+        chain = {}
+        for suffix in ('headers', 'dynamic', 'versions', 'notes', 'symbols', 'disassembly'):
+            command, text = bound_command(report, base + '-' + suffix, root)
+            if command.get('timed_out'):
+                raise ValueError('scan diagnostic timed out: ' + name + '-' + suffix)
+            allowed = (0, 1) if suffix == 'symbols' else (0,)
+            if command['exit_code'] not in allowed:
+                raise ValueError('scan command did not complete: ' + name + '-' + suffix)
+            chain[suffix] = text
+        disassembly = chain['disassembly']['stdout']
+        truncated = TRUNCATED in disassembly
+        counted = scan['raw_isa_presence']
+        if not truncated:
+            counted = {'avx_mnemonics': 0, 'aes_mnemonics': 0, 'pclmul_mnemonics': 0}
+            for line in disassembly.splitlines():
+                match = re.match(r'\s*[0-9a-f]+:\s+(\w+)', line)
+                if match:
+                    op = match[1]
+                    counted['avx_mnemonics'] += int(op.startswith('v') and op not in ('verr', 'verw'))
+                    counted['aes_mnemonics'] += int('aes' in op)
+                    counted['pclmul_mnemonics'] += int('pclmul' in op)
+        else:
+            if not isinstance(counted, dict) or set(counted) != {'avx_mnemonics', 'aes_mnemonics', 'pclmul_mnemonics'}:
+                raise ValueError('scan records a malformed ISA observation: ' + name)
+            if any(not isinstance(value, int) or value < 0 for value in counted.values()):
+                raise ValueError('scan records a malformed ISA observation: ' + name)
+        expected = scan_fields(chain['headers']['stdout'], chain['dynamic']['stdout'],
+            chain['versions']['stdout'], chain['notes']['stdout'], chain['symbols']['stdout'], counted)
+        for field, value in expected.items():
+            if scan.get(field) != value:
+                raise ValueError('scan verdict differs from its captured output: ' + name + '/' + field)
+        if scan['absolute_path_hazards'] and not name.startswith('external-tls-'):
+            raise ValueError('deployment-bearing scan has an absolute loader path: ' + name)
 
 
 class Capture:
@@ -127,21 +227,26 @@ class Capture:
         return (self.output / f'{label}.stdout.log').read_text()
 
     def scan(self, label: str, path: Path) -> dict:
+        digest = artifact_byte_digest(path).to_json()
         for old in self.prior.get('scans', {}).values():
-            if old['path'] == self.normalize(str(path)) and artifact_byte_sha256_equal(old['digest'], artifact_byte_digest(path).to_json()):
-                base = old['symbol_inventory_command'].removesuffix('-symbols')
-                records = [r for r in self.prior['commands'] if r['id'].startswith(base+'-')]
-                if records and all(r['exit_code'] == 0 or r['id'].endswith('-symbols') for r in records):
-                    for record in records:
-                        for key in ('stdout', 'stderr'):
-                            if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(ROOT / record[key]['path']).to_json()):
-                                raise ValueError('prior scan diagnostic changed')
-                    self.commands.extend(r for r in records if r not in self.commands)
-                    version_record = next(r for r in records if r['id'] == base+'-versions')
-                    observed = (ROOT / version_record['stdout']['path']).read_text()
-                    old = dict(old, required_symbol_versions=versions(observed.split('Version needs section', 1)[1]) if 'Version needs section' in observed else [],
-                               symbol_versions_role='symbol_versions includes definitions; required_symbol_versions records loader requirements only')
-                    return old
+            # Reuse prior observations only when their inputs, tools and scanner logic are identical.
+            if old['path'] != self.normalize(str(path)) or not artifact_byte_sha256_equal(old['digest'], digest):
+                continue
+            if not text_evidence_sha256_equal(old.get('scanner'), scanner_digest()):
+                continue
+            base = old['symbol_inventory_command'].removesuffix('-symbols')
+            records = [r for r in self.prior['commands'] if r['id'].startswith(base+'-')]
+            if not records or len({r['id'] for r in records}) != len(records):
+                continue
+            try:
+                for record in records:
+                    for key in ('stdout', 'stderr'):
+                        if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(ROOT / record[key]['path']).to_json()):
+                            raise ValueError('prior scan diagnostic changed')
+            except ValueError:
+                continue
+            self.commands.extend(r for r in records if r not in self.commands)
+            return dict(old)
         header = self.run(label+'-headers', ['readelf', '-hW', str(path)])
         dynamic = self.run(label+'-dynamic', ['readelf', '-dW', str(path)])
         symbol_versions = self.run(label+'-versions', ['readelf', '-VW', str(path)])
@@ -157,19 +262,61 @@ class Capture:
                     isa_counts['avx_mnemonics'] += int(op.startswith('v') and op not in ('verr', 'verw'))
                     isa_counts['aes_mnemonics'] += int('aes' in op)
                     isa_counts['pclmul_mnemonics'] += int('pclmul' in op)
-        machines = sorted(set(re.findall(r'Machine:\s+(.+)', header)))
-        return {'path': self.normalize(str(path)), 'digest': artifact_byte_digest(path).to_json(),
-                'machines': machines, 'elf_class': sorted(set(re.findall(r'Class:\s+(\S+)', header))),
-                **dynamic_fields(dynamic), 'symbol_versions': versions(symbol_versions),
-                'gnu_property_notes': [x.strip() for x in notes.splitlines() if 'x86' in x or 'ISA' in x],
-                'required_symbol_versions': versions(symbol_versions.split('Version needs section', 1)[1]) if 'Version needs section' in symbol_versions else [],
-                'symbol_versions_role': 'symbol_versions includes definitions; required_symbol_versions records loader requirements only',
-                'raw_isa_presence': isa_counts, 'minimum_cpu': 'NOT_INFERRED_FROM_DISASSEMBLY',
-                'unprefixed_tls_defined_symbols': sorted(set(re.findall(r'\b(?:SSL|OPENSSL|CRYPTO|EVP|X509)_[A-Za-z0-9_]+\b', symbols))),
+        return {'path': self.normalize(str(path)), 'digest': digest,
+                'scanner': scanner_digest(), **scan_fields(header, dynamic, symbol_versions,
+                    notes, symbols, isa_counts),
                 'symbol_inventory_command': self.prefix+label+'-symbols'}
 
 
-def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: Path) -> None:
+def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
+                     replacements: dict) -> None:
+    """Require the complete profile/app identity set and its compiled optional archives."""
+    def normalize(text: str) -> str:
+        for label, value in replacements.items():
+            text = text.replace(str(value), label)
+        return text
+
+    expected = {(profile, app) for profile in CONSUMER_PROFILES for app in CONSUMER_APPS}
+    declared = [(profile, app) for profile, app, _ in consumers]
+    if len(declared) != len(expected) or set(declared) != expected:
+        raise ValueError('binary verification requires every declared profile/app installed consumer exactly once')
+    captured = report.get('consumers', {})
+    if set(captured) != {profile + '/' + app for profile, app in expected}:
+        raise ValueError('installed consumer inventory changed; recapture required')
+    for profile, app, path in consumers:
+        label = normalize(str(path.resolve()))
+        if captured[profile + '/' + app] != label:
+            raise ValueError('installed consumer differs from its capture: ' + profile + '/' + app)
+    scans = {}
+    for name, scan in report['scans'].items():
+        if name.startswith('installed-consumer-'):
+            if scan['path'] in scans:
+                raise ValueError('installed consumer ELF scans repeat a path')
+            scans[scan['path']] = scan
+    if set(scans) != set(captured.values()):
+        raise ValueError('installed consumer ELF scans do not cover every declared consumer')
+    for profile, app, path in consumers:
+        scan = scans[normalize(str(path.resolve()))]
+        if not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(path.resolve()).to_json()):
+            raise ValueError('installed consumer changed: ' + profile + '/' + app)
+    archives = report.get('compiled_optional_modules', {})
+    expected_archives = {f'optional-consumer-{index}-{module}' for index in range(len(consumers))
+        for module in OPTIONAL_MODULES}
+    if set(archives) != expected_archives:
+        raise ValueError('compiled optional archive inventory is incomplete')
+    for label, path in archives.items():
+        resolved = path
+        for token, value in replacements.items():
+            resolved = resolved.replace(token, str(value))
+        if not Path(resolved).is_file():
+            raise ValueError('compiled optional archive is missing: ' + label)
+        scan = report['scans'].get(label)
+        if scan is None or not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(Path(resolved)).to_json()):
+            raise ValueError('compiled optional archive changed: ' + label)
+
+
+def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: Path,
+           consumers: list[tuple[str, str, Path]] = ()) -> None:
     if len(sdks) != len(report['sdk_inputs']) or report['status'] != 'PASS':
         raise ValueError('incomplete report or different SDK matrix')
     validate_abi_matrix(report['abi_matrix'], len(sdks))
@@ -182,6 +329,14 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
     if current.keys() != report['fixture_inputs'].keys() or any(not text_evidence_sha256_equal(
             current[k], report['fixture_inputs'][k]) for k in current):
         raise ValueError('fixture or capture tool changed; recapture required')
+    if report.get('helper_sources', {}).keys() != set(HELPER_SOURCES):
+        raise ValueError('binary verification helper inventory changed; recapture required')
+    for name, digest in helper_sources().items():
+        if not text_evidence_sha256_equal(report['helper_sources'][name], digest):
+            raise ValueError('binary verification helper changed: ' + name)
+    expected_sources = {str(p.relative_to(ROOT)) for p in release.production_sources(ROOT)}
+    if set(report['production_inputs']) != expected_sources:
+        raise ValueError('production source inventory changed; recapture required')
     for i, sdk in enumerate(sdks):
         if {str(p.relative_to(sdk)) for p in sdk_files(sdk)} != set(report['sdk_inputs'][str(i)]):
             raise ValueError('SDK library inventory changed; recapture required')
@@ -199,17 +354,26 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
             path = path.replace(label, str(replacement))
         if not artifact_byte_sha256_equal(digest, artifact_byte_digest(Path(path)).to_json()):
             raise ValueError('native tool changed; recapture required')
-    for scan in report['scans'].values():
+    for name, scan in report['scans'].items():
         path = scan['path']
         for label, replacement in replacements.items():
             path = path.replace(label, str(replacement))
         if not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(Path(path)).to_json()):
             raise ValueError('scanned binary/archive/library changed; recapture required')
+        if not text_evidence_sha256_equal(scan.get('scanner', {}), scanner_digest()):
+            raise ValueError('scan verdicts predate the current scanner; recapture required')
     for record in report['commands']:
         for key in ('stdout', 'stderr'):
             path = ROOT / record[key]['path']
             if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(path).to_json()):
                 raise ValueError('diagnostic log changed')
+        if record.get('timed_out'):
+            raise ValueError('gating command timed out: ' + record['id'])
+        expected_failure = record['id'].startswith('abi-')
+        if not expected_failure and record['exit_code'] != 0:
+            raise ValueError('gating command failed: ' + record['id'])
+    verify_scan_verdicts(report)
+    verify_consumers(report, list(consumers), replacements)
 
 
 def main() -> int:
@@ -220,7 +384,8 @@ def main() -> int:
     parser.add_argument('--wrapper', type=Path, required=True)
     parser.add_argument('--openssl-library', type=Path, required=True)
     parser.add_argument('--openssl-crypto-library', type=Path, required=True)
-    parser.add_argument('--consumer', action='append', type=Path, default=[])
+    parser.add_argument('--consumer', action='append', default=[],
+        help='<profile>/<app>=<installed executable> for every stable-native and candidate-native app')
     parser.add_argument('--verify', action='store_true')
     args = parser.parse_args()
     output = ROOT / 'docs/evidence/M12-002/binary'
@@ -232,7 +397,8 @@ def main() -> int:
         for argument, field in ((args.openssl_library, 'library_digest'), (args.openssl_crypto_library, 'crypto_library_digest')):
             if not artifact_byte_sha256_equal(selected_report['external_tls_fixture'][field], artifact_byte_digest(argument.resolve()).to_json()):
                 raise ValueError('independent TLS fixture input changed; recapture required')
-        verify(selected_report, args.archive, sdks, fixture, work)
+        consumers = [consumer_identity(value) for value in args.consumer]
+        verify(selected_report, args.archive, sdks, fixture, work, consumers)
         print('M12_002_BINARY_BINDING_PASS')
         return 0
     work.mkdir(parents=True, mode=0o700, exist_ok=True)
@@ -274,7 +440,8 @@ def main() -> int:
         'fixture_inputs': {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json()
             for p in fixture.rglob('*') if p.is_file() and p.suffix in ('.cj', '.c', '.toml')},
         'production_inputs': {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json()
-                              for p in release.production_sources(ROOT)}, 'native_tool_inputs': {}}
+                              for p in release.production_sources(ROOT)}, 'native_tool_inputs': {},
+        'helper_sources': helper_sources()}
     report['fixture_inputs']['tools/m12_002_binary.py'] = text_evidence_digest(Path(__file__)).to_json()
     report['fixture_inputs']['tools/tests/test_m12_002_binary.py'] = text_evidence_digest(ROOT / 'tools/tests/test_m12_002_binary.py').to_json()
     try:
@@ -372,10 +539,19 @@ def main() -> int:
                     magic = stream.read(4)
                 if magic == b'\x7fELF' or path.suffix == '.a':
                     report['scans'][f'sdk-{i}-{j}'] = capture.scan(f'sdk-{i}-{j}', path)
-        for i, path in enumerate(args.consumer):
-            report['scans'][f'installed-consumer-{i}'] = capture.scan(f'installed-consumer-{i}', path.resolve())
+        installed_consumers = [consumer_identity(value) for value in args.consumer]
+        report['consumers'] = {}
+        for profile, app, binary in installed_consumers:
+            if profile + '/' + app in report['consumers']:
+                raise ValueError('consumer declarations repeat a profile/app identity')
+            report['consumers'][profile + '/' + app] = capture.normalize(str(binary.resolve()))
+        if set(report['consumers']) != {profile + '/' + app for profile in CONSUMER_PROFILES
+                for app in CONSUMER_APPS}:
+            raise ValueError('capture requires every declared profile/app installed consumer exactly once')
+        for i, (profile, app, binary) in enumerate(installed_consumers):
+            report['scans'][f'installed-consumer-{i}'] = capture.scan(f'installed-consumer-{i}', binary.resolve())
         report['compiled_optional_modules'] = {}
-        for i, binary in enumerate(args.consumer):
+        for i, (profile, app, binary) in enumerate(installed_consumers):
             module_root = binary.resolve().parent.parent / 'wirestack'
             for module in ('gzip', 'sse', 'observability'):
                 archive = module_root / f'libwirestack.{module}.a'
