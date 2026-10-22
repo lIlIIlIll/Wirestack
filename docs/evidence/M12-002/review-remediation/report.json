@@ -101,9 +101,10 @@
     },
     "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/task-gate.json": {
       "exit_code": 2,
-      "result": "{\"status\": \"INVALID\", \"issues\": [{\"code\": \"DEPENDENCY_INCOMPLETE\", \"detail\": \"M10-004 dependency is not COMPLETE: M10-003\"}]}",
+      "result": "exit 2: {\"status\": \"INVALID\", \"issues\": [{\"code\": \"DEPENDENCY_INCOMPLETE\", \"detail\": \"M10-004 dependency is not COMPLETE: M10-003\"}]}",
       "log": "docs/evidence/M12-002/review-remediation/task-gate.log",
-      "note": "The gate refuses to start because the task-scope dependency closure is still global; that is P1-012, not an M12-002 verdict. Recorded as observed, not weakened."
+      "note": "The gate refuses to start because the task-scope dependency closure is still global; that is P1-012, not an M12-002 verdict. Recorded as observed, not weakened.",
+      "output": "docs/evidence/M12-002/review-remediation/task-gate.json"
     }
   },
   "rejected_stale_records": {
