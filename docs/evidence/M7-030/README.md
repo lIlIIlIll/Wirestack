@@ -126,14 +126,15 @@ the exact reviewed bytes or fails closed with `FROZEN_ASSET_NAME`,
    task, so the BLOCKED classification propagates. This task does not edit
    M7-031's row, tooling or evidence — that is M7-031's own scope — but the
    consequence is recorded here rather than left implicit:
-   `scripts/check-m7-031-release` now stops at
+   `scripts/check-m7-031-release` stops at
    `DEPENDENCY_INCOMPLETE: M7-030` because
    `tools/m7_031_linux_candidate.py::validate_dependency_status` requires
-   `| M7-030 | COMPLETE |` in `docs/planning/status.md`. The same change makes
-   `python3 -m unittest tools.tests.test_m7_031_linux_candidate` raise from its
-   `setUpClass` (`Ran 0 tests`); the suite ran 15 tests OK before this row
-   changed. That suite was already hiding a real failure: on the unmodified
-   base commit `scripts/check-m7-031-release` already exited with
+   `| M7-030 | COMPLETE |` in `docs/planning/status.md`. The unit-discovery
+   failure was fixed separately in draft PR #239:
+   `python3 -m unittest tools.tests.test_m7_031_linux_candidate -v` passes four
+   dependency-readiness tests and skips the `M7031LinuxCandidateTests` class
+   with `M7-031 prerequisites are not COMPLETE: M7-030`; its fifteen candidate
+   methods do not run. The base gate already failed with
    `DIGEST_INVALID: M7-030 artifact signed payload`, so M7-031's COMPLETE claim
    was not supported by its own gate even before this reclassification.
    `scripts/verify-evidence --task M7-031` reports the same
