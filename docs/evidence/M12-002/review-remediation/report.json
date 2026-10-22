@@ -115,6 +115,12 @@
       "log": "docs/evidence/M12-002/review-remediation/task-gate.log",
       "note": "The gate refuses to start because the repository-wide dependency closure includes an unfinished unrelated task. That scope defect belongs to P1-012; the refusal is recorded as observed and is not an M12-002 verdict.",
       "output": "docs/evidence/M12-002/review-remediation/task-gate.json"
+    },
+    "CJDOC_BIN=<cjdoc 0.7.2> scripts/check-docs --json": {
+      "exit_code": 1,
+      "result": "status=FAIL with CJDOC_CHECK: every one of the 35 scoped package commands passes (check, generate, render-api-surface, render-coverage, render-markdown for each of the seven packages, each strict check reporting 100% symbol and parameter coverage); the combined strict check then aborts inside cjdoc with \"Cannot allocate memory of 13779556(B), throw an OutOfMemory exception\" and returncode 1",
+      "log": "docs/evidence/M12-002/review-remediation/docs-check.log",
+      "note": "This is the known cjdoc heap exhaustion the deployment snapshot already records as repository_full_gate=NOT_RERUN_KNOWN_CJDOC_HEAP_OOM_ON_UNCHANGED_PUBLIC_SOURCE. It is not an M12-002 acceptance command and no pass is claimed for it."
     }
   },
   "rejected_stale_records": {
