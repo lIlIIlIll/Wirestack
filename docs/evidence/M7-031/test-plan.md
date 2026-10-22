@@ -17,6 +17,12 @@ public API inventory. It also records the current production-source digest and
 the repository commit that generated the report. Changes to release-critical
 source or evidence make the prior report stale.
 
+The candidate gate is also gated on its declared prerequisite tasks. When any
+dependency in `docs/planning/status.md` is not `COMPLETE`, the gate stops with
+`DEPENDENCY_INCOMPLETE` and the unit suite reports a skip for the candidate
+cases rather than a collection error, so repository-wide test
+discovery stays meaningful while a prerequisite is blocked.
+
 ## Control-flow path matrix
 
 | Path ID | Conditions and values | Check | Reachability | Required result |
@@ -41,6 +47,7 @@ source or evidence make the prior report stale.
 | P018 | Any Linux criterion fails, lacks current evidence, or uses `SKIPPED` as PASS | Decision | Reachable error | `NO_GO` and nonzero exit |
 | P019 | Candidate output replaces the prior file atomically | Persistence | Reachable | Complete canonical JSON |
 | P020 | Atomic replacement fails after a valid prior report exists | Persistence | Reachable error | Prior bytes remain unchanged |
+| P021 | A declared dependency is not COMPLETE in `docs/planning/status.md` | Dependency evidence | Reachable error | The candidate gate stops with `DEPENDENCY_INCOMPLETE: <task>` and the unit suite reports an honest skip instead of a collection error |
 
 ## Input and state domains
 
@@ -80,6 +87,7 @@ source or evidence make the prior report stale.
 | S010 | Atomic replace raises an error | Valid prior report | P020 | FAIL | Prior bytes remain byte-identical | fault-injection,persistence | P1 |
 | S011 | Linux musl or a non-Linux cell is presented as PASS | Valid Linux evidence | P002,P018 | FAIL | Report retains the Linux glibc boundary | negative,platform | P0 |
 | S012 | Current report is regenerated with unchanged inputs | Existing valid report | P001,P019 | PASS | Canonical semantic content and evidence digests are stable | regression,determinism | P1 |
+| S013 | One declared dependency is BLOCKED while the substitute `status.md` fixture is presented | Prerequisite check | P003,P021 | The gate fails closed and the suite skips | The unmet task ID is named, a COMPLETE table proceeds, and no test errors during discovery | negative,evidence | P0 |
 
 ## Test-plan matrix
 
@@ -95,6 +103,7 @@ source or evidence make the prior report stale.
 | T008 | S009 | P015,P016 | Current M7-032 and historical or leaking API inventories | PASS or FAIL | Zero internal aliases and pre-1.0 policy | fault-injection,API |
 | T009 | S010 | P019,P020 | Injected atomic replace failure | FAIL | Prior bytes preserved | fault-injection,persistence |
 | T010 | S001,S012 | P017,P019 | End-to-end repository evidence | PASS | 22-row report, exact release identity, known limitations, deterministic JSON | integration,release |
+| T011 | S002,S013 | P003,P004,P021 | Temporary `status.md` fixtures with COMPLETE, BLOCKED, IN_PROGRESS, READY, and absent prerequisite rows plus the repository's own status table | PASS, FAIL, or skip | Unmet dependencies are named in declaration order, `validate_dependency_status` raises `DEPENDENCY_INCOMPLETE`, the readiness suite runs unconditionally, and the candidate suite skips while the declared status agrees across the README and both planning tables | fault-injection,evidence | P0 |
 
 ## Coverage and gap review
 
