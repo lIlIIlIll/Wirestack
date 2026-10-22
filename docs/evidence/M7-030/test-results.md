@@ -177,6 +177,30 @@ workflow source. Behaviour with no arguments is unchanged, and
 `scripts/check-m7-030-release` still fetches and verifies the exact pinned draft
 asset, so the local release contract remains as strict as before.
 
+### Clean-checkout acceptance
+
+Running the canonical gate in a `git archive` export of `9ddc2c2a`, which has no
+`dist/` directory, exercises the retrieval path rather than reusing a staged
+copy:
+
+```
+$ scripts/check-task M7-030 --json
+test-plan-matrix                  PASS
+signing-update-fault-injection    PASS
+supply-chain-inputs               FAIL
+hosted-workflow-contract          PASS
+local-signing-update-rehearsal    PASS
+github-hosted-attestations        FAIL
+status FAIL, issues []
+```
+
+`frozen-artifact.json` from that run records
+`"mode": "downloaded-and-verified-frozen-artifact"` with the pinned bytes and
+`c0988f62…` digest, so the fail-closed prerequisite really does reach the draft
+Release instead of trusting a pre-existing file. The two FAIL rows are the
+M7-025 fingerprint drift and the retired hosted report already described above;
+neither is affected by test isolation.
+
 ## Gates not run
 
 - The one-hour SSE profile was not run.
