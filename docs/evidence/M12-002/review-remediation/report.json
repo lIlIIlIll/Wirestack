@@ -101,7 +101,7 @@
     },
     "python3 tools/m12_002_deployment.py verify": {
       "exit_code": 1,
-      "without_sdk_environment": "ValueError: WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify",
+      "without_sdk_environment": "ValueError: task source inventory is incomplete",
       "with_sdk_environment": "ValueError: task source inventory is incomplete - the committed verification.json lists the pre-revision source_paths, and behind that refusal the selected archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is untracked and absent",
       "logs": {
         "without_sdk_environment": "docs/evidence/M12-002/review-remediation/verify-no-env.log",
