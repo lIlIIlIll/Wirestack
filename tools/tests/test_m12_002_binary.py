@@ -1,4 +1,5 @@
 """Behavioral ELF checks use real linked objects, not fabricated readelf output."""
+import copy
 import json
 import os
 from pathlib import Path
@@ -9,9 +10,10 @@ import unittest
 from tools import m7_021_linux_release as release
 from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
 from tools.m12_002_binary import (CONSUMER_APPS, CONSUMER_PROFILES, OPTIONAL_MODULES,
-    TRUNCATED_ISA, bind_installed_payload, consumer_identity, dynamic_fields, gating_command_ids,
-    install_selected_archive, isa_presence, scan_fields, validate_abi_matrix, verify_abi_matrix,
-    verify_command_inventory, verify_consumers, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
+    SCAN_SUFFIXES, TRUNCATED_ISA, bind_installed_payload, bound_command, consumer_identity,
+    dynamic_fields, expected_scan_bases, gating_command_ids, install_selected_archive, isa_presence,
+    scan_fields, validate_abi_matrix, verify_abi_matrix, verify_command_inventory,
+    verify_consumers, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
 
 
 @unittest.skipUnless(shutil.which('gcc') and shutil.which('readelf'), 'native ELF tools required')
@@ -156,16 +158,26 @@ class AbiEvidenceBindingTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory(prefix='m12-abi-tests-')
         self.root = Path(self.directory.name)
         (self.root / 'docs/evidence/M12-002/binary').mkdir(parents=True)
-        self.runtime = '/sdk/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so'
+        self.work = self.root / 'scratch'
+        self.work.mkdir()
+        self.wrapper = self.root / 'wrapper'
+        self.openssl_library = self.root / 'libssl.so'
+        self.openssl_crypto_library = self.root / 'libcrypto.so'
+        self.wrapper.write_text('')
+        self.sdks = [self.root / f'sdk-{i}' for i in range(2)]
+        for sdk in self.sdks:
+            sdk.mkdir()
         self.binaries = []
         for index in range(2):
-            binary = self.root / f'coexist-{index}'
+            binary = self.work / f'coexist-{index}/target/release/bin/main'
+            binary.parent.mkdir(parents=True)
             binary.write_bytes(f'coexist-{index}'.encode())
             self.binaries.append(binary)
-        self.report = {'commands': [], 'abi_matrix': [], 'scans': {}}
+        self.report = {'commands': [{'id': 'tool-gcc'}], 'abi_matrix': [], 'scans': {}}
         for index, binary in enumerate(self.binaries):
             self.report['scans'][f'coexist-{index}'] = {
-                'path': str(binary), 'digest': artifact_byte_digest(binary).to_json()}
+                'path': f'<scratch>/coexist-{index}/target/release/bin/main',
+                'digest': artifact_byte_digest(binary).to_json()}
         for built in range(2):
             for runtime in range(2):
                 self.cell(built, runtime)
@@ -178,64 +190,226 @@ class AbiEvidenceBindingTests(unittest.TestCase):
         path.write_text(text)
         return {'path': str(path.relative_to(self.root)), 'digest': text_evidence_digest(path).to_json()}
 
+    def runtime_library(self, runtime):
+        return f'<sdk-{runtime}>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so'
+
     def cell(self, built, runtime):
         name = f'abi-{built}-to-{runtime}'
-        loading = f'calling init: {self.runtime}\n'
-        self.report['commands'].append({'id': name, 'argv': ['wrap', name], 'cwd': '/work',
-            'exit_code': 0, 'timed_out': False,
+        loading = f'calling init: {self.runtime_library(runtime)}\n'
+        argv = ['bwrap', '--die-with-parent', '--ro-bind', '/', '/', '--bind',
+            '<scratch>', '<scratch>', '--tmpfs', '<repo>', '--chdir', '<scratch>', '--',
+            '<repo>/wrapper', '--sdk-root', f'<sdk-{runtime}>', '--cwd', '<scratch>',
+            f'<scratch>/coexist-{built}/target/release/bin/main',
+            '<scratch>/certificate.der', '<scratch>/key.pk8']
+        environment = {
+            'WIRESTACK_FIXTURE_OPENSSL_LIBRARY': '<repo>/libssl.so',
+            'WIRESTACK_FIXTURE_OPENSSL_CRYPTO_LIBRARY': '<repo>/libcrypto.so',
+            'WIRESTACK_FIXTURE_CA_FILE': '<scratch>/certificate.pem',
+            'LD_DEBUG': 'libs'}
+        self.report['commands'].append({'id': name, 'argv': argv, 'cwd': '<scratch>',
+            'environment': environment, 'exit_code': 0, 'timed_out': False,
             'stdout': self.log(name, 'stdout', behavior_text()),
             'stderr': self.log(name, 'stderr', loading)})
         self.report['abi_matrix'].append({'built_sdk': built, 'runtime_sdk': runtime,
             'binary_digest': self.report['scans'][f'coexist-{built}']['digest'],
             'command': name, 'abi_result': 'PASS', 'semantic_result': 'PASS',
-            'runtime_loaded_library': self.runtime,
+            'runtime_loaded_library': self.runtime_library(runtime),
             'runtime_loading_proof': self.report['commands'][-1]['stderr']})
 
+    def verify(self):
+        verify_abi_matrix(self.report, self.root, self.work, self.sdks, self.wrapper,
+            self.openssl_library, self.openssl_crypto_library)
+
     def test_bound_evidence_is_accepted(self):
-        verify_abi_matrix(self.report, self.root)
+        self.verify()
 
     def test_row_cannot_claim_another_cell_command(self):
         self.report['abi_matrix'][0]['command'] = 'abi-1-to-1'
         self.report['abi_matrix'][3]['command'] = 'abi-0-to-0'
         with self.assertRaisesRegex(ValueError, 'ABI row is not bound to its own command: abi-1-to-1'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_two_rows_cannot_share_one_command(self):
         self.report['abi_matrix'][1]['command'] = 'abi-0-to-0'
         with self.assertRaisesRegex(ValueError, 'ABI matrix rows do not name distinct commands'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_missing_cell_command_is_rejected(self):
         self.report['commands'] = [c for c in self.report['commands'] if c['id'] != 'abi-1-to-0']
         with self.assertRaisesRegex(ValueError, 'ABI command inventory does not match the recorded matrix'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_behavior_is_rederived_from_the_retained_stdout(self):
-        path = self.root / self.report['commands'][0]['stdout']['path']
+        command = next(c for c in self.report['commands'] if c['id'] == 'abi-0-to-0')
+        path = self.root / command['stdout']['path']
         path.write_text(path.read_text().replace('CHECK wirestack_verified_tls PASS\n', ''))
-        self.report['commands'][0]['stdout']['digest'] = text_evidence_digest(path).to_json()
+        command['stdout']['digest'] = text_evidence_digest(path).to_json()
         with self.assertRaisesRegex(ValueError, 'same-process behavior checks missing or duplicated'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_substituted_loading_proof_is_rejected(self):
-        self.report['abi_matrix'][1]['runtime_loading_proof'] = self.report['commands'][0]['stderr']
+        self.report['abi_matrix'][1]['runtime_loading_proof'] = self.report['commands'][1]['stderr']
         with self.assertRaisesRegex(ValueError, 'ABI row loading proof is not its own command log'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_claimed_runtime_must_appear_in_the_loader_trace(self):
         self.report['abi_matrix'][2]['runtime_loaded_library'] = '/other/libcangjie-runtime.so'
         with self.assertRaisesRegex(ValueError, 'ABI row did not load its recorded runtime'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_failed_cell_command_is_rejected(self):
-        self.report['commands'][0]['exit_code'] = 1
+        next(c for c in self.report['commands'] if c['id'] == 'abi-0-to-0')['exit_code'] = 1
         with self.assertRaisesRegex(ValueError, 'ABI qualification command did not succeed: abi-0-to-0'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
 
     def test_row_must_execute_its_own_built_binary(self):
         self.report['scans']['coexist-0']['digest'] = self.report['scans']['coexist-1']['digest']
         with self.assertRaisesRegex(ValueError, 'ABI row executed a binary other than its built artifact'):
-            verify_abi_matrix(self.report, self.root)
+            self.verify()
+
+    def test_abi_command_must_run_its_declared_inputs(self):
+        mutations = (
+            ('binary', lambda command: command['argv'].__setitem__(-3,
+                '<scratch>/coexist-1/target/release/bin/main')),
+            ('runtime SDK', lambda command: command['argv'].__setitem__(
+                command['argv'].index('--sdk-root') + 1, '<sdk-1>')),
+            ('wrapper', lambda command: command['argv'].__setitem__(
+                command['argv'].index('--') + 1, '<repo>/other-wrapper')),
+            ('working directory', lambda command: command.update(cwd='/')),
+        )
+        for label, mutate in mutations:
+            with self.subTest(input=label):
+                report = copy.deepcopy(self.report)
+                command = next(c for c in report['commands'] if c['id'] == 'abi-0-to-0')
+                mutate(command)
+                with self.assertRaisesRegex(ValueError, 'ABI command invocation differs'):
+                    verify_abi_matrix(report, self.root, self.work, self.sdks, self.wrapper,
+                        self.openssl_library, self.openssl_crypto_library)
+
+    def test_abi_command_must_use_declared_tls_fixtures_and_loader_trace(self):
+        mutations = (
+            ('TLS library', lambda command: command['environment'].__setitem__(
+                'WIRESTACK_FIXTURE_OPENSSL_LIBRARY', '<repo>/other-libssl.so')),
+            ('loader trace', lambda command: command['environment'].__setitem__('LD_DEBUG', 'off')),
+            ('CA fixture', lambda command: command['environment'].__setitem__(
+                'WIRESTACK_FIXTURE_CA_FILE', '<scratch>/other-certificate.pem')))
+        for label, mutate in mutations:
+            with self.subTest(input=label):
+                report = copy.deepcopy(self.report)
+                command = next(c for c in report['commands'] if c['id'] == 'abi-0-to-0')
+                mutate(command)
+                with self.assertRaisesRegex(ValueError, 'ABI command environment differs'):
+                    verify_abi_matrix(report, self.root, self.work, self.sdks, self.wrapper,
+                        self.openssl_library, self.openssl_crypto_library)
+
+
+
+class BinaryEvidencePathTests(unittest.TestCase):
+    def test_symlinked_command_log_cannot_escape_evidence_root(self):
+        with tempfile.TemporaryDirectory(prefix='m12-binary-evidence-') as temporary:
+            base = Path(temporary)
+            root = base / 'evidence'
+            root.mkdir()
+            outside = base / 'outside.log'
+            outside.write_text('retained output\n')
+            (root / 'escape.log').symlink_to(outside)
+            stderr = root / 'probe.stderr.log'
+            stderr.write_text('')
+            report = {'commands': [{'id': 'probe',
+                'stdout': {'path': 'escape.log', 'digest': text_evidence_digest(outside).to_json()},
+                'stderr': {'path': stderr.name, 'digest': text_evidence_digest(stderr).to_json()}}]}
+            with self.assertRaisesRegex(ValueError, 'command evidence path escapes its evidence tree: probe'):
+                bound_command(report, 'probe', root)
+
+
+class IndependentScanInventoryTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-scan-inventory-')
+        self.base = Path(self.directory.name)
+        self.evidence = self.base / 'evidence'
+        self.evidence.mkdir()
+        self.work = self.base / 'scratch'
+        self.work.mkdir()
+        self.sdk = self.base / 'sdk'
+        self.sdk.mkdir()
+        self.consumers = [(profile, app, self.base / profile / app / 'main')
+            for profile in CONSUMER_PROFILES for app in CONSUMER_APPS]
+        self.wrapper = self.evidence / 'wrapper'
+        self.openssl_library = self.evidence / 'libssl.so'
+        system_output = 'libc.so.6 => <scratch>/libc.so.6 (0x1)\n'
+        external_output = 'libssl.so.3 => <scratch>/libssl.so.3 (0x2)\n'
+        self.report = {'commands': [{'id': 'tool-gcc'}], 'scans': {},
+            'dynamic_dependency_closure': {'<scratch>/libc.so.6': 'system-dependency-0'},
+            'external_tls_fixture': {'dynamic_dependencies': ['external-tls-dependency-0']}}
+        for name in ('closure-0-compiler', 'closure-0-runtime', 'closure-0-coexist'):
+            self.add_command(name, system_output)
+        self.add_command('external-tls-closure', external_output)
+        self.scan_bases = expected_scan_bases(self.report, ['target/native/libfixture.a'],
+            [self.sdk], self.consumers, self.work, self.wrapper, self.openssl_library, self.evidence)
+        self.report['scans'] = {base: {'symbol_inventory_command': base + '-symbols'}
+            for base in self.scan_bases}
+        expected = gating_command_ids(self.report, 1, self.scan_bases)
+        existing = {command['id'] for command in self.report['commands']}
+        self.report['commands'].extend({'id': command_id} for command_id in sorted(expected - existing))
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def add_command(self, name, stdout):
+        output = self.evidence / f'{name}.stdout.log'
+        error = self.evidence / f'{name}.stderr.log'
+        output.write_text(stdout)
+        error.write_text('')
+        if name.startswith('closure-'):
+            binary_name = name.removeprefix('closure-0-')
+            binary = {'compiler': '<sdk-0>/bin/cjc',
+                'runtime': '<sdk-0>/runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so',
+                'coexist': '<scratch>/coexist-0/target/release/bin/main'}[binary_name]
+            argv = ['<repo>/wrapper', '--sdk-root', '<sdk-0>', 'ldd', binary]
+        elif name == 'external-tls-closure':
+            argv = ['ldd', '<repo>/libssl.so']
+        else:
+            self.fail(f'unexpected closure command {name}')
+        self.report['commands'].append({'id': name, 'argv': argv, 'cwd': '<scratch>',
+            'exit_code': 0, 'timed_out': False,
+            'stdout': {'path': output.name, 'digest': text_evidence_digest(output).to_json()},
+            'stderr': {'path': error.name, 'digest': text_evidence_digest(error).to_json()}})
+
+    def test_independently_derived_scan_inventory_accepts_complete_report(self):
+        verify_command_inventory(self.report, 1, self.scan_bases)
+
+    def test_deleting_a_scan_and_its_six_command_chain_does_not_shrink_inventory(self):
+        base = 'system-dependency-0'
+        self.report['scans'].pop(base)
+        scanner_ids = {base + '-' + suffix for suffix in SCAN_SUFFIXES}
+        self.report['commands'] = [command for command in self.report['commands']
+            if command['id'] not in scanner_ids]
+        with self.assertRaisesRegex(ValueError, 'binary scan inventory is incomplete'):
+            verify_command_inventory(self.report, 1, self.scan_bases)
+
+    def test_missing_scanner_command_is_rejected(self):
+        missing = 'external-tls-dependency-0-dynamic'
+        self.report['commands'] = [command for command in self.report['commands']
+            if command['id'] != missing]
+        with self.assertRaisesRegex(ValueError, 'native command inventory is incomplete'):
+            verify_command_inventory(self.report, 1, self.scan_bases)
+
+    def test_dynamic_dependency_closure_is_bound_to_the_sdk_binary(self):
+        command = next(command for command in self.report['commands']
+            if command['id'] == 'closure-0-runtime')
+        command['argv'][-1] = '<sdk-0>/bin/cjc'
+        with self.assertRaisesRegex(ValueError,
+                'dynamic dependency closure invocation changed: closure-0-runtime'):
+            expected_scan_bases(self.report, ['target/native/libfixture.a'], [self.sdk],
+                self.consumers, self.work, self.wrapper, self.openssl_library, self.evidence)
+
+    def test_external_tls_closure_is_bound_to_the_selected_library(self):
+        command = next(command for command in self.report['commands']
+            if command['id'] == 'external-tls-closure')
+        command['argv'][-1] = '<repo>/other-libssl.so'
+        with self.assertRaisesRegex(ValueError, 'external TLS dependency closure invocation changed'):
+            expected_scan_bases(self.report, ['target/native/libfixture.a'], [self.sdk],
+                self.consumers, self.work, self.wrapper, self.openssl_library, self.evidence)
 
 
 class TruncatedDisassemblyTests(unittest.TestCase):

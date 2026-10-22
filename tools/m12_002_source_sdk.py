@@ -133,7 +133,11 @@ def _contracts() -> dict[str, tuple[tuple[str, list[str]], ...]]:
             ('system-ca-missing', 'system', None, (*relocated, *CA_MOUNTS['ca-missing'])),
             ('system-ca-incorrect', 'system', None, (*relocated, *CA_MOUNTS['ca-incorrect']))):
         argv = consumer('trust', mode, 'https://192.0.2.1:' + PORT + '/download')
-        fixed(name, _wrapped(CONSUMER_DIRECTORY + 'trust', mount, argv + ([certificate] if certificate else [])))
+        argv += [certificate] if certificate else []
+        shape = _wrapped(CONSUMER_DIRECTORY + 'trust', mount, argv)
+        fixed(name, shape)
+        if name.startswith('system-ca-'):
+            table[name] += (_wrapped(CONSUMER_DIRECTORY + 'trust', (*mount, *HOST_CA_MOUNT), argv),)
     fixed('service-operational', _wrapped(CONSUMER_DIRECTORY + 'service', relocated,
         consumer('service', 'serve', '--port', '0', '--certificate', CERTIFICATES[0],
             '--key', CERTIFICATES[1], '--budget-ms', '60000')))
@@ -207,7 +211,8 @@ def verify_tls_fixtures(report: dict) -> None:
     if not isinstance(recorded, dict) or recorded.keys() != set(TLS_FIXTURE_FILES):
         raise ValueError('retained TLS fixture inventory is incomplete')
     for name, digest in recorded.items():
-        if not isinstance(digest, dict) or digest.get('domain') != 'artifact-bytes-v1':
+        if not isinstance(digest, dict) or digest.get('domain') != 'artifact-bytes-v1' \
+                or not artifact_byte_sha256_equal(digest, digest):
             raise ValueError('retained TLS fixture is not byte-bound: ' + name)
     if recorded['certificate.der'] == recorded['untrusted.der'] or recorded['certificate.der'] == recorded['key.der']:
         raise ValueError('retained TLS fixtures are not distinct')
@@ -223,12 +228,23 @@ def verify_helper_sources(report: dict) -> None:
             raise ValueError('evidence helper changed: ' + name)
 
 
-def evidence_log(entry: dict, evidence: Path, command_id: str) -> Path:
-    """Resolve a retained log inside the evidence tree only; a report may not point elsewhere."""
+def _evidence_path(entry: dict, evidence: Path, command_id: str, failure: str) -> Path:
+    """Resolve evidence beneath its root, including symlink targets."""
     relative = entry['path']
     if not isinstance(relative, str) or not relative or Path(relative).is_absolute() or '..' in Path(relative).parts:
-        raise ValueError('command evidence path escapes its evidence tree: ' + command_id)
-    path = evidence / relative
+        raise ValueError(failure + ': ' + command_id)
+    try:
+        evidence_root = evidence.resolve()
+        path = (evidence / relative).resolve()
+        path.relative_to(evidence_root)
+    except (OSError, RuntimeError, ValueError):
+        raise ValueError(failure + ': ' + command_id) from None
+    return path
+
+
+def evidence_log(entry: dict, evidence: Path, command_id: str) -> Path:
+    """Resolve a retained log inside the evidence tree only; a report may not point elsewhere."""
+    path = _evidence_path(entry, evidence, command_id, 'command evidence path escapes its evidence tree')
     if not path.is_file():
         raise ValueError('command evidence is missing: ' + command_id)
     if not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(path).to_json()):
@@ -238,10 +254,7 @@ def evidence_log(entry: dict, evidence: Path, command_id: str) -> Path:
 
 def evidence_payload(entry: dict, evidence: Path, command_id: str, failure: str) -> Path:
     """The retained log of a command that is being re-read, with a resume-specific failure."""
-    relative = entry['path']
-    if not isinstance(relative, str) or not relative or Path(relative).is_absolute() or '..' in Path(relative).parts:
-        raise ValueError(failure + ': ' + command_id)
-    path = evidence / relative
+    path = _evidence_path(entry, evidence, command_id, failure)
     if not path.is_file() or not text_evidence_sha256_equal(entry['digest'], text_evidence_digest(path).to_json()):
         raise ValueError(failure + ': ' + command_id)
     return path
@@ -413,7 +426,7 @@ class Capture:
         if ca is not None:
             command += ['--tmpfs', '/etc/ssl', '--dir', '/etc/ssl/certs']
             if Path('/etc/pki').exists():
-                command += ['--tmpfs', '/etc/pki']
+                command += list(HOST_CA_MOUNT)
             if ca.is_file():
                 command += ['--ro-bind', str(ca), '/etc/ssl/certs/ca-certificates.crt']
         return command + ['--chdir', str(cwd), '--', *argv]

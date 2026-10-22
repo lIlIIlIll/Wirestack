@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from tools.m12_002_source_sdk import (CA_CHECKS, CA_DIAGNOSTICS, COMMAND_CONTRACTS,
-    EXPECTED_COMMANDS, HELPER_SOURCES, PORT, ROOT, TLS_FIXTURE_FILES, consumer_source_digests, helper_sources,
+    EXPECTED_COMMANDS, HELPER_SOURCES, HOST_CA_MOUNT, PORT, ROOT, TLS_FIXTURE_FILES, consumer_source_digests, helper_sources,
     native_compiler, validate_resume, verify_ca_checks, verify_command_inventory,
     verify_consumer_sources, verify_helper_sources, verify_report, verify_retained_binary,
     verify_retained_commands, verify_tls_fixtures)
@@ -134,6 +134,20 @@ class TlsFixtureBindingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'not byte-bound: certificate.pem'):
             verify_tls_fixtures({'tls_fixtures': recorded})
 
+    def test_malformed_byte_digest_is_rejected(self):
+        malformed = (
+            {'domain': 'artifact-bytes-v1', 'sha256': 'a' * 63},
+            {'domain': 'artifact-bytes-v1', 'sha256': 'g' * 64},
+            {'domain': 'artifact-bytes-v1', 'sha256': 'A' * 64},
+            {'domain': 'artifact-bytes-v1'},
+        )
+        for digest in malformed:
+            with self.subTest(digest=digest):
+                recorded = fixture_digests()
+                recorded['certificate.pem'] = digest
+                with self.assertRaisesRegex(ValueError, 'not byte-bound: certificate.pem'):
+                    verify_tls_fixtures({'tls_fixtures': recorded})
+
 
 class HelperBindingTests(unittest.TestCase):
     """The verdict depends on imported helpers, so their bytes must be part of the report."""
@@ -258,6 +272,23 @@ class CommandContractTests(CommandInventoryTests):
         with self.assertRaisesRegex(ValueError, 'command shape changed: system-ca-missing'):
             verify_command_inventory(changed, self.evidence)
 
+    def test_optional_host_ca_mount_is_accepted_for_all_system_scenarios(self):
+        for name in ('system-ca-installed', 'system-ca-missing', 'system-ca-incorrect'):
+            with self.subTest(name=name):
+                changed = self.changed()
+                argv = next(c for c in changed if c['id'] == name)['argv']
+                insertion = argv.index('--chdir')
+                argv[insertion:insertion] = HOST_CA_MOUNT
+                verify_command_inventory(changed, self.evidence)
+
+    def test_unrelated_mount_is_rejected_with_optional_host_ca_mount(self):
+        changed = self.changed()
+        argv = next(c for c in changed if c['id'] == 'system-ca-missing')['argv']
+        insertion = argv.index('--chdir')
+        argv[insertion:insertion] = [*HOST_CA_MOUNT, '--tmpfs', '/etc/other']
+        with self.assertRaisesRegex(ValueError, 'command shape changed: system-ca-missing'):
+            verify_command_inventory(changed, self.evidence)
+
     def test_hidden_probe_must_hide_the_checkout(self):
         changed = self.changed()
         next(c for c in changed if c['id'] == 'checkout-hidden')['argv'].remove('--tmpfs')
@@ -281,6 +312,20 @@ class CommandContractTests(CommandInventoryTests):
         next(c for c in changed if c['id'] == 'cjc')['stdout']['path'] = '/etc/hostname'
         with self.assertRaisesRegex(ValueError, 'command evidence path escapes its evidence tree: cjc'):
             verify_command_inventory(changed, self.evidence)
+
+    def test_symlinked_evidence_path_cannot_escape_tree(self):
+        outside = self.evidence.parent / (self.evidence.name + '-outside.log')
+        self.addCleanup(outside.unlink, missing_ok=True)
+        outside.write_text('cjc\n')
+        link = self.evidence / 'outside.log'
+        link.symlink_to(outside)
+        changed = self.changed()
+        command = next(c for c in changed if c['id'] == 'cjc')
+        command['stdout'] = {'path': link.name, 'digest': text_evidence_digest(outside).to_json()}
+        with self.assertRaisesRegex(ValueError, 'command evidence path escapes its evidence tree: cjc'):
+            verify_command_inventory(changed, self.evidence)
+        with self.assertRaisesRegex(ValueError, 'retained command log changed: cjc'):
+            verify_retained_commands(changed, self.evidence)
 
 
 class CaDiagnosticTests(CommandInventoryTests):

@@ -148,12 +148,18 @@ TOOL_PROGRAMS = ('gcc', 'g++', 'ar', 'as', 'ld', 'readelf', 'objdump', 'nm', 'op
 
 
 def evidence_path(entry: dict, root: Path, command_id: str) -> Path:
-    """Resolve a retained log beneath the evidence root; a report may not read elsewhere."""
+    """Resolve a retained log beneath the evidence root, including symlink targets."""
     relative = entry.get('path')
     if not isinstance(relative, str) or not relative or Path(relative).is_absolute() \
             or '..' in Path(relative).parts:
         raise ValueError('command evidence path escapes its evidence tree: ' + command_id)
-    return root / relative
+    try:
+        evidence_root = root.resolve()
+        path = (root / relative).resolve()
+        path.relative_to(evidence_root)
+    except (OSError, RuntimeError, ValueError):
+        raise ValueError('command evidence path escapes its evidence tree: ' + command_id) from None
+    return path
 
 
 def bound_command(report: dict, command_id: str, root: Path = ROOT) -> tuple[dict, dict]:
@@ -173,30 +179,135 @@ def bound_command(report: dict, command_id: str, root: Path = ROOT) -> tuple[dic
     return command, text
 
 
-def gating_command_ids(report: dict, sdk_count: int) -> set[str]:
-    """Everything a PASS verdict stands on, derived from the declared inputs and scans."""
-    ids = {'tool-' + name.replace('+', 'p') for name in TOOL_PROGRAMS}
-    ids |= {'backend-' + program for program in ('cc1', 'cc1plus')}
-    ids |= {'boundary-tests', 'certificate', 'certificate-der', 'key-der', 'external-tls-closure'}
+def _capture_replacements(root: Path, work: Path, sdks: list[Path]) -> list[tuple[str, str]]:
+    replacements = [(str(root), '<repo>'), (str(work), '<scratch>'),
+        *((str(sdk), f'<sdk-{i}>') for i, sdk in enumerate(sdks)),
+        (str(Path.home()), '$HOME'), (str(work.parent), '<task-scratch>')]
+    return sorted(replacements, key=lambda item: -len(item[0]))
+
+
+def _normalize_capture_path(value: str, root: Path, work: Path, sdks: list[Path]) -> str:
+    for actual, label in _capture_replacements(root, work, sdks):
+        value = value.replace(actual, label)
+    return value.replace(platform.node(), 'example-host').replace('127.0.0.1', '192.0.2.1')
+
+
+def _resolve_capture_path(value: str, root: Path, work: Path, sdks: list[Path]) -> Path:
+    replacements = [(label, Path(actual)) for actual, label in _capture_replacements(root, work, sdks)]
+    for label, actual in sorted(replacements, key=lambda item: -len(item[0])):
+        value = value.replace(label, str(actual))
+    return Path(value).resolve()
+
+
+def command_prefix(report: dict) -> str:
+    """Read the current capture prefix from its required compiler probe."""
+    matches = [command['id'] for command in report.get('commands', [])
+        if isinstance(command.get('id'), str) and command['id'].endswith('tool-gcc')]
+    if len(matches) != 1:
+        raise ValueError('native command inventory does not identify one compiler probe')
+    return matches[0][:-len('tool-gcc')]
+
+
+def expected_scan_bases(report: dict, archive_scans: list[str], sdks: list[Path],
+                         consumers: list[tuple[str, str, Path]], work: Path, wrapper: Path,
+                         openssl_library: Path, root: Path = ROOT) -> set[str]:
+    """Derive every scan label from declared artifacts and the fixed ldd command outputs."""
+    prefix = command_prefix(report)
+    bases = {f'coexist-{i}' for i in range(len(sdks))}
+    for i, sdk in enumerate(sdks):
+        for j, path in enumerate(sdk_files(sdk)):
+            with path.open('rb') as stream:
+                magic = stream.read(4)
+            if magic == b'\x7fELF' or path.suffix == '.a':
+                bases.add(f'sdk-{i}-{j}')
+    bases.update(f'archive-{i}' for i, _ in enumerate(archive_scans))
+    expected_consumers = {(profile, app) for profile in CONSUMER_PROFILES for app in CONSUMER_APPS}
+    declared_consumers = [(profile, app) for profile, app, _ in consumers]
+    if len(declared_consumers) != len(expected_consumers) or set(declared_consumers) != expected_consumers:
+        raise ValueError('binary verification requires every declared profile/app installed consumer exactly once')
+    bases.update(f'installed-consumer-{i}' for i in range(len(expected_consumers)))
+    bases.update(f'optional-{profile}-{app}-{module}'
+        for profile, app in expected_consumers for module in OPTIONAL_MODULES)
+    bases.add('external-tls-fixture')
+
+    dynamic_dependencies = {}
+    for i in range(len(sdks)):
+        sdk = sdks[i]
+        for name in ('compiler', 'runtime', 'coexist'):
+            command_id = prefix + f'closure-{i}-{name}'
+            command, text = bound_command(report, command_id, root)
+            binaries = {'compiler': sdk / 'bin/cjc',
+                'runtime': sdk / 'runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so',
+                'coexist': work / f'coexist-{i}/target/release/bin/main'}
+            expected_argv = [_normalize_capture_path(str(wrapper), root, work, sdks),
+                '--sdk-root', _normalize_capture_path(str(sdk), root, work, sdks),
+                'ldd', _normalize_capture_path(str(binaries[name]), root, work, sdks)]
+            expected_cwd = _normalize_capture_path(str(work), root, work, sdks)
+            if command.get('cwd') != expected_cwd or command.get('argv') != expected_argv:
+                raise ValueError('dynamic dependency closure invocation changed: ' + command_id)
+            if command.get('timed_out') or command.get('exit_code') != 0 or 'not found' in text['stdout']:
+                raise ValueError('dynamic dependency closure command is incomplete: ' + command_id)
+            for value in re.findall(r'=>\s+(\S+)\s+\(0x', text['stdout']):
+                path = _resolve_capture_path(value, root, work, sdks)
+                normalized = _normalize_capture_path(str(path), root, work, sdks)
+                if normalized not in dynamic_dependencies:
+                    dynamic_dependencies[normalized] = f'system-dependency-{len(dynamic_dependencies)}'
+    if report.get('dynamic_dependency_closure') != dynamic_dependencies:
+        raise ValueError('system dependency inventory differs from the retained closure commands')
+    bases.update(dynamic_dependencies.values())
+
+    command_id = prefix + 'external-tls-closure'
+    command, text = bound_command(report, command_id, root)
+    expected_argv = ['ldd', _normalize_capture_path(str(openssl_library.resolve()), root, work, sdks)]
+    expected_cwd = _normalize_capture_path(str(work), root, work, sdks)
+    if command.get('cwd') != expected_cwd or command.get('argv') != expected_argv:
+        raise ValueError('external TLS dependency closure invocation changed')
+    if command.get('timed_out') or command.get('exit_code') != 0 or 'not found' in text['stdout']:
+        raise ValueError('external TLS dependency closure is incomplete')
+    external_dependencies = [f'external-tls-dependency-{i}'
+        for i, _ in enumerate(re.findall(r'=>\s+(\S+)\s+\(0x', text['stdout']))]
+    external_fixture = report.get('external_tls_fixture')
+    if not isinstance(external_fixture, dict) or external_fixture.get('dynamic_dependencies') != external_dependencies:
+        raise ValueError('external TLS dependency inventory differs from its retained closure')
+    bases.update(external_dependencies)
+    return bases
+
+
+def gating_command_ids(report: dict, sdk_count: int, scan_bases: set[str]) -> set[str]:
+    """Derive required commands from fixed inputs and an independently derived scan inventory."""
+    prefix = command_prefix(report)
+    ids = {prefix + 'tool-' + name.replace('+', 'p') for name in TOOL_PROGRAMS}
+    ids |= {prefix + 'backend-' + program for program in ('cc1', 'cc1plus')}
+    ids |= {prefix + name for name in ('boundary-tests', 'certificate', 'certificate-der',
+        'key-der', 'external-tls-closure')}
     for index in range(sdk_count):
-        ids |= {f'fixture-{index}-compile', f'fixture-{index}-archive',
-                f'sdk-{index}-compiler-version', f'sdk-{index}-cjpm-version',
-                f'coexist-{index}-build', f'closure-{index}-compiler',
-                f'closure-{index}-runtime', f'closure-{index}-coexist'}
-        ids |= {f'abi-{index}-to-{runtime}' for runtime in range(sdk_count)}
-    bases = [scan['symbol_inventory_command'].removesuffix('-symbols') for scan in report['scans'].values()]
-    if len(set(bases)) != len(bases):
-        raise ValueError('scanner command bases are not unique')
-    ids |= {base + '-' + suffix for base in bases for suffix in SCAN_SUFFIXES}
+        ids |= {prefix + f'fixture-{index}-compile', prefix + f'fixture-{index}-archive',
+                prefix + f'sdk-{index}-compiler-version', prefix + f'sdk-{index}-cjpm-version',
+                prefix + f'coexist-{index}-build', prefix + f'closure-{index}-compiler',
+                prefix + f'closure-{index}-runtime', prefix + f'closure-{index}-coexist'}
+        ids |= {prefix + f'abi-{index}-to-{runtime}' for runtime in range(sdk_count)}
+    for base in scan_bases:
+        scan = report['scans'].get(base)
+        symbol_command = scan.get('symbol_inventory_command') if isinstance(scan, dict) else None
+        suffix = base + '-symbols'
+        if not isinstance(symbol_command, str) or not symbol_command.endswith(suffix):
+            raise ValueError('scanner command does not match independent scan inventory: ' + base)
+        command_base = symbol_command[:-len('-symbols')]
+        ids |= {command_base + '-' + suffix for suffix in SCAN_SUFFIXES}
     return ids
 
 
-def verify_command_inventory(report: dict, sdk_count: int) -> None:
-    """Every gating step is recorded exactly once, and nothing unexplainable is recorded."""
+def verify_command_inventory(report: dict, sdk_count: int, scan_bases: set[str]) -> None:
+    """Every gating step is recorded exactly once, including scans for every declared input."""
+    scans = report.get('scans')
+    if not isinstance(scans, dict) or set(scans) != scan_bases:
+        actual = set(scans) if isinstance(scans, dict) else set()
+        raise ValueError('binary scan inventory is incomplete; missing='
+            + repr(sorted(scan_bases - actual)) + ' extra=' + repr(sorted(actual - scan_bases)))
     ids = [command['id'] for command in report['commands']]
     if len(ids) != len(set(ids)):
         raise ValueError('native command inventory contains duplicates')
-    expected = gating_command_ids(report, sdk_count)
+    expected = gating_command_ids(report, sdk_count, scan_bases)
     if set(ids) != expected:
         raise ValueError('native command inventory is incomplete; missing='
             + repr(sorted(expected - set(ids))) + ' extra=' + repr(sorted(set(ids) - expected)))
@@ -331,12 +442,12 @@ def install_selected_archive(archive: Path, work: Path) -> Path:
     return installed
 
 
-def bind_installed_payload(report: dict, archive: Path) -> None:
-    """The report's installed payload is the selected archive's own payload, not a prior one."""
-    _, manifest = release.read_verified_payload(archive)
+def bind_installed_payload(report: dict, archive: Path) -> list[str]:
+    """Bind the selected archive and return its native archive inventory."""
+    payload, manifest = release.read_verified_payload(archive)
     if not schema_text_sha256_equal(report.get('payload_sha256'), manifest['payload_sha256']):
         raise ValueError('installed payload is not the selected archive; recapture required')
-
+    return sorted(path for path in payload if path.startswith('target/native/') and path.endswith('.a'))
 
 def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
                      replacements: dict) -> None:
@@ -386,40 +497,69 @@ def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
             raise ValueError('compiled optional archive changed: ' + label)
 
 
-def verify_abi_matrix(report: dict, root: Path = ROOT) -> None:
-    """Each cross-SDK row is bound to one command whose retained output proves the cell ran."""
+def verify_abi_matrix(report: dict, root: Path, work: Path, sdks: list[Path], wrapper: Path,
+                      openssl_library: Path, openssl_crypto_library: Path) -> None:
+    """Bind every cross-SDK row to the command for its declared binary and runtime SDK."""
+    prefix = command_prefix(report)
     rows = {row['command']: row for row in report['abi_matrix']}
     if len(rows) != len(report['abi_matrix']):
         raise ValueError('ABI matrix rows do not name distinct commands')
-    recorded = [command['id'] for command in report['commands'] if command['id'].startswith('abi-')]
+    recorded = [command['id'] for command in report['commands']
+        if command['id'].startswith(prefix + 'abi-')]
     if len(recorded) != len(set(recorded)) or set(recorded) != set(rows):
         raise ValueError('ABI command inventory does not match the recorded matrix')
     for command_id, row in rows.items():
-        if command_id != f'abi-{row["built_sdk"]}-to-{row["runtime_sdk"]}':
+        expected_id = prefix + f'abi-{row["built_sdk"]}-to-{row["runtime_sdk"]}'
+        if command_id != expected_id:
             raise ValueError('ABI row is not bound to its own command: ' + command_id)
         command, text = bound_command(report, command_id, root)
         if command['exit_code'] != 0 or command.get('timed_out'):
             raise ValueError('ABI qualification command did not succeed: ' + command_id)
-        # The behavior proof is re-derived from the retained stdout, never from the verdict field.
+        binary = work / f'coexist-{row["built_sdk"]}/target/release/bin/main'
+        sdk = sdks[row['runtime_sdk']]
+        invocation = ['bwrap', '--die-with-parent', '--ro-bind', '/', '/', '--bind', str(work),
+            str(work), '--tmpfs', str(root), '--chdir', str(work), '--', str(wrapper),
+            '--sdk-root', str(sdk), '--cwd', str(work), str(binary),
+            str(work / 'certificate.der'), str(work / 'key.pk8')]
+        expected_argv = [_normalize_capture_path(value, root, work, sdks) for value in invocation]
+        expected_cwd = _normalize_capture_path(str(work), root, work, sdks)
+        if command.get('cwd') != expected_cwd or command.get('argv') != expected_argv:
+            raise ValueError('ABI command invocation differs from its built binary and runtime SDK: ' + command_id)
+        expected_environment = {
+            'WIRESTACK_FIXTURE_OPENSSL_LIBRARY': _normalize_capture_path(
+                str(openssl_library.resolve()), root, work, sdks),
+            'WIRESTACK_FIXTURE_OPENSSL_CRYPTO_LIBRARY': _normalize_capture_path(
+                str(openssl_crypto_library.resolve()), root, work, sdks),
+            'WIRESTACK_FIXTURE_CA_FILE': _normalize_capture_path(str(work / 'certificate.pem'),
+                root, work, sdks),
+            'LD_DEBUG': 'libs'}
+        if command.get('environment') != expected_environment:
+            raise ValueError('ABI command environment differs from its declared TLS fixtures: ' + command_id)
+        # The behavior proof is re-derived from retained stdout, never from the verdict field.
         validate_behavior(text['stdout'])
         if row.get('runtime_loading_proof') != command['stderr']:
             raise ValueError('ABI row loading proof is not its own command log: ' + command_id)
-        library = row.get('runtime_loaded_library')
-        if not library or library not in re.findall(r'calling init:\s+(\S+)', text['stderr']):
+        library = _normalize_capture_path(str(sdk / 'runtime/lib/linux_x86_64_cjnative/libcangjie-runtime.so'),
+            root, work, sdks)
+        if row.get('runtime_loaded_library') != library or library not in re.findall(
+                r'calling init:\s+(\S+)', text['stderr']):
             raise ValueError('ABI row did not load its recorded runtime: ' + command_id)
         built = report['scans'].get('coexist-' + str(row['built_sdk']))
-        if built is None or not artifact_byte_sha256_equal(row['binary_digest'], built['digest']):
+        expected_binary = _normalize_capture_path(str(binary), root, work, sdks)
+        if built is None or built.get('path') != expected_binary \
+                or not artifact_byte_sha256_equal(row['binary_digest'], built['digest']):
             raise ValueError('ABI row executed a binary other than its built artifact: ' + command_id)
 
 
 def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: Path,
+           wrapper: Path, openssl_library: Path, openssl_crypto_library: Path,
            consumers: list[tuple[str, str, Path]] = ()) -> None:
     if len(sdks) != len(report['sdk_inputs']) or report['status'] != 'PASS':
         raise ValueError('incomplete report or different SDK matrix')
     validate_abi_matrix(report['abi_matrix'], len(sdks))
     if not artifact_byte_sha256_equal(report['archive_digest'], artifact_byte_digest(archive).to_json()):
         raise ValueError('archive changed; recapture required')
-    bind_installed_payload(report, archive)
+    archive_scans = bind_installed_payload(report, archive)
     current = {str(p.relative_to(ROOT)): text_evidence_digest(p).to_json() for p in fixture.rglob('*')
                if p.is_file() and p.suffix in ('.cj', '.c', '.toml')}
     current['tools/m12_002_binary.py'] = text_evidence_digest(Path(__file__)).to_json()
@@ -460,7 +600,10 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
             raise ValueError('scanned binary/archive/library changed; recapture required')
         if not text_evidence_sha256_equal(scan.get('scanner', {}), scanner_digest()):
             raise ValueError('scan verdicts predate the current scanner; recapture required')
-    verify_command_inventory(report, len(sdks))
+    scan_bases = expected_scan_bases(report, archive_scans, sdks, list(consumers), work,
+        wrapper, openssl_library)
+    verify_command_inventory(report, len(sdks), scan_bases)
+    abi_prefix = command_prefix(report) + 'abi-'
     for record in report['commands']:
         for key in ('stdout', 'stderr'):
             path = evidence_path(record[key], ROOT, record['id'])
@@ -469,11 +612,11 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
                 raise ValueError('diagnostic log changed')
         if record.get('timed_out'):
             raise ValueError('gating command timed out: ' + record['id'])
-        expected_failure = record['id'].startswith('abi-')
+        expected_failure = record['id'].startswith(abi_prefix)
         if not expected_failure and record['exit_code'] != 0:
             raise ValueError('gating command failed: ' + record['id'])
     verify_scan_verdicts(report)
-    verify_abi_matrix(report)
+    verify_abi_matrix(report, ROOT, work, sdks, wrapper, openssl_library, openssl_crypto_library)
     verify_consumers(report, list(consumers), replacements)
 
 
@@ -499,7 +642,8 @@ def main() -> int:
             if not artifact_byte_sha256_equal(selected_report['external_tls_fixture'][field], artifact_byte_digest(argument.resolve()).to_json()):
                 raise ValueError('independent TLS fixture input changed; recapture required')
         consumers = [consumer_identity(value) for value in args.consumer]
-        verify(selected_report, args.archive, sdks, fixture, work, consumers)
+        verify(selected_report, args.archive, sdks, fixture, work, args.wrapper,
+            args.openssl_library, args.openssl_crypto_library, consumers)
         print('M12_002_BINARY_BINDING_PASS')
         return 0
     work.mkdir(parents=True, mode=0o700, exist_ok=True)
