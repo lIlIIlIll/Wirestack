@@ -6,9 +6,11 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from unittest.mock import patch
 
-from tools.m12_002_source_sdk import (CA_CHECKS, CA_DIAGNOSTICS, COMMAND_CONTRACTS,
-    EXPECTED_COMMANDS, HELPER_SOURCES, HOST_CA_MOUNT, PORT, ROOT, TLS_FIXTURE_FILES, consumer_source_digests, helper_sources,
+from tools.m12_002_source_sdk import (CA_CHECKS, CA_DIAGNOSTICS, CAPTURE_ENVIRONMENT, COMMAND_CONTRACTS,
+    EXPECTED_COMMANDS, HELPER_SOURCES, HOST_CA_MOUNT, PORT, ROOT, TLS_FIXTURE_FILES, Capture,
+    consumer_source_digests, helper_sources,
     native_compiler, validate_resume, verify_ca_checks, verify_command_inventory,
     verify_consumer_sources, verify_helper_sources, verify_report, verify_retained_binary,
     verify_retained_commands, verify_tls_fixtures)
@@ -180,6 +182,23 @@ def contract_argv(name):
     return cwd, [value.replace(PORT, '44595') for value in argv]
 
 
+class CaptureEnvironmentTests(unittest.TestCase):
+    def test_capture_uses_only_the_allowlisted_environment_and_records_it(self):
+        with tempfile.TemporaryDirectory(prefix='m12-source-env-') as directory:
+            root = Path(directory)
+            work, output, sdk = root / 'scratch', root / 'evidence', root / 'sdk'
+            work.mkdir()
+            output.mkdir()
+            with patch.dict(os.environ, {'LD_PRELOAD': '/untrusted/preload.so',
+                    'PYTHONPATH': '/untrusted/python', 'HTTPS_PROXY': 'http://example.test'}):
+                capture = Capture(work, output, sdk)
+                self.assertNotIn('LD_PRELOAD', capture.env)
+                self.assertNotIn('PYTHONPATH', capture.env)
+                self.assertNotIn('HTTPS_PROXY', capture.env)
+                capture.record('probe', ['probe'], work, 0, 0, b'pass\n', b'')
+            self.assertEqual(capture.commands[0]['environment'], CAPTURE_ENVIRONMENT)
+
+
 class CommandInventoryTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory(prefix='m12-source-commands-')
@@ -192,6 +211,7 @@ class CommandInventoryTests(unittest.TestCase):
             logs['stderr'].write_text('')
             self.commands.append({'id': name, 'argv': argv, 'cwd': cwd, 'exit_code': expected,
                 'expected_exit_code': expected, 'timed_out': False,
+                'environment': copy.deepcopy(CAPTURE_ENVIRONMENT),
                 **{stream: {'path': log.name, 'digest': text_evidence_digest(log).to_json()}
                    for stream, log in logs.items()}})
         self.report = {'commands': self.commands,
@@ -248,6 +268,22 @@ class CommandContractTests(CommandInventoryTests):
 
     def test_every_declared_command_has_a_contract(self):
         self.assertEqual(set(COMMAND_CONTRACTS), set(EXPECTED_COMMANDS))
+
+    def test_uncontrolled_environment_is_rejected(self):
+        for key, value in (('LD_PRELOAD', '/untrusted/preload.so'),
+                           ('PYTHONPATH', '/untrusted/python'),
+                           ('HTTPS_PROXY', 'http://example.test')):
+            with self.subTest(key=key):
+                changed = self.changed()
+                changed[0]['environment'][key] = value
+                with self.assertRaisesRegex(ValueError, 'command environment changed: cjc'):
+                    verify_command_inventory(changed, self.evidence)
+
+    def test_command_without_environment_binding_is_rejected(self):
+        changed = self.changed()
+        del changed[0]['environment']
+        with self.assertRaisesRegex(ValueError, 'command environment changed: cjc'):
+            verify_command_inventory(changed, self.evidence)
 
     def test_relocated_consumer_must_not_run_from_the_hidden_tree(self):
         changed = self.changed()

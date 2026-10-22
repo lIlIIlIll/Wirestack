@@ -7,13 +7,14 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 from tools import m7_021_linux_release as release
 from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
 from tools.m12_002_binary import (CONSUMER_APPS, CONSUMER_PROFILES, OPTIONAL_MODULES,
-    SCAN_SUFFIXES, TRUNCATED_ISA, bind_installed_payload, bound_command, consumer_identity,
-    dynamic_fields, expected_scan_bases, gating_command_ids, install_selected_archive, isa_presence,
-    scan_fields, validate_abi_matrix, verify_abi_matrix, verify_command_inventory,
-    verify_consumers, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
+    SCAN_SUFFIXES, TRUNCATED_ISA, Capture, bind_installed_payload, bound_command, consumer_identity,
+    dynamic_fields, expected_scan_inputs, gating_command_ids, install_selected_archive, isa_presence,
+    scan_fields, scanner_digest, validate_abi_matrix, verify_abi_matrix, verify_command_inventory,
+    verify_consumers, verify_scan_inputs, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
 
 
 @unittest.skipUnless(shutil.which('gcc') and shutil.which('readelf'), 'native ELF tools required')
@@ -344,13 +345,22 @@ class IndependentScanInventoryTests(unittest.TestCase):
         for name in ('closure-0-compiler', 'closure-0-runtime', 'closure-0-coexist'):
             self.add_command(name, system_output)
         self.add_command('external-tls-closure', external_output)
-        self.scan_bases = expected_scan_bases(self.report, ['target/native/libfixture.a'],
+        self.scan_inputs = expected_scan_inputs(self.report, ['target/native/libfixture.a'],
             [self.sdk], self.consumers, self.work, self.wrapper, self.openssl_library, self.evidence)
-        self.report['scans'] = {base: {'symbol_inventory_command': base + '-symbols'}
-            for base in self.scan_bases}
-        expected = gating_command_ids(self.report, 1, self.scan_bases)
+        self.report['scans'] = {base: {'path': self.normalize_scan_path(path),
+            'symbol_inventory_command': base + '-symbols'}
+            for base, path in self.scan_inputs.items()}
+        expected = gating_command_ids(self.report, 1, self.scan_inputs)
         existing = {command['id'] for command in self.report['commands']}
         self.report['commands'].extend({'id': command_id} for command_id in sorted(expected - existing))
+
+    def normalize_scan_path(self, path):
+        value = str(path)
+        replacements = ((self.evidence, '<repo>'), (self.work, '<scratch>'),
+            (self.sdk, '<sdk-0>'), (self.work.parent, '<task-scratch>'), (Path.home(), '$HOME'))
+        for actual, token in sorted(replacements, key=lambda item: -len(str(item[0]))):
+            value = value.replace(str(actual), token)
+        return value
 
     def tearDown(self):
         self.directory.cleanup()
@@ -376,7 +386,18 @@ class IndependentScanInventoryTests(unittest.TestCase):
             'stderr': {'path': error.name, 'digest': text_evidence_digest(error).to_json()}})
 
     def test_independently_derived_scan_inventory_accepts_complete_report(self):
-        verify_command_inventory(self.report, 1, self.scan_bases)
+        verify_command_inventory(self.report, 1, self.scan_inputs)
+        verify_scan_inputs(self.report, self.scan_inputs, self.evidence, self.work, [self.sdk])
+
+    def test_scan_label_cannot_borrow_another_artifacts_path(self):
+        self.report['scans']['archive-0']['path'] = self.report['scans']['external-tls-fixture']['path']
+        with self.assertRaisesRegex(ValueError, 'scan path differs from its declared artifact: archive-0'):
+            verify_scan_inputs(self.report, self.scan_inputs, self.evidence, self.work, [self.sdk])
+
+    def test_scanner_command_must_match_its_scan_label(self):
+        self.report['scans']['archive-0']['symbol_inventory_command'] = 'external-tls-fixture-symbols'
+        with self.assertRaisesRegex(ValueError, 'scanner command does not match independent scan inventory: archive-0'):
+            verify_command_inventory(self.report, 1, self.scan_inputs)
 
     def test_deleting_a_scan_and_its_six_command_chain_does_not_shrink_inventory(self):
         base = 'system-dependency-0'
@@ -385,14 +406,14 @@ class IndependentScanInventoryTests(unittest.TestCase):
         self.report['commands'] = [command for command in self.report['commands']
             if command['id'] not in scanner_ids]
         with self.assertRaisesRegex(ValueError, 'binary scan inventory is incomplete'):
-            verify_command_inventory(self.report, 1, self.scan_bases)
+            verify_command_inventory(self.report, 1, self.scan_inputs)
 
     def test_missing_scanner_command_is_rejected(self):
         missing = 'external-tls-dependency-0-dynamic'
         self.report['commands'] = [command for command in self.report['commands']
             if command['id'] != missing]
         with self.assertRaisesRegex(ValueError, 'native command inventory is incomplete'):
-            verify_command_inventory(self.report, 1, self.scan_bases)
+            verify_command_inventory(self.report, 1, self.scan_inputs)
 
     def test_dynamic_dependency_closure_is_bound_to_the_sdk_binary(self):
         command = next(command for command in self.report['commands']
@@ -400,7 +421,7 @@ class IndependentScanInventoryTests(unittest.TestCase):
         command['argv'][-1] = '<sdk-0>/bin/cjc'
         with self.assertRaisesRegex(ValueError,
                 'dynamic dependency closure invocation changed: closure-0-runtime'):
-            expected_scan_bases(self.report, ['target/native/libfixture.a'], [self.sdk],
+            expected_scan_inputs(self.report, ['target/native/libfixture.a'], [self.sdk],
                 self.consumers, self.work, self.wrapper, self.openssl_library, self.evidence)
 
     def test_external_tls_closure_is_bound_to_the_selected_library(self):
@@ -408,7 +429,7 @@ class IndependentScanInventoryTests(unittest.TestCase):
             if command['id'] == 'external-tls-closure')
         command['argv'][-1] = '<repo>/other-libssl.so'
         with self.assertRaisesRegex(ValueError, 'external TLS dependency closure invocation changed'):
-            expected_scan_bases(self.report, ['target/native/libfixture.a'], [self.sdk],
+            expected_scan_inputs(self.report, ['target/native/libfixture.a'], [self.sdk],
                 self.consumers, self.work, self.wrapper, self.openssl_library, self.evidence)
 
 
@@ -444,7 +465,7 @@ class ConsumerEvidenceTests(unittest.TestCase):
         self.consumers = []
         for profile in CONSUMER_PROFILES:
             for app in CONSUMER_APPS:
-                binary = self.root / profile / app / 'main'
+                binary = self.root / profile / app / 'bin/main'
                 binary.parent.mkdir(parents=True)
                 binary.write_bytes((profile + app).encode())
                 self.consumers.append((profile, app, binary))
@@ -458,8 +479,10 @@ class ConsumerEvidenceTests(unittest.TestCase):
                  for index, (_, _, path) in enumerate(consumers)}
         archives = {}
         for profile, app, path in consumers:
+            module_root = path.resolve().parent.parent / 'wirestack'
+            module_root.mkdir(parents=True, exist_ok=True)
             for module in OPTIONAL_MODULES:
-                archive = path.with_name(f'{profile}-{app}-{module}.a')
+                archive = module_root / f'libwirestack.{module}.a'
                 archive.write_bytes(module.encode())
                 label = f'optional-{profile}-{app}-{module}'
                 archives[label] = str(archive)
@@ -651,6 +674,47 @@ class RepeatedCaptureInstallationTests(unittest.TestCase):
         bind_installed_payload({'payload_sha256': manifest['payload_sha256']}, first)
         with self.assertRaisesRegex(ValueError, 'installed payload is not the selected archive'):
             bind_installed_payload({'payload_sha256': manifest['payload_sha256']}, second)
+
+class RepeatedScanCacheTests(unittest.TestCase):
+    """Reused scanner observations are rebound to the current capture command namespace."""
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-scan-cache-')
+        self.base = Path(self.directory.name)
+        self.work = self.base / 'scratch'
+        self.work.mkdir()
+        self.output = self.base / 'docs/evidence/M12-002/binary'
+        self.output.mkdir(parents=True)
+        self.artifact = self.work / 'library.so'
+        self.artifact.write_bytes(b'unchanged scanner input')
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_cached_scan_commands_are_rebound_to_current_attempt(self):
+        prior_commands = []
+        for suffix in SCAN_SUFFIXES:
+            command_id = f'attempt-1-probe-{suffix}'
+            record = {'id': command_id}
+            for stream in ('stdout', 'stderr'):
+                log = self.output / f'{command_id}.{stream}.log'
+                log.write_text(f'{suffix} {stream}\n')
+                record[stream] = {'path': log.relative_to(self.base).as_posix(),
+                    'digest': text_evidence_digest(log).to_json()}
+            prior_commands.append(record)
+        prior_scan = {'path': '<scratch>/library.so',
+            'digest': artifact_byte_digest(self.artifact).to_json(),
+            'scanner': scanner_digest(),
+            'symbol_inventory_command': 'attempt-1-probe-symbols'}
+        with patch('tools.m12_002_binary.ROOT', self.base):
+            capture = Capture(self.output, self.work, [])
+            capture.prefix = 'attempt-2-'
+            capture.prior = {'scans': {'probe': prior_scan}, 'commands': prior_commands}
+            scan = capture.scan('probe', self.artifact)
+        self.assertEqual(scan['symbol_inventory_command'], 'attempt-2-probe-symbols')
+        self.assertEqual([record['id'] for record in capture.commands],
+            [f'attempt-2-probe-{suffix}' for suffix in SCAN_SUFFIXES])
+
 
 
 if __name__ == '__main__':

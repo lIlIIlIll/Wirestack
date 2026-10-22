@@ -208,31 +208,35 @@ def command_prefix(report: dict) -> str:
     return matches[0][:-len('tool-gcc')]
 
 
-def expected_scan_bases(report: dict, archive_scans: list[str], sdks: list[Path],
+def expected_scan_inputs(report: dict, archive_scans: list[str], sdks: list[Path],
                          consumers: list[tuple[str, str, Path]], work: Path, wrapper: Path,
-                         openssl_library: Path, root: Path = ROOT) -> set[str]:
-    """Derive every scan label from declared artifacts and the fixed ldd command outputs."""
+                         openssl_library: Path, root: Path = ROOT) -> dict[str, Path]:
+    """Derive every scan label and exact artifact path from independent inputs."""
     prefix = command_prefix(report)
-    bases = {f'coexist-{i}' for i in range(len(sdks))}
+    scan_inputs = {f'coexist-{i}': work / f'coexist-{i}/target/release/bin/main'
+        for i in range(len(sdks))}
     for i, sdk in enumerate(sdks):
         for j, path in enumerate(sdk_files(sdk)):
             with path.open('rb') as stream:
                 magic = stream.read(4)
             if magic == b'\x7fELF' or path.suffix == '.a':
-                bases.add(f'sdk-{i}-{j}')
-    bases.update(f'archive-{i}' for i, _ in enumerate(archive_scans))
+                scan_inputs[f'sdk-{i}-{j}'] = path
+    scan_inputs.update({f'archive-{i}': work / 'wirestack' / path
+        for i, path in enumerate(archive_scans)})
     expected_consumers = {(profile, app) for profile in CONSUMER_PROFILES for app in CONSUMER_APPS}
     declared_consumers = [(profile, app) for profile, app, _ in consumers]
     if len(declared_consumers) != len(expected_consumers) or set(declared_consumers) != expected_consumers:
         raise ValueError('binary verification requires every declared profile/app installed consumer exactly once')
-    bases.update(f'installed-consumer-{i}' for i in range(len(expected_consumers)))
-    bases.update(f'optional-{profile}-{app}-{module}'
-        for profile, app in expected_consumers for module in OPTIONAL_MODULES)
-    bases.add('external-tls-fixture')
+    for i, (profile, app, binary) in enumerate(sorted(consumers, key=lambda item: (item[0], item[1]))):
+        resolved_binary = binary.resolve()
+        scan_inputs[f'installed-consumer-{i}'] = resolved_binary
+        module_root = resolved_binary.parent.parent / 'wirestack'
+        for module in OPTIONAL_MODULES:
+            scan_inputs[f'optional-{profile}-{app}-{module}'] = module_root / f'libwirestack.{module}.a'
+    scan_inputs['external-tls-fixture'] = openssl_library.resolve()
 
     dynamic_dependencies = {}
-    for i in range(len(sdks)):
-        sdk = sdks[i]
+    for i, sdk in enumerate(sdks):
         for name in ('compiler', 'runtime', 'coexist'):
             command_id = prefix + f'closure-{i}-{name}'
             command, text = bound_command(report, command_id, root)
@@ -251,10 +255,11 @@ def expected_scan_bases(report: dict, archive_scans: list[str], sdks: list[Path]
                 path = _resolve_capture_path(value, root, work, sdks)
                 normalized = _normalize_capture_path(str(path), root, work, sdks)
                 if normalized not in dynamic_dependencies:
-                    dynamic_dependencies[normalized] = f'system-dependency-{len(dynamic_dependencies)}'
+                    label = f'system-dependency-{len(dynamic_dependencies)}'
+                    dynamic_dependencies[normalized] = label
+                    scan_inputs[label] = path
     if report.get('dynamic_dependency_closure') != dynamic_dependencies:
         raise ValueError('system dependency inventory differs from the retained closure commands')
-    bases.update(dynamic_dependencies.values())
 
     command_id = prefix + 'external-tls-closure'
     command, text = bound_command(report, command_id, root)
@@ -264,16 +269,18 @@ def expected_scan_bases(report: dict, archive_scans: list[str], sdks: list[Path]
         raise ValueError('external TLS dependency closure invocation changed')
     if command.get('timed_out') or command.get('exit_code') != 0 or 'not found' in text['stdout']:
         raise ValueError('external TLS dependency closure is incomplete')
-    external_dependencies = [f'external-tls-dependency-{i}'
-        for i, _ in enumerate(re.findall(r'=>\s+(\S+)\s+\(0x', text['stdout']))]
+    external_dependencies = []
+    for i, value in enumerate(re.findall(r'=>\s+(\S+)\s+\(0x', text['stdout'])):
+        label = f'external-tls-dependency-{i}'
+        external_dependencies.append(label)
+        scan_inputs[label] = _resolve_capture_path(value, root, work, sdks)
     external_fixture = report.get('external_tls_fixture')
     if not isinstance(external_fixture, dict) or external_fixture.get('dynamic_dependencies') != external_dependencies:
         raise ValueError('external TLS dependency inventory differs from its retained closure')
-    bases.update(external_dependencies)
-    return bases
+    return scan_inputs
 
 
-def gating_command_ids(report: dict, sdk_count: int, scan_bases: set[str]) -> set[str]:
+def gating_command_ids(report: dict, sdk_count: int, scan_inputs: dict[str, Path]) -> set[str]:
     """Derive required commands from fixed inputs and an independently derived scan inventory."""
     prefix = command_prefix(report)
     ids = {prefix + 'tool-' + name.replace('+', 'p') for name in TOOL_PROGRAMS}
@@ -286,31 +293,44 @@ def gating_command_ids(report: dict, sdk_count: int, scan_bases: set[str]) -> se
                 prefix + f'coexist-{index}-build', prefix + f'closure-{index}-compiler',
                 prefix + f'closure-{index}-runtime', prefix + f'closure-{index}-coexist'}
         ids |= {prefix + f'abi-{index}-to-{runtime}' for runtime in range(sdk_count)}
-    for base in scan_bases:
+    for base in scan_inputs:
         scan = report['scans'].get(base)
         symbol_command = scan.get('symbol_inventory_command') if isinstance(scan, dict) else None
-        suffix = base + '-symbols'
-        if not isinstance(symbol_command, str) or not symbol_command.endswith(suffix):
+        expected_symbol_command = prefix + base + '-symbols'
+        if symbol_command != expected_symbol_command:
             raise ValueError('scanner command does not match independent scan inventory: ' + base)
-        command_base = symbol_command[:-len('-symbols')]
+        command_base = prefix + base
         ids |= {command_base + '-' + suffix for suffix in SCAN_SUFFIXES}
     return ids
 
 
-def verify_command_inventory(report: dict, sdk_count: int, scan_bases: set[str]) -> None:
-    """Every gating step is recorded exactly once, including scans for every declared input."""
+def verify_command_inventory(report: dict, sdk_count: int, scan_inputs: dict[str, Path]) -> None:
+    """Every gating step is recorded exactly once, with each scan bound to its declared artifact."""
     scans = report.get('scans')
-    if not isinstance(scans, dict) or set(scans) != scan_bases:
+    expected = set(scan_inputs)
+    if not isinstance(scans, dict) or set(scans) != expected:
         actual = set(scans) if isinstance(scans, dict) else set()
         raise ValueError('binary scan inventory is incomplete; missing='
-            + repr(sorted(scan_bases - actual)) + ' extra=' + repr(sorted(actual - scan_bases)))
+            + repr(sorted(expected - actual)) + ' extra=' + repr(sorted(actual - expected)))
     ids = [command['id'] for command in report['commands']]
     if len(ids) != len(set(ids)):
         raise ValueError('native command inventory contains duplicates')
-    expected = gating_command_ids(report, sdk_count, scan_bases)
-    if set(ids) != expected:
+    required = gating_command_ids(report, sdk_count, scan_inputs)
+    if set(ids) != required:
         raise ValueError('native command inventory is incomplete; missing='
-            + repr(sorted(expected - set(ids))) + ' extra=' + repr(sorted(set(ids) - expected)))
+            + repr(sorted(required - set(ids))) + ' extra=' + repr(sorted(set(ids) - required)))
+
+
+def verify_scan_inputs(report: dict, scan_inputs: dict[str, Path], root: Path,
+                       work: Path, sdks: list[Path]) -> None:
+    """Require each scan label to identify its independently selected artifact."""
+    for label, path in scan_inputs.items():
+        scan = report['scans'].get(label)
+        expected_path = _normalize_capture_path(str(path), root, work, sdks)
+        if not isinstance(scan, dict) or scan.get('path') != expected_path:
+            raise ValueError('scan path differs from its declared artifact: ' + label)
+
+
 
 
 def verify_scan_verdicts(report: dict, root: Path = ROOT) -> None:
@@ -404,19 +424,26 @@ class Capture:
                 continue
             if not text_evidence_sha256_equal(old.get('scanner'), scanner_digest()):
                 continue
-            base = old['symbol_inventory_command'].removesuffix('-symbols')
-            records = [r for r in self.prior['commands'] if r['id'].startswith(base+'-')]
-            if not records or len({r['id'] for r in records}) != len(records):
+            old_base = old['symbol_inventory_command'].removesuffix('-symbols')
+            old_ids = {old_base + '-' + suffix for suffix in SCAN_SUFFIXES}
+            records = [record for record in self.prior['commands'] if record.get('id') in old_ids]
+            if len(records) != len(SCAN_SUFFIXES) or {record['id'] for record in records} != old_ids:
                 continue
             try:
                 for record in records:
                     for key in ('stdout', 'stderr'):
-                        if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(ROOT / record[key]['path']).to_json()):
+                        log = evidence_path(record[key], ROOT, record['id'])
+                        if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(log).to_json()):
                             raise ValueError('prior scan diagnostic changed')
-            except ValueError:
+            except (KeyError, TypeError, ValueError):
                 continue
-            self.commands.extend(r for r in records if r not in self.commands)
-            return dict(old)
+            current_base = self.prefix + label
+            for record in records:
+                suffix = record['id'][len(old_base) + 1:]
+                self.commands.append({**record, 'id': current_base + '-' + suffix})
+            rebound = dict(old)
+            rebound['symbol_inventory_command'] = current_base + '-symbols'
+            return rebound
         header = self.run(label+'-headers', ['readelf', '-hW', str(path)])
         dynamic = self.run(label+'-dynamic', ['readelf', '-dW', str(path)])
         symbol_versions = self.run(label+'-versions', ['readelf', '-VW', str(path)])
@@ -443,11 +470,11 @@ def install_selected_archive(archive: Path, work: Path) -> Path:
 
 
 def bind_installed_payload(report: dict, archive: Path) -> list[str]:
-    """Bind the selected archive and return its native archive inventory."""
+    """Bind the selected archive and return every native archive input in its payload."""
     payload, manifest = release.read_verified_payload(archive)
     if not schema_text_sha256_equal(report.get('payload_sha256'), manifest['payload_sha256']):
         raise ValueError('installed payload is not the selected archive; recapture required')
-    return sorted(path for path in payload if path.startswith('target/native/') and path.endswith('.a'))
+    return sorted(path for path in payload if path.endswith('.a'))
 
 def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
                      replacements: dict) -> None:
@@ -481,11 +508,14 @@ def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
         if not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(path.resolve()).to_json()):
             raise ValueError('installed consumer changed: ' + profile + '/' + app)
     archives = report.get('compiled_optional_modules', {})
-    # Archive labels carry the consumer identity, so a reordered capture cannot pass by position.
-    expected_archives = {f'optional-{profile}-{app}-{module}' for profile, app, _ in consumers
-        for module in OPTIONAL_MODULES}
-    if set(archives) != expected_archives:
-        raise ValueError('compiled optional archive inventory is incomplete')
+    expected_archives = {}
+    for profile, app, binary in consumers:
+        module_root = binary.resolve().parent.parent / 'wirestack'
+        for module in OPTIONAL_MODULES:
+            label = f'optional-{profile}-{app}-{module}'
+            expected_archives[label] = normalize(str(module_root / f'libwirestack.{module}.a'))
+    if archives != expected_archives:
+        raise ValueError('compiled optional archive inventory is incomplete or misbound to its installed consumers')
     for label, path in archives.items():
         resolved = path
         for token, value in replacements.items():
@@ -495,6 +525,7 @@ def verify_consumers(report: dict, consumers: list[tuple[str, str, Path]],
         scan = report['scans'].get(label)
         if scan is None or not artifact_byte_sha256_equal(scan['digest'], artifact_byte_digest(Path(resolved)).to_json()):
             raise ValueError('compiled optional archive changed: ' + label)
+
 
 
 def verify_abi_matrix(report: dict, root: Path, work: Path, sdks: list[Path], wrapper: Path,
@@ -592,6 +623,10 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
             path = path.replace(label, str(replacement))
         if not artifact_byte_sha256_equal(digest, artifact_byte_digest(Path(path)).to_json()):
             raise ValueError('native tool changed; recapture required')
+    scan_inputs = expected_scan_inputs(report, archive_scans, sdks, list(consumers), work,
+        wrapper, openssl_library)
+    verify_command_inventory(report, len(sdks), scan_inputs)
+    verify_scan_inputs(report, scan_inputs, ROOT, work, sdks)
     for name, scan in report['scans'].items():
         path = scan['path']
         for label, replacement in replacements.items():
@@ -600,9 +635,6 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
             raise ValueError('scanned binary/archive/library changed; recapture required')
         if not text_evidence_sha256_equal(scan.get('scanner', {}), scanner_digest()):
             raise ValueError('scan verdicts predate the current scanner; recapture required')
-    scan_bases = expected_scan_bases(report, archive_scans, sdks, list(consumers), work,
-        wrapper, openssl_library)
-    verify_command_inventory(report, len(sdks), scan_bases)
     abi_prefix = command_prefix(report) + 'abi-'
     for record in report['commands']:
         for key in ('stdout', 'stderr'):
@@ -719,7 +751,9 @@ def main() -> int:
                 'digest': text_evidence_digest(path).to_json(), 'content': json.loads(capture.normalize(json.dumps(value)))}
             if '-march=native' in json.dumps(value) or '-mcpu=native' in json.dumps(value):
                 raise ValueError('native ISA flags in shipped manifest')
-        for i, path in enumerate(sorted(installed.rglob('*.a'))):
+        archive_paths = sorted(installed.rglob('*.a'),
+            key=lambda path: path.relative_to(installed).as_posix())
+        for i, path in enumerate(archive_paths):
             report['scans'][f'archive-{i}'] = capture.scan(f'archive-{i}', path)
         report['optional_modules'] = {'gzip': 'pure Cangjie, no native compression archive',
             'sse': 'pure Cangjie', 'observability': 'pure Cangjie', 'websocket': 'in HTTP package'}
@@ -782,7 +816,8 @@ def main() -> int:
                     magic = stream.read(4)
                 if magic == b'\x7fELF' or path.suffix == '.a':
                     report['scans'][f'sdk-{i}-{j}'] = capture.scan(f'sdk-{i}-{j}', path)
-        installed_consumers = [consumer_identity(value) for value in args.consumer]
+        installed_consumers = sorted((consumer_identity(value) for value in args.consumer),
+            key=lambda item: (item[0], item[1]))
         report['consumers'] = {}
         for profile, app, binary in installed_consumers:
             if profile + '/' + app in report['consumers']:

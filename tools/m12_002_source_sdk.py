@@ -73,6 +73,25 @@ CONSUMER_DIRECTORY = '<scratch>/relocated/consumers/'
 CONSUMER_BINARY = '/target/release/bin/main'
 
 
+# Captures run with an allowlisted environment. Every value is recorded in each command
+# report using these normalized paths; ambient loader, Python and proxy variables are absent.
+CAPTURE_ENVIRONMENT = {
+    'PATH': os.pathsep.join(('<sdk>/bin', '<sdk>/tools/bin', os.defpath)),
+    'HOME': '<scratch>/home',
+    'TMPDIR': '<scratch>',
+    'TMP': '<scratch>',
+    'TEMP': '<scratch>',
+    'DISABLE_ZOXIDE': '1',
+    'CANGJIE_HOME': '<sdk>',
+    'CANGJIE_SDK_ROOT': '<sdk>',
+    'LD_LIBRARY_PATH': os.pathsep.join(('<sdk>/runtime/lib/linux_x86_64_cjnative', '<sdk>/tools/lib')),
+    'CJ_SDK_LIBPATH': os.pathsep.join(('<sdk>/runtime/lib/linux_x86_64_cjnative', '<sdk>/tools/lib')),
+    'LANG': 'C',
+    'LC_ALL': 'C',
+    'TZ': 'UTC',
+    'PYTHONNOUSERSITE': '1',
+}
+
 def consumer(app: str, *arguments: str) -> list[str]:
     """The relocated installed consumer binary for one M11-004 application."""
     return [CONSUMER_DIRECTORY + app + CONSUMER_BINARY, *arguments]
@@ -272,8 +291,14 @@ def verify_command_argv(command: dict, shape: tuple[str, list[str]]) -> None:
             raise ValueError('command shape changed: ' + command['id'])
 
 
+def verify_command_environment(command: dict) -> None:
+    """Only the fixed, recorded source-capture environment is eligible to support a verdict."""
+    if command.get('environment') != CAPTURE_ENVIRONMENT:
+        raise ValueError('command environment changed: ' + command['id'])
+
 def verify_command_contract(command: dict) -> None:
-    """Require the command's own recorded invocation to be one declared, reproducible shape."""
+    """Require the exact recorded environment and a declared, reproducible invocation."""
+    verify_command_environment(command)
     shapes = COMMAND_CONTRACTS.get(command['id'])
     if not shapes:
         raise ValueError('command has no declared contract: ' + command['id'])
@@ -405,11 +430,26 @@ def validate_resume(previous: dict, report: dict) -> None:
 class Capture:
     def __init__(self, work: Path, output: Path, sdk: Path):
         self.work, self.output, self.sdk = work, output, sdk
-        self.env = dict(os.environ, TMPDIR=str(work), TMP=str(work), TEMP=str(work), DISABLE_ZOXIDE='1')
-        self.env['PATH'] = os.pathsep.join((str(sdk / 'bin'), str(sdk / 'tools/bin'), os.environ['PATH']))
-        self.env['CANGJIE_HOME'] = self.env['CANGJIE_SDK_ROOT'] = str(sdk)
-        self.env['LD_LIBRARY_PATH'] = ':'.join((str(sdk / 'runtime/lib/linux_x86_64_cjnative'), str(sdk / 'tools/lib')))
-        self.env['CJ_SDK_LIBPATH'] = self.env['LD_LIBRARY_PATH']
+        home = work / 'home'
+        home.mkdir(parents=True, exist_ok=True)
+        library_path = os.pathsep.join((str(sdk / 'runtime/lib/linux_x86_64_cjnative'),
+            str(sdk / 'tools/lib')))
+        self.env = {
+            'PATH': os.pathsep.join((str(sdk / 'bin'), str(sdk / 'tools/bin'), os.defpath)),
+            'HOME': str(home),
+            'TMPDIR': str(work),
+            'TMP': str(work),
+            'TEMP': str(work),
+            'DISABLE_ZOXIDE': '1',
+            'CANGJIE_HOME': str(sdk),
+            'CANGJIE_SDK_ROOT': str(sdk),
+            'LD_LIBRARY_PATH': library_path,
+            'CJ_SDK_LIBPATH': library_path,
+            'LANG': 'C',
+            'LC_ALL': 'C',
+            'TZ': 'UTC',
+            'PYTHONNOUSERSITE': '1',
+        }
         self.commands = []
 
     def normalize(self, text: str) -> str:
@@ -433,7 +473,8 @@ class Capture:
 
     def record(self, name: str, argv: list[str], cwd: Path, code: int | None, expected: int, out: bytes, err: bytes, timed_out: bool = False):
         entry = {'id': name, 'argv': [self.normalize(value) for value in argv], 'cwd': self.normalize(str(cwd)),
-            'exit_code': code, 'expected_exit_code': expected, 'timed_out': timed_out}
+            'exit_code': code, 'expected_exit_code': expected, 'timed_out': timed_out,
+            'environment': {key: self.normalize(value) for key, value in self.env.items()}}
         for stream, raw in (('stdout', out), ('stderr', err)):
             path = self.output / f'{name}.{stream}.log'
             path.write_text(self.normalize(raw.decode(errors='replace')))
