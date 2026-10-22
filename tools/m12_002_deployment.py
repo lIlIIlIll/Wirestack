@@ -5,14 +5,14 @@ import argparse
 import json
 import os
 from pathlib import Path
-import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from tools.evidence_digest import artifact_byte_digest, artifact_byte_sha256_equal, schema_artifact_sha256_equal, text_evidence_digest
-from tools.m12_002_source_sdk import verify_report as verify_source
+from tools.m12_002_source_sdk import native_compiler_digest, verify_report as verify_source
+from tools import m7_021_linux_release as release
 from tools.m12_002_platform import verify_report as verify_platform
 
 from tools.m12_002_binary import verify as verify_binary
@@ -37,6 +37,22 @@ def selected_sdks() -> dict[str, Path]:
     return result
 
 
+def require_compiler_binding(report: dict) -> None:
+    """A retained source profile only qualifies builds from the compiler that produced it."""
+    require(artifact_byte_sha256_equal(native_compiler_digest(), report['native_cc_digest']),
+        'native compiler changed; old source profile cannot qualify new build inputs')
+
+
+def require_production_inventory(report: dict) -> None:
+    """Bind the profile to the complete current production source set, not to its own keys."""
+    expected = {str(path.relative_to(ROOT)) for path in release.production_sources(ROOT)}
+    require(set(report['production_sources']) == expected,
+        'source profile production inventory is not the current production sources')
+    for relative, digest in report['production_sources'].items():
+        require(artifact_byte_sha256_equal(digest, artifact_byte_digest(ROOT / relative).to_json()),
+            'production source changed: ' + relative)
+
+
 def current_inputs(binary_report: Path | None = None) -> dict:
     selected = selected_sdks()
     profiles = {}
@@ -44,13 +60,11 @@ def current_inputs(binary_report: Path | None = None) -> dict:
         path = SOURCE_REPORTS[name]
         report = json.loads(path.read_text())
         verify_source(report, ARCHIVE, sdk, path.parent)
-        require(artifact_byte_digest(Path(shutil.which('cc'))).to_json() == report['native_cc_digest'],
-            'native compiler changed; old source profile cannot qualify new build inputs')
+        require_compiler_binding(report)
         profiles[name] = report
     require(profiles['stable']['production_sources'] == profiles['candidate']['production_sources'],
         'source profiles did not use identical production inputs')
-    for relative, expected in profiles['stable']['production_sources'].items():
-        require(artifact_byte_digest(ROOT / relative).to_json() == expected, 'production source changed: ' + relative)
+    require_production_inventory(profiles['stable'])
     for relative, expected in profiles['stable']['native_archives'].items():
         require(artifact_byte_digest(ROOT / relative).to_json() == expected, 'native archive changed: ' + relative)
     native = json.loads(PLATFORM_REPORT.read_text())
@@ -121,7 +135,8 @@ def contracts() -> int:
     os.environ['WIRESTACK_SOURCE_SDK_ROOT'] = str(selected_sdks()['stable'])
     os.environ['WIRESTACK_SOURCE_SDK_REPORT'] = str(SOURCE_REPORTS['stable'])
     suite = unittest.defaultTestLoader.loadTestsFromNames(('tools.tests.test_m12_002_source_sdk',
-        'tools.tests.test_m12_002_platform', 'tools.tests.test_m12_002_binary'))
+        'tools.tests.test_m12_002_platform', 'tools.tests.test_m12_002_binary',
+        'tools.tests.test_m12_002_deployment'))
     result = unittest.TextTestRunner(verbosity=1).run(suite)
     return 0 if result.wasSuccessful() and not result.skipped else 1
 
