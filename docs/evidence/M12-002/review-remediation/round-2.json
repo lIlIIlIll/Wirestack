@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "kind": "review-remediation-round",
+  "task_id": "M12-002",
+  "round": 2,
+  "status": "BLOCKED",
+  "completion_claim": false,
+  "release_qualification": "NOT_QUALIFIED",
+  "revision": {
+    "branch": "fix/stack200-m12-002",
+    "commit": "202ca728f8e850682e8497a556e1e2ae181c3e0e",
+    "publication": "LOCAL_ONLY"
+  },
+  "scope": "Verifier and regression-test hardening only; no deployment profile was recaptured and no production runtime behavior changed.",
+  "remediated_findings": [
+    {
+      "area": "binary ABI evidence",
+      "change": "Each ABI row now requires the retained command argv/cwd to identify its declared wrapper, built coexist binary, runtime SDK, certificate/key inputs and bwrap isolation. Its recorded environment must select the declared OpenSSL fixtures and CA file and enable LD_DEBUG=libs.",
+      "tests": [
+        "test_abi_command_must_run_its_declared_inputs",
+        "test_abi_command_must_use_declared_tls_fixtures_and_loader_trace"
+      ]
+    },
+    {
+      "area": "binary scan inventory",
+      "change": "Required scan labels and exact artifact paths are derived from the selected archive payload, SDK files, fixed consumer/profile/module set and retained dynamic-dependency closures, not from report.scans. The ldd closure commands are bound to their declared binary/library, wrapper, SDK root and working directory; scanner command IDs must match their labels.",
+      "tests": [
+        "test_deleting_a_scan_and_its_six_command_chain_does_not_shrink_inventory",
+        "test_missing_scanner_command_is_rejected",
+        "test_scan_label_cannot_borrow_another_artifacts_path",
+        "test_scanner_command_must_match_its_scan_label",
+        "test_dynamic_dependency_closure_is_bound_to_the_sdk_binary",
+        "test_external_tls_closure_is_bound_to_the_selected_library"
+      ]
+    },
+    {
+      "area": "cached binary scan reuse",
+      "change": "A cached observation is reused only with its exact six prior scanner records and unchanged, evidence-root-contained log digests. The six command IDs and the row's symbol_inventory_command are rebound to the current capture prefix.",
+      "tests": [
+        "test_cached_scan_commands_are_rebound_to_current_attempt"
+      ]
+    },
+    {
+      "area": "evidence path containment",
+      "change": "Binary command logs and source-SDK command logs/payloads are resolved and required to remain beneath their evidence roots, including symlink targets.",
+      "tests": [
+        "test_symlinked_command_log_cannot_escape_evidence_root",
+        "test_symlinked_evidence_path_cannot_escape_tree"
+      ]
+    },
+    {
+      "area": "source-SDK command and fixture validation",
+      "change": "The verifier accepts only the exact optional host CA mount for each system-CA scenario and rejects unrelated mounts. Retained TLS fixtures must use a well-formed typed artifact-byte SHA-256 digest.",
+      "tests": [
+        "test_optional_host_ca_mount_is_accepted_for_all_system_scenarios",
+        "test_unrelated_mount_is_rejected_with_optional_host_ca_mount",
+        "test_malformed_byte_digest_is_rejected"
+      ]
+    },
+    {
+      "area": "source-SDK capture environment",
+      "change": "Source capture no longer inherits ambient process variables. It uses the fixed allowlist, records the normalized environment per command, and the verifier rejects absent or changed bindings.",
+      "tests": [
+        "test_capture_uses_only_the_allowlisted_environment_and_records_it",
+        "test_uncontrolled_environment_is_rejected",
+        "test_command_without_environment_binding_is_rejected"
+      ]
+    }
+  ],
+  "files_changed": [
+    "tools/m12_002_binary.py",
+    "tools/tests/test_m12_002_binary.py",
+    "tools/m12_002_source_sdk.py",
+    "tools/tests/test_m12_002_source_sdk.py",
+    "docs/evidence/M12-002/README.md",
+    "docs/evidence/M12-002/review-remediation/round-2.json",
+    "docs/planning/status.md"
+  ],
+  "verification": [
+    {
+      "command": "python3 -m unittest tools.tests.test_m12_002_source_sdk tools.tests.test_m12_002_binary -v",
+      "environment": "TMPDIR, TMP and TEMP pointed to disk-backed task scratch",
+      "exit_code": 0,
+      "result": "Ran 123 tests in 1.598s, OK (skipped=1). SourceSdkEvidenceTests was skipped because real captured source-SDK report/root inputs were not supplied."
+    },
+    {
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0,
+      "result": "architecture guard: PASS"
+    },
+    {
+      "command": "python3 tools/m12_002_deployment.py verify",
+      "exit_code": 1,
+      "result": "ValueError: task source inventory is incomplete; the committed verification.json predates the current source inventory."
+    },
+    {
+      "command": "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/task-gate.json",
+      "exit_code": 2,
+      "result": "status INVALID; DEPENDENCY_INCOMPLETE: M10-004 dependency is not COMPLETE: M10-003",
+      "output": "docs/evidence/M12-002/review-remediation/task-gate.json"
+    }
+  ],
+  "qualification_blockers": [
+    "Current deployment verification rejects the stale committed source inventory.",
+    "The task gate exits before running task commands because the repository dependency closure includes blocked M10-003.",
+    "The selected M12-001 development archive, a second authorized supported SDK and the native KVM guest with the selected glibc 2.44 runtime are unavailable for recapture."
+  ],
+  "not_run": [
+    "M12-002 source-SDK capture",
+    "M12-002 binary capture and verification",
+    "M12-002 native-platform capture and verification",
+    "M12-002 deployment collect",
+    "tools/m12_002_deployment.py contracts"
+  ],
+  "independent_security_review": {
+    "result": "No findings.",
+    "scope": [
+      "tools/m12_002_binary.py",
+      "tools/tests/test_m12_002_binary.py",
+      "tools/m12_002_source_sdk.py",
+      "tools/tests/test_m12_002_source_sdk.py"
+    ],
+    "confirmed_fix": "Cached scanner command IDs are rebound to the current attempt only after exact six-command and retained-log verification."
+  },
+  "publication": {
+    "pr": 229,
+    "known_state_before_push": "OPEN/DRAFT",
+    "push_command": "but push fix/stack200-m12-002",
+    "push_exit_code": 1,
+    "failed_revision": "572a22eae7b272b414b4bf3280dfb4bae12e651e",
+    "current_local_revision": "202ca728f8e850682e8497a556e1e2ae181c3e0e",
+    "result": "The push of the earlier local revision was rejected. The current local revision remains unpublished; PR #229 and its description were not updated."
+  }
+}
