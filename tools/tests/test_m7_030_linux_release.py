@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import copy
 import gzip
 import io
@@ -25,28 +26,94 @@ class M7030LinuxReleaseTest(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         return private
 
+    def synthetic_artifact(self, root: Path) -> bytes:
+        """Build a tiny deterministic release archive for hermetic tests."""
+        path = root / "synthetic-artifact.tar.gz"
+        self.archive(path, [("wirestack-0.1.0/release-manifest.json",
+                             b'{"synthetic":true}\n', "file")])
+        return path.read_bytes()
+
+    @contextlib.contextmanager
+    def frozen_fixture(self, root: Path):
+        """Pin a synthetic frozen artifact, supply chain, and workflow together.
+
+        Success-path tests must not read the ignored ``dist/m7-021`` staging
+        directory or touch the network, so they materialise their own artifact
+        and pin the expected size and digest for the duration of the test. The
+        production constants keep their real values; the workflow copy is
+        rewritten so the pinned-digest cross-check still holds against the
+        expectation that is active inside the block.
+        """
+        real_chain = release.SUPPLY_CHAIN
+        real_workflow = (release.ROOT / release.WORKFLOW).read_text(encoding="utf-8")
+        payload = self.synthetic_artifact(root)
+        artifact = root / "dist/m7-021" / release.FROZEN_ARTIFACT_NAME
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        artifact.write_bytes(payload)
+        digest = evidence_digest.artifact_bytes_sha256(payload)
+        chain = root / "supply-chain"
+        chain.mkdir(exist_ok=True)
+        for name in ("provider-manifest.json", "sbom.spdx.json",
+                     "build-fingerprint.json", "bundle.json"):
+            (chain / name).write_bytes((real_chain / name).read_bytes())
+        bundle = release.load_json(chain / "bundle.json")
+        if "payloadSha256" in bundle["artifact"]:
+            bundle["artifact"]["payloadSha256"] = digest
+        bundle["artifact"]["bytes"] = len(payload)
+        bundle["artifact"]["sha256"] = digest
+        (chain / "bundle.json").write_bytes(release.canonical_json(bundle))
+        staged_workflow = real_workflow.replace(release.FROZEN_ARTIFACT_SHA256, digest)
+        with contextlib.ExitStack() as stack:
+            for name, value in (
+                ("ARTIFACT", artifact),
+                ("SUPPLY_CHAIN", chain),
+                ("SBOM", chain / "sbom.spdx.json"),
+                ("FROZEN_ARTIFACT_BYTES", len(payload)),
+                ("FROZEN_ARTIFACT_SHA256", digest),
+            ):
+                stack.enter_context(unittest.mock.patch.object(release, name, value))
+            stack.enter_context(
+                unittest.mock.patch.object(release, "workflow_text",
+                                           lambda: staged_workflow)
+            )
+            yield artifact
+
     def test_current_inputs_build_strict_deterministic_manifest(self) -> None:
-        first = release.build_release_manifest()
-        second = release.build_release_manifest()
-        self.assertEqual(release.canonical_json(first), release.canonical_json(second))
-        self.assertEqual("c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee",
-                         first["subjects"][0]["sha256"])
-        self.assertEqual(["artifact", "sbom"], [item["name"] for item in first["subjects"]])
+        bundle = release.load_json(release.SUPPLY_CHAIN / "bundle.json")
+        self.assertEqual(bundle["artifact"]["sha256"], release.FROZEN_ARTIFACT_SHA256)
+        self.assertEqual(bundle["artifact"]["bytes"], release.FROZEN_ARTIFACT_BYTES)
+        self.assertEqual(bundle["artifact"]["name"], release.FROZEN_ARTIFACT_NAME)
+        # The committed retrieval receipt must describe the same production pin.
+        receipt = release.load_json(release.ROOT / "docs/evidence/M7-030/frozen-artifact.json")
+        self.assertEqual(receipt["decision"], "PASS")
+        self.assertEqual(receipt["sha256"], release.FROZEN_ARTIFACT_SHA256)
+        self.assertEqual(receipt["bytes"], release.FROZEN_ARTIFACT_BYTES)
+        self.assertEqual(receipt["name"], release.FROZEN_ARTIFACT_NAME)
+        self.assertEqual(receipt["tag"], release.FROZEN_ARTIFACT_TAG)
+        with tempfile.TemporaryDirectory() as directory:
+            with self.frozen_fixture(Path(directory)) as artifact:
+                first = release.build_release_manifest()
+                second = release.build_release_manifest()
+                self.assertEqual(release.canonical_json(first), release.canonical_json(second))
+                self.assertEqual(
+                    evidence_digest.artifact_bytes_sha256(artifact.read_bytes()),
+                    first["subjects"][0]["sha256"],
+                )
+                self.assertEqual(["artifact", "sbom"],
+                                 [item["name"] for item in first["subjects"]])
 
     def test_missing_or_stale_supply_chain_input_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            for name in ("provider-manifest.json", "sbom.spdx.json",
-                         "build-fingerprint.json", "bundle.json"):
-                (root / name).write_bytes((release.SUPPLY_CHAIN / name).read_bytes())
-            bundle = release.load_json(root / "bundle.json")
-            bundle["documents"]["sbom.spdx.json"]["sha256"] = "0" * 64
-            (root / "bundle.json").write_bytes(release.canonical_json(bundle))
-            with self.assertRaisesRegex(release.ReleaseError, "SUPPLY_CHAIN_STALE"):
-                release.build_release_manifest(supply_chain=root)
-            (root / "provider-manifest.json").unlink()
-            with self.assertRaisesRegex(release.ReleaseError, "JSON_INVALID"):
-                release.build_release_manifest(supply_chain=root)
+            with self.frozen_fixture(Path(directory)):
+                chain = release.SUPPLY_CHAIN
+                bundle = release.load_json(chain / "bundle.json")
+                bundle["documents"]["sbom.spdx.json"]["sha256"] = "0" * 64
+                (chain / "bundle.json").write_bytes(release.canonical_json(bundle))
+                with self.assertRaisesRegex(release.ReleaseError, "SUPPLY_CHAIN_STALE"):
+                    release.build_release_manifest()
+                (chain / "provider-manifest.json").unlink()
+                with self.assertRaisesRegex(release.ReleaseError, "JSON_INVALID"):
+                    release.build_release_manifest()
 
     def test_json_duplicates_unknown_schema_paths_and_subjects_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -54,7 +121,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             path.write_text('{"schemaVersion":1,"schemaVersion":2}', encoding="utf-8")
             with self.assertRaisesRegex(release.ReleaseError, "JSON_DUPLICATE"):
                 release.load_json(path)
-        manifest = release.build_release_manifest()
+        with tempfile.TemporaryDirectory() as directory:
+            with self.frozen_fixture(Path(directory)):
+                manifest = release.build_release_manifest()
         unknown = copy.deepcopy(manifest)
         unknown["unknown"] = True
         with self.assertRaisesRegex(release.ReleaseError, "MANIFEST_SCHEMA"):
@@ -79,15 +148,18 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                     task_id="M8-007", workflow=workflow,
                     qualified_inputs=[qualification], root=root,
                 )
-            first = manifest()
+            with self.frozen_fixture(root):
+                first = manifest()
             private = self.key(root)
             public = release.public_key(private)
             signature = root / "manifest.sig"
             release.sign_bytes(private, release.canonical_json(first), signature)
             release.verify_bytes(public, release.canonical_json(first), signature, "release-manifest")
             qualification.write_text('{"decision":"FAIL"}\n', encoding="utf-8")
+            with self.frozen_fixture(root):
+                resigned = manifest()
             with self.assertRaisesRegex(release.ReleaseError, "SIGNATURE_INVALID"):
-                release.verify_bytes(public, release.canonical_json(manifest()), signature, "release-manifest")
+                release.verify_bytes(public, release.canonical_json(resigned), signature, "release-manifest")
             with self.assertRaisesRegex(release.ReleaseError, "MANIFEST_POLICY"):
                 release.validate_release_manifest(first, task_id="M8-007")
             first["qualifiedInputs"]["qualification.json"]["domain"] = "artifact-bytes-v1"
@@ -103,8 +175,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             outside.write_text("{}\n", encoding="utf-8")
             link = child / "qualification.json"
             link.symlink_to(outside)
-            with self.assertRaisesRegex(release.ReleaseError, "PATH_UNSAFE"):
-                release.build_release_manifest(qualified_inputs=[link], root=child)
+            with self.frozen_fixture(root):
+                with self.assertRaisesRegex(release.ReleaseError, "PATH_UNSAFE"):
+                    release.build_release_manifest(qualified_inputs=[link], root=child)
 
     def test_key_type_identity_and_location_fail_closed_without_secret_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -123,42 +196,44 @@ class M7030LinuxReleaseTest(unittest.TestCase):
     def test_offline_rehearsal_verifies_and_all_subject_or_signature_mutations_fail(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            private = self.key(root)
-            output = root / "signed"
-            index = release.create_offline_bundle(
-                private, private.with_suffix(".pub"), output, allow_temporary_key=True
-            )
-            self.assertEqual("REHEARSAL", index["classification"])
-            public = output / "release-signing-key.pub"
-            self.assertEqual("PASS", release.verify_offline_bundle(output, public)["decision"])
-
-            artifact = root / release.ARTIFACT.name
-            artifact.write_bytes(release.ARTIFACT.read_bytes() + b"x")
-            with self.assertRaises(release.ReleaseError):
-                release.verify_offline_bundle(output, public, artifact=artifact)
-            sbom = root / "sbom.spdx.json"
-            sbom.write_bytes(release.SBOM.read_bytes() + b" ")
-            with self.assertRaises(release.ReleaseError):
-                release.verify_offline_bundle(output, public, sbom=sbom)
-            manifest_path = output / "release-manifest.json"
-            original_manifest = manifest_path.read_bytes()
-            manifest = release.load_json(manifest_path)
-            manifest["release"]["version"] = "tampered"
-            manifest_path.write_bytes(release.canonical_json(manifest))
-            with self.assertRaisesRegex(release.ReleaseError, "SIGNATURE_INVALID"):
-                release.verify_offline_bundle(output, public)
-            manifest_path.write_bytes(original_manifest)
-
-            for name in ("artifact", "sbom", "release-manifest"):
-                signature = output / f"{name}.sig"
-                original = signature.read_bytes()
-                mutation = len(original) // 2
-                signature.write_bytes(
-                    original[:mutation] + bytes([original[mutation] ^ 1]) + original[mutation + 1:]
+            with self.frozen_fixture(root):
+                private = self.key(root)
+                output = root / "signed"
+                index = release.create_offline_bundle(
+                    private, private.with_suffix(".pub"), output, allow_temporary_key=True
                 )
+                self.assertEqual("REHEARSAL", index["classification"])
+                public = output / "release-signing-key.pub"
+                self.assertEqual("PASS", release.verify_offline_bundle(output, public)["decision"])
+
+                artifact = root / release.ARTIFACT.name
+                artifact.write_bytes(release.ARTIFACT.read_bytes() + b"x")
+                with self.assertRaises(release.ReleaseError):
+                    release.verify_offline_bundle(output, public, artifact=artifact)
+                sbom = root / "sbom.spdx.json"
+                sbom.write_bytes(release.SBOM.read_bytes() + b" ")
+                with self.assertRaises(release.ReleaseError):
+                    release.verify_offline_bundle(output, public, sbom=sbom)
+                manifest_path = output / "release-manifest.json"
+                original_manifest = manifest_path.read_bytes()
+                manifest = release.load_json(manifest_path)
+                manifest["release"]["version"] = "tampered"
+                manifest_path.write_bytes(release.canonical_json(manifest))
                 with self.assertRaisesRegex(release.ReleaseError, "SIGNATURE_INVALID"):
                     release.verify_offline_bundle(output, public)
-                signature.write_bytes(original)
+                manifest_path.write_bytes(original_manifest)
+
+                for name in ("artifact", "sbom", "release-manifest"):
+                    signature = output / f"{name}.sig"
+                    original = signature.read_bytes()
+                    mutation = len(original) // 2
+                    signature.write_bytes(
+                        original[:mutation] + bytes([original[mutation] ^ 1])
+                        + original[mutation + 1:]
+                    )
+                    with self.assertRaisesRegex(release.ReleaseError, "SIGNATURE_INVALID"):
+                        release.verify_offline_bundle(output, public)
+                    signature.write_bytes(original)
 
     def test_atomic_report_failure_preserves_previous_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -187,7 +262,8 @@ class M7030LinuxReleaseTest(unittest.TestCase):
     def test_clean_consumer_and_malicious_archives(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            extracted = release.safe_extract(release.ARTIFACT, root / "consumer")
+            with self.frozen_fixture(root):
+                extracted = release.safe_extract(release.ARTIFACT, root / "consumer")
             self.assertTrue((extracted / "release-manifest.json").is_file())
             cases = (
                 [("../escape", b"x", "file")],
@@ -457,27 +533,30 @@ class M7030LinuxReleaseTest(unittest.TestCase):
     def test_frozen_asset_prerequisite_rejects_missing_and_wrong_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            missing = root / release.FROZEN_ARTIFACT_NAME
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
-                release.verify_frozen_artifact(missing)
-            wrong_name = root / "wirestack-0.1.0-linux-x86_64-musl.tar.gz"
-            wrong_name.write_bytes(release.ARTIFACT.read_bytes())
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_NAME"):
-                release.verify_frozen_artifact(wrong_name)
-            sized = root / release.FROZEN_ARTIFACT_NAME
-            sized.write_bytes(release.ARTIFACT.read_bytes()[:-1])
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_SIZE"):
-                release.verify_frozen_artifact(sized)
-            original = release.ARTIFACT.read_bytes()
-            sized.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
-            self.assertEqual(release.FROZEN_ARTIFACT_BYTES, sized.stat().st_size)
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DIGEST"):
-                release.verify_frozen_artifact(sized)
-            sized.write_bytes(original)
-            verified = release.verify_frozen_artifact(sized)
-            self.assertEqual("PASS", verified["decision"])
-            self.assertEqual(release.FROZEN_ARTIFACT_SHA256, verified["sha256"])
-            self.assertEqual(release.FROZEN_ARTIFACT_TAG, verified["tag"])
+            with self.frozen_fixture(root):
+                missing = root / "absent" / release.FROZEN_ARTIFACT_NAME
+                with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
+                    release.verify_frozen_artifact(missing)
+                wrong_name = root / "wirestack-0.1.0-linux-x86_64-musl.tar.gz"
+                wrong_name.write_bytes(release.ARTIFACT.read_bytes())
+                with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_NAME"):
+                    release.verify_frozen_artifact(wrong_name)
+                original = release.ARTIFACT.read_bytes()
+                sized = root / "sized" / release.FROZEN_ARTIFACT_NAME
+                sized.parent.mkdir()
+                sized.write_bytes(original[:-1])
+                with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_SIZE"):
+                    release.verify_frozen_artifact(sized)
+                # A one-byte flip keeps the size and must still be rejected.
+                sized.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+                self.assertEqual(release.FROZEN_ARTIFACT_BYTES, sized.stat().st_size)
+                with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DIGEST"):
+                    release.verify_frozen_artifact(sized)
+                sized.write_bytes(original)
+                verified = release.verify_frozen_artifact(sized)
+                self.assertEqual("PASS", verified["decision"])
+                self.assertEqual(release.FROZEN_ARTIFACT_SHA256, verified["sha256"])
+                self.assertEqual(release.FROZEN_ARTIFACT_TAG, verified["tag"])
 
     def test_clean_checkout_without_frozen_asset_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -496,70 +575,75 @@ class M7030LinuxReleaseTest(unittest.TestCase):
     def test_frozen_artifact_retrieval_uses_exact_asset_and_verifies_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            target = root / "dist/m7-021" / release.FROZEN_ARTIFACT_NAME
-            commands: list[list[str]] = []
+            with self.frozen_fixture(root):
+                self._retrieval_uses_exact_asset(root)
 
-            def good(argv):
-                commands.append(list(argv))
-                directory_argument = Path(argv[argv.index("--dir") + 1])
-                directory_argument.mkdir(parents=True, exist_ok=True)
-                (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
-                    release.ARTIFACT.read_bytes()
-                )
-                return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+    def _retrieval_uses_exact_asset(self, root: Path) -> None:
+        target = root / "retrieval" / release.FROZEN_ARTIFACT_NAME
+        commands: list[list[str]] = []
 
-            staged = release.fetch_frozen_artifact(target, runner=good)
-            self.assertEqual("downloaded-and-verified-frozen-artifact", staged["mode"])
-            self.assertEqual(release.FROZEN_ARTIFACT_SHA256, staged["sha256"])
-            self.assertEqual(release.ARTIFACT.read_bytes(), target.read_bytes())
-            self.assertEqual(
-                [
-                    "gh", "release", "download", release.FROZEN_ARTIFACT_TAG,
-                    "--repo", release.REPOSITORY,
-                    "--pattern", release.FROZEN_ARTIFACT_NAME, "--dir",
-                ],
-                commands[0][: len(commands[0]) - 1],
+        def good(argv):
+            commands.append(list(argv))
+            directory_argument = Path(argv[argv.index("--dir") + 1])
+            directory_argument.mkdir(parents=True, exist_ok=True)
+            (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
+                release.ARTIFACT.read_bytes()
             )
-            self.assertNotIn("--latest", commands[0])
-            again = release.fetch_frozen_artifact(target, runner=good)
-            self.assertEqual("verified-existing-artifact", again["mode"])
-            self.assertEqual(1, len(commands))
+            return release.subprocess.CompletedProcess(argv, 0, b"", b"")
 
-            tampered = root / "second" / release.FROZEN_ARTIFACT_NAME
+        staged = release.fetch_frozen_artifact(target, runner=good)
+        self.assertEqual("downloaded-and-verified-frozen-artifact", staged["mode"])
+        self.assertEqual(release.FROZEN_ARTIFACT_SHA256, staged["sha256"])
+        self.assertEqual(release.ARTIFACT.read_bytes(), target.read_bytes())
+        self.assertEqual(
+            [
+                "gh", "release", "download", release.FROZEN_ARTIFACT_TAG,
+                "--repo", release.REPOSITORY,
+                "--pattern", release.FROZEN_ARTIFACT_NAME, "--dir",
+            ],
+            commands[0][: len(commands[0]) - 1],
+        )
+        self.assertNotIn("--latest", commands[0])
+        again = release.fetch_frozen_artifact(target, runner=good)
+        self.assertEqual("verified-existing-artifact", again["mode"])
+        self.assertEqual(1, len(commands))
 
-            def beyond(argv):
-                directory_argument = Path(argv[argv.index("--dir") + 1])
-                directory_argument.mkdir(parents=True, exist_ok=True)
-                original = release.ARTIFACT.read_bytes()
-                (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
-                    original[:-1] + bytes([original[-1] ^ 1])
-                )
-                return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+        tampered = root / "second" / release.FROZEN_ARTIFACT_NAME
 
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DIGEST"):
-                release.fetch_frozen_artifact(tampered, runner=beyond)
-            self.assertFalse(tampered.exists())
+        def beyond(argv):
+            directory_argument = Path(argv[argv.index("--dir") + 1])
+            directory_argument.mkdir(parents=True, exist_ok=True)
+            original = release.ARTIFACT.read_bytes()
+            (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
+                original[:-1] + bytes([original[-1] ^ 1])
+            )
+            return release.subprocess.CompletedProcess(argv, 0, b"", b"")
 
-            def irrelevant(argv):
-                directory_argument = Path(argv[argv.index("--dir") + 1])
-                directory_argument.mkdir(parents=True, exist_ok=True)
-                (directory_argument / "other.tar.gz").write_bytes(b"x")
-                return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+        with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DIGEST"):
+            release.fetch_frozen_artifact(tampered, runner=beyond)
+        self.assertFalse(tampered.exists())
 
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
-                release.fetch_frozen_artifact(root / "third" / release.FROZEN_ARTIFACT_NAME,
-                                              runner=irrelevant)
+        def irrelevant(argv):
+            directory_argument = Path(argv[argv.index("--dir") + 1])
+            directory_argument.mkdir(parents=True, exist_ok=True)
+            (directory_argument / "other.tar.gz").write_bytes(b"x")
+            return release.subprocess.CompletedProcess(argv, 0, b"", b"")
 
-            def failed(argv):
-                return release.subprocess.CompletedProcess(argv, 1, b"", b"not found")
+        with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_MISSING"):
+            release.fetch_frozen_artifact(root / "third" / release.FROZEN_ARTIFACT_NAME,
+                                          runner=irrelevant)
 
-            with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DOWNLOAD"):
-                release.fetch_frozen_artifact(root / "fourth" / release.FROZEN_ARTIFACT_NAME,
-                                              runner=failed)
+        def failed(argv):
+            return release.subprocess.CompletedProcess(argv, 1, b"", b"not found")
+
+        with self.assertRaisesRegex(release.ReleaseError, "FROZEN_ASSET_DOWNLOAD"):
+            release.fetch_frozen_artifact(root / "fourth" / release.FROZEN_ARTIFACT_NAME,
+                                          runner=failed)
 
     def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            report = release.local_rehearsal(Path(directory))
+            with self.frozen_fixture(Path(directory)):
+                report = release.local_rehearsal(Path(directory) / "work")
             self.assertEqual("PASS", report["decision"])
             self.assertEqual("REHEARSAL", report["classification"])
             self.assertEqual("PASS", report["updateFlow"]["decision"])
