@@ -71,11 +71,12 @@
     },
     "python3 tools/m12_002_deployment.py contracts": {
       "exit_code": 1,
-      "log": "docs/evidence/M12-002/review-remediation/contracts-both.log",
       "without_sdk_environment": "ValueError: WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify",
       "with_sdk_environment": "Exit 1: Ran 75 tests, 3 failures in SourceSdkEvidenceTests because the selected archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is absent; the archive binding is checked before the reconstructed SDK closure and command inventory.",
-      "log_without_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-no-env.log",
-      "log_with_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-with-env.log"
+      "logs": {
+        "without_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-no-env.log",
+        "with_sdk_environment": "docs/evidence/M12-002/review-remediation/contracts-with-env.log"
+      }
     },
     "python3 tools/m12_002_deployment.py verify": {
       "exit_code": 1,
