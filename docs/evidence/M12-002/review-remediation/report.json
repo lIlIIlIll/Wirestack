@@ -98,6 +98,12 @@
         "with_sdk_environment": "docs/evidence/M12-002/review-remediation/verify.log"
       },
       "note": "The selected development archive is not tracked and is absent from this clone, so no deployment snapshot can be verified."
+    },
+    "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/task-gate.json": {
+      "exit_code": 2,
+      "result": "{\"status\": \"INVALID\", \"issues\": [{\"code\": \"DEPENDENCY_INCOMPLETE\", \"detail\": \"M10-004 dependency is not COMPLETE: M10-003\"}]}",
+      "log": "docs/evidence/M12-002/review-remediation/task-gate.log",
+      "note": "The gate refuses to start because the task-scope dependency closure is still global; that is P1-012, not an M12-002 verdict. Recorded as observed, not weakened."
     }
   },
   "rejected_stale_records": {
