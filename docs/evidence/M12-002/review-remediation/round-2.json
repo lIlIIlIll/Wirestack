@@ -9,7 +9,7 @@
   "revision": {
     "branch": "fix/stack200-m12-002",
     "commit": "202ca728f8e850682e8497a556e1e2ae181c3e0e",
-    "publication": "LOCAL_ONLY"
+    "publication": "PUBLISHED_TO_PR_229"
   },
   "scope": "Verifier and regression-test hardening only; no deployment profile was recaptured and no production runtime behavior changed.",
   "remediated_findings": [
@@ -126,9 +126,10 @@
     "pr": 229,
     "known_state_before_push": "OPEN/DRAFT",
     "push_command": "but push fix/stack200-m12-002",
-    "push_exit_code": 1,
+    "push_exit_code": 0,
     "failed_revision": "572a22eae7b272b414b4bf3280dfb4bae12e651e",
-    "current_local_revision": "202ca728f8e850682e8497a556e1e2ae181c3e0e",
-    "result": "The push of the earlier local revision was rejected. The current local revision remains unpublished; PR #229 and its description were not updated."
+    "verified_source_revision": "202ca728f8e850682e8497a556e1e2ae181c3e0e",
+    "published_revision": "b597baa25c73859548e5ac547a844ad3c43e7fd6",
+    "result": "The initial push of the earlier local revision was rejected. After correcting only this checkout's HTTPS authentication route, the verified source revision was published to PR #229 and its description was refreshed. PR #229 remains OPEN/DRAFT; no merge or ready transition occurred."
   }
 }
