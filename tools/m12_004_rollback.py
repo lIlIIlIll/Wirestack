@@ -218,6 +218,26 @@ def security(args: argparse.Namespace, report: dict) -> None:
     report["security"] = {"status": "PASS", "disposition": digest.text_evidence_digest(args.security_disposition).to_json()}
 
 
+def active_candidate(pointer: dict, deployment: Path, candidate_sha256: str) -> Path:
+    """Return the stored artifact readers actually resolve for this pointer.
+
+    Readers resolve ``current.json`` through its ``version`` directory, so the
+    compare-and-swap must bind that version to the candidate digest. A pointer
+    whose digest and version disagree is not the candidate deployment.
+    """
+    require(digest.schema_artifact_sha256_equal(pointer.get("artifact", {}).get("sha256"), candidate_sha256),
+            "DEPLOYMENT_CHANGED", "candidate compare-and-swap failed")
+    version = pointer.get("version")
+    require(isinstance(version, str) and version not in {"", ".", ".."} and Path(version).name == version,
+            "DEPLOYMENT_CHANGED", "active deployment version is missing or unsafe")
+    require(version == candidate_sha256, "DEPLOYMENT_CHANGED",
+            "active deployment version does not match the candidate digest")
+    stored = deployment / "versions" / version / "artifact.tar.gz"
+    require(stored.is_file() and not stored.is_symlink(), "DEPLOYMENT_CHANGED",
+            "active deployment artifact is missing")
+    return stored
+
+
 def restore(args: argparse.Namespace, artifact: Path, report: dict) -> None:
     deployment = args.deployment.resolve()
     require(deployment.is_relative_to(args.work_root.resolve()) and deployment != args.work_root.resolve(),
@@ -228,19 +248,27 @@ def restore(args: argparse.Namespace, artifact: Path, report: dict) -> None:
         active = deployment / "current.json"
         before = active.read_bytes()
         current = signing.load_json(active)
-        require(digest.schema_artifact_sha256_equal(current.get("artifact", {}).get("sha256"), args.candidate_sha256),
-                "DEPLOYMENT_CHANGED", "candidate compare-and-swap failed")
-        old = deployment / "versions" / args.candidate_sha256 / "artifact.tar.gz"
+        old = active_candidate(current, deployment, args.candidate_sha256)
         require(digest.schema_artifact_sha256_equal(digest.artifact_byte_sha256(old), args.candidate_sha256),
                 "DEPLOYMENT_CHANGED", "installed candidate bytes differ")
         version = deployment / "versions" / report["bindings"]["artifact"]["sha256"]
-        version.mkdir(parents=True, exist_ok=False)
-        signing.atomic_bytes(version / "artifact.tar.gz", artifact.read_bytes())
-        for path in (artifact.parent / "signatures").iterdir():
-            require(path.is_file() and not path.is_symlink(), "SIGNATURE_PATH", "regular signature sidecars required")
-            signing.atomic_bytes(version / path.name, path.read_bytes())
+        require(not version.exists(), "DEPLOYMENT_CHANGED", "rollback version already staged")
+        staging = deployment / "versions" / (".staging-" + report["bindings"]["artifact"]["sha256"])
+        shutil.rmtree(staging, ignore_errors=True)
+        try:
+            staging.mkdir(parents=True, exist_ok=False)
+            signing.atomic_bytes(staging / "artifact.tar.gz", artifact.read_bytes())
+            for path in (artifact.parent / "signatures").iterdir():
+                require(path.is_file() and not path.is_symlink(), "SIGNATURE_PATH", "regular signature sidecars required")
+                signing.atomic_bytes(staging / path.name, path.read_bytes())
+            require(active.read_bytes() == before, "DEPLOYMENT_CHANGED", "deployment changed during staging")
+            # Re-bind the staged candidate to the still-active version under the lock.
+            active_candidate(signing.load_json(active), deployment, args.candidate_sha256)
+            staging.rename(version)
+        except BaseException:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
         signing.atomic_bytes(deployment / "previous-current.json", before)
-        require(active.read_bytes() == before, "DEPLOYMENT_CHANGED", "deployment changed during staging")
         signing.atomic_json(active, {"artifact": report["bindings"]["artifact"], "version": version.name})
         report["restore"] = "PASS"
 

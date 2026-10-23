@@ -30,12 +30,42 @@ TEST_FILES = ('src/internal/tls_engine/m3_028_fuzz_test.cj',
               'src/http/deterministic_fuzz_test.cj')
 
 
-def inventory(installed, payload):
-    return {name: d.artifact_byte_digest(installed / name).to_json() for name in sorted(payload)}
+def tree_inventory(installed):
+    """Complete regular-file inventory of an extracted candidate.
+
+    Hashing only archive-declared paths hides added test sources, corpora and
+    ``target`` build output, so every entry under the installation is bound.
+    """
+    entries = {}
+    for path in sorted(installed.rglob('*')):
+        relative = path.relative_to(installed).as_posix()
+        if path.is_symlink():
+            raise ValueError('installed candidate contains a symbolic link: ' + relative)
+        if path.is_dir():
+            continue
+        if not path.is_file():
+            raise ValueError('installed candidate contains a non-regular entry: ' + relative)
+        entries[relative] = d.artifact_byte_digest(path).to_json()
+    return entries
+
+
+def payload_inventory(payload):
+    return {name: d.artifact_byte_digest_bytes(raw).to_json() for name, raw in sorted(payload.items())}
+
+
+def tree_digest(entries):
+    rendered = ''.join(name + '\0' + entries[name]['sha256'] + '\n' for name in sorted(entries))
+    return d.text_evidence_digest_bytes(rendered.encode('utf-8')).to_json()
+
+
+def assert_pristine(installed, payload):
+    """Require the installation to contain exactly the archive payload."""
+    if tree_inventory(installed) != payload_inventory(payload):
+        raise ValueError('installed candidate does not equal the extracted archive')
 
 
 def assert_unchanged(installed, payload, before):
-    if inventory(installed, payload) != before or (installed / 'build.cj').exists():
+    if tree_inventory(installed) != before or before != payload_inventory(payload):
         raise ValueError('installed candidate production/native payload changed')
 
 
@@ -201,12 +231,13 @@ def execute(args):
     report['archive'] = d.artifact_byte_digest(args.artifact).to_json()
     report['baseline_archive'] = d.artifact_byte_digest(args.baseline).to_json()
     report['provider'] = manifest['provider']
-    installed = release.extract_archive(args.artifact, runner.work / 'candidate-install')
     baseline_payload, _ = release.read_verified_payload(args.baseline)
-    baseline = release.extract_archive(args.baseline, runner.work / 'baseline-install')
-    before = inventory(installed, payload)
-    baseline_before = inventory(baseline, baseline_payload)
+    installed = release.extract_archive(args.artifact, runner.work / 'candidate-install')
+    before = tree_inventory(installed)
+    report['archive_payload'] = payload_inventory(payload)
     report['installed_payload_before'] = before
+    report['installed_payload_digest'] = tree_digest(before)
+    assert_pristine(installed, payload)
     production = {str(p.relative_to(ROOT)): d.artifact_byte_digest(p).to_json() for p in release.production_sources(ROOT)}
     for name, digest in production.items():
         if name not in before or digest != before[name]:
@@ -217,37 +248,69 @@ def execute(args):
               *(ROOT / name for name in TEST_FILES), *(ROOT / 'fuzz/corpus/m7-023/v1').glob('*.hex')]
     report['gate_inputs'] = {p.relative_to(ROOT).as_posix(): d.text_evidence_digest(p).to_json() for p in inputs}
     for name, action in [('tls', lambda: tls_gate(runner, installed)),
-                         ('fuzz', lambda: fuzz_gate(runner, installed, report)),
-                         ('performance', lambda: performance_gate(runner, {'baseline': baseline, 'candidate': installed}))]:
+                         ('fuzz', lambda: fuzz_gate(runner, args.artifact, payload, report)),
+                         ('performance', lambda: performance_action(runner, args, payload, baseline_payload, report))]:
+        integrity = None
         try:
             assert_unchanged(installed, payload, before)
             report[name] = action()
         except Exception as error:
             report[name] = {'status': 'FAIL', 'error': runner.redact(str(error))}
         finally:
+            # Integrity is re-checked even when the gate above raised.
             try:
                 assert_unchanged(installed, payload, before)
-                assert_unchanged(baseline, baseline_payload, baseline_before)
             except Exception as error:
-                report['integrity'] = {'status': 'FAIL', 'error': runner.redact(str(error))}
-                report['status'] = 'FAIL'
-                write_report(args.output / 'report.json', report, runner)
-                return 1
+                integrity = error
+        if integrity is not None:
+            report['integrity'] = {'status': 'FAIL', 'error': runner.redact(str(integrity))}
+            report['status'] = 'FAIL'
             write_report(args.output / 'report.json', report, runner)
-    report['installed_payload_after'] = inventory(installed, payload)
+            return 1
+        write_report(args.output / 'report.json', report, runner)
+    report['installed_payload_after'] = tree_inventory(installed)
     report['production_sources_unchanged'] = production == {str(p.relative_to(ROOT)): d.artifact_byte_digest(p).to_json() for p in release.production_sources(ROOT)}
     report['final_bindings'] = {'archive': d.artifact_byte_digest(args.artifact).to_json(),
         'baseline_archive': d.artifact_byte_digest(args.baseline).to_json(), 'sdk_files': upgrade.validate_sdk(sdk),
         'gate_inputs': {p.relative_to(ROOT).as_posix(): d.text_evidence_digest(p).to_json() for p in inputs}}
-    report['bindings_unchanged'] = report['production_sources_unchanged'] and all(
-        report[key] == value for key, value in report['final_bindings'].items())
+    report['bindings_unchanged'] = (report['production_sources_unchanged'] and report['installed_payload_after'] == before
+        and all(report[key] == value for key, value in report['final_bindings'].items()))
     report['status'] = 'FAIL' if not report['bindings_unchanged'] or any(report[name]['status'] == 'FAIL' for name in ('tls', 'fuzz', 'performance')) else 'COMPLETE_NOT_QUALIFIED'
     write_report(args.output / 'report.json', report, runner)
     return 1 if report['status'] == 'FAIL' else 0
 
 
-def fuzz_gate(runner, installed, report):
+def performance_action(runner, args, payload, baseline_payload, report):
+    """Measure a freshly extracted pair, never a directory another gate touched.
+
+    The fuzz gate adds test sources, corpora and compiled output. Extracting the
+    archives again after that gate and binding the new trees means the measured
+    binaries provably come from the archives, not from the fuzz-era directory.
+    """
+    candidate = release.extract_archive(args.artifact, runner.work / 'performance-candidate')
+    baseline = release.extract_archive(args.baseline, runner.work / 'performance-baseline')
+    assert_pristine(candidate, payload)
+    assert_pristine(baseline, baseline_payload)
+    binding = {'candidate': {'archive': d.artifact_byte_digest(args.artifact).to_json(),
+                             'tree': tree_digest(tree_inventory(candidate))},
+               'baseline': {'archive': d.artifact_byte_digest(args.baseline).to_json(),
+                            'tree': tree_digest(tree_inventory(baseline))}}
+    report['performance_installations'] = binding
+    result = performance_gate(runner, {'baseline': baseline, 'candidate': candidate})
+    assert_pristine(candidate, payload)
+    assert_pristine(baseline, baseline_payload)
+    result['installations'] = binding
+    result['archive_binding'] = {'candidate': d.artifact_byte_digest(args.artifact).to_json(),
+                                 'baseline': d.artifact_byte_digest(args.baseline).to_json()}
+    return result
+
+
+def fuzz_gate(runner, artifact, payload, report):
     manifest, targets = fuzz.load_manifest(ROOT, ROOT / 'tools/gates/campaigns/m7-023-linux-fuzz.json')
+    # The overlay needs its own extraction so the pristine candidate tree stays
+    # comparable with the archive, including the directories fuzz adds.
+    installed = release.extract_archive(artifact, runner.work / 'fuzz-candidate')
+    assert_pristine(installed, payload)
     report['test_overlay'] = overlay(ROOT, installed, targets)
     runner.run('fuzz-build', fuzz.build_command(), installed, 1200)
     with patch.dict(os.environ, runner.env):

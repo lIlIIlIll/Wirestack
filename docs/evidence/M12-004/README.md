@@ -175,6 +175,30 @@ Published files separate captured artifact bytes from normalized text digests.
 Only this supplement and the current M12-004 status are updated; no SDK/provider
 build, commit, push, issue edit or signing occurs. M12-004 remains BLOCKED.
 
+## Stack #200 review remediation
+
+Six confirmed findings from the historical PR #211 review were repaired against
+the current sources: rollback compare-and-swap bound to the active version
+(#295), a re-extracted pristine candidate before the performance leg (#296), a
+revalidated archive before the inventory report is bound (#297), the task
+manifest inside its own source inventory (#298), a post-build source recheck
+(#299), and a pristine fuzz positive control that a BLOCKED baseline can no
+longer bypass (#300).
+
+The [remediation record](review-remediation/report.json) lists each invariant,
+the [baseline red log](review-remediation/baseline-red.log) and the
+[branch green log](review-remediation/branch-green.log) are the executable
+proof, and the two control reports that recorded `STALE_FUZZ_INPUTS` beside
+`PASS` are preserved byte-exactly under
+[review-remediation/historical](review-remediation/historical). Their live
+copies are retired to `FAIL`/`BLOCKED`.
+
+No capture was rerun. The candidate, baseline and M7-021 archives, the STS SDK
+and the native VM remain absent, no rollback disposition exists, and the
+committed index still binds pre-remediation sources. M12-004 therefore remains
+BLOCKED and nothing here is performance, fuzz, rollback or release
+qualification.
+
 ## Workspace and remaining prerequisites
 
 Physical branch `gitbutler/workspace`; logical task branch `m12-004-dependency-rehearsal`; HEAD `e023996a847a863bc52be20983139ff6d28d9625`; main merge base `00d6864f8f5dee6a5c13a5a68144135e9e9601bc`. The initial safety record contains 272 dirty entries: 0 staged, 134 unstaged and 138 untracked. Paths use `<repo>`/`$HOME` placeholders.

@@ -1,259 +1,259 @@
 {
-  "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-10-09T21:06:19.426902Z",
-  "platform": {
-    "libc": "glibc",
-    "libc_version": "2.44",
-    "machine": "x86_64",
-    "system": "Linux"
+ "acceptance_status": "BLOCKED",
+ "generated_at_utc": "2026-10-09T21:06:19.426902Z",
+ "platform": {
+  "libc": "glibc",
+  "libc_version": "2.44",
+  "machine": "x86_64",
+  "system": "Linux"
+ },
+ "reports": [
+  {
+   "acceptance_status": "BLOCKED",
+   "path": "docs/evidence/M12-004/workspace.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "81733ab6361f5482da20d4a5b5bc1b49960ad246b05850d2648c89b2aac3c029"
+   },
+   "source_task": "M12-004"
   },
-  "reports": [
-    {
-      "acceptance_status": "BLOCKED",
-      "path": "docs/evidence/M12-004/workspace.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "81733ab6361f5482da20d4a5b5bc1b49960ad246b05850d2648c89b2aac3c029"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/upgrade/report.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "87e2a12557d43db63710c5481edf5dac1915a40c051e62b9e3d0578a0c6f32db"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/inventory/candidate/inventory.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "52297359ca9dd664627b064412bb9d474164d5695ea15cc110e7322a80bfc07d"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/verifier-controls/candidate-verification.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "c76af0446f621ec96849cbb2f394f95659bfd20512981df81248534648cbffdb"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "BLOCKED",
-      "path": "docs/evidence/M12-004/rollback/final-candidate-refusal.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "5e80a312f4a4d7baa4b044ed4023898507c8cfcf02630e58ee70f2bcea80dfd4"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "REQUIRES_REMEDIATION",
-      "path": "docs/evidence/M12-004/review/independent-review.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "e78bd20f7889417ae23fef7a999faa6c00f0f8d8bee45e8004c44c53b73c75d3"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "REQUIRES_REMEDIATION_OUTSIDE_CLOSED_M12_FINDINGS",
-      "path": "docs/evidence/M12-004/review/independent-review-followup.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "1c8a7ddcbdbfef8539ea5f4d609a26dee3c2c732f5ef8b86e986c8b77f6df9d7"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "FAIL",
-      "path": "docs/evidence/M12-004/candidate-gates/final2/report.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "c5743509b7983daa2d7b177affdb86bbf5d8f28612f611728f60a1d3e7d2e828"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/installed/sts113-upgrade/report.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "ced8dc893d8f2bdb7e461567db311f6e6dec99aca351064ddc8602c71effebb7"
-      },
-      "source_task": "M12-002"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/installed/index.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "40953b4a30798131e9259334d2bfe3e323ecb60c28a114ec6f303fa0c12cae7c"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/native-floor/index.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "b76d7347f636c5d9a3513ca0af454b41be54e4b4a40dc0d9e7c04b792ad31fde"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/native-floor/native-glibc244/report.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "dff5dba2bcb39baa4b095bd9cbed7be2b81c7f7e5f5e4b04f0a895facd23114f"
-      },
-      "source_task": "M12-002"
-    },
-    {
-      "acceptance_status": "BLOCKED",
-      "path": "docs/evidence/M12-004/matrix/native-floor/owned-cleanup.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "65a41b6ba982a0b7447d8178dd1dca9a9173050187e7a141e9c41f7d8020da09"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/binary/report.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "a074144e588b3a6a8696cc77f5824d7527aa9998fd4aebb5a0830626ee80d3f3"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/binary/index.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "044b2b4ccf2dae5eeca16454aa4340e6d7f5946598a05318b11f5b69dab358a2"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/matrix/binary/summary.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "db83b0bf753c3cd163dbf8cc2af7d9a42a3d59c3f133d668542d29e71d6b8840"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "PASS",
-      "path": "docs/evidence/M12-004/integration/tests.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "69c686de2ce7c8f02c8a08d64ff1ed0a7a5f29c882f3561461251ee7e13d56e6"
-      },
-      "source_task": "M12-004"
-    },
-    {
-      "acceptance_status": "BLOCKED",
-      "path": "docs/evidence/M12-004/acceptance.json",
-      "sha256": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "167333432a3530ff2aeb9c1360f469e844d43868919c44deffb82182b9de108b"
-      },
-      "source_task": "M12-004"
-    }
-  ],
-  "revision": "e023996a847a863bc52be20983139ff6d28d9625",
-  "schema_version": 2,
-  "source_sha256": {
-    "docs/references/m12-004-aws-lc-upgrade.json": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "51f6a60461dad4920e6a76d8353fbced0339416c935e8c6c576c5cb71304a356"
-    },
-    "native/tls/aws_lc/wirestack_tls_provider.c": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "6ef17497cc37b61316f492edd417ed92cb738c4724b9a4865619e6b217fc5e16"
-    },
-    "src/tls/package_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "53df5a10666fc7070b623e69076aef5f683d313268d6ec64370aade3be573e9e"
-    },
-    "tools/build_linux_tls_provider.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "dd2423e4e2d952309bb50fea1d54285252b3ddfbcc632ce3951260616f783010"
-    },
-    "tools/m12_004_candidate_gates.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "71d6e4d2458eb585cc05fa7e349d1e7b4140e03fee28a445ae51f4d55c59af57"
-    },
-    "tools/m12_004_inventory.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "5a25ef9cd7934ebffb5f0b14181fee007739ae90c364aa1152ca4effd2a20354"
-    },
-    "tools/m12_004_rollback.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "f59cc7a25bbe0087c046f40edb6202c42881d23ec58fb612f5d145ed35771503"
-    },
-    "tools/m12_004_upgrade.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "d97172e833d6d14b98a1f886c2b9a2ce2dcc396c107fd16d712111dc1e4bd99a"
-    },
-    "tools/m12_004_verifier_controls.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "0d60086a085436e85d6368ff92f47252c408545258381bc61c0cf0a846bfc608"
-    },
-    "tools/m7_021_linux_release.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"
-    },
-    "tools/m8_006_native_tls.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "9b79b129beae60cd00c901a693dcfec3a83852d7a5f39ed84fb418f579bc62b9"
-    },
-    "tools/m8_007_final_release.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "789eaa3e2708f5a15b1c0585b8142e5df111339c66b89d812e930687f8d19f85"
-    },
-    "tools/release_smoke/main.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "1fc1e5e5d4b6a585e32d08133e2294684f4c49b09bd700a7e4ad561e4d864734"
-    },
-    "tools/tests/test_m12_004_candidate_gates.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "ff4768ea47dc4eb49d8c091f2866fa83cc72e9deb9643a86f29b99d73c096763"
-    },
-    "tools/tests/test_m12_004_inventory.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "66e5d034d55b6ef7465045a5e524068e5fc5393acf6804d5665d54548c7533c0"
-    },
-    "tools/tests/test_m12_004_rollback.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "a8400fdaf5a960080214f574160d8ea0d824ba52ac68689e0a60eb78c4d0f96d"
-    },
-    "tools/tests/test_m12_004_upgrade.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "ee8ef42aab4548eeb0fec0fe48eff698b511a26e97e39bb19e28775ba8158671"
-    },
-    "tools/tests/test_m12_004_verifier_controls.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "fac883b488eca72fe67cac1093da6b66b283ff39ab9ec2ded13627877e818fb6"
-    },
-    "tools/tests/test_m7_021_linux_release.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "ed4b9c4b7eefecaca1a086783af6d0c8b4f0185e5145219067cd35ecbcae8092"
-    }
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/upgrade/report.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "87e2a12557d43db63710c5481edf5dac1915a40c051e62b9e3d0578a0c6f32db"
+   },
+   "source_task": "M12-004"
   },
-  "source_task": "M12-004",
-  "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-    "cjpm": "Cangjie Project Manager: 1.1.3"
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/inventory/candidate/inventory.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "52297359ca9dd664627b064412bb9d474164d5695ea15cc110e7322a80bfc07d"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "BLOCKED",
+   "path": "docs/evidence/M12-004/verifier-controls/candidate-verification.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "d93281f863bb4ecd41b780c3bc40cdd8fa516abc77a7d68a36a6a628715d7537"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "BLOCKED",
+   "path": "docs/evidence/M12-004/rollback/final-candidate-refusal.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "5e80a312f4a4d7baa4b044ed4023898507c8cfcf02630e58ee70f2bcea80dfd4"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "REQUIRES_REMEDIATION",
+   "path": "docs/evidence/M12-004/review/independent-review.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e78bd20f7889417ae23fef7a999faa6c00f0f8d8bee45e8004c44c53b73c75d3"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "REQUIRES_REMEDIATION_OUTSIDE_CLOSED_M12_FINDINGS",
+   "path": "docs/evidence/M12-004/review/independent-review-followup.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "1c8a7ddcbdbfef8539ea5f4d609a26dee3c2c732f5ef8b86e986c8b77f6df9d7"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "FAIL",
+   "path": "docs/evidence/M12-004/candidate-gates/final2/report.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "c5743509b7983daa2d7b177affdb86bbf5d8f28612f611728f60a1d3e7d2e828"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/installed/sts113-upgrade/report.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "ced8dc893d8f2bdb7e461567db311f6e6dec99aca351064ddc8602c71effebb7"
+   },
+   "source_task": "M12-002"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/installed/index.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "40953b4a30798131e9259334d2bfe3e323ecb60c28a114ec6f303fa0c12cae7c"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/native-floor/index.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "b76d7347f636c5d9a3513ca0af454b41be54e4b4a40dc0d9e7c04b792ad31fde"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/native-floor/native-glibc244/report.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "dff5dba2bcb39baa4b095bd9cbed7be2b81c7f7e5f5e4b04f0a895facd23114f"
+   },
+   "source_task": "M12-002"
+  },
+  {
+   "acceptance_status": "BLOCKED",
+   "path": "docs/evidence/M12-004/matrix/native-floor/owned-cleanup.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "65a41b6ba982a0b7447d8178dd1dca9a9173050187e7a141e9c41f7d8020da09"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/binary/report.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "a074144e588b3a6a8696cc77f5824d7527aa9998fd4aebb5a0830626ee80d3f3"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/binary/index.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "044b2b4ccf2dae5eeca16454aa4340e6d7f5946598a05318b11f5b69dab358a2"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/matrix/binary/summary.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "db83b0bf753c3cd163dbf8cc2af7d9a42a3d59c3f133d668542d29e71d6b8840"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "PASS",
+   "path": "docs/evidence/M12-004/integration/tests.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "69c686de2ce7c8f02c8a08d64ff1ed0a7a5f29c882f3561461251ee7e13d56e6"
+   },
+   "source_task": "M12-004"
+  },
+  {
+   "acceptance_status": "BLOCKED",
+   "path": "docs/evidence/M12-004/acceptance.json",
+   "sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "692ea6a874730ec273f9fdb27ee9807fcb05647a72764ebb06e9fa21c66de9bf"
+   },
+   "source_task": "M12-004"
   }
+ ],
+ "revision": "e023996a847a863bc52be20983139ff6d28d9625",
+ "schema_version": 2,
+ "source_sha256": {
+  "docs/references/m12-004-aws-lc-upgrade.json": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "51f6a60461dad4920e6a76d8353fbced0339416c935e8c6c576c5cb71304a356"
+  },
+  "native/tls/aws_lc/wirestack_tls_provider.c": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "6ef17497cc37b61316f492edd417ed92cb738c4724b9a4865619e6b217fc5e16"
+  },
+  "src/tls/package_test.cj": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "53df5a10666fc7070b623e69076aef5f683d313268d6ec64370aade3be573e9e"
+  },
+  "tools/build_linux_tls_provider.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "dd2423e4e2d952309bb50fea1d54285252b3ddfbcc632ce3951260616f783010"
+  },
+  "tools/m12_004_candidate_gates.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "71d6e4d2458eb585cc05fa7e349d1e7b4140e03fee28a445ae51f4d55c59af57"
+  },
+  "tools/m12_004_inventory.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "5a25ef9cd7934ebffb5f0b14181fee007739ae90c364aa1152ca4effd2a20354"
+  },
+  "tools/m12_004_rollback.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "f59cc7a25bbe0087c046f40edb6202c42881d23ec58fb612f5d145ed35771503"
+  },
+  "tools/m12_004_upgrade.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "d97172e833d6d14b98a1f886c2b9a2ce2dcc396c107fd16d712111dc1e4bd99a"
+  },
+  "tools/m12_004_verifier_controls.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "0d60086a085436e85d6368ff92f47252c408545258381bc61c0cf0a846bfc608"
+  },
+  "tools/m7_021_linux_release.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"
+  },
+  "tools/m8_006_native_tls.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "9b79b129beae60cd00c901a693dcfec3a83852d7a5f39ed84fb418f579bc62b9"
+  },
+  "tools/m8_007_final_release.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "789eaa3e2708f5a15b1c0585b8142e5df111339c66b89d812e930687f8d19f85"
+  },
+  "tools/release_smoke/main.cj": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "1fc1e5e5d4b6a585e32d08133e2294684f4c49b09bd700a7e4ad561e4d864734"
+  },
+  "tools/tests/test_m12_004_candidate_gates.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "ff4768ea47dc4eb49d8c091f2866fa83cc72e9deb9643a86f29b99d73c096763"
+  },
+  "tools/tests/test_m12_004_inventory.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "66e5d034d55b6ef7465045a5e524068e5fc5393acf6804d5665d54548c7533c0"
+  },
+  "tools/tests/test_m12_004_rollback.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "a8400fdaf5a960080214f574160d8ea0d824ba52ac68689e0a60eb78c4d0f96d"
+  },
+  "tools/tests/test_m12_004_upgrade.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "ee8ef42aab4548eeb0fec0fe48eff698b511a26e97e39bb19e28775ba8158671"
+  },
+  "tools/tests/test_m12_004_verifier_controls.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "fac883b488eca72fe67cac1093da6b66b283ff39ab9ec2ded13627877e818fb6"
+  },
+  "tools/tests/test_m7_021_linux_release.py": {
+   "domain": "text-utf8-lf-v1",
+   "sha256": "ed4b9c4b7eefecaca1a086783af6d0c8b4f0185e5145219067cd35ecbcae8092"
+  }
+ },
+ "source_task": "M12-004",
+ "toolchain": {
+  "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+  "cjpm": "Cangjie Project Manager: 1.1.3"
+ }
 }

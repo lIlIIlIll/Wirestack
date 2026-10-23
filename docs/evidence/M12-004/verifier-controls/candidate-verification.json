@@ -1,1 +1,356 @@
-{"SDKpolicy":"STS_ONLY","commands":[{"argv":["ssh-keygen","-q","-t","ed25519","-N","","-C","TEST_ONLY","-f","<sandbox>/TEST_ONLY_signer"],"exit_code":0,"stderr_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"stdout_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}},{"argv":["ssh-keygen","-q","-t","ed25519","-N","","-C","TEST_ONLY","-f","<sandbox>/TEST_ONLY_wrong_signer"],"exit_code":0,"stderr_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"stdout_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}},{"argv":["cc","<sandbox>/smoke.c","<sandbox>/installed/wirestack-0.1.0/target/native/current/lib/libwirestack_tls_provider.a","-pthread","-ldl","-o","<sandbox>/smoke"],"exit_code":0,"stderr_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"stdout_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}},{"argv":["<sandbox>/smoke"],"exit_code":0,"stderr_digest":{"domain":"artifact-bytes-v1","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"stdout_digest":{"domain":"artifact-bytes-v1","sha256":"36ed89602c1f37cb072193f1fbd5e936f21ef20d4de58ed3820d815e50650b8b"}}],"controls":[{"error":"SUBJECT_DIGEST","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"f6c5589a61b4975ea07d11f5b65a29aad2cbe0854a9e9ea52bb5da34bf8a5278"}},"expected_error":"SUBJECT_DIGEST","id":"archive-replacement","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SUBJECT_DIGEST","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"c9baa3d9d280dfc0c23015ca19752505705c0fe5b98b32c6f5122f1c9f87b552"}},"expected_error":"SUBJECT_DIGEST","id":"sbom-mismatch","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SIGNATURE_MISSING","evidence":{"missing":"artifact.sig"},"expected_error":"SIGNATURE_MISSING","id":"missing-artifact-signature","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SIGNATURE_MISSING","evidence":{"missing":"sbom.sig"},"expected_error":"SIGNATURE_MISSING","id":"missing-sbom-signature","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SIGNATURE_MISSING","evidence":{"missing":"release-manifest.sig"},"expected_error":"SIGNATURE_MISSING","id":"missing-release-manifest-signature","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SIGNATURE_INVALID","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"8c51536a7f07a8ee8fd408cf759f537726cae6eb3af949ae78c9afb3d1178903"}},"expected_error":"SIGNATURE_INVALID","id":"wrong-source-binding","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"MANIFEST_POLICY","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"98c085ddafc038a83563f7e5576446a7cb94acdd6221c398d8cfc0e9ffcf1897"}},"expected_error":"MANIFEST_POLICY","id":"signed-wrong-source-policy","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SIGNATURE_INVALID","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"fe5900efbb55ec7d62c863b038c22ab34794d6f9e152eef51d81ed8d7afa9d27"}},"expected_error":"SIGNATURE_INVALID","id":"wrong-signer","status":"PASS","verifier":"m7_030.verify_offline_bundle"},{"error":"SUPPLY_CHAIN_STALE","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"b364ba7c955e84e055f2400e7ba089303374e0ff08ce339025e09f976e07a1e8"}},"expected_error":"SUPPLY_CHAIN_STALE","id":"stale-supply-report","status":"PASS","verifier":"m7_030.build_release_manifest"},{"error":"STALE_FUZZ_INPUTS","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"e1024ec738515a8bafc8c4d11b6936592e46eea18bc99fac3d74105f80b25ddb"}},"expected_error":"STALE_FUZZ_INPUTS","id":"stale-candidate-fuzz-report","status":"PASS","verifier":"m8_007.verify_fuzz"},{"error":"KEYLOG_CAPABILITY_FORBIDDEN","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"53538989be89e7ee814366daf4b5fdc578cb8563942038e1a8ea1562b222289b"}},"expected_error":"KEYLOG_CAPABILITY_FORBIDDEN","id":"keylog-capabilities","status":"PASS","verifier":"m7_021.collect_payload"},{"error":"KEYLOG_CAPABILITY_FORBIDDEN","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"fe4ba3144489212ce03cd04e9d65d96fb98d3b1419658d72a3fe615ea9b5098a"}},"expected_error":"KEYLOG_CAPABILITY_FORBIDDEN","id":"keylog-test_only_key_log","status":"PASS","verifier":"m7_021.collect_payload"},{"error":"NATIVE_ARCHIVE_PROVENANCE","evidence":{"mutation_digest":{"domain":"artifact-bytes-v1","sha256":"7cdf2d36d6c9316e895cfa65477712c85cdccfcfc05def1db53c9fad2cb2e293"}},"expected_error":"NATIVE_ARCHIVE_PROVENANCE","id":"native-static-archive-replacement","status":"PASS","verifier":"m7_021.collect_payload"}],"family":"verifier-controls","historical_fuzz_baseline":{"detail":"STALE_FUZZ_INPUTS: fuzz qualification inputs changed","error":"STALE_FUZZ_INPUTS","qualification":"NOT_QUALIFIED","status":"BLOCKED"},"limitations":["Historical M7-025/M7-030 bytes provide only a positive offline cryptographic fixture, not current candidate qualification.","Wrong source control binds signed manifest bytes, not GitHub OIDC provenance. Production attestation authorization is not exercised.","Native controls and ABI smoke apply only to the selected native artifact. No Cangjie SDK is executed."],"native_artifact":{"digest":{"domain":"artifact-bytes-v1","sha256":"bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"},"path":"docs/evidence/M12-004/upgrade/candidate.tar.gz"},"native_payload_positive":"PASS","native_smoke":{"source_digest":{"domain":"text-utf8-lf-v1","sha256":"b60c0b21cd98e036e8fa59d6b7c867c042c618dac46936bb8fd8cc1129c584af"},"status":"PASS"},"offline_positive":{"decision":"PASS","verifiedSubjects":["artifact","release-manifest","sbom"]},"offline_restored":{"decision":"PASS","verifiedSubjects":["artifact","release-manifest","sbom"]},"original_inputs":{"dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz":{"domain":"artifact-bytes-v1","sha256":"c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"},"docs/evidence/M12-004/upgrade/candidate.tar.gz":{"domain":"artifact-bytes-v1","sha256":"bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"},"docs/evidence/M7-025/linux_x86_64/build-fingerprint.json":{"domain":"artifact-bytes-v1","sha256":"5ba2bae96fc52d7a0a5eda9335cfba9ba7cb16e1ac15e3c6b9b676084ca69b82"},"docs/evidence/M7-025/linux_x86_64/bundle.json":{"domain":"artifact-bytes-v1","sha256":"638919d7fd44193781914fb889fb95bb616f02f34dcda3dbf652ad2a079cfc87"},"docs/evidence/M7-025/linux_x86_64/provider-manifest.json":{"domain":"artifact-bytes-v1","sha256":"1576f659b5a95763b8827a3f5468ab8b08c910509877a44d9b1b2c90aed7c016"},"docs/evidence/M7-025/linux_x86_64/sbom.spdx.json":{"domain":"artifact-bytes-v1","sha256":"49df6442eaceb13f413c9b5b330b3855eee559c896532d30eb6de5d4e892bc6c"},"docs/evidence/M8-007/linux_x86_64/fuzz-report.json":{"domain":"artifact-bytes-v1","sha256":"c64365248f03341808f8820ad50a710de96a1e0902f71264de13f98358f0b85a"}},"original_inputs_untouched":true,"qualification":"NOT_QUALIFIED","schema_version":1,"signing_material":"TEST_ONLY","sources":{"tools/m12_004_verifier_controls.py":{"domain":"text-utf8-lf-v1","sha256":"0d60086a085436e85d6368ff92f47252c408545258381bc61c0cf0a846bfc608"},"tools/m7_021_linux_release.py":{"domain":"text-utf8-lf-v1","sha256":"f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"},"tools/m7_030_linux_release.py":{"domain":"text-utf8-lf-v1","sha256":"1bef870c9411d02a0ed1d305f19b581e45f304d01bba6f65cb5356dfb5252505"},"tools/m8_007_final_release.py":{"domain":"text-utf8-lf-v1","sha256":"789eaa3e2708f5a15b1c0585b8142e5df111339c66b89d812e930687f8d19f85"}},"status":"PASS","task_id":"M12-004","temporary_material_removed":true}
+{
+  "SDKpolicy": "STS_ONLY",
+  "acceptance_superseded": {
+    "issue": "https://github.com/lIlIIlIll/Wirestack/issues/300",
+    "previous_status": "PASS",
+    "pristine_baseline": "BLOCKED",
+    "reason": "A BLOCKED pristine fuzz baseline cannot coexist with a suite PASS; the positive control that credits stale-candidate-fuzz-report never passed.",
+    "regenerate": "Re-run tools/m12_004_verifier_controls.py against a retained historical fuzz report that verify_fuzz() accepts, then seal a new PASS."
+  },
+  "commands": [
+    {
+      "argv": [
+        "ssh-keygen",
+        "-q",
+        "-t",
+        "ed25519",
+        "-N",
+        "",
+        "-C",
+        "TEST_ONLY",
+        "-f",
+        "<sandbox>/TEST_ONLY_signer"
+      ],
+      "exit_code": 0,
+      "stderr_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "ssh-keygen",
+        "-q",
+        "-t",
+        "ed25519",
+        "-N",
+        "",
+        "-C",
+        "TEST_ONLY",
+        "-f",
+        "<sandbox>/TEST_ONLY_wrong_signer"
+      ],
+      "exit_code": 0,
+      "stderr_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "cc",
+        "<sandbox>/smoke.c",
+        "<sandbox>/installed/wirestack-0.1.0/target/native/current/lib/libwirestack_tls_provider.a",
+        "-pthread",
+        "-ldl",
+        "-o",
+        "<sandbox>/smoke"
+      ],
+      "exit_code": 0,
+      "stderr_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "<sandbox>/smoke"
+      ],
+      "exit_code": 0,
+      "stderr_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout_digest": {
+        "domain": "artifact-bytes-v1",
+        "sha256": "36ed89602c1f37cb072193f1fbd5e936f21ef20d4de58ed3820d815e50650b8b"
+      }
+    }
+  ],
+  "controls": [
+    {
+      "error": "SUBJECT_DIGEST",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "f6c5589a61b4975ea07d11f5b65a29aad2cbe0854a9e9ea52bb5da34bf8a5278"
+        }
+      },
+      "expected_error": "SUBJECT_DIGEST",
+      "id": "archive-replacement",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SUBJECT_DIGEST",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "c9baa3d9d280dfc0c23015ca19752505705c0fe5b98b32c6f5122f1c9f87b552"
+        }
+      },
+      "expected_error": "SUBJECT_DIGEST",
+      "id": "sbom-mismatch",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SIGNATURE_MISSING",
+      "evidence": {
+        "missing": "artifact.sig"
+      },
+      "expected_error": "SIGNATURE_MISSING",
+      "id": "missing-artifact-signature",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SIGNATURE_MISSING",
+      "evidence": {
+        "missing": "sbom.sig"
+      },
+      "expected_error": "SIGNATURE_MISSING",
+      "id": "missing-sbom-signature",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SIGNATURE_MISSING",
+      "evidence": {
+        "missing": "release-manifest.sig"
+      },
+      "expected_error": "SIGNATURE_MISSING",
+      "id": "missing-release-manifest-signature",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SIGNATURE_INVALID",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "8c51536a7f07a8ee8fd408cf759f537726cae6eb3af949ae78c9afb3d1178903"
+        }
+      },
+      "expected_error": "SIGNATURE_INVALID",
+      "id": "wrong-source-binding",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "MANIFEST_POLICY",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "98c085ddafc038a83563f7e5576446a7cb94acdd6221c398d8cfc0e9ffcf1897"
+        }
+      },
+      "expected_error": "MANIFEST_POLICY",
+      "id": "signed-wrong-source-policy",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SIGNATURE_INVALID",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "fe5900efbb55ec7d62c863b038c22ab34794d6f9e152eef51d81ed8d7afa9d27"
+        }
+      },
+      "expected_error": "SIGNATURE_INVALID",
+      "id": "wrong-signer",
+      "status": "PASS",
+      "verifier": "m7_030.verify_offline_bundle"
+    },
+    {
+      "error": "SUPPLY_CHAIN_STALE",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "b364ba7c955e84e055f2400e7ba089303374e0ff08ce339025e09f976e07a1e8"
+        }
+      },
+      "expected_error": "SUPPLY_CHAIN_STALE",
+      "id": "stale-supply-report",
+      "status": "PASS",
+      "verifier": "m7_030.build_release_manifest"
+    },
+    {
+      "error": "STALE_FUZZ_INPUTS",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e1024ec738515a8bafc8c4d11b6936592e46eea18bc99fac3d74105f80b25ddb"
+        }
+      },
+      "expected_error": "STALE_FUZZ_INPUTS",
+      "id": "stale-candidate-fuzz-report",
+      "status": "PASS",
+      "verifier": "m8_007.verify_fuzz"
+    },
+    {
+      "error": "KEYLOG_CAPABILITY_FORBIDDEN",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "53538989be89e7ee814366daf4b5fdc578cb8563942038e1a8ea1562b222289b"
+        }
+      },
+      "expected_error": "KEYLOG_CAPABILITY_FORBIDDEN",
+      "id": "keylog-capabilities",
+      "status": "PASS",
+      "verifier": "m7_021.collect_payload"
+    },
+    {
+      "error": "KEYLOG_CAPABILITY_FORBIDDEN",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "fe4ba3144489212ce03cd04e9d65d96fb98d3b1419658d72a3fe615ea9b5098a"
+        }
+      },
+      "expected_error": "KEYLOG_CAPABILITY_FORBIDDEN",
+      "id": "keylog-test_only_key_log",
+      "status": "PASS",
+      "verifier": "m7_021.collect_payload"
+    },
+    {
+      "error": "NATIVE_ARCHIVE_PROVENANCE",
+      "evidence": {
+        "mutation_digest": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "7cdf2d36d6c9316e895cfa65477712c85cdccfcfc05def1db53c9fad2cb2e293"
+        }
+      },
+      "expected_error": "NATIVE_ARCHIVE_PROVENANCE",
+      "id": "native-static-archive-replacement",
+      "status": "PASS",
+      "verifier": "m7_021.collect_payload"
+    }
+  ],
+  "family": "verifier-controls",
+  "historical_fuzz_baseline": {
+    "detail": "STALE_FUZZ_INPUTS: fuzz qualification inputs changed",
+    "error": "STALE_FUZZ_INPUTS",
+    "qualification": "NOT_QUALIFIED",
+    "status": "BLOCKED"
+  },
+  "limitations": [
+    "Historical M7-025/M7-030 bytes provide only a positive offline cryptographic fixture, not current candidate qualification.",
+    "Wrong source control binds signed manifest bytes, not GitHub OIDC provenance. Production attestation authorization is not exercised.",
+    "Native controls and ABI smoke apply only to the selected native artifact. No Cangjie SDK is executed."
+  ],
+  "native_artifact": {
+    "digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+    },
+    "path": "docs/evidence/M12-004/upgrade/candidate.tar.gz"
+  },
+  "native_payload_positive": "PASS",
+  "native_smoke": {
+    "source_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b60c0b21cd98e036e8fa59d6b7c867c042c618dac46936bb8fd8cc1129c584af"
+    },
+    "status": "PASS"
+  },
+  "offline_positive": {
+    "decision": "PASS",
+    "verifiedSubjects": [
+      "artifact",
+      "release-manifest",
+      "sbom"
+    ]
+  },
+  "offline_restored": {
+    "decision": "PASS",
+    "verifiedSubjects": [
+      "artifact",
+      "release-manifest",
+      "sbom"
+    ]
+  },
+  "original_inputs": {
+    "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+    },
+    "docs/evidence/M12-004/upgrade/candidate.tar.gz": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "bb12abafb87ffe60b3e3adbdf4c1ac6ea7f8da47a7a5ad8a2df58b9e8981556d"
+    },
+    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5ba2bae96fc52d7a0a5eda9335cfba9ba7cb16e1ac15e3c6b9b676084ca69b82"
+    },
+    "docs/evidence/M7-025/linux_x86_64/bundle.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "638919d7fd44193781914fb889fb95bb616f02f34dcda3dbf652ad2a079cfc87"
+    },
+    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "1576f659b5a95763b8827a3f5468ab8b08c910509877a44d9b1b2c90aed7c016"
+    },
+    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "49df6442eaceb13f413c9b5b330b3855eee559c896532d30eb6de5d4e892bc6c"
+    },
+    "docs/evidence/M8-007/linux_x86_64/fuzz-report.json": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c64365248f03341808f8820ad50a710de96a1e0902f71264de13f98358f0b85a"
+    }
+  },
+  "original_inputs_untouched": true,
+  "positive_controls": {
+    "pristine_fuzz_verifier": "BLOCKED",
+    "stale_candidate_fuzz_credit": "NOT_GRANTED"
+  },
+  "qualification": "NOT_QUALIFIED",
+  "schema_version": 1,
+  "signing_material": "TEST_ONLY",
+  "sources": {
+    "tools/m12_004_verifier_controls.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0d60086a085436e85d6368ff92f47252c408545258381bc61c0cf0a846bfc608"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f1ffead25b5beaf44d7a375829f75bd04d21312707bb6deda611bae3dbb2079b"
+    },
+    "tools/m7_030_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1bef870c9411d02a0ed1d305f19b581e45f304d01bba6f65cb5356dfb5252505"
+    },
+    "tools/m8_007_final_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "789eaa3e2708f5a15b1c0585b8142e5df111339c66b89d812e930687f8d19f85"
+    }
+  },
+  "status": "BLOCKED",
+  "task_id": "M12-004",
+  "temporary_material_removed": true
+}

@@ -159,6 +159,72 @@ class RollbackTest(unittest.TestCase):
         self.assertEqual(result.exception.code, "DEPLOYMENT_CHANGED")
         self.assertEqual((args.deployment / "current.json").read_bytes(), before)
 
+    def pointer(self, args, version):
+        signing.atomic_json(args.deployment / "current.json", {
+            "artifact": {"domain": "artifact-bytes-v1", "sha256": args.candidate_sha256},
+            "version": version})
+
+    def test_pointer_version_must_match_the_active_digest(self):
+        args = self.deployment()
+        other = "f" * 64
+        directory = args.deployment / "versions" / other
+        directory.mkdir(parents=True)
+        (directory / "artifact.tar.gz").write_bytes(b"installed candidate bytes")
+        # Digest and version disagree. The digest-named directory still holds
+        # the candidate bytes, so a digest-only compare-and-swap authorizes this.
+        self.pointer(args, other)
+        pointer = (args.deployment / "current.json").read_bytes()
+        with self.assertRaises(signing.ReleaseError) as result:
+            rollback.restore(args, self.artifact, self.report)
+        self.assertEqual(result.exception.code, "DEPLOYMENT_CHANGED")
+        self.assertFalse((args.deployment / "versions" / self.binding["sha256"]).exists())
+        self.assertFalse((args.deployment / "previous-current.json").exists())
+        self.assertEqual((args.deployment / "current.json").read_bytes(), pointer)
+
+    def test_pointer_without_a_version_is_rejected_before_staging(self):
+        args = self.deployment()
+        signing.atomic_json(args.deployment / "current.json", {
+            "artifact": {"domain": "artifact-bytes-v1", "sha256": args.candidate_sha256}})
+        pointer = (args.deployment / "current.json").read_bytes()
+        with self.assertRaises(signing.ReleaseError) as result:
+            rollback.restore(args, self.artifact, self.report)
+        self.assertEqual(result.exception.code, "DEPLOYMENT_CHANGED")
+        self.assertFalse((args.deployment / "versions" / self.binding["sha256"]).exists())
+        self.assertEqual((args.deployment / "current.json").read_bytes(), pointer)
+
+    def test_pointer_with_an_unsafe_version_is_rejected(self):
+        args = self.deployment()
+        for version in ("../versions", "versions/x", "", ".."):
+            with self.subTest(version=version):
+                self.pointer(args, version)
+                with self.assertRaises(signing.ReleaseError) as result:
+                    rollback.restore(args, self.artifact, self.report)
+                self.assertEqual(result.exception.code, "DEPLOYMENT_CHANGED")
+
+    def test_concurrent_rollback_cannot_publish_a_stale_candidate(self):
+        args = self.deployment()
+        replacement = "f" * 64
+        real = signing.atomic_bytes
+        staged = []
+
+        def racing_atomic_bytes(path, data):
+            if Path(path).name == "artifact.tar.gz" and not staged:
+                staged.append(True)
+                # Another writer rolls the deployment forward mid-staging.
+                signing.atomic_json(args.deployment / "current.json", {
+                    "artifact": {"domain": "artifact-bytes-v1", "sha256": replacement},
+                    "version": replacement})
+            return real(path, data)
+
+        with mock.patch.object(signing, "atomic_bytes", side_effect=racing_atomic_bytes):
+            with self.assertRaises(signing.ReleaseError) as result:
+                rollback.restore(args, self.artifact, self.report)
+        self.assertEqual(result.exception.code, "DEPLOYMENT_CHANGED")
+        self.assertEqual(staged, [True])
+        self.assertFalse((args.deployment / "versions" / self.binding["sha256"]).exists())
+        self.assertFalse((args.deployment / "previous-current.json").exists())
+        self.assertEqual(json.loads((args.deployment / "current.json").read_text())["version"], replacement)
+
     def test_actual_cli_rejects_missing_archive_without_replacement(self):
         args = self.deployment()
         before = (args.deployment / "current.json").read_bytes()

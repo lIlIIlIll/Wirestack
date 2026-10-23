@@ -88,6 +88,29 @@ def required_control_inputs(native_artifact: Path) -> list[Path]:
             ("bundle.json", "provider-manifest.json", "build-fingerprint.json", "sbom.spdx.json")],
             ROOT / "docs/evidence/M8-007/linux_x86_64/fuzz-report.json"]
 
+def fuzz_control(baseline: str, verify, evidence: dict) -> dict:
+    """Credit the fuzz mutation only when the pristine report verified first.
+
+    A verifier that rejects the unmodified report rejects the mutation for the
+    same reason, so the mutation proves nothing. Withhold the credit and fail.
+    """
+    if baseline != "PASS":
+        return {"id": "stale-candidate-fuzz-report", "status": "FAIL",
+                "expected_error": "STALE_FUZZ_INPUTS", "error": "POSITIVE_CONTROL_BLOCKED",
+                "verifier": "m8_007.verify_fuzz", "evidence": evidence}
+    return rejection("stale-candidate-fuzz-report", "STALE_FUZZ_INPUTS", "m8_007.verify_fuzz", verify, evidence)
+
+
+def suite_status(report: dict) -> str:
+    """Fail closed when the pristine positive control is not a PASS."""
+    baseline = report.get("historical_fuzz_baseline", {}).get("status", "NOT_RUN")
+    passed = (all(item["status"] == "PASS" for item in report.get("controls", []))
+              and baseline == "PASS" and report.get("original_inputs_untouched") is True
+              and report.get("temporary_material_removed") is True
+              and report.get("native_smoke", {}).get("status") == "PASS")
+    return "PASS" if passed else "FAIL"
+
+
 def run_controls(scratch_parent: Path, native_artifact: Path = NATIVE) -> dict:
     native_artifact = native_artifact.resolve()
     scratch_parent = scratch_parent.resolve()
@@ -197,7 +220,10 @@ def run_controls(scratch_parent: Path, native_artifact: Path = NATIVE) -> dict:
             changed["final_release_inputs"] = {"TEST_ONLY": "stale-candidate"}
             stale_fuzz.write_bytes(signing.canonical_json(changed))
             final.FUZZ_REPORT = stale_fuzz
-            control("stale-candidate-fuzz-report", "STALE_FUZZ_INPUTS", "m8_007.verify_fuzz", final.verify_fuzz, stale_fuzz)
+            report["controls"].append(fuzz_control(
+                report["historical_fuzz_baseline"]["status"], final.verify_fuzz,
+                {"mutation_digest": digest.artifact_byte_digest(stale_fuzz).to_json(),
+                 "pristine_baseline": report["historical_fuzz_baseline"]["status"]}))
             installed = payload_release.extract_archive(native_artifact, sandbox / "installed")
             payload_release.collect_payload(installed)
             report["native_payload_positive"] = "PASS"
@@ -230,9 +256,11 @@ def run_controls(scratch_parent: Path, native_artifact: Path = NATIVE) -> dict:
     report["temporary_material_removed"] = not Path(temporary).exists()
     after = {input_name(path): digest.artifact_byte_digest(path).to_json() for path in files}
     report["original_inputs_untouched"] = originals == after
-    report["status"] = "PASS" if (all(item["status"] == "PASS" for item in report["controls"])
-        and report["original_inputs_untouched"] and report["temporary_material_removed"]
-        and report["native_smoke"]["status"] == "PASS") else "FAIL"
+    baseline = report.get("historical_fuzz_baseline", {}).get("status", "NOT_RUN")
+    report["positive_controls"] = {
+        "pristine_fuzz_verifier": baseline,
+        "stale_candidate_fuzz_credit": "NOT_GRANTED" if baseline != "PASS" else "GRANTED"}
+    report["status"] = suite_status(report)
     return report
 
 

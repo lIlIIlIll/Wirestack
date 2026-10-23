@@ -95,6 +95,18 @@ class Capture:
         return (self.output / (label + '.stdout.log')).read_text()
 
 
+def require_source_unchanged(source: Path, manifest: dict, identity: dict) -> dict:
+    """Re-verify the external checkout after the build consumed it."""
+    try:
+        observed = builder.verify_source(source, manifest)
+    except builder.BuildError as error:
+        raise signing.ReleaseError('SOURCE_CHANGED',
+            'AWS-LC source checkout changed during the build: ' + str(error)) from error
+    require(observed == identity, 'SOURCE_CHANGED',
+        'AWS-LC source checkout identity changed during the build')
+    return observed
+
+
 def build_candidate(args, report):
     work, output, sdk = args.work_root.resolve(), args.output.resolve(), args.sdk_root.resolve()
     require(work != ROOT and ROOT not in work.parents, 'WORKSPACE_ISOLATION', 'work root must be outside the repository')
@@ -125,6 +137,11 @@ def build_candidate(args, report):
     tools.update({name + '_version': builder.tool_version(path) for name, path in list(tools.items())})
     native, produced = builder.build_provider(ROOT, args.source_dir.resolve(), identity, manifest,
         ROOT / 'tools/tls_provider/abi-v1.json', work / 'native', tools, builder.platform_identity())
+    # The build compiles from the external checkout. Re-verify it before any
+    # identity-bearing output so a checkout change during the build cannot be
+    # published as the pinned source bytes.
+    report['source_identity_after_build'] = require_source_unchanged(
+        args.source_dir.resolve(), manifest, identity)
     shutil.copytree(native, package / 'target/native/current', dirs_exist_ok=True)
     shutil.copyfile(args.source_dir / 'LICENSE', package / 'third_party/aws-lc/LICENSE')
     baseline_pin = builder.load_provider_manifest(ROOT / 'native/tls/aws_lc/provider.json')

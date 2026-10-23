@@ -7,6 +7,7 @@ import tempfile
 import unittest
 
 from tools.evidence_digest import text_evidence_digest
+from tools.repository import repository_tooling as tooling
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -58,6 +59,125 @@ class CheckerTests(unittest.TestCase):
         result = subprocess.run([sys.executable, '-B', '-c', script, str(CHECKER)],
                                 cwd=ROOT, capture_output=True, text=True, check=True)
         self.assertEqual(Path(result.stdout.strip()).resolve(), INPUT.resolve())
+
+
+TASK_MANIFEST = 'tools/tasks/M12-004.json'
+
+
+class ManifestSourceBindingTests(unittest.TestCase):
+    """The task manifest must hash itself, so edits invalidate sealed evidence."""
+
+    def test_task_manifest_is_in_its_own_source_inventory(self):
+        task = json.loads((ROOT / TASK_MANIFEST).read_text())
+        self.assertIn(TASK_MANIFEST, task['source_paths'])
+        self.assertEqual(len(task['source_paths']), len(set(task['source_paths'])))
+
+    def test_manifest_edit_drift_is_reported_against_the_manifest_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = ManifestFixture(Path(directory))
+            self.assertEqual('PASS', fixture.verify()['status'])
+            fixture.edit_manifest()
+            report = fixture.verify()
+            self.assertEqual('STALE', report['status'])
+            self.assertEqual(
+                [{'code': 'DIGEST_STALE', 'detail': fixture.manifest_path}],
+                report['tasks'][0]['issues'])
+
+    def test_manifest_omitted_from_the_inventory_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = ManifestFixture(Path(directory))
+            fixture.evidence['source_sha256'].pop(fixture.manifest_path)
+            fixture.write_evidence()
+            report = fixture.verify()
+            self.assertEqual('FAIL', report['status'])
+            self.assertEqual('SOURCE_INVENTORY', report['tasks'][0]['issues'][0]['code'])
+            self.assertIn('does not match manifest', report['tasks'][0]['issues'][0]['detail'])
+
+    def test_sealed_evidence_records_the_manifest_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = ManifestFixture(Path(directory))
+            sealed = fixture.seal()
+            self.assertIn(fixture.manifest_path, sealed['source_sha256'])
+            self.assertEqual(text_evidence_digest(fixture.root / fixture.manifest_path).to_json(),
+                             sealed['source_sha256'][fixture.manifest_path])
+
+
+class ManifestFixture:
+    """A throwaway repository with one task that hashes its own manifest."""
+
+    manifest_path = 'tools/tasks/TEST-004.json'
+
+    def __init__(self, root: Path):
+        self.root = root
+        (root / 'tools/tasks').mkdir(parents=True)
+        (root / 'docs/planning').mkdir(parents=True)
+        (root / 'docs/evidence/TEST-004').mkdir(parents=True)
+        (root / 'source.txt').write_text('current\n')
+        rows = '| TEST-004 | task | source | condition |\n'
+        (root / 'docs/planning/implementation-backlog.md').write_text(rows)
+        (root / 'docs/planning/status.md').write_text(
+            '| TEST-004 | IN_PROGRESS | evidence | note |\n')
+        (root / 'docs/evidence/TEST-004/report.json').write_text(
+            json.dumps({'status': 'PASS', 'source_task': 'TEST-004'}))
+        self.manifest = {
+            'schema_version': 1, 'task_id': 'TEST-004', 'dependencies': [],
+            'allowed_paths': ['tools/tasks', 'source.txt'],
+            'platforms': ['linux-x86_64-glibc'],
+            'acceptance_commands': [{'id': 'unit', 'argv': ['python3', '-c', 'pass'],
+                                     'timeout_seconds': 10, 'long_running': False, 'gate': 'task'}],
+            'required_evidence': ['docs/evidence/TEST-004/evidence.json',
+                                  'docs/evidence/TEST-004/report.json'],
+            'timeout_seconds': 60, 'long_running_gate': False,
+            'source_paths': ['source.txt', self.manifest_path],
+        }
+        self.write_manifest()
+        self.git('init', '--quiet')
+        self.git('config', 'core.hooksPath', str(root / 'disabled-hooks'))
+        self.git('config', 'user.name', 'Wirestack Test')
+        self.git('config', 'user.email', 'wirestack-test@example.invalid')
+        self.git('config', 'commit.gpgsign', 'false')
+        self.git('add', '--force', 'source.txt', self.manifest_path,
+                 'docs/evidence/TEST-004/report.json')
+        self.git('commit', '--quiet', '-m', 'fixture')
+        self.revision = self.git('rev-parse', 'HEAD').stdout.strip()
+        self.evidence = {
+            'schema_version': 2, 'source_task': 'TEST-004',
+            'platform': tooling.platform_identity(),
+            'toolchain': tooling.toolchain_identity(root),
+            'acceptance_status': 'PASS', 'generated_at_utc': tooling.utc_now(),
+            'revision': self.revision,
+            'reports': [{'path': 'docs/evidence/TEST-004/report.json',
+                         'sha256': text_evidence_digest(root / 'docs/evidence/TEST-004/report.json').to_json(),
+                         'source_task': 'TEST-004', 'acceptance_status': 'PASS'}],
+            'source_sha256': {name: text_evidence_digest(root / name).to_json()
+                              for name in self.manifest['source_paths']},
+        }
+        self.write_evidence()
+
+    def git(self, *args):
+        return subprocess.run(['git', *args], cwd=self.root, capture_output=True, text=True,
+                              timeout=10, check=True)
+
+    def write_manifest(self):
+        path = self.root / self.manifest_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(self.manifest, indent=2))
+
+    def edit_manifest(self):
+        changed = dict(self.manifest, timeout_seconds=61)
+        self.manifest = changed
+        self.write_manifest()
+
+    def write_evidence(self):
+        (self.root / 'docs/evidence/TEST-004/evidence.json').write_text(json.dumps(self.evidence))
+
+    def verify(self):
+        return tooling.verify(self.root, 'TEST-004')
+
+    def seal(self):
+        return tooling.seal_evidence(
+            self.root, 'TEST-004', ['docs/evidence/TEST-004/report.json'],
+            self.root / 'docs/evidence/TEST-004/sealed-evidence.json', self.revision)
 
 
 if __name__ == '__main__':

@@ -280,4 +280,14 @@ hostglibc14, six original binaries and historical reports remain unchanged;
 owned processes and fixture keys are cleared. Private glibc2.44/nonexclusive
 CPU affinity does not grant stock-host qualification. Formal M7-024,86400-second
 soak, security approval, source publication and signing remain unmet.
-M12-004 remains BLOCKED; no automatic next-task execution.
+M12-004 Stack #200 review remediation:
+[six-guard record](../evidence/M12-004/review-remediation/report.json),
+[baseline red](../evidence/M12-004/review-remediation/baseline-red.log) and
+[branch green](../evidence/M12-004/review-remediation/branch-green.log) logs.
+Rollback CAS now binds the active version, performance measures a fresh
+extraction, inventory revalidates the archive before binding, the task manifest
+is in its own source inventory, the upgrade rechecks the checkout after the
+build, and a BLOCKED pristine fuzz baseline fails the control suite instead of
+sitting beside a PASS. No capture was rerun; archives, STS SDK and rollback
+disposition remain absent, so M12-004 remains BLOCKED.
+

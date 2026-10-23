@@ -73,9 +73,12 @@ class VerifierControlsTest(unittest.TestCase):
         if self.report.get("error") == "CONTROL_INPUTS_MISSING":
             self.assertEqual("BLOCKED", self.report["status"])
             self.assertTrue(self.report["missing_inputs"])
+            self.assertNotIn("historical_fuzz_baseline", self.report)
         else:
-            self.assertEqual("PASS", self.report["status"])
             self.assertEqual("NOT_QUALIFIED", self.report["historical_fuzz_baseline"]["qualification"])
+            baseline = self.report["historical_fuzz_baseline"]["status"]
+            self.assertEqual("PASS" if baseline == "PASS" else "FAIL", self.report["status"])
+            self.assertIn(baseline, {"PASS", "BLOCKED"})
         self.assertTrue(self.report["limitations"])
         serialized = json.dumps(self.report)
         for secret in (str(Path.home()), str(controls.ROOT), str(self.scratch), "OPENSSH PRIVATE KEY"):
@@ -100,6 +103,46 @@ class VerifierControlsTest(unittest.TestCase):
         self.assertEqual("UNRELATED_FAILURE", observed["error"])
         self.assertEqual("UNEXPECTED_VERIFIER_ERROR", controls.error_code(RuntimeError(
             "test-only TLS key logging cannot enter a release artifact")))
+
+    def test_blocked_pristine_fuzz_baseline_cannot_credit_the_mutation(self):
+        def verifier():
+            raise controls.payload_release.ReleaseError("should not run", code="STALE_FUZZ_INPUTS")
+
+        blocked = controls.fuzz_control("BLOCKED", verifier, {"pristine_baseline": "BLOCKED"})
+        self.assertEqual("FAIL", blocked["status"])
+        self.assertEqual("POSITIVE_CONTROL_BLOCKED", blocked["error"])
+        self.assertEqual("STALE_FUZZ_INPUTS", blocked["expected_error"])
+
+        verified = controls.fuzz_control("PASS", verifier, {})
+        self.assertEqual("PASS", verified["status"])
+        self.assertEqual("STALE_FUZZ_INPUTS", verified["error"])
+
+    def test_blocked_baseline_fails_the_whole_control_suite(self):
+        report = {"historical_fuzz_baseline": {"status": "BLOCKED"},
+                  "controls": [{"status": "PASS"}], "original_inputs_untouched": True,
+                  "temporary_material_removed": True, "native_smoke": {"status": "PASS"}}
+        self.assertEqual("FAIL", controls.suite_status(report))
+        for baseline in ("NOT_RUN", None, "FAIL"):
+            with self.subTest(baseline=baseline):
+                changed = {**report, "historical_fuzz_baseline": {"status": baseline}}
+                self.assertEqual("FAIL", controls.suite_status(changed))
+        passing = {**report, "historical_fuzz_baseline": {"status": "PASS"}}
+        self.assertEqual("PASS", controls.suite_status(passing))
+        missing = {key: value for key, value in passing.items() if key != "historical_fuzz_baseline"}
+        self.assertEqual("FAIL", controls.suite_status(missing))
+
+    def test_committed_controls_never_credit_a_blocked_baseline(self):
+        # Whatever the environment supplies, a BLOCKED baseline may not appear
+        # next to a suite PASS or a credited mutation control.
+        baseline = self.report.get("historical_fuzz_baseline", {})
+        if baseline.get("status") == "PASS":
+            return
+        self.assertNotEqual("PASS", self.report.get("status"))
+        credited = [item for item in self.report.get("controls", [])
+                    if item["id"] == "stale-candidate-fuzz-report" and item["status"] == "PASS"]
+        self.assertEqual([], credited)
+        self.assertEqual("NOT_GRANTED", self.report.get("positive_controls", {}).get(
+            "stale_candidate_fuzz_credit", "NOT_GRANTED"))
 
     def test_external_native_artifact_is_bound_preserved_and_sanitized(self):
         self.require_full_control_inputs()

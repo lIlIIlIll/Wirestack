@@ -1,8 +1,10 @@
 """Exercise inventory rejection with a self-contained synthetic manifest."""
 import copy
+import subprocess
 import unittest
 from pathlib import Path
 import tempfile
+from unittest import mock
 from tools import evidence_digest as digest
 from tools import m12_004_inventory as inventory
 
@@ -211,6 +213,93 @@ class InventoryTests(unittest.TestCase):
         metadata['license_sha256']['third_party/aws-lc/NOTICE'] = '0' * 64
         with self.assertRaisesRegex(inventory.supply.SupplyChainError, 'notice inventory'):
             self.check(metadata=metadata)
+
+
+class ArtifactRevalidationTests(unittest.TestCase):
+    """The emitted artifact block must describe the bytes that were inspected."""
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.artifact = self.root / 'candidate.tar.gz'
+        self.artifact.write_bytes(b'first inspected archive bytes')
+        self.inspected = inventory.artifact_binding(self.artifact)
+        self.sdk = self.root / 'sts-sdk'
+        self.sdk.mkdir()
+        self.work = self.root / 'work'
+        self.work.mkdir()
+        self.output = self.root / 'output'
+        self.payload = {}
+        for base, name in (('target/native/current', 'libwirestack_tls_provider.a'),
+                           ('target/native/resolver/current', 'libwirestack_resolver.a'),
+                           ('target/native/http_files/current', 'libwirestack_http_files.a')):
+            self.payload[base + '/lib/' + name] = b'archive'
+            self.payload[base + '/include/' + name.removeprefix('lib').removesuffix('.a') + '.h'] = b'int x(void);\n'
+        for name in inventory.supply.LICENSE_MEMBERS:
+            self.payload[name] = b'license\n'
+        for name in inventory.supply.PUBLIC_SUFFIX_FILES:
+            self.payload[name] = b'suffix\n'
+
+    def fake_run(self, argv, **kwargs):
+        if argv[0] == 'nm' and '-u' not in argv:
+            name = Path(argv[-1]).name
+            prefix = {'libwirestack_tls_provider.a': 'wirestack_tls_',
+                      'libwirestack_resolver.a': 'wirestack_resolver_',
+                      'libwirestack_http_files.a': 'wirestack_http_files_'}[name]
+            return subprocess.CompletedProcess(argv, 0, f'0000000000000000 T {prefix}abi_version\n'.encode(), b'')
+        return subprocess.CompletedProcess(argv, 0, b'', b'')
+
+    def collect(self, intake):
+        sdk_binding = mock.patch.object(inventory, 'sdk_binding', return_value={})
+        with mock.patch.object(inventory.subprocess, 'run', side_effect=self.fake_run), \
+             mock.patch.object(inventory.supply, 'artifact_metadata', return_value=self.metadata()), \
+             mock.patch.object(inventory.release, 'read_verified_payload',
+                               return_value=(self.payload, {'package': 'wirestack', 'version': '1.0.0',
+                                                            'production_source_files': 1, 'artifactBuildFingerprint': 'a' * 64,
+                                                            'payload_sha256': 'b' * 64})), \
+             mock.patch.object(inventory, 'validate_components', return_value=([], {})), \
+             mock.patch.object(inventory, 'intake', side_effect=intake), \
+             mock.patch.object(inventory, 'validate_symbols'), \
+             sdk_binding:
+            return inventory.collect(self.artifact, self.sdk, self.output, self.work)
+
+    def metadata(self):
+        provider = {'providerVersion': '5.11.0', 'patchLevel': '0', 'build_fingerprint': 'c' * 64,
+                    'build_inputs': {'provider': {'source': {'kind': 'git'}, 'patches': [],
+                                                  'license_expression': 'Apache-2.0'}}}
+        return {'provider': provider, 'resolver': {}, 'http_files': {},
+                'public_suffix': {'name': 'publicsuffix/list'}}
+
+    def test_untouched_artifact_revalidates(self):
+        self.assertEqual(inventory.require_artifact_unchanged(self.artifact, self.inspected), self.inspected)
+
+    def test_same_size_replacement_is_rejected(self):
+        # A same-length replacement defeats any size-only comparison, and the
+        # window covers symbol checks, compiler smoke, SDK commands and intake.
+        self.artifact.write_bytes(b'other inspected archive bytes')
+        self.assertEqual(self.artifact.stat().st_size, self.inspected['bytes'])
+        with self.assertRaisesRegex(ValueError, 'artifact changed during inspection: candidate.tar.gz'):
+            inventory.require_artifact_unchanged(self.artifact, self.inspected)
+
+    def test_missing_artifact_is_reported_as_drift(self):
+        self.artifact.unlink()
+        with self.assertRaisesRegex(ValueError, 'artifact changed during inspection'):
+            inventory.require_artifact_unchanged(self.artifact, self.inspected)
+
+    def test_artifact_replaced_during_the_run_aborts_instead_of_reporting(self):
+        def replacing(output, versions):
+            self.artifact.write_bytes(b'second inspected archive byt')
+            return {'channels': []}
+
+        with self.assertRaisesRegex(ValueError, 'artifact changed during inspection'):
+            self.collect(replacing)
+
+    def test_emitted_artifact_block_is_the_inspected_identity(self):
+        report = self.collect(lambda output, versions: {'channels': []})
+        self.assertEqual(report['status'], 'PASS')
+        self.assertEqual(report['artifact']['digest'], self.inspected['digest'])
+        self.assertEqual(report['artifact']['bytes'], self.inspected['bytes'])
 
 
 if __name__ == '__main__':

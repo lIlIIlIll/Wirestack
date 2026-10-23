@@ -120,6 +120,7 @@
     "tools/m12_004_verifier_controls.py",
     "tools/m12_004_rollback.py",
     "tools/m12_004_candidate_gates.py",
+    "tools/tasks/M12-004.json",
     "tools/tests/test_m12_004_upgrade.py",
     "tools/tests/test_m12_004_inventory.py",
     "tools/tests/test_m12_004_verifier_controls.py",

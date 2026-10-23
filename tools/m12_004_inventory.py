@@ -108,11 +108,35 @@ def intake(output, versions):
     return {'channels': records, 'uncertainty': 'Public intake is bounded and may omit private, unpublished or paginated advisories. Release notes are not a vulnerability clearance. Baseline and selected versions require human applicability review.', 'qualification': 'NOT_QUALIFIED'}
 
 
+def artifact_binding(artifact):
+    """Capture the exact artifact identity the inventory will describe."""
+    try:
+        return {'digest': d.artifact_byte_digest(artifact).to_json(), 'bytes': artifact.stat().st_size}
+    except (OSError, d.DigestError) as error:
+        raise ValueError('inventory artifact is not readable: ' + artifact.name) from error
+
+
+def require_artifact_unchanged(artifact, inspected):
+    """Require the inspected bytes to still be the bytes in the report.
+
+    Symbol checks, the compiler smoke, SDK commands and network intake all run
+    after the first read. Without this re-check a replacement artifact would be
+    reported with a digest that never produced those results.
+    """
+    try:
+        observed = artifact_binding(artifact)
+    except ValueError as error:
+        raise ValueError('inventory artifact changed during inspection: ' + artifact.name) from error
+    require(observed == inspected, 'inventory artifact changed during inspection: ' + artifact.name)
+    return observed
+
+
 def collect(artifact, sdk, output, work, source_root=ROOT, selected_version='5.11.0'):
     require('sts' in sdk.name.lower(), 'STS SDK root required')
     if (sdk / 'cangjie').is_dir():
         sdk = sdk / 'cangjie'
     output.mkdir(parents=True, exist_ok=True)
+    inspected = artifact_binding(artifact)
     commands = []
     def run(command):
         result = subprocess.run([str(x) for x in command], cwd=work, capture_output=True, timeout=90)
@@ -123,6 +147,7 @@ def collect(artifact, sdk, output, work, source_root=ROOT, selected_version='5.1
         return result.stdout.decode()
     metadata = supply.artifact_metadata(artifact)
     payload, manifest = release.read_verified_payload(artifact)
+    require_artifact_unchanged(artifact, inspected)
     sources, gzip = validate_components(metadata, payload, source_root)
     dependencies = []
     configs = [('provider', 'SPDXRef-Package-TlsProvider-aws-lc', 'target/native/current', 'libwirestack_tls_provider.a', 'wirestack_tls_'),
@@ -180,15 +205,18 @@ int main(void) {
     wrapper = Path.home() / '.codex/scripts/codex_cangjie_env'
     versions = {name: run([wrapper, '--sdk-root', sdk.parent if sdk.name == 'cangjie' else sdk, '--', name, '--version']) for name in ('cjc', 'cjpm')}
     bindings = sdk_binding(sdk)
+    advisory = intake(output, [provider['providerVersion'], selected_version])
+    # Bind the emitted artifact block to the bytes every result above came from.
+    observed = require_artifact_unchanged(artifact, inspected)
     report = {'schema_version': 1, 'task_id': 'M12-004', 'family': 'inventory', 'status': 'PASS', 'sdk_policy': 'STS_ONLY', 'qualification': 'NOT_QUALIFIED',
-        'created_utc': datetime.now(timezone.utc).isoformat(), 'artifact': {'digest': d.artifact_byte_digest(artifact).to_json(), 'bytes': artifact.stat().st_size, 'payload_digest': d.ArtifactByteDigest(manifest['payload_sha256']).to_json()},
+        'created_utc': datetime.now(timezone.utc).isoformat(), 'artifact': {'digest': observed['digest'], 'bytes': observed['bytes'], 'payload_digest': d.ArtifactByteDigest(manifest['payload_sha256']).to_json()},
         'package': {'name': manifest['package'], 'version': manifest['version'], 'production_source_files': manifest['production_source_files'], 'build_fingerprint': manifest['artifactBuildFingerprint']},
         'dependencies': dependencies, 'licenses_and_notices': licenses,
         'source_digests': {name: d.text_evidence_digest(source_root / name).to_json() for name in sources},
         'inventory_tool_digests': {name: d.text_evidence_digest(ROOT / name).to_json() for name in ('tools/m12_004_inventory.py', 'tools/tests/test_m12_004_inventory.py', 'tools/m7_025_linux_supply_chain.py')},
         'package_source_digests': {name: d.text_evidence_digest_bytes(raw).to_json() for name, raw in payload.items() if name.startswith('src/') and name.endswith('.cj')},
         'sdk': {'root': normalized(sdk), 'versions': versions, 'files': bindings, 'binding_scope': 'ACTUALLY_EXECUTED_INVENTORY_SDK_NOT_ORIGINAL_PACKAGE_BUILD_PROOF'},
-        'commands': commands, 'advisory_intake': intake(output, [provider['providerVersion'], selected_version])}
+        'commands': commands, 'advisory_intake': advisory}
     # Strip machine-local paths present in embedded historical manifests.
     return json.loads(normalized(json.dumps(report)))
 

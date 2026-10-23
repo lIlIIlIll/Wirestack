@@ -1,0 +1,173 @@
+{
+  "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+  "blockers": [
+    {
+      "code": "EVIDENCE_NOT_CURRENT",
+      "detail": "The committed M12-004 index binds the pre-remediation source digests and a revision that is not in this repository, so no sealed PASS is claimable."
+    },
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "verify-evidence M12-004 exits FAIL with DEPENDENCY_INCOMPLETE for the unrelated M10-003 task; the closure check runs before the M12-004 index is read."
+    },
+    {
+      "code": "CAPTURE_INPUTS_MISSING",
+      "detail": "Candidate, baseline and M7-021 archives plus the STS SDK are absent, so performance, fuzz, rollback and control captures cannot be regenerated."
+    }
+  ],
+  "completion_claim": false,
+  "evidence": {
+    "baseline_log": "baseline-red.log",
+    "branch_log": "branch-green.log",
+    "historical_control_reports": [
+      "historical/verification-2026-10-09.json",
+      "historical/candidate-verification-2026-10-09.json"
+    ]
+  },
+  "historical_owner_pr": "https://github.com/lIlIIlIll/Wirestack/pull/211",
+  "kind": "review-remediation",
+  "method": "Read the six confirmed Stack #200 findings, the current M12-004 drivers, their committed reports and the retained evidence, then changed only the invariant each finding names. Every new regression was run against the unmodified baseline sources and against this branch: the baseline log records the defect, the branch log records the rejection. No performance, fuzz, rollback or matrix capture was rerun, and no artifact, SDK or native VM is claimed.",
+  "missing_inputs": [
+    {
+      "input": "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+      "reason": "The M7-021 release archive is untracked and absent from a clean checkout, so the rejection-control CLI stops with CONTROL_INPUTS_MISSING before exercising any verifier."
+    },
+    {
+      "input": "docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",
+      "reason": "The frozen native baseline archive is untracked and absent, so native payload, keylog and ABI smoke cases cannot run."
+    },
+    {
+      "input": "docs/evidence/M12-004/upgrade/candidate.tar.gz",
+      "reason": "The 5.11.0 candidate archive is untracked (its provider debug data embeds private paths), so no current candidate control, inventory or gate can be recaptured."
+    },
+    {
+      "input": "selected STS 1.1.3 SDK and native VM",
+      "reason": "No cjc/cjpm is installed on this host, so no capture, build or performance measurement is claimed."
+    },
+    {
+      "input": "signed rollback security disposition",
+      "reason": "No independently authorized present-day disposition exists for the original archive, so restore remains NOT_RUN."
+    }
+  ],
+  "not_run": [
+    "tools/m12_004_candidate_gates.py capture",
+    "tools/m12_004_upgrade.py rebuild",
+    "tools/m12_004_inventory.py capture",
+    "tools/m12_004_rollback.py rehearsal with --restore",
+    "tools/m12_004_verifier_controls.py with complete fixtures",
+    "scripts/verify-evidence M12-004"
+  ],
+  "observed_acceptance": {
+    "new_regressions": [
+      "rollback: pointer version != candidate digest, missing version, unsafe version, and a concurrent pointer roll-forward during staging all raise DEPLOYMENT_CHANGED with nothing staged",
+      "candidate gates: newly added fuzz sources, corpora and target output are visible to the integrity check; the performance leg measures a fresh extraction and rejects a tree another gate modified",
+      "inventory: a same-size archive replacement, a removed archive and a replacement during the run abort instead of emitting the replacement digest",
+      "manifest: the task manifest is inside its own source inventory and an edit drifts the sealed evidence against that path",
+      "upgrade: a checkout that changes, disappears or becomes dirty during the build raises SOURCE_CHANGED before any candidate identity is written",
+      "verifier controls: a BLOCKED pristine baseline fails the suite and withholds the mutation credit"
+    ]
+  },
+  "parent_issue": "https://github.com/lIlIIlIll/Wirestack/issues/185",
+  "red_green": {
+    "baseline": {
+      "log": "baseline-red.log",
+      "result": "27 failing tests, including every new rejection"
+    },
+    "baseline_revision": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+    "branch": {
+      "log": "branch-green.log",
+      "result": "Ran 70 tests, OK (skipped=3)"
+    },
+    "command": "python3 -m unittest tools.tests.test_m12_004_upgrade tools.tests.test_m12_004_inventory tools.tests.test_m12_004_verifier_controls tools.tests.test_m12_004_rollback tools.tests.test_m12_004_candidate_gates tools.tests.test_m12_004_checker"
+  },
+  "rejected_stale_records": {
+    "docs/evidence/M12-004/verifier-controls/candidate-verification.json": "same contradiction for the 5.11.0 candidate; retired to BLOCKED",
+    "docs/evidence/M12-004/verifier-controls/verification.json": "recorded status PASS beside historical_fuzz_baseline BLOCKED/STALE_FUZZ_INPUTS; retired to FAIL"
+  },
+  "release_qualification": "NOT_QUALIFIED",
+  "remediated_roots": {
+    "#295": {
+      "changes": [
+        "active_candidate() requires current.json artifact.sha256 to equal --candidate-sha256 and current.json version to equal it too",
+        "the artifact is read, hashed and required to be a regular file through versions/<active version>/artifact.tar.gz, so a digest-only directory cannot authorize the restore",
+        "version names are rejected unless they are a single safe path component",
+        "staging happens in versions/.staging-<digest>, is re-bound to the still-active pointer under the lock, and is renamed only when both checks pass; a rejected run leaves no version, no previous-current.json and an unchanged pointer"
+      ],
+      "finding": "rollback compare-and-swap authorized against the digest-named directory instead of the active version",
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/295",
+      "paths": [
+        "tools/m12_004_rollback.py",
+        "tools/tests/test_m12_004_rollback.py"
+      ]
+    },
+    "#296": {
+      "changes": [
+        "fuzz_gate() extracts its own candidate tree, so the compared installation never receives tests, corpora or target output",
+        "tree_inventory() hashes every regular entry of an installation, not only archive-declared paths; symbolic links and non-regular entries are rejected",
+        "assert_pristine() requires the installation to equal the archive payload exactly",
+        "performance_action() re-extracts both archives, requires both trees pristine, binds archive and tree digests in performance_installations, measures, then re-verifies the same trees",
+        "bindings_unchanged additionally requires installed_payload_after to equal installed_payload_before"
+      ],
+      "finding": "the performance leg measured the fuzz-polluted installation",
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/296",
+      "paths": [
+        "tools/m12_004_candidate_gates.py",
+        "tools/tests/test_m12_004_candidate_gates.py"
+      ]
+    },
+    "#297": {
+      "changes": [
+        "artifact_binding() captures the inspected digest and size before any inspection",
+        "require_artifact_unchanged() re-checks the bytes after the payload read and again immediately before the report is built; a changed digest, a changed size or a missing/unreadable artifact aborts with the artifact name",
+        "the emitted artifact block uses the re-verified digest and size rather than a fresh read"
+      ],
+      "finding": "the inventory report could describe a different archive than the one it inspected",
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/297",
+      "paths": [
+        "tools/m12_004_inventory.py",
+        "tools/tests/test_m12_004_inventory.py"
+      ]
+    },
+    "#298": {
+      "changes": [
+        "tools/tasks/M12-004.json is listed in source_paths, so validate_evidence() and seal_evidence() hash the manifest itself",
+        "a manifest edit now produces DIGEST_STALE naming tools/tasks/M12-004.json, and an inventory that omits the path fails with SOURCE_INVENTORY"
+      ],
+      "finding": "tools/tasks/M12-004.json was absent from its own source inventory",
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/298",
+      "paths": [
+        "tools/tasks/M12-004.json",
+        "tools/tests/test_m12_004_checker.py"
+      ]
+    },
+    "#299": {
+      "changes": [
+        "require_source_unchanged() re-runs builder.verify_source() immediately after build_provider() returns",
+        "commit, tree and content identity must equal the pre-build identity; a dirty, missing or drifted checkout raises SOURCE_CHANGED",
+        "the re-verified identity is recordable and every candidate, consumer and supply-chain output is produced only after it matches"
+      ],
+      "finding": "the external source checkout was verified only before the long build",
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/299",
+      "paths": [
+        "tools/m12_004_upgrade.py",
+        "tools/tests/test_m12_004_upgrade.py"
+      ]
+    },
+    "#300": {
+      "changes": [
+        "suite_status() requires historical_fuzz_baseline.status == PASS in addition to the previous conditions",
+        "fuzz_control() withholds stale-candidate-fuzz-report credit with POSITIVE_CONTROL_BLOCKED whenever the pristine report did not verify, so the mutation can never look effective without a passing positive control",
+        "positive_controls records the pristine baseline and whether the mutation credit was granted",
+        "the two committed control reports that recorded STALE_FUZZ_INPUTS beside PASS are preserved byte-exactly under historical/ and their live copies are retired to FAIL/BLOCKED"
+      ],
+      "finding": "a BLOCKED pristine fuzz baseline still produced a suite PASS",
+      "issue": "https://github.com/lIlIIlIll/Wirestack/issues/300",
+      "paths": [
+        "tools/m12_004_verifier_controls.py",
+        "tools/tests/test_m12_004_verifier_controls.py"
+      ]
+    }
+  },
+  "schema_version": 1,
+  "source_task": "M12-004",
+  "status": "BLOCKED"
+}
