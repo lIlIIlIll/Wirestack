@@ -159,11 +159,18 @@ public class HappyEyeballsConnector {
             if (tcp.isCancellationRequested() || tcp.isDeadlineExceeded()) {
                 let cancelled = tcp.isCancellationRequested()
                 let abortReason = if (cancelled) { AbortReason.Cancelled } else { AbortReason.DeadlineExceeded }
-                connected.abort(reason: Some(abortReason))
+                // A cleanup failure must not replace the canonical cancellation or deadline result.
+                // Keep the abort failure as the cause and still report the stopped operation.
+                let cleanupFailure = try {
+                    connected.abort(reason: Some(abortReason))
+                    None<Exception>
+                } catch (error: Exception) {
+                    Some(error)
+                }
                 let code = if (cancelled) { NetworkErrorCode.Cancelled } else { NetworkErrorCode.TimedOut }
                 throw NetworkException(NetworkErrorCategory.Connect, NetworkPhase.TcpConnect,
                     code, "literal connection stopped before publication",
-                    retryability: Retryability.Never)
+                    retryability: Retryability.Never, cause: cleanupFailure)
             }
             emitNetworkEvent(tcp, NetworkEvent(NetworkEventKind.ConnectAttemptCompleted,
                 NetworkEventOutcome.Succeeded, phase: Some(NetworkPhase.TcpConnect),

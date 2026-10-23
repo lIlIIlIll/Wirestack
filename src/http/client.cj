@@ -537,24 +537,36 @@ public class HttpClient <: Resource {
                 case http1.HttpDuplexExchangeResult.Response(response) =>
                     try { captureCookies(response.headers, h1Request.url, context) }
                     catch (error: Exception) { response.close(); throw error }
+                    // Completion is published only after the response is successfully wrapped and
+                    // its generation lifetime is retained. A cancellation that wins the wrap must
+                    // produce exactly one terminal event, so it reaches the failure path below
+                    // instead of following an already-published success event.
+                    let wrapped = try {
+                        let value = cancellation.wrap(response)
+                        cancellation.retainResource(lifetime)
+                        value
+                    } catch (error: Exception) {
+                        response.close()
+                        throw error
+                    }
+                    transferred = true
                     if (!deferRequestCompletion) {
                         emitHttpObservation(context, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
                     }
-                    cancellation.retainResource(lifetime)
-                    transferred = true
-                    http1.HttpDuplexExchangeResult.Response(cancellation.wrap(response))
+                    http1.HttpDuplexExchangeResult.Response(wrapped)
                 case http1.HttpDuplexExchangeResult.Connected(connection) =>
                     try { captureCookies(connection.headers, h1Request.url, context) }
                     catch (error: Exception) { connection.transport.close(); throw error }
+                    cancellation.detachCancellation()
+                    let transferredConnection = http1.HttpDuplexConnection(
+                        connection.status, connection.headers, connection.version,
+                        ClientRotationTransport(connection.transport, lifetime, cancellation),
+                        context: connection.operationContext.withCancellation(parent.cancellation))
+                    transferred = true
                     if (!deferRequestCompletion) {
                         emitHttpObservation(context, NetworkEventKind.RequestCompleted, NetworkEventOutcome.Succeeded)
                     }
-                    cancellation.detachCancellation()
-                    transferred = true
-                    http1.HttpDuplexExchangeResult.Connected(http1.HttpDuplexConnection(
-                        connection.status, connection.headers, connection.version,
-                        ClientRotationTransport(connection.transport, lifetime, cancellation),
-                        context: connection.operationContext.withCancellation(parent.cancellation)))
+                    http1.HttpDuplexExchangeResult.Connected(transferredConnection)
             }
         } catch (error: Exception) {
             cancellation.fail()

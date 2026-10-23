@@ -169,6 +169,77 @@ private class ConnectorEventSink <: NetworkEventSink {
     func events(): Array<NetworkEvent> { synchronized(mutex) { recorded.toArray() } }
 }
 
+/** Returns a live transport whose abort always throws, after the stop already won. */
+private class ThrowingAbortLiteralFactory <: TransportFactory {
+    private let source: CancellationSource
+    private let onConnect: () -> Unit
+    private let mutex = Mutex()
+    private var aborts: Int64 = 0
+    private var transport: ?MemoryTransport = None<MemoryTransport>
+
+    init(source: CancellationSource, onConnect!: () -> Unit = { => () }) {
+        this.source = source
+        this.onConnect = onConnect
+    }
+
+    public func connect(_: SocketEndpoint, _: OperationContext): DuplexTransport {
+        // Cancelling the token (or expiring the deadline) before returning makes the canonical
+        // stop win the post-connect recheck.
+        source.cancel()
+        onConnect()
+        let (connected, peer) = MemoryTransport.pair()
+        peer.close()
+        synchronized(mutex) {
+            transport = Some(connected)
+        }
+        ThrowingAbortTransport(connected, this)
+    }
+
+    func recordAbort(): Unit {
+        synchronized(mutex) { aborts++ }
+    }
+
+    func abortAttempts(): Int64 { synchronized(mutex) { aborts } }
+
+    func transportClosed(): Bool {
+        match (synchronized(mutex) { transport }) {
+            case Some(value) => value.isClosed()
+            case None => true
+        }
+    }
+}
+
+/** Delegates real transport work and fails only the cleanup call under test. */
+private class ThrowingAbortTransport <: DuplexTransport {
+    private let delegate: MemoryTransport
+    private let owner: ThrowingAbortLiteralFactory
+
+    init(delegate: MemoryTransport, owner: ThrowingAbortLiteralFactory) {
+        this.delegate = delegate
+        this.owner = owner
+    }
+
+    public prop info: TransportInfo { get() { delegate.info } }
+    public func readSome(destination: MutableByteSpan,
+        context!: OperationContext = OperationContext.background()): ReadResult {
+        delegate.readSome(destination, context: context)
+    }
+    public func writeSome(source: ByteSpan,
+        context!: OperationContext = OperationContext.background()): Int64 {
+        delegate.writeSome(source, context: context)
+    }
+    public func shutdown(direction: ShutdownDirection): Unit { delegate.shutdown(direction) }
+    public func close(context: OperationContext): Unit { delegate.close(context) }
+    public func close(): Unit { delegate.close() }
+    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
+        owner.recordAbort()
+        // The peer is still released so the fixture cannot leak a live endpoint.
+        delegate.close()
+        throw IllegalStateException("scripted abort cleanup failure")
+    }
+    public func isClosed(): Bool { delegate.isClosed() }
+}
+
 private class ConnectorFakeClock <: MonotonicClock {
     private let mutex = Mutex()
     private var current: MonoTime
@@ -505,6 +576,77 @@ class HappyEyeballsConnectorTest {
         // The stage must report the stop as a aborted attempt; the number of completed
         // failure events depends on the connector generation (kept out of this contract).
         let _ = failed
+    }
+
+    @TestCase
+    func literalCleanupFailureKeepsCanonicalCancellationAndCause(): Unit {
+        let source = CancellationSource()
+        let factory = ThrowingAbortLiteralFactory(source)
+        let sink = ConnectorEventSink()
+        let error = try {
+            let _ = HappyEyeballsConnector(LiteralDialResolver(), factory).connectLiteral(
+                ipv4Address(2), 443,
+                context: OperationContext(cancellation: source.token, eventSink: Some(sink))
+            )
+            @Fail("cancelled literal success with failing cleanup was published")
+        } catch (value: NetworkException) {
+            value
+        }
+        // The cleanup exception never replaces the canonical cancellation classification.
+        @Expect(connectNetworkCode(error.code, NetworkErrorCode.Cancelled))
+        match (error.category) {
+            case NetworkErrorCategory.Connect => ()
+            case _ => @Fail("literal cleanup failure lost the connect category")
+        }
+        match (error.phase) {
+            case NetworkPhase.TcpConnect => ()
+            case _ => @Fail("literal cleanup failure lost the TCP connect phase")
+        }
+        @Expect(error.cause.isSome())
+        @Expect(factory.abortAttempts(), 1)
+        @Expect(factory.transportClosed())
+        var succeeded = false
+        var failedCode = None<NetworkErrorCode>
+        for (event in sink.events()) {
+            if (isEvent(event, NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Succeeded)) {
+                succeeded = true
+            }
+            if (isEvent(event, NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Failed)) {
+                failedCode = event.errorCode
+            }
+        }
+        @Expect(!succeeded)
+        @Expect(failedCode.isSome())
+        @Expect(connectNetworkCode(failedCode.getOrThrow(), NetworkErrorCode.Cancelled))
+    }
+
+    @TestCase
+    func literalCleanupFailureKeepsCanonicalDeadlineAndCause(): Unit {
+        let clock = ConnectorFakeClock(MonoTime.now())
+        let deadline = Deadline.after(Duration.second, clock: clock)
+        let factory = ThrowingAbortLiteralFactory(CancellationSource(),
+            onConnect: { => clock.advance(Duration.second) })
+        let sink = ConnectorEventSink()
+        let error = try {
+            let _ = HappyEyeballsConnector(LiteralDialResolver(), factory).connectLiteral(
+                ipv4Address(2), 443,
+                context: OperationContext(deadline: Some(deadline), eventSink: Some(sink))
+            )
+            @Fail("expired literal success with failing cleanup was published")
+        } catch (value: NetworkException) {
+            value
+        }
+        @Expect(connectNetworkCode(error.code, NetworkErrorCode.TimedOut))
+        @Expect(error.cause.isSome())
+        @Expect(factory.abortAttempts(), 1)
+        var failedCode = None<NetworkErrorCode>
+        for (event in sink.events()) {
+            if (isEvent(event, NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Failed)) {
+                failedCode = event.errorCode
+            }
+        }
+        @Expect(failedCode.isSome())
+        @Expect(connectNetworkCode(failedCode.getOrThrow(), NetworkErrorCode.TimedOut))
     }
 }
 

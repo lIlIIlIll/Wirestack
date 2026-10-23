@@ -75,6 +75,8 @@ try {
 
 每个方向只有一个 active operation 和一个 pending caller。第三个同方向 caller 得到 `WebSocketErrorCode.CapacityExceeded`，不发送 frame bytes，也不改变 session。应用应保持一个 reader loop、一个 writer loop，并使用自己的显式有界消息队列；慢 consumer 和 HTTP/2 flow-control 会阻塞 writer，不产生无限后台缓存。取消或绝对 deadline 能唤醒 active、pending 和 backpressure 等待。
 
+协议要求的回复不受应用 writer 阻塞影响：自动 Pong 与被动的 Close 回复各自占用一个 reserved 单槽位，应用 writer 在取得 active slot 前让位给它们；显式 `close(code, reason)` 的 close frame 也有自己的 reserved 单槽位。因此即使应用的 send 正持有 writer、且已有 close 在等待，收到的 Ping 或 Close 仍能得到应答。`close(code, reason)` 会先占用 reader admission 再写 close frame：当同方向已有 active reader 和 pending reader 时，第三个 `close` 直接以 `CapacityExceeded` 失败，不写任何字节也不终止 session。
+
 `receive` 返回一个 frame，不拼接整条消息：
 
 - `Text`/`Binary` 开始消息，`Continuation` 继续；`finalFragment` 表示结束。应用累计数据必须同样有界。

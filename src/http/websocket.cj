@@ -185,7 +185,8 @@ public enum WebSocketConnectResult {
  * The connection owns its transport. Extension bits are rejected because no extensions are negotiated.
  * Exactly one reader and one writer operate at a time, with at most one pending caller per direction.
  * Additional callers fail with CapacityExceeded without changing the session or writing frame bytes.
- * Control responses share the same bounded writer gate and never splice bytes into a data frame.
+ * Required inbound replies use one separately bounded reserved writer slot that is admitted ahead of
+ * queued callers; control responses never splice bytes into a data frame.
  */
 public class WebSocketConnection <: Resource {
     /** Endpoint role that controls outbound and inbound masking requirements. */
@@ -204,7 +205,8 @@ public class WebSocketConnection <: Resource {
     private var writerActive = false
     private var readerWaiting = false
     private var writerWaiting = false
-    private var controlWriterWaiting = false
+    private var replyWaiting = false
+    private var closeWaiting = false
     private var terminal = false
     private var closeSent = false
     private var closeReceived = false
@@ -277,7 +279,8 @@ public class WebSocketConnection <: Resource {
 
     private func sendWithContext(frame: WebSocketFrame, context: OperationContext): Unit {
         checkWebSocketContext(context)
-        acquireWriter(context)
+        let closeFrame = isCloseOpcode(frame.opcode)
+        if (closeFrame) { acquireCloseWriter(context) } else { acquireWriter(context) }
         let outboundUtf8State = outboundUtf8.snapshot()
         let attemptedIo = writeProgress
         attemptedIo.started = false
@@ -322,6 +325,11 @@ public class WebSocketConnection <: Resource {
     private func receiveWithContext(context: OperationContext): WebSocketFrame {
         checkWebSocketContext(context)
         acquireReader(context)
+        try { return receiveAdmitted(context) } finally { releaseReader() }
+    }
+
+    /** Reads and answers one frame while this call already owns the reader slot. */
+    private func receiveAdmitted(context: OperationContext): WebSocketFrame {
         let attemptedIo = readProgress
         attemptedIo.started = false
         try {
@@ -356,8 +364,6 @@ public class WebSocketConnection <: Resource {
         } catch (error: Exception) {
             if (attemptedIo.started) { failClosed(webSocketAbortReason(context)) }
             throw wrapWebSocketOperationFailure(error, context)
-        } finally {
-            releaseReader()
         }
     }
 
@@ -386,19 +392,26 @@ public class WebSocketConnection <: Resource {
         }
         let payload = encodeWebSocketClose(code, reason)
         let bounded = context.shortenDeadline(limits.closeTimeout)
-        sendAutomaticCloseIfNeeded(payload, bounded)
-        while (true) {
-            if (synchronized(mutex) { closeReceived }) {
-                completeGracefully(bounded)
-                return
+        // Reader admission is reserved before any close-frame byte is written: a rejected third
+        // same-direction caller must not send a close frame and then abort a usable session.
+        acquireReader(bounded)
+        try {
+            sendCloseFrameIfNeeded(payload, bounded, reply: false)
+            while (true) {
+                if (synchronized(mutex) { closeReceived }) {
+                    completeGracefully(bounded)
+                    return
+                }
+                try {
+                    let _ = receiveAdmitted(bounded)
+                } catch (error: WebSocketException) {
+                    if (synchronized(mutex) { closeReceived }) { return }
+                    if (synchronized(mutex) { closeSent }) { failClosed(webSocketAbortReason(bounded)) }
+                    throw error
+                }
             }
-            try {
-                let _ = receiveWithContext(bounded)
-            } catch (error: WebSocketException) {
-                if (synchronized(mutex) { closeReceived }) { return }
-                if (synchronized(mutex) { closeSent }) { failClosed(webSocketAbortReason(bounded)) }
-                throw error
-            }
+        } finally {
+            releaseReader()
         }
     }
 
@@ -411,6 +424,17 @@ public class WebSocketConnection <: Resource {
     /** Reports whether this connection has entered its terminal state. */
     public func isClosed(): Bool { synchronized(mutex) { terminal } }
 
+    /** Non-sensitive admission observation for in-package verification; no caller-visible contract. */
+    internal prop admissionState: WebSocketAdmissionState {
+        get() {
+            synchronized(mutex) {
+                WebSocketAdmissionState(readerActive, if (readerWaiting) { 1 } else { 0 }, writerActive,
+                    if (writerWaiting) { 1 } else { 0 }, if (replyWaiting) { 1 } else { 0 },
+                    if (closeWaiting) { 1 } else { 0 })
+            }
+        }
+    }
+
     private func acquireReader(context: OperationContext): Unit {
         acquireOperation(context, reader: true)
     }
@@ -419,20 +443,20 @@ public class WebSocketConnection <: Resource {
         acquireOperation(context, reader: false)
     }
 
-    /** Automatic Ping/Pong/Close replies use one reserved, bounded control-writer slot: they never
-     * consume the single pending application-writer admission slot and win the active slot before
-     * a queued application caller. At most one control writer may wait; further control callers are
-     * rejected with CapacityExceeded so blocked control waiters stay bounded. */
-    private func acquireControlWriter(context: OperationContext): Unit {
+    /** Protocol-required replies (Pong and the Close reply) use one reserved, bounded writer slot:
+     * they never consume the application writer's pending slot and the application writer yields the
+     * active slot to them. Reader admission already bounds reserved replies to one, so a second
+     * reserved reply is rejected without I/O instead of growing an unbounded queue. */
+    private func acquireReplyWriter(context: OperationContext): Unit {
         let waiting = synchronized(mutex) {
             checkWebSocketContext(context)
             if (terminal) { throw webSocketClosed() }
             if (writerActive) {
-                if (controlWriterWaiting) {
+                if (replyWaiting) {
                     throw WebSocketException(WebSocketErrorCode.CapacityExceeded,
-                        "WebSocket reserved control-writer admission is occupied")
+                        "WebSocket reserved reply admission is occupied")
                 }
-                controlWriterWaiting = true
+                replyWaiting = true
                 true
             } else {
                 writerActive = true
@@ -453,7 +477,46 @@ public class WebSocketConnection <: Resource {
             }
         } finally {
             synchronized(mutex) {
-                controlWriterWaiting = false
+                replyWaiting = false
+                changed.notifyAll()
+            }
+            registration.unregister()
+        }
+    }
+
+    /** A caller-initiated Close frame uses its own reserved slot, so a required inbound reply is never
+     * rejected because a close frame already waits for the writer. At most one close writer may wait. */
+    private func acquireCloseWriter(context: OperationContext): Unit {
+        let waiting = synchronized(mutex) {
+            checkWebSocketContext(context)
+            if (terminal) { throw webSocketClosed() }
+            if (writerActive) {
+                if (closeWaiting) {
+                    throw WebSocketException(WebSocketErrorCode.CapacityExceeded,
+                        "WebSocket reserved close admission is occupied")
+                }
+                closeWaiting = true
+                true
+            } else {
+                writerActive = true
+                false
+            }
+        }
+        if (!waiting) { return }
+        let registration = context.cancellation.register { => wakeOperations() }
+        try {
+            synchronized(mutex) {
+                while ((writerActive || replyWaiting) && !terminal) {
+                    checkWebSocketContext(context)
+                    waitWebSocketCondition(changed, context)
+                }
+                checkWebSocketContext(context)
+                if (terminal) { throw webSocketClosed() }
+                writerActive = true
+            }
+        } finally {
+            synchronized(mutex) {
+                closeWaiting = false
                 changed.notifyAll()
             }
             registration.unregister()
@@ -465,7 +528,7 @@ public class WebSocketConnection <: Resource {
             checkWebSocketContext(context)
             if (terminal) { throw webSocketClosed() }
             let busy = if (reader) { readerActive || readerWaiting } else {
-                writerActive || writerWaiting || controlWriterWaiting
+                writerActive || writerWaiting || replyWaiting || closeWaiting
             }
             if (busy) {
                 if (if (reader) { readerWaiting } else { writerWaiting }) {
@@ -483,7 +546,7 @@ public class WebSocketConnection <: Resource {
         let registration = context.cancellation.register { => wakeOperations() }
         try {
             synchronized(mutex) {
-                while ((if (reader) { readerActive } else { writerActive || controlWriterWaiting }) && !terminal) {
+                while ((if (reader) { readerActive } else { writerActive || replyWaiting || closeWaiting }) && !terminal) {
                     checkWebSocketContext(context)
                     waitWebSocketCondition(changed, context)
                 }
@@ -588,7 +651,7 @@ public class WebSocketConnection <: Resource {
         payload: Array<Byte>,
         context: OperationContext
     ): Unit {
-        acquireControlWriter(context)
+        acquireReplyWriter(context)
         let attemptedIo = writeProgress
         attemptedIo.started = false
         try {
@@ -606,8 +669,19 @@ public class WebSocketConnection <: Resource {
     }
 
     private func sendAutomaticCloseIfNeeded(payload: Array<Byte>, context: OperationContext): Unit {
+        sendCloseFrameIfNeeded(payload, context, reply: true)
+    }
+
+    /** Sends the single Close frame for this session. `reply` selects the reserved slot used by a
+     * protocol-required reply; a caller-initiated close keeps its own reserved slot so replies and
+     * callers cannot starve each other. */
+    private func sendCloseFrameIfNeeded(
+        payload: Array<Byte>,
+        context: OperationContext,
+        reply: Bool
+    ): Unit {
         if (synchronized(mutex) { closeSent }) { return }
-        acquireControlWriter(context)
+        if (reply) { acquireReplyWriter(context) } else { acquireCloseWriter(context) }
         let attemptedIo = writeProgress
         attemptedIo.started = false
         try {
@@ -799,6 +873,26 @@ public class WebSocketConnection <: Resource {
             value
         }
         if (let Some(value) <- registration) { value.unregister() }
+    }
+}
+
+/** One lock-consistent view of the WebSocket admission slots; verification only. */
+internal struct WebSocketAdmissionState {
+    let readerActive: Bool
+    let readerWaiters: Int64
+    let writerActive: Bool
+    let writerWaiters: Int64
+    let replyWaiters: Int64
+    let closeWaiters: Int64
+
+    init(readerActive: Bool, readerWaiters: Int64, writerActive: Bool, writerWaiters: Int64,
+        replyWaiters: Int64, closeWaiters: Int64) {
+        this.readerActive = readerActive
+        this.readerWaiters = readerWaiters
+        this.writerActive = writerActive
+        this.writerWaiters = writerWaiters
+        this.replyWaiters = replyWaiters
+        this.closeWaiters = closeWaiters
     }
 }
 

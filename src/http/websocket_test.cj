@@ -1,6 +1,7 @@
 package wirestack.http
 
 import std.collection.*
+import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
@@ -258,6 +259,257 @@ class WebSocketConnectionTest {
             "mutations=${mutations.size} schedules=${schedules.size} executions=${executions} " +
             "maxInputBytes=${maximumInputBytes} readCalls=${readCalls} decision=PASS"
         )
+    }
+
+    @TestCase
+    func rejectedCloseWritesNoFrameAndLeavesTheSessionUsable(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 4096, maxChunk: 4096)
+        let client = WebSocketConnection(clientTransport, WebSocketRole.Client)
+        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)
+        let bounded = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))
+        try {
+            let first = spawn { server.receive(context: bounded) }
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.readerActive }).readerActive)
+            let second = spawn { server.receive(context: bounded) }
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.readerWaiters == 1 }).readerWaiters, 1)
+
+            let rejected = @AssertThrows[WebSocketException](
+                server.close(1000u16, "done", context: bounded))
+            @Expect(webSocketTestError(rejected.code, WebSocketErrorCode.CapacityExceeded))
+            // Side-effect free rejection: no close frame was written and no slot was consumed.
+            @Expect(!server.isClosed())
+            let after = server.admissionState
+            @Expect(after.closeWaiters, 0)
+            @Expect(after.replyWaiters, 0)
+            @Expect(after.writerWaiters, 0)
+            @Expect(after.readerWaiters, 1)
+
+            client.send(WebSocketFrame(WebSocketOpcode.Binary, payload: [1u8, 2u8, 3u8]))
+            let active = first.get(3 * Duration.second)
+            @Expect(webSocketTestOpcode(active.opcode, WebSocketOpcode.Binary))
+            @Expect(active.payload, [1u8, 2u8, 3u8])
+            client.send(WebSocketFrame(WebSocketOpcode.Binary, payload: [4u8]))
+            let queued = second.get(3 * Duration.second)
+            @Expect(webSocketTestOpcode(queued.opcode, WebSocketOpcode.Binary))
+            @Expect(queued.payload, [4u8])
+
+            // The session stayed open, so a later close handshake still completes normally.
+            let peer = spawn {
+                try { Some(client.receive(context: bounded)) } catch (_: WebSocketException) { None<WebSocketFrame> }
+            }
+            server.close(1000u16, "done", context: bounded)
+            @Expect(server.isClosed())
+            @Expect(webSocketTestOpcode(peer.get(3 * Duration.second).getOrThrow().opcode, WebSocketOpcode.Close))
+        } finally {
+            client.close()
+            server.close()
+        }
+    }
+
+    @TestCase
+    func reservedReplySurvivesABlockedApplicationWriterAndWaitingClose(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64, maxChunk: 64)
+        let client = WebSocketConnection(clientTransport, WebSocketRole.Client)
+        let server = WebSocketConnection(serverTransport, WebSocketRole.Server)
+        let payload = Array<Byte>(512, repeat: 42u8)
+        let bounded = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))
+        try {
+            let blockedSend = spawn { server.send(WebSocketFrame(WebSocketOpcode.Binary, payload: payload),
+                context: bounded) }
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.writerActive }).writerActive)
+            let reader = spawn { server.receive(context: bounded) }
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.readerActive }).readerActive)
+            // The caller close reserves reader admission before writing, so it waits without
+            // occupying the reserved reply slot.
+            let closer = spawn { server.close(1000u16, "done", context: bounded) }
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.readerWaiters == 1 }).readerWaiters, 1)
+            @Expect(server.admissionState.closeWaiters, 0)
+
+            client.send(WebSocketFrame(WebSocketOpcode.Ping, payload: "probe".toArray()))
+            // The reply waits in its own bounded slot, not in the application writer's pending slot.
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.replyWaiters == 1 }).replyWaiters, 1)
+            @Expect(server.admissionState.writerWaiters, 0)
+            let pendingSend = spawn { server.send(WebSocketFrame(WebSocketOpcode.Binary, payload: [7u8]),
+                context: bounded) }
+            @Expect(webSocketTestAwaitAdmission(server, { state => state.writerWaiters == 1 }).writerWaiters, 1)
+            let overflow = @AssertThrows[WebSocketException](
+                server.send(WebSocketFrame(WebSocketOpcode.Binary, payload: [8u8]), context: bounded))
+            @Expect(webSocketTestError(overflow.code, WebSocketErrorCode.CapacityExceeded))
+            @Expect(!server.isClosed())
+
+            let large = client.receive(context: bounded)
+            @Expect(webSocketTestOpcode(large.opcode, WebSocketOpcode.Binary))
+            @Expect(large.payload.size, payload.size)
+            var pongSeen = false
+            var closeSeen = false
+            for (_ in 0..4) {
+                if (pongSeen && closeSeen) { break }
+                let frame = client.receive(context: bounded)
+                match (frame.opcode) {
+                    case WebSocketOpcode.Pong =>
+                        @Expect(frame.payload, "probe".toArray())
+                        pongSeen = true
+                    case WebSocketOpcode.Close => closeSeen = true
+                    case _ => ()
+                }
+            }
+            @Expect(pongSeen)
+            @Expect(closeSeen)
+            @Expect(webSocketTestOpcode(reader.get(3 * Duration.second).opcode, WebSocketOpcode.Ping))
+            // The blocked and pending application writes may finish or fail once the close frame
+            // is sent; either way the session must reach exactly one terminal state.
+            webSocketTestSettle(blockedSend)
+            webSocketTestSettle(pendingSend)
+            webSocketTestSettle(closer)
+            @Expect(server.isClosed())
+        } finally {
+            client.close()
+            server.close()
+        }
+    }
+
+    @TestCase
+    func terminalCleanupRunsExactlyOnceAfterGracefulCloseAndAfterFailure(): Unit {
+        let (gracefulClient, gracefulServer) =
+            MemoryTransport.pair(capacity: 4096, maxChunk: 4096)
+        let gracefulCounting = WebSocketTestCountingTransport(gracefulServer)
+        let gracefulPeer = WebSocketConnection(gracefulClient, WebSocketRole.Client)
+        let graceful = WebSocketConnection(gracefulCounting, WebSocketRole.Server)
+        let bounded = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))
+        try {
+            gracefulPeer.close(1000u16, "done", context: bounded)
+            let closeFrame = graceful.receive(context: bounded)
+            @Expect(webSocketTestOpcode(closeFrame.opcode, WebSocketOpcode.Close))
+            @Expect(graceful.isClosed())
+            let afterClose = gracefulCounting.terminalCounts()
+            @Expect(afterClose.closes, 1)
+            @Expect(afterClose.aborts, 0)
+            graceful.close()
+            gracefulPeer.close()
+            let stable = gracefulCounting.terminalCounts()
+            @Expect(stable.closes, 1)
+            @Expect(stable.aborts, 0)
+        } finally {
+            graceful.close()
+            gracefulPeer.close()
+        }
+
+        let (failedClient, failedServer) = MemoryTransport.pair(capacity: 4096, maxChunk: 4096)
+        let failedCounting = WebSocketTestCountingTransport(failedServer)
+        let failed = WebSocketConnection(failedCounting, WebSocketRole.Server)
+        try {
+            failedClient.close()
+            let failure = @AssertThrows[WebSocketException](failed.receive(context: bounded))
+            @Expect(webSocketTestError(failure.code, WebSocketErrorCode.TransportFailure))
+            @Expect(failed.isClosed())
+            let afterFailure = failedCounting.terminalCounts()
+            @Expect(afterFailure.closes, 0)
+            @Expect(afterFailure.aborts, 1)
+            failed.close()
+            failed.close()
+            let stable = failedCounting.terminalCounts()
+            @Expect(stable.closes, 0)
+            @Expect(stable.aborts, 1)
+        } finally {
+            failed.close()
+            failedClient.close()
+        }
+
+        let (raceClient, raceServer) = MemoryTransport.pair(capacity: 4096, maxChunk: 4096)
+        let raceCounting = WebSocketTestCountingTransport(raceServer)
+        let racePeer = WebSocketConnection(raceClient, WebSocketRole.Client)
+        let race = WebSocketConnection(raceCounting, WebSocketRole.Server)
+        try {
+            let receiver = spawn {
+                try { let _ = race.receive(context: bounded); true } catch (_: WebSocketException) { true }
+            }
+            let closers = Array<Future<Unit>>(4, { _ => spawn { race.close() } })
+            let peerClose = spawn {
+                try { racePeer.close(1000u16, "done", context: bounded) } catch (_: Exception) { () }
+            }
+            @Expect(receiver.get(3 * Duration.second))
+            peerClose.get(3 * Duration.second)
+            for (closer in closers) { closer.get(3 * Duration.second) }
+            let counts = raceCounting.terminalCounts()
+            @Expect(counts.closes + counts.aborts, 1)
+            race.close()
+            let stable = raceCounting.terminalCounts()
+            @Expect(stable.closes + stable.aborts, 1)
+        } finally {
+            race.close()
+            racePeer.close()
+        }
+    }
+}
+
+private func webSocketTestAwaitAdmission(
+    session: WebSocketConnection,
+    predicate: (WebSocketAdmissionState) -> Bool
+): WebSocketAdmissionState {
+    let deadline = Deadline.after(3 * Duration.second)
+    while (!deadline.isExpired()) {
+        let state = session.admissionState
+        if (predicate(state)) { return state }
+        sleep(Duration.millisecond)
+    }
+    throw Exception("WebSocket admission did not reach the expected state")
+}
+
+/** Waits for one racing caller to finish; a terminal close may legitimately fail it. */
+private func webSocketTestSettle(future: Future<Unit>): Unit {
+    try {
+        future.get(3 * Duration.second)
+    } catch (_: Exception) {
+        ()
+    }
+}
+
+/** Delegates to a real in-memory pair while counting terminal transport calls. */
+private class WebSocketTestCountingTransport <: api.DuplexTransport {
+    private let delegate: MemoryTransport
+    private let mutex = Mutex()
+    private var closes: Int64 = 0
+    private var aborts: Int64 = 0
+
+    init(delegate: MemoryTransport) {
+        this.delegate = delegate
+    }
+
+    public prop info: api.TransportInfo { get() { delegate.info } }
+    public func readSome(destination: api.MutableByteSpan,
+        context!: OperationContext = OperationContext.background()): api.ReadResult {
+        delegate.readSome(destination, context: context)
+    }
+    public func writeSome(source: api.ByteSpan,
+        context!: OperationContext = OperationContext.background()): Int64 {
+        delegate.writeSome(source, context: context)
+    }
+    public func shutdown(direction: api.ShutdownDirection): Unit { delegate.shutdown(direction) }
+    public func close(context: OperationContext): Unit {
+        synchronized(mutex) { closes++ }
+        delegate.close(context)
+    }
+    public func close(): Unit {
+        synchronized(mutex) { closes++ }
+        delegate.close()
+    }
+    public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit {
+        synchronized(mutex) { aborts++ }
+        delegate.abort(reason: reason)
+    }
+    public func isClosed(): Bool { delegate.isClosed() }
+    func terminalCounts(): WebSocketTestTerminalCounts {
+        synchronized(mutex) { WebSocketTestTerminalCounts(closes, aborts) }
+    }
+}
+
+private struct WebSocketTestTerminalCounts {
+    let closes: Int64
+    let aborts: Int64
+
+    init(closes: Int64, aborts: Int64) {
+        this.closes = closes
+        this.aborts = aborts
     }
 }
 

@@ -1798,6 +1798,66 @@ private class PublicRedirectPushObserver <: ResponseBodyObserver {
 }
 
 @Test
+class HttpCancellationHandlesCallbackTest {
+    @TestCase
+    func retainedCallbackRunsAtMostOnceAcrossSequentialCancellations(): Unit {
+        let request = HttpRequestCancellationHandle()
+        let connection = HttpConnectionCancellationHandle()
+        let stream = HttpStreamCancellationHandle()
+        let calls = AtomicInt64(0)
+        let handles = HttpCancellationHandles(
+            request: Some(request), connection: Some(connection), stream: Some(stream))
+        let lifetime = handles.retainCancellation({ => let _ = calls.fetchAdd(1) })
+        try {
+            let _ = request.cancel()
+            @Expect(calls.load(), 1)
+            let _ = connection.cancel()
+            let _ = stream.cancel()
+        } finally { lifetime.close() }
+        @Expect(calls.load(), 1)
+    }
+
+    @TestCase
+    func retainedCallbackRunsAtMostOnceWhenHandlesWereAlreadyCancelled(): Unit {
+        let request = HttpRequestCancellationHandle()
+        let connection = HttpConnectionCancellationHandle()
+        let stream = HttpStreamCancellationHandle()
+        let _ = request.cancel()
+        let _ = connection.cancel()
+        let calls = AtomicInt64(0)
+        let handles = HttpCancellationHandles(
+            request: Some(request), connection: Some(connection), stream: Some(stream))
+        let lifetime = handles.retainCancellation({ => let _ = calls.fetchAdd(1) })
+        try {
+            @Expect(calls.load(), 1)
+            let _ = stream.cancel()
+        } finally { lifetime.close() }
+        @Expect(calls.load(), 1)
+    }
+
+    @TestCase
+    func concurrentHandleCancellationRunsTheGateExactlyOnce(): Unit {
+        let calls = AtomicInt64(0)
+        for (index in 0..64) {
+            let request = HttpRequestCancellationHandle()
+            let connection = HttpConnectionCancellationHandle()
+            let stream = HttpStreamCancellationHandle()
+            let handles = HttpCancellationHandles(
+                request: Some(request), connection: Some(connection), stream: Some(stream))
+            let lifetime = handles.retainCancellation({ => let _ = calls.fetchAdd(1) })
+            let first = spawn { let _ = request.cancel() }
+            let second = spawn { let _ = connection.cancel() }
+            let third = spawn { let _ = stream.cancel() }
+            first.get(3 * Duration.second)
+            second.get(3 * Duration.second)
+            third.get(3 * Duration.second)
+            @Expect(calls.load(), Int64(index + 1))
+            lifetime.close()
+        }
+    }
+}
+
+@Test
 class HttpServerAuthorityCanonicalizationTest {
     @TestCase
     func canonicalServerAuthoritiesCollapseEquivalentSpellings(): Unit {

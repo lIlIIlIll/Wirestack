@@ -52,7 +52,12 @@
     "tools/tasks/M11-003.json",
     "docs/evidence/M11-003",
     "docs/api/generated",
-    "tools/m11_002_native_gzip.py"
+    "tools/m11_002_native_gzip.py",
+    ".gitignore",
+    "src/internal/http1/proxy_literal_connect_deadline_test.cj",
+    "src/http/websocket_test.cj",
+    "src/http/upgrade_terminal_test.cj",
+    "tools/tests/test_m11_003_evidence_inventory.py"
   ],
   "platforms": [
     "linux-x86_64-glibc"
@@ -204,6 +209,11 @@
     "docs/guides/http-parity-linux.md",
     "docs/planning/status.md",
     "tools/tasks/M11-003.json",
-    "tools/m11_002_native_gzip.py"
+    "tools/m11_002_native_gzip.py",
+    ".gitignore",
+    "src/internal/http1/proxy_literal_connect_deadline_test.cj",
+    "src/http/websocket_test.cj",
+    "src/http/upgrade_terminal_test.cj",
+    "tools/tests/test_m11_003_evidence_inventory.py"
   ]
 }

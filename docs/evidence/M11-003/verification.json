@@ -1,438 +1,100 @@
 {
   "schema_version": 1,
   "task_id": "M11-003",
-  "status": "PASS",
-  "task_status": "COMPLETE",
-  "generated_at_utc": "2026-10-09T05:04:05.386107Z",
-  "release_qualification": "NOT_QUALIFIED",
+  "status": "BLOCKED",
+  "acceptance_status": "BLOCKED",
   "candidate_committed": false,
-  "evidence_kind": "SOURCE_BOUND_WORKING_TREE_ACCEPTANCE",
-  "workspace_safety": {
-    "path": "docs/evidence/M11-003/workspace.json",
-    "digest": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "553565a936178be77d5f237b05a39c628316b6e68c7bf47ebe6732e1a252b439"
+  "release_qualification": "NOT_QUALIFIED",
+  "evidence_generation": "HANDWRITTEN_STATUS_ONLY_NO_COMMAND_OR_TEST_RUN",
+  "status_detail": {
+    "reason": "No receipt under this directory binds the current sources. The review fixes changed production files after the last measurement, so the task cannot be sealed or restored to COMPLETE from this branch.",
+    "measured_head": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+    "review_fixes_in_this_round": "Stack #200 follow-ups #278-#282 repair WebSocket admission, Upgrade terminal ordering, connector cleanup and the cancellation once-gate tests, and bind the omitted source inputs.",
+    "changed_in_this_round": [
+      "src/http/websocket.cj",
+      "src/http/websocket_test.cj",
+      "src/http/client.cj",
+      "src/http/facade_test.cj",
+      "src/http/upgrade_terminal_test.cj",
+      "src/internal/connector/happy_eyeballs.cj",
+      "src/internal/connector/happy_eyeballs_test.cj",
+      "tools/tasks/M11-003.json",
+      "tools/tests/test_m11_003_evidence_inventory.py",
+      "docs/guides/websocket.md",
+      "docs/planning/status.md",
+      "docs/evidence/M11-003/README.md",
+      "docs/evidence/M11-003/verification.json",
+      "docs/evidence/M11-003/historical"
+    ],
+    "historical_receipts": {
+      "directory": "docs/evidence/M11-003/historical",
+      "measured_head": "d96a333e4017059dc38f62ddda03a3536c200676",
+      "measured_on": "2026-10-09",
+      "citable_as_current_evidence": false
+    },
+    "required_before_complete": [
+      "Run scripts/check-task M11-003 --json --output docs/evidence/M11-003/task-gate.json on the qualified Linux SDK environment.",
+      "Run cjpm test --target-dir target/m11-003-native --exclude-tags=Performance --parallel 1 --no-progress --no-color --timeout-each 60s and record the exact totals.",
+      "Regenerate docs/evidence/M11-003/installed/report.json with python3 tools/m11_003_native_websocket.py.",
+      "Run the same runner against the qualified SDK 1.1.3 profile into docs/evidence/M11-003/installed-sdk113/report.json.",
+      "Run env cjHeapSize=1GB scripts/check-docs --html --output docs/evidence/M11-003/docs/report.json.",
+      "Run scripts/check-m7-032-public-api --write --json into docs/evidence/M11-003/public-api.json.",
+      "Record a fresh docs/evidence/M11-003/workspace.json for this branch.",
+      "Regenerate this file from the new receipts and seal it with python3 tools/repository/repository_tooling.py seal-evidence."
+    ],
+    "source_inventory_note": "tools/tasks/M11-003.json now lists every non-evidence file the merged owner PR #206 changed, including .gitignore and src/internal/http1/proxy_literal_connect_deadline_test.cj, plus this round's new regression sources."
+  },
+  "review_findings": {
+    "issue-278": {
+      "status": "FIXED_IN_SOURCE_NOT_MEASURED",
+      "title": "Reserve priority for inbound control replies",
+      "change": "src/http/websocket.cj separates the reserved reply slot from the caller writer and close slots. Pong and the Close reply use replyWaiting, a caller close frame uses closeWaiting, and the application writer yields both slots before taking the active writer. closeWithContext reserves reader admission before writing any close frame, so a rejected third caller is side-effect free.",
+      "regressions": [
+        "WebSocketConnectionTest.rejectedCloseWritesNoFrameAndLeavesTheSessionUsable",
+        "WebSocketConnectionTest.reservedReplySurvivesABlockedApplicationWriterAndWaitingClose"
+      ]
+    },
+    "issue-279": {
+      "status": "FIXED_IN_SOURCE_NOT_MEASURED",
+      "title": "Defer completion until the rejected response is wrapped",
+      "change": "src/http/client.cj executeDuplex wraps the rejected response and retains its lifetime before emitting RequestCompleted/Succeeded. A cancellation that wins the wrap reaches the single failure path, so one logical request emits exactly one terminal event.",
+      "regressions": [
+        "HttpUpgradeTerminalOrderingTest.cancellationWinningBeforeTheWrapYieldsExactlyOneFailedCompletion"
+      ]
+    },
+    "issue-280": {
+      "status": "FIXED_IN_SOURCE_NOT_MEASURED",
+      "title": "Preserve the stop error when abort cleanup fails",
+      "change": "src/internal/connector/happy_eyeballs.cj isolates the literal abort failure in connectLiteral, keeps the cleanup exception as the cause and still throws the canonical Cancelled/TimedOut Connect-category exception, which drives the existing failed attempt event.",
+      "regressions": [
+        "HappyEyeballsConnectorTest.literalCleanupFailureKeepsCanonicalCancellationAndCause",
+        "HappyEyeballsConnectorTest.literalCleanupFailureKeepsCanonicalDeadlineAndCause"
+      ]
+    },
+    "issue-281": {
+      "status": "FIXED_IN_SOURCE_NOT_MEASURED",
+      "title": "Restore the cancellation once-gate regression tests",
+      "change": "src/http/facade_test.cj restores both once-gate tests next to the server-authority canonicalization case and adds a concurrent three-handle case.",
+      "regressions": [
+        "HttpCancellationHandlesCallbackTest.retainedCallbackRunsAtMostOnceAcrossSequentialCancellations",
+        "HttpCancellationHandlesCallbackTest.retainedCallbackRunsAtMostOnceWhenHandlesWereAlreadyCancelled",
+        "HttpCancellationHandlesCallbackTest.concurrentHandleCancellationRunsTheGateExactlyOnce"
+      ]
+    },
+    "issue-282": {
+      "status": "FIXED_IN_SOURCE_NOT_MEASURED",
+      "title": "Bind the modified proxy-literal test into task evidence",
+      "change": "tools/tasks/M11-003.json adds src/internal/http1/proxy_literal_connect_deadline_test.cj and .gitignore to allowed_paths and source_paths; the whole owner-PR changed-file set is now covered with no omissions.",
+      "regressions": [
+        "tools/tests/test_m11_003_evidence_inventory.py"
+      ]
     }
   },
-  "dependencies": [
-    {
-      "task_id": "M9-001",
-      "status_at_start": "COMPLETE"
-    },
-    {
-      "task_id": "M10-001",
-      "status_at_start": "COMPLETE"
-    },
-    {
-      "task_id": "M10-005",
-      "status_at_start": "COMPLETE"
-    }
-  ],
-  "task_gate": {
-    "commands": 5,
-    "passed": 5,
-    "failed": 0,
-    "timed_out": 0
-  },
-  "native_regression": {
-    "total": 1030,
-    "passed": 1002,
-    "skipped": 28,
-    "error": 0,
-    "failed": 0,
-    "skip_reason": "28 explicitly excluded Performance cases"
-  },
-  "focused_websocket": {
-    "primary": {
-      "total": 1030,
-      "passed": 27,
-      "skipped": 1003,
-      "error": 0,
-      "failed": 0,
-      "skip_reason": "non-WebSocket cases filtered"
-    },
-    "sdk113": {
-      "total": 1030,
-      "passed": 27,
-      "skipped": 1003,
-      "error": 0,
-      "failed": 0,
-      "skip_reason": "non-WebSocket cases filtered"
-    }
-  },
-  "installed": {
-    "primary": {
-      "checks_passed": 15,
-      "toolchain": {
-        "compiler": "Cangjie Compiler: 1.3.0-alpha.06 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-        "cjpm": "Cangjie Project Manager: 1.3.0-alpha.06"
-      },
-      "capacity_observation": {
-        "frame_limit": 32768,
-        "retained_bytes": 32776,
-        "high_water_bytes": 32776,
-        "capacity_bytes": 262144,
-        "physical_connections": 1
-      },
-      "binary_digest": {
-        "domain": "artifact-bytes-v1",
-        "sha256": "d42631e596cf4db4a7adf732da5f66ea795a53db8b3f0240f580a152c012f851"
-      },
-      "archive_digest": {
-        "domain": "artifact-bytes-v1",
-        "sha256": "c1adde56765174b475a7069ecd664223f57b0a8a75fee91b46388542f0bcd0a3"
-      }
-    },
-    "sdk113": {
-      "checks_passed": 15,
-      "toolchain": {
-        "compiler": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-        "cjpm": "Cangjie Project Manager: 1.1.3"
-      },
-      "capacity_observation": {
-        "frame_limit": 32768,
-        "retained_bytes": 32772,
-        "high_water_bytes": 32772,
-        "capacity_bytes": 262144,
-        "physical_connections": 1
-      },
-      "binary_digest": {
-        "domain": "artifact-bytes-v1",
-        "sha256": "a744123accd4252b1293b278a6bd990e4def084c8ab308924dcd78a7add7a532"
-      },
-      "archive_digest": {
-        "domain": "artifact-bytes-v1",
-        "sha256": "c1adde56765174b475a7069ecd664223f57b0a8a75fee91b46388542f0bcd0a3"
-      }
-    },
-    "current_production_bytes_match": true,
-    "consumer_and_runner_match_across_sdks": true,
-    "native_needed": [
-      "libboundscheck.so",
-      "libc.so.6",
-      "libcangjie-runtime.so",
-      "libm.so.6"
-    ]
-  },
-  "public_api": {
-    "declarations": 363,
-    "internal_aliases": 0,
-    "historical_inventory": "RETAINED_NOT_COMPARED",
-    "compatibility": "NOT_EVALUATED_PRE_1_0"
-  },
-  "docs": {
-    "packages": 7,
-    "symbols": {
-      "documented": 1870,
-      "percent": 100,
-      "total": 1870
-    },
-    "parameters": {
-      "documented": 947,
-      "percent": 100,
-      "total": 947
-    },
-    "strict_deny_warnings": true,
-    "browser_surface": "PASS"
-  },
-  "python_tooling": {
-    "tests": 48,
-    "exit_code": 0
-  },
-  "architecture": {
-    "status": "PASS",
-    "exit_code": 0
-  },
-  "capability_contract": {
-    "status": "PASS",
-    "exit_code": 0
-  },
-  "privacy_check": {
-    "command": "git privacy-check",
-    "exit_code": 0
-  },
-  "typed_spdx_shared_gate_smoke": {
-    "status": "PASS",
-    "scope": "actual current extracted archive SPDX source comparison; prior native dependency observations retained, not re-executed",
-    "matched_source_count": 4,
-    "changed_installed_source_rejected": true,
-    "archive_digest": {
-      "domain": "artifact-bytes-v1",
-      "sha256": "c1adde56765174b475a7069ecd664223f57b0a8a75fee91b46388542f0bcd0a3"
-    },
-    "historical_evidence_untouched": true
-  },
-  "review_round_source_binding": {
-    "note": "Files added to the task manifest by Codex review-round fixes after the 2026-10-09 accepted candidate. Current working-tree digests are recorded for truthful manifest binding only; they are not part of the historical acceptance inventory and do not extend the accepted-candidate claim.",
-    "source_sha256": {
-      "src/gzip/client.cj": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "ef52a886a36b170fb8ea0620209ab70b08447377af5f261636e6bd9add75a98f"
-      },
-      "src/http_message.cj": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "1e324d3d5bc13bfc2d46984bb377fffe90b5370ef8134e0489658cd963d18a0a"
-      },
-      "src/internal/connector/happy_eyeballs_test.cj": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "d9e71bc18c75eec64b1b3284bc2cf0751aa4b4655504219a86ed494d904da994"
-      },
-      "tools/tests/test_m11_003_native_websocket.py": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "4f838fac93dbae0c88936ad7ccf3645b760208cf7554f9c5809f408a1027000b"
-      }
-    }
-  },
-  "source_sha256": {
-    "src/common.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "a9264356fb3508b944f2919255dcf08a30fd3a828a97373fd0af75ea18b98cae"
-    },
-    "src/cancellation.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "d17cfd36391c38dcc4a30c2ad532b20039846f870535d46480c0e12267ec7a38"
-    },
-    "src/http_url.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "0636a1ff272f384c9e6f8775947eb6db9efda9e27de21504ac6c5f138a155b49"
-    },
-    "src/net/dns_resolver.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "7f9054340e354204b8571c6ff83f85b17025375a2ebc67d04b860e3e308e1eb1"
-    },
-    "src/http/websocket_url.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "91f589b93950dcc0a32d7acdd9a185aa840f6af08f9614c64623cb1151363bcb"
-    },
-    "src/http/websocket_url_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "4b5c387c42d14a2e072f17581f5690ae017ef3288f16dfa657fac26062ca1ac4"
-    },
-    "src/http/websocket.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "4511bca2f41407997772dc43e61a48d3c9f7d71369a09635c9ca5c3ce5a1e5e0"
-    },
-    "src/http/websocket_handshake.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "b1bd6429e8ef9977313f2812575d5663116fe0f122dca7a05bfd87f7fcd9b4d3"
-    },
-    "src/http/websocket_handshake_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "ac3534b09e13bfed2600ec24631bd21960e7758a8eb386ee02eff1aad2abfdd4"
-    },
-    "src/http/websocket_lifecycle_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "280f0c78ffbdd6e7a3914d054a247fd3e0fac6d7a935b0e0bc8bbf493e96d30a"
-    },
-    "src/http/client.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "0db4199c0144debdc134476c0e2c6cb6c91a9fc32c91959f064ca4049ca4c133"
-    },
-    "src/http/client_rotation.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "492de359076836ee509543950872d4a3ee9ae55a97cf86f06f7cf000ce271b71"
-    },
-    "src/http/facade_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "0208e031cc82cb6ba6b28a82871582623f7bede8c27a7a5c27986e5fd163cc17"
-    },
-    "src/http/duplex.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "7cfbf568d873ddf89b11465b6474584550e56546b7e0273cf0100fef95ad51d6"
-    },
-    "src/http/cancellation.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "2e598e224f402937c0e6054b98aa67ffe4db05800bef8ce455348eb126b0296c"
-    },
-    "src/internal/connector/happy_eyeballs.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "46016b2aab6800d72c5637e89aa64533a3aae2ccacd6f7c3a2a17333258deebd"
-    },
-    "src/internal/http1/client_pipeline.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "57dc5def43110b361eea51b1c99c3b24f93ad5673e1f0a0849a9cef6cd28b4e1"
-    },
-    "src/internal/http1/tls_client_pipeline.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "509dc54082973f735b0cdbba325d52293d93b2267f5a1b3cf8f9b21998eff35a"
-    },
-    "src/internal/http1/proxy_client_pipeline.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "6a191e3561973edab201c9af3e2d1cfc6a91e9d91e73abee21654c7315da45fc"
-    },
-    "src/internal/http1/automatic_tls_client_pipeline_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "a89df465b6fba595750f6d599fa87dc301601b2aff65dec5d828600dd02e68cf"
-    },
-    "src/internal/http1/tls_client_pipeline_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "51122aa77ab4fbb4c459c3b412491231064df55a1fe0bdfaa8db938ac6e76036"
-    },
-    "src/internal/http1/proxy_client_pipeline_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "11b654e151b927914bfd82bb2960896c20c6c685dd03b8c12f388fbecd83a20c"
-    },
-    "src/internal/http1/tls_server_test.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "9fc3ffdcc627975ce57273320a7cff17f04680697c623613de7a36d7925cba63"
-    },
-    "src/internal/http1/response_reader.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "90e14f076570813283a45c4c94d66f415d4a1d84a3d60004fe046c639d062137"
-    },
-    "src/internal/http1/protocol_upgrade.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "07f09eadce829979bd333e07cbf18de62e79af6615553233320f41989acc0f27"
-    },
-    "src/internal/http2/client_connection.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "1730c8c42b9e3f7eccd1c76a3bebe3805a8922f8894274589f8224604857aaab"
-    },
-    "examples/linux/m8_005/native_http.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "b74cbdea0be691f987ee76d9f9fdbfa0961ab5d1537470d883cb989f271551c4"
-    },
-    "examples/linux/m11_003/websocket.cj": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "e3850ff8f31857b23eceebb611c94126936a4682ad3c9a932318d8f7e0114fd0"
-    },
-    "tools/m11_003_native_websocket.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "7283af0b4af261848e1121b82fc9fa9fe7793e1635c58a1e6d19749ab6e83bbc"
-    },
-    "tools/docs/m7_033_docs.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "f06dd00591972400dfaab735620fdb2602315d5dcf88b181f450683848ba157e"
-    },
-    "tools/m7_032_public_api_inventory.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "d8ceee8c34655ec3f6fcbf938edb3693ddad7be98fdf086858345f2f91d92471"
-    },
-    "README.md": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "f90295f8ca54e90ee0142299bb81ebded307d1f6f4e14117e5245226daf05722"
-    },
-    "docs/api/README.md": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "f8c4d80f3895151c19d264558de8ed2ee8e48cb5e6a2ea4d597740107c50fcf8"
-    },
-    "docs/api/baselines/wirestack-linux-pre1-m11-003.json": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "fc6feefc4350ac44d46fe5f8971cb29beea924d250811ea7bfdc10aea2e39f48"
-    },
-    "docs/guides/websocket.md": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "4e6bfff502f8ea21c12630b864e6ce2416e0ab248b156417b46a61a90c719234"
-    },
-    "docs/guides/http1-linux.md": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "cc0dae3e94abee57bb95b5e8aac2e11eb72161033c5966e56a3b829ef37ed294"
-    },
-    "docs/guides/http-parity-linux.md": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "53d1f0023996012c1d7cdee98ab248326004d2b393e135b6a4c661fce57c7e05"
-    },
-    "docs/planning/status.md": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "73a3f6c9d81216da82d46a549c2e93b0b9ef16aadf18cdb3ed83ac3cd979ae57"
-    },
-    "tools/tasks/M11-003.json": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "a75ee39bc655024cbed4f186e7759e35af47015f5a39dab800c70e55849f9943"
-    },
-    "tools/m11_002_native_gzip.py": {
-      "domain": "text-utf8-lf-v1",
-      "sha256": "dd1ec868f1b9c27ade813e1443ac51e6dfa4d89361b2544d2d50ed28472ae8d6"
-    }
-  },
-  "reports": [
-    {
-      "path": "docs/evidence/M11-003/workspace.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "553565a936178be77d5f237b05a39c628316b6e68c7bf47ebe6732e1a252b439"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/task-gate.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "d81bd0da86f345ba9a8920fbe3e1017c5660ccd65f9d041b7d0f659774d7b2aa"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/public-api.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "8539296c0609a70e4851714f3e9c96c50c3a15b8043188fa1514a40ba4aa613a"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/installed/report.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "9b86737b5b10dfcb952a6018c29bb503563a8d49700138cb3c4d1be847996bae"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/installed-sdk113/report.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "5daf477f492649e55219c8f026961858fe2b6a23613d643bc24328b5d967b577"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/docs/report.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "104b554968d31d1963e17d2713df1e30559dec2bd652657c327423f4f2206a9f"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/docs/browser.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "832745c6ccea1322653db589aec3e14d8238e8ca934b53fb78c3ba55a780cc39"
-      }
-    },
-    {
-      "path": "docs/evidence/M11-003/logs/typed-spdx-smoke.json",
-      "digest": {
-        "domain": "text-utf8-lf-v1",
-        "sha256": "57ad65052595a6dff14e4f11b795c6676cc790fd81ae94dfb3496399a1464d93"
-      }
-    }
-  ],
-  "visual_proof": {
-    "path": "docs/evidence/M11-003/docs/websocket-url.webp",
-    "digest": {
-      "domain": "artifact-bytes-v1",
-      "sha256": "671649287205ae9118e704d56021c7f56072f890a59ddefb172d15637b19e3e6"
-    }
-  },
-  "failing_before": [
-    {
-      "path": "docs/evidence/M11-003/logs/before-deadline.log",
-      "outcome": "Compiled old implementation exceeded the three-second observation bound for a one-second session deadline; TimeoutException, exit1."
-    },
-    {
-      "path": "docs/evidence/M11-003/failed-native-ipv6.tar.gz",
-      "outcome": "Actual installed IPv6 URL failed in DNS-only HostName construction."
-    },
-    {
-      "path": "docs/evidence/M11-003/pre-send-barrier.tar.gz",
-      "outcome": "Primary passed; SDK113 exposed fixture full-window assumption. Corrected native sender-state barrier passes both."
-    }
-  ],
-  "scope_review": "docs/evidence/M11-003/scenario-matrix.md",
-  "remaining_implementation_blockers": [],
-  "next_ready_task": "M11-004",
   "non_claims": [
-    "No committed-candidate seal, signing or release qualification.",
-    "No non-Linux platform proof.",
-    "No total-RSS or performance qualification; managed DATA ledger only.",
-    "Default-port native route probes use an ephemeral listener, not privileged-port binding.",
-    "No extensions/compression, automatic heartbeat, reconnect, application replay or exactly-once guarantee.",
-    "Historical M11-002 acceptance was not regenerated by the shared typed-comparison smoke."
-  ]
+    "No build, test, installed-consumer, documentation or gate command was executed for this candidate on this branch.",
+    "The historical receipts remain byte-for-byte and describe the 2026-10-09 working tree only.",
+    "No platform, release, ABI or performance qualification is claimed.",
+    "Exactly-once delivery, automatic reconnect and compression remain out of scope."
+  ],
+  "next_ready_task": "M11-004"
 }
