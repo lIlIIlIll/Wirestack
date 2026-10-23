@@ -94,6 +94,126 @@ verified subjects. `task-check.json` binds the six acceptance commands.
 `scripts/verify-evidence M7-030 --json` returns PASS with two indexed reports,
 23 source digests and no stale path.
 
+## Current acceptance state (2026-10-23)
+
+The preceding local and hosted results are the 2026-08-30 record and remain
+historical. The current local gate was run on candidate
+`946995b2ab048c263ad6c71e73b80bbc1e2c5c54` in a clean checkout without `dist/`:
+
+`DISABLE_ZOXIDE=1 scripts/check-task M7-030 --json --output
+build/m7-030/task-check-current.json`
+
+The command exited 1 after executing all six acceptance commands. Overall
+status was `FAIL`, `issues: []`; four commands passed and two failed:
+
+| Command | Current result |
+|---|---|
+| `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tools.tests.test_m7_030_linux_release -v` (clean export of candidate `946995b2…`, no `dist/`) | PASS; 23/23 tests. `test_failed_hosted_validation_never_replaces_existing_report` verifies `HOSTED_REPORT_SUBJECT` failure preserves the prior report bytes and leaves no temporary report. |
+| `supply-chain-inputs` | FAIL, exit 1: `release artifact is absent` because `dist/m7-021` is absent. The later rehearsal successfully downloaded the exact frozen asset to ignored `build/m7-030/`. With that asset staged under `dist/`, the separately recorded validation reports the stale M7-025 generator fingerprint (`42e064cf…` versus `b7a15290…`) after M11-002 commit `0a3161e5`. Regenerating that evidence belongs to M7-025. |
+| `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
+| `local-signing-update-rehearsal` | PASS as `REHEARSAL`; the exact asset was downloaded and verified. `productionAttestation` remains `FAIL` with `HOSTED_REPORT_SUBJECT`. |
+| `github-hosted-attestations` | FAIL, exit 1, `HOSTED_REPORT_SUBJECT`: the committed report lacks `signedPayloadSha256`; the retired workflow cannot produce current hosted evidence. |
+
+The task-check JSON and command logs are under ignored `build/` and are not a
+current evidence seal. Task-specific dependency validation runs all six
+commands; repository-wide readiness remains blocked on
+`M10-004 → M10-003`. No production attestation, current task PASS, or source
+seal is claimed.
+
+Marking this task BLOCKED also propagates to M7-031, which lists M7-030 as a
+dependency and whose `validate_dependency_status` requires
+`| M7-030 | COMPLETE |` in `docs/planning/status.md`. The
+`scripts/check-m7-031-release` gate therefore reports
+`DEPENDENCY_INCOMPLETE: M7-030`. The unittest discovery failure was fixed
+separately in draft PR #239: `python3 -m unittest
+tools.tests.test_m7_031_linux_candidate -v` passes four dependency-readiness
+tests and skips `M7031LinuxCandidateTests` with
+`M7-031 prerequisites are not COMPLETE: M7-030`; its fifteen candidate
+methods do not run. The underlying gate already failed on the base commit
+with `DIGEST_INVALID: M7-030 artifact signed payload`, so M7-031's COMPLETE
+record was not supported by its own gate before this change. M7-031's row,
+tooling and evidence stay untouched here because they are outside this task's
+`allowed_paths`.
+
+The exact task-gate run above left `frozen-artifact.json`,
+`workflow-contract.json` and `hosted-validation.json` unchanged. The frozen
+asset receipt was staged under ignored `build/m7-030/`; the local rehearsal
+rewrote its configured `local-rehearsal.json`, which was restored to the
+committed historical bytes after recording the result. The failed
+`validate-hosted --output` emitted structured JSON to stdout and preserved the
+existing hosted report byte-for-byte. The fetch and hosted-validation commands
+write only successful receipts; the current hosted report remains historical
+and no evidence seal was refreshed.
+
+## Unit-test isolation (2026-10-22)
+
+The fault-injection suite originally read the ignored `dist/m7-021` staging
+archive, so its verdict depended on an ambient build product: on a clean
+checkout of the branch head 10 of 19 tests failed with `FROZEN_ASSET_MISSING`
+or `ARTIFACT_STALE`. The suite is now hermetic. A `frozen_fixture` context
+manager materialises a tiny deterministic `wirestack-0.1.0` archive in a
+temporary directory, copies the committed M7-025 documents beside it, rewrites
+the copied `bundle.json` so its artifact entry names that payload, and pins
+`ARTIFACT`, `SUPPLY_CHAIN`, `SBOM`, `FROZEN_ARTIFACT_BYTES`,
+`FROZEN_ARTIFACT_SHA256` and the workflow text for the duration of the block
+with `unittest.mock.patch.object`. Production constants are never rewritten:
+the committed `FROZEN_ARTIFACT_NAME`, tag, 2,499,451 bytes and `c0988f62…`
+digest keep their real values, and the unpatched suite cross-checks them
+against both the committed M7-025 bundle and the committed
+`frozen-artifact.json` retrieval receipt.
+
+The negative tests keep their teeth independently of the fixture: a renamed
+copy still trips `FROZEN_ASSET_NAME`, a one-byte-short copy trips
+`FROZEN_ASSET_SIZE`, a same-length single-bit flip trips `FROZEN_ASSET_DIGEST`,
+an absent staging path trips `FROZEN_ASSET_MISSING` for both
+`build_release_manifest` and `fetch_frozen_artifact`, and a failed `gh release
+download` trips `FROZEN_ASSET_DOWNLOAD` without leaving the asset behind.
+Replacing `verify_frozen_artifact` with a permissive stub fails those tests, so
+they observe the check rather than the fixture.
+
+Supporting the injection required resolving path defaults at call time in
+`tools/m7_030_linux_release.py`: `build_release_manifest`,
+`verify_frozen_artifact`, `fetch_frozen_artifact`, `create_offline_bundle`,
+`verify_offline_bundle` and `inspect_workflow` now take `None` and fall back to
+the module attribute, and a new `workflow_text()` seam supplies the default
+workflow source. Behaviour with no arguments is unchanged, and
+`scripts/check-m7-030-release` still fetches and verifies the exact pinned draft
+asset, so the local release contract remains as strict as before.
+
+### Clean-checkout acceptance
+
+Running the canonical gate in a `git archive` export of `9ddc2c2a`, which has no
+`dist/` directory, exercises the retrieval path rather than reusing a staged
+copy:
+
+```
+$ scripts/check-task M7-030 --json
+test-plan-matrix                  PASS
+signing-update-fault-injection    PASS
+supply-chain-inputs               FAIL
+hosted-workflow-contract          PASS
+local-signing-update-rehearsal    PASS
+github-hosted-attestations        FAIL
+status FAIL, issues []
+```
+
+That export has no `dist/` directory, so the supply-chain command in it fails
+before any fingerprint or digest comparison: `scripts/generate-m7-025-linux-
+supply-chain --validate-only` reports `release artifact is absent`. The
+stale-generator-fingerprint FAIL described above is what a tree with a staged
+artifact reports instead; the two are different failure points and are not
+interchangeable.
+
+The receipt committed in this branch records
+`"mode": "verified-existing-artifact"`, not a download. No current captured
+receipt shows `downloaded-and-verified-frozen-artifact`, so that mode is not
+claimed here: the committed receipt documents verification of an already present
+artifact, and any future download-mode capture must be committed as its own
+report rather than inferred from this one. The fail-closed staging logic itself
+is exercised only by the injected-runner unit tests, which assert that a failed
+download, a wrong-size payload and a digest mismatch each publish nothing.
+
 ## Gates not run
 
 - The one-hour SSE profile was not run.

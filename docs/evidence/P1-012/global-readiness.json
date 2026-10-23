@@ -1,0 +1,71 @@
+{
+  "blockers": [
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "M10-004 dependency is not COMPLETE: M10-003",
+      "task_id": "M10-004"
+    }
+  ],
+  "checks": [
+    {
+      "exit_code": 0,
+      "id": "task-check",
+      "report": "docs/evidence/P1-012/task-check.json",
+      "status": "PASS"
+    },
+    {
+      "counts": {
+        "paths": 18,
+        "scenarios": 17,
+        "tests": 15
+      },
+      "exit_code": 0,
+      "id": "test-plan-validation",
+      "report": "docs/evidence/P1-012/test-plan-validation.json",
+      "status": "PASS"
+    },
+    {
+      "count": 44,
+      "exit_code": 0,
+      "id": "repository-tooling-tests",
+      "status": "PASS"
+    },
+    {
+      "exit_code": 2,
+      "id": "validate-tasks",
+      "report": "docs/evidence/P1-012/validate-tasks-current.json",
+      "status": "INVALID"
+    },
+    {
+      "command_count": 0,
+      "exit_code": 2,
+      "id": "global-fast",
+      "report": "docs/evidence/P1-012/fast-check-current.json",
+      "status": "INVALID"
+    },
+    {
+      "command_count": 0,
+      "exit_code": 2,
+      "id": "global-full",
+      "report": "docs/evidence/P1-012/full-check-current.json",
+      "status": "INVALID"
+    },
+    {
+      "exit_code": 1,
+      "id": "verify-evidence-all",
+      "report": "docs/evidence/P1-012/evidence-all-current.json",
+      "status": "FAIL"
+    },
+    {
+      "exit_code": 1,
+      "id": "verify-evidence-task",
+      "issue_code": "ACCEPTANCE_NOT_PASS",
+      "report": "docs/evidence/P1-012/evidence-task-current.json",
+      "status": "FAIL"
+    }
+  ],
+  "kind": "P1-012-requalification",
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "task_id": "P1-012"
+}
