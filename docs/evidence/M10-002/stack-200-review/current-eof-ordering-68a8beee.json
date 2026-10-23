@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M10-002",
+  "status": "BLOCKED",
+  "pullRequest": 216,
+  "testedCodeRevision": "68a8beee03987685e09414cec020c0c5deefaaaa",
+  "source": {
+    "path": "src/internal/http2/client_connection.cj",
+    "sha256": "30f648fb8f2b5377d30f001ff3f9f2dab60d60281c75c036483cf41de52f7007"
+  },
+  "change": "Inbound END_STREAM DATA is queued without publishing body EOF; peerEnd updates the stream registry before channel.finish publishes EOF. The existing Q4 buffer-lease-before-flow-control-permit order is unchanged.",
+  "environment": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "target": "x86_64-unknown-linux-gnu",
+    "cangjieCompiler": "1.3.0-alpha.20261020001052 (cjnative)",
+    "cjpm": "1.3.0-alpha.07"
+  },
+  "checks": [
+    {
+      "command": "python3 tools/architecture_guard.py --root . --format text && python3 tools/check_network_capabilities.py --check",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "Architecture guard passed; network contract passed with 86 rows."
+    },
+    {
+      "command": "scripts/build-linux-resolver --quiet",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "cjpm check (through codex_cangjie_env)",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "cjpm build (through codex_cangjie_env)",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exitCode": 0,
+      "status": "PASS",
+      "total": 1114,
+      "passed": 1086,
+      "skipped": 28,
+      "errors": 0,
+      "failed": 0,
+      "regressionCases": [
+        "peerGoAwayDrainsConnectionWithoutFailingAcceptedStream",
+        "saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill"
+      ]
+    },
+    {
+      "command": "taskset -c 0 cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json (through codex_cangjie_env)",
+      "exitCode": 0,
+      "status": "PASS",
+      "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "combinedApiEntries": 1873,
+      "documentedSymbolsPercent": 100,
+      "documentedParametersPercent": 100
+    },
+    {
+      "command": "scripts/check (through codex_cangjie_env)",
+      "exitCode": 1,
+      "status": "FAIL",
+      "pythonTestsRun": 584,
+      "failures": 25,
+      "errors": 16,
+      "skipped": 4,
+      "blockerExamples": [
+        "test_evolution_status_matches_readiness_classification reports a M10-004 status mismatch (expected COMPLETE, observed BLOCKED)",
+        "M3-031 raw evidence fixtures return RAW_RESULT instead of the expected validation codes",
+        "TLS provider evidence fixtures reject stale AWS-LC advisory dispositions"
+      ]
+    },
+    {
+      "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current-eof-ordering.json",
+      "exitCode": 2,
+      "status": "INVALID",
+      "acceptanceCommandsExecuted": 0,
+      "report": "docs/evidence/M10-002/stack-200-review/task-check-current-eof-ordering.json",
+      "issue": {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "M10-003 dependency is not COMPLETE: M10-002"
+      }
+    }
+  ],
+  "documentationGateReport": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+  "decision": "Keep M10-002 BLOCKED and PR #216 OPEN/DRAFT. Current native and focused resource-profile checks pass, but the repository check and task-specific gate are blocked by global task-status/validator issues outside this PR.",
+  "remainingBlockers": [
+    "The task validator evaluates the downstream M10-003 dependency while checking M10-002; its scoped-check correction is tracked in PR #220 (P1-012) and is not part of this task branch.",
+    "The status table marks M10-004 COMPLETE while the readiness classification is BLOCKED because its M10-003 dependency is blocked; PR #230 tracks the status correction.",
+    "The repository-wide Python suite has 25 failures and 16 errors across M3-031, M10-004 readiness classification, and TLS provider evidence fixtures; these are outside M10-002 scope."
+  ],
+  "historicalNote": "The earlier b521 full-suite receipt recorded one cross-origin waiter timeout. On this current source revision the full suite passes, and the named cross-origin waiter regression case passes."
+}
