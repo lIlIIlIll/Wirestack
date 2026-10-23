@@ -1,0 +1,19 @@
+{
+  "revision": "c0a19b4bc6288803ccdf5937d0ba73115e4c69d6",
+  "command": "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json",
+  "exit_code": 2,
+  "result": {
+    "commands": [],
+    "issues": [
+      {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "M10-003 dependency is not COMPLETE: M10-002"
+      }
+    ],
+    "kind": "repository-check",
+    "mode": "task",
+    "schema_version": 1,
+    "status": "INVALID",
+    "task_id": "M10-002"
+  }
+}
