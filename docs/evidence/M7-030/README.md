@@ -112,16 +112,15 @@ BLOCKED it emits the structured result without replacing the existing
 
 ## Current blockers
 
-1. `supply-chain-inputs` — `scripts/generate-m7-025-linux-supply-chain
-   --validate-only` exits 1 with `generator fingerprint is stale`. The recorded
-   generator digest in
-   `docs/evidence/M7-025/linux_x86_64/build-fingerprint.json` is
-   `42e064cf1a11276c4360ec99c155626182872bba042b9d2d66657cd381b8238e`; the
-   current `tools/m7_025_linux_supply_chain.py` digests to
-   `b7a15290f28b7cf14e8a1fdc5bacafaab6c53e14e35ec268c4fb1afd46cf273a`. Commit
-   `0a3161e5` (M11-002) changed that generator after the M7-025 evidence was
-   frozen. Regenerating the M7-025 bundle is M7-025 work, outside this task's
-   `allowed_paths`.
+1. `supply-chain-inputs` — the exact task check on a clean checkout fails first
+   with `release artifact is absent`, because ignored `dist/m7-021` is absent.
+   The later local rehearsal downloads and verifies the pinned 2,499,451-byte
+   asset into ignored `build/m7-030/`. With that exact asset staged under
+   `dist/m7-021`, `scripts/generate-m7-025-linux-supply-chain --validate-only`
+   reports the stale M7-025 generator fingerprint (`42e064cf…` recorded,
+   `b7a15290…` current). M11-002 commit `0a3161e5` changed the generator after
+   the M7-025 evidence was frozen; regenerating that bundle is outside this
+   task's `allowed_paths`.
 2. `github-hosted-attestations` — `scripts/release-m7-030-linux validate-hosted`
    exits 1 with `HOSTED_REPORT_SUBJECT` and
    `expected ['bundleSha256','name','sha256','signedPayloadSha256','verification'],
@@ -132,17 +131,17 @@ BLOCKED it emits the structured result without replacing the existing
    `.github/workflows/linux-release-attestation.yml` is intentionally retired —
    `on: workflow_dispatch` with an explicit no-op and M8-007 is the active
    signer — so this task must not reactivate it or mint new attestations.
-3. `check-task` — on this stacked branch, where P1-012 scopes dependency
-   readiness to the requested task closure, `scripts/check-task M7-030 --json`
-   runs all six commands and reports `status: FAIL` with exactly the two failing
-   commands above and `issues: []`. The unscoped repository-wide readiness gate
+3. `check-task` — at candidate `946995b2ab048c263ad6c71e73b80bbc1e2c5c54`,
+   `DISABLE_ZOXIDE=1 scripts/check-task M7-030 --json --output
+   build/m7-030/task-check-current.json` executed all six commands and returned
+   `FAIL` with `issues: []`: four passed, while `supply-chain-inputs` failed
+   because the artifact was absent and `github-hosted-attestations` failed
+   `HOSTED_REPORT_SUBJECT`. The later local rehearsal downloaded and verified
+   the pinned asset and passed as `REHEARSAL`; it still recorded
+   `productionAttestation: FAIL`. The unscoped repository-wide readiness check
    additionally reports `DEPENDENCY_INCOMPLETE` on the unrelated
-   `M10-004 → M10-003` edge; M7-030's own dependencies, M7-022, M7-025 and
-   M7-029, are COMPLETE. In a fresh clean checkout with no `dist/` directory,
-   `supply-chain-inputs` fails earlier with `release artifact is absent` because
-   `scripts/generate-m7-025-linux-supply-chain --validate-only` has no artifact
-   to inspect; the stale-generator-fingerprint diagnosis only applies once a
-   staged artifact exists.
+   `M10-004 → M10-003` edge; M7-030's own dependencies M7-022, M7-025 and
+   M7-029 are COMPLETE.
 4. Downstream, this row is the only dependency M7-031 has on a non-COMPLETE
    task, so the BLOCKED classification propagates. This task does not edit
    M7-031's row, tooling or evidence — that is M7-031's own scope — but the
