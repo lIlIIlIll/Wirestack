@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "source_revision": "b521751c98419c2e29478db4ea288b345debe2d6",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.3.0-alpha.20261020001052",
+    "cjpm": "1.3.0-alpha.07",
+    "cjdoc": "0.7.2"
+  },
+  "pr_state": "OPEN_DRAFT",
+  "issue_174": "OPEN",
+  "issue_175": "NOT_STARTED_OR_MODIFIED",
+  "qualification_status": "BLOCKED",
+  "task_gate": {
+    "command": "scripts/check-task M10-002 --json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "commands_executed": 0,
+    "report": "task-check-current-b521.json",
+    "blocker": "DEPENDENCY_INCOMPLETE: M10-003 dependency is not COMPLETE: M10-002"
+  },
+  "checks": [
+    {
+      "id": "architecture-guard",
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "network-capability-contract",
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "cjpm-check",
+      "command": "cjpm check",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "cjpm-build",
+      "command": "cjpm build",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "Build succeeded with compiler warnings; no build errors."
+    },
+    {
+      "id": "full-native-regression",
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 1,
+      "status": "FAIL",
+      "total": 1114,
+      "passed": 1085,
+      "skipped": 28,
+      "errors": 1,
+      "failed": 0,
+      "error": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill timed out after 3.012s"
+    },
+    {
+      "id": "isolated-cross-origin-waiter-regression",
+      "command": "cjpm test --filter='Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill' --parallel 1 --no-progress --no-color src/internal/http1",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 1,
+      "passed": 1
+    },
+    {
+      "id": "http2-resource-profile-nofile-64",
+      "command": "ulimit -n 64; cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219
+    },
+    {
+      "id": "http2-resource-profile-data-1g",
+      "command": "ulimit -d 1048576; cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219
+    },
+    {
+      "id": "http2-resource-profile-as-4g",
+      "command": "ulimit -v 4194304; cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219
+    },
+    {
+      "id": "http2-resource-profile-single-cpu",
+      "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 1,
+      "status": "FAIL",
+      "total": 219,
+      "passed": 218,
+      "failed": 1,
+      "failing_case": "peerGoAwayDrainsConnectionWithoutFailingAcceptedStream",
+      "observed": "expected activeStreamCount 0, got 1"
+    },
+    {
+      "id": "linux-resolver-build",
+      "command": "scripts/build-linux-resolver --quiet",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "documentation-gate",
+      "command": "scripts/check-docs",
+      "exit_code": 0,
+      "status": "PASS",
+      "cjdoc": "0.7.2",
+      "commands_passed": 40,
+      "combined_symbols": 1873,
+      "combined_documented_symbols": 1873,
+      "combined_parameters": 950,
+      "combined_documented_parameters": 950,
+      "generated_at_utc": "2026-10-23T19:24:53.339304Z"
+    },
+    {
+      "id": "repository-check",
+      "command": "scripts/check",
+      "exit_code": 1,
+      "status": "FAIL",
+      "python_tests": 584,
+      "failures": 27,
+      "errors": 16,
+      "skipped": 4,
+      "failure_families": [
+        "M3-031 fixtures",
+        "M7 frozen artifact/task-count gates",
+        "M12 source inputs",
+        "P1-014 CRLF digest",
+        "stale AWS-LC advisory"
+      ]
+    }
+  ],
+  "q4_result": "The Q4 scheduler cases were included in each passing HTTP/2 resource-profile suite. Full native regression is not qualified because of the recorded waiter timeout; single-CPU resource profile also has one distinct failure.",
+  "notes": [
+    "The task gate is invalid before executing its acceptance commands; it is not a passing task check.",
+    "The isolated waiter test passing does not convert the failing full-suite run into a pass.",
+    "The repository-wide failures belong to other task evidence/gates and are not repaired on this M10-002 branch."
+  ]
+}
