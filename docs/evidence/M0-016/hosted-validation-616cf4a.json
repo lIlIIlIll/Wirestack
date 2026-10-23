@@ -1,0 +1,76 @@
+{
+  "captured_at": "2026-10-23",
+  "decision": "BLOCKED",
+  "hosted": {
+    "analysis": {
+      "conclusion": "PASS",
+      "run_id": 39996500517,
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39996500517"
+    },
+    "clean_cangjie_build": {
+      "conclusion": "PASS",
+      "run_id": 39996506952,
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39996506952"
+    },
+    "docs_build_and_generation": {
+      "conclusion": "PASS",
+      "deploy_latest_main_documentation": "SKIPPED",
+      "run_id": 39996507111,
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39996507111"
+    },
+    "linux_macos_provider_matrix": {
+      "conclusion": "FAIL",
+      "run_id": 39996507158,
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39996507158",
+      "cells": {
+        "linux-glibc (aws-lc)": "PASS",
+        "linux-glibc (mbedtls)": "FAIL: M0-016 validation: known affected provider pin blocks promotion",
+        "linux-glibc (openssl)": "FAIL: M0-016 validation: known affected provider pin blocks promotion",
+        "linux-musl (aws-lc)": "PASS",
+        "linux-musl (mbedtls)": "FAIL: M0-016 validation: known affected provider pin blocks promotion",
+        "linux-musl (openssl)": "FAIL: M0-016 validation: known affected provider pin blocks promotion",
+        "macos-arm64 (aws-lc)": "PASS",
+        "macos-arm64 (mbedtls)": "FAIL: M0-016 validation: known affected provider pin blocks promotion",
+        "macos-arm64 (openssl)": "FAIL: M0-016 validation: known affected provider pin blocks promotion"
+      },
+      "validate_contract": "PASS"
+    },
+    "windows_provider_matrix": {
+      "conclusion": "FAIL",
+      "run_id": 39996506926,
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39996506926",
+      "cells": {
+        "windows-x86-64 (aws-lc)": "PASS",
+        "windows-x86-64 (mbedtls)": "FAIL: M0-016 validation: known affected provider pin blocks promotion",
+        "windows-x86-64 (openssl)": "FAIL: M0-016 validation: known affected provider pin blocks promotion"
+      }
+    }
+  },
+  "local": {
+    "matrix_contract_validation": {
+      "command": "python3 tools/tls_provider_poc/validate.py --matrix docs/evidence/M0-016/platform-matrix.json --matrix-contract-only",
+      "result": "PASS"
+    },
+    "unit_tests": {
+      "command": "python3 -m unittest tools.tests.test_tls_provider_poc -v",
+      "result": "PASS",
+      "tests_run": 77
+    }
+  },
+  "source_revision": "616cf4a564db1b36aeeccad33b47848fcc139596",
+  "task_id": "M0-016",
+  "blockers": [
+    "Eight Mbed TLS 4.2.0 and OpenSSL 3.6.4 hosted cells are fail-closed because their reviewed pins are affected; none is promoted.",
+    "Native Android, iOS, and HarmonyOS/OpenHarmony evidence is absent; cross-compilation does not satisfy these cells.",
+    "No human advisory-review approval is recorded."
+  ],
+  "other_hosted_checks": {
+    "architecture_guard": "PASS",
+    "gate_harness": "PASS",
+    "harness_tests": "PASS",
+    "validate": "PASS",
+    "validate_contract": "PASS",
+    "codeql": "PASS",
+    "docs_status": "PASS"
+  }
+}

@@ -115,26 +115,33 @@ The Unix artifacts expire on 2026-11-30. The Windows artifacts expire on
 license payload, matrix digest, normalized build provenance, or source
 identity.
 
-## Current hosted failures
+## Current hosted qualification evidence
 
-Both hosted provider workflows currently fail by policy, not by an
-infrastructure error. On head `5550cd4a`:
+The provider runs bind to source revision
+`616cf4a564db1b36aeeccad33b47848fcc139596`, the production/test candidate
+before this evidence-only refresh on PR #236. Their machine-readable summary is
+[`hosted-validation-616cf4a.json`](hosted-validation-616cf4a.json).
 
-- `TLS Provider PoC` run `39757514924` failed `linux-glibc (mbedtls)`,
-  `linux-musl (mbedtls)`, `macos-arm64 (mbedtls)`, `linux-glibc (openssl)`,
-  `linux-musl (openssl)` and `macos-arm64 (openssl)`; the three AWS-LC jobs and
-  `validate-contract` passed.
-- `M0-016 Windows Provider PoC` run `39757514700` failed
-  `windows-x86-64 (mbedtls)` and `windows-x86-64 (openssl)`;
-  `windows-x86-64 (aws-lc)` passed.
+- [`TLS Provider PoC` run 39996507158](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996507158):
+  Linux glibc AWS-LC, Linux musl AWS-LC, and macOS arm64 AWS-LC pass. All six
+  Mbed TLS/OpenSSL cells fail at validation with
+  `M0-016 validation: FAIL: known affected provider pin blocks promotion`.
+  `validate-contract` passes.
+- [`M0-016 Windows Provider PoC` run 39996506926](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996506926):
+  Windows AWS-LC passes; the Mbed TLS and OpenSSL cells fail with the same
+  affected-pin validation result.
+- [`clean-cangjie-build` run 39996506952](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996506952),
+  [`docs build and generation` run 39996507111](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996507111),
+  static analysis, architecture guard, gate harness, harness tests, and
+  validators pass. Documentation deployment is skipped for this non-main run.
+- On the same source revision, the matrix-contract validator passes and the
+  TLS provider test suite passes all 77 tests.
 
-Every failing job ends with
-`M0-016 validation: FAIL: known affected provider pin blocks promotion`, which
-is the intended fail-closed result: Mbed TLS 4.2.0 and OpenSSL 3.6.4 are
-`affected` by the reviewed advisories, so no PoC result for them may be
-promoted. These jobs cannot pass until the pins move to fixed releases, which
-this task does not do. The failure is not suppressed and no provider is
-claimed to pass.
+These runs confirm fail-closed rejection of the affected pins; they do not
+qualify or promote Mbed TLS 4.2.0 or OpenSSL 3.6.4. The matrix continues to
+mark all 12 retained desktop artifacts `BLOCKED`. Native Android, iOS, and
+HarmonyOS/OpenHarmony evidence and human advisory-review approval are absent.
+M0-016 remains **BLOCKED** and PR #236 remains draft.
 
 `tools/tasks/M0-016.json` does not exist. It is not added: the repository's
 unscoped `validate-tasks` gate would then gain a new
