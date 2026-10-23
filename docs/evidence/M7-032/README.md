@@ -68,34 +68,38 @@ The report records 363 declarations, 114 resolved aliases, and zero internal
 aliases. The generated current-source pair is separate from the sealed
 243-declaration M7 report.
 
-The [`isolated-pr-head-task-check.json`](isolated-pr-head-task-check.json) file
-records the task gate run from the isolated remediation worktree. Its
-`architecture-guard.stdout_excerpt` is normalized: the absolute checkout root
-was replaced with `<repo-root>`, and the raw stdout log is not committed. This
-file is not the historical `task-check.json` receipt or a revision-bound
-qualification.
+The [`isolated-pr-head-task-check.json`](isolated-pr-head-task-check.json)
+retains the earlier standalone-branch failure, before the P1-012 (#220)
+dependency-scope fix and M10-004 (#230) status correction were stacked. Its
+architecture-guard excerpt is normalized to `<repo-root>`; raw logs are not
+committed.
 
-- Test-plan validation: PASS, 11/10/7.
-- Ownership/fault-injection suite: FAIL; it reports the existing
-  M10-004/M10-003 status-consistency assertion. The retained receipt omits the
-  total test count, so no count is claimed.
-- Architecture guard and current-source API inventory: PASS.
-- Clean consumer: FAIL; offline AWS-LC provider preparation cannot resolve
-  `HEAD`.
-- `cjpm check`, `cjpm build`, and `cjpm test`: unavailable because `cjpm`
-  cannot be executed in this environment.
+The current [`task-check.json`](task-check.json) records the full M7-032 task
+gate on the stacked source with both parent fixes applied. All eight acceptance
+commands pass: test-plan validation, ownership/fault-injection tests,
+architecture guard, public API inventory, clean consumer, `cjpm check`,
+`cjpm build`, and `cjpm test`.
 
-No current-source task-gate PASS is claimed. The
-[`current-evidence-verification.json`](current-evidence-verification.json)
-records `UNKNOWN_SCHEMA` because the current verifier does not accept the
-historical schema-v1 seal. The current API inventory PASS does not override
-the task-level blockers. `task-check.json` remains the older receipt; it is
-not the isolated current-source run and its digest does not match the
-historical seal.
+- Test-plan validation: PASS, 11 paths, 10 scenarios, 7 tests.
+- Ownership/fault-injection suite: PASS.
+- Architecture guard and current-source API inventory: PASS; 363 declarations,
+  114 resolved aliases, zero internal aliases.
+- Native clean consumer: build and run PASS, including all ten HTTPS/TLS,
+  H1/H2 server, SSE, CONNECT, custom-CA, mTLS, scoped-cancellation, and
+  no-follow-redirect markers.
+- `cjpm check`, `cjpm build`, and `cjpm test --exclude-tags=Performance`:
+  PASS with the qualified STS 1.1.3 SDK. Offline AWS-LC 5.5.0 source was
+  supplied from the verified clean commit
+  `991e67ff4cf04df4dd89e407f8b920c6936cb56a`.
 
-The repository-wide `scripts/check` remains outside this focused regression
-run. The 86,400-second M7-022 soak, one-hour SSE profile, and other long gates
-were not run for this requalification.
+This gate is evidence for the stacked M7-032 source, not standalone PR #221
+against `main` without its #220 and #230 parents. The current-source pair
+remains outside `source_paths` and `required_evidence`; the original schema-v1
+seal remains unchanged. `current-evidence-verification.json` still records
+`UNKNOWN_SCHEMA` for that archival seal, so no current-source evidence-verifier
+PASS or replacement canonical seal is claimed. The repository-wide
+`scripts/check`, the 86,400-second M7-022 soak, one-hour SSE profile, and other
+long gates were not run.
 
 ## Release evidence boundary
 
