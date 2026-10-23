@@ -117,31 +117,34 @@ identity.
 
 ## Current hosted qualification evidence
 
-The provider runs bind to source revision
-`616cf4a564db1b36aeeccad33b47848fcc139596`, the production/test candidate
-before this evidence-only refresh on PR #236. Their machine-readable summary is
-[`hosted-validation-616cf4a.json`](hosted-validation-616cf4a.json).
+The latest provider workflows ran on PR #236 head
+`9f7121714e62bc75809efc80916483f7abd596eb`; their `result.json` receipts bind
+GitHub's synthetic pull-request execution revision
+`96c12b9c40ac631c3be05c7e72284f937ad59061`. The exact job IDs, outcomes and
+artifact names are in
+[`hosted-validation-9f712171.json`](hosted-validation-9f712171.json).
 
-- [`TLS Provider PoC` run 39996507158](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996507158):
-  Linux glibc AWS-LC, Linux musl AWS-LC, and macOS arm64 AWS-LC pass. All six
-  Mbed TLS/OpenSSL cells fail at validation with
-  `M0-016 validation: FAIL: known affected provider pin blocks promotion`.
-  `validate-contract` passes.
-- [`M0-016 Windows Provider PoC` run 39996506926](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996506926):
-  Windows AWS-LC passes; the Mbed TLS and OpenSSL cells fail with the same
-  affected-pin validation result.
-- [`clean-cangjie-build` run 39996506952](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996506952),
-  [`docs build and generation` run 39996507111](https://github.com/lIlIIlIll/Wirestack/actions/runs/39996507111),
-  static analysis, architecture guard, gate harness, harness tests, and
-  validators pass. Documentation deployment is skipped for this non-main run.
-- On the same source revision, the matrix-contract validator passes and the
-  TLS provider test suite passes all 77 tests.
+- [`TLS Provider PoC` run 40004184226](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184226)
+  and [`M0-016 Windows Provider PoC` run 40004184420](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184420)
+  produced 12 result receipts. The four AWS-LC receipts validate PASS. The
+  eight Mbed TLS/OpenSSL receipts fail closed with
+  `known affected provider pin blocks promotion`.
+- All 12 downloaded receipts were checked with
+  `tools/tls_provider_poc/validate.py --result <receipt> --expected-revision
+  96c12b9c40ac631c3be05c7e72284f937ad59061`. The four AWS-LC results are not
+  copied into or promoted by `platform-matrix.json`; all retained matrix cells
+  remain BLOCKED.
+- [`clean-cangjie-build` run 40004184235](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184235),
+  [`docs build and generation` run 40004184211](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184211),
+  architecture guard, CodeQL, gate harness and network harness checks pass.
+  Main-documentation deployment is skipped on this non-main run.
 
-These runs confirm fail-closed rejection of the affected pins; they do not
-qualify or promote Mbed TLS 4.2.0 or OpenSSL 3.6.4. The matrix continues to
-mark all 12 retained desktop artifacts `BLOCKED`. Native Android, iOS, and
-HarmonyOS/OpenHarmony evidence and human advisory-review approval are absent.
-M0-016 remains **BLOCKED** and PR #236 remains draft.
+The earlier [`hosted-validation-616cf4a.json`](hosted-validation-616cf4a.json)
+and its 77 local provider tests remain bound to source revision
+`616cf4a564db1b36aeeccad33b47848fcc139596`; they are historical, not results
+for PR head `9f712171`. No provider result or license bundle was promoted.
+Native Android, iOS and HarmonyOS/OpenHarmony evidence and human advisory-review
+approval are absent. M0-016 remains **BLOCKED** and PR #236 remains draft.
 
 `tools/tasks/M0-016.json` does not exist. It is not added: the repository's
 unscoped `validate-tasks` gate would then gain a new
