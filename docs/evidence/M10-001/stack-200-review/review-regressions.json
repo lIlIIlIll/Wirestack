@@ -3,8 +3,8 @@
   "source_task": "M10-001",
   "status": "PASS",
   "acceptance_status": "PASS_FOCUSED_ONLY",
-  "revision": "3e65a74dfa1db865c78a3cce91c547eb02a110fb",
-  "scope": "Stack #200 T1-T5, corrected finding 6, and added HTTP/1 deadline/proxy-cancellation follow-up. This report does not replace or requalify the original M10-001 acceptance.",
+  "revision": "501f21af0fbd2e6937fd17fadb87715be3d043b0",
+  "scope": "Focused Stack #200 review evidence on the current M10-001 candidate, plus explicitly revision-bound historical replays. The report does not replace or requalify the original M10-001 acceptance.",
   "platform": "linux-x86_64-glibc",
   "toolchain": {
     "cangjie": "1.1.3",
@@ -174,7 +174,7 @@
     ,
     {
       "id": "review-deadline-boundaries-and-proxy-cancellation",
-      "revision": "3e65a74dfa1db865c78a3cce91c547eb02a110fb",
+      "revision": "7468ec68de9a169ad87e36b5464f246cc28d5cd9",
       "command": "\"$HOME/.codex/scripts/codex_cangjie_env\" --cwd <repo> -- cjpm test src/internal/http1 src/internal/http2 src/http --filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.prefixBytesReturnedAfterStreamIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.emptyReadRechecksDeadlineAfterTransportStateCheck,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http1LiteralProxyLateSuccessReviewTest.cancellationWhileLiteralProxyDialingIsPreservedIfAbortFails,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls --no-color --no-progress",
       "environment": {
         "TMPDIR": "<task-tmp>",
@@ -198,14 +198,38 @@
       "skipped": 545,
       "errors": 0,
       "failed": 0,
-      "scope": "FOCUSED_SMOKE_ONLY",
+      "scope": "FOCUSED_SMOKE_ONLY on the composite M10-002 source 7468ec68de9a169ad87e36b5464f246cc28d5cd9; 558 total = 541 M10-001 cases + 17 M10-002 cases.",
       "baseline_reproduction": "NOT_OBTAINED: the initial test invocation stopped in the native-provider pre-test hook before compilation because the default ignored checkout was empty."
+    }
+    ,
+    {
+      "id": "current-pr-head-clean-build",
+      "revision": "501f21af0fbd2e6937fd17fadb87715be3d043b0",
+      "command": "Clean Cangjie Build: scripts/check-code; scripts/check-m7-027-linux-examples --json",
+      "workflow": "Clean Cangjie Build",
+      "run_id": 39947353734,
+      "status": "PASS",
+      "exit_code": 0,
+      "toolchain": {
+        "cangjie": "1.1.3",
+        "cjpm": "1.1.3"
+      },
+      "scope": "scripts/check-code passed, including architecture and network-capability checks, Linux resolver build, strict docs, cjpm check/build and the full non-Performance test suite; the installed public-consumer check also passed."
+    },
+    {
+      "id": "current-task-gate-preflight",
+      "revision": "501f21af0fbd2e6937fd17fadb87715be3d043b0",
+      "command": "python3 tools/repository/repository_tooling.py --root . check task M10-001 --json",
+      "exit_code": 2,
+      "result": "INVALID",
+      "commands_executed": 0,
+      "blocker": "DEPENDENCY_INCOMPLETE: M10-004 dependency is not COMPLETE: M10-003."
     }
   ],
   "full_suite_failure_assessment": {
-    "classification": "The corrected finding-6 regression passes on current source, but the current full HTTP suite errors in the M10-003 H2 pool-fairness scenario; an earlier unrelated admission failure remains unexplained.",
+    "classification": "The current PR #215 candidate passes the hosted Clean Cangjie Build; earlier full-suite timeouts remain historical, and current task readiness is still invalid.",
     "prior_evidence": "The current run at 18a2b9a79b0b8886db8bfae3fdd48184ff45d23c failed with 531/538 passed, 6 skipped, and one TimeoutException in Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill. The earlier 935351da4880f2d4e1be963100ca19146ea8b6f5 run failed at HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission; its isolated case passed. The intervening 97cac410c727b301e1f85a0b8e61595980292287 run passed 532/538, but its finding-6 assertion expected the incorrect timeout result.",
-    "scope_note": "The corrected late-final-response test passes 1/171 on current source; this focused result does not establish the full suite or original task acceptance. The current task gate is INVALID because M10-004 depends on M10-003."
+    "scope_note": "At source 501f21af0fbd2e6937fd17fadb87715be3d043b0, Clean Cangjie Build passed the full non-Performance suite, including the prefix-preservation regression. The task gate remains INVALID (exit 2, zero commands) because M10-004 depends on incomplete M10-003; this does not requalify the original task."
   },
   "github_checks": [
     {
@@ -315,8 +339,29 @@
       "run_id": 39314986691,
       "status": "SKIPPED",
       "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39314986691"
+    },
+    {
+      "workflow": "Clean Cangjie Build",
+      "revision": "501f21af0fbd2e6937fd17fadb87715be3d043b0",
+      "run_id": 39947353734,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39947353734"
+    },
+    {
+      "workflow": "M7-033 Developer Documentation",
+      "revision": "501f21af0fbd2e6937fd17fadb87715be3d043b0",
+      "run_id": 39947353813,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39947353813"
+    },
+    {
+      "workflow": "PR #215",
+      "revision": "501f21af0fbd2e6937fd17fadb87715be3d043b0",
+      "run_id": 39947350816,
+      "status": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39947350816"
     }
   ],
-  "github_check_note": "At exact candidate source revision 6223022ef3943437596ad9fedcd8571b975a382e, all listed applicable GitHub checks passed. The latest-main documentation deployment was skipped by its workflow.",
-  "task_boundary": "The original M10-001 task remains COMPLETE under its historical acceptance evidence. This supplemental report records the prior focused fixes, corrected finding 6, and added deadline/proxy regressions at 3e65a74dfa1db865c78a3cce91c547eb02a110fb. The 13-case focused replay passed on Cangjie 1.3.0-alpha.20261020001052/CJPM 1.3.0-alpha.07; no full current task acceptance or other platform qualification is claimed. The existing task-gate preflight receipt is INVALID because M10-004 depends on BLOCKED M10-003."
+  "github_check_note": "All 10 GitHub workflow runs for source 501f21af0fbd2e6937fd17fadb87715be3d043b0 completed successfully. Clean Cangjie Build and M7-033 documentation evidence are linked above; the latest-main documentation deployment was skipped. The separate task-gate preflight is INVALID before commands.",
+  "task_boundary": "The original M10-001 task remains COMPLETE under historical acceptance. The 13-case focused replay is bound to the M10-002 composite source 7468ec68de9a169ad87e36b5464f246cc28d5cd9, not the M10-001 head. The current PR #215 candidate 501f21af0fbd2e6937fd17fadb87715be3d043b0 passes the hosted Clean Cangjie Build, including the prefixed-byte retry regression, but the global task gate remains INVALID because M10-004 depends on BLOCKED M10-003. No current task seal or additional platform qualification is claimed."
 }
