@@ -92,18 +92,23 @@ SHA-256
 bytes are absent, `fetch-frozen-artifact` retrieves them from the single pinned
 draft-Release tag `m7-030-frozen-artifact-c0988f62` — no `--latest` fallback —
 verifies them, and only then publishes the file. A failed download or a digest
-mismatch publishes nothing. `scripts/check-m7-030-release` stages its
-receipt under the Git-ignored `build/m7-030/` work directory before rehearsing,
-so a clean checkout either reproduces the exact reviewed bytes or fails closed
-with `FROZEN_ASSET_NAME`, `FROZEN_ASSET_MISSING`, `FROZEN_ASSET_SIZE`,
-`FROZEN_ASSET_DIGEST` or `FROZEN_ASSET_DOWNLOAD`. The staging target is never
-`docs/evidence/M7-030/frozen-artifact.json`: a failed staging run must not
-replace the committed PASS receipt, and `main` refuses to write a failure
-payload to that receipt at all. The committed receipt records
-`"mode": "verified-existing-artifact"` from a run against an already staged
-artifact and is bound in the task manifest's `source_paths` and
+mismatch publishes nothing. `scripts/check-m7-030-release` stages its receipt
+under the Git-ignored `build/m7-030/` work directory before rehearsing, so a
+clean checkout either reproduces the exact reviewed bytes or fails closed with
+`FROZEN_ASSET_NAME`, `FROZEN_ASSET_MISSING`, `FROZEN_ASSET_SIZE`,
+`FROZEN_ASSET_DIGEST` or `FROZEN_ASSET_DOWNLOAD`. The canonical gate never
+targets `docs/evidence/M7-030/frozen-artifact.json`; the fetch command writes a
+receipt only after the asset passes its name, size and digest checks, so a
+failed staging run cannot replace the committed PASS receipt. The committed
+receipt records `"mode": "verified-existing-artifact"` from a run against an
+already staged artifact and is bound in the task manifest's `source_paths` and
 `required_evidence`, so deleting or tampering with it fails the evidence gate;
 no downloaded-mode capture is claimed for the current tree.
+
+`validate-hosted --output` follows the same success-only receipt rule. It writes
+a PASS validation record only after all hosted subjects verify; on FAIL or
+BLOCKED it emits the structured result without replacing the existing
+`hosted-validation.json`.
 
 ## Current blockers
 
@@ -161,11 +166,9 @@ frozen-artifact prerequisite in place, and the rehearsal now records the
 hosted-attestation blocker as `productionAttestation: {"decision": "FAIL",
 "detail": "HOSTED_REPORT_SUBJECT"}` rather than inheriting the historical PASS.
 
-A gate run has three evidence-report side effects, not two. Before this
-change it rewrote `docs/evidence/M7-030/frozen-artifact.json`,
-`local-rehearsal.json` and `hosted-validation.json` in place, so a checkout
-showed all three as modified afterwards. The receipt staging target now lives
-under the Git-ignored `build/m7-030/`, so `frozen-artifact.json` is no longer a
-run target and only `local-rehearsal.json` and `hosted-validation.json` are
-rewritten in place; the committed receipt is only replaced deliberately, never
-by a failing run.
+The task gate stages the frozen receipt under ignored `build/m7-030/` and
+`validate-workflow` and the local rehearsal write their configured current
+reports. `validate-hosted --output` writes only after successful validation.
+The current `HOSTED_REPORT_SUBJECT` failure therefore leaves the existing
+`hosted-validation.json` byte-identical; its 2026-08-30 PASS remains historical
+and is not promoted to current acceptance.
