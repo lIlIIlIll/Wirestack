@@ -89,6 +89,7 @@
   ],
   "required_evidence": [
     "docs/evidence/M3-031/core-prerequisite-audit.json",
+    "docs/evidence/M3-031/dependency-status-cascade.json",
     "docs/evidence/M3-031/desktop-provider-matrix.json",
     "docs/evidence/M3-031/evidence.json",
     "docs/evidence/M3-031/hosted-run.json",
@@ -125,6 +126,7 @@
     "docs/evidence/M3-030/task-check.json",
     "docs/evidence/M3-030/test-provider-results.json",
     "docs/evidence/M3-031/README.md",
+    "docs/evidence/M3-031/dependency-status-cascade.json",
     "docs/evidence/M3-031/macos-arm64/license-bundle/files/LICENSE",
     "docs/evidence/M3-031/macos-arm64/license-bundle/files/NOTICE",
     "docs/evidence/M3-031/macos-arm64/license-bundle/files/third_party/fiat/LICENSE",

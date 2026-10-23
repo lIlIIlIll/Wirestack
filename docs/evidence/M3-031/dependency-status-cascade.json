@@ -1,0 +1,24 @@
+{
+  "blocking_prerequisite": "M3-031",
+  "convention": "A COMPLETE task may not depend on a BLOCKED prerequisite. The P1 status rows are reclassified by the stacked PRs #243 (P1-012/P1-013), #245 (P1-014), #246 (P1-015) and #247 (P1-016); #248 reclassifies M9-001. This branch intentionally does not edit those rows so the two status stacks do not diverge into a second convention.",
+  "kind": "blocked-prerequisite-status-cascade",
+  "notes": "With this branch alone applied, P1-013 remains COMPLETE while M3-031 is BLOCKED; that contradiction is exactly what #243 resolves. No status row was weakened here and no task gate was relaxed.",
+  "observed_violations": [
+    {
+      "blocked_dependencies": [
+        "M3-031"
+      ],
+      "status": "COMPLETE",
+      "task_id": "P1-013"
+    }
+  ],
+  "pr": "#237",
+  "prerequisite_status": "BLOCKED",
+  "schema_version": 1,
+  "sequencing": [
+    "#243/#245/#246/#247/#248 must be rebased onto or merged before or together with this branch, because they reclassify P1-013..P1-016 and M9-001 below the M3-031 blocker.",
+    "This branch's base #236 gains two commits; #237 must be pushed with its own history after #236, not force-refreshed onto a new base."
+  ],
+  "task_id": "M3-031",
+  "verification": "python3 tools/repository/repository_tooling.py --root . validate-tasks --json"
+}
