@@ -1,6 +1,6 @@
 # Use the repository control plane
 
-Status: **COMPLETE**
+Status: **BLOCKED**
 
 P1-012 adds bounded diagnostics and validation commands for maintainers, CI,
 and coding agents. The commands use one task contract and one result model, so
@@ -75,15 +75,22 @@ BLOCKED, or FAIL return FAIL.
 Task manifests live at `tools/tasks/<TASK-ID>.json` and use
 `tools/tasks/schema-v1.json`. Schema v1 requires:
 
-- task ID and completed dependencies;
+- task ID and declared dependencies (COMPLETE for a task-specific check);
 - allowed repository paths and supported platforms;
 - acceptance command arguments, timeout, gate and long-running marker;
 - required evidence paths;
 - task timeout and task-level long-running marker;
 - source paths whose SHA-256 values bind retained evidence to the code.
 
-Unknown fields and schema versions fail closed. Dependencies must exist in the
-backlog and status, have COMPLETE status, and form an acyclic graph.
+Dependency IDs must exist in the backlog and status, and all manifests must
+form an acyclic graph. `validate-tasks`, `check-fast`, `check-full`, and
+`verify-evidence --all` are repository-wide gates: any incomplete declared
+dependency makes them fail before acceptance commands or evidence are
+processed. An optional task ID does not narrow a global fast/full check.
+
+A task-specific `check-task`, `check-long`, or `verify-evidence TASK` checks
+only that task's transitive dependency closure; unrelated blocked tasks do not
+invalidate the selected task. Structural manifest validation remains global.
 
 ## Stable exit codes
 
@@ -99,11 +106,69 @@ backlog and status, have COMPLETE status, and form an acyclic graph.
 
 ## Evidence boundary
 
-The machine reports in this directory record native Linux glibc execution.
-The current-toolchain requalification ran `scripts/check-task P1-012` and
-`scripts/check-full`; both returned PASS. The task gate validated the 16-path,
-12-scenario, 10-test plan and all 17 repository-tooling unit tests. The full
-gate delegated to `scripts/check` and returned exit 0.
+The current `scripts/check-task P1-012 --json` passes: the plan has 18 paths,
+17 scenarios, and 15 tests; all 44 repository-tooling tests pass. The exact
+task report and plan validation are retained in
+[`task-check.json`](task-check.json) and
+[`test-plan-validation.json`](test-plan-validation.json).
+
+Repository-wide readiness is BLOCKED because M10-004 depends on incomplete
+M10-003. A separate draft change (PR #230) records M10-004 as BLOCKED instead
+of COMPLETE and claims no acceptance; that correction resolves the misleading
+status record but does not complete M10-003. `validate-tasks` and global
+fast/full checks return INVALID (exit 2) before selecting or executing
+commands; `verify-evidence --all` returns FAIL
+(exit 1) on the same dependency. The reports are linked from
+[`global-readiness.json`](global-readiness.json). P1-012 remains BLOCKED; no
+current PASS evidence seal is claimed. The active
+[`evidence.json`](evidence.json) records BLOCKED, and
+[`evidence-unqualified-2026-10-19.json`](evidence-unqualified-2026-10-19.json)
+records provenance for the former PASS index, bound to unpublished revision
+`8beeed24620452e0b8101c0375e1494b73e0de6e`. The original index remains in
+earlier PR history and is not current evidence.
+
+A selected `verify-evidence P1-012` also returns FAIL with
+`ACCEPTANCE_NOT_PASS`; the BLOCKED marker cannot be treated as a current seal.
+
+[`dependency-scope-reproduction.json`](dependency-scope-reproduction.json)
+separates the two revisions it cites. `historical_after_c1d908a5` records the
+values that `c1d908a5d1f3a53f8b6e038cc0eacd2bb1e9e50a` produced: 39
+repository-tooling tests and a plan of 17 paths, 13 scenarios, 11 tests.
+`final_revision` records the refreshed head values: 44 tests and 18/17/15.
+Only the latter matches the retained [`task-check.json`](task-check.json) and
+[`test-plan-validation.json`](test-plan-validation.json).
+
+The M12-003 after-receipt [`m12-003-after.json`](m12-003-after.json) is
+historical: at that revision 47 fault-contract tests passed with one
+environment-gated skip, while its source-bound evidence verifier failed on
+drift in `tools/gates/m12_003_resources.py`. On the current tree the selected
+M12-003 closure reaches BLOCKED P1-012 through P1-013, so
+[`m12-003-current.json`](m12-003-current.json) returns INVALID with
+`P1-013 dependency is not COMPLETE: P1-012`; M12-003 remains BLOCKED. The
+deliberately blocked M10-004 selection in
+[`blocked-dependency-smoke.json`](blocked-dependency-smoke.json) rejects its own
+incomplete M10-003 dependency.
+
+Dependency completeness is transitive, so recording P1-012 as BLOCKED rejects
+every task whose closure contains it. The report
+[`dependency-scope-transitive-impact.json`](dependency-scope-transitive-impact.json)
+records that effect: 16 manifests have P1-012 in their closure, 13 are now
+rejected through `P1-013 dependency is not COMPLETE: P1-012`, and 3 stop at the
+earlier `M10-003` edge. Reclassifying those rows belongs to their own tasks;
+this branch changes only P1-012.
+
+[`historical/validate-tasks-c1d908a5.json`](historical/validate-tasks-c1d908a5.json)
+is the byte-exact `validate-tasks` PASS from `c1d908a5`, before the M10-004
+status correction. It is retained as history and referenced by no acceptance
+command; see [`historical/README.md`](historical/README.md).
+
+[`full-check.json`](full-check.json) is the unchanged historical 2026-09-01 PASS receipt.
+[`full-check-pre-strict-global-readiness.json`](full-check-pre-strict-global-readiness.json)
+summarizes an earlier pre-fix run (584 tests, 25 failures, 16 errors, 4 skips);
+the original report remains in earlier PR history, not current qualification.
+The current full check is
+[`full-check-current.json`](full-check-current.json): it returns INVALID before
+delegating to `scripts/check`. No current repository-wide full PASS is claimed.
 
 P1-012 did not run the one-hour SSE profile, the 24-hour soak, or another long
 profile. It did not modify runtime, std, stdx, or an SDK, and did not build an

@@ -1,6 +1,6 @@
 # M7-031 test results
 
-Date: 2026-08-30
+Date: 2026-08-30 (historical); 2026-10-22 (dependency-readiness rerun)
 
 Platform: Linux x86_64 glibc 2.44
 
@@ -9,7 +9,15 @@ Repository validation toolchain: Cangjie `1.1.0-alpha.20260829040003`, CJPM
 
 Frozen artifact toolchain: Cangjie `1.1.0-alpha.20260817040003`, CJPM `1.1.3`
 
-## Results
+## Historical results
+
+The table below records the 2026-08-30 tree. It is retained unchanged as
+history; [`README.md`](README.md) explains why M7-031 is now BLOCKED and why
+these numbers are not a current verdict. The gate could not be reproduced on
+current source: `scripts/check-m7-031-release` stops at
+`DEPENDENCY_INCOMPLETE: M7-030` because M7-030 is BLOCKED, and before that
+reclassification it already failed `DIGEST_INVALID: M7-030 artifact signed
+payload`.
 
 | Command | Result |
 |---|---|
@@ -41,3 +49,46 @@ failure, not a source or assertion failure.
 - The 86,400-second soak was not rerun. M7-022 already completed it for the
   exact candidate artifact, and M7-031 verifies that identity.
 - No SDK, runtime, std, stdx, Linux musl or non-Linux gate was run.
+
+## Dependency readiness (2026-10-22)
+
+`tools/m7_031_linux_candidate.py` now exposes
+`unmet_dependencies(root)`, and `validate_dependency_status` reports the first
+unmet declared dependency through it. In `setUpClass`, the unit suite reads
+the same helper and raises `unittest.SkipTest` when a prerequisite is not
+`COMPLETE`. Here unittest reports the whole `M7031LinuxCandidateTests` class
+as one skip event; its fifteen candidate methods do not run. This avoids the
+previous collection error while preserving the blocked prerequisite. The four
+`M7031DependencyReadinessTests` cases run unconditionally on temporary
+`status.md` fixtures.
+
+| Command | Result |
+|---|---|
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-031/test-plan.md --json` | PASS; 21 paths, 13 scenarios and 11 planned tests. |
+| `python3 -m unittest tools.tests.test_m7_031_linux_candidate -v` | PASS; 4 readiness tests pass and the candidate class is skipped with `M7-031 prerequisites are not COMPLETE: M7-030`. |
+| `python3 -m unittest discover -s tools/tests -p 'test_m7_031_linux_candidate.py' -v` | PASS; the same four readiness tests run; candidate class is skipped, no discovery error. |
+| `python3 -m unittest tools.tests.test_m7_linux_task_graph -v` | FAIL; 5/6 tests. `test_evolution_status_matches_readiness_classification` reports `AssertionError: 'COMPLETE' != 'BLOCKED'` for M10-004, whose dependency M10-003 is BLOCKED. The same failure was observed on base `d496a242`; this branch does not weaken that invariant or alter M10-004's separate status task. |
+| `scripts/check-m7-031-release` | FAIL; `M7-031 candidate: FAIL: DEPENDENCY_INCOMPLETE: M7-030`. |
+| `scripts/verify-evidence M7-031 --json --output docs/evidence/M7-031/evidence-check-current.json` | FAIL; `DEPENDENCY_INCOMPLETE: M7-031 dependency is not COMPLETE: M7-030`; current report retained. |
+| `scripts/check-task M7-031 --json --output docs/evidence/M7-031/task-check-current.json` | INVALID; dependency closure rejects M7-030 before execution; zero commands. |
+
+`docs/evidence/M7-031/evidence.json` and `docs/evidence/M7-031/task-check.json`
+are the 2026-08-30 seals and are retained byte-identically as history. They are
+not resealed, because `seal_evidence` refuses a non-PASS acceptance status and
+this branch makes no current PASS claim.
+
+The current `task-check-current.json` (`INVALID`) and
+`evidence-check-current.json` (`FAIL`) remain in `tools/tasks/M7-031.json`
+`source_paths`, so deleting or changing either report invalidates the manifest
+binding. They are excluded from `required_evidence`: current non-PASS diagnostics
+cannot be indexed as acceptance reports in a future PASS seal.
+
+`M7031DependencyReadinessTests.test_blocked_current_receipts_are_source_bound_not_required_evidence`
+checks that contract. The 2026-10-22 table above records the four readiness
+tests that existed then; the manifest-binding test was added afterward. On
+2026-10-24, the refreshed focused run exercised all five readiness tests:
+
+| Command | Result |
+|---|---|
+| `python3 -m unittest tools.tests.test_m7_031_linux_candidate -v` | PASS; 5 tests, `OK (skipped=1)`. All five readiness tests pass; `M7031LinuxCandidateTests` is skipped because M7-030 remains BLOCKED. |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-031/test-plan.md --json` | PASS; 21 paths, 13 scenarios and 11 planned tests. |

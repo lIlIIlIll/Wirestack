@@ -82,6 +82,8 @@
     "docs/evidence/M7-031/linux_x86_64/release-candidate.json",
     "docs/evidence/M7-031/test-plan.md",
     "docs/evidence/M7-031/test-results.md",
+    "docs/evidence/M7-031/task-check-current.json",
+    "docs/evidence/M7-031/evidence-check-current.json",
     "docs/evidence/M7-032/linux_x86_64/public-api.json",
     "docs/evidence/M7-032/linux_x86_64/clean-consumer.json",
     "docs/planning/linux-status.md",

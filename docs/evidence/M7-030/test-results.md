@@ -94,6 +94,138 @@ verified subjects. `task-check.json` binds the six acceptance commands.
 `scripts/verify-evidence M7-030 --json` returns PASS with two indexed reports,
 23 source digests and no stale path.
 
+## Current acceptance state (2026-10-22)
+
+The results above are the 2026-08-30 record and are unchanged history. On the
+current tree the frozen-artifact prerequisite now runs before any manifest,
+signing or update work: `scripts/check-m7-030-release` first stages
+`frozen-artifact.json` and the rehearsal refuses the run when the asset name,
+2,499,451-byte length or `c0988f62…` SHA-256 differs, or when the pinned draft
+Release cannot supply it.
+
+The task check runs all six acceptance commands and returns FAIL. Two are red
+and four pass:
+
+| Command | Current result |
+|---|---|
+| `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
+| `signing-update-fault-injection` | PASS; `python3 -m unittest tools.tests.test_m7_030_linux_release` in the worktree and in a clean `git archive` export that has no `dist/` directory. The suite now also covers receipt preservation for download failure, size mismatch and digest mismatch. |
+| `supply-chain-inputs` | FAIL exit 1, `generator fingerprint is stale`: recorded `42e064cf…` versus current `b7a15290…`. M11-002 (`0a3161e5`) changed `tools/m7_025_linux_supply_chain.py` after the M7-025 evidence was frozen; regenerating that bundle is M7-025 work. |
+| `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
+| `local-signing-update-rehearsal` | PASS as `REHEARSAL`, but `productionAttestation` now records `{"decision": "FAIL", "detail": "HOSTED_REPORT_SUBJECT"}` instead of the inherited historical PASS. The command itself does not record which staging mode it used; the committed receipt's mode is stated separately below. |
+| `github-hosted-attestations` | FAIL exit 1, `HOSTED_REPORT_SUBJECT`: the committed report predates the required `signedPayloadSha256` subject field, and the workflow is retired with M8-007 as the active signer. |
+
+On this stacked branch, where P1-012 scopes dependency validation to the
+requested task closure, `scripts/check-task M7-030 --json` runs all six commands
+and reports `status: FAIL` with exactly the two failing commands above and
+`issues: []`. The unscoped repository-wide readiness check still reports
+`DEPENDENCY_INCOMPLETE` on the unrelated `M10-004 → M10-003` edge. M7-030's own
+dependencies M7-022, M7-025 and M7-029 are COMPLETE. In a fresh clean checkout
+with no `dist/` directory, `supply-chain-inputs` fails earlier with
+`release artifact is absent`, before any fingerprint comparison: the
+`--validate-only` mode has no artifact to inspect. The stale-generator
+diagnosis above applies only once a staged artifact is present.
+
+Marking this task BLOCKED also propagates to M7-031, which lists M7-030 as a
+dependency and whose `validate_dependency_status` requires
+`| M7-030 | COMPLETE |` in `docs/planning/status.md`. The
+`scripts/check-m7-031-release` gate therefore reports
+`DEPENDENCY_INCOMPLETE: M7-030`. The unittest discovery failure was fixed
+separately in draft PR #239: `python3 -m unittest
+tools.tests.test_m7_031_linux_candidate -v` passes four dependency-readiness
+tests and skips `M7031LinuxCandidateTests` with
+`M7-031 prerequisites are not COMPLETE: M7-030`; its fifteen candidate
+methods do not run. The underlying gate already failed on the base commit
+with `DIGEST_INVALID: M7-030 artifact signed payload`, so M7-031's COMPLETE
+record was not supported by its own gate before this change. M7-031's row,
+tooling and evidence stay untouched here because they are outside this task's
+`allowed_paths`.
+
+Running the gate has three evidence-report side effects, not two. Before this
+change it regenerated `frozen-artifact.json`, `local-rehearsal.json` and
+`hosted-validation.json` in place, so after a run the working tree showed all
+three files modified even though the rehearsal and hosted verdicts were
+unchanged in kind. None of the three is rewritten here. `local-rehearsal.json` and
+`hosted-validation.json` keep their 2026-08-30 bytes, and
+`frozen-artifact.json` keeps the receipt first committed on 2026-10-22, which is
+what the historical record documents. The gate
+script now stages its receipt under the Git-ignored `build/m7-030/` directory
+instead of `docs/evidence/M7-030/frozen-artifact.json`, and the tool refuses to
+write a failure payload to that receipt at all, so a failed staging or digest
+check can no longer replace the committed PASS receipt; the two remaining
+in-place evidence rewrites are `local-rehearsal.json` and
+`hosted-validation.json`. The receipt is also listed in the task manifest's
+`source_paths` and `required_evidence`, so its deletion or tampering is detected
+rather than silently accepted.
+
+## Unit-test isolation (2026-10-22)
+
+The fault-injection suite originally read the ignored `dist/m7-021` staging
+archive, so its verdict depended on an ambient build product: on a clean
+checkout of the branch head 10 of 19 tests failed with `FROZEN_ASSET_MISSING`
+or `ARTIFACT_STALE`. The suite is now hermetic. A `frozen_fixture` context
+manager materialises a tiny deterministic `wirestack-0.1.0` archive in a
+temporary directory, copies the committed M7-025 documents beside it, rewrites
+the copied `bundle.json` so its artifact entry names that payload, and pins
+`ARTIFACT`, `SUPPLY_CHAIN`, `SBOM`, `FROZEN_ARTIFACT_BYTES`,
+`FROZEN_ARTIFACT_SHA256` and the workflow text for the duration of the block
+with `unittest.mock.patch.object`. Production constants are never rewritten:
+the committed `FROZEN_ARTIFACT_NAME`, tag, 2,499,451 bytes and `c0988f62…`
+digest keep their real values, and the unpatched suite cross-checks them
+against both the committed M7-025 bundle and the committed
+`frozen-artifact.json` retrieval receipt.
+
+The negative tests keep their teeth independently of the fixture: a renamed
+copy still trips `FROZEN_ASSET_NAME`, a one-byte-short copy trips
+`FROZEN_ASSET_SIZE`, a same-length single-bit flip trips `FROZEN_ASSET_DIGEST`,
+an absent staging path trips `FROZEN_ASSET_MISSING` for both
+`build_release_manifest` and `fetch_frozen_artifact`, and a failed `gh release
+download` trips `FROZEN_ASSET_DOWNLOAD` without leaving the asset behind.
+Replacing `verify_frozen_artifact` with a permissive stub fails those tests, so
+they observe the check rather than the fixture.
+
+Supporting the injection required resolving path defaults at call time in
+`tools/m7_030_linux_release.py`: `build_release_manifest`,
+`verify_frozen_artifact`, `fetch_frozen_artifact`, `create_offline_bundle`,
+`verify_offline_bundle` and `inspect_workflow` now take `None` and fall back to
+the module attribute, and a new `workflow_text()` seam supplies the default
+workflow source. Behaviour with no arguments is unchanged, and
+`scripts/check-m7-030-release` still fetches and verifies the exact pinned draft
+asset, so the local release contract remains as strict as before.
+
+### Clean-checkout acceptance
+
+Running the canonical gate in a `git archive` export of `9ddc2c2a`, which has no
+`dist/` directory, exercises the retrieval path rather than reusing a staged
+copy:
+
+```
+$ scripts/check-task M7-030 --json
+test-plan-matrix                  PASS
+signing-update-fault-injection    PASS
+supply-chain-inputs               FAIL
+hosted-workflow-contract          PASS
+local-signing-update-rehearsal    PASS
+github-hosted-attestations        FAIL
+status FAIL, issues []
+```
+
+That export has no `dist/` directory, so the supply-chain command in it fails
+before any fingerprint or digest comparison: `scripts/generate-m7-025-linux-
+supply-chain --validate-only` reports `release artifact is absent`. The
+stale-generator-fingerprint FAIL described above is what a tree with a staged
+artifact reports instead; the two are different failure points and are not
+interchangeable.
+
+The receipt committed in this branch records
+`"mode": "verified-existing-artifact"`, not a download. No current captured
+receipt shows `downloaded-and-verified-frozen-artifact`, so that mode is not
+claimed here: the committed receipt documents verification of an already present
+artifact, and any future download-mode capture must be committed as its own
+report rather than inferred from this one. The fail-closed staging logic itself
+is exercised only by the injected-runner unit tests, which assert that a failed
+download, a wrong-size payload and a digest mismatch each publish nothing.
+
 ## Gates not run
 
 - The one-hour SSE profile was not run.
