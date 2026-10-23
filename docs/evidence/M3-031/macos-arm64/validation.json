@@ -20,11 +20,12 @@
     "truncation": "PASS"
   },
   "external_signer_calls": 2,
+  "license_bundle_manifest_sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
   "platform": "macos-arm64",
   "provider": "aws-lc",
   "provider_version": "5.5.0",
   "repeated_cleanup_cycles": 10000,
-  "repository_revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+  "repository_revision": "f5cb82cdc780bef905f436435470952a1a1acbb5",
   "schema_version": 1,
   "status": "PASS",
   "task_id": "M3-031"

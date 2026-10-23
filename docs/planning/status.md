@@ -116,7 +116,7 @@ milestone.
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M3-031 | COMPLETE | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md), [`hosted-run.json`](../evidence/M3-031/hosted-run.json), [`desktop-provider-matrix.json`](../evidence/M3-031/desktop-provider-matrix.json), [`task-check.json`](../evidence/M3-031/task-check.json) | The desktop-scoped Core audit and source-bound exact-revision native Windows Server 2025 x86_64/macOS 15 arm64 AWS-LC 5.5.0 schema-v11 PoCs pass, including measured TLS 1.2 and TLS 1.3 resumption. Global six-platform and mobile conditions remain NOT_EVALUATED; no trust or key adapter is claimed. |
+| M3-031 | BLOCKED | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md); [`current verification`](../evidence/M3-031/current-verification-f5cb82.json); [`hosted run`](../evidence/M3-031/hosted-run.json) | Current Windows/macOS AWS-LC 5.5.0 hosted receipts pass at `f5cb82cdc780bef905f436435470952a1a1acbb5` (run 40005174235). Full acceptance remains blocked: M3-030 retained Linux evidence has invalid semantics; task preflight is INVALID at M10-004 → M10-003; Python acceptance is 113/114 with the matching status-graph contradiction. No full PASS or seal is claimed. |
 
 ## Future upstream enhancements
 

@@ -1,0 +1,95 @@
+{
+  "checks": {
+    "desktop-adoption-fault-injection": {
+      "command": "python3 -m unittest tools.tests.test_m3_031_desktop_tls_adoption tools.tests.test_tls_provider_poc tools.tests.test_m3_030_tls_provider_architecture tools.tests.test_m7_linux_task_graph -v",
+      "exit_code": 1,
+      "failure": "M7LinuxTaskGraphTests.test_evolution_status_matches_readiness_classification: M10-004 is marked COMPLETE despite its M10-003 dependency being BLOCKED",
+      "failed": 1,
+      "passed": 113,
+      "status": "FAIL",
+      "total": 114
+    },
+    "provider-neutral-core-tests": {
+      "command": "cjpm test src/internal/tls_engine src/internal/trust --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 0,
+      "errors": 0,
+      "passed": 83,
+      "skipped": 0,
+      "status": "PASS",
+      "total": 83,
+      "toolchain": {
+        "cjc": "1.3.0-alpha.20261020001052",
+        "target": "x86_64-unknown-linux-gnu",
+        "cjpm": "1.3.0-alpha.07"
+      }
+    },
+    "stored-desktop-provider-results": {
+      "command": "scripts/check-m3-031-desktop-tls-adoption",
+      "exit_code": 1,
+      "failure": {
+        "code": "RETAINED_EVIDENCE",
+        "detail": "docs/evidence/M3-030/linux-aws-lc-results.json: report semantics are invalid"
+      },
+      "status": "FAIL"
+    },
+    "task-gate": {
+      "command": "scripts/check-task M3-031 --json",
+      "exit_code": 2,
+      "issues": [
+        {
+          "code": "DEPENDENCY_INCOMPLETE",
+          "detail": "M10-004 dependency is not COMPLETE: M10-003"
+        }
+      ],
+      "commands": [],
+      "status": "INVALID"
+    },
+    "test-plan-matrix": {
+      "command": "python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M3-031/test-plan.md --json",
+      "exit_code": 0,
+      "counts": {
+        "paths": 17,
+        "scenarios": 16,
+        "tests": 17
+      },
+      "status": "PASS"
+    },
+    "windows-provider-result": {
+      "exit_code": 0,
+      "status": "PASS",
+      "platform": "windows-x86_64",
+      "provider": "aws-lc",
+      "repository_revision": "f5cb82cdc780bef905f436435470952a1a1acbb5"
+    },
+    "macos-provider-result": {
+      "exit_code": 0,
+      "status": "PASS",
+      "platform": "macos-arm64",
+      "provider": "aws-lc",
+      "repository_revision": "f5cb82cdc780bef905f436435470952a1a1acbb5"
+    }
+  },
+  "hosted_run": {
+    "conclusion": "success",
+    "revision": "f5cb82cdc780bef905f436435470952a1a1acbb5",
+    "run_id": 40005174235,
+    "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/40005174235",
+    "jobs": {
+      "windows-aws-lc": {
+        "job_id": 120591153151,
+        "status": "PASS"
+      },
+      "macos-aws-lc": {
+        "job_id": 120591153396,
+        "status": "PASS"
+      }
+    },
+    "capabilities_per_platform": 18,
+    "repeated_cleanup_cycles_per_platform": 10000,
+    "external_signer_calls_per_platform": 2
+  },
+  "schema_version": 1,
+  "source_revision": "f5cb82cdc780bef905f436435470952a1a1acbb5",
+  "status": "BLOCKED",
+  "task_id": "M3-031"
+}
