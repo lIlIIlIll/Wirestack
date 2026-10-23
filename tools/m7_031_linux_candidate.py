@@ -182,11 +182,19 @@ def load_documents(root: Path) -> dict[str, dict[str, Any]]:
     return {key: load_json(safe_path(root, relative)) for key, relative in DOCUMENT_PATHS.items()}
 
 
-def validate_dependency_status(root: Path) -> None:
+def unmet_dependencies(root: Path) -> tuple[str, ...]:
+    """Return the declared dependencies that are not COMPLETE, in declaration order."""
     text = safe_path(root, "docs/planning/status.md").read_text(encoding="utf-8")
-    for task_id in DEPENDENCIES:
-        pattern = re.compile(rf"^\| {re.escape(task_id)} \| COMPLETE \|", re.MULTILINE)
-        require(pattern.search(text) is not None, "DEPENDENCY_INCOMPLETE", task_id)
+    return tuple(
+        task_id
+        for task_id in DEPENDENCIES
+        if re.search(rf"^\| {re.escape(task_id)} \| COMPLETE \|", text, re.MULTILINE) is None
+    )
+
+
+def validate_dependency_status(root: Path) -> None:
+    unmet = unmet_dependencies(root)
+    require(not unmet, "DEPENDENCY_INCOMPLETE", unmet[0] if unmet else "")
 
 
 def require_pass(value: Mapping[str, Any], label: str) -> None:

@@ -33,8 +33,15 @@ REPOSITORY = "lIlIIlIll/Wirestack"
 WORKFLOW = ".github/workflows/linux-release-attestation.yml"
 SIGNER_WORKFLOW_IDENTITY = f"{REPOSITORY}/{WORKFLOW}"
 ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+FROZEN_ARTIFACT_NAME = "wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
 FROZEN_ARTIFACT_TAG = "m7-030-frozen-artifact-c0988f62"
+FROZEN_ARTIFACT_BYTES = 2_499_451
 FROZEN_ARTIFACT_SHA256 = "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+FROZEN_ARTIFACT_TIMEOUT_SECONDS = 180
+# Commands whose ``--output`` is a receipt for a successful verification only.
+# A failed staging run must never replace an existing receipt with a failure
+# payload; it reports on stdout/stderr instead.
+SUCCESS_ONLY_OUTPUT_COMMANDS = frozenset({"fetch-frozen-artifact"})
 SUPPLY_CHAIN = ROOT / "docs/evidence/M7-025/linux_x86_64"
 SBOM = SUPPLY_CHAIN / "sbom.spdx.json"
 PROVIDER_MANIFEST = SUPPLY_CHAIN / "provider-manifest.json"
@@ -128,14 +135,17 @@ def _strict_digest(value: Any, field: str) -> str:
 
 
 def build_release_manifest(
-    artifact: Path = ARTIFACT,
-    supply_chain: Path = SUPPLY_CHAIN,
+    artifact: Path | None = None,
+    supply_chain: Path | None = None,
     *,
     task_id: str = TASK_ID,
     workflow: str = WORKFLOW,
     qualified_inputs: Sequence[Path] = (),
     root: Path = ROOT,
 ) -> dict[str, Any]:
+    artifact = ARTIFACT if artifact is None else artifact
+    supply_chain = SUPPLY_CHAIN if supply_chain is None else supply_chain
+    _require_frozen_prerequisite(artifact)
     provider = load_json(supply_chain / "provider-manifest.json")
     fingerprint = load_json(supply_chain / "build-fingerprint.json")
     bundle = load_json(supply_chain / "bundle.json")
@@ -312,6 +322,74 @@ def _run(argv: Sequence[str], *, input_bytes: bytes | None = None) -> subprocess
     return result
 
 
+def verify_frozen_artifact(path: Path | None = None) -> dict[str, Any]:
+    """Accept only the exact unpublished M7-030 staging asset bytes."""
+    path = ARTIFACT if path is None else path
+    require(path.name == FROZEN_ARTIFACT_NAME, "FROZEN_ASSET_NAME", path.name)
+    require(path.is_file(), "FROZEN_ASSET_MISSING", path.name)
+    try:
+        size = path.stat().st_size
+        actual = evidence_digest.artifact_byte_sha256(path)
+    except OSError as error:
+        raise ReleaseError("FROZEN_ASSET_MISSING", path.name) from error
+    require(size == FROZEN_ARTIFACT_BYTES, "FROZEN_ASSET_SIZE", str(size))
+    require(evidence_digest.schema_artifact_sha256_equal(actual, FROZEN_ARTIFACT_SHA256),
+            "FROZEN_ASSET_DIGEST", actual)
+    return {
+        "decision": "PASS",
+        "taskId": TASK_ID,
+        "name": path.name,
+        "bytes": size,
+        "tag": FROZEN_ARTIFACT_TAG,
+        "repository": REPOSITORY,
+        "sha256": FROZEN_ARTIFACT_SHA256,
+    }
+
+
+def _download_command(directory: Path) -> list[str]:
+    return [
+        "gh", "release", "download", FROZEN_ARTIFACT_TAG, "--repo", REPOSITORY,
+        "--pattern", FROZEN_ARTIFACT_NAME, "--dir", str(directory),
+    ]
+
+
+def _run_download(argv: Sequence[str]) -> subprocess.CompletedProcess[bytes]:
+    try:
+        return subprocess.run(
+            argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            timeout=FROZEN_ARTIFACT_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ReleaseError("FROZEN_ASSET_DOWNLOAD", Path(argv[0]).name) from error
+
+
+def fetch_frozen_artifact(
+    target: Path | None = None,
+    *,
+    runner: Callable[[Sequence[str]], subprocess.CompletedProcess[bytes]] | None = None,
+) -> dict[str, Any]:
+    """Stage the frozen asset from its single draft Release, verified byte for byte."""
+    target = ARTIFACT if target is None else target
+    require(target.name == FROZEN_ARTIFACT_NAME, "FROZEN_ASSET_NAME", target.name)
+    if target.exists():
+        return {**verify_frozen_artifact(target), "mode": "verified-existing-artifact"}
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".m7-030-download-", dir=target.parent) as temporary:
+        directory = Path(temporary)
+        completed = (runner or _run_download)(_download_command(directory))
+        require(completed.returncode == 0,
+                "FROZEN_ASSET_DOWNLOAD", f"{FROZEN_ARTIFACT_TAG} exit {completed.returncode}")
+        detail = verify_frozen_artifact(directory / FROZEN_ARTIFACT_NAME)
+        (directory / FROZEN_ARTIFACT_NAME).replace(target)
+    return {**detail, "mode": "downloaded-and-verified-frozen-artifact"}
+
+
+def _require_frozen_prerequisite(artifact: Path) -> None:
+    """Fail closed before any local signing/update gate consumes the M7-030 artifact."""
+    if artifact == ARTIFACT:
+        verify_frozen_artifact(artifact)
+
+
 def public_key(private_key: Path) -> bytes:
     result = _run(["ssh-keygen", "-y", "-f", str(private_key)])
     require(result.returncode == 0, "SIGNING_KEY_INVALID", private_key.name)
@@ -382,10 +460,12 @@ def create_offline_bundle(
     trusted_public_key: Path,
     output: Path,
     *,
-    artifact: Path = ARTIFACT,
-    supply_chain: Path = SUPPLY_CHAIN,
+    artifact: Path | None = None,
+    supply_chain: Path | None = None,
     allow_temporary_key: bool = False,
 ) -> dict[str, Any]:
+    artifact = ARTIFACT if artifact is None else artifact
+    supply_chain = SUPPLY_CHAIN if supply_chain is None else supply_chain
     public = public_key(private_key) if allow_temporary_key else validate_signing_key(
         private_key, trusted_public_key, output
     )
@@ -423,9 +503,11 @@ def verify_offline_bundle(
     output: Path,
     public_key_path: Path,
     *,
-    artifact: Path = ARTIFACT,
-    sbom: Path = SBOM,
+    artifact: Path | None = None,
+    sbom: Path | None = None,
 ) -> dict[str, Any]:
+    artifact = ARTIFACT if artifact is None else artifact
+    sbom = SBOM if sbom is None else sbom
     public = public_key_path.read_bytes().strip() + b"\n"
     require(public.startswith(b"ssh-ed25519 "), "SIGNING_KEY_TYPE", "trusted key")
     manifest = load_json(output / "release-manifest.json")
@@ -685,8 +767,13 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
     }
 
 
-def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
-    text = path.read_text(encoding="utf-8")
+def workflow_text() -> str:
+    """Return the signer workflow source used by the default inspection."""
+    return (ROOT / WORKFLOW).read_text(encoding="utf-8")
+
+
+def inspect_workflow(path: Path | None = None) -> dict[str, Any]:
+    text = workflow_text() if path is None else path.read_text(encoding="utf-8")
     require(text.count("runs-on: ubuntu-latest") == 2,
             "WORKFLOW_RUNNER", "two GitHub-hosted Linux jobs required")
     require("permissions: {}" in text, "WORKFLOW_PERMISSION", "default token permissions disabled")
@@ -915,6 +1002,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
     manifest = subparsers.add_parser("manifest")
     manifest.add_argument("--output", type=Path, required=True)
+    fetch = subparsers.add_parser("fetch-frozen-artifact")
+    fetch.add_argument("--output", type=Path)
     rehearsal = subparsers.add_parser("rehearse")
     rehearsal.add_argument("--work-dir", type=Path, default=ROOT / "build/m7-030")
     rehearsal.add_argument("--output", type=Path, required=True)
@@ -940,6 +1029,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "manifest":
             atomic_json(args.output, build_release_manifest())
             result = {"decision": "PASS", "output": args.output.as_posix()}
+        elif args.command == "fetch-frozen-artifact":
+            result = fetch_frozen_artifact()
+            if args.output:
+                atomic_json(args.output, result)
         elif args.command == "rehearse":
             args.work_dir.mkdir(parents=True, exist_ok=True)
             result = local_rehearsal(args.work_dir)
@@ -968,7 +1061,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = {"schemaVersion": 1, "taskId": TASK_ID, "decision": decision,
                   "code": error.code, "detail": error.detail}
         output = getattr(args, "output", None)
-        if output:
+        if output and args.command not in SUCCESS_ONLY_OUTPUT_COMMANDS:
             atomic_json(output, report)
         print(json.dumps(report, sort_keys=True, separators=(",", ":")))
         return 2 if decision == "BLOCKED" else 1

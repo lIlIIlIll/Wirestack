@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import io
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -16,9 +17,95 @@ sys.path.insert(0, str(ROOT / "tools"))
 import m7_031_linux_candidate as candidate  # noqa: E402
 
 
+def status_table(statuses: dict[str, str]) -> str:
+    """Render a planning status table whose rows satisfy the candidate's parser."""
+    lines = ["| Task | Status | Evidence | Note |", "|---|---|---|---|"]
+    for task_id in candidate.DEPENDENCIES:
+        status = statuses.get(task_id, "COMPLETE")
+        lines.append(f"| {task_id} | {status} | [evidence](README.md) | note |")
+    return "\n".join(lines) + "\n"
+
+
+def status_cell(relative: str, task_id: str) -> str:
+    for line in (ROOT / relative).read_text(encoding="utf-8").splitlines():
+        if line.startswith(f"| {task_id} |"):
+            return line.strip().strip("|").split("|")[1].strip()
+    raise AssertionError(f"{task_id} is not declared in {relative}")
+
+
+class M7031DependencyReadinessTests(unittest.TestCase):
+    """Deterministic prerequisite check; runs even while the real gate is blocked."""
+
+    def root_with(self, statuses: dict[str, str]) -> Path:
+        directory = tempfile.mkdtemp(prefix="wirestack-m7-031-status-")
+        self.addCleanup(shutil.rmtree, directory, True)
+        root = Path(directory)
+        (root / "docs/planning").mkdir(parents=True)
+        (root / "docs/planning/status.md").write_text(
+            status_table(statuses), encoding="utf-8"
+        )
+        return root
+
+    def test_complete_prerequisites_are_ready(self) -> None:
+        root = self.root_with({})
+        self.assertEqual((), candidate.unmet_dependencies(root))
+        candidate.validate_dependency_status(root)
+
+    def test_unfinished_prerequisite_fails_closed_with_its_task_id(self) -> None:
+        for status in ("BLOCKED", "IN_PROGRESS", "READY"):
+            root = self.root_with({"M7-030": status})
+            self.assertEqual(("M7-030",), candidate.unmet_dependencies(root))
+            with self.assertRaisesRegex(candidate.CandidateError, r"DEPENDENCY_INCOMPLETE: M7-030"):
+                candidate.validate_dependency_status(root)
+
+    def test_absent_prerequisite_row_is_not_complete(self) -> None:
+        root = self.root_with({})
+        path = root / "docs/planning/status.md"
+        path.write_text(
+            "\n".join(
+                line for line in path.read_text(encoding="utf-8").splitlines()
+                if not line.startswith("| M7-030 |")
+            ) + "\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(("M7-030",), candidate.unmet_dependencies(root))
+
+    def test_repository_state_agrees_between_status_and_evidence(self) -> None:
+        declared = status_cell("docs/planning/status.md", "M7-031")
+        self.assertIn(declared, {"COMPLETE", "BLOCKED", "IN_PROGRESS", "READY"})
+        readme = (ROOT / "docs/evidence/M7-031/README.md").read_text(encoding="utf-8")
+        self.assertIn(f"Status: **{declared}**", readme)
+        self.assertIn(
+            f"| M7-031 Linux release candidate | {declared} |",
+            (ROOT / "docs/planning/linux-status.md").read_text(encoding="utf-8"),
+        )
+        unmet = candidate.unmet_dependencies(ROOT)
+        self.assertEqual(declared != "COMPLETE", bool(unmet))
+        for task_id in unmet:
+            self.assertIn(task_id, readme)
+
+    def test_current_receipts_are_bound_by_the_task_manifest(self) -> None:
+        manifest = json.loads(
+            (ROOT / "tools/tasks/M7-031.json").read_text(encoding="utf-8")
+        )
+        receipts = {
+            "docs/evidence/M7-031/task-check-current.json",
+            "docs/evidence/M7-031/evidence-check-current.json",
+        }
+        self.assertEqual(receipts, receipts & set(manifest["source_paths"]))
+        self.assertEqual(receipts, receipts & set(manifest["required_evidence"]))
+        for relative in sorted(receipts):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+
+
 class M7031LinuxCandidateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        unmet = candidate.unmet_dependencies(ROOT)
+        if unmet:
+            raise unittest.SkipTest(
+                "M7-031 prerequisites are not COMPLETE: " + ", ".join(unmet)
+            )
         cls.original_documents = candidate.load_documents(ROOT)
         cls.documents = copy.deepcopy(cls.original_documents)
         for subject in cls.documents["m7_030_hosted"]["subjects"]:
