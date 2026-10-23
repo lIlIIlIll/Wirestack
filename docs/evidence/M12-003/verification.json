@@ -3,7 +3,20 @@
   "status": "BLOCKED",
   "canonical_task_gate": {
     "status": "NOT_PUBLISHED",
-    "reason": "The only task-gate receipt is historical: it passed before review fixes changed tools/gates/m12_003_network.py, so it is not current validation. Regenerate docs/gates/M12-003-task.json with scripts/check-task M12-003 --json --output docs/gates/M12-003-task.json only after a current-bound campaign PASS.",
+    "reason": "The only task-gate receipt is historical: it passed before review fixes changed tools/gates/m12_003_network.py, so it is not current validation. Current source-bound campaign verification exits 1, and the repository-wide task precheck is INVALID because M10-004 depends on incomplete M10-003. Do not publish a canonical report until the current campaign passes and a no-output task precheck returns PASS.",
+    "prepublication_check": {
+      "checked_commit": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+      "command": "python3 tools/repository/repository_tooling.py --root . check task M12-003 --json",
+      "exit_status": 2,
+      "status": "INVALID",
+      "commands": [],
+      "issues": [
+        {
+          "code": "DEPENDENCY_INCOMPLETE",
+          "detail": "M10-004 dependency is not COMPLETE: M10-003"
+        }
+      ]
+    },
     "historical_receipt": "historical/task-gate-2026-10-09.json",
     "historical_receipt_status": "PASS on 2026-10-09, superseded",
     "historical_receipt_byte_exact": true
