@@ -115,6 +115,33 @@ The Unix artifacts expire on 2026-11-30. The Windows artifacts expire on
 license payload, matrix digest, normalized build provenance, or source
 identity.
 
+## Current hosted failures
+
+Both hosted provider workflows currently fail by policy, not by an
+infrastructure error. On head `5550cd4a`:
+
+- `TLS Provider PoC` run `39757514924` failed `linux-glibc (mbedtls)`,
+  `linux-musl (mbedtls)`, `macos-arm64 (mbedtls)`, `linux-glibc (openssl)`,
+  `linux-musl (openssl)` and `macos-arm64 (openssl)`; the three AWS-LC jobs and
+  `validate-contract` passed.
+- `M0-016 Windows Provider PoC` run `39757514700` failed
+  `windows-x86-64 (mbedtls)` and `windows-x86-64 (openssl)`;
+  `windows-x86-64 (aws-lc)` passed.
+
+Every failing job ends with
+`M0-016 validation: FAIL: known affected provider pin blocks promotion`, which
+is the intended fail-closed result: Mbed TLS 4.2.0 and OpenSSL 3.6.4 are
+`affected` by the reviewed advisories, so no PoC result for them may be
+promoted. These jobs cannot pass until the pins move to fixed releases, which
+this task does not do. The failure is not suppressed and no provider is
+claimed to pass.
+
+`tools/tasks/M0-016.json` does not exist. It is not added: the repository's
+unscoped `validate-tasks` gate would then gain a new
+`M0-017 -> M0-016` incomplete-dependency edge, and M0-016 has no sealed
+`evidence.json` acceptance index to declare. The advisory review is instead
+machine-checked by `validate_advisory_review` above.
+
 ## Pinned sources
 
 | Provider | Version | Source identity |
@@ -136,14 +163,26 @@ repository root:
 
     python3 -m unittest tools.tests.test_tls_provider_poc
 
-Matrix validation checks the contract and every retained cell. A cell that
-still claims PASS or PARTIAL rehashes its retained result, license manifest,
-and license files, and rejects missing files, path escape, digest drift,
-unsupported schema, stale execution revision, skipped diagnostics presented as
-PASS, an incomplete capability set presented as PASS, and a retained result
-whose bound `security_update` object no longer matches the reviewed
-disposition. Because every desktop cell is currently `BLOCKED`, the retained
-results are checked only when a cell re-promotes them.
+Matrix validation checks the contract and every retained cell. Every cell that
+still has a retained artifact keeps that result, its SHA-256 and its
+license-bundle manifest binding even while it is `BLOCKED`, so a deleted or
+corrupted historical artifact is detected immediately. A `BLOCKED` cell may
+not drop a binding it previously had, and a cell with no artifact may not
+claim one.
+
+A promoted cell (PASS or PARTIAL) additionally reruns the full result contract:
+missing files, path escape, digest drift, unsupported schema, stale execution
+revision, skipped diagnostics presented as PASS, an incomplete capability set
+presented as PASS, a bound `security_update` object that no longer matches the
+reviewed disposition, and a known affected provider pin are all rejected.
+
+`validate_advisory_review` binds
+[`advisory-review-2026-10-22.json`](advisory-review-2026-10-22.json) to
+`providers.json` and this matrix by digest. It checks per-provider pin, version
+and archive identity, the disposition status and affected sets against
+`providers.json`, that the AWS-LC ancestry proof covers every advisory fix tag
+with `behind=0`, and that the superseded-cell list equals the matrix's retained
+cells exactly.
 
 ## Evidence rules
 
