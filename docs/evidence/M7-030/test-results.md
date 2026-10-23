@@ -103,24 +103,28 @@ signing or update work: `scripts/check-m7-030-release` first stages
 2,499,451-byte length or `c0988f62…` SHA-256 differs, or when the pinned draft
 Release cannot supply it.
 
-Two of the six acceptance commands are red and one cannot be evaluated:
+The task check runs all six acceptance commands and returns FAIL. Two are red
+and four pass:
 
 | Command | Current result |
 |---|---|
 | `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
-| `signing-update-fault-injection` | PASS; 19/19 `python3 -m unittest tools.tests.test_m7_030_linux_release` in the worktree and in a clean `git archive` export that has no `dist/` directory. |
+| `signing-update-fault-injection` | PASS; `python3 -m unittest tools.tests.test_m7_030_linux_release` in the worktree and in a clean `git archive` export that has no `dist/` directory. The suite now also covers receipt preservation for download failure, size mismatch and digest mismatch. |
 | `supply-chain-inputs` | FAIL exit 1, `generator fingerprint is stale`: recorded `42e064cf…` versus current `b7a15290…`. M11-002 (`0a3161e5`) changed `tools/m7_025_linux_supply_chain.py` after the M7-025 evidence was frozen; regenerating that bundle is M7-025 work. |
 | `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
-| `local-signing-update-rehearsal` | PASS as `REHEARSAL` with `verified-existing-artifact`, but `productionAttestation` now records `{"decision": "FAIL", "detail": "HOSTED_REPORT_SUBJECT"}` instead of the inherited historical PASS. |
+| `local-signing-update-rehearsal` | PASS as `REHEARSAL`, but `productionAttestation` now records `{"decision": "FAIL", "detail": "HOSTED_REPORT_SUBJECT"}` instead of the inherited historical PASS. The command itself does not record which staging mode it used; the committed receipt's mode is stated separately below. |
 | `github-hosted-attestations` | FAIL exit 1, `HOSTED_REPORT_SUBJECT`: the committed report predates the required `signedPayloadSha256` subject field, and the workflow is retired with M8-007 as the active signer. |
 
-`scripts/check-task M7-030 --json` cannot produce a receipt: the repository-wide
-readiness check reports `DEPENDENCY_INCOMPLETE` on the unrelated
-`M10-004 → M10-003` edge until P1-012 scopes dependency validation to the
-requested task closure. M7-030's own dependencies M7-022, M7-025 and M7-029 are
-COMPLETE. On the stacked branch the scoped run does produce a receipt and
-reports `status: FAIL` with exactly the two failing commands above and
-`issues: []`.
+On this stacked branch, where P1-012 scopes dependency validation to the
+requested task closure, `scripts/check-task M7-030 --json` runs all six commands
+and reports `status: FAIL` with exactly the two failing commands above and
+`issues: []`. The unscoped repository-wide readiness check still reports
+`DEPENDENCY_INCOMPLETE` on the unrelated `M10-004 → M10-003` edge. M7-030's own
+dependencies M7-022, M7-025 and M7-029 are COMPLETE. In a fresh clean checkout
+with no `dist/` directory, `supply-chain-inputs` fails earlier with
+`release artifact is absent`, before any fingerprint comparison: the
+`--validate-only` mode has no artifact to inspect. The stale-generator
+diagnosis above applies only once a staged artifact is present.
 
 Marking this task BLOCKED also propagates to M7-031, which lists M7-030 as a
 dependency and whose `validate_dependency_status` requires
@@ -137,13 +141,22 @@ record was not supported by its own gate before this change. M7-031's row,
 tooling and evidence stay untouched here because they are outside this task's
 `allowed_paths`.
 
-Running the gate rewrites two committed reports as a side effect:
-`local-rehearsal.json` and `hosted-validation.json` are regenerated in place, so
-after a run the working tree shows those two files modified even though the
-rehearsal and hosted verdicts are unchanged in kind. Neither file is updated
-here; both keep the bytes committed on 2026-08-30, which is what the historical
-record documents. A future passing run should regenerate them deliberately
-rather than let a failing acceptance run overwrite the record.
+Running the gate has three evidence-report side effects, not two. Before this
+change it regenerated `frozen-artifact.json`, `local-rehearsal.json` and
+`hosted-validation.json` in place, so after a run the working tree showed all
+three files modified even though the rehearsal and hosted verdicts were
+unchanged in kind. None of the three is rewritten here. `local-rehearsal.json` and
+`hosted-validation.json` keep their 2026-08-30 bytes, and
+`frozen-artifact.json` keeps the receipt first committed on 2026-10-22, which is
+what the historical record documents. The gate
+script now stages its receipt under the Git-ignored `build/m7-030/` directory
+instead of `docs/evidence/M7-030/frozen-artifact.json`, and the tool refuses to
+write a failure payload to that receipt at all, so a failed staging or digest
+check can no longer replace the committed PASS receipt; the two remaining
+in-place evidence rewrites are `local-rehearsal.json` and
+`hosted-validation.json`. The receipt is also listed in the task manifest's
+`source_paths` and `required_evidence`, so its deletion or tampering is detected
+rather than silently accepted.
 
 ## Unit-test isolation (2026-10-22)
 
@@ -197,12 +210,21 @@ github-hosted-attestations        FAIL
 status FAIL, issues []
 ```
 
-`frozen-artifact.json` from that run records
-`"mode": "downloaded-and-verified-frozen-artifact"` with the pinned bytes and
-`c0988f62…` digest, so the fail-closed prerequisite really does reach the draft
-Release instead of trusting a pre-existing file. The two FAIL rows are the
-M7-025 fingerprint drift and the retired hosted report already described above;
-neither is affected by test isolation.
+That export has no `dist/` directory, so the supply-chain command in it fails
+before any fingerprint or digest comparison: `scripts/generate-m7-025-linux-
+supply-chain --validate-only` reports `release artifact is absent`. The
+stale-generator-fingerprint FAIL described above is what a tree with a staged
+artifact reports instead; the two are different failure points and are not
+interchangeable.
+
+The receipt committed in this branch records
+`"mode": "verified-existing-artifact"`, not a download. No current captured
+receipt shows `downloaded-and-verified-frozen-artifact`, so that mode is not
+claimed here: the committed receipt documents verification of an already present
+artifact, and any future download-mode capture must be committed as its own
+report rather than inferred from this one. The fail-closed staging logic itself
+is exercised only by the injected-runner unit tests, which assert that a failed
+download, a wrong-size payload and a digest mismatch each publish nothing.
 
 ## Gates not run
 
