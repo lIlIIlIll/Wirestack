@@ -32,7 +32,8 @@
     "generator_sha256": "e33251dbeba4a0eb5852a8431e219265bb3c0bf30b8b1e11eff8768da552dc34"
   },
   "task_gate": {
-    "command": "DISABLE_ZOXIDE=1 scripts/check-task M7-032 --json --output docs/evidence/M7-032/task-check.json",
+    "command": "env TMPDIR=<task-temp> TMP=<task-temp> TEMP=<task-temp> DISABLE_ZOXIDE=1 WIRESTACK_AWS_LC_SOURCE=<verified-AWS-LC-source> codex_cangjie_env --sdk-root <STS-1.1.3-SDK> --cwd <repo> scripts/check-task M7-032 --json --output <task-temp>/task-check.fourth.json",
+    "sanitized_receipt": "docs/evidence/M7-032/task-check.json",
     "exit_code": 0,
     "status": "PASS",
     "candidate_scope": "Stacked source with P1-012 (#220) and M10-004 (#230) parent changes applied; not standalone PR #221 against main.",
