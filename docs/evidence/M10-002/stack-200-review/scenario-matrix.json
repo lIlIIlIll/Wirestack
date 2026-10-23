@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.1.3",
+    "cjpm": "1.1.3"
+  },
+  "status": "BLOCKED",
+  "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
+  "acceptance_scenarios": [
+    {
+      "id": "owner-budget-and-snapshot",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "Instance, route, origin, connection, request, stream, and managed-buffer limits use real owners, and snapshots separate active, reserved, and managed-buffer counts.",
+      "coverage": [
+        "src/http/facade_test.cj",
+        "src/internal/http_resource_budget.cj",
+        "src/internal/http1/pool_key_test.cj",
+        "src/internal/http2/observability_test.cj",
+        "src/internal/http2/server_mapping_test.cj",
+        "classicConnectWithoutSchemeUsesTlsTransportOwner",
+        "classicConnectResourceOwnerUsesTheTransportScheme"
+      ]
+    },
+    {
+      "id": "bounded-fair-admission",
+      "status": "PASS_CURRENT_RUN_WITH_PRIOR_INTERMITTENT_FAILURE",
+      "criterion": "Capacity waits are bounded by OperationContext, fair across owners, and do not retain unrelated resources while blocked.",
+      "coverage": [
+        "src/internal/http1/pool_admission.cj",
+        "src/internal/http1/connection_pool.cj",
+        "src/internal/http2/write_scheduler_test.cj",
+        "src/internal/http2/server_mapping_test.cj"
+      ],
+      "note": "The current full native run on e72bbb3c8a10670b716dcf263cdafff052102b84 passed 1,082/1,110 with 28 skips. An earlier run timed out in Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill; its isolated case passed. That pool case is outside the Q4 source changes."
+    },
+    {
+      "id": "q4-buffer-before-flow-permit",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "Outbound DATA admission caps the requested frame to current stream flow credit before waiting for a managed-buffer lease; a blocked buffer wait holds no flow permit, credit is rechecked after acquisition, and a shrunk-credit lease is released before retry. A fast-path permit retains the caller OperationContext for backpressure events after a SETTINGS shrink. If the configured route/origin cap cannot satisfy the 10-byte minimum, reject before cancellation registration, waiter creation, or owner allocation; exact 10-byte capacity succeeds.",
+      "coverage": [
+        "blockedOutboundDataBufferWaitDoesNotHoldFlowPermit",
+        "blockedFlowPermitWaitDoesNotRetainManagedBufferLease",
+        "cancelledOutboundDataBufferWaitReleasesAllAdmissionState",
+        "deadlineOutboundDataBufferWaitReleasesAllAdmissionState",
+        "fullWriteQueueReleasesOutboundDataPermitAndBufferLease",
+        "shrunkFlowCreditReleasesOversizedLeaseAndRetriesExactDataSize",
+        "dataSourceIsSlicedBeforeWaitingForOwnerBufferLease",
+        "zeroFlowCreditDoesNotHoldADataBufferWhileWaitingForPermit",
+        "closingStreamCancelsItsPendingDataBufferWaiter",
+        "closingFlowControllerCancelsItsPendingDataBufferWaiter",
+        "partialFlowAdmissionLeavesUnsentServerBytesStaged",
+        "dataLeaseIsSizedByCurrentFlowCreditBeforeOwnerWait",
+        "pendingDataBufferAdmissionRechecksShrunkFlowCredit",
+        "impossibleDataBufferMinimumDoesNotRegisterWaiter",
+        "q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall"
+      ]
+    },
+    {
+      "id": "exact-once-lifecycle-cleanup",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "Cancellation, deadline, factory failure, RST, GOAWAY, body close, and shutdown release ownership once and return snapshots to the expected steady state.",
+      "coverage": [
+        "src/internal/http2/server_cancellation_test.cj",
+        "src/internal/http2/server_push_lifecycle_test.cj",
+        "src/internal/http2/client_connection_test.cj",
+        "src/internal/http2/server_mapping_test.cj",
+        "src/internal/http1/client_pipeline_test.cj",
+        "src/internal/http1/http2_connection_pool_test.cj"
+      ]
+    },
+    {
+      "id": "control-progress-under-data-stall",
+      "status": "PASS_CURRENT_FULL_SUITE",
+      "criterion": "HTTP/2 control frames continue to make progress while DATA is flow-control stalled, without violating bounded queue or control-reserve limits.",
+      "coverage": [
+        "src/internal/http2/write_scheduler_test.cj",
+        "src/internal/http2/flow_control_test.cj",
+        "src/internal/http2/client_connection_test.cj"
+      ]
+    },
+    {
+      "id": "resource-limited-regression",
+      "status": "PASS_ALL_PROFILES",
+      "criterion": "Native HTTP/2 regression scenarios pass with constrained file descriptors, data/address space, and one CPU; deterministic test refusal is not represented as an OOM kill.",
+      "profiles": [
+        "RLIMIT_NOFILE=64: 218 passed, 0 skipped, 0 errors, 0 failed",
+        "RLIMIT_DATA=1 GiB: 218 passed, 0 skipped, 0 errors, 0 failed",
+        "RLIMIT_AS=4 GiB: 218 passed, 0 skipped, 0 errors, 0 failed",
+        "CPU affinity=0: 218 passed, 0 skipped, 0 errors, 0 failed on the first attempt"
+      ]
+    },
+    {
+      "id": "current-toolchain-build-test-docs",
+      "status": "BLOCKED_REPOSITORY_AND_TASK_GATES",
+      "criterion": "Current source passes pinned SDK check/build, full native regression, and strict documentation; repository-wide and task-dependency gates remain blocked.",
+      "coverage": [
+        "cjpm check",
+        "cjpm build",
+        "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+        "scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+        "scripts/check",
+        "python3 tools/repository/repository_tooling.py --root . check task M10-002 --json"
+      ],
+      "note": "On source revision e72bbb3c8a10670b716dcf263cdafff052102b84, cjpm check/build, the full native suite (1,082/1,110; 28 skipped), strict docs (1,873/1,873 symbols; 950/950 parameters), and all four HTTP/2 profiles (218/218) passed. `scripts/check` failed with 25 failures, 16 errors, and 4 skips in the initial tooling stage; the targeted reproduction at evidence head b872f1b8304a16a769a517efa8cdf566e20ff963 ran 122 tests and reproduced 25 failures and 16 errors. The published #216 validator is INVALID on global M10-004 → M10-003 readiness. The scoped validator from #220 also returns INVALID/DEPENDENCY_INCOMPLETE on M10-002 → M9-001 → P1-015 → P1-013 → P1-012 because it sees P1-012 as not COMPLETE despite both P1-012 and P1-013 being labelled COMPLETE in the planning status; zero M10-002 commands ran. Current PR-head workflows passed except `Deploy latest main documentation` was skipped. No installed-consumer or native capability qualification is claimed."
+    }
+  ],
+  "review": {
+    "revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+    "reviewed_pr_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
+    "result": "NO_FINDINGS_ON_EXACT_PUBLISHED_HEAD",
+    "reviewers": ["Q4PermitReview", "Q4EvidenceBindingReview", "M10-002 draft PR re-review"],
+    "note": "The earlier Q4 reviewers assessed revision 5d6b2c7358e08169ede6198b472b37d773e017d. After their fixes, an independent read-only subagent reviewed exact PR #216 head e6590ee111449977fb732edaf42164ffb7c265a3 and reported no findings."
+  },
+  "evidence_policy": "This matrix is bound to the committed source revision above. verification.json records exact acceptance commands, exit codes, outcomes, toolchain, platform, and current blockers. Historical SDK 1.3 smoke evidence is not used as current acceptance evidence."
+}

@@ -1,0 +1,521 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+  "status": "BLOCKED",
+  "acceptance_status": "BLOCKED",
+  "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie": "1.1.3",
+    "cjpm": "1.1.3",
+    "cjdoc": "0.7.2"
+  },
+  "checks": [
+    {
+      "id": "architecture-guard",
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "architecture guard: PASS"
+    },
+    {
+      "id": "network-capability-contract",
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "Contract check PASS; source_task M9-003; native NOT_RUN. This is not native platform qualification."
+    },
+    {
+      "id": "cjpm-check",
+      "command": "cjpm check",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "cjpm check success"
+    },
+    {
+      "id": "cjpm-build",
+      "command": "cjpm build",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "cjpm build success; compiler emitted unreachable-block warnings, with no build errors."
+    },
+    {
+      "id": "full-native-regression",
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 1110,
+      "passed": 1082,
+      "skipped": 28,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "impossible-data-buffer-minimum-regression",
+      "command": "cjpm test --filter='HttpResourceBudgetTest.impossibleDataBufferMinimumDoesNotRegisterWaiter' --parallel 1 --no-progress --no-color src/internal",
+      "pre_fix": {
+        "source_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e",
+        "exit_code": 1,
+        "total": 16,
+        "passed": 0,
+        "skipped": 15,
+        "errors": 0,
+        "failed": 1,
+        "result": "With the regression test added to the working tree while implementation remained at 2eb92251a0a600c974dc6c59b2313c806e660e5e, both route-cap=9 and origin-cap=9 timed out instead of rejecting; highWaterAdmissionWaiters became 1 and rejectedOperations remained 0."
+      },
+      "post_fix": {
+        "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+        "exit_code": 0,
+        "total": 16,
+        "passed": 1,
+        "skipped": 15,
+        "errors": 0,
+        "failed": 0,
+        "result": "Both impossible minima reject immediately with no waiter or owner; exact 10-byte capacity acquires and releases successfully."
+      }
+    },
+    {
+      "id": "q4-fast-path-observation-context-regression",
+      "command": "cjpm test --filter='Http2WriteSchedulerTest.q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall' --parallel 1 --no-progress --no-color src/internal/http2",
+      "pre_fix": {
+        "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+        "exit_code": 1,
+        "total": 216,
+        "passed": 0,
+        "skipped": 215,
+        "errors": 0,
+        "failed": 1,
+        "result": "After a peer SETTINGS shrink stalled the queued DATA write, the background writer emitted no caller-correlated backpressure events."
+      },
+      "post_fix": {
+        "source_revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+        "exit_code": 0,
+        "total": 216,
+        "passed": 1,
+        "skipped": 215,
+        "errors": 0,
+        "failed": 0,
+        "result": "Backpressure start/completion events retained the caller trace, request, attempt, connection, stream, and RequestWrite stage; the permit and managed-buffer bytes returned to zero."
+      }
+    },
+    {
+      "id": "resource-profile-nofile-64",
+      "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 218,
+      "passed": 218,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-data-1g",
+      "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 218,
+      "passed": 218,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-as-4g",
+      "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 218,
+      "passed": 218,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-single-cpu",
+      "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 218,
+      "passed": 218,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "documentation-check",
+      "command": "env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "exit_code": 0,
+      "status": "PASS",
+      "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "cjdoc": "0.7.2",
+      "combined": {
+        "status": "PASS",
+        "symbols": {
+          "documented": 1873,
+          "total": 1873
+        },
+        "parameters": {
+          "documented": 950,
+          "total": 950
+        },
+        "docs_sha256": "5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099"
+      },
+      "note": "All seven layers and the combined API report passed. The check produced a reserialized docs.json; that generated format-only worktree change was restored because the public API is unchanged."
+    },
+    {
+      "id": "repository-check",
+      "command": "scripts/check",
+      "exit_code": 1,
+      "status": "FAIL",
+      "tests_total": 584,
+      "failures": 25,
+      "errors": 16,
+      "skipped": 4,
+      "failure_families": [
+        "stale AWS-LC advisory disposition in provider validation",
+        "M3-031 desktop-provider fixture and expected error-code mismatches",
+        "M7-030 release/evidence-digest errors",
+        "M12-002 platform-support source mismatch",
+        "M7 task-graph expectation drift"
+      ],
+      "note": "Re-run after the P1-012 CLI regression update. The gate still fails in the initial tooling unittest stage before scripts/check-code; the same five unrelated owner families remain. No stale security disposition, historical artifact, task-status, or foreign-task fixture was rewritten."
+    }
+  ],
+  "repository_check_diagnostic": "docs/evidence/M10-002/stack-200-review/repository-check-diagnostic.json",
+  "task_gate": {
+    "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current.json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json",
+    "issues": [
+      {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "P1-013 dependency is not COMPLETE: P1-012"
+      }
+    ],
+    "shared_validator_revision": "e33894a6f1fab9fdb257104c580ba92b3076a5d9",
+    "note": "The scoped-readiness check was run in the combined workspace with P1-012 revision e33894a6f1fab9fdb257104c580ba92b3076a5d9. The published #216 validator preflights the unrelated global M10-004 -> M10-003 edge; the scoped validator avoids that rejection but returns DEPENDENCY_INCOMPLETE on M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012 because it sees P1-012 as not COMPLETE, despite docs/planning/status.md listing P1-012 and P1-013 as COMPLETE. This task-status/gate mismatch and global readiness edge require reconciliation by their owners. No M10-002 acceptance command ran. The shared-validator change is in draft PR #220 and is not integrated into published PR #216; no task-gate PASS is claimed."
+  },
+  "github_ci": {
+    "initial_clean_build": {
+      "run_id": 39448838666,
+      "head_sha": "b031cfd545e375b3a13f747c8eafe616bee5309e",
+      "status": "FAIL",
+      "failed_step": "Reject build-time source-tree mutation",
+      "finding": "The committed docs/api/generated/docs.json did not match the exact pinned CI CJDoc generator output.",
+      "resolved_in_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e"
+    },
+    "previous_published_head": [
+      {
+        "run_id": 39400213874,
+        "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
+        "workflow": "Clean Cangjie Build",
+        "status": "PASS",
+        "result": "Historical current-source build/test gate, installed public consumer, and source-tree mutation rejection passed on that earlier revision.",
+        "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400213874"
+      },
+      {
+        "run_id": 39400212565,
+        "head_sha": "3638eb49be6b4dad3ef018ec3c6d4440ee0ceee1",
+        "workflow": "M7-033 Developer Documentation",
+        "status": "PASS",
+        "result": "Historical strict documentation gate and public clean consumer passed on that earlier revision.",
+        "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39400212565"
+      }
+    ],
+    "previous_candidate_head_ci": {
+      "source_revision": "2eb92251a0a600c974dc6c59b2313c806e660e5e",
+      "runs": [
+        {
+          "run_id": 39458729218,
+          "workflow": "Clean Cangjie Build",
+          "status": "FAIL",
+          "result": "Run current-source build and test gate failed.",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39458729218"
+        },
+        {
+          "run_id": 39458729333,
+          "workflow": "M7-033 Developer Documentation",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39458729333"
+        },
+        {
+          "run_id": 39458729178,
+          "workflow": "Threat Model",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729332,
+          "workflow": "Architecture Guard",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729109,
+          "workflow": "NET01",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458728958,
+          "workflow": "NET02",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729240,
+          "workflow": "NET03",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729253,
+          "workflow": "Gate Harness",
+          "status": "PASS"
+        },
+        {
+          "run_id": 39458729057,
+          "workflow": "DNS Carrier Thread",
+          "status": "PASS"
+        }
+      ]
+    },
+    "previous_pushed_head_ci": {
+      "source_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+      "status": "PASS",
+      "runs": [
+        {
+          "run_id": 39468864351,
+          "workflow": "DNS Carrier Thread Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864351"
+        },
+        {
+          "run_id": 39468864648,
+          "workflow": "NET-03 Absolute Deadline Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864648"
+        },
+        {
+          "run_id": 39468864636,
+          "workflow": "Threat Model",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864636"
+        },
+        {
+          "run_id": 39468864424,
+          "workflow": "NET-01 Close Wakeup Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864424"
+        },
+        {
+          "run_id": 39468864628,
+          "workflow": "Gate Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864628"
+        },
+        {
+          "run_id": 39468864638,
+          "workflow": "Architecture Guard",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864638"
+        },
+        {
+          "run_id": 39468865010,
+          "workflow": "NET-02 Full Duplex and Race Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468865010"
+        },
+        {
+          "run_id": 39468864649,
+          "workflow": "Clean Cangjie Build",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864649"
+        },
+        {
+          "run_id": 39468864637,
+          "workflow": "M7-033 Developer Documentation",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468864637"
+        },
+        {
+          "run_id": 39468856823,
+          "workflow": "PR #216",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39468856823"
+        }
+      ],
+      "note": "All 10 GitHub Actions workflows completed successfully on the exact pushed source revision."
+    },
+    "current_candidate_ci": {
+      "source_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+      "head_sha": "e6590ee111449977fb732edaf42164ffb7c265a3",
+      "status": "PASS",
+      "runs": [
+        {
+          "run_id": 39536638119,
+          "workflow": "NET-02 Full Duplex and Race Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638119"
+        },
+        {
+          "run_id": 39536638097,
+          "workflow": "Gate Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638097"
+        },
+        {
+          "run_id": 39536638069,
+          "workflow": "NET-03 Absolute Deadline Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638069"
+        },
+        {
+          "run_id": 39536638115,
+          "workflow": "DNS Carrier Thread Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638115"
+        },
+        {
+          "run_id": 39536638085,
+          "workflow": "Threat Model",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638085"
+        },
+        {
+          "run_id": 39536638090,
+          "workflow": "NET-01 Close Wakeup Harness",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638090"
+        },
+        {
+          "run_id": 39536638086,
+          "workflow": "Architecture Guard",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638086"
+        },
+        {
+          "run_id": 39536638095,
+          "workflow": "M7-033 Developer Documentation",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638095"
+        },
+        {
+          "run_id": 39536638059,
+          "workflow": "Clean Cangjie Build",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536638059"
+        },
+        {
+          "run_id": 39536634268,
+          "workflow": "PR #216",
+          "status": "PASS",
+          "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39536634268"
+        }
+      ],
+      "note": "All 10 workflows passed on exact published PR head e6590ee111449977fb732edaf42164ffb7c265a3. This head includes source commit e72bbb3c8a10670b716dcf263cdafff052102b84 and the refreshed acceptance evidence commit."
+    }
+  },
+  "review": {
+    "reviewed_revision": "5d6b2c7358e08169ede6198b472b37d773e017d",
+    "baseline_revision": "e82743ee2bfa16ee6160d3e0236d340cf2ad0b87",
+    "result": "TWO_FINDINGS_FIXED_NO_NEW_FINDINGS",
+    "method": "Independent read-only subagents Q4PermitReview and Q4EvidenceBindingReview inspected the exact fixed source, test, and task-manifest diff. Neither ran builds or tests; both reported no new findings.",
+    "findings": [
+      {
+        "severity": "P2",
+        "file": "src/internal/http2/write_scheduler.cj",
+        "finding": "The tryReserveSend fast path did not retain the caller OperationContext on its flow-control permit. After a peer SETTINGS shrink, the background writer emitted backpressure events without the caller's observation identifiers.",
+        "resolution": "When the caller context has an event sink, associate it with the fast-path permit before transferring the buffer lease. This matches reserveSend's fallback behavior.",
+        "regression_test": "q4FastPathPermitRetainsCallerObservationContextAfterSettingsStall"
+      },
+      {
+        "severity": "P2",
+        "file": "tools/tasks/M10-002.json",
+        "finding": "The HTTP resource-budget test file was missing from the M10-002 allowed_paths and source_paths inventories.",
+        "resolution": "Added src/internal/http_resource_budget_test.cj to both inventories."
+      }
+    ]
+  },
+  "all_draft_review": {
+    "status": "NO_FINDINGS",
+    "reviews": [
+      {
+        "pr": 215,
+        "head_sha": "2a04a1c1fa2fc2bdc8d6433aac6f253004b4f81d",
+        "result": "NO_FINDINGS"
+      },
+      {
+        "pr": 216,
+        "head_sha": "e6590ee111449977fb732edaf42164ffb7c265a3",
+        "result": "NO_FINDINGS"
+      },
+      {
+        "pr": 220,
+        "head_sha": "a1dd89c4364de272d4ff79e3332ed9e6bb340475",
+        "result": "NO_FINDINGS"
+      },
+      {
+        "pr": 221,
+        "head_sha": "e76c3ba4301472fd2272aed3a96e7dc64dac5bf6",
+        "result": "NO_FINDINGS"
+      }
+    ],
+    "method": "Four independent read-only subagents reviewed the exact heads of all open draft PRs. No new findings were reported."
+  },
+  "pr_description": {
+    "status": "UPDATED",
+    "reviewed_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
+    "head_source_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+    "body_status": "CURRENT",
+    "base_branch": "fix/M10-001-terminal-deadline-checks",
+    "draft": true,
+    "reason": "Refreshed through authenticated GitHub CLI with current repository and task-gate results, current blocker ownership, exact evidence links, and explicit separation of #216 from the shared validator in #220.",
+    "next_action": "Keep #216 OPEN and DRAFT while repository and task-gate blockers remain. M10-003/#175 remains open and not ready."
+  },
+  "full_suite_stability": {
+    "earlier_run": {
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 1,
+      "total": 1099,
+      "passed": 1070,
+      "skipped": 28,
+      "errors": 1,
+      "failed": 0,
+      "error": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill timed out awaiting cross-origin refill; stderr reported HTTP/2 connection pool closed."
+    },
+    "isolated_case": {
+      "command": "cjpm test --filter='Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill' --parallel 1 --no-progress --no-color src/internal/http1",
+      "exit_code": 0,
+      "total": 170,
+      "passed": 1,
+      "skipped": 169,
+      "errors": 0,
+      "failed": 0
+    },
+    "interpretation": "The current complete native run on e72bbb3c8a10670b716dcf263cdafff052102b84 passed 1,082/1,110 with 28 skips and no errors or failures. All four HTTP/2 resource profiles passed 218/218 on the first attempt. Earlier full-suite pool-fairness and CPU-affinity failures remain historical stability risks; the isolated/retry outcomes are recorded above."
+  },
+  "noncanonical_attempts": [
+    {
+      "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2 with an extra cjHeapSize=1GB override",
+      "exit_code": 134,
+      "status": "FAILED_BEFORE_TESTS",
+      "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The earlier manifest-equivalent run with the default heap passed 213/213; this noncanonical attempt is not counted as acceptance evidence."
+    }
+  ],
+  "intermediate_regression_run": {
+    "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+    "exit_code": 1,
+    "status": "FAILED_THEN_FIXED",
+    "total": 1104,
+    "passed": 1073,
+    "skipped": 28,
+    "errors": 3,
+    "failed": 0,
+    "result": "Three scheduler cases initially exhausted their test resource budget because the test limits reserved the full inbound connection-window allowance. The test budgets were corrected. The subsequent e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 run passed 1,079/1,107, the 5d6b2c7358e08169ede6198b472b37d773e017d run passed 1,080/1,108, and the current e72bbb3c8a10670b716dcf263cdafff052102b84 run passed 1,082/1,110."
+  },
+  "decision": {
+    "task_status": "BLOCKED",
+    "pr_216": "Remain OPEN and DRAFT. Q4 source is e72bbb3c8a10670b716dcf263cdafff052102b84. All 10 workflows passed on source-bearing head 02699b42892e2a2b0b67042b60552fc742422f54; evidence-only PR-head checks are reported in the PR description. Refreshed scripts/check and task-gate blockers remain; do not mark ready.",
+    "issue_174": "Remains open and untouched.",
+    "m10_003_issue_175": "Remains open, not ready, and not started or modified because M10-002 remains BLOCKED."
+  }
+}

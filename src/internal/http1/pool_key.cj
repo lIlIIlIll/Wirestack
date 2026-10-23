@@ -2,6 +2,8 @@ package wirestack.internal.http1
 
 import wirestack.internal as internal
 
+internal const HTTP_PROXY_AUTHENTICATED_NO_REUSE_SUFFIX: String = "|authenticated-no-reuse"
+
 /** Complete security and routing partition key for HTTP connection reuse. */
 public struct HttpConnectionPoolKey <: Equatable<HttpConnectionPoolKey> & Hashable {
     public let scheme: String
@@ -82,7 +84,13 @@ public struct HttpConnectionPoolKey <: Equatable<HttpConnectionPoolKey> & Hashab
 /** Stable aggregate-budget owner shared by every protocol pool for this route. */
 public func httpResourceOwnerForPoolKey(key: HttpConnectionPoolKey): internal.HttpResourceOwnerKey {
     let route = match (key.proxyRoute) {
-        case Some(value) => "proxy:${value}"
+        case Some(value) =>
+            let aggregateRoute = if (value.endsWith(HTTP_PROXY_AUTHENTICATED_NO_REUSE_SUFFIX)) {
+                value.removeSuffix(HTTP_PROXY_AUTHENTICATED_NO_REUSE_SUFFIX)
+            } else {
+                value
+            }
+            "proxy:${aggregateRoute}"
         case None => "direct"
     }
     internal.HttpResourceOwnerKey("${key.scheme}://${key.originHost}:${key.originPort}", route)

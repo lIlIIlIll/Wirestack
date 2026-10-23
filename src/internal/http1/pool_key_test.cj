@@ -35,6 +35,7 @@ class HttpConnectionPoolKeyTest {
         for (variant in variants) { @Expect(variant != baseline) }
     }
 
+
     @TestCase
     func refusesIncompletePartitionIdentities(): Unit {
         var rejected = false

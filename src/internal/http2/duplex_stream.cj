@@ -100,17 +100,9 @@ public class Http2StreamTransport <: DuplexTransport {
             writeActive = true
         }
         try {
-            let permit = flow.reserveSend(streamId, source.length, context: context)
-            let payload = Array<Byte>(permit.amount, repeat: 0u8)
-            for (index in 0..permit.amount) { payload[index] = source.bytes[source.offset + index] }
-            let frame = Http2Frame(
-                Http2FrameHeader(
-                    UInt32(payload.size), Http2FrameType.Data, Http2Flags(), streamId, limits: limits
-                ),
-                payload
-            )
-            waitDuplexWrite(writer.enqueueReservedData(frame, permit), context)
-            permit.amount
+            let (ticket, written) = writer.enqueueDataWaiting(flow, streamId, source, context)
+            waitDuplexWrite(ticket, context)
+            written
         } catch (error: Exception) {
             if (context.isCancellationRequested() || context.isDeadlineExceeded()) {
                 abort(reason: if (context.isCancellationRequested()) {

@@ -36,7 +36,10 @@ class Http2ClientBodyUpdateReviewTest {
                 @Expect(flow.consumeReceived(id, 4096).isEmpty())
                 channel.finish(None)
             } else {
-                channel.offer(Array<Byte>(32768, repeat: 120u8), 32768, true)
+                channel.offerView(
+                    Array<Byte>(32768, repeat: 120u8), 0, 32768, 32768, true,
+                    None<Http2ReceivedBufferReservation>
+                )
             }
             let reading = spawn {
                 channel.readSome(MutableByteSpan(Array<Byte>(32768, repeat: 0)), context)
@@ -92,7 +95,10 @@ class Http2ClientBodyUpdateReviewTest {
                 @Expect(flow.consumeReceived(id, 4096).isEmpty())
                 channel.finish(None)
             } else {
-                channel.offer(Array<Byte>(32768, repeat: 120u8), 32768, false)
+                channel.offerView(
+                    Array<Byte>(32768, repeat: 120u8), 0, 32768, 32768, false,
+                    None<Http2ReceivedBufferReservation>
+                )
             }
             let reading = spawn {
                 try {
@@ -107,7 +113,10 @@ class Http2ClientBodyUpdateReviewTest {
                 if (!preRead) {
                     var rejectedAfterFailure = false
                     try {
-                        channel.offer(Array<Byte>(1, repeat: 120u8), 1, false)
+                        channel.offerView(
+                            Array<Byte>(1, repeat: 120u8), 0, 1, 1, false,
+                            None<Http2ReceivedBufferReservation>
+                        )
                     } catch (_: Http2ProtocolException) {
                         rejectedAfterFailure = true
                     }

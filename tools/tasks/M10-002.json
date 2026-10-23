@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "dependencies": [
+    "M9-001"
+  ],
+  "allowed_paths": [
+    "docs/api/generated/docs.json",
+    "docs/evidence/M10-002/stack-200-follow-up.md",
+    "docs/evidence/M10-002/stack-200-review",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "src/http/client.cj",
+    "src/http/facade_test.cj",
+    "src/http/resource_budget.cj",
+    "src/http/server.cj",
+    "src/internal/http_resource_budget.cj",
+    "src/internal/http_resource_budget_test.cj",
+    "src/internal/http1/client_pipeline.cj",
+    "src/internal/http1/client_pipeline_test.cj",
+    "src/internal/http1/connection_pool.cj",
+    "src/internal/http1/http2_connection_pool.cj",
+    "src/internal/http1/http2_connection_pool_test.cj",
+    "src/internal/http1/pool_admission.cj",
+    "src/internal/http1/pool_key.cj",
+    "src/internal/http1/pool_key_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/server_connection.cj",
+    "src/internal/http2/client_body_update_deadline_test.cj",
+    "src/internal/http2/client_connection.cj",
+    "src/internal/http2/client_connection_test.cj",
+    "src/internal/http2/client_push.cj",
+    "src/internal/http2/duplex_stream.cj",
+    "src/internal/http2/flow_control.cj",
+    "src/internal/http2/frame_codec.cj",
+    "src/internal/http2/frame_codec_test.cj",
+    "src/internal/http2/reader_loop.cj",
+    "src/internal/http2/observability_test.cj",
+    "src/internal/http2/reader_loop_test.cj",
+    "src/internal/http2/server_cancellation_test.cj",
+    "src/internal/http2/server_connection.cj",
+    "src/internal/http2/server_mapping.cj",
+    "src/internal/http2/server_mapping_test.cj",
+    "src/internal/http2/server_push_lifecycle_test.cj",
+    "src/internal/http2/write_scheduler.cj",
+    "src/internal/http2/write_scheduler_test.cj",
+    "tools/tasks/M10-002.json"
+  ],
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": [
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "text"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "network-capability-contract",
+      "argv": [
+        "python3",
+        "tools/check_network_capabilities.py",
+        "--check"
+      ],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cjpm-check",
+      "argv": [
+        "cjpm",
+        "check"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cjpm-build",
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "full-native-regression",
+      "argv": [
+        "cjpm",
+        "test",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "timeout_seconds": 3600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "resource-profile-nofile-64",
+      "argv": [
+        "bash",
+        "-c",
+        "ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "resource-profile-data-1g",
+      "argv": [
+        "bash",
+        "-c",
+        "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "resource-profile-as-4g",
+      "argv": [
+        "bash",
+        "-c",
+        "ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "resource-profile-single-cpu",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "cjpm",
+        "test",
+        "--skip-build",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color",
+        "src/internal/http2"
+      ],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "documentation-check",
+      "argv": [
+        "env",
+        "cjHeapSize=1GB",
+        "scripts/check-docs",
+        "--json",
+        "--output",
+        "docs/evidence/M10-002/stack-200-review/docs-report.json"
+      ],
+      "timeout_seconds": 1800,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-check",
+      "argv": [
+        "scripts/check"
+      ],
+      "timeout_seconds": 7200,
+      "long_running": false,
+      "gate": "full"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M10-002/stack-200-review/scenario-matrix.json",
+    "docs/evidence/M10-002/stack-200-review/verification.json"
+  ],
+  "timeout_seconds": 21600,
+  "long_running_gate": false,
+  "revision_bound_reports": [
+    "docs/evidence/M10-002/stack-200-review/scenario-matrix.json",
+    "docs/evidence/M10-002/stack-200-review/verification.json"
+  ],
+  "source_paths": [
+    "docs/api/generated/docs.json",
+    "docs/guides/http1-linux.md",
+    "src/http/client.cj",
+    "src/http/facade_test.cj",
+    "src/http/resource_budget.cj",
+    "src/http/server.cj",
+    "src/internal/http_resource_budget.cj",
+    "src/internal/http_resource_budget_test.cj",
+    "src/internal/http1/client_pipeline.cj",
+    "src/internal/http1/client_pipeline_test.cj",
+    "src/internal/http1/connection_pool.cj",
+    "src/internal/http1/http2_connection_pool.cj",
+    "src/internal/http1/http2_connection_pool_test.cj",
+    "src/internal/http1/pool_admission.cj",
+    "src/internal/http1/pool_key.cj",
+    "src/internal/http1/pool_key_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/server_connection.cj",
+    "src/internal/http2/client_body_update_deadline_test.cj",
+    "src/internal/http2/client_connection.cj",
+    "src/internal/http2/client_connection_test.cj",
+    "src/internal/http2/client_push.cj",
+    "src/internal/http2/duplex_stream.cj",
+    "src/internal/http2/flow_control.cj",
+    "src/internal/http2/frame_codec.cj",
+    "src/internal/http2/frame_codec_test.cj",
+    "src/internal/http2/reader_loop.cj",
+    "src/internal/http2/reader_loop_test.cj",
+    "src/internal/http2/observability_test.cj",
+    "src/internal/http2/server_cancellation_test.cj",
+    "src/internal/http2/server_connection.cj",
+    "src/internal/http2/server_mapping.cj",
+    "src/internal/http2/server_mapping_test.cj",
+    "src/internal/http2/server_push_lifecycle_test.cj",
+    "src/internal/http2/write_scheduler.cj",
+    "src/internal/http2/write_scheduler_test.cj",
+    "tools/tasks/M10-002.json"
+  ]
+}
