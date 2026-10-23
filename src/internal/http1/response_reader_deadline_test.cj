@@ -445,6 +445,18 @@ class Http1UpgradedReadBudgetReviewTest {
                 case api.NetworkPhase.TcpRead => ()
                 case _ => @Fail("prefixed read deadline lost its TCP-read phase")
             }
+
+            let retry = Array<Byte>(8, repeat: 0u8)
+            match (transport.readSome(MutableByteSpan(retry), context: context)) {
+                case ReadResult.Data(count) => @Expect(count, 6)
+                case _ => @Fail("deadline rejection consumed the prefixed response bytes")
+            }
+            @Expect(retry[0], 112u8)
+            @Expect(retry[1], 114u8)
+            @Expect(retry[2], 101u8)
+            @Expect(retry[3], 102u8)
+            @Expect(retry[4], 105u8)
+            @Expect(retry[5], 120u8)
         } finally {
             transport.close(OperationContext.background())
         }

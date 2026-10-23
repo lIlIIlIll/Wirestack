@@ -103,7 +103,7 @@ Exit: 0. `TOTAL: 163`; `PASSED: 1`; `SKIPPED: 162`; `ERROR: 0`; `FAILED: 0`.
 
 All commands below used the qualified SDK wrapper with `TMPDIR`, `TMP`, and `TEMP` set to `<task-tmp>`, and `DISABLE_ZOXIDE=1`.
 
-The T4 and T5 red runs used the new regression tests before their production fixes. The first combined green run used the composite GitButler stack workspace, including the M10-002 child changes. The exact M10-001 candidate replay is recorded in [review-regressions.json](stack-200-review/review-regressions.json).
+The T4 and T5 red runs used the new regression tests before their production fixes. The first combined green run used a composite GitButler stack workspace including M10-002 child changes; the 13-case replay binds to composite source `7468ec68de9a169ad87e36b5464f246cc28d5cd9`, not the M10-001 branch head.
 
 ### T4: one HTTP/1 RequestWrite budget across head and body
 

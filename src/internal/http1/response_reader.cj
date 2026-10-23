@@ -414,23 +414,28 @@ internal class Http1PrefixedTransport <: DuplexTransport {
                 checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
                 return ReadResult.Data(0)
             }
-            let count = synchronized(mutex) {
-                let available = prefix.size - offset
-                let copied = min(destination.length, available)
-                for (index in 0..copied) {
-                    destination.bytes[destination.offset + index] = prefix[offset + index]
-                }
-                offset += copied
-                copied
-            }
             emitHttpStage(readContext, true)
             try {
                 checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
-                let result = if (count > 0) { ReadResult.Data(count) }
-                    else { delegate.readSome(destination, context: readContext) }
-                checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
-                emitHttpStage(readContext, false)
-                result
+                let count = synchronized(mutex) {
+                    let available = prefix.size - offset
+                    let copied = min(destination.length, available)
+                    for (index in 0..copied) {
+                        destination.bytes[destination.offset + index] = prefix[offset + index]
+                    }
+                    copied
+                }
+                if (count > 0) {
+                    checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                    emitHttpStage(readContext, false)
+                    synchronized(mutex) { offset += count }
+                    ReadResult.Data(count)
+                } else {
+                    let result = delegate.readSome(destination, context: readContext)
+                    checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                    emitHttpStage(readContext, false)
+                    result
+                }
             } catch (error: Exception) {
                 emitHttpStage(readContext, false, code: Some(httpObservationError(error)))
                 throw error
