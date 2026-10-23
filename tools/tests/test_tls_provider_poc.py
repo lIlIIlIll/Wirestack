@@ -305,6 +305,8 @@ class ProviderPocValidationTests(unittest.TestCase):
         value = copy.deepcopy(self.matrix)
         cell = next(item for item in value["cells"] if item.get("result"))
         cell.pop("result")
+        cell.pop("sha256")
+        cell.pop("license_bundle")
         with self.assertRaisesRegex(validator.ValidationError,
                                     "retained artifact binding removed"):
             validator.validate_retained_results(value, self.spec, ROOT)
@@ -342,6 +344,9 @@ class ProviderPocValidationTests(unittest.TestCase):
         cell = next(item for item in value["cells"]
                     if (item["provider"], item["platform"]) ==
                     ("aws-lc", "linux-glibc-x86_64"))
+        # This scenario validates one promoted cell; unrelated retained results
+        # must keep their own provider/platform fixture identity.
+        value["cells"] = [cell]
         result = complete_result(
             eligible, provider="aws-lc", platform="linux-glibc-x86_64")
         result["build"]["license_bundle"]["sha256"] = cell["license_bundle"]["sha256"]
@@ -366,10 +371,15 @@ class ProviderPocValidationTests(unittest.TestCase):
             "status": "affected",
             "affected_advisory_ids": ["GHSA-3jrg-j22w-mpmc"],
         })
-        with mock.patch.object(validator, "load", return_value=result), \
+        affected_result = copy.deepcopy(result)
+        affected_result["source"]["security_update"] = copy.deepcopy(
+            affected_provider["security_update"])
+        with mock.patch.object(
+                validator, "load", return_value=affected_result), \
                 mock.patch.object(validator, "validate_license_bundle"), \
-                self.assertRaisesRegex(validator.ValidationError,
-                                       "known affected provider pin blocks promotion"):
+                self.assertRaisesRegex(
+                    validator.ValidationError,
+                    "known affected provider pin blocks promotion"):
             validator.validate_retained_results(value, affected, ROOT)
 
     def test_matrix_contract_only_does_not_promote_stale_retained_results(self):
@@ -694,12 +704,18 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.spec, provider=cell["provider"], platform=cell["platform"],
             status="PARTIAL",
         )
-        with mock.patch.object(validator, "load", return_value=result), \
-             mock.patch.object(
-                 validator.evidence_digest, "text_evidence_sha256", return_value="1" * 64
-             ), \
-             self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
-            validator.validate_retained_results(value, self.spec, ROOT)
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            (repository / "synthetic-result.json").write_text(
+                "{}", encoding="utf-8")
+            with mock.patch.object(validator, "load", return_value=result), \
+                 mock.patch.object(
+                     validator.evidence_digest, "text_evidence_sha256",
+                     return_value="1" * 64
+                 ), \
+                 self.assertRaisesRegex(
+                     validator.ValidationError, "sha256 mismatch"):
+                validator.validate_retained_results(value, self.spec, repository)
 
     def test_blocked_capability_cannot_pass(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
