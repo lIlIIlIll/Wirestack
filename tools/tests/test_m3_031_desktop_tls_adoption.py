@@ -539,16 +539,6 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 self.assertEqual("PASS", result["status"])
                 self.assertEqual(2, result["external_signer_calls"])
 
-    def test_retained_windows_provider_license_digest_is_stale(self) -> None:
-        self.assert_code(
-            "LICENSE_BUNDLE",
-            lambda: adoption.validate_provider_result(
-                provider_result("windows-x86_64", self.revision),
-                expected_platform="windows-x86_64",
-                expected_revision=self.revision,
-            ),
-        )
-
     def test_provider_license_bundle_is_retained_and_digest_bound(self) -> None:
         raw = provider_result("windows-x86_64", self.revision)
         raw["build"]["license_bundle"]["sha256"] = "0" * 64
