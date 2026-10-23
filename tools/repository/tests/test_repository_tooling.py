@@ -161,6 +161,219 @@ class RepositoryToolingTests(unittest.TestCase):
             tooling.validate_repository_tasks(self.root)
         self.assertEqual("DEPENDENCY_MISSING", caught.exception.code)
 
+    def test_selected_task_scopes_unrelated_incomplete_dependency(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCK-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["BASE-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCK-001"]))
+
+        self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root, "TEST-001"))
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root)
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        all_evidence = tooling.verify(self.root, None)
+        self.assertEqual("FAIL", all_evidence["status"])
+        self.assertEqual([], all_evidence["tasks"])
+        self.assertEqual(
+            "DEPENDENCY_INCOMPLETE",
+            all_evidence["issues"][0]["code"],
+        )
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "OTHER-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_fast_and_full_checks_reject_unrelated_incomplete_tasks(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["BASE-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+
+        with mock.patch.object(tooling, "run_command") as run_command:
+            for mode in ("fast", "full"):
+                report = tooling.check(self.root, mode, "TEST-001")
+                self.assertIsNone(report["task_id"])
+                self.assertEqual("INVALID", report["status"])
+                self.assertEqual([], report["commands"])
+                self.assertEqual(
+                    "DEPENDENCY_INCOMPLETE",
+                    report["issues"][0]["code"],
+                )
+                run_command.assert_not_called()
+        self.assertEqual(
+            "SKIPPED", tooling.check(self.root, "long", "TEST-001")["status"]
+        )
+
+    def test_global_check_preserves_explicit_task_id_validation(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["BASE-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+
+        repository_root = Path(__file__).resolve().parents[3]
+        script = repository_root / "tools/repository/repository_tooling.py"
+        for mode in ("fast", "full"):
+            report = tooling.check(self.root, mode, "BOGUS-999")
+            self.assertIsNone(report["task_id"])
+            self.assertEqual("INVALID", report["status"])
+            self.assertEqual([], report["commands"])
+            self.assertEqual("TASK_MISSING", report["issues"][0]["code"])
+            self.assertIn("BOGUS-999", report["issues"][0]["detail"])
+
+        cli_cases = (
+            ("fast", "BOGUS-999", "TASK_MISSING"),
+            ("full", "BOGUS-999", "TASK_MISSING"),
+            ("fast", "TEST-001", "DEPENDENCY_INCOMPLETE"),
+            ("full", "TEST-001", "DEPENDENCY_INCOMPLETE"),
+        )
+        for mode, task_id, expected_issue in cli_cases:
+            with self.subTest(mode=mode, task_id=task_id):
+                receipt = self.root / f"{mode}-{task_id.lower()}.json"
+                completed = subprocess.run(
+                    [
+                        "python3", str(script), "--root", str(self.root),
+                        "check", mode, task_id, "--json", "--output", str(receipt),
+                    ],
+                    cwd=repository_root,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=30,
+                    check=False,
+                )
+                self.assertEqual(2, completed.returncode, completed.stderr)
+                report = json.loads(receipt.read_text(encoding="utf-8"))
+                self.assertEqual(mode, report["mode"])
+                self.assertIsNone(report["task_id"])
+                self.assertEqual("INVALID", report["status"])
+                self.assertEqual([], report["commands"])
+                self.assertEqual(expected_issue, report["issues"][0]["code"])
+                expected_detail = "BOGUS-999" if expected_issue == "TASK_MISSING" else "BLOCKED-001"
+                self.assertIn(expected_detail, report["issues"][0]["detail"])
+
+    def test_selected_task_rejects_incomplete_transitive_dependency(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "MID-001": "COMPLETE",
+            "BASE-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["MID-001"]))
+        self.write_manifest(self.manifest("MID-001", ["BASE-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_selected_task_accepts_complete_dependency_without_manifest(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "PLAN-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+
+        self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root, "TEST-001"))
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root)
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+
+    def test_selected_task_rejects_incomplete_plan_only_transitive_leaf(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "MID-001": "COMPLETE",
+            "LEAF-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("TEST-001", ["MID-001"]))
+        self.write_manifest(self.manifest("MID-001", ["LEAF-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        self.assertIn("LEAF-001", caught.exception.detail)
+
+    def test_selected_task_evidence_passes_while_unrelated_task_blocks_global(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
+        self.evidence()
+
+        selected = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("PASS", selected["status"])
+        self.assertEqual([], selected["issues"])
+
+        global_report = tooling.verify(self.root, None)
+        self.assertEqual("FAIL", global_report["status"])
+        self.assertEqual([], global_report["tasks"])
+        self.assertEqual(
+            "DEPENDENCY_INCOMPLETE", global_report["issues"][0]["code"]
+        )
+
+    def test_task_cli_executes_selected_command_with_unrelated_blocked_dependency(self) -> None:
+        self.write_planning({
+            "TEST-001": "READY",
+            "BASE-001": "COMPLETE",
+            "OTHER-001": "READY",
+            "BLOCKED-001": "BLOCKED",
+        })
+        selected = self.manifest("TEST-001", ["BASE-001"])
+        selected["acceptance_commands"][0]["argv"] = [
+            "python3", "-c", "print('selected-task-ran')"
+        ]
+        unrelated = self.manifest("OTHER-001", ["BLOCKED-001"])
+        unrelated["required_evidence"] = [
+            "docs/evidence/OTHER-001/evidence.json"
+        ]
+        unrelated["acceptance_commands"][0]["argv"] = [
+            "python3", "-c",
+            "from pathlib import Path; Path('unrelated-task-ran').write_text('bad')",
+        ]
+        self.write_manifest(selected)
+        self.write_manifest(unrelated)
+
+        repository_root = Path(__file__).resolve().parents[3]
+        script = repository_root / "tools/repository/repository_tooling.py"
+        receipt = self.root / "task-receipt.json"
+        completed = subprocess.run(
+            [
+                "python3", str(script), "--root", str(self.root),
+                "check", "task", "TEST-001", "--json", "--output", str(receipt),
+            ],
+            cwd=repository_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        report = json.loads(receipt.read_text(encoding="utf-8"))
+        self.assertEqual("PASS", report["status"])
+        self.assertEqual(["unit"], [command["id"] for command in report["commands"]])
+        self.assertEqual("PASS", report["commands"][0]["status"])
+        stdout_path = self.root / report["commands"][0]["stdout_path"]
+        self.assertEqual(
+            "selected-task-ran\n", stdout_path.read_text(encoding="utf-8")
+        )
+        self.assertFalse((self.root / "unrelated-task-ran").exists())
+
     def test_dependency_cycle_is_rejected(self) -> None:
         self.write_planning({"TEST-001": "COMPLETE", "TEST-002": "COMPLETE"})
         first = self.manifest("TEST-001", ["TEST-002"])

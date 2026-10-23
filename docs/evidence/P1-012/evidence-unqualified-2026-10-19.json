@@ -1,0 +1,9 @@
+{
+  "former_acceptance_status": "PASS",
+  "former_revision": "8beeed24620452e0b8101c0375e1494b73e0de6e",
+  "kind": "superseded-evidence-index-provenance",
+  "original_path": "docs/evidence/P1-012/evidence.json",
+  "reason": "The former index was bound to a revision unavailable in the clean checkout. Repository-wide readiness is now BLOCKED; the former PASS is not current qualification.",
+  "schema_version": 1,
+  "status": "UNQUALIFIED"
+}
