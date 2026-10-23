@@ -94,37 +94,32 @@ verified subjects. `task-check.json` binds the six acceptance commands.
 `scripts/verify-evidence M7-030 --json` returns PASS with two indexed reports,
 23 source digests and no stale path.
 
-## Current acceptance state (2026-10-22)
+## Current acceptance state (2026-10-23)
 
-The results above are the 2026-08-30 record and are unchanged history. On the
-current tree the frozen-artifact prerequisite now runs before any manifest,
-signing or update work: `scripts/check-m7-030-release` first stages
-`frozen-artifact.json` and the rehearsal refuses the run when the asset name,
-2,499,451-byte length or `c0988f62…` SHA-256 differs, or when the pinned draft
-Release cannot supply it.
+The preceding local and hosted results are the 2026-08-30 record and remain
+historical. The current local gate was run on candidate
+`946995b2ab048c263ad6c71e73b80bbc1e2c5c54` in a clean checkout without `dist/`:
 
-The task check runs all six acceptance commands and returns FAIL. Two are red
-and four pass:
+`DISABLE_ZOXIDE=1 scripts/check-task M7-030 --json --output
+build/m7-030/task-check-current.json`
+
+The command exited 1 after executing all six acceptance commands. Overall
+status was `FAIL`, `issues: []`; four commands passed and two failed:
 
 | Command | Current result |
 |---|---|
 | `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
-| `signing-update-fault-injection` | PASS; `python3 -m unittest tools.tests.test_m7_030_linux_release` in the worktree and in a clean `git archive` export that has no `dist/` directory. The suite now also covers receipt preservation for download failure, size mismatch and digest mismatch. |
-| `supply-chain-inputs` | FAIL exit 1, `generator fingerprint is stale`: recorded `42e064cf…` versus current `b7a15290…`. M11-002 (`0a3161e5`) changed `tools/m7_025_linux_supply_chain.py` after the M7-025 evidence was frozen; regenerating that bundle is M7-025 work. |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tools.tests.test_m7_030_linux_release -v` (clean export of candidate `946995b2…`, no `dist/`) | PASS; 23/23 tests. `test_failed_hosted_validation_never_replaces_existing_report` verifies `HOSTED_REPORT_SUBJECT` failure preserves the prior report bytes and leaves no temporary report. |
+| `supply-chain-inputs` | FAIL, exit 1: `release artifact is absent` because `dist/m7-021` is absent. The later rehearsal successfully downloaded the exact frozen asset to ignored `build/m7-030/`. With that asset staged under `dist/`, the separately recorded validation reports the stale M7-025 generator fingerprint (`42e064cf…` versus `b7a15290…`) after M11-002 commit `0a3161e5`. Regenerating that evidence belongs to M7-025. |
 | `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
-| `local-signing-update-rehearsal` | PASS as `REHEARSAL`, but `productionAttestation` now records `{"decision": "FAIL", "detail": "HOSTED_REPORT_SUBJECT"}` instead of the inherited historical PASS. The command itself does not record which staging mode it used; the committed receipt's mode is stated separately below. |
-| `github-hosted-attestations` | FAIL exit 1, `HOSTED_REPORT_SUBJECT`: the committed report predates the required `signedPayloadSha256` subject field, and the workflow is retired with M8-007 as the active signer. |
+| `local-signing-update-rehearsal` | PASS as `REHEARSAL`; the exact asset was downloaded and verified. `productionAttestation` remains `FAIL` with `HOSTED_REPORT_SUBJECT`. |
+| `github-hosted-attestations` | FAIL, exit 1, `HOSTED_REPORT_SUBJECT`: the committed report lacks `signedPayloadSha256`; the retired workflow cannot produce current hosted evidence. |
 
-On this stacked branch, where P1-012 scopes dependency validation to the
-requested task closure, `scripts/check-task M7-030 --json` runs all six commands
-and reports `status: FAIL` with exactly the two failing commands above and
-`issues: []`. The unscoped repository-wide readiness check still reports
-`DEPENDENCY_INCOMPLETE` on the unrelated `M10-004 → M10-003` edge. M7-030's own
-dependencies M7-022, M7-025 and M7-029 are COMPLETE. In a fresh clean checkout
-with no `dist/` directory, `supply-chain-inputs` fails earlier with
-`release artifact is absent`, before any fingerprint comparison: the
-`--validate-only` mode has no artifact to inspect. The stale-generator
-diagnosis above applies only once a staged artifact is present.
+The task-check JSON and command logs are under ignored `build/` and are not a
+current evidence seal. Task-specific dependency validation runs all six
+commands; repository-wide readiness remains blocked on
+`M10-004 → M10-003`. No production attestation, current task PASS, or source
+seal is claimed.
 
 Marking this task BLOCKED also propagates to M7-031, which lists M7-030 as a
 dependency and whose `validate_dependency_status` requires
@@ -141,22 +136,15 @@ record was not supported by its own gate before this change. M7-031's row,
 tooling and evidence stay untouched here because they are outside this task's
 `allowed_paths`.
 
-Running the gate has three evidence-report side effects, not two. Before this
-change it regenerated `frozen-artifact.json`, `local-rehearsal.json` and
-`hosted-validation.json` in place, so after a run the working tree showed all
-three files modified even though the rehearsal and hosted verdicts were
-unchanged in kind. None of the three is rewritten here. `local-rehearsal.json` and
-`hosted-validation.json` keep their 2026-08-30 bytes, and
-`frozen-artifact.json` keeps the receipt first committed on 2026-10-22, which is
-what the historical record documents. The gate
-script now stages its receipt under the Git-ignored `build/m7-030/` directory
-instead of `docs/evidence/M7-030/frozen-artifact.json`, and the tool refuses to
-write a failure payload to that receipt at all, so a failed staging or digest
-check can no longer replace the committed PASS receipt; the two remaining
-in-place evidence rewrites are `local-rehearsal.json` and
-`hosted-validation.json`. The receipt is also listed in the task manifest's
-`source_paths` and `required_evidence`, so its deletion or tampering is detected
-rather than silently accepted.
+The exact task-gate run above left `frozen-artifact.json`,
+`workflow-contract.json` and `hosted-validation.json` unchanged. The frozen
+asset receipt was staged under ignored `build/m7-030/`; the local rehearsal
+rewrote its configured `local-rehearsal.json`, which was restored to the
+committed historical bytes after recording the result. The failed
+`validate-hosted --output` emitted structured JSON to stdout and preserved the
+existing hosted report byte-for-byte. The fetch and hosted-validation commands
+write only successful receipts; the current hosted report remains historical
+and no evidence seal was refreshed.
 
 ## Unit-test isolation (2026-10-22)
 
