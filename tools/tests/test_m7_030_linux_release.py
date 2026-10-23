@@ -702,6 +702,50 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                 self.assertEqual("downloaded-and-verified-frozen-artifact", written["mode"])
                 self.assertEqual(release.FROZEN_ARTIFACT_SHA256, written["sha256"])
 
+    def test_failed_hosted_validation_never_replaces_existing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subjects = []
+            for name in ("artifact", "sbom", "release-manifest"):
+                subject = root / name
+                bundle = root / f"{name}.bundle"
+                verification = root / f"{name}.verification.json"
+                subject.write_text(name, encoding="utf-8")
+                bundle.write_text(f"bundle:{name}", encoding="utf-8")
+                verification.write_bytes(release.canonical_json({"verified": 1}))
+                subjects.append((name, subject, bundle, verification))
+            report = release.build_hosted_report(
+                "a" * 40, subjects
+            )
+            artifact = next(
+                item for item in report["subjects"] if item["name"] == "artifact"
+            )
+            artifact["signedPayloadSha256"] = "0" * 64
+            report_path = root / "github-attestation.json"
+            report_path.write_bytes(release.canonical_json(report))
+
+            output = root / "hosted-validation.json"
+            previous = (
+                release.ROOT / "docs/evidence/M7-030/hosted-validation.json"
+            ).read_bytes()
+            output.write_bytes(previous)
+            stdout = io.StringIO()
+            with unittest.mock.patch("sys.stdout", stdout):
+                exit_code = release.main(
+                    [
+                        "validate-hosted",
+                        "--report",
+                        str(report_path),
+                        "--output",
+                        str(output),
+                    ]
+                )
+            self.assertEqual(1, exit_code)
+            failure = json.loads(stdout.getvalue())
+            self.assertEqual("HOSTED_REPORT_SUBJECT", failure["code"])
+            self.assertEqual(previous, output.read_bytes())
+            self.assertEqual([], list(root.glob(f".{output.name}.*")))
+
     def test_manifest_binds_the_committed_receipt(self) -> None:
         """Deleting or tampering with the receipt must be detected, not ignored."""
         manifest = release.load_json(release.ROOT / "tools/tasks/M7-030.json")
