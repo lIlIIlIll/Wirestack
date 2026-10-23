@@ -8,11 +8,7 @@
     "command": "DISABLE_ZOXIDE=1 python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-032/test-plan.md --json",
     "exit_code": 0,
     "status": "PASS",
-    "counts": {
-      "paths": 11,
-      "scenarios": 10,
-      "tests": 7
-    }
+    "counts": {"paths": 11, "scenarios": 10, "tests": 7}
   },
   "focused_regression": {
     "command": "python3 -m unittest tools.tests.test_m7_032_public_api_contract -v",
@@ -36,26 +32,50 @@
     "generator_sha256": "e33251dbeba4a0eb5852a8431e219265bb3c0bf30b8b1e11eff8768da552dc34"
   },
   "task_gate": {
-    "command": "DISABLE_ZOXIDE=1 scripts/check-task M7-032 --json --output docs/evidence/M7-032/isolated-pr-head-task-check.json",
-    "exit_code": 1,
-    "status": "FAIL",
+    "command": "DISABLE_ZOXIDE=1 scripts/check-task M7-032 --json --output docs/evidence/M7-032/task-check.json",
+    "exit_code": 0,
+    "status": "PASS",
+    "candidate_scope": "Stacked source with P1-012 (#220) and M10-004 (#230) parent changes applied; not standalone PR #221 against main.",
     "commands_executed": 8,
-    "ownership_and_fault_injection_tests": {
-      "failures": 1,
-      "status": "FAIL",
-      "failure": "test_evolution_status_matches_readiness_classification: M10-004 is COMPLETE while M10-003 is BLOCKED",
-      "test_count_note": "The total is not retained in the committed task-gate receipt; no count is claimed."
-    },
-    "architecture_guard": "PASS",
-    "current_api_inventory": "PASS",
-    "clean_consumer": {
-      "status": "FAIL",
-      "detail": "Offline AWS-LC provider preparation cannot resolve HEAD in the source checkout."
-    },
-    "cangjie_check": "UNAVAILABLE",
-    "cangjie_build": "UNAVAILABLE",
-    "cangjie_tests": "UNAVAILABLE"
+    "task_check_sha256": "f0867de486d5d7189646f574698a39e64773abb8357528b4691a6bc587c589dd",
+    "cangjie_tests": {
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 0,
+      "total": 1084,
+      "passed": 1056,
+      "skipped": 28,
+      "error": 0,
+      "failed": 0,
+      "status": "PASS"
+    }
   },
+  "full_task_gate_history": [
+    {
+      "candidate": "Stacked source before the final README/status evidence refresh",
+      "status": "PASS",
+      "current_candidate_claim": false
+    },
+    {
+      "candidate": "Current documentation/evidence source, full run 1",
+      "status": "FAIL",
+      "failed_test": "wirestack.internal.http2.Http2ClientConnectionTest.queuedHalfCloseCancellationDoesNotWaitForConnectionWriter",
+      "observed_error": "NetworkException: same-direction transport operation already active",
+      "focused_rerun": {"passed": 1, "skipped": 1083, "error": 0, "failed": 0, "status": "PASS"}
+    },
+    {
+      "candidate": "Current documentation/evidence source, full run 2",
+      "status": "FAIL",
+      "failed_test": "wirestack.http.HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission",
+      "observed_assertion": "secondRejected was false; expected true",
+      "focused_rerun": {"passed": 1, "skipped": 1083, "error": 0, "failed": 0, "status": "PASS"}
+    },
+    {
+      "candidate": "Current documentation/evidence source, latest full run",
+      "status": "PASS",
+      "commands_passed": 8,
+      "commands_failed": 0
+    }
+  ],
   "evidence_verification": {
     "command": "DISABLE_ZOXIDE=1 scripts/verify-evidence M7-032 --json --output docs/evidence/M7-032/current-evidence-verification.json",
     "exit_code": 1,
@@ -68,13 +88,14 @@
     "sha256": "5ff5a2b0988f873c167380257a1ca3394f0299bdcc61f4dc81dc5ea5bced76af",
     "identical_to_base_revision_seal": true,
     "recorded_task_check_sha256": "9b0778d7fda764fcb1a74ba3c845b5be5a98295f60286d766e8e4fda6af213e6",
-    "available_task_check_sha256": "c25a902c6907389e61b5d60e518c418ffba6b3e3982f1705abbc4b93d8444195",
+    "available_task_check_sha256": "f0867de486d5d7189646f574698a39e64773abb8357528b4691a6bc587c589dd",
     "recorded_revision_available": false,
     "verification_status": "ARCHIVAL_ONLY"
   },
   "non_claims": [
-    "The current API inventory PASS is not full M7-032 task acceptance.",
+    "The current API inventory PASS and current full task-gate PASS do not replace the unsupported historical evidence seal.",
     "The current-source API pair is an unsealed requalification output and is not included in task source_paths or required_evidence.",
-    "No current-source clean-consumer, Cangjie, full repository-check, or release qualification PASS is claimed."
+    "The latest full task gate covers the stacked source, not standalone PR #221 against main.",
+    "No current-source evidence-verifier PASS, full repository-check PASS, or release qualification is claimed."
   ]
 }
