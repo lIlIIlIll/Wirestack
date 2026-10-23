@@ -38,6 +38,10 @@ FROZEN_ARTIFACT_TAG = "m7-030-frozen-artifact-c0988f62"
 FROZEN_ARTIFACT_BYTES = 2_499_451
 FROZEN_ARTIFACT_SHA256 = "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
 FROZEN_ARTIFACT_TIMEOUT_SECONDS = 180
+# Commands whose ``--output`` is a receipt for a successful verification only.
+# A failed staging run must never replace an existing receipt with a failure
+# payload; it reports on stdout/stderr instead.
+SUCCESS_ONLY_OUTPUT_COMMANDS = frozenset({"fetch-frozen-artifact"})
 SUPPLY_CHAIN = ROOT / "docs/evidence/M7-025/linux_x86_64"
 SBOM = SUPPLY_CHAIN / "sbom.spdx.json"
 PROVIDER_MANIFEST = SUPPLY_CHAIN / "provider-manifest.json"
@@ -1057,7 +1061,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = {"schemaVersion": 1, "taskId": TASK_ID, "decision": decision,
                   "code": error.code, "detail": error.detail}
         output = getattr(args, "output", None)
-        if output:
+        if output and args.command not in SUCCESS_ONLY_OUTPUT_COMMANDS:
             atomic_json(output, report)
         print(json.dumps(report, sort_keys=True, separators=(",", ":")))
         return 2 if decision == "BLOCKED" else 1
