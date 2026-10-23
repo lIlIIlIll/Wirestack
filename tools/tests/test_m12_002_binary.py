@@ -13,8 +13,9 @@ from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
 from tools.m12_002_binary import (CONSUMER_APPS, CONSUMER_PROFILES, OPTIONAL_MODULES,
     SCAN_SUFFIXES, TRUNCATED_ISA, Capture, bind_installed_payload, bound_command, consumer_identity,
     dynamic_fields, expected_scan_inputs, gating_command_ids, install_selected_archive, isa_presence,
-    scan_fields, scanner_digest, validate_abi_matrix, verify_abi_matrix, verify_command_inventory,
-    verify_consumers, verify_scan_inputs, verify_scan_verdicts, versions, CHECKS, TRUNCATED)
+    raw_disassembly_isa, scan_fields, scanner_digest, truncated_digest, validate_abi_matrix,
+    verify_abi_matrix, verify_command_inventory, verify_consumers, verify_scan_inputs,
+    verify_scan_verdicts, versions, CHECKS, TRUNCATED)
 
 
 @unittest.skipUnless(shutil.which('gcc') and shutil.which('readelf'), 'native ELF tools required')
@@ -442,6 +443,99 @@ class TruncatedDisassemblyTests(unittest.TestCase):
                          ['avx_mnemonics'], 1)
 
 
+@unittest.skipUnless(all(shutil.which(name) for name in ('gcc', 'readelf', 'nm', 'objdump')),
+                     'native ELF tools required')
+class PublishedCaptureVerificationTests(unittest.TestCase):
+    """A capture's truncated published disassembly still supports its own ISA verdict."""
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-published-capture-')
+        self.base = Path(self.directory.name)
+        self.work = self.base / 'scratch'
+        self.work.mkdir()
+        self.output = self.base / 'docs/evidence/M12-002/binary'
+        self.output.mkdir(parents=True)
+        source = self.base / 'probe.c'
+        source.write_text('#include <stdio.h>\nint main(void) { return puts("scan") < 0; }\n')
+        self.artifact = self.base / 'probe'
+        subprocess.run(['gcc', '-march=x86-64', str(source), '-o', str(self.artifact)],
+            check=True, capture_output=True)
+        with patch('tools.m12_002_binary.ROOT', self.base):
+            capture = Capture(self.output, self.work, [])
+            self.recorded = capture.scan('probe', self.artifact)
+        self.report = {'scans': {'probe': self.recorded}, 'commands': capture.commands}
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def published(self, suffix):
+        return self.output / f'probe-{suffix}.stdout.log'
+
+    def rewrite(self, text):
+        """Replace the published disassembly log and rebind its recorded digest."""
+        log = self.published('disassembly')
+        log.write_text(text)
+        command = next(record for record in self.report['commands']
+            if record['id'] == 'probe-disassembly')
+        command['stdout']['digest'] = text_evidence_digest(log).to_json()
+
+    def test_captured_truncated_disassembly_is_accepted_by_the_verifier(self):
+        marker = truncated_digest(self.published('disassembly').read_text())
+        self.assertIsNotNone(marker)
+        with patch('tools.m12_002_binary.ROOT', self.base):
+            verify_scan_verdicts(self.report, self.base, self.work)
+        self.assertEqual(self.recorded['raw_isa_presence'], isa_presence(
+            (self.work / 'probe-disassembly.stdout.raw').read_text()))
+
+    def test_truncated_verdict_without_a_selected_raw_output_fails_closed(self):
+        with patch('tools.m12_002_binary.ROOT', self.base), \
+                self.assertRaisesRegex(ValueError, 'complete disassembly is not selected'):
+            verify_scan_verdicts(self.report, self.base)
+
+    def test_missing_raw_disassembly_fails_closed(self):
+        (self.work / 'probe-disassembly.stdout.raw').unlink()
+        with patch('tools.m12_002_binary.ROOT', self.base), \
+                self.assertRaisesRegex(ValueError, 'complete raw disassembly is unavailable'):
+            verify_scan_verdicts(self.report, self.base, self.work)
+
+    def test_changed_raw_disassembly_is_rejected(self):
+        raw = self.work / 'probe-disassembly.stdout.raw'
+        raw.write_text(raw.read_text() + '  401000:\tvaesenc %xmm0,%xmm1\n')
+        with patch('tools.m12_002_binary.ROOT', self.base), \
+                self.assertRaisesRegex(ValueError, 'complete raw disassembly changed'):
+            verify_scan_verdicts(self.report, self.base, self.work)
+
+    def test_raw_output_substitution_cannot_change_the_verdict(self):
+        raw = self.work / 'probe-disassembly.stdout.raw'
+        raw.write_text('  401000:\tvaesenc %xmm0,%xmm1\n')
+        with patch('tools.m12_002_binary.ROOT', self.base):
+            with self.assertRaisesRegex(ValueError, 'complete raw disassembly changed'):
+                verify_scan_verdicts(self.report, self.base, self.work)
+
+    def test_published_log_cannot_drop_its_raw_binding(self):
+        log = self.published('disassembly')
+        self.rewrite('\n'.join(line for line in log.read_text().splitlines()
+            if not line.startswith(TRUNCATED)) + '\n')
+        with patch('tools.m12_002_binary.ROOT', self.base), \
+                self.assertRaisesRegex(ValueError,
+                    'published disassembly truncation differs from its binding'):
+            verify_scan_verdicts(self.report, self.base, self.work)
+
+    def test_two_raw_bindings_are_rejected(self):
+        log = self.published('disassembly')
+        self.rewrite(log.read_text() + TRUNCATED
+            + json.dumps(artifact_byte_digest(self.work / 'probe-disassembly.stdout.raw').to_json()) + '\n')
+        with patch('tools.m12_002_binary.ROOT', self.base), \
+                self.assertRaisesRegex(ValueError, 'more than one raw output binding'):
+            verify_scan_verdicts(self.report, self.base, self.work)
+
+    def test_malformed_raw_binding_is_rejected(self):
+        self.rewrite(TRUNCATED + 'not-json\n')
+        with patch('tools.m12_002_binary.ROOT', self.base), \
+                self.assertRaisesRegex(ValueError, 'raw output binding is not JSON'):
+            verify_scan_verdicts(self.report, self.base, self.work)
+
+
 class ConsumerDeclarationTests(unittest.TestCase):
     def test_every_declared_profile_and_app_parses(self):
         for profile in CONSUMER_PROFILES:
@@ -556,6 +650,8 @@ class ScanVerdictTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory(prefix='m12-scan-tests-')
         self.root = Path(self.directory.name)
         (self.root / 'docs/evidence/M12-002/binary').mkdir(parents=True)
+        self.scratch = self.root / 'scratch'
+        self.scratch.mkdir()
         self.binary = self.root / 'probe'
         source = self.root / 'probe.c'
         source.write_text('#include <stdio.h>\nint main(void) { return puts("scan") < 0; }\n')
@@ -576,10 +672,16 @@ class ScanVerdictTests(unittest.TestCase):
             result = subprocess.run([*argv, str(path)], capture_output=True, text=True)
             log = self.root / f'docs/evidence/M12-002/binary/{label}-{suffix}.stdout.log'
             log.write_text(result.stdout)
-            self.report['commands'].append({'id': f'{label}-{suffix}', 'exit_code': result.returncode,
+            record = {'id': f'{label}-{suffix}', 'exit_code': result.returncode,
                 'timed_out': False, 'argv': [*argv, str(path)], 'cwd': str(self.root),
                 'stdout': {'path': str(log.relative_to(self.root)), 'digest': text_evidence_digest(log).to_json()},
-                'stderr': {'path': str(log.relative_to(self.root)), 'digest': text_evidence_digest(log).to_json()}})
+                'stderr': {'path': str(log.relative_to(self.root)), 'digest': text_evidence_digest(log).to_json()}}
+            if suffix == 'disassembly':
+                raw = self.scratch / f'{label}-{suffix}.stdout.raw'
+                raw.write_text(result.stdout)
+                record['disassembly_raw'] = {'truncated': False,
+                    'digest': artifact_byte_digest(raw).to_json()}
+            self.report['commands'].append(record)
             output[suffix] = result.stdout
         return {'path': str(path), 'digest': artifact_byte_digest(path).to_json(),
                 'symbol_inventory_command': label + '-symbols',
@@ -587,28 +689,28 @@ class ScanVerdictTests(unittest.TestCase):
                     output['notes'], output['symbols'], isa_presence(output['disassembly']))}
 
     def test_real_scanner_output_satisfies_the_recorded_verdicts(self):
-        verify_scan_verdicts(self.report, self.root)
+        verify_scan_verdicts(self.report, self.root, self.scratch)
 
     def test_altered_loader_verdict_is_rejected(self):
         self.report['scans']['probe']['needed'] = ['libtls.so.6']
         with self.assertRaisesRegex(ValueError, 'scan verdict differs from its captured output: probe/needed'):
-            verify_scan_verdicts(self.report, self.root)
+            verify_scan_verdicts(self.report, self.root, self.scratch)
 
     def test_claimed_cpu_minimum_is_rejected(self):
         self.report['scans']['probe']['minimum_cpu'] = 'AVX2'
         with self.assertRaisesRegex(ValueError, 'scan verdict differs from its captured output: probe/minimum_cpu'):
-            verify_scan_verdicts(self.report, self.root)
+            verify_scan_verdicts(self.report, self.root, self.scratch)
 
     def test_missing_scanner_command_is_rejected(self):
         self.report['commands'] = [c for c in self.report['commands'] if c['id'] != 'probe-dynamic']
         with self.assertRaisesRegex(ValueError, 'native command is not recorded exactly once: probe-dynamic'):
-            verify_scan_verdicts(self.report, self.root)
+            verify_scan_verdicts(self.report, self.root, self.scratch)
 
     def test_altered_scanner_log_is_rejected(self):
         log = self.root / self.report['commands'][0]['stdout']['path']
         log.write_text(log.read_text() + 'changed\n')
         with self.assertRaisesRegex(ValueError, 'scan diagnostic log changed: probe-headers'):
-            verify_scan_verdicts(self.report, self.root)
+            verify_scan_verdicts(self.report, self.root, self.scratch)
 
     def test_absolute_loader_path_hazard_is_rejected(self):
         library = self.root / 'libfixture.so'
@@ -621,7 +723,7 @@ class ScanVerdictTests(unittest.TestCase):
         subprocess.run(['gcc', str(source), str(library), '-o', str(binary)], check=True, capture_output=True)
         self.report['scans']['linked'] = self.scan('linked', binary)
         with self.assertRaisesRegex(ValueError, 'absolute loader path: linked'):
-            verify_scan_verdicts(self.report, self.root)
+            verify_scan_verdicts(self.report, self.root, self.scratch)
 
 
 class RepeatedCaptureInstallationTests(unittest.TestCase):
@@ -702,6 +804,11 @@ class RepeatedScanCacheTests(unittest.TestCase):
                 record[stream] = {'path': log.relative_to(self.base).as_posix(),
                     'digest': text_evidence_digest(log).to_json()}
             prior_commands.append(record)
+            if suffix == 'disassembly':
+                raw = self.work / f'{command_id}.stdout.raw'
+                raw.write_text('  401000:\tvmovdqa %xmm0,%xmm1\n')
+                record['disassembly_raw'] = {'truncated': False,
+                    'digest': artifact_byte_digest(raw).to_json()}
         prior_scan = {'path': '<scratch>/library.so',
             'digest': artifact_byte_digest(self.artifact).to_json(),
             'scanner': scanner_digest(),

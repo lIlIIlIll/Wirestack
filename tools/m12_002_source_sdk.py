@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
 from tools import m7_021_linux_release as release
 from tools import m11_004_installed_consumers as consumers
 from tools.evidence_digest import (artifact_byte_digest, text_evidence_digest,
-    artifact_byte_sha256_equal, text_evidence_sha256_equal)
+    artifact_byte_sha256_equal, text_evidence_sha256_equal, parse_artifact_digest, DigestError)
 
 # Implementation closure: the runner plus every imported helper that shapes the captured
 # verdict. Their bytes are part of the binding, so a changed helper invalidates old evidence.
@@ -224,17 +224,36 @@ def verify_consumer_sources(report: dict) -> None:
             raise ValueError('consumer source changed')
 
 
-def verify_tls_fixtures(report: dict) -> None:
-    """The TLS material every acceptance run consumed must be inventoried by the report."""
+def verify_tls_fixtures(report: dict, capture_root: Path | None) -> None:
+    """The TLS material every acceptance run consumed must be the retained fixture bytes.
+
+    Private keys are never committed, so the report carries byte digests and the verifier
+    re-hashes the named files beneath the profile's retained private scratch directory.
+    """
     recorded = report.get('tls_fixtures')
     if not isinstance(recorded, dict) or recorded.keys() != set(TLS_FIXTURE_FILES):
         raise ValueError('retained TLS fixture inventory is incomplete')
+    parsed = {}
     for name, digest in recorded.items():
-        if not isinstance(digest, dict) or digest.get('domain') != 'artifact-bytes-v1' \
-                or not artifact_byte_sha256_equal(digest, digest):
-            raise ValueError('retained TLS fixture is not byte-bound: ' + name)
-    if recorded['certificate.der'] == recorded['untrusted.der'] or recorded['certificate.der'] == recorded['key.der']:
+        try:
+            parsed[name] = parse_artifact_digest(digest, 'TLS fixture digest')
+        except DigestError:
+            raise ValueError('retained TLS fixture is not byte-bound: ' + name) from None
+    if len(set(parsed.values())) != len(TLS_FIXTURE_FILES):
         raise ValueError('retained TLS fixtures are not distinct')
+    if capture_root is None:
+        raise ValueError('retained TLS fixture material is not selected: '
+            + 'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch')
+    profile = report.get('profile')
+    if not isinstance(profile, str) or re.fullmatch(r'[a-z0-9-]+', profile) is None:
+        raise ValueError('retained TLS fixtures cannot be located without a declared capture profile')
+    directory = Path(capture_root) / profile
+    for name, digest in recorded.items():
+        path = directory / name
+        if not path.is_file():
+            raise ValueError('retained TLS fixture is missing: ' + name)
+        if not artifact_byte_sha256_equal(digest, artifact_byte_digest(path).to_json()):
+            raise ValueError('retained TLS fixture changed: ' + name)
 
 
 def verify_helper_sources(report: dict) -> None:
@@ -358,7 +377,14 @@ def verify_command_inventory(commands: list[dict], evidence: Path) -> None:
                 raise ValueError('command evidence path changed: ' + command['id'])
 
 
-def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path) -> None:
+def capture_root() -> Path | None:
+    """The retained private capture root that holds each profile's TLS fixture material."""
+    selected = os.environ.get('WIRESTACK_SOURCE_CAPTURE_ROOT')
+    return Path(selected).resolve() if selected else None
+
+
+def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path,
+                  fixtures: Path | None = None) -> None:
     if report.get('status') != 'PASS' or report.get('binary_cross_sdk') != 'NOT_CLAIMED':
         raise ValueError('report is not a successful source-only compatibility proof')
     if not artifact_byte_sha256_equal(report['archive_digest'], artifact_byte_digest(archive).to_json()):
@@ -370,7 +396,7 @@ def verify_report(report: dict, archive: Path, sdk: Path, evidence: Path) -> Non
     if not text_evidence_sha256_equal(report['runner_digest'], text_evidence_digest(Path(__file__)).to_json()):
         raise ValueError('capture runner changed')
     verify_helper_sources(report)
-    verify_tls_fixtures(report)
+    verify_tls_fixtures(report, capture_root() if fixtures is None else fixtures)
     verify_command_inventory(report['commands'], evidence)
     verify_ca_checks(report, evidence)
     commands = {command['id']: command for command in report['commands']}

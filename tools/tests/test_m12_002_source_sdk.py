@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from tools.m12_002_source_sdk import (CA_CHECKS, CA_DIAGNOSTICS, CAPTURE_ENVIRONMENT, COMMAND_CONTRACTS,
     EXPECTED_COMMANDS, HELPER_SOURCES, HOST_CA_MOUNT, PORT, ROOT, TLS_FIXTURE_FILES, Capture,
-    consumer_source_digests, helper_sources,
+    capture_root, consumer_source_digests, helper_sources,
     native_compiler, validate_resume, verify_ca_checks, verify_command_inventory,
     verify_consumer_sources, verify_helper_sources, verify_report, verify_retained_binary,
     verify_retained_commands, verify_tls_fixtures)
@@ -111,30 +111,49 @@ class ResumeDriftTests(unittest.TestCase):
 
 
 class TlsFixtureBindingTests(unittest.TestCase):
-    def test_complete_fixture_inventory_is_accepted(self):
-        verify_tls_fixtures({'tls_fixtures': fixture_digests()})
+    """Retained TLS fixtures are re-hashed from the private capture root, never self-compared."""
 
-    def test_missing_fixture_is_rejected(self):
-        recorded = fixture_digests()
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix='m12-source-fixtures-')
+        self.capture = Path(self.directory.name)
+        self.work = self.capture / 'stable-native'
+        self.work.mkdir()
+        self.files = {}
+        for index, name in enumerate(TLS_FIXTURE_FILES):
+            path = self.work / name
+            path.write_bytes(name.encode() + b'-' + str(index).encode())
+            self.files[name] = path
+        self.report = {'profile': 'stable-native',
+            'tls_fixtures': {name: artifact_byte_digest(path).to_json()
+                for name, path in self.files.items()}}
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_retained_fixture_bytes_are_accepted(self):
+        verify_tls_fixtures(self.report, self.capture)
+
+    def test_missing_fixture_inventory_is_rejected(self):
+        recorded = dict(self.report['tls_fixtures'])
         del recorded['key.der']
         with self.assertRaisesRegex(ValueError, 'TLS fixture inventory is incomplete'):
-            verify_tls_fixtures({'tls_fixtures': recorded})
+            verify_tls_fixtures(dict(self.report, tls_fixtures=recorded), self.capture)
 
     def test_unbound_fixture_is_rejected(self):
         with self.assertRaisesRegex(ValueError, 'TLS fixture inventory is incomplete'):
-            verify_tls_fixtures({})
+            verify_tls_fixtures({}, self.capture)
 
     def test_one_file_cannot_stand_in_for_every_fixture(self):
-        recorded = fixture_digests()
+        recorded = dict(self.report['tls_fixtures'])
         recorded['untrusted.der'] = recorded['certificate.der']
         with self.assertRaisesRegex(ValueError, 'TLS fixtures are not distinct'):
-            verify_tls_fixtures({'tls_fixtures': recorded})
+            verify_tls_fixtures(dict(self.report, tls_fixtures=recorded), self.capture)
 
     def test_fixture_must_carry_a_byte_digest(self):
-        recorded = fixture_digests()
+        recorded = dict(self.report['tls_fixtures'])
         recorded['certificate.pem'] = text_digest('c')
         with self.assertRaisesRegex(ValueError, 'not byte-bound: certificate.pem'):
-            verify_tls_fixtures({'tls_fixtures': recorded})
+            verify_tls_fixtures(dict(self.report, tls_fixtures=recorded), self.capture)
 
     def test_malformed_byte_digest_is_rejected(self):
         malformed = (
@@ -145,10 +164,50 @@ class TlsFixtureBindingTests(unittest.TestCase):
         )
         for digest in malformed:
             with self.subTest(digest=digest):
-                recorded = fixture_digests()
+                recorded = dict(self.report['tls_fixtures'])
                 recorded['certificate.pem'] = digest
                 with self.assertRaisesRegex(ValueError, 'not byte-bound: certificate.pem'):
-                    verify_tls_fixtures({'tls_fixtures': recorded})
+                    verify_tls_fixtures(dict(self.report, tls_fixtures=recorded), self.capture)
+
+    def test_unselected_capture_root_is_a_controlled_refusal(self):
+        with self.assertRaisesRegex(ValueError, 'WIRESTACK_SOURCE_CAPTURE_ROOT must select'):
+            verify_tls_fixtures(self.report, None)
+
+    def test_capture_root_selector_resolves_the_environment(self):
+        with patch.dict(os.environ, {'WIRESTACK_SOURCE_CAPTURE_ROOT': str(self.capture)}):
+            self.assertEqual(capture_root(), self.capture.resolve())
+
+    def test_absent_capture_root_selector_is_unset(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertIsNone(capture_root())
+
+    def test_mutated_fixture_is_rejected(self):
+        self.files['certificate.der'].write_bytes(b'replaced certificate')
+        with self.assertRaisesRegex(ValueError, 'retained TLS fixture changed: certificate.der'):
+            verify_tls_fixtures(self.report, self.capture)
+
+    def test_removed_fixture_is_rejected(self):
+        self.files['key.der'].unlink()
+        with self.assertRaisesRegex(ValueError, 'retained TLS fixture is missing: key.der'):
+            verify_tls_fixtures(self.report, self.capture)
+
+    def test_swapped_fixtures_are_rejected(self):
+        certificate = self.files['certificate.der'].read_bytes()
+        untrusted = self.files['untrusted.der'].read_bytes()
+        self.files['certificate.der'].write_bytes(untrusted)
+        self.files['untrusted.der'].write_bytes(certificate)
+        with self.assertRaisesRegex(ValueError, 'retained TLS fixture changed: certificate.der'):
+            verify_tls_fixtures(self.report, self.capture)
+
+    def test_fixture_from_another_profile_cannot_stand_in(self):
+        """The report's declared profile selects the directory; a sibling profile is not read."""
+        other = self.capture / 'candidate-native'
+        other.mkdir()
+        for name in self.files:
+            (other / name).write_bytes(b'candidate ' + name.encode())
+        verify_tls_fixtures(self.report, self.capture)
+        with self.assertRaisesRegex(ValueError, 'retained TLS fixture changed: certificate.key'):
+            verify_tls_fixtures(dict(self.report, profile='candidate-native'), self.capture)
 
 
 class HelperBindingTests(unittest.TestCase):
@@ -485,8 +544,11 @@ class SourceSdkEvidenceTests(unittest.TestCase):
     def setUpClass(cls):
         report = os.environ.get('WIRESTACK_SOURCE_SDK_REPORT')
         sdk = os.environ.get('WIRESTACK_SOURCE_SDK_ROOT')
-        if not report or not sdk:
-            raise unittest.SkipTest('Set WIRESTACK_SOURCE_SDK_REPORT and WIRESTACK_SOURCE_SDK_ROOT to real captured evidence')
+        capture = os.environ.get('WIRESTACK_SOURCE_CAPTURE_ROOT')
+        if not report or not sdk or not capture:
+            raise unittest.SkipTest('Set WIRESTACK_SOURCE_SDK_REPORT, WIRESTACK_SOURCE_SDK_ROOT and '
+                'WIRESTACK_SOURCE_CAPTURE_ROOT to real captured evidence')
+        cls.capture = Path(capture)
         cls.path = Path(report)
         cls.sdk = Path(sdk).resolve()
         cls.report = json.loads(cls.path.read_text())
@@ -507,26 +569,26 @@ class SourceSdkEvidenceTests(unittest.TestCase):
         changed = self.candidate()
         changed['archive_digest'] = artifact_byte_digest_bytes(b'different artifact').to_json()
         with self.assertRaisesRegex(ValueError, 'archive binding changed'):
-            verify_report(changed, self.archive, self.sdk, self.path.parent)
+            verify_report(changed, self.archive, self.sdk, self.path.parent, self.capture)
 
     def test_new_compiler_cannot_reuse_report(self):
         changed = self.candidate()
         changed['sdk_files']['bin/cjc'] = artifact_byte_digest_bytes(b'different compiler').to_json()
         with self.assertRaisesRegex(ValueError, 'SDK compiler/runtime/import binding changed'):
-            verify_report(changed, self.archive, self.sdk, self.path.parent)
+            verify_report(changed, self.archive, self.sdk, self.path.parent, self.capture)
 
     def test_new_runtime_cannot_reuse_report(self):
         changed = self.candidate()
         runtime = next(k for k in changed['sdk_files'] if k.endswith('libcangjie-runtime.so'))
         changed['sdk_files'][runtime] = artifact_byte_digest_bytes(b'different runtime').to_json()
         with self.assertRaisesRegex(ValueError, 'SDK compiler/runtime/import binding changed'):
-            verify_report(changed, self.archive, self.sdk, self.path.parent)
+            verify_report(changed, self.archive, self.sdk, self.path.parent, self.capture)
 
     def test_build_success_is_not_binary_cross_sdk_support(self):
         changed = self.candidate()
         changed['binary_cross_sdk'] = 'PASS'
         with self.assertRaisesRegex(ValueError, 'source-only compatibility proof'):
-            verify_report(changed, self.archive, self.sdk, self.path.parent)
+            verify_report(changed, self.archive, self.sdk, self.path.parent, self.capture)
 
 
 if __name__ == '__main__':

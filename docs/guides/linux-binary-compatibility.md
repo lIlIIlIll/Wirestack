@@ -16,7 +16,27 @@ python3 tools/m12_002_binary.py \
   --openssl-crypto-library /usr/lib/libcrypto.so.3
 ```
 
-`--consumer <profile>/<app>=<installed-executable>` adds ELF scans of independently built installed applications. Repeat it for every `stable-native` and `candidate-native` application (`cli`, `decoded`, `streams`, `service`, `trust`); capture and `--verify` both reject a missing, duplicated or undeclared identity. `--verify` checks the selected archive, production sources, fixture sources, capture tool, native tool binaries, SDK compiler/runtime libraries, every scanned ELF verdict and retained command logs against the report's typed digest bindings. Any changed input requires a fresh capture. A compiler version string alone is not a binding. SDK source qualification snapshots do not qualify replacement compiler or runtime bits.
+No default path, host library or wrapper is inferred. `--wrapper`, `--openssl-library` and `--openssl-crypto-library` select the exact files, `--scratch` selects the retained capture root, and `--consumer <profile>/<app>=<installed-executable>` adds ELF scans of independently built installed applications. Repeat it for every `stable-native` and `candidate-native` application (`cli`, `decoded`, `streams`, `service`, `trust`); capture and `--verify` both reject a missing, duplicated or undeclared identity. `--verify` checks the selected archive, production sources, fixture sources, capture tool, native tool binaries, SDK compiler/runtime libraries, every scanned ELF verdict and retained command logs against the report's typed digest bindings. Any changed input requires a fresh capture.
+
+## Scanner output truncation
+
+Published scan logs keep only the first 20 disassembly lines and then the marker `Complete disassembly retained in private scratch; raw output binding: <artifact-byte digest>`. The complete raw output stays at `<scratch>/<scan-label>-disassembly.stdout.raw`. Each disassembly command also declares `disassembly_raw: {truncated, digest}` in the report.
+
+Verification re-derives the mnemonic counts from that complete raw file, requires its bytes to match both the declared digest and the marker, and rejects a mismatch between the declared truncation flag and the published marker. A truncated published verdict is therefore never conclusive on its own: without the selected raw output, verification fails closed with `complete disassembly is not selected` or `complete raw disassembly is unavailable`. Do not hand-edit a published disassembly log or a `disassembly_raw` binding to make an old report pass. A compiler version string alone is not a binding. SDK source qualification snapshots do not qualify replacement compiler or runtime bits.
+
+## Deployment verification inputs
+
+`python3 tools/m12_002_deployment.py collect` and `verify` call the binary verifier directly, so they require the same selections as `tools/m12_002_binary.py`:
+
+| Variable | Selection |
+|---|---|
+| `WIRESTACK_BINARY_CAPTURE_ROOT` | retained binary capture directory (`--scratch`) holding the raw outputs and installed consumers |
+| `WIRESTACK_BINARY_WRAPPER` | the exact SDK environment wrapper file the capture used |
+| `WIRESTACK_BINARY_OPENSSL_LIBRARY` | the exact independent OpenSSL SSL library file |
+| `WIRESTACK_BINARY_OPENSSL_CRYPTO_LIBRARY` | the exact independent OpenSSL crypto library file |
+| `WIRESTACK_SOURCE_CAPTURE_ROOT` | private source-capture root holding each profile's TLS fixtures |
+
+No selection has a default. Every value is resolved, required to exist, and passed into `verify()`; the two TLS libraries must be distinct files, and their digests must equal the `external_tls_fixture` library and crypto digests the binary report bound. `collect` validates the whole snapshot in memory and writes `verification.json` only after that validation passes, so a failed verification leaves the previous file untouched instead of publishing `status: COMPLETE`.
 
 Capture aborts if any built-SDK/runtime cell fails, and `--verify` requires the complete matrix to contain only passing cells; the report's top-level `PASS` alone is not matrix acceptance. A repeated capture in the same scratch installs the newly selected archive and removes the previous attempt's installation, so the scans and production sources always describe the archive the report names. The deployment `collect` and `verify` commands check the binary report that the snapshot records (the supplied `--binary-report`), so an alternate report must satisfy the same archive, SDK matrix, fixture, scan, log and behavior bindings.
 

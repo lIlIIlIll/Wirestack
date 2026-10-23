@@ -112,6 +112,10 @@ def isa_presence(disassembly: str) -> dict | str:
     """ISA mnemonics are only observable from a complete disassembly that is still retained."""
     if TRUNCATED in disassembly:
         return TRUNCATED_ISA
+    return count_mnemonics(disassembly)
+
+
+def count_mnemonics(disassembly: str) -> dict[str, int]:
     counts = {'avx_mnemonics': 0, 'aes_mnemonics': 0, 'pclmul_mnemonics': 0}
     for line in disassembly.splitlines():
         match = re.match(r'\s*[0-9a-f]+:\s+(\w+)', line)
@@ -121,6 +125,48 @@ def isa_presence(disassembly: str) -> dict | str:
             counts['aes_mnemonics'] += int('aes' in op)
             counts['pclmul_mnemonics'] += int('pclmul' in op)
     return counts
+
+
+def truncated_digest(published: str) -> dict | None:
+    """The raw-output binding a truncated published log carries, or None when it is complete."""
+    markers = [line for line in published.splitlines() if line.startswith(TRUNCATED)]
+    if not markers:
+        return None
+    if len(markers) != 1:
+        raise ValueError('truncated disassembly carries more than one raw output binding')
+    try:
+        digest = json.loads(markers[0][len(TRUNCATED):])
+    except json.JSONDecodeError:
+        raise ValueError('truncated disassembly raw output binding is not JSON') from None
+    if not isinstance(digest, dict) or digest.get('domain') != 'artifact-bytes-v1' \
+            or not isinstance(digest.get('sha256'), str):
+        raise ValueError('truncated disassembly raw output binding is not an artifact digest')
+    return digest
+
+
+def disassembly_binding(command: dict) -> dict:
+    """The scan's own declaration of the complete raw output and whether it was published whole."""
+    declared = command.get('disassembly_raw')
+    if not isinstance(declared, dict) or not isinstance(declared.get('truncated'), bool) \
+            or not isinstance(declared.get('digest'), dict):
+        raise ValueError('raw disassembly binding is missing: ' + command['id'])
+    return declared
+
+
+def raw_disassembly_isa(published: str, declared: dict, scratch: Path, command_id: str) -> dict:
+    """Re-derive mnemonic counts from the complete raw output the capture retained."""
+    bound = truncated_digest(published)
+    if (bound is not None) != declared['truncated']:
+        raise ValueError('published disassembly truncation differs from its binding: ' + command_id)
+    raw = scratch / f'{command_id}.stdout.raw'
+    if not raw.is_file():
+        raise ValueError('complete raw disassembly is unavailable: ' + command_id)
+    actual = artifact_byte_digest(raw).to_json()
+    if not artifact_byte_sha256_equal(declared['digest'], actual):
+        raise ValueError('complete raw disassembly changed: ' + command_id)
+    if bound is not None and not artifact_byte_sha256_equal(bound, actual):
+        raise ValueError('published raw output binding differs from the retained output: ' + command_id)
+    return count_mnemonics(raw.read_text(errors='replace'))
 
 
 def scan_fields(header: str, dynamic: str, symbol_versions: str, notes: str, symbols: str,
@@ -333,7 +379,7 @@ def verify_scan_inputs(report: dict, scan_inputs: dict[str, Path], root: Path,
 
 
 
-def verify_scan_verdicts(report: dict, root: Path = ROOT) -> None:
+def verify_scan_verdicts(report: dict, root: Path = ROOT, scratch: Path | None = None) -> None:
     """Recompute every derived ELF/loader verdict from the bound scanner output."""
     for name, scan in report['scans'].items():
         base = scan['symbol_inventory_command'].removesuffix('-symbols')
@@ -349,8 +395,14 @@ def verify_scan_verdicts(report: dict, root: Path = ROOT) -> None:
             if command['exit_code'] not in allowed:
                 raise ValueError('scan command did not complete: ' + name + '-' + suffix)
             chain[suffix] = text
-        # A truncated disassembly cannot prove its own mnemonic counts; only a complete one can.
-        counted = isa_presence(chain['disassembly']['stdout'])
+        # A published log may truncate the disassembly, but only the complete raw output it binds
+        # can prove mnemonic counts; without that raw output this verdict is unavailable.
+        command = next(record for record in report['commands']
+            if record['id'] == base + '-disassembly')
+        if scratch is None:
+            raise ValueError('complete disassembly is not selected: ' + name)
+        counted = raw_disassembly_isa(chain['disassembly']['stdout'],
+            disassembly_binding(command), scratch, base + '-disassembly')
         expected = scan_fields(chain['headers']['stdout'], chain['dynamic']['stdout'],
             chain['versions']['stdout'], chain['notes']['stdout'], chain['symbols']['stdout'], counted)
         if scan.get('raw_isa_presence') != counted:
@@ -435,12 +487,22 @@ class Capture:
                         log = evidence_path(record[key], ROOT, record['id'])
                         if not text_evidence_sha256_equal(record[key]['digest'], text_evidence_digest(log).to_json()):
                             raise ValueError('prior scan diagnostic changed')
-            except (KeyError, TypeError, ValueError):
+                disassembly = next(record for record in records
+                    if record['id'] == old_base + '-disassembly')
+                # A reused observation still needs the complete raw output its verdict was derived from.
+                raw_disassembly_isa(evidence_path(disassembly['stdout'], ROOT,
+                    disassembly['id']).read_text(), disassembly_binding(disassembly),
+                    self.work, disassembly['id'])
+            except (KeyError, TypeError, ValueError, StopIteration):
                 continue
             current_base = self.prefix + label
             for record in records:
                 suffix = record['id'][len(old_base) + 1:]
-                self.commands.append({**record, 'id': current_base + '-' + suffix})
+                self.commands.append({**record, 'id': current_base + '-' + suffix} if suffix != 'disassembly'
+                else {**record, 'id': current_base + '-' + suffix,
+                    'disassembly_raw': disassembly_binding(record)})
+            shutil.copyfile(self.work / (old_base + '-disassembly.stdout.raw'),
+                self.work / (current_base + '-disassembly.stdout.raw'))
             rebound = dict(old)
             rebound['symbol_inventory_command'] = current_base + '-symbols'
             return rebound
@@ -450,7 +512,12 @@ class Capture:
         notes = self.run(label+'-notes', ['readelf', '-nW', str(path)])
         symbols = self.run(label+'-symbols', ['nm', '-g', '--defined-only', str(path)], allow_failure=True)
         self.run(label+'-disassembly', ['objdump', '-d', '--no-show-raw-insn', str(path)])
-        isa_counts = isa_presence((self.work / f'{self.prefix}{label}-disassembly.stdout.raw').read_text(errors='replace'))
+        disassembly = self.commands[-1]
+        raw = self.work / f"{disassembly['id']}.stdout.raw"
+        disassembly['disassembly_raw'] = {
+            'truncated': truncated_digest((self.output / f"{disassembly['id']}.stdout.log").read_text()) is not None,
+            'digest': artifact_byte_digest(raw).to_json()}
+        isa_counts = count_mnemonics(raw.read_text(errors='replace'))
         return {'path': self.normalize(str(path)), 'digest': digest,
                 'scanner': scanner_digest(), **scan_fields(header, dynamic, symbol_versions,
                     notes, symbols, isa_counts),
@@ -647,7 +714,7 @@ def verify(report: dict, archive: Path, sdks: list[Path], fixture: Path, work: P
         expected_failure = record['id'].startswith(abi_prefix)
         if not expected_failure and record['exit_code'] != 0:
             raise ValueError('gating command failed: ' + record['id'])
-    verify_scan_verdicts(report)
+    verify_scan_verdicts(report, ROOT, work)
     verify_abi_matrix(report, ROOT, work, sdks, wrapper, openssl_library, openssl_crypto_library)
     verify_consumers(report, list(consumers), replacements)
 

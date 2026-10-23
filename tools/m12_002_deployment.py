@@ -10,12 +10,14 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from tools.evidence_digest import artifact_byte_digest, artifact_byte_sha256_equal, schema_artifact_sha256_equal, text_evidence_digest
-from tools.m12_002_source_sdk import native_compiler_digest, verify_report as verify_source
+from tools.evidence_digest import (artifact_byte_digest, artifact_byte_sha256_equal, atomic_json,
+    schema_artifact_sha256_equal, text_evidence_digest)
+from tools.m12_002_source_sdk import (capture_root as source_capture_root, native_compiler_digest,
+    verify_report as verify_source)
 from tools import m7_021_linux_release as release
 from tools.m12_002_platform import verify_report as verify_platform
 
-from tools.m12_002_binary import verify as verify_binary
+from tools.m12_002_binary import CONSUMER_APPS, CONSUMER_PROFILES, verify as verify_binary
 EVIDENCE = ROOT / 'docs/evidence/M12-002'
 ARCHIVE = ROOT / 'docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz'
 SOURCE_REPORTS = {'stable': EVIDENCE / 'source-sdk/stable-native/report.json',
@@ -37,6 +39,40 @@ def selected_sdks() -> dict[str, Path]:
     return result
 
 
+def selected_binary_inputs() -> dict[str, Path]:
+    """Every binary-verification input is an explicit selection, never a host default."""
+    selected = {}
+    for key, variable in (('capture_root', 'WIRESTACK_BINARY_CAPTURE_ROOT'),
+            ('wrapper', 'WIRESTACK_BINARY_WRAPPER'),
+            ('openssl_library', 'WIRESTACK_BINARY_OPENSSL_LIBRARY'),
+            ('openssl_crypto_library', 'WIRESTACK_BINARY_OPENSSL_CRYPTO_LIBRARY')):
+        value = os.environ.get(variable)
+        require(bool(value), variable + ' must select retained qualified binary inputs')
+        selected[key] = Path(value).resolve()
+    require(selected['openssl_library'] != selected['openssl_crypto_library'],
+        'independent TLS libraries must be distinct files')
+    for key in ('wrapper', 'openssl_library', 'openssl_crypto_library'):
+        require(selected[key].is_file(), selected[key].name + ' selection does not name a file: ' + str(selected[key]))
+    require(selected['capture_root'].is_dir(), 'binary capture root selection is not a directory')
+    return selected
+
+
+def selected_consumers(binary: dict, capture_root: Path) -> list[tuple[str, str, Path]]:
+    """Resolve every installed consumer executable the binary report recorded beneath its root."""
+    result = []
+    for profile in CONSUMER_PROFILES:
+        for app in CONSUMER_APPS:
+            name = profile + '/' + app
+            recorded = binary.get('consumers', {}).get(name)
+            require(isinstance(recorded, str) and bool(recorded),
+                'binary report does not declare the installed consumer: ' + name)
+            consumer = Path(recorded.replace('<scratch>', str(capture_root)))
+            require(consumer.is_file(), 'installed consumer selection is missing: ' + str(consumer))
+            result.append((profile, app, consumer.resolve()))
+    return result
+
+
+
 def require_compiler_binding(report: dict) -> None:
     """A retained source profile only qualifies builds from the compiler that produced it."""
     require(artifact_byte_sha256_equal(native_compiler_digest(), report['native_cc_digest']),
@@ -53,13 +89,41 @@ def require_production_inventory(report: dict) -> None:
             'production source changed: ' + relative)
 
 
+def require_binary_tls_binding(binary: dict, binary_inputs: dict[str, Path]) -> None:
+    """The selected independent TLS libraries are the bytes the binary report bound."""
+    for field, key in (('library_digest', 'openssl_library'),
+            ('crypto_library_digest', 'openssl_crypto_library')):
+        require(artifact_byte_sha256_equal(binary['external_tls_fixture'][field],
+            artifact_byte_digest(binary_inputs[key]).to_json()),
+            'selected independent TLS library differs from the binary report: ' + key)
+
+
+def binary_verification_arguments(binary: dict, binary_inputs: dict[str, Path],
+                                  sdks: list[Path]) -> tuple:
+    """The exact positional inputs `m12_002_binary.verify` declares, in its declared order."""
+    return (binary, ARCHIVE, sdks, ROOT / 'examples/linux/m12_002/coexist',
+        binary_inputs['capture_root'], binary_inputs['wrapper'],
+        binary_inputs['openssl_library'], binary_inputs['openssl_crypto_library'],
+        selected_consumers(binary, binary_inputs['capture_root']))
+
+
+def selected_source_capture_root() -> Path:
+    """Retained private source captures hold the TLS fixtures the reports only digest."""
+    root = source_capture_root()
+    require(root is not None, 'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained source captures')
+    require(root.is_dir(), 'source capture root selection is not a directory: ' + str(root))
+    return root
+
+
 def current_inputs(binary_report: Path | None = None) -> dict:
     selected = selected_sdks()
+    binary_inputs = selected_binary_inputs()
+    captures = selected_source_capture_root()
     profiles = {}
     for name, sdk in selected.items():
         path = SOURCE_REPORTS[name]
         report = json.loads(path.read_text())
-        verify_source(report, ARCHIVE, sdk, path.parent)
+        verify_source(report, ARCHIVE, sdk, path.parent, captures)
         require_compiler_binding(report)
         profiles[name] = report
     require(profiles['stable']['production_sources'] == profiles['candidate']['production_sources'],
@@ -75,17 +139,16 @@ def current_inputs(binary_report: Path | None = None) -> dict:
         'native VM did not validate the selected installed payload')
     require(native['image']['selected_glibc']['namespace_runner_digest'] ==
         text_evidence_digest(ROOT / 'tools/m12_002_glibc_namespace.py').to_json(), 'runtime namespace runner changed')
-    capture_root = os.environ.get('WIRESTACK_BINARY_CAPTURE_ROOT')
-    require(bool(capture_root), 'WIRESTACK_BINARY_CAPTURE_ROOT must select retained qualified binary inputs')
     selected_binary = (binary_report or EVIDENCE / 'binary/report.json').resolve()
     require(ROOT in selected_binary.parents, 'binary report must be selected from the repository evidence tree')
-    verify_binary(json.loads(selected_binary.read_text()), ARCHIVE, list(selected.values()),
-        ROOT / 'examples/linux/m12_002/coexist', Path(capture_root).resolve())
-    return {'source': profiles, 'native': native}
+    binary = json.loads(selected_binary.read_text())
+    require_binary_tls_binding(binary, binary_inputs)
+    verify_binary(*binary_verification_arguments(binary, binary_inputs, list(selected.values())))
+    return {'source': profiles, 'native': native, 'binary_report': selected_binary}
 
 
-def verify_snapshot(path: Path) -> dict:
-    snapshot = json.loads(path.read_text())
+def verify_snapshot(snapshot: dict, inputs: dict | None = None) -> dict:
+    """Validate a complete snapshot in memory; nothing is published before this succeeds."""
     require(snapshot['status'] == 'COMPLETE' and snapshot['candidate_committed'] is False,
         'snapshot is not this uncommitted task acceptance evidence')
     task = json.loads((ROOT / 'tools/tasks/M12-002.json').read_text())
@@ -95,7 +158,12 @@ def verify_snapshot(path: Path) -> dict:
         'snapshot does not record the verified binary report')
     binary_report = (ROOT / recorded_binary_report).resolve()
     require(ROOT in binary_report.parents, 'snapshot binary report is outside the repository')
-    inputs = current_inputs(binary_report)
+    if inputs is None:
+        inputs = current_inputs(binary_report)
+    else:
+        require(inputs['binary_report'] == binary_report,
+            'snapshot binary report differs from the verified report')
+
     require(artifact_byte_sha256_equal(snapshot['archive_digest'], inputs['source']['stable']['archive_digest']), 'deployment archive changed')
     for relative, expected in snapshot['source_digests'].items():
         require(text_evidence_digest(ROOT / relative).to_json() == expected, 'task source changed: ' + relative)
@@ -104,6 +172,10 @@ def verify_snapshot(path: Path) -> dict:
     require(snapshot['production_source_count'] == len(inputs['source']['stable']['production_sources']) == 164,
         'production input inventory changed')
     return snapshot
+
+
+def load_snapshot(path: Path) -> dict:
+    return verify_snapshot(json.loads(path.read_text()))
 
 
 def collect(binary_report: Path) -> dict:
@@ -125,8 +197,9 @@ def collect(binary_report: Path) -> dict:
         'binary_report': str(selected.relative_to(ROOT)),
         'excluded_platforms': ['linux-aarch64', 'musl', 'Windows', 'macOS'],
         'repository_full_gate': 'NOT_RERUN_KNOWN_CJDOC_HEAP_OOM_ON_UNCHANGED_PUBLIC_SOURCE'}
-    (EVIDENCE / 'verification.json').write_text(json.dumps(result, indent=2) + '\n')
-    verify_snapshot(EVIDENCE / 'verification.json')
+    # Validate the complete snapshot first; publish atomically only when every binding holds.
+    verify_snapshot(result, inputs)
+    atomic_json(EVIDENCE / 'verification.json', result)
     return result
 
 
@@ -152,7 +225,7 @@ def main() -> int:
     if args.action == 'contracts':
         return contracts()
     if args.action == 'verify':
-        verify_snapshot(EVIDENCE / 'verification.json')
+        load_snapshot(EVIDENCE / 'verification.json')
         print('M12_002_DEPLOYMENT_EVIDENCE_PASS')
     else:
         collect(args.binary_report.resolve())

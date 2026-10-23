@@ -5,8 +5,8 @@
   "status": "BLOCKED",
   "completion_claim": false,
   "release_qualification": "NOT_QUALIFIED",
-  "recorded_at_utc": "2026-10-22T12:00:00Z",
-  "method": "Typed text-evidence and artifact-byte SHA-256 comparison between the committed M12-002 reports and this revision, followed by the hardened verifier suites and the four declared acceptance commands. No capture, measurement or verification command produced new evidence: the selected archive, the second supported SDK and the native guest are unavailable in this clone. The task is BLOCKED because a required acceptance input (the selected development archive and the candidate-native SDK identity) is absent.",
+  "recorded_at_utc": "2026-10-23T00:00:00Z",
+  "method": "Typed text-evidence and artifact-byte SHA-256 comparison between the committed M12-002 reports and this revision, followed by the hardened verifier suites. No capture, measurement or verification command produced new evidence: the selected archive, the second supported SDK, the retained binary/source capture roots and the native guest are unavailable in this clone. The task is BLOCKED because a required acceptance input is absent.",
   "captured_evidence": {
     "acceptance": "docs/evidence/M12-002/README.md",
     "verification_snapshot": "docs/evidence/M12-002/verification.json",
@@ -94,7 +94,7 @@
     }
   },
   "rejected_commands": {
-    "python3 tools/m12_002_deployment.py verify": "Exit 1. Both selections stop at the committed verification.json, whose source inventory predates this revision (ValueError: task source inventory is incomplete); behind that refusal the selected archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is not tracked and is absent, so no deployment snapshot can be regenerated or verified.",
+    "python3 tools/m12_002_deployment.py verify": "Exit 1. The command now also requires WIRESTACK_SOURCE_CAPTURE_ROOT, WIRESTACK_BINARY_WRAPPER, WIRESTACK_BINARY_OPENSSL_LIBRARY and WIRESTACK_BINARY_OPENSSL_CRYPTO_LIBRARY; with every selector present it stops at the committed verification.json, whose source inventory predates this revision (ValueError: task source inventory is incomplete). Behind that refusal the selected archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is not tracked and is absent, so no deployment snapshot can be regenerated or verified.",
     "python3 tools/m12_002_deployment.py contracts": "Exit 1 without either SDK selection: it raises 'WIRESTACK_STABLE_SDK_ROOT must select the exact SDK to verify'. With both selections pointing at the installed sts 1.1.3 tree it exits 0 with 'Ran 146 tests ... OK', which exercises the contract suite only; it is not a second-version claim and it does not accept the stale reports.",
     "scripts/check-m7-032-public-api --json": "Exit 1 with {\"status\": \"FAIL\", \"error\": \"committed public API inventory is stale\"}; the current public API inventory is M7-032's to refresh, not this task's."
   },
@@ -118,5 +118,33 @@
       "gate": "qualified-deployment-inputs",
       "reason": "Depends on the three inputs above; see docs/evidence/M12-002/review-remediation/report.json."
     }
-  ]
+  ],
+  "required_retained_inputs": {
+    "WIRESTACK_STABLE_SDK_ROOT": "exact stable SDK installation",
+    "WIRESTACK_CANDIDATE_SDK_ROOT": "exact candidate SDK installation",
+    "WIRESTACK_SOURCE_CAPTURE_ROOT": "private source-capture root holding <profile>/ TLS fixtures; the source verifier re-hashes the seven fixture files there, and private keys are never committed",
+    "WIRESTACK_BINARY_CAPTURE_ROOT": "retained binary capture directory holding raw disassembly output and installed consumers",
+    "WIRESTACK_BINARY_WRAPPER": "exact SDK environment wrapper file used by the capture",
+    "WIRESTACK_BINARY_OPENSSL_LIBRARY": "exact independent OpenSSL SSL library file",
+    "WIRESTACK_BINARY_OPENSSL_CRYPTO_LIBRARY": "exact independent OpenSSL crypto library file",
+    "note": "Every selector is required and has no default. The two TLS libraries must be distinct files and must match the binary report's external_tls_fixture digests."
+  },
+  "round_3_hardening": {
+    "evidence": "docs/evidence/M12-002/review-remediation/round-3.json",
+    "source_base_commit": "5f448b1ecdfc2cd297427b24457f0639ccd1aa65",
+    "changes": [
+      "tools/m12_002_deployment.py passes the selected wrapper, capture root and both TLS libraries into m12_002_binary.verify, which previously received five arguments for a nine-parameter signature",
+      "collect() validates the complete snapshot in memory and publishes it atomically, so a refused verification leaves no COMPLETE snapshot",
+      "verify_scan_verdicts() re-derives ISA counts from the retained complete raw disassembly bound by disassembly_raw and the truncation marker, failing closed when unavailable",
+      "verify_tls_fixtures() re-hashes the seven retained fixture files under WIRESTACK_SOURCE_CAPTURE_ROOT/<profile> instead of comparing each digest with itself"
+    ],
+    "tests_run": "python3 -m unittest tools.tests.test_m12_002_deployment tools.tests.test_m12_002_binary tools.tests.test_m12_002_source_sdk: Ran 161 tests, OK (skipped=1)",
+    "not_run": [
+      "capture",
+      "collect",
+      "verify",
+      "contracts"
+    ],
+    "status_effect": "none; M12-002 remains BLOCKED and NOT_QUALIFIED"
+  }
 }
