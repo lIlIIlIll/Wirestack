@@ -346,6 +346,8 @@ internal class Http2ClientPushSource <: HttpPushSource {
                 (exchange.tryTransfer(), false)
             }
         }
+        // Observation runs outside the source lock so a sink cannot re-enter receive().
+        if (outcome[0]) { exchange.observeClaimedBody() }
         if (!outcome[0]) {
             try { response.close() } catch (_: Exception) {}
             if (outcome[1]) {
@@ -410,6 +412,9 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
     private var opened = false
     private var transferred = false
     private var terminal = false
+    private var bodyObserved = false
+    private var bodyAbandoned = false
+    private var abandonedBeforeFailure = false
 
     internal prop isTerminal: Bool { get() { synchronized(mutex) { terminal } } }
 
@@ -440,7 +445,7 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
             streamId, request.method, limits: limits, http2Limits: http2Limits
         )
         channel = Http2ClientBodyChannel(
-            streamId, flow, writer, parentContext, http2Limits,
+            streamId, flow, writer, http2StreamEventContext(parentContext, streamId), http2Limits,
             readTimeoutStage: OperationTimeoutStage.BodyReadIdle
         )
     }
@@ -541,6 +546,9 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         }
     }
 
+    /** Opens the returned pushed-body envelope once, outside the source lock. */
+    func observeClaimedBody(): Unit { observeBodyStarted() }
+
     func reject(code: Http2ErrorCode, reason: String): Unit {
         signalFailure(Http2ProtocolException(code, Http2ErrorScope.Stream(streamId), reason))
         try { channel.close() } catch (_: Exception) {}
@@ -567,8 +575,43 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
     public func completed(): Unit { finish() }
 
     public func abandoned(): Unit {
+        synchronized(mutex) {
+            bodyAbandoned = true
+            // Only an abandonment that owns the terminal decision reports a discard;
+            // a reset or reader failure recorded first keeps its typed cause.
+            if (failure.isNone()) { abandonedBeforeFailure = true }
+        }
         try { let _ = reset.cancelLocal(streamId) } catch (_: Exception) {}
         finish()
+    }
+
+    private func observeBodyStarted(): Unit {
+        if (channel.observationContext.eventSink.isNone()) { return }
+        let owns = synchronized(mutex) {
+            if (bodyObserved) { false } else { bodyObserved = true; true }
+        }
+        if (owns) {
+            http2Observe(channel.observationContext, NetworkEventKind.BodyStarted, NetworkEventOutcome.Started)
+        }
+    }
+
+    /** Closes the pushed-body envelope opened by the ownership claim.
+     * Reset and connection failure report the typed cause; abandonment is a discard.
+     */
+    private func observeBodyCompleted(observed: Bool, abandoned: Bool,
+        abandonedFirst: Bool): Unit {
+        if (!observed) { return }
+        if (abandonedFirst || (abandoned && failure.isNone() && channel.terminalFailure.isNone())) {
+            http2Observe(channel.observationContext, NetworkEventKind.BodyCompleted,
+                NetworkEventOutcome.Discarded, error: Some(pushedBodyClosed()))
+            return
+        }
+        let cause = match (synchronized(mutex) { failure }) { case Some(value) => value; case None => channel.terminalFailure }
+        let outcome = match (cause) {
+            case Some(_) => NetworkEventOutcome.Failed
+            case None => NetworkEventOutcome.Succeeded
+        }
+        http2Observe(channel.observationContext, NetworkEventKind.BodyCompleted, outcome, error: cause)
     }
 
     private func signalFailure(error: Exception): Unit {
@@ -583,7 +626,8 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         let disposition = synchronized(mutex) {
             if (terminal) { return }
             terminal = true
-            (resetRegistration, readerRegistration, transferred)
+            (resetRegistration, readerRegistration, transferred, bodyObserved,
+                bodyAbandoned, abandonedBeforeFailure)
         }
         try { channel.close() } catch (_: Exception) {}
         if (let Some(lease) <- resourceLease) { lease.close() }
@@ -593,6 +637,7 @@ internal class Http2ClientPushedExchange <: ResponseBodyObserver &
         for (frame in updates) {
             try { let _ = writer.enqueue(frame) } catch (_: Exception) {}
         }
+        observeBodyCompleted(disposition[3], disposition[4], disposition[5])
         onTerminated(streamId)
         if (!disposition[2]) { source.failed(this) }
     }
@@ -643,6 +688,11 @@ private func checkPushContext(context: OperationContext): Unit {
             retryability: Retryability.Temporary
         )
     }
+}
+
+private func pushedBodyClosed(): NetworkException {
+    NetworkException(NetworkErrorCategory.Closed, NetworkPhase.HttpBody, NetworkErrorCode.Closed,
+        "HTTP/2 pushed response body abandoned before full consumption", retryability: Retryability.Never)
 }
 
 private func pushedStreamError(streamId: Http2StreamId, message: String): Nothing {

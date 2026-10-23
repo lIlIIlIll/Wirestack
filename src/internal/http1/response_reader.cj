@@ -135,7 +135,15 @@ public func exchangeHttp1ExpectContinue(
             continueContext
         }
         let parsed = try {
-            observedHttp1ReadHead(reader, waitContext)
+            if (bodySent) {
+                observedHttp1ReadHead(reader, waitContext)
+            } else {
+                // The continue wait is an internal probe bounded by its own short budget,
+                // not the caller's response-header stage. Reporting its expected expiry as a
+                // failed stage is both spurious and, under withEarlierDeadline, mislabeled as
+                // a total-deadline timeout while the caller's total deadline is still live.
+                readHttp1ContinueWaitHead(reader, waitContext, responseHeadersBudget)
+            }
         } catch (error: NetworkException) {
             if (!bodySent && !context.isDeadlineExceeded() &&
                 isContinueWaitTimeout(error) && continueBudget.isDeadlineExceeded() &&
@@ -592,6 +600,43 @@ private func observedHttp1ReadHead(reader: Http1ResponseSequenceReader, context:
     } catch (error: Exception) {
         emitHttpStage(context, false, code: Some(httpObservationError(error)))
         throw error
+    }
+}
+
+/** Reads one head while waiting for `100 Continue`.
+ * The continue wait is an internal probe bounded by its own short budget, not the
+ * caller's response-header stage. Its expected expiry therefore reports nothing: the
+ * caller intentionally writes the body and keeps waiting. Unexpected failures report
+ * against the caller's response-header budget, so a still-live total deadline is never
+ * mislabeled as the expired owner. Both events are emitted after the read so the
+ * suppressed expected expiry never leaves an unmatched StageStarted behind.
+ */
+private func readHttp1ContinueWaitHead(reader: Http1ResponseSequenceReader,
+    waitContext: OperationContext, evidenceContext: OperationContext): Http1ParsedResponseHead {
+    try {
+        let parsed = reader.readNext(waitContext)
+        emitHttpStage(waitContext, true)
+        emitHttpStage(waitContext, false)
+        parsed
+    } catch (error: Exception) {
+        if (!isExpectedContinueWaitExpiry(error, waitContext, evidenceContext)) {
+            emitHttpStage(evidenceContext, true)
+            emitHttpStage(evidenceContext, false, code: Some(httpObservationError(error)))
+        }
+        throw error
+    }
+}
+
+private func isExpectedContinueWaitExpiry(error: Exception,
+    waitContext: OperationContext, evidenceContext: OperationContext): Bool {
+    if (evidenceContext.eventSink.isNone()) { return false }
+    match (error) {
+        case value: NetworkException => match (value.code) {
+            case NetworkErrorCode.TimedOut =>
+                waitContext.isDeadlineExceeded() && !evidenceContext.isDeadlineExceeded()
+            case _ => false
+        }
+        case _ => false
     }
 }
 

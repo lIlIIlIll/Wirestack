@@ -4,6 +4,7 @@ import std.sync.*
 import std.time.MonoTime
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack as api
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
 import wirestack.internal as internal
@@ -101,6 +102,78 @@ class Http2ClientPushOwnershipTest {
         @Expect(fixture.registry.activeCount, 0)
         @Expect(fixture.flow.activeStreamCount, 0)
         @Expect(fixture.terminations.load(), 1)
+    }
+
+    @TestCase
+    func claimedPushedBodiesEmitTheirOwnLifecycleOnThePromisedStream(): Unit {
+        let events = api.NetworkEventBuffer(capacity: 32)
+        let fixture = ClientPushOwnershipFixture(
+            context: OperationContext(eventSink: Some<api.NetworkEventSink>(events),
+                requestId: Some(801), attemptId: Some(802), connectionId: Some(803)))
+        let exchange = fixture.offer(2u32, "/pushed")
+        exchange.acceptHeaders(pushResponseFields(contentLength: 1), false)
+        let pushed = fixture.source.receive().getOrThrow()
+        exchange.acceptData(pushData(exchange.streamId, b'x'))
+        let bytes = Array<Byte>(1, repeat: 0u8)
+        @Expect(pushed.response.body.read(bytes), 1)
+        @Expect(bytes[0], b'x')
+        @Expect(pushed.response.body.read(bytes), 0)
+        pushed.close()
+        fixture.source.parentFinished()
+
+        var started: Int64 = 0
+        var completed: Int64 = 0
+        for (event in events.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyStarted =>
+                    started++
+                    // Pushed-body reads belong to the promised stream, never the parent.
+                    @Expect(event.streamId, Some(2))
+                    @Expect(event.requestId, Some(801))
+                    @Expect(event.connectionId, Some(803))
+                case NetworkEventKind.BodyCompleted =>
+                    completed++
+                    @Expect(event.streamId, Some(2))
+                    @Expect(event.outcome, NetworkEventOutcome.Succeeded)
+                    @Expect(event.errorCode.isNone())
+                case _ => ()
+            }
+        }
+        @Expect(started, 1); @Expect(completed, 1)
+        @Expect(fixture.registry.activeCount, 0)
+        @Expect(fixture.flow.activeStreamCount, 0)
+    }
+
+    @TestCase
+    func abandoningAClaimedPushedBodyClosesItsLifecycleAsDiscarded(): Unit {
+        let events = api.NetworkEventBuffer(capacity: 32)
+        let fixture = ClientPushOwnershipFixture(
+            context: OperationContext(eventSink: Some<api.NetworkEventSink>(events), connectionId: Some(804)))
+        let exchange = fixture.offer(2u32, "/abandoned")
+        exchange.acceptHeaders(pushResponseFields(contentLength: 1), false)
+        let pushed = fixture.source.receive().getOrThrow()
+        pushed.close()
+        fixture.source.parentFinished()
+
+        var started: Int64 = 0
+        var discarded: Int64 = 0
+        for (event in events.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyStarted => started++
+                case NetworkEventKind.BodyCompleted =>
+                    @Expect(event.outcome, NetworkEventOutcome.Discarded)
+                    @Expect(match (event.errorCode) {
+                        case Some(NetworkErrorCode.Closed) => true
+                        case _ => false
+                    })
+                    @Expect(event.streamId, Some(2))
+                    discarded++
+                case _ => ()
+            }
+        }
+        @Expect(started, 1); @Expect(discarded, 1)
+        @Expect(fixture.registry.activeCount, 0)
+        @Expect(fixture.flow.activeStreamCount, 0)
     }
 
     @TestCase

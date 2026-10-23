@@ -74,7 +74,10 @@
     "docs/planning/status.md",
     "tools/tasks/M10-005.json",
     "docs/evidence/M10-005",
-    "docs/api/generated"
+    "docs/api/generated",
+    "src/internal/http2/client_push.cj",
+    "src/internal/http2/client_push_ownership_test.cj",
+    "src/internal/http1/response_reader_deadline_test.cj"
   ],
   "platforms": [
     "linux-x86_64-glibc"
@@ -180,7 +183,8 @@
     "docs/evidence/M10-005/scenario-matrix.json",
     "docs/evidence/M10-005/verification.json",
     "docs/evidence/M10-005/installed/report.json",
-    "docs/evidence/M10-005/native-resolver-fixture.json"
+    "docs/evidence/M10-005/native-resolver-fixture.json",
+    "docs/evidence/M10-005/review-fixes-260-265.md"
   ],
   "timeout_seconds": 3600,
   "long_running_gate": false,
@@ -252,6 +256,10 @@
     "docs/guides/network-foundation-linux.md",
     "docs/guides/http1-linux.md",
     "docs/planning/status.md",
-    "tools/tasks/M10-005.json"
+    "tools/tasks/M10-005.json",
+    "src/internal/http2/client_push.cj",
+    "src/internal/http2/client_push_ownership_test.cj",
+    "src/internal/http1/response_reader_deadline_test.cj",
+    "docs/evidence/M10-005/review-fixes-260-265.md"
   ]
 }

@@ -338,6 +338,83 @@ class Http2ConnectionPoolTest {
     }
 
     @TestCase
+    func connectionCreationFailureReportsTheFailedPoolAcquisition(): Unit {
+        let pool = Http2ConnectionPool()
+        let sink = api.NetworkEventBuffer(capacity: 32)
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(601), attemptId: Some(602))
+        let error = @AssertThrows[NetworkException](pool.acquire(
+            poolKey("origin.example", "h2,http/1.1"), PoolNoopGoAwayListener(),
+            PoolFailingFactory(), context: context
+        ))
+        @Expect(match (error.code) { case NetworkErrorCode.ConnectRefused => true; case _ => false })
+        expectFailedH2Acquisition(sink.drain(), 601, 602, NetworkErrorCode.ConnectRefused)
+        @Expect(pool.observationSnapshot().reservedStreams, 0)
+        pool.close()
+    }
+
+    @TestCase
+    func streamAdmissionFailureReportsTheFailedPoolAcquisition(): Unit {
+        let pool = Http2ConnectionPool()
+        let sink = api.NetworkEventBuffer(capacity: 48)
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(603), attemptId: Some(604))
+        let error = @AssertThrows[Exception](pool.acquire(
+            poolKey("origin.example", "h2,http/1.1"), PoolNoopGoAwayListener(),
+            PoolStreamFailingFactory(), context: context
+        ))
+        @Expect(error.message, "fixture HTTP/2 stream admission failed")
+        expectFailedH2Acquisition(sink.drain(), 603, 604, NetworkErrorCode.SystemFailure)
+        @Expect(pool.observationSnapshot().connectingConnections, 0)
+        @Expect(pool.observationSnapshot().reservedStreams, 0)
+        pool.close()
+    }
+
+    @TestCase
+    func aggregateAdmissionFailureReportsTheFailedPoolAcquisition(): Unit {
+        // One owner record is already taken, so the pool's aggregate stream admission is
+        // rejected deterministically before any factory work or stage completion.
+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2, maximumOwners: 1
+        ))
+        let held = budget.acquireStream(internal.HttpResourceOwnerKey("origin.example", "held"))
+        let pool = Http2ConnectionPool(resourceBudget: Some(budget))
+        let sink = api.NetworkEventBuffer(capacity: 32)
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(605), attemptId: Some(606))
+        let factory = CountingH2Factory(PoolFakeFactory(8u32))
+        let error = @AssertThrows[NetworkException](pool.acquire(
+            poolKey("origin.example", "h2,http/1.1"), PoolNoopGoAwayListener(),
+            factory, context: context
+        ))
+        @Expect(match (error.code) { case NetworkErrorCode.ResourceExhausted => true; case _ => false })
+        expectFailedH2Acquisition(sink.drain(), 605, 606, NetworkErrorCode.ResourceExhausted)
+        @Expect(factory.calls.load(), 0)
+        held.close()
+        pool.close()
+    }
+
+    @TestCase
+    func successfulH2AcquisitionEmitsExactlyOneTerminalEvent(): Unit {
+        let pool = Http2ConnectionPool()
+        let factory = PoolFakeFactory(8u32)
+        let sink = api.NetworkEventBuffer(capacity: 32)
+        let lease = pool.acquire(poolKey("origin.example", "h2,http/1.1"),
+            PoolNoopGoAwayListener(), factory, context: OperationContext(eventSink: Some(sink)))
+        var acquisitions: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.HttpConnectionAcquired =>
+                    @Expect(event.outcome, NetworkEventOutcome.Succeeded)
+                    @Expect(event.connectionId, Some(lease.connectionId))
+                    acquisitions++
+                case _ => ()
+            }
+        }
+        @Expect(acquisitions, 1)
+        factory.finish(lease)
+        pool.release(lease)
+        pool.close()
+    }
+
+    @TestCase
     func poolCloseAbortsEverySharedConnectionExactlyOnce(): Unit {
         let pool = Http2ConnectionPool()
         let factory = PoolFakeFactory(1u32)
@@ -627,6 +704,83 @@ private class PoolFakeFactory <: Http2MultiplexedConnectionFactory {
             }
         }
         throw Exception("pooled HTTP/2 stream owner was not found")
+    }
+}
+
+private func expectFailedH2Acquisition(events: Array<NetworkEvent>,
+    requestId: Int64, attemptId: Int64, code: NetworkErrorCode): Unit {
+    var failedAcquisitions: Int64 = 0
+    var failedStages: Int64 = 0
+    for (event in events) {
+        match (event.kind) {
+            case NetworkEventKind.HttpConnectionAcquired =>
+                @Expect(event.outcome, NetworkEventOutcome.Failed)
+                @Expect(event.connectionId.isNone())
+                @Expect(event.requestId, Some(requestId))
+                @Expect(event.attemptId, Some(attemptId))
+                @Expect(match (event.errorCode) {
+                    case Some(value) => sameHttp2PoolCode(value, code)
+                    case None => false
+                })
+                failedAcquisitions++
+            case NetworkEventKind.StageCompleted =>
+                if (event.errorCode.isSome()) { failedStages++ }
+            case _ => ()
+        }
+    }
+    // The pool stage completes at most once; every case here faults before admission ends.
+    @Expect(failedStages <= 1)
+    @Expect(failedAcquisitions, 1)
+}
+
+private func sameHttp2PoolCode(left: NetworkErrorCode, right: NetworkErrorCode): Bool {
+    match ((left, right)) {
+        case (NetworkErrorCode.ConnectRefused, NetworkErrorCode.ConnectRefused) => true
+        case (NetworkErrorCode.ResourceExhausted, NetworkErrorCode.ResourceExhausted) => true
+        case (NetworkErrorCode.SystemFailure, NetworkErrorCode.SystemFailure) => true
+        case _ => false
+    }
+}
+
+private class PoolStreamFailingFactory <: Http2MultiplexedConnectionFactory {
+    public func create(_: HttpConnectionPoolKey, _: OperationContext,
+        _: ?internal.HttpResourceLease): Http2MultiplexedConnection {
+        PoolStreamFailingConnection(PoolFakeConnection(8u32))
+    }
+}
+
+private class PoolStreamFailingConnection <: Http2MultiplexedConnection {
+    private let delegate: PoolFakeConnection
+    init(delegate: PoolFakeConnection) { this.delegate = delegate }
+    public prop activeStreamCount: Int64 { get() { delegate.activeStreamCount } }
+    public prop ownedStreamCount: Int64 { get() { delegate.ownedStreamCount } }
+    public prop streamCapacity: UInt32 { get() { delegate.streamCapacity } }
+    public prop acceptingNewStreams: Bool { get() { delegate.acceptingNewStreams } }
+    public func openStream(_: Http2GoAwayListener, _: Bool): Http2PoolStreamClaim {
+        throw Exception("fixture HTTP/2 stream admission failed")
+    }
+    public func close(): Unit { delegate.close() }
+    public func isClosed(): Bool { delegate.isClosed() }
+    public func abort(reason!: AbortReason): Unit { delegate.abort(reason: reason) }
+}
+
+private class CountingH2Factory <: Http2MultiplexedConnectionFactory {
+    private let delegate: PoolFakeFactory
+    let calls = AtomicInt64(0)
+    init(delegate: PoolFakeFactory) { this.delegate = delegate }
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        lease: ?internal.HttpResourceLease): Http2MultiplexedConnection {
+        let _ = calls.fetchAdd(1)
+        delegate.create(key, context, lease)
+    }
+}
+
+private class PoolFailingFactory <: Http2MultiplexedConnectionFactory {
+    public func create(_: HttpConnectionPoolKey, _: OperationContext,
+        _: ?internal.HttpResourceLease): Http2MultiplexedConnection {
+        throw NetworkException(NetworkErrorCategory.Connect, NetworkPhase.TcpConnect,
+            NetworkErrorCode.ConnectRefused, "fixture H2 creation failure",
+            retryability: Retryability.Temporary)
     }
 }
 

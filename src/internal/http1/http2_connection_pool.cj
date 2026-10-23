@@ -326,6 +326,9 @@ public class Http2ConnectionPool <: Resource {
         let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
         emitHttpStage(poolContext, true)
         var poolStageOpen = true
+        // Terminal acquisition evidence is owed even when the failure happens after
+        // capacity admission: stream, aggregate or connection creation.
+        var acquisitionOpen = true
         let registration = poolContext.cancellation.register { => wakeHttp2Pool() }
         var streamResourceLease = None<internal.HttpResourceLease>
         var streamLeaseTransferred = false
@@ -343,6 +346,7 @@ public class Http2ConnectionPool <: Resource {
                         pendingClaimOutstanding = false
                         emitHttpStage(poolContext, false)
                         poolStageOpen = false
+                        acquisitionOpen = false
                         emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Reused)
                         emitReusedConnectionStages(context, lease.connectionId, key.scheme == "https")
                         return lease
@@ -416,6 +420,7 @@ public class Http2ConnectionPool <: Resource {
                             }
                             streamLeaseTransferred = true
                             if (poolStageOpen) { emitHttpStage(poolContext, false); poolStageOpen = false }
+                            acquisitionOpen = false
                             emitPoolAcquired(poolContext, id, NetworkEventOutcome.Succeeded)
                             return Http2PoolLease(
                                 id, key, created, admission, streamResourceLease: streamResourceLease
@@ -437,6 +442,7 @@ public class Http2ConnectionPool <: Resource {
             throw http2PoolClosed()
         } catch (error: Exception) {
             if (poolStageOpen) { emitHttpStage(poolContext, false, code: Some(httpObservationError(error))) }
+            if (acquisitionOpen) { emitPoolAcquireFailed(poolContext, error) }
             throw error
         } finally {
             if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }

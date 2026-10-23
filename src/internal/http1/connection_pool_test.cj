@@ -352,6 +352,47 @@ class Http1ConnectionPoolTest {
     }
 
     @TestCase
+    func factoryFailureAfterAggregateAdmissionStillReportsTheFailedAcquisition(): Unit {
+        let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 1048576u64, 1048576u64, 2
+        ))
+        let pool = Http1ConnectionPool(resourceBudget: Some(budget))
+        let sink = api.NetworkEventBuffer(capacity: 32)
+        let context = OperationContext(eventSink: Some(sink), requestId: Some(501), attemptId: Some(502))
+        let failed = @AssertThrows[Exception](pool.acquire(poolTestKey(), FailingPoolFactory(), context: context))
+        @Expect(failed.message, "connect failed")
+        @Expect(pool.snapshot().reservations, 0)
+        @Expect(budget.snapshot().reservedConnections, 0)
+        var starts: Int64 = 0
+        var completed: Int64 = 0
+        var failedCompletions: Int64 = 0
+        var failedAcquisitions: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.StageStarted =>
+                    starts++
+                    @Expect(event.stage.getOrThrow(), OperationTimeoutStage.ConnectionPool)
+                case NetworkEventKind.StageCompleted =>
+                    completed++
+                    if (event.errorCode.isSome()) { failedCompletions++ }
+                case NetworkEventKind.HttpConnectionAcquired =>
+                    @Expect(event.outcome, NetworkEventOutcome.Failed)
+                    @Expect(event.errorCode.isSome())
+                    @Expect(event.connectionId.isNone())
+                    @Expect(event.requestId, Some(501))
+                    @Expect(event.attemptId, Some(502))
+                    failedAcquisitions++
+                case _ => ()
+            }
+        }
+        // Admission completed the pool stage exactly once; the factory failure owns only
+        // the acquisition terminal, so the hook is not told a stage failed after admission.
+        @Expect(starts, 1); @Expect(completed, 1); @Expect(failedCompletions, 0)
+        @Expect(failedAcquisitions, 1)
+        pool.close()
+    }
+
+    @TestCase
     func evictsLeasedConnectionAtMaximumLifetimeOnRelease(): Unit {
         let clock = PoolTestClock()
         let pool = Http1ConnectionPool(

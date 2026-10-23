@@ -34,13 +34,24 @@ internal func http2Observe(context: OperationContext, kind: NetworkEventKind,
     outcome: NetworkEventOutcome, error!: ?Exception = None<Exception>): Unit {
     if (context.eventSink.isNone()) { return }
     let code = match (error) {
-        case Some(value) => match (value) {
-            case network: NetworkException => Some(network.code)
-            case _ => Some(NetworkErrorCode.InvalidState)
-        }
+        case Some(value) => Some(http2ObservationErrorCode(value))
         case None => None<NetworkErrorCode>
     }
     emitNetworkEvent(context, NetworkEvent(kind, outcome, errorCode: code))
+}
+
+/** Maps a typed HTTP/2 failure to its stable observation code.
+ * A peer RST_STREAM(CANCEL) is a cancellation, not an undifferentiated protocol fault.
+ */
+internal func http2ObservationErrorCode(error: Exception): NetworkErrorCode {
+    match (error) {
+        case network: NetworkException => network.code
+        case protocol: Http2ProtocolException => match (protocol.code) {
+            case Http2ErrorCode.Cancel => NetworkErrorCode.Cancelled
+            case _ => NetworkErrorCode.InvalidState
+        }
+        case _ => NetworkErrorCode.InvalidState
+    }
 }
 
 internal func http2ObservedStage<T>(context: OperationContext, action: () -> T): T {

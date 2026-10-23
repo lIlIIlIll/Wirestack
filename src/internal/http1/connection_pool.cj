@@ -140,6 +140,9 @@ public class Http1ConnectionPool <: Resource {
         let poolContext = context.forStage(OperationTimeoutStage.ConnectionPool)
         emitHttpStage(poolContext, true)
         var poolStageOpen = true
+        // Stays true until an acquired/reused terminal event is emitted, so a factory
+        // failure after capacity admission still reaches HttpConnectionPoolHook.
+        var acquisitionOpen = true
         let registration = poolContext.cancellation.register { => wake() }
         try {
             while (true) {
@@ -147,6 +150,7 @@ public class Http1ConnectionPool <: Resource {
                     case Http1PoolDecision.Reuse(lease) =>
                         emitHttpStage(poolContext, false)
                         poolStageOpen = false
+                        acquisitionOpen = false
                         emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Reused)
                         emitReusedConnectionStages(context, lease.connectionId, key.scheme == "https")
                         return lease
@@ -192,6 +196,7 @@ public class Http1ConnectionPool <: Resource {
                                 throw poolClosed()
                             }
                             let lease = Http1PoolLease(id, key, connection)
+                            acquisitionOpen = false
                             emitPoolAcquired(poolContext, lease.connectionId, NetworkEventOutcome.Succeeded)
                             return lease
                         } catch (error: Exception) {
@@ -210,10 +215,12 @@ public class Http1ConnectionPool <: Resource {
             }
             throw poolClosed()
         } catch (error: Exception) {
+            // The stage completes once, at admission. A later factory failure closes no
+            // stage but still owes the hook a failed acquisition.
             if (poolStageOpen) {
                 emitHttpStage(poolContext, false, code: Some(httpObservationError(error)))
-                emitPoolAcquireFailed(poolContext, error)
             }
+            if (acquisitionOpen) { emitPoolAcquireFailed(poolContext, error) }
             throw error
         } finally {
             registration.unregister()
@@ -653,7 +660,7 @@ internal func emitPoolAcquired(context: OperationContext, id: Int64,
     ))
 }
 
-private func emitPoolAcquireFailed(context: OperationContext, error: Exception): Unit {
+internal func emitPoolAcquireFailed(context: OperationContext, error: Exception): Unit {
     let code = match (error) {
         case value: NetworkException => Some(value.code)
         case _ => Some(NetworkErrorCode.SystemFailure)

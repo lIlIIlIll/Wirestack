@@ -136,6 +136,134 @@ class Http1ServerConnectionTest {
             @Expect(running.get(2 * Duration.second).requestsServed, 1)
         } finally { client.close(); server.close() }
     }
+    @TestCase
+    func bodylessRequestAndResponseEmitResponseBodyLifecycleWithoutATransfer(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        let sink = api.NetworkEventBuffer(capacity: 128)
+        let running = spawn {
+            serveHttp1Connection(server, BodylessServerHandler(), maximumRequests: 1,
+                context: OperationContext(eventSink: Some<NetworkEventSink>(sink), connectionId: Some(911)))
+        }
+        let request = HttpRequest(HttpMethod("GET"), HttpUrl.parse("http://example.com/empty"),
+            headers: HttpHeaders.builder().add("Connection", "close").build())
+        let _ = writeHttp1Request(client, request)
+        let response = readHttp1Response(client, request.method)
+        @Expect(response.response.status, 200)
+        @Expect(response.response.body.read(Array<Byte>(1, repeat: 0u8)), 0)
+        response.response.close()
+        @Expect(running.get(Duration.second).requestsServed, 1)
+        var started: Int64 = 0
+        var completed: Int64 = 0
+        var requestId = None<Int64>
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyStarted =>
+                    started++; requestId = event.requestId
+                case NetworkEventKind.BodyCompleted =>
+                    completed++
+                    @Expect(event.requestId, requestId)
+                    @Expect(event.outcome, NetworkEventOutcome.Succeeded)
+                    @Expect(event.errorCode.isNone())
+                case _ => ()
+            }
+        }
+        // The request body has no transfer lifecycle; only the returned response body does.
+        @Expect(started, 1); @Expect(completed, 1)
+        client.close()
+    }
+
+    @TestCase
+    func streamingResponseFailureClosesTheBodyLifecycleAsFailed(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 64, maxChunk: 8)
+        let sink = api.NetworkEventBuffer(capacity: 128)
+        let reading = spawn {
+            try {
+                let response = readHttp1Response(client, HttpMethod("GET"))
+                response.response.close()
+            } catch (_: Exception) {}
+            true
+        }
+        // The server owns the write failure; the peer only observes the truncated response.
+        let error = @AssertThrows[Http1ResponseWriteException](serveHttp1Connection(
+            server, BrokenResponseBodyHandler(), maximumRequests: 1,
+            context: OperationContext(eventSink: Some<NetworkEventSink>(sink), connectionId: Some(912))))
+        match (error.code) {
+            case Http1ResponseWriteErrorCode.WriteFailed => ()
+            case _ => @Fail("broken response body lost its write failure")
+        }
+        @Expect(reading.get(Duration.second), true)
+        var started: Int64 = 0
+        var failedCompletions: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyStarted => started++
+                case NetworkEventKind.BodyCompleted =>
+                    @Expect(event.outcome, NetworkEventOutcome.Failed)
+                    @Expect(event.errorCode.isSome())
+                    failedCompletions++
+                case _ => ()
+            }
+        }
+        @Expect(started, 1); @Expect(failedCompletions, 1)
+        client.close(); server.close()
+    }
+
+    @TestCase
+    func unreadRequestBodyDoesNotProduceARequestBodyLifecycle(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        let sink = api.NetworkEventBuffer(capacity: 64)
+        let running: Future<Http1ServerConnectionResult> = spawn {
+            serveHttp1Connection(server, RejectingServerHandler(), maximumRequests: 1,
+                context: OperationContext(eventSink: Some<NetworkEventSink>(sink)))
+        }
+        let request = HttpRequest(HttpMethod("POST"), HttpUrl.parse("http://example.com/"),
+            headers: HttpHeaders.builder()
+                .add("Content-Length", "4").add("Expect", "100-continue").build(),
+            body: RequestBody.bytes("data".toArray()))
+        let _ = Http1RequestWriter(request).writeHead(client)
+        let response = readHttp1Response(client, request.method)
+        @Expect(response.response.status, 403)
+        response.response.close()
+        @Expect(running.get(Duration.second).closedForUnreadRequestBody, true)
+        var started: Int64 = 0
+        var completed: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyStarted => started++
+                case NetworkEventKind.BodyCompleted =>
+                    // The unread inbound body must not surface as a discarded response body.
+                    @Expect(event.outcome, NetworkEventOutcome.Succeeded)
+                    @Expect(event.errorCode.isNone())
+                    completed++
+                case _ => ()
+            }
+        }
+        @Expect(started, 1); @Expect(completed, 1)
+        client.close()
+    }
+}
+
+private class BodylessServerHandler <: Http1ServerHandler {
+    public func handle(_: Http1ServerRequest, _: OperationContext): Http1ServerResponse {
+        Http1ServerResponse(HttpResponse(200, "OK", ResponseBody.empty(),
+            headers: HttpHeaders.builder().add("Content-Length", "0").build()))
+    }
+}
+
+private class BrokenResponseBodyHandler <: Http1ServerHandler {
+    public func handle(_: Http1ServerRequest, _: OperationContext): Http1ServerResponse {
+        Http1ServerResponse(HttpResponse(200, "OK", ResponseBody(BrokenStreamingBody()),
+            headers: HttpHeaders.builder().add("Transfer-Encoding", "chunked").build()))
+    }
+}
+
+private class BrokenStreamingBody <: HttpBodyStream {
+    public prop contentLength: ?Int64 { get() { None<Int64> } }
+    public func read(_: Array<Byte>): Int64 {
+        throw Exception("response body source failed")
+    }
+    public func close(): Unit {}
+    public func isClosed(): Bool { false }
 }
 
 private class EchoServerHandler <: Http1ServerHandler {

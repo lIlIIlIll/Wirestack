@@ -101,11 +101,7 @@ public func serveHttp1Connection(
                 emitHttp1ServerPhase(headerContext, NetworkPhase.HttpHeaders, false, code: Some(httpObservationError(error)))
                 throw error
             }
-            let request = if (requestContext.eventSink.isSome()) {
-                Http1ServerRequest(parsed.head, observedHttp1ResponseBody(
-                    Http1ServerObservedBodySource(parsed.body), Http1ServerObservationObserver(), requestContext,
-                    { => parsed.body.trailer }), upgradeRemainder: parsed.upgradeRemainder)
-            } else { parsed }
+            let request = parsed
             if (let Some(control) <- drainControl) {
                 if (!control.admit()) { request.close(); break }
             }
@@ -127,13 +123,27 @@ public func serveHttp1Connection(
             let output = produced.getOrThrow()
             let writeContext = http1ServerObservationContext(requestContext)
             emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, true)
+            let observesBody = writeContext.eventSink.isSome() && output.duplexHandler.isNone()
+            let bodyContext = http1ServerObservationContext(requestContext)
+            if (observesBody) {
+                emitNetworkEvent(bodyContext, NetworkEvent(NetworkEventKind.BodyStarted, NetworkEventOutcome.Started))
+            }
             let evidence = try {
                 let value = writeHttp1Response(transport, request.head.method, output.response,
                     context: writeContext, limits: limits, trailer: output.trailer)
                 emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, false)
+                if (observesBody) {
+                    emitNetworkEvent(bodyContext, NetworkEvent(
+                        NetworkEventKind.BodyCompleted, NetworkEventOutcome.Succeeded))
+                }
                 value
             } catch (error: Exception) {
-                emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, false, code: Some(httpObservationError(error)))
+                let code = httpObservationError(error)
+                emitHttp1ServerPhase(writeContext, NetworkPhase.TcpWrite, false, code: Some(code))
+                if (observesBody) {
+                    emitNetworkEvent(bodyContext, NetworkEvent(NetworkEventKind.BodyCompleted,
+                        NetworkEventOutcome.Failed, errorCode: Some(code)))
+                }
                 throw error
             }
             served += 1
@@ -191,20 +201,6 @@ private func http1ServerRequestContext(context: OperationContext): OperationCont
     context.withEventCorrelation(requestId: Some(nextNetworkCorrelationId()),
         attemptId: Some(nextNetworkCorrelationId()), connectionId: context.connectionId,
         streamId: None<Int64>)
-}
-
-private class Http1ServerObservedBodySource <: HttpBodyStream {
-    private let body: ResponseBody
-    init(body: ResponseBody) { this.body = body }
-    public prop contentLength: ?Int64 { get() { body.contentLength } }
-    public func read(destination: Array<Byte>): Int64 { body.read(destination) }
-    public func close(): Unit { body.close() }
-    public func isClosed(): Bool { body.isClosed() }
-}
-
-private class Http1ServerObservationObserver <: ResponseBodyObserver {
-    public func completed(): Unit {}
-    public func abandoned(): Unit {}
 }
 
 private func writeServerFailure(transport: DuplexTransport, method: HttpMethod,

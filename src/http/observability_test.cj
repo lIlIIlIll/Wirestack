@@ -5,6 +5,8 @@ import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack as api
+import wirestack.internal.http1 as http1
+import wirestack.internal.http2 as http2
 import wirestack.net.TcpStream
 
 @Test
@@ -133,6 +135,90 @@ class HttpFacadeObservabilityTest {
     }
 
     @TestCase
+    func wrappedRequestWriteTimeoutKeepsItsPhaseCodeAndTimeoutOwner(): Unit {
+        let events = api.NetworkEventBuffer(capacity: 8)
+        let context = OperationContext(deadline: Some(api.Deadline.after(Duration.Zero)),
+            eventSink: Some<api.NetworkEventSink>(events), requestId: Some(301), attemptId: Some(302))
+        let timeout = api.NetworkException(api.NetworkErrorCategory.DeadlineExceeded,
+            api.NetworkPhase.TcpWrite, api.NetworkErrorCode.TimedOut, "fixture write timeout")
+        let wrapped = HttpException(HttpErrorCode.InvalidResponse, "wrapped write failure",
+            cause: Some<Exception>(http1.Http1RequestWriteException(
+                http1.Http1RequestWriteErrorCode.WriteFailed, "fixture HTTP/1 write failure",
+                http1.Http1RequestCommitEvidence(9, 4), cause: Some<Exception>(timeout))))
+        emitHttpFailure(context, api.NetworkEventKind.RequestCompleted, wrapped)
+        let published = events.drain()
+        @Expect(published.size, 1)
+        @Expect(published[0].kind, api.NetworkEventKind.RequestCompleted)
+        @Expect(published[0].outcome, api.NetworkEventOutcome.Failed)
+        @Expect(match (published[0].phase) {
+            case Some(api.NetworkPhase.TcpWrite) => true
+            case _ => false
+        })
+        @Expect(match (published[0].errorCode) {
+            case Some(api.NetworkErrorCode.TimedOut) => true
+            case _ => false
+        })
+        @Expect(match (published[0].timeoutReason) {
+            case Some(api.NetworkTimeoutReason.TotalDeadline) => true
+            case _ => false
+        })
+    }
+
+    @TestCase
+    func http2ProtocolAndGoAwayFailuresKeepTypedTerminalCodes(): Unit {
+        let events = api.NetworkEventBuffer(capacity: 8)
+        let context = OperationContext(eventSink: Some<api.NetworkEventSink>(events),
+            requestId: Some(311), attemptId: Some(312))
+        emitHttpFailure(context, api.NetworkEventKind.RequestCompleted,
+            http2.Http2ProtocolException(http2.Http2ErrorCode.ProtocolError,
+                http2.Http2ErrorScope.Stream(http2.Http2StreamId(3u32)), "fixture stream fault"))
+        emitHttpFailure(context, api.NetworkEventKind.RequestCompleted,
+            http2.Http2ProtocolException(http2.Http2ErrorCode.Cancel,
+                http2.Http2ErrorScope.Stream(http2.Http2StreamId(3u32)), "fixture peer cancel"))
+        emitHttpFailure(context, api.NetworkEventKind.RequestCompleted,
+            http2.Http2ProtocolException(http2.Http2ErrorCode.InternalError,
+                http2.Http2ErrorScope.Connection, "fixture connection fault"))
+        let published = events.drain()
+        @Expect(published.size, 3)
+        @Expect(match (published[0].phase) {
+            case Some(api.NetworkPhase.HttpBody) => true
+            case _ => false
+        })
+        @Expect(match (published[0].errorCode) {
+            case Some(api.NetworkErrorCode.InvalidState) => true
+            case _ => false
+        })
+        @Expect(match (published[1].errorCode) {
+            case Some(api.NetworkErrorCode.Cancelled) => true
+            case _ => false
+        })
+        @Expect(match (published[2].phase) {
+            case Some(api.NetworkPhase.HttpHeaders) => true
+            case _ => false
+        })
+        @Expect(match (published[2].errorCode) {
+            case Some(api.NetworkErrorCode.InvalidState) => true
+            case _ => false
+        })
+    }
+
+    @TestCase
+    func retainedSessionKeepsTheClosedResolversFinalSnapshot(): Unit {
+        let resolver = HttpObservationFinalSnapshotResolver()
+        let client = HttpClient.builder().resolver(resolver).build()
+        try {
+            let snapshot = client.observationSnapshot()
+            @Expect(snapshot.resolvers.size, 1)
+            @Expect(snapshot.unavailableResolvers, 0)
+            @Expect(snapshot.resolvers[0].ownerId, 4242)
+            @Expect(!snapshot.resolvers[0].isLive)
+            @Expect(snapshot.resolvers[0].activeQueries, 0)
+            @Expect(snapshot.resolvers[0].rejectedQueries, 7)
+            @Expect(snapshot.configuration.retainedGenerations, 1)
+        } finally { client.close() }
+    }
+
+    @TestCase
     func customResolverUnavailableAndRotationObservationIsReentrant(): Unit {
         let resolver = HttpObservationUnknownResolver()
         let client = HttpClient.builder().resolver(resolver).build()
@@ -252,6 +338,15 @@ private class HttpObservationRetryConnector <: HttpConnector {
         TcpStream.connect(endpoint, context: context)
     }
 }
+private class HttpObservationFinalSnapshotResolver <: Resolver & api.ResolverResourceOwner {
+    public func resolve(_: HostName, _: ?String, _: ResolveOptions, _: OperationContext): ResolveResult {
+        throw Exception("fixture resolver is not used")
+    }
+    public func resolverResourceSnapshot(): api.ResolverResourceSnapshot {
+        api.ResolverResourceSnapshot(4242, 0, 0, 0, 5, 7, isLive: false)
+    }
+}
+
 private class HttpObservationUnknownResolver <: Resolver {
     public func resolve(_: HostName, _: ?String, _: ResolveOptions, _: OperationContext): ResolveResult {
         throw Exception("fixture resolver is not used")

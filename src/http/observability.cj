@@ -3,6 +3,7 @@ package wirestack.http
 import std.collection.ArrayList
 import wirestack as api
 import wirestack.internal.http1 as http1
+import wirestack.internal.http2 as http2
 
 /** Separately sampled client counters. No cross-module atomicity is promised.
  * Resolver rows and resource owner rows are bounded diagnostic data, not metric labels.
@@ -63,22 +64,43 @@ internal func emitHttpObservation(context: OperationContext, kind: NetworkEventK
 }
 internal func emitHttpFailure(context: OperationContext, kind: NetworkEventKind, error: Exception): Unit {
     if (context.eventSink.isNone()) { return }
+    match (httpObservationFailureCause(error)) {
+        case Some(value) =>
+            api.emitNetworkEvent(context, NetworkEvent(kind, NetworkEventOutcome.Failed,
+                phase: Some(value[0]), errorCode: Some(value[1])))
+        case None => emitHttpObservation(context, kind, NetworkEventOutcome.Failed)
+    }
+}
+/** Walks the typed cause chain so terminal request events keep a stable phase and code.
+ * Free-form messages are never inspected; only declared exception types are mapped.
+ */
+private func httpObservationFailureCause(error: Exception): ?(NetworkPhase, NetworkErrorCode) {
     var current = error
     for (_ in 0..16) {
         match (current) {
-            case value: NetworkException =>
-                api.emitNetworkEvent(context, NetworkEvent(kind, NetworkEventOutcome.Failed,
-                    phase: Some(value.phase), errorCode: Some(value.code)))
-                return
-            case value: HttpException =>
-                match (value.cause) {
-                    case Some(cause) => current = cause
-                    case None => emitHttpObservation(context, kind, NetworkEventOutcome.Failed); return
-                }
-            case _ => emitHttpObservation(context, kind, NetworkEventOutcome.Failed); return
+            case value: NetworkException => return Some((value.phase, value.code))
+            case value: HttpException => match (value.cause) {
+                case Some(cause) => current = cause
+                case None => return None<(NetworkPhase, NetworkErrorCode)>
+            }
+            case value: http1.Http1RequestWriteException => match (value.cause) {
+                case Some(cause) => current = cause
+                case None => return Some((NetworkPhase.TcpWrite, NetworkErrorCode.InvalidState))
+            }
+            case value: http2.Http2ProtocolException => return Some((
+                match (value.scope) {
+                    case http2.Http2ErrorScope.Stream(_) => NetworkPhase.HttpBody
+                    case http2.Http2ErrorScope.Connection => NetworkPhase.HttpHeaders
+                },
+                match (value.code) {
+                    case http2.Http2ErrorCode.Cancel => NetworkErrorCode.Cancelled
+                    case _ => NetworkErrorCode.InvalidState
+                }))
+            case _: http2.Http2GoAwayException => return Some((NetworkPhase.HttpHeaders, NetworkErrorCode.InvalidState))
+            case _ => return None<(NetworkPhase, NetworkErrorCode)>
         }
     }
-    emitHttpObservation(context, kind, NetworkEventOutcome.Failed)
+    None<(NetworkPhase, NetworkErrorCode)>
 }
 internal func sampleHttpPool(value: Resource): api.NetworkConnectionPoolSnapshot {
     match (value) {
@@ -101,8 +123,9 @@ internal func sampleHttpResolvers(values: Array<Resolver>): (Array<api.ResolverR
     for (value in values) {
         match (value) {
             case owner: api.ResolverResourceOwner =>
+                // A closed owner still publishes its immutable final sample. That row is
+                // real data, so only owners without counters are unavailable.
                 let row = owner.resolverResourceSnapshot()
-                if (!row.isLive) { unavailable++; continue }
                 var found = false
                 for (existing in rows) { if (existing.ownerId == row.ownerId) { found = true; break } }
                 if (!found) { rows.add(row) }

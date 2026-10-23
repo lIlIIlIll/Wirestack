@@ -48,6 +48,57 @@ class Http1ResponseHeaderBudgetReviewTest {
 }
 
 @Test
+class Http1ContinueWaitObservationReviewTest {
+    @TestCase
+    func expectedContinueWaitExpiryEmitsNoFailedStageAndKeepsTheTotalDeadlineOwner(): Unit {
+        let clock = ReviewContinueManualClock()
+        let transport = ReviewContinueBudgetTransport(clock, true, 2 * Duration.millisecond)
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"),
+            headers: HttpHeaders.builder()
+                .add("Content-Length", "1")
+                .add("Expect", "100-continue")
+                .build(),
+            body: RequestBody.bytes([120u8])
+        )
+        let writer = Http1RequestWriter(request)
+        let sink = api.NetworkEventBuffer(capacity: 32)
+        let context = OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock)),
+            eventSink: Some<api.NetworkEventSink>(sink),
+            timeoutPolicy: OperationTimeoutPolicy(
+                responseHeaders: Some(10 * Duration.millisecond)
+            )
+        )
+        let result = exchangeHttp1ExpectContinue(
+            transport, request, writer, 5 * Duration.millisecond, context: context
+        )
+        @Expect(result.response.status, 200)
+        @Expect(writer.evidence.bodyBytesWritten, 1)
+        var failedHeaders: Int64 = 0
+        var succeededHeaders: Int64 = 0
+        for (event in sink.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.StageCompleted =>
+                    match (event.phase) {
+                        case Some(api.NetworkPhase.HttpHeaders) =>
+                            if (event.errorCode.isSome()) {
+                                failedHeaders++
+                                // The caller's total deadline is still live: the expected
+                                // continue-wait expiry must never be labeled a total timeout.
+                                @Expect(event.timeoutReason.isNone())
+                            } else { succeededHeaders++ }
+                        case _ => ()
+                    }
+                case _ => ()
+            }
+        }
+        @Expect(failedHeaders, 0); @Expect(succeededHeaders, 1)
+        result.response.close()
+    }
+}
+
+@Test
 class Http1ResponseHeaderBoundaryReviewTest {
     @TestCase
     func responseHeaderBudgetExpiryBeforeContinueDoesNotSendBody(): Unit {

@@ -314,6 +314,47 @@ class Http2ClientConnectionTest {
     }
 
     @TestCase
+    func peerCancelResetReportsCancelledOnBodyAndStreamTerminalEvents(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024, maxChunk: 13)
+        let peer = ResetIsolationHttp2Peer(serverTransport)
+        let serving = spawn { peer.serve() }
+        let events = api.NetworkEventBuffer(capacity: 64)
+        let connection = Http2ClientConnection.connect(clientTransport,
+            context: OperationContext(eventSink: Some(events), connectionId: Some(710)))
+        let resetRequest = spawn { expectResetResponse(connection, "/reset") }
+        let okRequest = spawn {
+            let response = connection.execute(HttpRequest.get("https://example.test/ok"))
+            try { readClientBody(response.body) } finally { response.close() }
+        }
+        try {
+            @Expect(resetRequest.get(Duration.second * 5), true)
+            @Expect(okRequest.get(Duration.second * 5), "ok")
+            @Expect(serving.get(Duration.second * 5), true)
+        } finally {
+            connection.abort()
+            serverTransport.abort()
+        }
+        var cancelledBodies: Int64 = 0
+        var cancelledStreams: Int64 = 0
+        var succeededBodies: Int64 = 0
+        for (event in events.drain()) {
+            match (event.kind) {
+                case NetworkEventKind.BodyCompleted =>
+                    if (match (event.errorCode) { case Some(NetworkErrorCode.Cancelled) => true; case _ => false }) {
+                        cancelledBodies++
+                    } else { succeededBodies++ }
+                case NetworkEventKind.Http2StreamClosed =>
+                    if (match (event.errorCode) { case Some(NetworkErrorCode.Cancelled) => true; case _ => false }) {
+                        cancelledStreams++
+                    }
+                case _ => ()
+            }
+        }
+        // Peer RST_STREAM(CANCEL) is a cancellation; the untouched sibling still succeeds.
+        @Expect(cancelledBodies, 1); @Expect(cancelledStreams, 1); @Expect(succeededBodies, 1)
+    }
+
+    @TestCase
     func peerGoAwayDrainsConnectionWithoutFailingAcceptedStream(): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024, maxChunk: 19)
         let peer = DrainingHttp2Peer(serverTransport)
