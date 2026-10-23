@@ -1170,7 +1170,9 @@ private func readWebSocketExact(
         checkWebSocketContext(readContext)
         attemptedIo.started = true
         try {
-            match (transport.readSome(remaining, context: readContext)) {
+            let result = transport.readSome(remaining, context: readContext)
+            checkWebSocketContext(readContext)
+            match (result) {
                 case api.ReadResult.Data(count) =>
                     if (count <= 0 || count > remaining.length) {
                         throw WebSocketException(WebSocketErrorCode.TransportFailure,

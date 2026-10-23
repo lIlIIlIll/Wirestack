@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-001",
+  "dependencies": ["M9-001"],
+  "allowed_paths": [
+    ".gitignore",
+    "docs/api/generated/docs.json",
+    "docs/evidence/M10-001",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "src/http/cancellation.cj",
+    "src/http/facade_test.cj",
+    "src/http/websocket.cj",
+    "src/http/websocket_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/proxy_literal_connect_deadline_test.cj",
+    "src/internal/http1/request_writer.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/response_reader_deadline_test.cj",
+    "src/internal/http2/write_scheduler.cj",
+    "src/internal/http2/write_scheduler_test.cj",
+    "tools/tasks/M10-001.json"
+  ],
+  "platforms": ["linux-x86_64-glibc"],
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "argv": ["python3", "tools/architecture_guard.py", "--root", ".", "--format", "text"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "network-capability-correspondence",
+      "argv": ["python3", "tools/check_network_capabilities.py", "--check"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cjpm-check",
+      "argv": ["cjpm", "check"],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cjpm-build",
+      "argv": ["cjpm", "build"],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "http-packages-full-regression",
+      "argv": ["cjpm", "test", "--exclude-tags=Performance", "--parallel", "1", "--no-progress", "--no-color", "src/internal/http1", "src/internal/http2", "src/http"],
+      "timeout_seconds": 3600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "stack-200-focused-regressions",
+      "argv": ["cjpm", "test", "src/internal/http1", "src/internal/http2", "src/http", "--filter=Http1LateReadDeadlineReviewTest.responseHeadersReturnedAfterBudgetExpiryAreRejected,Http1LateReadDeadlineReviewTest.lateFinalResponseAfterContinueDeadlineIsReturnedWithoutRequestBody,Http1LateReadDeadlineReviewTest.responseBodyBytesReturnedAfterIdleExpiryAreRejected,Http1LateReadDeadlineReviewTest.upgradedBytesReturnedAfterIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.prefixBytesReturnedAfterStreamIdleExpiryAreRejected,Http1UpgradedReadBudgetReviewTest.emptyReadRechecksDeadlineAfterTransportStateCheck,Http1LiteralProxyLateSuccessReviewTest.lateLiteralProxyDialIsRejectedBeforeRequestAndSuccessEvent,Http1LiteralProxyLateSuccessReviewTest.cancellationWhileLiteralProxyDialingIsPreservedIfAbortFails,Http2WriteSchedulerTest.completedTicketWaitRejectsAnExpiredContext,WebSocketLateReadDeadlineReviewTest.successfulBytesAfterStreamIdleAreNotPublished,Http1RequestWriteBudgetReviewTest.expectContinueReusesOneRequestWriteBudgetForHeadAndBody,Http1RequestWriteBudgetReviewTest.completeRequestReusesOneRequestWriteBudgetForHeadAndBody,HttpFacadeTest.requestCancellationOutlivesCompletedParentWhileTransferredPushStalls", "--no-color", "--no-progress"],
+      "timeout_seconds": 1800,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "public-api-docs",
+      "argv": ["env", "cjHeapSize=1GB", "scripts/check-docs", "--json"],
+      "timeout_seconds": 1800,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M10-001/stack-200-review/review-regressions.json"
+  ],
+  "revision_bound_reports": [
+    "docs/evidence/M10-001/stack-200-review/review-regressions.json"
+  ],
+  "timeout_seconds": 5400,
+  "long_running_gate": false,
+  "source_paths": [
+    ".gitignore",
+    "docs/api/generated/docs.json",
+    "docs/guides/http1-linux.md",
+    "docs/planning/status.md",
+    "src/http/cancellation.cj",
+    "src/http/facade_test.cj",
+    "src/http/websocket.cj",
+    "src/http/websocket_test.cj",
+    "src/internal/http1/proxy_client_pipeline.cj",
+    "src/internal/http1/proxy_literal_connect_deadline_test.cj",
+    "src/internal/http1/request_writer.cj",
+    "src/internal/http1/response_reader.cj",
+    "src/internal/http1/response_reader_deadline_test.cj",
+    "src/internal/http2/write_scheduler.cj",
+    "src/internal/http2/write_scheduler_test.cj",
+    "tools/tasks/M10-001.json"
+  ]
+}

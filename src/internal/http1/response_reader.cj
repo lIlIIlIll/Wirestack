@@ -134,8 +134,14 @@ public func exchangeHttp1ExpectContinue(
         } else {
             continueContext
         }
+        // Bytes may arrive after the shorter continue wait but within the full response-header budget.
         let parsed = try {
-            observedHttp1ReadHead(reader, waitContext)
+            observedHttp1ReadHead(
+                reader, waitContext, completionContext: Some(responseHeadersBudget)
+            )
+        } catch (error: Http1LateReadCompletionException) {
+            // The response bytes were consumed; this is not an empty continue wait.
+            throw error
         } catch (error: NetworkException) {
             if (!bodySent && !context.isDeadlineExceeded() &&
                 isContinueWaitTimeout(error) && continueBudget.isDeadlineExceeded() &&
@@ -389,7 +395,9 @@ internal class Http1PrefixedTransport <: DuplexTransport {
                 "CONNECT tunnel read deadline exceeded", retryability: Retryability.Temporary
             )
         }
-        if (delegate.isClosed()) { throw closedUpgradeTransport() }
+        let delegateClosed = delegate.isClosed()
+        checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+        if (delegateClosed) { throw closedUpgradeTransport() }
         synchronized(mutex) {
             if (terminal) { throw closedUpgradeTransport() }
             if (readActive) {
@@ -401,22 +409,33 @@ internal class Http1PrefixedTransport <: DuplexTransport {
             readActive = true
         }
         try {
-            if (destination.isEmpty()) { return ReadResult.Data(0) }
-            let count = synchronized(mutex) {
-                let available = prefix.size - offset
-                let copied = min(destination.length, available)
-                for (index in 0..copied) {
-                    destination.bytes[destination.offset + index] = prefix[offset + index]
-                }
-                offset += copied
-                copied
+            checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+            if (destination.isEmpty()) {
+                checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                return ReadResult.Data(0)
             }
             emitHttpStage(readContext, true)
             try {
-                let result = if (count > 0) { ReadResult.Data(count) }
-                    else { delegate.readSome(destination, context: readContext) }
-                emitHttpStage(readContext, false)
-                result
+                checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                let count = synchronized(mutex) {
+                    let available = prefix.size - offset
+                    let copied = min(destination.length, available)
+                    for (index in 0..copied) {
+                        destination.bytes[destination.offset + index] = prefix[offset + index]
+                    }
+                    copied
+                }
+                if (count > 0) {
+                    checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                    emitHttpStage(readContext, false)
+                    synchronized(mutex) { offset += count }
+                    ReadResult.Data(count)
+                } else {
+                    let result = delegate.readSome(destination, context: readContext)
+                    checkHttp1ReadContext(readContext, NetworkPhase.TcpRead)
+                    emitHttpStage(readContext, false)
+                    result
+                }
             } catch (error: Exception) {
                 emitHttpStage(readContext, false, code: Some(httpObservationError(error)))
                 throw error
@@ -554,6 +573,21 @@ private func isContinueWaitTimeout(error: NetworkException): Bool {
     }
 }
 
+/** Marks a read that consumed bytes before losing its deadline race. */
+private class Http1LateReadCompletionException <: NetworkException {
+    init(phase: NetworkPhase) {
+        super(
+            NetworkErrorCategory.DeadlineExceeded,
+            phase,
+            NetworkErrorCode.TimedOut,
+            "HTTP/1 read completed after its operation deadline",
+            retryability: Retryability.Temporary
+        )
+    }
+
+    protected override func getClassName(): String { "Http1LateReadCompletionException" }
+}
+
 private func responseCanReuse(head: Http1ResponseHead): Bool {
     match (head.framing) {
         case Http1BodyFraming.CloseDelimited | Http1BodyFraming.Tunnel => return false
@@ -583,10 +617,14 @@ protected func headerContainsToken(headers: HttpHeaders, name: String, token: St
     false
 }
 
-private func observedHttp1ReadHead(reader: Http1ResponseSequenceReader, context: OperationContext): Http1ParsedResponseHead {
+private func observedHttp1ReadHead(
+    reader: Http1ResponseSequenceReader,
+    context: OperationContext,
+    completionContext!: ?OperationContext = None<OperationContext>
+): Http1ParsedResponseHead {
     emitHttpStage(context, true)
     try {
-        let parsed = reader.readNext(context)
+        let parsed = reader.readNext(context, completionContext: completionContext)
         emitHttpStage(context, false)
         parsed
     } catch (error: Exception) {
@@ -623,7 +661,10 @@ private class Http1ResponseSequenceReader {
         parser = Http1ResponseHeadParser(requestMethod, limits: limits)
     }
 
-    func readNext(context: OperationContext): Http1ParsedResponseHead {
+    func readNext(
+        context: OperationContext,
+        completionContext!: ?OperationContext = None<OperationContext>
+    ): Http1ParsedResponseHead {
         while (true) {
             if (!input.isEmpty()) {
                 let current = input
@@ -635,7 +676,8 @@ private class Http1ResponseSequenceReader {
                 }
             }
             match (readHttp1Transport(
-                transport, MutableByteSpan(readBuffer), context, NetworkPhase.HttpHeaders
+                transport, MutableByteSpan(readBuffer), context, NetworkPhase.HttpHeaders,
+                completionContext: completionContext
             )) {
                 case ReadResult.Data(count) =>
                     if (count <= 0 || count > readBuffer.size) {
@@ -961,6 +1003,30 @@ private func readHttp1Transport(
     transport: DuplexTransport,
     destination: MutableByteSpan,
     context: OperationContext,
+    phase: NetworkPhase,
+    completionContext!: ?OperationContext = None<OperationContext>
+): ReadResult {
+    let result = readHttp1TransportResult(transport, destination, context, phase)
+    let completion = match (completionContext) {
+        case Some(value) => value
+        case None => context
+    }
+    if (completion.isCancellationRequested()) {
+        checkHttp1ReadContext(completion, phase)
+    }
+    if (completion.isDeadlineExceeded()) {
+        match (result) {
+            case ReadResult.Data(_) => throw Http1LateReadCompletionException(phase)
+            case ReadResult.EndOfStream => checkHttp1ReadContext(completion, phase)
+        }
+    }
+    result
+}
+
+private func readHttp1TransportResult(
+    transport: DuplexTransport,
+    destination: MutableByteSpan,
+    context: OperationContext,
     phase: NetworkPhase
 ): ReadResult {
     try {
@@ -979,6 +1045,21 @@ private func readHttp1Transport(
             )
         }
         throw error
+    }
+}
+
+private func checkHttp1ReadContext(context: OperationContext, phase: NetworkPhase): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled, phase, NetworkErrorCode.Cancelled,
+            "HTTP/1 read cancelled", retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded, phase, NetworkErrorCode.TimedOut,
+            "HTTP/1 read deadline exceeded", retryability: Retryability.Temporary
+        )
     }
 }
 
