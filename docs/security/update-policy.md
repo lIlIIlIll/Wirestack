@@ -105,3 +105,23 @@ scripts/verify-evidence M7-030
 
 Missing, skipped, timed-out or local-only production-attestation evidence is
 not a pass.
+
+The local rehearsal consumes only the frozen M7-021 bytes. Stage them with
+`python3 tools/m7_030_linux_release.py fetch-frozen-artifact` before rehearsing;
+the command verifies an existing copy or downloads the single pinned draft
+Release asset and fails closed on a renamed, resized or byte-mutated file. A
+clean checkout must never pass on ambient ignored bytes, and the release gate
+writes its staging receipt under the ignored `build/m7-030/` work directory so a
+failed staging run cannot overwrite the committed
+`docs/evidence/M7-030/frozen-artifact.json` PASS receipt. That receipt is bound
+in the M7-030 task manifest, so removing or editing it fails the evidence gate
+instead of passing silently.
+
+`linux-release-attestation.yml` is retired as a signing entry point: it keeps
+`workflow_dispatch` with an explicit no-op, M8-007 is the active signer, and no
+new OIDC/Sigstore attestation may be minted for M7-030 without explicit
+authorization. The committed M7-030 hosted report therefore remains historical,
+and `validate-hosted` fails closed with `HOSTED_REPORT_SUBJECT` until a
+conforming report is authorized and imported. See
+[the M7-030 evidence README](../evidence/M7-030/README.md#current-blockers) for
+the current acceptance state.

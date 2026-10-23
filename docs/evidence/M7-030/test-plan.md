@@ -50,6 +50,7 @@ synthetic provider fixture is a released AWS-LC update.
 | P024 | Frozen artifact is absent from source checkout and must cross the hosted-runner boundary | Frozen asset retrieval | Reachable/hosted error | Download one exact draft Release asset by fixed tag, verify its fixed SHA-256, then validate the M7-025 bundle; missing, mismatched, latest or fallback selection fails closed |
 | P025 | Read-only GitHub Actions token cannot see the unpublished draft Release | Hosted token boundary | Hosted error | A separate staging job gets only `contents: write`, downloads and checks the draft asset, then passes it to an attestation job that has no contents write permission; OIDC and draft-write permission never coexist in one job |
 | P026 | `gh attestation verify` receives a relative signer workflow path | Hosted identity verification | Reachable/hosted error | FAIL; signer identity must be the exact `owner/repository/.github/workflows/file.yml` value for all three subjects |
+| P027 | A clean local checkout has no ignored `dist/m7-021` frozen artifact, or has a renamed, resized or byte-mutated copy | Local signing/update prerequisite | Reachable/error | FAIL closed before any manifest, signing or update gate; only the exact tag, asset name, 2,499,451 bytes and SHA-256 `c0988f62…` may be staged, and a retrieval failure or digest mismatch never leaves the artifact in place |
 
 ## Input and state domains
 
@@ -109,6 +110,7 @@ synthetic provider fixture is a released AWS-LC update.
 | S021 | Source checkout lacks the ignored artifact, or hosted retrieval selects missing, latest, fallback or digest-mismatched bytes | Frozen artifact exists only in the draft Release | P024 | FAIL closed before supply-chain validation or attestations | Workflow downloads once by exact tag and name, checks the fixed SHA-256, then validates M7-025; no other asset is accepted | CI,supply-chain,negative | P0 |
 | S022 | Read-only job queries the draft tag, or one job holds both contents write and OIDC | Unpublished draft Release | P025 | FAIL closed or static rejection | Staging and attestation permissions stay in separate jobs; both sides verify the fixed artifact digest | CI,permissions,security | P0 |
 | S023 | Attestations exist but verification uses `.github/workflows/linux-release-attestation.yml` without repository identity | Three signed subjects | P026 | FAIL closed | All verification commands use `lIlIIlIll/Wirestack/.github/workflows/linux-release-attestation.yml`; relative or foreign identity is rejected | CI,identity,regression | P0 |
+| S024 | A clean checkout lacks the ignored frozen artifact, or holds a renamed, truncated or byte-mutated copy | No `dist/m7-021` artifact | P027 | FAIL closed before manifest, signing or update work; the exact draft asset is staged once and re-verified before use | Missing, wrong-name, wrong-size and wrong-digest inputs each raise a distinct stable code, a failed retrieval publishes nothing, and an already staged artifact is verified rather than trusted | supply-chain,negative,regression | P0 |
 
 ## Test-plan matrix
 
@@ -133,6 +135,7 @@ synthetic provider fixture is a released AWS-LC update.
 | T017 | S015,S021 | P018,P024 | Wrong tag, digest, latest selector and download/validation order injected into hosted workflow | FAIL | Static contract binds one exact draft asset retrieval and requires digest check before supply-chain validation | CI,supply-chain,fault-injection |
 | T018 | S015,S022 | P018,P025 | Inject OIDC into staging job or contents write into attestation job | FAIL | Static contract requires two jobs, isolated permissions and SHA-256 checks before and after bounded transfer | CI,permissions,fault-injection |
 | T019 | S016,S023 | P019,P026 | Replace full signer workflow identity with a relative path | FAIL | Static contract requires the exact repository-qualified identity three times; published artifact bundle verifies with that identity | CI,identity,fault-injection |
+| T020 | S024 | P027 | Absent, renamed, truncated, byte-mutated and stubbed-download frozen artifacts | FAIL/PASS | Each negative raises its stable code, failed retrieval writes nothing, the committed `docs/evidence/M7-030/frozen-artifact.json` receipt is left byte-identical, the gate stages under ignored `build/m7-030/`, and the exact bytes stage once and re-verify | supply-chain,negative,fault-injection |
 
 ## Coverage and gap review
 
