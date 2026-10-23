@@ -89,15 +89,15 @@ Exact commands and results are in
 revision-bound report at
 [review-regressions.json](stack-200-review/review-regressions.json).
 
-### Additional review regressions — source `3e65a74dfa1db865c78a3cce91c547eb02a110fb`
+### Additional review regressions — composite source `7468ec68de9a169ad87e36b5464f246cc28d5cd9`
 
-The added HTTP/1 prefixed-read and empty-destination deadline checks, proxy-dial
-cancellation with a throwing abort cleanup, and strengthened request-write
-budget boundary pass in a 13-case focused replay. The run used the available
-Cangjie 1.3.0-alpha.20261020001052 / CJPM 1.3.0-alpha.07 toolchain and the
-accepted AWS-LC 5.5.0 commit. This is focused smoke evidence only; no full
-M10-001 acceptance or task-gate pass is claimed. The exact command, counts, and
-baseline-reproduction limit are recorded in
+The 13-case focused replay ran on the composite M10-002 source, not on M10-001
+commit `3e65a74dfa1db865c78a3cce91c547eb02a110fb`. Its 558-test total is 541
+M10-001 cases plus 17 M10-002 cases. The run used Cangjie
+1.3.0-alpha.20261020001052 / CJPM 1.3.0-alpha.07 and AWS-LC 5.5.0. This is
+focused smoke evidence only; it neither requalifies the current M10-001 branch
+nor replaces the original M10-001 acceptance. The exact source, command, counts,
+and baseline-reproduction limit are in
 [`review-deadline-regressions.md`](review-deadline-regressions.md) and
 [`review-regressions.json`](stack-200-review/review-regressions.json).
 

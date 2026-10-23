@@ -84,8 +84,6 @@
   "source_paths": [
     ".gitignore",
     "docs/api/generated/docs.json",
-    "docs/evidence/M10-001/README.md",
-    "docs/evidence/M10-001/review-deadline-regressions.md",
     "docs/guides/http1-linux.md",
     "docs/planning/status.md",
     "src/http/cancellation.cj",
