@@ -1,7 +1,15 @@
 {
   "checked_commit": "5550cd4a19a1bfcc527fd42a7bb7cd083e2aa42f",
-  "command": ["scripts/check-m3-031-desktop-tls-adoption"],
+  "checked_source_revision": {
+    "branch": "task/M0-016-advisory-review",
+    "commit": "5550cd4a19a1bfcc527fd42a7bb7cd083e2aa42f",
+    "convention": "This is the revision whose provider inputs were inspected. It is intentionally not the current head and not the parent pull-request head; the record binds its inputs by digest, so an unrelated later commit leaves it valid and a changed input invalidates it."
+  },
+  "command": [
+    "scripts/check-m3-031-desktop-tls-adoption"
+  ],
   "command_exit_code": 1,
+  "completion_claim": false,
   "generated_at_utc": "2026-10-22T09:48:12Z",
   "hosted_run": {
     "revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
@@ -14,13 +22,59 @@
     "hosted_sha256": "600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429",
     "path": "tools/tls_provider_poc/providers.json"
   },
-  "next_action": "Rerun both native Windows and macOS provider jobs at an exact revision containing the reviewed provider input; do not promote the retained historical PASS results.",
+  "next_action": "Rerun both native Windows and macOS provider jobs at an exact revision containing these inputs, then regenerate hosted-run.json and both provider results. Do not promote the retained historical PASS results.",
   "observed_result": {
     "code": "STALE_SOURCE",
     "detail": "hosted provider inputs differ from retained run",
     "status": "FAIL"
   },
   "schema_version": 1,
+  "stale_inputs": {
+    "input_inventory_sha256": "57475b64773e1a5a3bdead63e44809af1a50504f370f3e7258dcf38912e31c19",
+    "inputs": [
+      {
+        "changed_after_hosted_run": false,
+        "changed_by_m0_016_review": false,
+        "current_sha256": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
+        "hosted_sha256": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
+        "last_change_commit": "997d0d3d5f07345950799bdbe4e97fecd077012c",
+        "path": "tools/tls_provider_poc/openssl_memory_poc.c",
+        "present_at_base": true,
+        "sha256_at_base": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933"
+      },
+      {
+        "changed_after_hosted_run": true,
+        "changed_by_m0_016_review": true,
+        "current_sha256": "bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e",
+        "hosted_sha256": "600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429",
+        "last_change_commit": "5550cd4a19a1bfcc527fd42a7bb7cd083e2aa42f",
+        "path": "tools/tls_provider_poc/providers.json",
+        "present_at_base": true,
+        "sha256_at_base": "600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429"
+      },
+      {
+        "changed_after_hosted_run": true,
+        "changed_by_m0_016_review": false,
+        "current_sha256": "cba3b7d7aba7b92895eeb13b4d3d1f88811104bdd967168e896a1aa59baf1468",
+        "hosted_sha256": "9584507f916463a83a7f0133d791f8cb4e1ac2b090761ad58f94f53e13cc0adf",
+        "last_change_commit": "1c2e35362d69bce39546e7c1e2da7ed716bda5a4",
+        "path": "tools/tls_provider_poc/run.py",
+        "present_at_base": true,
+        "sha256_at_base": "cba3b7d7aba7b92895eeb13b4d3d1f88811104bdd967168e896a1aa59baf1468"
+      },
+      {
+        "changed_after_hosted_run": true,
+        "changed_by_m0_016_review": false,
+        "current_sha256": "662e99b2de9f5b569d5c3c026f5ebf83d54ee56bd3f72c776ef3e9d0b181b1b8",
+        "hosted_sha256": "e348adeb6ef461c858fff39830add55d7c69f669b097ad9c99aa8fb2c09193ba",
+        "last_change_commit": "f43f36b330b2e473784218810e8ddc39427d7fd8",
+        "path": "tools/tls_provider_poc/validate.py",
+        "present_at_base": true,
+        "sha256_at_base": "662e99b2de9f5b569d5c3c026f5ebf83d54ee56bd3f72c776ef3e9d0b181b1b8"
+      }
+    ],
+    "summary": "All four hosted inputs are stale relative to the hosted run. Only providers.json was changed by the M0-016 advisory review (5550cd4a). run.py and validate.py already differed at base d496a242 and were changed by P1-014 digest-boundary commits 1c2e3536 and f43f36b3. openssl_memory_poc.c is byte-identical to the hosted run but is still bound and must be reverified."
+  },
   "status": "BLOCKED",
   "task_id": "M3-031"
 }

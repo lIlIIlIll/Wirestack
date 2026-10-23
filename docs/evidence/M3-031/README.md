@@ -36,10 +36,16 @@ artifacts:
 - `task-check.json`
 - `evidence.json`
 
-`hosted-run.json`, `desktop-provider-matrix.json`, `task-check.json`, and
-`evidence.json` record the historical PASS at revision
+`hosted-run.json`, `desktop-provider-matrix.json`, and `task-check.json`
+record the historical PASS at revision
 `6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`. Their PASS fields do not establish
 current M3-031 acceptance.
+
+`evidence.json` is now a schema-v2 `BLOCKED` index; the former PASS index is
+preserved verbatim in
+[`historical-acceptance-evidence.json`](historical-acceptance-evidence.json).
+`seal-evidence` refuses a non-PASS index, so this is an explicit blocker record
+rather than a fabricated qualification.
 
 `requalification-blocker-2026-10-22.json` records the current source-bound gate
 failure.
@@ -53,11 +59,30 @@ passed both native jobs at revision
 macOS 15 arm64 each passed all 18 schema-v11 capabilities with AWS-LC 5.5.0.
 Those results remain valid for the provider inputs they tested.
 
-M0-016 advisory review PR #236 changes the current
-`tools/tls_provider_poc/providers.json` input. The historical run binds SHA-256
-`600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429`; the
-current file at the reviewed M0-016 commit binds
-`bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e`.
+Four hosted provider inputs are stale relative to the historical run. The
+complete per-input inventory, with hosted, base and current digests plus the
+commit that last changed each file, is in
+[`requalification-blocker-2026-10-22.json`](requalification-blocker-2026-10-22.json).
+
+| Input | At base `d496a242` | Changed by #236 | Current digest differs from hosted |
+|---|---|---|---|
+| `providers.json` | same as current | yes (`5550cd4a`) | yes |
+| `run.py` | already differed | no (`1c2e3536`) | yes |
+| `validate.py` | already differed | no (`f43f36b3`) | yes |
+| `openssl_memory_poc.c` | identical | no (`997d0d3d`) | no |
+
+`providers.json` hosted SHA-256 is
+`600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429`; the current
+file binds `bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e`.
+`run.py` and `validate.py` were already stale at the M3-031 base, before the
+M0-016 advisory review changed anything, so this requalification gap is not
+attributable to #236 alone.
+
+`checked_source_revision` is the revision whose inputs were inspected. It is
+not the current head and not the parent pull-request head: the record binds its
+inputs by digest, so an unrelated later commit leaves it valid and any changed
+input invalidates it.
+
 ADR-0007 requires both native provider jobs to be rerun when a provider source
 input changes.
 
