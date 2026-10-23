@@ -29,12 +29,15 @@ does not preserve the historical experimental API.
 
 The canonical [`evidence.json`](evidence.json) is the original M7-032 PASS
 seal, preserved byte-for-byte. It retains the original revision, report
-digests, and source digests. The referenced task-check digest (`9b0778d7…`)
-does not match the currently available `task-check.json` (`c25a902c…`), and
-the recorded revision is unavailable in this checkout and on GitHub. The seal
-is archival evidence, not a newly verified current-source result. The current
-verifier rejects the schema-v1 seal as `UNKNOWN_SCHEMA`; current-source
-requalification remains BLOCKED.
+digests, and source digests. The task-check digest recorded by the seal
+(`9b0778d7…`) matches no `task-check.json` in this tree: `main` carries
+`c25a902c…` and the current committed receipt here is `f0867de4…`, which is
+also `task_gate.task_check_sha256` in
+[`current-source-requalification.json`](current-source-requalification.json).
+The seal's recorded revision is unavailable in this checkout and on GitHub.
+The seal is archival evidence, not a newly verified current-source result. The
+current verifier rejects the schema-v1 seal as `UNKNOWN_SCHEMA`;
+current-source requalification remains BLOCKED.
 
 The historical M7 API report and baseline remain unchanged because M7-031 and
 the M7-028 security index consume their digests. The validator's bare default
@@ -48,6 +51,20 @@ must be supplied together. The
 [`default-path-regression.json`](default-path-regression.json) records relative
 root routing, historical-artifact protection, M11 pair routing, one-sided
 override rejection, and stale-report rejection.
+
+The inventory and the public API report are byte-identical to the base
+revision. The [clean-consumer report](linux_x86_64/clean-consumer.json) is not:
+this branch adds the `NO_FOLLOW_REDIRECT=PASS` marker, so its digest moves from
+`140e6415…` to `557e5e99…`. The M7-031 candidate
+(`release-candidate.json#evidenceIndex`), the M7-031 seal
+(`evidence.json#source_sha256`), and the M7-028 security index
+(`docs/security/review/linux-1.0/evidence-index.json#evidence`) still bind the
+pre-PR `140e6415…` value. They are stale consumers, recorded as such in
+`default-path-regression.json`, and are not rewritten here: refreshing them is
+M7-031 and M7-028 requalification work, and this branch mints no replacement
+acceptance digest. On this head the M7-028 index check therefore reports
+`DIGEST_MISMATCH` for this path, and the M7-031 candidate gate is out of scope
+for M7-032.
 
 The current-source pair is intentionally a requalification output, not M7-032
 task evidence. It is absent from this task's `source_paths` and

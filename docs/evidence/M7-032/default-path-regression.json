@@ -35,12 +35,21 @@
     "generator_sha256": "e33251dbeba4a0eb5852a8431e219265bb3c0bf30b8b1e11eff8768da552dc34"
   },
   "historical_m7_artifacts": {
-    "status": "UNCHANGED",
+    "status": "API_ARTIFACTS_UNCHANGED_CLEAN_CONSUMER_REGENERATED",
     "inventory": "docs/api/baselines/wirestack-linux-pre1-m7-032.json",
     "inventory_sha256": "82d21d2aed88441d74218dae66546fbf3947d9a8516bef684a81afbe86ee4fb7",
     "report": "docs/evidence/M7-032/linux_x86_64/public-api.json",
     "report_sha256": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66",
-    "clean_consumer_sha256": "140e6415af1245934d6ec1f3103beb1c6b9253862a54f23405357aff14048685",
+    "clean_consumer": "docs/evidence/M7-032/linux_x86_64/clean-consumer.json",
+    "clean_consumer_before_sha256": "140e6415af1245934d6ec1f3103beb1c6b9253862a54f23405357aff14048685",
+    "clean_consumer_after_sha256": "557e5e994fc9bd89da1bd75360a5f246bbc84725e6841d115d615343d9e8b792",
+    "stale_consumers": [
+      "docs/evidence/M7-031/linux_x86_64/release-candidate.json#evidenceIndex",
+      "docs/evidence/M7-031/evidence.json#source_sha256",
+      "docs/security/review/linux-1.0/evidence-index.json#evidence"
+    ],
+    "consumer_state": "STALE_PENDING_OWNING_REQUALIFICATION",
+    "consumer_note": "The historical inventory and report are byte-identical to the base revision; only the clean-consumer report changed, by adding the NO_FOLLOW_REDIRECT=PASS marker. The M7-031 candidate, the M7-031 seal, and the M7-028 security index still bind the pre-PR clean-consumer digest. They are recorded as stale and are not rewritten here; refreshing them is M7-031 and M7-028 requalification work, and this branch mints or copies no replacement acceptance digest.",
     "m7_031_seal_api_digest": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66",
     "security_index_api_digest": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66"
   },
@@ -85,7 +94,11 @@
     "sha256": "5ff5a2b0988f873c167380257a1ca3394f0299bdcc61f4dc81dc5ea5bced76af",
     "identical_to_base_revision_seal": true,
     "recorded_task_check_sha256": "9b0778d7fda764fcb1a74ba3c845b5be5a98295f60286d766e8e4fda6af213e6",
-    "available_task_check_sha256": "c25a902c6907389e61b5d60e518c418ffba6b3e3982f1705abbc4b93d8444195",
+    "recorded_task_check_note": "The seal records the task-check digest captured at its sealed revision; it is not the digest of any task-check.json in this tree.",
+    "base_revision_task_check_sha256": "c25a902c6907389e61b5d60e518c418ffba6b3e3982f1705abbc4b93d8444195",
+    "base_revision_task_check_note": "The base revision's task-check.json, retained for comparison only; it is not current evidence.",
+    "available_task_check_sha256": "f0867de486d5d7189646f574698a39e64773abb8357528b4691a6bc587c589dd",
+    "available_task_check_note": "Current committed task-check.json in this tree; its digest also matches task_gate.task_check_sha256 in current-source-requalification.json.",
     "recorded_revision_available": false,
     "availability_note": "The referenced revision is absent from local Git objects and the GitHub commit API; the preserved seal is archival, not newly verified."
   }
