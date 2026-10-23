@@ -4,6 +4,7 @@
     "cleanConsumerBuild": "PASS",
     "cleanConsumerRun": "PASS",
     "exampleMarkers": [
+      "NO_FOLLOW_REDIRECT=PASS",
       "HTTP1_SERVER=PASS",
       "SSE=PASS",
       "SCOPED_CANCELLATION=PASS",

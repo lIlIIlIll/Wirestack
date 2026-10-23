@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "task_id": "M7-032",
+  "kind": "public-api-validator-default-path-regression",
+  "current_requalification_status": "BLOCKED",
+  "focused_regression": {
+    "command": "python3 -m unittest tools.tests.test_m7_032_public_api_contract -v",
+    "exit_code": 0,
+    "tests_run": 3,
+    "failures": 0,
+    "status": "PASS"
+  },
+  "test_plan": {
+    "command": "DISABLE_ZOXIDE=1 python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-032/test-plan.md --json",
+    "exit_code": 0,
+    "status": "PASS",
+    "counts": {
+      "paths": 11,
+      "scenarios": 10,
+      "tests": 7
+    }
+  },
+  "current_source_api": {
+    "write_command": "scripts/check-m7-032-public-api --write --json",
+    "write_exit_code": 0,
+    "validate_command": "scripts/check-m7-032-public-api --json",
+    "validate_exit_code": 0,
+    "status": "PASS",
+    "inventory": "docs/evidence/M7-032/current-source/linux_x86_64/public-api-inventory.json",
+    "report": "docs/evidence/M7-032/current-source/linux_x86_64/public-api.json",
+    "declarations": 363,
+    "resolved_aliases": 114,
+    "internal_aliases": 0,
+    "inventory_sha256": "086d08a610475f1e5bd528f98d675ddf8a8a16f440dd294f3bb79c07b9643db2",
+    "generator_sha256": "e33251dbeba4a0eb5852a8431e219265bb3c0bf30b8b1e11eff8768da552dc34"
+  },
+  "historical_m7_artifacts": {
+    "status": "API_ARTIFACTS_UNCHANGED_CLEAN_CONSUMER_REGENERATED",
+    "inventory": "docs/api/baselines/wirestack-linux-pre1-m7-032.json",
+    "inventory_sha256": "82d21d2aed88441d74218dae66546fbf3947d9a8516bef684a81afbe86ee4fb7",
+    "report": "docs/evidence/M7-032/linux_x86_64/public-api.json",
+    "report_sha256": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66",
+    "clean_consumer": "docs/evidence/M7-032/linux_x86_64/clean-consumer.json",
+    "clean_consumer_before_sha256": "140e6415af1245934d6ec1f3103beb1c6b9253862a54f23405357aff14048685",
+    "clean_consumer_after_sha256": "557e5e994fc9bd89da1bd75360a5f246bbc84725e6841d115d615343d9e8b792",
+    "stale_consumers": [
+      "docs/evidence/M7-031/linux_x86_64/release-candidate.json#evidenceIndex",
+      "docs/evidence/M7-031/evidence.json#source_sha256",
+      "docs/security/review/linux-1.0/evidence-index.json#evidence"
+    ],
+    "consumer_state": "STALE_PENDING_OWNING_REQUALIFICATION",
+    "consumer_note": "The historical inventory and report are byte-identical to the base revision; only the clean-consumer report changed, by adding the NO_FOLLOW_REDIRECT=PASS marker. The M7-031 candidate, the M7-031 seal, and the M7-028 security index still bind the pre-PR clean-consumer digest. They are recorded as stale and are not rewritten here; refreshing them is M7-031 and M7-028 requalification work, and this branch mints or copies no replacement acceptance digest.",
+    "m7_031_seal_api_digest": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66",
+    "security_index_api_digest": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66"
+  },
+  "write_protection": {
+    "status": "PASS",
+    "regression": "The temporary-root CLI rejects writes to historical M7 inventory/report paths before mutation; the helper guard also rejects absolute historical paths in the source root."
+  },
+  "explicit_m11_pair": {
+    "status": "PASS",
+    "regression": "The temporary-root test writes and validates an explicit M11-003 inventory/report pair without changing either historical M7 artifact."
+  },
+  "task_gate": {
+    "command": "DISABLE_ZOXIDE=1 scripts/check-task M7-032 --json --output docs/evidence/M7-032/isolated-pr-head-task-check.json",
+    "exit_code": 1,
+    "status": "FAIL",
+    "commands_executed": 8,
+    "ownership_and_fault_injection_tests": {
+      "status": "FAIL",
+      "test_count_note": "The raw task-gate total is not retained in this report; no count is claimed.",
+      "failures": 1,
+      "failure": "test_evolution_status_matches_readiness_classification: M10-004 is COMPLETE while M10-003 is BLOCKED"
+    },
+    "architecture_guard": "PASS",
+    "current_source_api": "PASS",
+    "clean_consumer": {
+      "status": "FAIL",
+      "reason": "Offline AWS-LC provider preparation cannot resolve HEAD in the source checkout."
+    },
+    "cangjie_check": "UNAVAILABLE",
+    "cangjie_build": "UNAVAILABLE",
+    "cangjie_tests": "UNAVAILABLE"
+  },
+  "evidence_verification": {
+    "command": "DISABLE_ZOXIDE=1 scripts/verify-evidence M7-032 --json --output docs/evidence/M7-032/current-evidence-verification.json",
+    "exit_code": 1,
+    "status": "FAIL",
+    "issue_code": "UNKNOWN_SCHEMA",
+    "detail": "The current verifier rejects the canonical schema-v1 historical PASS seal."
+  },
+  "historical_seal": {
+    "path": "docs/evidence/M7-032/evidence.json",
+    "sha256": "5ff5a2b0988f873c167380257a1ca3394f0299bdcc61f4dc81dc5ea5bced76af",
+    "identical_to_base_revision_seal": true,
+    "recorded_task_check_sha256": "9b0778d7fda764fcb1a74ba3c845b5be5a98295f60286d766e8e4fda6af213e6",
+    "recorded_task_check_note": "The seal records the task-check digest captured at its sealed revision; it is not the digest of any task-check.json in this tree.",
+    "base_revision_task_check_sha256": "c25a902c6907389e61b5d60e518c418ffba6b3e3982f1705abbc4b93d8444195",
+    "base_revision_task_check_note": "The base revision's task-check.json, retained for comparison only; it is not current evidence.",
+    "available_task_check_sha256": "f0867de486d5d7189646f574698a39e64773abb8357528b4691a6bc587c589dd",
+    "available_task_check_note": "Current committed task-check.json in this tree; its digest also matches task_gate.task_check_sha256 in current-source-requalification.json.",
+    "recorded_revision_available": false,
+    "availability_note": "The referenced revision is absent from local Git objects and the GitHub commit API; the preserved seal is archival, not newly verified."
+  }
+}
