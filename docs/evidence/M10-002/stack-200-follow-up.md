@@ -2,17 +2,28 @@
 
 This report records the current PR #216 candidate, including Q4 outbound HTTP/2 DATA admission. It supersedes the earlier Stack #200 follow-up results for this candidate. The historical report at `docs/evidence/M10-002/verification.json` remains unchanged and is not evidence for this source revision.
 
+## Current published candidate
+
+- Published PR #216 head: `c0a19b4bc6288803ccdf5937d0ba73115e4c69d6`.
+- All nine GitHub workflows concluded successfully. Clean Cangjie Build #39966657771 ran `scripts/check-code` and the non-Performance Cangjie suite, including `failedBufferReservationCancelsGrantedFlowPermitBeforeRetry`. M7-033 docs #39966658137 passed; main-document deployment was skipped.
+- `check task M10-002` and `validate-tasks` both exited 2 before running commands. The exact error is `DEPENDENCY_INCOMPLETE: M10-003 dependency is not COMPLETE: M10-002`; see [published task check](stack-200-review/task-check-published-c0a19b4.json), [published graph validation](stack-200-review/validate-tasks-published-c0a19b4.json), and [current PR-head report](stack-200-review/current-pr-head-verification.json).
+- `task-check-current.json` is a distinct combined-review result using PR #220's scoped validator; it reports the P1-013 → P1-012 edge and does not describe the published #216 task check.
+- `scripts/check` was not rerun at c0a19b4. The 584-test failure recorded below belongs to the earlier e72bbb3 source.
+- M10-002 remains **BLOCKED**. Keep #216 OPEN/DRAFT, #174 open, and #175 untouched. No task-gate acceptance command ran.
+
+The source-bound local acceptance details below describe the earlier candidate `e72bbb3c8a10670b716dcf263cdafff052102b84`; they are retained as historical evidence and do not qualify c0a19b4.
+
 ## Candidate and scope
 
-- Source revision: `e72bbb3c8a10670b716dcf263cdafff052102b84` (Q4 source and regression tests).
+- Historical source revision: `e72bbb3c8a10670b716dcf263cdafff052102b84` (Q4 source and regression tests).
 - Platform: Linux x86_64 glibc.
 - Toolchain: Cangjie 1.1.3, CJPM 1.1.3, cjdoc 0.7.2.
 - Q4 behavior: for positive current flow credit, cap the DATA frame to that credit, wait for the exact owner-buffer lease, recheck credit, then acquire the flow-control permit. If credit is zero, wait without retaining a managed buffer; after credit returns, acquire a lease non-blockingly or release the permit and retry through the buffer-first wait path. Stream/controller termination cancels pending lease waiters. Classic CONNECT without `:scheme` uses the actual `http` or `https` transport scheme for resource ownership.
 - No public API was added or changed.
 
-Commit `e72bbb3c8a10670b716dcf263cdafff052102b84` contains the current Q4 source and regression-test fixes. The revision-bound reports include the complete current-source run; no public API or M10-003/downstream task manifest changed.
+Commit `e72bbb3c8a10670b716dcf263cdafff052102b84` contains the earlier Q4 source and regression-test fixes. No public API or M10-003/downstream task manifest changed.
 
-The full revision-bound results are in `docs/evidence/M10-002/stack-200-review/verification.json`; scenario coverage is in `scenario-matrix.json`. The current strict documentation report is `docs-report.json` (CJDoc 0.7.2, PASS: 1,873/1,873 symbols and 950/950 parameters). The report records generated output; the checker’s format-only rewrite of checked-in `docs.json` was restored because the public API is unchanged.
+The earlier revision-bound local results are in `docs/evidence/M10-002/stack-200-review/verification.json`; scenario coverage is in `scenario-matrix.json`. The strict documentation report is `docs-report.json` (CJDoc 0.7.2, PASS: 1,873/1,873 symbols and 950/950 parameters). These reports remain bound to e72bbb3; they are not evidence for the published c0a19b4 head.
 
 ## Review finding closure
 

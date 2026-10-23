@@ -20,16 +20,19 @@ The independent 122-test analysis also confirmed that refreshing only the adviso
 
 ## M10-002 task-gate blockers
 
-`task-check-current.json` is `INVALID` (exit 2), has `commands: []`, and reports `DEPENDENCY_INCOMPLETE: P1-013 dependency is not COMPLETE: P1-012`. No M10-002 acceptance command ran.
+At the published #216 head `c0a19b4bc6288803ccdf5937d0ba73115e4c69d6`, `task-check-published-c0a19b4.json` records `check task M10-002` exiting 2 with `INVALID`, `commands: []`, and `DEPENDENCY_INCOMPLETE: M10-003 dependency is not COMPLETE: M10-002`. `validate-tasks-published-c0a19b4.json` records the same graph error, exit 2, and no task IDs. Neither command ran M10-002 acceptance commands.
 
-P1-012's `global-readiness.json` is `BLOCKED`: the global readiness check rejects M10-004 because M10-003 is not COMPLETE. `validate-tasks` and global fast/full checks stop as `INVALID` before commands; evidence-all and task evidence verification fail. The planning status also contains the M10-004/M10-003 contradiction above.
+`task-check-current.json` is a separate combined-review result using the scoped-validator changes from draft PR #220. It reports `P1-013 dependency is not COMPLETE: P1-012`; that result is not the published #216 task check and #220 is not integrated into #216.
 
-The strict repository validator evaluates declared dependencies even for BLOCKED rows. Therefore changing only M10-004's row to BLOCKED repairs the graph unit test but does not clear global task readiness or the M10-002 closure. The scoped-readiness changes on draft PR #220 are not integrated into #216 and have not made P1-012 COMPLETE; the combined-workspace M10-002 gate still returns `INVALID` on the P1-012 dependency.
+The global readiness receipt for P1-012 also records `BLOCKED` because the global task graph rejects M10-004 → M10-003. The planning status contains that M10-004/M10-003 contradiction.
 
-These are cross-task gate/status ownership issues. Do not edit M10-004, P1-012, or P1-013 evidence on the M10-002 branch, and do not relax the graph or dependency validators to manufacture a pass.
+The strict repository validator evaluates declared dependencies even for BLOCKED rows. Correcting only M10-004's row may clear the graph unit test, but it does not by itself establish global readiness or M10-002 acceptance. Do not edit M10-004, P1-012, or P1-013 evidence on the M10-002 branch, and do not relax dependency validators to manufacture a pass.
+
+These reports remain separate because they are bound to different candidate workspaces and dependency edges.
 
 ## Disposition
 
-M10-002 remains **BLOCKED**. The Q4 source and its recorded Linux-focused checks are not a substitute for repository-wide or task-gate acceptance. The blocker fixes require evidence or status changes owned by M0-016, M3-031, M7-030, M12-002, M10-004, and P1-012; none is safely resolvable by changing M10-002's HTTP/2 implementation.
+M10-002 remains **BLOCKED**. The published Q4 candidate has nine successful hosted workflows, including Clean Cangjie Build (which exercised the Q4 scheduler regression), but `scripts/check` was not rerun at this revision and the exact task gate is `INVALID` before acceptance commands. The current published result is recorded in `current-pr-head-verification.json`; the prior `verification.json` and source-bound local suite results describe earlier candidate `e72bbb3c8a10670b716dcf263cdafff052102b84`. The remaining repository and task-status blockers require their owning tasks; none is resolved by changing M10-002's HTTP/2 implementation.
 
-Keep PR #216 **OPEN and DRAFT** and issue #174 open. Do not start or modify M10-003 / #175, and do not mark any PR ready or merge it. Reevaluate #175 only after the repository checks and M10-002 task gate become valid and the required M10-002 acceptance commands pass on the exact candidate.
+Keep PR #216 **OPEN and DRAFT** and issue #174 open. Do not start or modify M10-003 / #175, and do not mark any PR ready or merge it. Reevaluate #175 only after repository checks and the M10-002 task gate become valid and required M10-002 acceptance commands pass on the exact candidate.
+
