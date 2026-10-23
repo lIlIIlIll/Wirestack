@@ -732,6 +732,8 @@ public class Http2ConnectionPool <: Resource {
                             case Some(id) =>
                                 waiterId = id
                                 waiters++
+                                // Waiter-count observers share this condition.
+                                changed.notifyAll()
                             case None => throw http2PoolExhausted()
                         }
                     }
