@@ -131,17 +131,17 @@ BLOCKED it emits the structured result without replacing the existing
    `.github/workflows/linux-release-attestation.yml` is intentionally retired —
    `on: workflow_dispatch` with an explicit no-op and M8-007 is the active
    signer — so this task must not reactivate it or mint new attestations.
-3. `check-task` — at candidate `946995b2ab048c263ad6c71e73b80bbc1e2c5c54`,
-   `DISABLE_ZOXIDE=1 scripts/check-task M7-030 --json --output
-   build/m7-030/task-check-current.json` executed all six commands and returned
-   `FAIL` with `issues: []`: four passed, while `supply-chain-inputs` failed
-   because the artifact was absent and `github-hosted-attestations` failed
-   `HOSTED_REPORT_SUBJECT`. The later local rehearsal downloaded and verified
-   the pinned asset and passed as `REHEARSAL`; it still recorded
-   `productionAttestation: FAIL`. The unscoped repository-wide readiness check
-   additionally reports `DEPENDENCY_INCOMPLETE` on the unrelated
-   `M10-004 → M10-003` edge; M7-030's own dependencies M7-022, M7-025 and
-   M7-029 are COMPLETE.
+3. `check-task` — candidate `eb21fc4b29d31992a110487442df7bf1452a0792`
+   was tested from a clean archive export with `dist/` absent. The
+   `scripts/check-task M7-030 --json --output
+   build/m7-030/task-check-current-stacked.json` command exited 1 after all six
+   acceptance commands: four passed and two failed, with `issues: []`. The
+   path-redacted [task-gate report](task-check-current-eb21fc4.json) records
+   the exact command statuses. The local rehearsal downloaded and verified
+   the pinned asset and passed as `REHEARSAL`; `productionAttestation` remains
+   `FAIL`. Repository-wide readiness additionally reports
+   `DEPENDENCY_INCOMPLETE` on the unrelated `M10-004 → M10-003` edge;
+   M7-030's own dependencies M7-022, M7-025 and M7-029 are COMPLETE.
 4. Downstream, this row is the only dependency M7-031 has on a non-COMPLETE
    task, so the BLOCKED classification propagates. This task does not edit
    M7-031's row, tooling or evidence — that is M7-031's own scope — but the

@@ -94,14 +94,16 @@ verified subjects. `task-check.json` binds the six acceptance commands.
 `scripts/verify-evidence M7-030 --json` returns PASS with two indexed reports,
 23 source digests and no stale path.
 
-## Current acceptance state (2026-10-23)
+## Current acceptance state (2026-10-24)
 
-The preceding local and hosted results are the 2026-08-30 record and remain
-historical. The current local gate was run on candidate
-`946995b2ab048c263ad6c71e73b80bbc1e2c5c54` in a clean checkout without `dist/`:
+The hosted attestation report remains the historical 2026-08-30 record. The
+current task gate ran on candidate
+`eb21fc4b29d31992a110487442df7bf1452a0792` from a clean tracked export with no
+`dist/`:
 
-`DISABLE_ZOXIDE=1 scripts/check-task M7-030 --json --output
-build/m7-030/task-check-current.json`
+`TMPDIR=<task-temp> TMP=<task-temp> TEMP=<task-temp> DISABLE_ZOXIDE=1
+PYTHONDONTWRITEBYTECODE=1 scripts/check-task M7-030 --json --output
+build/m7-030/task-check-current-stacked.json`
 
 The command exited 1 after executing all six acceptance commands. Overall
 status was `FAIL`, `issues: []`; four commands passed and two failed:
@@ -109,15 +111,17 @@ status was `FAIL`, `issues: []`; four commands passed and two failed:
 | Command | Current result |
 |---|---|
 | `test-plan-matrix` | PASS; 27 paths, 24 scenarios and 20 planned tests. |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tools.tests.test_m7_030_linux_release -v` (clean export of candidate `946995b2…`, no `dist/`) | PASS; 23/23 tests. `test_failed_hosted_validation_never_replaces_existing_report` verifies `HOSTED_REPORT_SUBJECT` failure preserves the prior report bytes and leaves no temporary report. |
-| `supply-chain-inputs` | FAIL, exit 1: `release artifact is absent` because `dist/m7-021` is absent. The later rehearsal successfully downloaded the exact frozen asset to ignored `build/m7-030/`. With that asset staged under `dist/`, the separately recorded validation reports the stale M7-025 generator fingerprint (`42e064cf…` versus `b7a15290…`) after M11-002 commit `0a3161e5`. Regenerating that evidence belongs to M7-025. |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tools.tests.test_m7_030_linux_release -v` (clean export of candidate `eb21fc4b…`, no `dist/`) | PASS; 23/23 tests. |
+| `supply-chain-inputs` | FAIL, exit 1: the frozen asset is absent from `dist/m7-021` in the clean export. A separate earlier validation with the exact asset staged there reported the stale M7-025 generator fingerprint (`42e064cf…` recorded, `b7a15290…` current) after M11-002 commit `0a3161e5`; that M7-025 input repair was not rerun here and is outside this task. |
 | `hosted-workflow-contract` | PASS; frozen mode, isolated staging and attestation permissions, three subjects. |
-| `local-signing-update-rehearsal` | PASS as `REHEARSAL`; the exact asset was downloaded and verified. `productionAttestation` remains `FAIL` with `HOSTED_REPORT_SUBJECT`. |
+| `local-signing-update-rehearsal` | PASS as `REHEARSAL`; downloaded and verified the exact frozen asset (2,499,451 bytes, SHA-256 `c0988f62…`). `productionAttestation` remains `FAIL` with `HOSTED_REPORT_SUBJECT`. |
 | `github-hosted-attestations` | FAIL, exit 1, `HOSTED_REPORT_SUBJECT`: the committed report lacks `signedPayloadSha256`; the retired workflow cannot produce current hosted evidence. |
 
-The task-check JSON and command logs are under ignored `build/` and are not a
-current evidence seal. Task-specific dependency validation runs all six
-commands; repository-wide readiness remains blocked on
+A path-redacted copy of the exact task-check JSON is retained at
+[`task-check-current-eb21fc4.json`](task-check-current-eb21fc4.json); raw command
+logs remain under ignored `build/` in the clean export. The report is current
+gate evidence, not a source-bound evidence seal. Task-specific dependency
+validation ran all six commands; repository-wide readiness remains blocked on
 `M10-004 → M10-003`. No production attestation, current task PASS, or source
 seal is claimed.
 
