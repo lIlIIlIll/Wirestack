@@ -114,19 +114,36 @@ public class SseWriter <: HttpBodyStream {
         try {
             let context = OperationContext.background()
             while (true) {
-                let remaining = prepareWait(context)
+                // complete() with an empty ring is this body's terminal EOF. It is observed
+                // before the lifetime context, so a cancellation or deadline that lands after
+                // completion cannot rewrite an established end-of-stream as an abort/reset.
+                let finished = synchronized(mutex) {
+                    requireOpen()
+                    drainedLocked()
+                }
+                if (finished) { return 0 }
+                var remaining: ?Duration = None<Duration>
+                var failure: ?Exception = None<Exception>
+                try { remaining = prepareWait(context) } catch (error: Exception) { failure = Some(error) }
                 let copied = synchronized(mutex) {
-                    checkCancellation(context); requireOpen()
-                    if (destination.isEmpty() || (count == 0 && completed)) { 0 }
-                    else if (count == 0) { waitChanged(remaining); -1 }
-                    else {
-                        let size = min(count, destination.size)
-                        for (i in 0..size) { destination[i] = ring[(head + i) % maximumBufferBytes] }
-                        head = (head + size) % maximumBufferBytes
-                        count -= size
-                        if (completed && count == 0) { ring = Array<Byte>() }
-                        changed.notifyAll()
-                        size
+                    requireOpen()
+                    if (drainedLocked()) {
+                        // Completion may have drained while the deadline clock was sampled.
+                        0
+                    } else {
+                        if (let Some(error) <- failure) { throw error }
+                        checkCancellation(context)
+                        if (destination.isEmpty()) { 0 }
+                        else if (count == 0) { waitChanged(remaining); -1 }
+                        else {
+                            let size = min(count, destination.size)
+                            for (i in 0..size) { destination[i] = ring[(head + i) % maximumBufferBytes] }
+                            head = (head + size) % maximumBufferBytes
+                            count -= size
+                            if (completed && count == 0) { ring = Array<Byte>() }
+                            changed.notifyAll()
+                            size
+                        }
                     }
                 }
                 if (copied >= 0) { return copied }
@@ -139,6 +156,11 @@ public class SseWriter <: HttpBodyStream {
             owner.unregister()
             synchronized(mutex) { reading = false; changed.notifyAll() }
         }
+    }
+
+    // complete() with nothing left in the ring is this body's terminal EOF.
+    private func drainedLocked(): Bool {
+        completed && count == 0
     }
 
     /** Aborts immediately, discards queued bytes and wakes both directions.

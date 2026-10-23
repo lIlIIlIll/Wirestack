@@ -14,6 +14,13 @@
     "src/http/error.cj",
     "src/http/error_test.cj",
     "src/http/resource_budget.cj",
+    "src/http/server.cj",
+    "src/http/facade_test.cj",
+    "src/internal/http2/server_connection.cj",
+    "src/internal/http2/server_mapping_test.cj",
+    "src/internal/http2/write_scheduler_test.cj",
+    "src/internal/http_resource_budget.cj",
+    "src/internal/http_resource_budget_test.cj",
     "src/sse/model.cj",
     "src/sse/decoder.cj",
     "src/sse/encoder.cj",
@@ -45,7 +52,10 @@
     "docs/planning/status.md",
     "tools/tasks/M11-001.json",
     "docs/evidence/M11-001",
-    "docs/api/generated"
+    "docs/api/generated",
+    "tools/tests/test_m11_001_evidence_inventory.py",
+    "docs/evidence/M11-001/README.md",
+    "docs/evidence/M11-001/verification.json"
   ],
   "platforms": [
     "linux-x86_64-glibc"
@@ -163,6 +173,7 @@
   ],
   "required_evidence": [
     "docs/evidence/M11-001/verification.json",
+    "docs/evidence/M11-001/task-gate.json",
     "docs/evidence/M11-001/installed/report.json",
     "docs/evidence/M11-001/docs-report.json",
     "docs/evidence/M11-001/public-api.json",
@@ -176,6 +187,13 @@
     "src/http/error.cj",
     "src/http/error_test.cj",
     "src/http/resource_budget.cj",
+    "src/http/server.cj",
+    "src/http/facade_test.cj",
+    "src/internal/http2/server_connection.cj",
+    "src/internal/http2/server_mapping_test.cj",
+    "src/internal/http2/write_scheduler_test.cj",
+    "src/internal/http_resource_budget.cj",
+    "src/internal/http_resource_budget_test.cj",
     "src/sse/model.cj",
     "src/sse/decoder.cj",
     "src/sse/encoder.cj",
@@ -205,6 +223,7 @@
     "docs/guides/sse-linux.md",
     "docs/references/whatwg-server-sent-events-2026-10-08.md",
     "docs/planning/status.md",
-    "tools/tasks/M11-001.json"
+    "tools/tasks/M11-001.json",
+    "tools/tests/test_m11_001_evidence_inventory.py"
   ]
 }

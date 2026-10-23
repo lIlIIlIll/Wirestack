@@ -17,7 +17,8 @@ Normative codec rules used:
 - Data lines append LF; dispatch at a blank line removes the final LF.
   Absent data does not dispatch; an empty data field does.
 - Empty event type defaults to message. Id containing NUL is ignored.
-  Blank-line processing commits the cursor, including id-only blocks.
+  Blank-line processing commits the pending last-event-ID buffer, including
+  id-only blocks; an id line alone and any block truncated at EOF do not.
 - Retry is ASCII digits only. Incomplete events are discarded at EOF.
 - HTTP 200 requires event-stream MIME; HTTP 204 stops reconnection.
 

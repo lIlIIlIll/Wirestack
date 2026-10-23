@@ -32,12 +32,14 @@ invalid response metadata, codec limits, cancellation and expiry are fatal.
 HTTP 200 requires MIME `text/event-stream`, with optional parameters. HTTP 204
 ends without another GET. Redirects are not followed.
 
-The parsed `lastEventId` becomes `Last-Event-ID` on a subsequent GET. A
-blank-line-terminated id-only block can update it without dispatching data;
-an incomplete block at EOF cannot. An empty id clears it, and an id containing
-NUL is ignored. **Parsing a cursor is not acknowledgement of application
-processing.** Duplicate ids and events remain possible. Applications own
-deduplication and processing checkpoints; there is no Exactly-once contract.
+The parsed `lastEventId` becomes `Last-Event-ID` on a subsequent GET. The value
+is committed only when the block's blank delimiter is processed: an `id:` line
+alone, or any block truncated at EOF, never advances the cursor. A
+blank-line-terminated id-only block still commits without dispatching data. An
+empty id clears it, and an id containing NUL is ignored. **Parsing a cursor is
+not acknowledgement of application processing.** Duplicate ids and events remain
+possible. Applications own deduplication and processing checkpoints; there is no
+Exactly-once contract.
 
 ## POST and other one-shot streams
 
@@ -118,10 +120,12 @@ writer creates no timer or worker itself.
 
 `flush()` waits for consumption by the HTTP body reader, **not** socket delivery
 or peer acknowledgement. `complete()` ends publication and drains queued bytes
-before EOF. `close()` aborts, discards bytes, wakes both directions, and makes
+before EOF. Once the ring is drained after `complete()`, the reader's EOF is
+final: a later cancellation or deadline on the writer lifetime does not turn it
+into an abort. `close()` aborts, discards bytes, wakes both directions, and makes
 later reads fail with `Closed`. A failed partial publication aborts so another
-event cannot complete that prefix. Both writer lifetime and operation context
-constrain waits.
+event cannot complete that prefix. Cancellation and deadlines still interrupt
+waits that have no established EOF.
 
 ## Ownership, errors and observability
 
@@ -136,8 +140,11 @@ structured failures where present. Do not branch on message text. Existing M10
 request/attempt, connection and H2 stream correlations remain active across
 reconnects. Parser payload and event ids do not enter network telemetry.
 
-[M11-001 evidence](../evidence/M11-001/README.md) records negative framing,
-malformed UTF-8, fuzzing, POST no-replay, reconnect bounds, real leases and
-installed consumers. Native platform claims are limited to Linux x86_64 glibc.
-Browser APIs/CORS, application acknowledgements, WebSocket expansion and gRPC
-are outside this task.
+[M11-001 evidence](../evidence/M11-001/README.md) lists the regressions for
+negative framing, malformed UTF-8, fuzzing, POST no-replay, reconnect bounds,
+real leases and installed consumers. Its task is currently BLOCKED: the earlier
+native, installed-consumer and profile receipts are historical and
+[no current receipt binds these sources](../evidence/M11-001/verification.json).
+Native platform claims are limited to Linux x86_64 glibc. Browser APIs/CORS,
+application acknowledgements, WebSocket expansion and gRPC are outside this
+task.

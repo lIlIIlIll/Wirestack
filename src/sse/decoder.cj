@@ -197,10 +197,10 @@ public class SseDecoder {
             if (size > limits.maximumIdBytes) {
                 throw SseException(SseErrorCode.IdLimit, "SSE cursor exceeds byte limit")
             }
+            // The parsed value stays pending. Only the blank-line dispatch step commits it,
+            // so a block truncated by EOF cannot advance the reconnect cursor past an
+            // event the caller never received.
             pendingId = String.fromUtf8(scratch[0..size])
-            // WHATWG updates the last event ID buffer when the id field is processed.
-            // EOF discards the pending data event but keeps this cursor update.
-            cursor = pendingId
         }
         None<SseEvent>
     }

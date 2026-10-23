@@ -1,25 +1,57 @@
 # M11-001: bounded SSE codec and explicit reconnect sessions
 
-**BLOCKED — the recorded working-tree acceptance predates post-review SSE source
-changes; source-bound evidence must be regenerated before this task can return to
-COMPLETE.**
+**BLOCKED — no receipt under this directory binds the current sources.
+Source-bound evidence must be regenerated before this task can return to COMPLETE.**
 Issue [#178](https://github.com/lIlIIlIll/Wirestack/issues/178).
-[Verification index](verification.json), [workspace receipt](workspace.json),
-[canonical task gate](task-gate.json), [installed consumer](installed/report.json),
-[one-hour profile](streaming/report.json), and [strict documentation](docs-report.json).
+[Current source status](verification.json), [task inventory](../../../tools/tasks/M11-001.json),
+and [historical receipts](historical/README.md).
 
-No commit, push, PR or issue mutation was authorized or performed. These receipts
-bind the working tree measured on 2026-10-08, not a committed release candidate.
-Post-review fixes changed `src/sse/decoder.cj` and `src/sse/session.cj` (and their
-regression tests) after that measurement, so the recorded native, installed-consumer
-and one-hour streaming runs do not bind the current sources and were not rerun.
-They do not claim release qualification or non-Linux execution.
+The task inventory is authoritative for what this task owns. After Stack #200 the
+owner PR was found to have changed `src/http/server.cj`,
+`src/internal/http2/server_connection.cj` and `src/internal/http_resource_budget.cj`
+without listing them, so `tools/tasks/M11-001.json` now binds those production
+files and their tests in both `allowed_paths` and `source_paths`. A sealed record
+therefore hashes every production file the task claims.
 
-## Scope and acceptance
+Two review rounds changed the SSE sources after the 2026-10-08 measurement, and
+this branch then changed them again:
+
+- `id:` values stay pending until the blank delimiter, so a block truncated at
+  EOF cannot advance the reconnect cursor (#266);
+- a drained `complete()` keeps normal EOF even when cancellation or expiry lands
+  before the sender's next read (#267);
+- the task inventory and this evidence layout bind every changed production file
+  (#268).
+
+Every previous receipt — native, installed consumer, one-hour H1/H2 profile, fuzz
+corpus, strict documentation, task gate, workspace and the old verification index —
+was moved byte-for-byte to [historical/](historical/README.md). It records the
+working tree measured on 2026-10-08 and is **not** current validation. Nothing in
+that directory may be cited for this revision.
+
+No build, test, installed-consumer, documentation or one-hour profile command has
+been executed for this branch. The regressions described below exist in source;
+their outcomes are not claimed here, and no commit, push, PR, merge or issue
+mutation was performed by this task.
+
+## Current regressions
+
+| Finding | Source change | Permanent regressions |
+|---|---|---|
+| #266 cursor only at dispatch | `src/sse/decoder.cj` | `SseDecoderTests.idLineStaysPendingUntilTheBlockBlankLineDispatches`, `pendingIdSurvivesTruncationAtEveryByteAndOnlyBlankLineAdvancesCursor`, `cursorAdvancesExactlyAtEachBlankDelimiterBytewise`; `SseNativeSessionTest.idLineTruncatedBeforeTheBlankDelimiterIsNotUsedOnReconnect`, `idOnlyBlockCommittedAtItsDelimiterReachesTheReconnectRequest` |
+| #267 completed EOF precedence | `src/sse/writer.cj` | `SseWriterTest.completedRingKeepsEofWhenCancellationOrExpiryFollowsDrain`, `SseWriterTest.incompleteDrainStillReportsCancellationAndExpiry` |
+| #268 evidence binding | `tools/tasks/M11-001.json` | `tools/tests/test_m11_001_evidence_inventory.py` |
+
+## Historical scope and acceptance (2026-10-08, superseded)
+
+The table below describes what the historical receipts measured. It is retained
+as context for the design, not as evidence for the current candidate.
+
+### Scope and acceptance
 
 | Criterion | Executed evidence |
 |---|---|
-| Incremental UTF-8/BOM/CR/LF/CRLF, multiline and empty data, event/id/retry/comments/unknown fields, incomplete EOF | `SseDecoderTests`; 594 normative cut schedules; [reproducible corpus](fuzz/corpus.json) |
+| Incremental UTF-8/BOM/CR/LF/CRLF, multiline and empty data, event/id/retry/comments/unknown fields, incomplete EOF | `SseDecoderTests`; 594 normative cut schedules; [reproducible corpus](historical/fuzz/corpus.json) |
 | Malformed UTF-8 replacement, bounded line/block/fields/cursor/retry/no-progress state | Negative decoder cases and 1,536 deterministic mutations in `SseDeterministicFuzzTests` |
 | Bounded event/comment encoding and server publication | `SseEncoderTest`, `SseWriterTest`; ring backpressure, flush, completion, partial-publication abort, close, cancellation and deadline |
 | Explicit GET recovery, cursor versus acknowledgement, no POST replay or redirect | `SseNativeSessionTest`, `SseNativeFramingTest`; installed duplicate cursor/truncated GET and explicitly-safe POST cases |
@@ -27,22 +59,25 @@ They do not claim release qualification or non-Linux execution.
 | Impossible reservations fail without waiting or submitting | `unadmittableBufferFailsWithoutWaiterOrRequest`; zero and oversized DATA reservations |
 | Distinct graceful EOF, local close, cancellation and truncation; fatal malformed framing/MIME | Native framing peers verify structured exceptions and original causes; owned bodies/leases return to zero |
 | One hour and at least one million ordered events per protocol, steady resources, prompt cancellation | Production-session H1/H2 profile below; no substituted M6 parser |
-| Installation independent of checkout paths | Eight checks in the extracted consumer; [compiled example](../../../examples/linux/m11_001/sse.cj), 14 native server requests |
-| Public API documentation and architecture | Six packages at 100% symbol/parameter coverage; generated HTML navigated through SSE to `SseSession`; architecture guard PASS; [current pre-1.0 inventory](../../api/baselines/wirestack-linux-pre1-m11-001.json) |
+| Installation independent of checkout paths | Eight checks in the extracted consumer; [compiled example](../../../../examples/linux/m11_001/sse.cj), 14 native server requests |
+| Public API documentation and architecture | Six packages at 100% symbol/parameter coverage; generated HTML navigated through SSE to `SseSession`; architecture guard PASS; [current pre-1.0 inventory](../../../api/baselines/wirestack-linux-pre1-m11-001.json) |
 
 The session holds an actual client DATA lease, not a facade counter. Parsed
 Last-Event-ID is not application acknowledgement; duplicates remain possible.
 GET recovery is disabled by default and finite when enabled. `oneShot` never
 replays POST, even for a replayable, explicitly-safe request. `flush` means
 consumption by the local HTTP body reader, not delivery to a peer.
-See the [SSE guide](../../guides/sse-linux.md) for defaults, hard ceilings,
-ownership and [normative input](../../references/whatwg-server-sent-events-2026-10-08.md).
+See the [SSE guide](../../../guides/sse-linux.md) for defaults, hard ceilings,
+ownership and [normative input](../../../references/whatwg-server-sent-events-2026-10-08.md).
 
-## Exact native results
+### Exact native results
+
+These results belong to the superseded 2026-10-08 measurement and are not
+current validation.
 
 | Command/scenario | Result |
 |---|---|
-| `scripts/check-task M11-001 --json --output docs/evidence/M11-001/task-gate.json` | Exit 0; all five selected task commands PASS |
+| `scripts/check-task M11-001 --json --output docs/evidence/M11-001/task-gate.json` (historical) | Exit 0; all five selected task commands PASS |
 | `cjpm check` | Exit 0 |
 | `cjpm build --target-dir <scratch>/check-build-target` | Exit 0 |
 | `cjpm test --target-dir target/m11-001-native --exclude-tags=Performance --parallel 1 --no-progress --no-color --timeout-each 60s` | Exit 0; 990 total, 962 passed, 28 explicitly skipped, zero failures/errors |
@@ -57,9 +92,9 @@ Default native compiler/manager: Cangjie 1.3.0-alpha.06, target
 `x86_64-unknown-linux-gnu`. SDK 1.1.3 was already qualified and was not rebuilt
 or modified. Performance cases skipped in correctness commands are not counted
 as passes; the one-hour profiles were executed separately with SDK 1.3.
-Raw normalized outputs are under [native/](native/) and [streaming/](streaming/).
+Raw normalized outputs are under [native/](historical/native/) and [streaming/](historical/streaming/).
 
-## Formal production-session profile
+### Formal production-session profile
 
 Executed both protocols concurrently for 3600 seconds, each requiring at least
 1,000,000 numbered events. The real `SseSession`/`SseDecoder` consumes the stream;
@@ -87,7 +122,7 @@ reservation during active samples and release it at termination. H2 sibling
 survival passed. This is a bounded-lifetime acceptance profile, not a throughput
 improvement claim or benchmark comparison.
 
-[Start receipt](streaming/start.json) and final report seal the production sources
+[Start receipt](historical/streaming/start.json) and final report seal the production sources
 measured at that time and four compiled test artifacts. Start/end hashes are
 identical within the recorded run, but the recorded inventory predates the
 post-review `src/sse/decoder.cj` and `src/sse/session.cj` changes, so it no longer
@@ -108,7 +143,7 @@ python3 tools/gates/m11_001_sse_streaming_profile.py \
 The environment runner follows the repository's existing SDK gate convention.
 Set `TMPDIR`, `TMP` and `TEMP` to that private disk-backed task directory.
 
-## Integration corrections and limits
+### Integration corrections and limits
 
 A prematurely terminated H1 chunk previously escaped the public body boundary
 as an internal chunk exception. The boundary now preserves it as typed

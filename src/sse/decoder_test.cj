@@ -57,18 +57,76 @@ class SseDecoderTests {
         decoder.close()
     }
     @TestCase
-    func idLineCommitsCursorImmediatelyAndEofKeepsItWithoutDispatch(): Unit {
+    func idLineStaysPendingUntilTheBlockBlankLineDispatches(): Unit {
         let decoder = SseDecoder(lastEventId: "old")
         let _ = decoder.decode("id: next\n".toArray())
-        @Expect(decoder.lastEventId, "next")
+        @Expect(decoder.lastEventId, "old")
         @Expect(decoder.decode("\n".toArray()).event.isNone())
         @Expect(decoder.lastEventId, "next")
         let _ = decoder.decode("id: unfinished\ndata: pending\n".toArray())
-        @Expect(decoder.lastEventId, "unfinished")
+        @Expect(decoder.lastEventId, "next")
         decoder.finish()
-        @Expect(decoder.lastEventId, "unfinished")
+        @Expect(decoder.lastEventId, "next")
         @Expect(@AssertThrows[SseException](decoder.decode(Array<Byte>())).code == SseErrorCode.Closed)
         decoder.close()
+    }
+    @TestCase
+    func pendingIdSurvivesTruncationAtEveryByteAndOnlyBlankLineAdvancesCursor(): Unit {
+        let payload = "id: next\ndata: kept\n".toArray()
+        for cut in 0..=payload.size {
+            let decoder = SseDecoder(lastEventId: "old")
+            let head = decoder.decode(payload, length: Some(cut))
+            @Expect(head.event.isNone())
+            @Expect(decoder.lastEventId, "old")
+            decoder.finish()
+            @Expect(decoder.lastEventId, "old")
+            decoder.close()
+        }
+        let exact = SseDecoder(lastEventId: "old")
+        @Expect(exact.decode("id: next\ndata: kept\n\n".toArray()).event.getOrThrow().lastEventId, "next")
+        @Expect(exact.lastEventId, "next")
+        exact.close()
+        // A truncated block keeps the last dispatched cursor even when an earlier block dispatched.
+        let dispatched = SseDecoder()
+        @Expect(dispatched.decode("data: first\nid: one\n\n".toArray()).event.getOrThrow().lastEventId, "one")
+        @Expect(dispatched.decode("data: second\nid: two\n".toArray()).event.isNone())
+        @Expect(dispatched.lastEventId, "one")
+        dispatched.finish()
+        @Expect(dispatched.lastEventId, "one")
+        dispatched.close()
+    }
+    @TestCase
+    func cursorAdvancesExactlyAtEachBlankDelimiterBytewise(): Unit {
+        let bytes = "id: a\ndata: first\n\nid: b\n\ndata: third\n\n".toArray()
+        @Expect(bytes.size, 39)
+        let decoder = SseDecoder(lastEventId: "start")
+        for consumed in 0..bytes.size {
+            let result = decoder.decode(bytes, offset: consumed, length: Some(1))
+            @Expect(result.consumed, 1)
+            let committed = consumed + 1
+            let expected = if (committed < 19) { "start" } else if (committed < 26) { "a" } else { "b" }
+            @Expect(decoder.lastEventId, expected)
+            if (let Some(event) <- result.event) { @Expect(event.lastEventId, expected) }
+        }
+        @Expect(decoder.lastEventId, "b")
+        decoder.finish()
+        @Expect(decoder.lastEventId, "b")
+        decoder.close()
+        // A window ending before the first delimiter never commits; the delimiter byte does.
+        for cut in [0, 6, 18, 19] {
+            let window = SseDecoder(lastEventId: "start")
+            let head = window.decode(bytes, length: Some(cut))
+            @Expect(head.consumed, cut)
+            @Expect(window.lastEventId, if (cut < 19) { "start" } else { "a" })
+            window.close()
+        }
+        // An id-only block commits at its own delimiter even though it dispatches no event.
+        let idOnly = SseDecoder(lastEventId: "start")
+        @Expect(idOnly.decode("id: only\n".toArray()).event.isNone())
+        @Expect(idOnly.lastEventId, "start")
+        @Expect(idOnly.decode("\n".toArray()).event.isNone())
+        @Expect(idOnly.lastEventId, "only")
+        idOnly.close()
     }
     @TestCase
     func retryIsImmediateDigitOnlyClampedWithoutOverflow(): Unit {

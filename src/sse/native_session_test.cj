@@ -30,9 +30,9 @@ class SseNativeSessionTest {
             @Expect(duplicate.data, first.data)
             @Expect(duplicate.lastEventId, first.lastEventId)
             @Expect(fixture.handler.duplicateRequests.load(), 2)
-            // The complete "id: unfinished" line commits even though EOF follows
-            // before a blank delimiter, so the reconnect uses that newer cursor.
-            @Expect(fixture.handler.lastCursor, Some("unfinished"))
+            // The truncated "id: unfinished" line never reached a blank delimiter, so it is
+            // not dispatched and must not advance the reconnect cursor past event 7.
+            @Expect(fixture.handler.lastCursor, Some("7"))
             @Expect(session.receive().isNone())
             @Expect(session.receive().isNone())
             @Expect(session.reconnectCount, 2)
@@ -115,9 +115,23 @@ class SseNativeSessionTest {
     }
 
     @TestCase
-    func cursorCommittedByAnIdLineIsSentOnReconnectAfterEof(): Unit {
+    func idLineTruncatedBeforeTheBlankDelimiterIsNotUsedOnReconnect(): Unit {
         let fixture = NativeSseFixture()
         let session = SseSession.eventSource(fixture.client, fixture.url("/id-eof"),
+            policy: nativeSseFastPolicy(1))
+        try {
+            // The peer closes after a complete "id: next" line and a complete data line but
+            // before the blank delimiter, so the block is never dispatched.
+            @Expect(session.receive().getOrThrow().data, "missing")
+            @Expect(session.reconnectCount, 1)
+            @Expect(fixture.handler.lastCursor.isNone())
+        } finally { session.close(); fixture.close() }
+    }
+
+    @TestCase
+    func idOnlyBlockCommittedAtItsDelimiterReachesTheReconnectRequest(): Unit {
+        let fixture = NativeSseFixture()
+        let session = SseSession.eventSource(fixture.client, fixture.url("/id-block"),
             policy: nativeSseFastPolicy(1))
         try {
             @Expect(session.receive().getOrThrow().data, "next")
@@ -335,6 +349,7 @@ private class NativeSseHandler <: HttpServerHandler {
     let postRequests = AtomicInt64(0)
     let eofRequests = AtomicInt64(0)
     let idEofRequests = AtomicInt64(0)
+    let idBlockRequests = AtomicInt64(0)
     let mimeRequests = AtomicInt64(0)
     let redirectRequests = AtomicInt64(0)
     let redirectTargets = AtomicInt64(0)
@@ -364,7 +379,13 @@ private class NativeSseHandler <: HttpServerHandler {
         if (request.target == "/id-eof") {
             let count = idEofRequests.fetchAdd(1) + 1
             synchronized(mutex) { receivedCursor = request.headers.getFirst("last-event-id") }
-            if (count == 1) { return reply("id: next\n") }
+            if (count == 1) { return reply("id: next\ndata: hidden\n") }
+            return reply("data:" + request.headers.getFirst("last-event-id").getOrDefault({ => "missing" }) + "\n\n")
+        }
+        if (request.target == "/id-block") {
+            let count = idBlockRequests.fetchAdd(1) + 1
+            synchronized(mutex) { receivedCursor = request.headers.getFirst("last-event-id") }
+            if (count == 1) { return reply("id:next\n\n") }
             return reply("data:" + request.headers.getFirst("last-event-id").getOrDefault({ => "missing" }) + "\n\n")
         }
         if (request.target == "/mime") { mimeRequests.fetchAdd(1); return reply("not-sse", mime: "text/plain") }

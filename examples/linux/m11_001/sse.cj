@@ -184,7 +184,8 @@ func scopes(h1: HttpClient, h2: HttpClient, base1: String, base2: String, handle
 func reconnect(client: HttpClient, base: String, handler: Handler): Unit {
     let session = SseSession.eventSource(client, HttpUrl.parse("${base}/reconnect"), policy: policy(), context: context())
     let first = session.receive().getOrThrow()
-    // Deliberately do not process or acknowledge first. Parsing already moved the cursor.
+    // Deliberately do not process or acknowledge first. The dispatched block already
+    // committed the cursor.
     require(session.lastEventId == "cursor-1", "cursor did not advance before application acknowledgement")
     let duplicate = session.receive().getOrThrow()
     require(first.data == duplicate.data && first.lastEventId == duplicate.lastEventId,

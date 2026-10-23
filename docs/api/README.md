@@ -492,7 +492,9 @@ scripts/check-m7-032-public-api --json --inventory docs/api/baselines/wirestack-
 ```
 
 This inventory is source-only, not an ABI, future-version or runtime-compatibility
-claim. Current SSE acceptance is recorded in [M11-001 evidence](../evidence/M11-001/README.md).
+claim. M11-001 is currently BLOCKED: [current source status](../evidence/M11-001/verification.json)
+records that no regenerated receipt binds the current SSE sources, and the earlier
+public-API report is retained only under [historical receipts](../evidence/M11-001/historical/README.md).
 
 M8-006 为 `TlsCapability` 增加 `ExternalDecryptor`、`KeyLog`，为 `TlsContextErrorCode`
 增加 `InvalidHook`。旧的穷尽匹配需要补充分支；当前 Cangjie context 布局也有变化。

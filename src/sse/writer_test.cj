@@ -154,6 +154,53 @@ class SseWriterTest {
     }
 
     @TestCase
+    func completedRingKeepsEofWhenCancellationOrExpiryFollowsDrain(): Unit {
+        let cancellation = CancellationSource()
+        let cancelling = SseWriter(context: OperationContext(cancellation: cancellation.token))
+        let event = SseEvent("tail")
+        cancelling.write(event)
+        let queued = cancelling.queuedBytes
+        @Expect(queued > 0)
+        let buffer = Array<Byte>(queued, repeat: 0u8)
+        @Expect(cancelling.read(buffer), queued)
+        @Expect(SseDecoder().decode(buffer).event.getOrThrow().data, "tail")
+        cancelling.complete()
+        cancellation.cancel()
+        @Expect(cancelling.read(buffer), 0)
+        @Expect(cancelling.read(buffer), 0)
+        @Expect(!cancelling.isClosed())
+        cancelling.close()
+        @Expect(cancelling.isClosed())
+
+        let deadlineWriter = SseWriter(context: OperationContext(
+            deadline: Some(Deadline.after(20 * Duration.millisecond))))
+        deadlineWriter.comment("expired")
+        let pending = Array<Byte>(deadlineWriter.queuedBytes, repeat: 0u8)
+        @Expect(deadlineWriter.read(pending), pending.size)
+        deadlineWriter.complete()
+        sleep(40 * Duration.millisecond)
+        @Expect(deadlineWriter.read(pending), 0)
+        @Expect(deadlineWriter.read(pending), 0)
+        deadlineWriter.close()
+    }
+
+    @TestCase
+    func incompleteDrainStillReportsCancellationAndExpiry(): Unit {
+        let cancellation = CancellationSource()
+        let writer = SseWriter(context: OperationContext(cancellation: cancellation.token))
+        writer.comment("unread")
+        cancellation.cancel()
+        @Expect(writerNetworkFailure({ => writer.read(Array<Byte>(1, repeat: 0u8)); () }), "cancelled")
+        writer.close()
+        let expiring = SseWriter(context: OperationContext(
+            deadline: Some(Deadline.after(10 * Duration.millisecond))))
+        expiring.comment("unread")
+        sleep(30 * Duration.millisecond)
+        @Expect(writerNetworkFailure({ => expiring.read(Array<Byte>(1, repeat: 0u8)); () }), "timed-out")
+        expiring.close()
+    }
+
+    @TestCase
     func completeDrainsAndValidationDoesNotPoisonWriter(): Unit {
         let writer = SseWriter()
         @Expect(writerSseFailure({ => writer.write(SseEvent("bad", lastEventId: "x\ny")) }), SseErrorCode.InvalidMetadata)
