@@ -4,7 +4,9 @@ Task: [GitHub #181](https://github.com/lIlIIlIll/Wirestack/issues/181). Current 
 
 ## Workspace and dependencies
 
-[workspace.json](workspace.json) records the starting HEAD, merge base, physical GitButler workspace branch, task branch and all 226 pre-existing dirty entries. [initial-status.txt](initial-status.txt) preserves their normalized paths. No unrelated changes, upstream repository, SDK, commit, push, PR or issue was modified. [dependencies.json](dependencies.json) binds the COMPLETE evidence for all eleven required M9/M10/M11 dependencies before implementation.
+[workspace.json](workspace.json) records the starting HEAD, merge base, physical GitButler workspace branch, task branch and all 226 pre-existing dirty entries. [initial-status.txt](initial-status.txt) preserves their normalized paths. No unrelated changes, upstream repository, SDK, commit, push, PR or issue was modified.
+
+[dependencies.json](dependencies.json) copies each prerequisite status from [the planning index](../../planning/status.md) and binds that file's digest, so the record cannot claim COMPLETE for a blocked prerequisite. It currently records **M10-003 and M11-001 as BLOCKED**, and `--validate-only` prints `M11_004_DEPENDENCY_BLOCKED tasks=M10-003,M11-001`. The earlier revision of this record asserted COMPLETE for both while the parent index said BLOCKED (issue #287); that assertion has been removed, not repaired by editing the prerequisites.
 
 ## Deliverables
 
@@ -43,9 +45,9 @@ Native self-checks are not the only runtime proof. The runner also starts the ac
 
 ## Current review evidence
 
-[Review boundary tests](review-boundary-tests.log) pass 11 checks, including exact M9 mode markers. Separately, [the installed M9 review report](installed-review-m9/report.json) and per-mode logs record oversized custom-trust rejection in the cli, decoded and streams consumers. This is not release qualification.
+[Review boundary tests](review-boundary-tests.log) is the historical 11-check run with exact M9 mode markers. The review-fix round adds ten checks (package-level linker/compiler override rejection, unknown package fields, per-region documentation coverage, caller-owned TLS configuration closure, bounded captured output and the flooding-child cap); they are **not** re-run here and the log has not been regenerated, so no current pass is claimed for them. Separately, [the installed M9 review report](installed-review-m9/report.json) and per-mode logs record oversized custom-trust rejection in the cli, decoded and streams consumers. This is not release qualification.
 
-The linked [default-SDK report](installed/report.json) and [SDK1.1.3 report](installed-sdk113/report.json) predate the review-round runner (`fbaff257...` versus the committed `05daa670...`) and do not bind the review-round CLI, decoded or streams sources. The newer [review-round installed run](installed-review/report.json) and [review-round M9 run](installed-review-m9/report.json) bind the committed runner and the review-round applications, but this review round then changed the streams fixture's bounded certificate/key loading and the service request-body budget enforcement. No committed native run therefore covers this revision; [verification.json](verification.json) records `BLOCKED` and the regeneration commands required before completion. The Python application/documentation contract (`python3 tools/m11_004_installed_consumers.py --validate-only`) passes on this working tree; no native result is claimed or fabricated for this revision.
+The linked [default-SDK report](installed/report.json) and [SDK1.1.3 report](installed-sdk113/report.json) predate the review-round runner (the reports record `fbaff257…`, the review-round runner was `05daa670…`) and do not bind the review-round CLI, decoded or streams sources. The newer [review-round installed run](installed-review/report.json) and [review-round M9 run](installed-review-m9/report.json) bind that review-round runner and its applications, but the review rounds that followed changed the streams fixture and certificate loading, the streams self-check and client TLS ownership, the service request budget and option parsing, the runner's manifest/documentation/capture gates and the operational guide. No committed native run therefore covers this revision; [verification.json](verification.json) records `BLOCKED`, the exact stale reports and the regeneration commands required before completion. These Python contract tests and the dependency record are not native evidence and are not presented as such.
 
 ## Canonical commands
 
@@ -59,7 +61,29 @@ python3 tools/m11_004_installed_consumers.py --include-m9 --output docs/evidence
 
 The last command requires the already-qualified SDK1.1.3; it does not build or qualify an SDK. The task gate runs architecture and API checks, application/documentation contracts, package check, the new negative acceptance-gate tests alongside existing release/API regressions, and a fresh default-SDK installed execution. Exact invoked commands and results are retained in the reports.
 
-Negative gates cover an escaping/global or second dependency, internal/transport/SDK imports, foreign/native override, default optional-module import, missing/tampered native archive, implicit system-library dependency, documentation drift/missing application, missing/duplicate acceptance scenarios and proxy worker cleanup. Tests use actual file inputs and digests rather than mock forwarding assertions.
+Negative gates cover an escaping/global or second dependency, internal/transport/SDK imports, foreign/native override, package-level link/compile/configuration overrides and unknown package fields, default optional-module import, missing/tampered native archive, implicit system-library dependency, documentation drift, a missing application **and any single missing tagged region** (including a second snippet of one application), unclosed or unowned caller-owned TLS configurations, a flooding child exceeding the capture cap, missing/duplicate acceptance scenarios and proxy worker cleanup. Tests use actual file inputs, real subprocesses and digests rather than mock forwarding assertions.
+
+## Review-fix round (issues #283–#289)
+
+| Issue | Repair |
+|---|---|
+| [#283] package-level linker overrides | `validate_manifest` rejects non-empty `link-option`, `override-compile-option`, `compile-option`, `package-configuration`, `target-dir`/`script-dir` and any unknown `package` field with a typed `ManifestContractError` code. |
+| [#284] service budget during routed work | The handler rechecks the shortened operation after `/graceful`, `/security` and `/drain` and returns 408; a native `service_budget_expiry` check holds all three routes past `--budget-ms`. |
+| [#285] bounded captured output | `run_captured` copies each child stream through pipes into a file, stops at `CAPTURE_LIMIT_BYTES`, kills the child and raises the typed `EvidenceCaptureError("CAPTURE_LIMIT")`; normalization is incremental and bounded. |
+| [#286] unknown service options | `parseServeOptions` consumes every argument once and rejects unknown, repeated or dangling options; the process exits 2 with `ERROR category=usage phase=option code=2`, and `service_unknown_option` plus an operational invocation assert it. |
+| [#287] blocked prerequisites | `dependencies.json` is status-derived and digest-bound; M10-003 and M11-001 remain BLOCKED and are reported as blockers by both the contract check and the installed run. |
+| [#288] fixture TLS lifecycle | The streams fixture and self-check retain their server/client configurations and close them in `finally` (including on `build()` failure); the CLI/stream clients close caller-owned configurations; `validate_tls_ownership` fails any unretained or unclosed construction. |
+| [#289] every tagged documentation region | `validate_docs` compares the snippet key set against the complete `regions` key set and lists every missing key. |
+
+These repairs are working-tree only. No native or installed run in this repository binds them, so `verification.json` stays `BLOCKED`.
+
+[#283]: https://github.com/lIlIIlIll/Wirestack/issues/283
+[#284]: https://github.com/lIlIIlIll/Wirestack/issues/284
+[#285]: https://github.com/lIlIIlIll/Wirestack/issues/285
+[#286]: https://github.com/lIlIIlIll/Wirestack/issues/286
+[#287]: https://github.com/lIlIIlIll/Wirestack/issues/287
+[#288]: https://github.com/lIlIIlIll/Wirestack/issues/288
+[#289]: https://github.com/lIlIIlIll/Wirestack/issues/289
 
 ## Preserved failure evidence
 

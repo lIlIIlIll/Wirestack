@@ -87,7 +87,7 @@ secure-rotate replacement-certificate.der replacement-key.pk8
 stop
 ```
 
-Ordinary rotation permits admitted old-generation requests to finish. Security rotation requires client authentication using the configured certificate as the fixture trust root, cancels old-generation work and rejects new unauthenticated clients. Use an actual reviewed trust policy for an application, not this fixture policy by accident. `stop` rejects new admissions, drains admitted work within its context and prints `SERVICE_STOPPED` after shutdown. The upload handler caps request payload at 4096 bytes and reports the consumed byte count; a stalled request body is cancelled through the request's public cancellation handle when the shortened budget expires, and streamed producers inherit the same shortened absolute context.
+Ordinary rotation permits admitted old-generation requests to finish. Security rotation requires client authentication using the configured certificate as the fixture trust root, cancels old-generation work and rejects new unauthenticated clients. Use an actual reviewed trust policy for an application, not this fixture policy by accident. `stop` rejects new admissions, drains admitted work within its context and prints `SERVICE_STOPPED` after shutdown. The upload handler caps request payload at 4096 bytes and reports the consumed byte count; a stalled request body is cancelled through the request's public cancellation handle when the shortened budget expires, and streamed producers inherit the same shortened absolute context. The shortened budget is rechecked after `/graceful`, `/security` and `/drain` return, so a held route that outlives `--budget-ms` answers 408 instead of succeeding. Unrecognized, repeated or dangling `serve` options exit 2 with `ERROR category=usage phase=option code=2` instead of falling back to a default limit.
 
 The standalone stream fixture accepts `stop` and prints `STREAM_STOPPED`. Acceptance enforces bounded process stop even on a failed client invocation.
 
@@ -266,7 +266,7 @@ func consumeWebSocket(client: HttpClient, url: String, maximumFrames: Int64,
         }
         // A body EOF can race the watchdog; an expired or cancelled operation must not reach a
         // side-effecting route or report success.
-        if (operation.isCancellationRequested() || operation.isDeadlineExceeded()) {
+        if (budgetExpired(operation)) {
             return HttpServerResponse(HttpResponse(408, "Request Timeout", ResponseBody.empty()))
         }
         if (request.target == "/upload") {
@@ -276,6 +276,9 @@ func consumeWebSocket(client: HttpClient, url: String, maximumFrames: Int64,
         if (request.target == "/graceful") { graceful.hold(operation) }
         if (request.target == "/security") { security.hold(operation) }
         if (request.target == "/drain") { draining.hold(operation) }
+        // A blocking route returns as soon as the shortened operation expires, so the budget is
+        // rechecked before any success path; an expired --budget-ms must never report success.
+        if (budgetExpired(operation)) { return HttpServerResponse(HttpResponse(408, "Request Timeout", ResponseBody.empty())) }
         if (request.target == "/stream" || request.target == "/hold") {
             let writer = SseWriter(maximumBufferBytes: 128, context: operation)
             producers.fetchAdd(1)

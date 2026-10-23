@@ -28,7 +28,24 @@ from tools.m11_003_native_websocket import ProxyFixture, client_hello_name
 
 APPS = ROOT / "examples/linux/m11_004"
 GUIDE = ROOT / "docs/guides/installed-applications-linux.md"
+DEPENDENCIES = ROOT / "docs/evidence/M11-004/dependencies.json"
+STATUS = ROOT / "docs/planning/status.md"
+MANIFEST = ROOT / "tools/tasks/M11-004.json"
 APP_NAMES = ("cli", "decoded", "streams", "service")
+# Upper bound for one captured command stream. The full `nm --defined-only` inventories are
+# about 3 MiB, so this keeps real evidence while making a flooding child fail closed.
+CAPTURE_LIMIT_BYTES = 4 * 1024 * 1024
+# Declarative package fields that cannot influence how the installed package is linked or
+# compiled. These must stay absent or empty; any other package field is unknown to the gate.
+PACKAGE_METADATA_FIELDS = frozenset((
+    "name", "version", "cjc-version", "output-type", "organization", "description",
+    "repository", "homepage", "documentation", "authors", "license", "src-dir",
+))
+EMPTY_PACKAGE_OPTION_FIELDS = frozenset((
+    "compile-option", "override-compile-option", "link-option",
+    "package-configuration", "target-dir", "script-dir",
+))
+TLS_CONFIG_TYPES = ("HttpServerTlsConfig", "HttpClientTlsConfig")
 REQUIRED_CHECKS = {app: {f"{app}_{scenario}" for scenario in (
     "success", "pre_cancel", "active_cancel", "deadline", "capacity",
     "peer_disconnect", "explicit_close", "cleanup")} for app in APP_NAMES}
@@ -36,7 +53,8 @@ for app, extras in {
     "cli": ("output_failure", "raw_gzip", "proxy_connect"),
     "decoded": ("output_failure", "decoded_gzip"),
     "streams": ("cursor_duplicate_explicit_recover", "post_exactly_once_after_peer_failure", "bounded_slow_consumer_h2_sibling", "untrusted_chain"),
-    "service": ("untrusted_rejected", "server_capacity", "ordinary_rotation", "security_cancel", "security_rotation", "graceful_stop"),
+    "service": ("untrusted_rejected", "server_capacity", "ordinary_rotation", "security_cancel", "security_rotation",
+        "graceful_stop", "budget_route_expiry", "unknown_option"),
 }.items():
     REQUIRED_CHECKS[app].update(f"{app}_{scenario}" for scenario in extras)
 NATIVE_ARCHIVES = (
@@ -64,25 +82,60 @@ def app_files(app: Path) -> list[Path]:
     return [app / "cjpm.toml", *sorted((app / "src").rglob("*.cj"))]
 
 
+class ManifestContractError(ValueError):
+    """Typed application-manifest contract failure."""
+
+    def __init__(self, code: str, detail: str):
+        super().__init__(f"code={code} {detail}")
+        self.code = code
+        self.detail = detail
+
+
+class EvidenceCaptureError(ValueError):
+    """Typed captured-output failure raised instead of exhausting memory or scratch."""
+
+    def __init__(self, code: str, detail: str):
+        super().__init__(f"code={code} {detail}")
+        self.code = code
+        self.detail = detail
+
+
+def validate_manifest(package: dict, name: str) -> None:
+    """Reject any package-level field that could re-link or re-compile the installed package."""
+    for field in sorted(set(package) - PACKAGE_METADATA_FIELDS - EMPTY_PACKAGE_OPTION_FIELDS):
+        raise ManifestContractError("MANIFEST_PACKAGE_FIELD", f"application declares an uncontrolled package field: {field}")
+    for field in sorted(EMPTY_PACKAGE_OPTION_FIELDS):
+        if field not in package:
+            continue
+        value = package[field]
+        if field == "package-configuration":
+            if value != {}:
+                raise ManifestContractError("MANIFEST_PACKAGE_OVERRIDE", "application may not override installed package configuration")
+            continue
+        if value != "":
+            raise ManifestContractError("MANIFEST_PACKAGE_OVERRIDE", f"application may not set package {field}")
+
+
 def validate_app(app: Path, name: str) -> list[str]:
     manifest = tomllib.loads((app / "cjpm.toml").read_text())
     package = manifest["package"]
     if package.get("name") != f"wirestack_m11_004_{name}" or package.get("output-type") != "executable":
-        raise ValueError("application must be its independent named CJPM executable")
+        raise ManifestContractError("MANIFEST_IDENTITY", "application must be its independent named CJPM executable")
+    validate_manifest(package, name)
     if manifest.get("dependencies") != {"wirestack": {"path": "../../install/wirestack"}}:
-        raise ValueError("application must depend only on its relative extracted package")
+        raise ManifestContractError("MANIFEST_DEPENDENCY", "application must depend only on its relative extracted package")
     if set(manifest) != {"package", "dependencies"}:
-        raise ValueError("application may not override installed native or SDK linkage")
+        raise ManifestContractError("MANIFEST_TABLE", "application may not override installed native or SDK linkage")
     imports = []
     for path in sorted((app / "src").rglob("*.cj")):
         text = path.read_text()
         imports.extend(re.findall(r"^\s*import\s+([^\n]+)", text, re.MULTILINE))
         if re.search(r"\bforeign\s+func\b", text):
-            raise ValueError("application may not declare provider/native accessors")
+            raise ManifestContractError("MANIFEST_FOREIGN", "application may not declare provider/native accessors")
     if not imports or any(re.search(r"\b(?:wirestack\.internal|std\.net|stdx\.)", line) for line in imports):
-        raise ValueError("application imports an internal or legacy network API")
+        raise ManifestContractError("MANIFEST_IMPORT", "application imports an internal or legacy network API")
     if name == "cli" and any(re.search(r"\bwirestack\.(?:sse|gzip|observability)\b", line) for line in imports):
-        raise ValueError("base CLI imported an optional feature module")
+        raise ManifestContractError("MANIFEST_OPTIONAL_MODULE", "base CLI imported an optional feature module")
     return imports
 
 
@@ -108,10 +161,249 @@ def validate_docs(guide: Path, apps: Path) -> dict[str, str]:
         raise ValueError("documentation requires distinct bound compiled snippets")
     if any(key not in regions or regions[key] != body for key, body in snippets):
         raise ValueError("documentation code drifted from its compiled application")
-    documented = {key.split("/", 1)[0] for key, _ in snippets}
-    if documented != set(APP_NAMES):
-        raise ValueError("documentation omitted a compiled application")
+    documented = {key for key, _ in snippets}
+    missing = sorted(set(regions) - documented)
+    if missing:
+        raise ValueError(f"documentation omitted tagged compiled regions: {', '.join(missing)}")
     return {key: body for key, body in snippets}
+
+
+CONFIG_CONSTRUCTION = re.compile(r"\b(HttpServerTlsConfig|HttpClientTlsConfig)\s*\(")
+
+
+def binding_extents(text: str) -> list[tuple[str, int, int]]:
+    """Return `(name, start, end)` byte offsets for every `let` initializer in one file.
+
+    The extent ends after the initializer's balanced braces (for `if`/`match` expressions) or at
+    the end of the line for simple expressions, so a construction nested in any branch is still
+    attributed to its owning binding.
+    """
+    extents = []
+    for match in re.finditer(r"\blet\s+([A-Za-z_][A-Za-z0-9_]*)\s*=", text):
+        start = match.end()
+        depth = 0
+        index = start
+        end = len(text)
+        while index < len(text):
+            character = text[index]
+            if character in "([{":
+                depth += 1
+            elif character in ")]}":
+                depth -= 1
+                if depth == 0 and character == "}":
+                    following = text[index + 1:]
+                    if re.match(r"\s*else\b", following):
+                        index += 1
+                        continue
+                    end = index + 1
+                    break
+            elif character == "\n" and depth == 0:
+                end = index
+                break
+            index += 1
+        extents.append((match.group(1), start, end))
+    return extents
+
+
+def owner_closed(text: str, owner: str) -> bool:
+    """Report whether the owning local is closed directly or through its Option binding."""
+    if f"{owner}.close()" in text:
+        return True
+    for match in re.finditer(rf"if\s*\(let\s+Some\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)\s*<-\s*{owner}\)", text):
+        if re.search(rf"\b{match.group(1)}\.close\(\)", text[match.end():match.end() + 512]):
+            return True
+    return False
+
+
+def validate_tls_ownership(apps: Path) -> dict[str, int]:
+    """Every caller-owned TLS configuration in the compiled examples must be retained and closed.
+
+    `HttpServerBuilder.build()` and `HttpClientBuilder.build()` clone the configured handshaker,
+    so an inline configuration becomes unreachable with its PKCS#8 copy while relying on
+    nondeterministic finalization. Each construction must therefore be bound to a named local
+    that the same file closes; the compiled fixtures additionally assert `isClosed()`.
+    """
+    counts = {kind: 0 for kind in TLS_CONFIG_TYPES}
+    for name in APP_NAMES:
+        for path in sorted((apps / name / "src").rglob("*.cj")):
+            text = path.read_text()
+            relative = path.relative_to(apps).as_posix()
+            extents = binding_extents(text)
+            for match in CONFIG_CONSTRUCTION.finditer(text):
+                kind = match[1]
+                counts[kind] += 1
+                line_start = text.rfind("\n", 0, match.start()) + 1
+                if ".tls(" in text[line_start:match.start()]:
+                    raise ValueError(f"{relative} passes an unowned {kind} directly to a builder")
+                candidates = [(owner, end - start) for owner, start, end in extents if start <= match.start() < end]
+                if not candidates:
+                    raise ValueError(f"{relative} constructs {kind} without a retained owner")
+                owner = min(candidates, key=lambda candidate: candidate[1])[0]
+                if not owner_closed(text, owner):
+                    raise ValueError(f"{relative} never closes its {kind} owner {owner}")
+    return counts
+
+
+def normalize_capture(path: Path, destination: Path, redact) -> tuple[int, bool]:
+    """Publish one captured stream line by line under an explicit byte cap.
+
+    Real command output stays file-backed; a flooding child is cut off at
+    `CAPTURE_LIMIT_BYTES` and, for run commands, fails the scenario through
+    `run_captured` instead of the whole file being loaded into memory.
+    """
+    written = 0
+    truncated = False
+    with path.open("r", errors="replace") as source, destination.open("w") as target:
+        for line in source:
+            normalized = redact(line)
+            encoded = normalized.encode()
+            if written + len(encoded) > CAPTURE_LIMIT_BYTES:
+                truncated = True
+                break
+            target.write(normalized)
+            written += len(encoded)
+    return written, truncated
+
+
+def bounded_copy(source, destination: Path, overflow: threading.Event,
+                 written: list[int]) -> None:
+    """Copy one child stream into a file, stopping at the cap and signalling overflow."""
+    try:
+        with destination.open("wb") as sink:
+            while True:
+                chunk = source.read(65536)
+                if not chunk:
+                    return
+                remaining = CAPTURE_LIMIT_BYTES - written[0]
+                if len(chunk) > remaining:
+                    sink.write(chunk[:remaining])
+                    written[0] += remaining
+                    overflow.set()
+                    return
+                sink.write(chunk)
+                written[0] += len(chunk)
+    finally:
+        source.close()
+
+
+def run_captured(command: list[str], cwd: Path, env: dict, stdout: Path, stderr: Path,
+                 timeout: float) -> tuple[int, bool]:
+    """Run one child through pipes into bounded files, killing it on cap overflow.
+
+    The copied bytes, not the child's own write rate, determine scratch growth: output stops at
+    `CAPTURE_LIMIT_BYTES` per stream, and an overflow fails the scenario with a typed evidence
+    error. Memory stays bounded because streams are copied in fixed-size chunks.
+    """
+    timed_out = False
+    overflow = threading.Event()
+    totals = {"stdout": [0], "stderr": [0]}
+    process = subprocess.Popen(command, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    copiers = [threading.Thread(target=bounded_copy, args=(process.stdout, stdout, overflow, totals["stdout"]), daemon=True),
+        threading.Thread(target=bounded_copy, args=(process.stderr, stderr, overflow, totals["stderr"]), daemon=True)]
+    for copier in copiers:
+        copier.start()
+    end = time.monotonic() + timeout
+    try:
+        while process.poll() is None:
+            if overflow.is_set():
+                break
+            if time.monotonic() >= end:
+                timed_out = True
+                break
+            time.sleep(0.01)
+        if overflow.is_set():
+            process.kill()
+        code = process.wait(timeout=10)
+        for copier in copiers:
+            copier.join(10)
+        if overflow.is_set():
+            kind = "stdout" if totals["stdout"][0] >= CAPTURE_LIMIT_BYTES else "stderr"
+            raise EvidenceCaptureError("CAPTURE_LIMIT",
+                f"command {kind} exceeded {CAPTURE_LIMIT_BYTES} bytes; bounded capture refused")
+        return code, timed_out
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=10)
+        for copier in copiers:
+            copier.join(10)
+
+
+def status_rows(status_path: Path) -> dict[str, str]:
+    """Return the declared development status for every task row in status.md."""
+    rows = {}
+    for line in status_path.read_text().splitlines():
+        match = re.match(r"^\| ([A-Z][A-Z0-9]*-\d{3}) \| ([A-Z_]+) \|", line)
+        if match:
+            rows[match.group(1)] = match.group(2)
+    return rows
+
+
+def validate_dependencies(record: list, status_path: Path, manifest_path: Path,
+                          evidence_root: Path = ROOT) -> list[str]:
+    """Bind the dependency record to the declared status and the task manifest.
+
+    The record must cover exactly the manifest's declared prerequisites, report each one's
+    current status.md value, and point at a digest that still matches. Prerequisites that are
+    not COMPLETE are returned as blockers so the task cannot claim completion.
+    """
+    declared = json.loads(manifest_path.read_text())["dependencies"]
+    recorded = [entry.get("task_id") for entry in record]
+    if recorded != declared:
+        raise ValueError(f"dependency record does not match the task manifest: {recorded} != {declared}")
+    expected_source = {"path": "docs/planning/status.md", "digest": text_evidence_digest(status_path).to_json()}
+    statuses = status_rows(status_path)
+    blockers = []
+    for entry in record:
+        task_id = entry["task_id"]
+        if entry.get("status_source") != expected_source:
+            raise ValueError(f"dependency {task_id} is not bound to the current status.md digest")
+        declared_status = statuses.get(task_id)
+        if declared_status is None:
+            raise ValueError(f"dependency {task_id} has no status.md row")
+        if entry.get("status_at_start") != declared_status:
+            raise ValueError(f"dependency {task_id} records {entry.get('status_at_start')} but status.md declares {declared_status}")
+        path = evidence_root / entry["path"]
+        if not path.is_file():
+            raise ValueError(f"dependency {task_id} evidence is missing: {entry['path']}")
+        if text_evidence_digest(path).to_json() != entry["digest"]:
+            raise ValueError(f"dependency {task_id} evidence digest does not match {entry['path']}")
+        if entry.get("blocked") != (declared_status != "COMPLETE"):
+            raise ValueError(f"dependency {task_id} blocked flag disagrees with status.md")
+        if declared_status != "COMPLETE":
+            blockers.append(task_id)
+    return blockers
+
+
+def refresh_dependencies(record_path: Path, status_path: Path, manifest_path: Path,
+                         evidence_root: Path = ROOT) -> list[str]:
+    """Rewrite the dependency record from status.md and the evidence it points at.
+
+    Statuses are copied, never inferred: a prerequisite that status.md declares BLOCKED stays
+    BLOCKED in the record, and its own evidence digest is only recorded for traceability.
+    """
+    declared = json.loads(manifest_path.read_text())["dependencies"]
+    previous = {}
+    if record_path.is_file():
+        previous = {entry["task_id"]: entry["path"] for entry in json.loads(record_path.read_text())}
+    statuses = status_rows(status_path)
+    source = {"path": "docs/planning/status.md", "digest": text_evidence_digest(status_path).to_json()}
+    record = []
+    for task_id in declared:
+        status = statuses.get(task_id)
+        if status is None:
+            raise ValueError(f"dependency {task_id} has no status.md row")
+        path = previous.get(task_id)
+        if path is None:
+            raise ValueError(f"dependency {task_id} has no evidence path to preserve")
+        evidence = evidence_root / path
+        if not evidence.is_file():
+            raise ValueError(f"dependency {task_id} evidence is missing: {path}")
+        record.append({"task_id": task_id, "status_at_start": status, "status_source": source,
+            "blocked": status != "COMPLETE", "path": path,
+            "digest": text_evidence_digest(evidence).to_json()})
+    record_path.write_text(json.dumps(record, indent=2) + "\n")
+    return validate_dependencies(record, status_path, manifest_path, evidence_root)
 
 
 def validate_installed(installed: Path, manifest: dict) -> None:
@@ -246,7 +538,10 @@ def main() -> int:
         for name in APP_NAMES:
             validate_app(APPS / name, name)
         validate_docs(GUIDE, APPS)
+        validate_tls_ownership(APPS)
+        blockers = validate_dependencies(json.loads(DEPENDENCIES.read_text()), STATUS, MANIFEST)
         print("M11_004_APPLICATION_CONTRACT_PASS")
+        print(f"M11_004_DEPENDENCY_BLOCKED tasks={','.join(blockers) if blockers else 'none'}")
         return 0
     output = args.output.resolve()
     if output.relative_to(ROOT).parts[:3] != ("docs", "evidence", "M11-004"):
@@ -283,22 +578,28 @@ def main() -> int:
             if private_ipv6_route:
                 command = ["unshare", "--user", "--map-root-user", "--net", "--", "python3", "-c", "import os,sys,fcntl,struct,socket,subprocess\nfd=os.open('/dev/net/tun',os.O_RDWR)\ntry:\n fcntl.ioctl(fd,0x400454ca,struct.pack('16sH',b'ws-mcast',0x1002))\n for command in (['ip','link','set','lo','up'],['ip','link','set','ws-mcast','up'],['ip','-6','addr','add','fe80::1/64','dev','ws-mcast','nodad'],['ip','-6','route','add','ff00::/8','dev','ws-mcast']): subprocess.run(command,check=True)\n environment=dict(os.environ,WIRESTACK_M9_003_IPV6_INTERFACE_INDEX=str(socket.if_nametoindex('ws-mcast')))\n result=subprocess.run(sys.argv[1:],env=environment).returncode\nfinally:\n os.close(fd)\nsys.exit(result)\n", *command]
             files = {kind: work / f"{name}.{kind}.raw" for kind in ("stdout", "stderr")}
-            code, timed_out = None, False
-            with files["stdout"].open("wb") as stdout, files["stderr"].open("wb") as stderr:
-                try:
-                    completed = subprocess.run(command, cwd=cwd, env=env | (extra_env or {}), stdout=stdout, stderr=stderr, timeout=timeout)
-                    code = completed.returncode
-                except subprocess.TimeoutExpired:
-                    timed_out = True
+            try:
+                code, timed_out = run_captured(command, cwd, env | (extra_env or {}), files["stdout"], files["stderr"], timeout)
+            except EvidenceCaptureError as error:
+                records = {}
+                for kind, path in files.items():
+                    destination = output / f"{name}.{kind}.log"
+                    written, truncated = normalize_capture(path, destination, redact)
+                    records[kind] = {"path": str(destination.relative_to(ROOT)), "digest": text_evidence_digest(destination).to_json(),
+                        "captured_bytes": written, "truncated": truncated}
+                report["commands"].append({"id": name, "argv": [redact(value) for value in command], "cwd": redact(str(cwd)),
+                    "checkout_hidden": isolated, "exit_code": None, "expected_exit_code": expected_exit, "timed_out": False,
+                    "capture_error": error.code, **records})
+                raise
             records = {}
             text = ""
             for kind, path in files.items():
                 destination = output / f"{name}.{kind}.log"
-                # Real command streams remain file-backed. Published diagnostics are normalized line by line.
-                with path.open("r", errors="replace") as source, destination.open("w") as target:
-                    for line in source:
-                        target.write(redact(line))
-                records[kind] = {"path": str(destination.relative_to(ROOT)), "digest": text_evidence_digest(destination).to_json()}
+                # Real command streams remain file-backed. Published diagnostics are normalized
+                # line by line and bounded, so neither scratch nor memory grows with child output.
+                written, truncated = normalize_capture(path, destination, redact)
+                records[kind] = {"path": str(destination.relative_to(ROOT)), "digest": text_evidence_digest(destination).to_json(),
+                    "captured_bytes": written, "truncated": truncated}
                 if kind == "stdout":
                     text = destination.read_text()
             report["commands"].append({"id": name, "argv": [redact(value) for value in command], "cwd": redact(str(cwd)),
@@ -309,52 +610,104 @@ def main() -> int:
         @contextmanager
         def endpoint(name: str, argv: list[str], cwd: Path, ready: str, stopped: str):
             command = hidden(argv, cwd)
+            stdout_path = work / f"{name}.stdout.raw"
             stderr_path = work / f"{name}.stderr.raw"
-            captured = bytearray()
             process = None
             timed_out = False
+            capture_error = None
+            written_total = 0
+            readiness = bytearray()
+
+            def drain(limit_seconds: float, waiting_for_ready: bool) -> tuple[bool, "int | None"]:
+                """Copy child stdout into the raw file under one byte cap and report EOF.
+
+                Readiness is matched incrementally against the first bounded bytes, so an
+                endpoint that floods after startup is bounded without loading its stream.
+                """
+                nonlocal capture_error, written_total
+                port = None
+                end = time.monotonic() + limit_seconds
+                with stdout_path.open("ab") as sink:
+                    while True:
+                        remaining = end - time.monotonic()
+                        if remaining <= 0:
+                            return False, port
+                        readable, _, _ = select.select([process.stdout], [], [], min(0.1, remaining))
+                        if not readable:
+                            continue
+                        data = os.read(process.stdout.fileno(), 65536)
+                        if not data:
+                            return True, port
+                        written_total += len(data)
+                        if written_total > CAPTURE_LIMIT_BYTES:
+                            capture_error = EvidenceCaptureError("CAPTURE_LIMIT",
+                                f"{name} stdout exceeded {CAPTURE_LIMIT_BYTES} bytes; bounded capture refused")
+                            return True, port
+                        sink.write(data)
+                        if waiting_for_ready and port is None:
+                            readiness.extend(data)
+                            if len(readiness) > 16384:
+                                capture_error = EvidenceCaptureError("READINESS_LIMIT",
+                                    "operational endpoint readiness output exceeded its bound")
+                                return True, port
+                            match = re.search(rb"^" + ready.encode() + rb" port=(\d+)\r?$", bytes(readiness), re.MULTILINE)
+                            if match:
+                                port = int(match[1])
+
             try:
                 with stderr_path.open("wb") as stderr:
                     process = subprocess.Popen(command, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=stderr)
                     expires = time.monotonic() + 5
                     port = None
                     while port is None:
-                        if time.monotonic() >= expires or process.poll() is not None:
+                        if time.monotonic() >= expires:
                             raise RuntimeError("operational endpoint did not become ready within five seconds")
-                        readable, _, _ = select.select([process.stdout], [], [], 0.1)
-                        if readable:
-                            captured.extend(os.read(process.stdout.fileno(), 8192))
-                            if len(captured) > 16384:
-                                raise ValueError("operational endpoint readiness output exceeded its bound")
-                            match = re.search(rb"^" + ready.encode() + rb" port=(\d+)\r?$", captured, re.MULTILINE)
-                            if match:
-                                port = int(match[1])
+                        finished, found = drain(0.1, True)
+                        if capture_error is not None:
+                            raise capture_error
+                        if found is not None:
+                            port = found
+                        elif finished:
+                            raise RuntimeError("operational endpoint exited before becoming ready")
                     yield port
                     process.stdin.write(b"stop\n")
                     process.stdin.flush()
+                    finished, _ = drain(10.0, False)
+                    if capture_error is not None:
+                        raise capture_error
+                    if not finished:
+                        timed_out = True
+                        raise RuntimeError("operational endpoint failed bounded stop")
                     try:
-                        remaining, _ = process.communicate(timeout=10)
-                        captured.extend(remaining)
+                        process.wait(timeout=5)
                     except subprocess.TimeoutExpired:
                         timed_out = True
                         raise RuntimeError("operational endpoint failed bounded stop")
-                    if process.returncode != 0 or captured.decode(errors="replace").splitlines().count(stopped) != 1:
+                    if process.returncode != 0:
+                        raise ValueError("operational endpoint did not close successfully")
+                    if stdout_path.read_text(errors="replace").splitlines().count(stopped) != 1:
                         raise ValueError("operational endpoint did not close successfully")
             finally:
                 if process is not None and process.poll() is None:
                     process.kill()
-                    remaining, _ = process.communicate(timeout=5)
-                    captured.extend(remaining)
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        timed_out = True
                 records = {}
-                for kind, raw in (("stdout", captured.decode(errors="replace")), ("stderr", stderr_path.read_text(errors="replace"))):
-                    path = output / f"{name}.{kind}.log"
-                    path.write_text(redact(raw))
-                    records[kind] = {"path": str(path.relative_to(ROOT)), "digest": text_evidence_digest(path).to_json()}
+                for kind, path in (("stdout", stdout_path), ("stderr", stderr_path)):
+                    destination = output / f"{name}.{kind}.log"
+                    written, truncated = normalize_capture(path, destination, redact) if path.exists() else (0, False)
+                    records[kind] = {"path": str(destination.relative_to(ROOT)), "digest": text_evidence_digest(destination).to_json(),
+                        "captured_bytes": written, "truncated": truncated}
                 report["commands"].append({"id": name, "argv": [redact(value) for value in command], "cwd": redact(str(cwd)),
                     "checkout_hidden": True, "exit_code": None if process is None else process.returncode, "timed_out": timed_out, **records})
 
         try:
             report["documented_regions"] = {key: text_evidence_digest(APPS / key.split("#")[0]).to_json() for key in validate_docs(GUIDE, APPS)}
+            report["tls_configuration_owners"] = validate_tls_ownership(APPS)
+            blockers = validate_dependencies(json.loads(DEPENDENCIES.read_text()), STATUS, MANIFEST)
+            report["dependency_blockers"] = blockers
             imports = {name: validate_app(APPS / name, name) for name in APP_NAMES}
             payload, manifest = release.collect_payload(ROOT)
             archive = work / "wirestack-current.tar.gz"
@@ -444,6 +797,13 @@ def main() -> int:
                     raise ValueError("oversized stream trust file did not produce the expected application failure")
                 operational["streams"] = {"status": "PASS", "sse_output": sse_text.strip(), "websocket_output": socket_text.strip(), "oversized_trust_rejected": True}
             operational["service"] = {"status": "PASS", "stdin_stop": "SERVICE_STOPPED", "fixture_bytes_verified": True}
+            # A misspelled resource limit must fail with a diagnostic instead of starting with
+            # the default of 16 requests. Nothing is started, so no certificate is needed.
+            run("service-unknown-option", [str(service_binary), "serve", "--max-request", "1"], service, expected_exit=2)
+            diagnostic = (output / "service-unknown-option.stderr.log").read_text()
+            if "ERROR category=usage phase=option code=2" not in diagnostic:
+                raise ValueError("unknown service option did not produce a typed usage diagnostic")
+            operational["service"]["unknown_option_rejected"] = True
             report["operational_commands"] = operational
             if args.include_m9:
                 run_m9(installed, work, env, run, report)

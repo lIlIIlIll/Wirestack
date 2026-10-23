@@ -131,15 +131,21 @@ func stoppedWs(client: HttpClient, url: String, deadline: Bool): Unit {
 func selfCheck(certPath: String, keyPath: String, untrustedPath: String): Unit {
     let cert = boundedFile(certPath); let key = boundedFile(keyPath); let untrusted = boundedFile(untrustedPath)
     let fixture = StreamFixture()
+    // Builder.build() clones the handshaker instead of taking ownership of these caller-owned
+    // configurations, so each one is retained here and closed on every exit path below.
+    let server2Tls = HttpServerTlsConfig([cert], key)
     let server1 = HttpServer.builder().listen(SocketEndpoint(loopback(), 0u16)).handler(fixture).build()
-    let server2 = HttpServer.builder().listen(SocketEndpoint(loopback(), 0u16)).handler(fixture).tls(HttpServerTlsConfig([cert], key)).build()
+    let server2 = try { HttpServer.builder().listen(SocketEndpoint(loopback(), 0u16)).handler(fixture).tls(server2Tls).build() }
+        catch (error: Exception) { server1.close(); server2Tls.close(); throw error }
     let serving1 = spawn { server1.serve() }; let serving2 = spawn { server2.serve() }
     let resolver = StaticResolver(ResolveResult([loopback()], HostName("example.test"), ResolverSource.Static))
     let limits = HttpResourceLimits(maximumConnections: 1, maximumConnectionsPerRoute: 1, maximumConnectionsPerOrigin: 1,
         maximumManagedBufferBytes: 262144u64, reservedControlBufferBytes: 65536u64,
         maximumManagedBufferBytesPerRoute: 196608u64, maximumManagedBufferBytesPerOrigin: 196608u64)
     let h1 = HttpClient.builder().retryPolicy(HttpRetryPolicy(maximumAttempts: 3)).build()
-    let h2 = HttpClient.builder().resolver(resolver).tls(HttpClientTlsConfig([cert])).resourceLimits(limits).build()
+    let h2Tls = HttpClientTlsConfig([cert])
+    let h2 = try { HttpClient.builder().resolver(resolver).tls(h2Tls).resourceLimits(limits).build() }
+        catch (error: Exception) { h2Tls.close(); h1.close(); server1.close(); server2.close(); server2Tls.close(); throw error }
     let base1 = "http://127.0.0.1:${server1.localEndpoint.port}"; let base2 = "https://example.test:${server2.localEndpoint.port}"
     let ws1 = "ws://127.0.0.1:${server1.localEndpoint.port}/socket"; let ws2 = "wss://example.test:${server2.localEndpoint.port}/socket"
     try {
@@ -230,13 +236,15 @@ func selfCheck(certPath: String, keyPath: String, untrustedPath: String): Unit {
         } finally { limited.close() }
         require(limited.isClosed()); check("explicit_close")
         clean(h2); check("capacity")
-        let badTrust = HttpClient.builder().resolver(resolver).tls(HttpClientTlsConfig([untrusted])).build()
+        let badTrustTls = HttpClientTlsConfig([untrusted])
+        let badTrust = try { HttpClient.builder().resolver(resolver).tls(badTrustTls).build() }
+            catch (error: Exception) { badTrustTls.close(); throw error }
         try {
             var rejected = false
             try { let session = wsOpen(badTrust, ws2, owner()); session.close() }
             catch (error: api.TlsEngineException) { rejected = match (error.tlsCode) { case api.TlsEngineErrorCode.CertificateUntrusted => true; case _ => false } }
             require(rejected); clean(badTrust)
-        } finally { badTrust.close() }
+        } finally { badTrust.close(); badTrustTls.close() }
         check("untrusted_chain")
     } finally {
         h1.close(); h2.close(); clean(h1); clean(h2)
@@ -248,6 +256,10 @@ func selfCheck(certPath: String, keyPath: String, untrustedPath: String): Unit {
         serving1.get(5 * Duration.second); serving2.get(5 * Duration.second)
         let end = Deadline.after(3 * Duration.second)
         while (fixture.producers.load() != 0) { require(!end.isExpired()); sleep(Duration.millisecond) }
+        // Client.close() closes only the handshaker it built; these caller-owned configurations
+        // retain their own copies and are closed explicitly here.
+        h2Tls.close(); server2Tls.close()
+        require(h2Tls.isClosed() && server2Tls.isClosed())
     }
     check("cleanup"); println("APP_ACCEPTANCE_PASS")
 }

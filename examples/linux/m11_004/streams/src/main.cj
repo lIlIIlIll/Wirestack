@@ -130,12 +130,19 @@ main(args: Array<String>): Int64 {
         require(budget > 0 && budget <= 60000 && maximum > 0 && maximum <= 10000 && recover >= 0 && recover <= 8)
         require(cursorPolicy != "none" || recover == 0)
         let builder = HttpClient.builder()
-        if (!trust.isEmpty()) { builder.tls(HttpClientTlsConfig([boundedFile(trust)])) }
-        let client = builder.build()
+        // The builder clones the handshaker, so this caller-owned trust configuration keeps its
+        // own copy and is closed here even though the client is closed in the same scope.
+        let config = if (trust.isEmpty()) { None<HttpClientTlsConfig> } else { Some(HttpClientTlsConfig([boundedFile(trust)])) }
+        if (let Some(value) <- config) { builder.tls(value) }
+        let client = try { builder.build() }
+            catch (error: Exception) { if (let Some(value) <- config) { value.close() }; throw error }
         try {
             if (args[0] == "sse") { let _ = consumeSse(client, args[1], post, recover, maximum, owner(ms: budget)) }
             else { let _ = consumeWebSocket(client, args[1], maximum, recover, command, owner(ms: budget)) }
-        } finally { client.close() }
+        } finally {
+            client.close()
+            if (let Some(value) <- config) { value.close(); require(value.isClosed()) }
+        }
         return 0
     } catch (_: api.NetworkException) { eprintln("ERROR category=network phase=operation code=2"); return 1 }
     catch (_: HttpException) { eprintln("ERROR category=http phase=operation code=3"); return 1 }

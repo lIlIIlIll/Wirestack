@@ -2,6 +2,14 @@
   {
     "task_id": "M9-001",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M9-001/evidence.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -11,6 +19,14 @@
   {
     "task_id": "M9-002",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M9-002/evidence.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -20,6 +36,14 @@
   {
     "task_id": "M9-003",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M9-003/evidence.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -29,15 +53,31 @@
   {
     "task_id": "M10-001",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M10-001/README.md",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "337176ea927a1e6039bf305016e01e4da700e3e5de378a3329fe165aa2f58bdd"
+      "sha256": "b9a39b8cb89226fa74bb3c8e14ff08f421292619bca8e8ee89bedc5eadb17083"
     }
   },
   {
     "task_id": "M10-002",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M10-002/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -46,16 +86,32 @@
   },
   {
     "task_id": "M10-003",
-    "status_at_start": "COMPLETE",
+    "status_at_start": "BLOCKED",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": true,
     "path": "docs/evidence/M10-003/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d405775bfaece77637b199d1127c035ce650108cd116a4f2d298527dcc2efbac"
+      "sha256": "6f764a5adb2c2d4192d63d6a8548106953a092b4a88342254e5cfcf3cef69711"
     }
   },
   {
     "task_id": "M10-004",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M10-004/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -65,6 +121,14 @@
   {
     "task_id": "M10-005",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M10-005/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -73,16 +137,32 @@
   },
   {
     "task_id": "M11-001",
-    "status_at_start": "COMPLETE",
+    "status_at_start": "BLOCKED",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": true,
     "path": "docs/evidence/M11-001/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "807ac7b9a622bacb6380a2511215537d34b40e531ae1c8bd862273907fc550e6"
+      "sha256": "8335d97b9efd815de44791cf29e31151873bca0e97da09952972536736ed3555"
     }
   },
   {
     "task_id": "M11-002",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M11-002/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
@@ -92,10 +172,18 @@
   {
     "task_id": "M11-003",
     "status_at_start": "COMPLETE",
+    "status_source": {
+      "path": "docs/planning/status.md",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+      }
+    },
+    "blocked": false,
     "path": "docs/evidence/M11-003/verification.json",
     "digest": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "930e587decf996ecac49f5397e4224e071d7c8a34e0ecfef0233fc2592ad4305"
+      "sha256": "b528571087c41d7ee1d220abe73997d8e235725010e1477352c734ce1fde88cb"
     }
   }
 ]

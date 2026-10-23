@@ -58,6 +58,38 @@ wirestack = {{path = "../../install/wirestack"}}
         with self.assertRaisesRegex(ValueError, "override"):
             apps.validate_app(app, "cli")
 
+    def test_package_level_linker_and_compiler_overrides_are_rejected(self):
+        for field, value in (("link-option", '"-lssl"'), ("override-compile-option", '"-I/vendor/include"'),
+                             ("compile-option", '"-O0"'), ("package-configuration", '{vendor = "custom"}')):
+            with self.subTest(field=field):
+                app = self.application()
+                manifest = app / "cjpm.toml"
+                manifest.write_text(manifest.read_text().replace(
+                    'output-type = "executable"', f'output-type = "executable"\n{field} = {value}'))
+                with self.assertRaises(apps.ManifestContractError) as raised:
+                    apps.validate_app(app, "cli")
+                self.assertEqual(raised.exception.code, "MANIFEST_PACKAGE_OVERRIDE")
+                import shutil
+                shutil.rmtree(app)
+
+    def test_unknown_package_field_is_rejected(self):
+        app = self.application()
+        manifest = app / "cjpm.toml"
+        manifest.write_text(manifest.read_text().replace(
+            'output-type = "executable"', 'output-type = "executable"\nunexpected-linker-setting = "x"'))
+        with self.assertRaises(apps.ManifestContractError) as raised:
+            apps.validate_app(app, "cli")
+        self.assertEqual(raised.exception.code, "MANIFEST_PACKAGE_FIELD")
+
+    def test_empty_package_option_fields_stay_permitted(self):
+        app = self.application()
+        manifest = app / "cjpm.toml"
+        manifest.write_text(manifest.read_text().replace(
+            'output-type = "executable"',
+            'output-type = "executable"\ncompile-option = ""\noverride-compile-option = ""\n'
+            'link-option = ""\npackage-configuration = {}\ntarget-dir = ""\nscript-dir = ""\ndescription = "consumer"'))
+        self.assertEqual(apps.validate_app(app, "cli"), ["wirestack.http.*"])
+
     def test_documentation_byte_drift_missing_app_and_duplicate_are_rejected(self):
         entries = []
         for name in apps.APP_NAMES:
@@ -73,7 +105,99 @@ wirestack = {{path = "../../install/wirestack"}}
                 with self.assertRaises(ValueError):
                     apps.validate_docs(guide, self.root)
 
+
+    def test_every_tagged_region_of_a_multi_snippet_application_is_required(self):
+        entries = []
+        for name in apps.APP_NAMES:
+            app = self.application(name=name)
+            tags = [f"{name}-one", f"{name}-two"] if name == "streams" else [name]
+            source = "".join(f"// DOC-BEGIN {tag}\nprintln({index})\n// DOC-END {tag}\n" for index, tag in enumerate(tags))
+            (app / "src/main.cj").write_text(f"package wirestack_m11_004_{name}\n{source}")
+            for index, tag in enumerate(tags):
+                entries.append(f"<!-- compiled: {name}/src/main.cj#{tag} -->\n```cangjie\nprintln({index})\n```\n")
+        guide = self.root / "guide.md"
+        guide.write_text("\n".join(entries))
+        documented = apps.validate_docs(guide, self.root)
+        self.assertIn("streams/src/main.cj#streams-two", documented)
+        guide.write_text("\n".join(entry for entry in entries if "#streams-two" not in entry))
+        with self.assertRaisesRegex(ValueError, "streams/src/main.cj#streams-two"):
+            apps.validate_docs(guide, self.root)
+
+    def test_untracked_application_snippet_is_still_required(self):
+        entries = []
+        for name in apps.APP_NAMES:
+            app = self.application(name=name)
+            (app / "src/main.cj").write_text(f"package wirestack_m11_004_{name}\n// DOC-BEGIN {name}\nprintln(1)\n// DOC-END {name}\n")
+            entries.append(f"<!-- compiled: {name}/src/main.cj#{name} -->\n```cangjie\nprintln(1)\n```\n")
+        guide = self.root / "guide.md"
+        guide.write_text("\n".join(entries))
+        self.assertEqual(len(apps.validate_docs(guide, self.root)), len(apps.APP_NAMES))
+        (self.root / "cli/src/extra.cj").write_text("package wirestack_m11_004_cli\n// DOC-BEGIN extra\nprintln(2)\n// DOC-END extra\n")
+        with self.assertRaisesRegex(ValueError, "cli/src/extra.cj#extra"):
+            apps.validate_docs(guide, self.root)
+
+    def test_unclosed_caller_owned_tls_configuration_is_rejected(self):
+        for name in apps.APP_NAMES:
+            app = self.application(name=name)
+            (app / "src/main.cj").write_text(f"package wirestack_m11_004_{name}\n")
+        source = self.root / "streams/src/main.cj"
+        unclosed = ["package wirestack_m11_004_streams", "func run(): Unit {",
+            "    let config = HttpServerTlsConfig([], [])",
+            "    let server = HttpServer.builder().tls(config).build()", "}", ""]
+        source.write_text("\n".join(unclosed))
+        with self.assertRaisesRegex(ValueError, "never closes its HttpServerTlsConfig owner config"):
+            apps.validate_tls_ownership(self.root)
+        inline = ["package wirestack_m11_004_streams", "func run(): Unit {",
+            "    let server = HttpServer.builder().tls(HttpServerTlsConfig([], [])).build()", "}", ""]
+        source.write_text("\n".join(inline))
+        with self.assertRaisesRegex(ValueError, "passes an unowned HttpServerTlsConfig"):
+            apps.validate_tls_ownership(self.root)
+        closed = ["package wirestack_m11_004_streams", "func run(): Unit {",
+            "    let config = HttpServerTlsConfig([], [])",
+            "    let server = HttpServer.builder().tls(config).build()",
+            "    try { server.close() } finally { config.close() }", "}", ""]
+        source.write_text("\n".join(closed))
+        self.assertEqual(apps.validate_tls_ownership(self.root), {"HttpServerTlsConfig": 1, "HttpClientTlsConfig": 0})
+
+    def test_optional_binding_tls_configuration_is_recognized_as_owned(self):
+        for name in apps.APP_NAMES:
+            app = self.application(name=name)
+            (app / "src/main.cj").write_text(f"package wirestack_m11_004_{name}\n")
+        optional = ["package wirestack_m11_004_cli", "func run(trust: String): Unit {",
+            "    let config = if (trust.isEmpty()) { None<HttpClientTlsConfig> } else { Some(HttpClientTlsConfig([])) }",
+            "    let client = HttpClient.builder().build()",
+            "    try { } finally { client.close(); if (let Some(value) <- config) { value.close() } }", "}", ""]
+        (self.root / "cli/src/main.cj").write_text("\n".join(optional))
+        self.assertEqual(apps.validate_tls_ownership(self.root), {"HttpServerTlsConfig": 0, "HttpClientTlsConfig": 1})
+
+    def test_compiled_examples_close_every_tls_configuration(self):
+        owners = apps.validate_tls_ownership(apps.APPS)
+        self.assertGreater(owners["HttpServerTlsConfig"], 0)
+        self.assertGreater(owners["HttpClientTlsConfig"], 0)
+
+    def test_flooding_child_fails_with_a_typed_capture_error(self):
+        stdout = self.root / "stdout.raw"
+        stderr = self.root / "stderr.raw"
+        code, timed_out = apps.run_captured(["python3", "-c", "print('bounded')"], self.root, {}, stdout, stderr, 30)
+        self.assertEqual((code, timed_out), (0, False))
+        self.assertEqual(stdout.read_text(), "bounded\n")
+        flood = "import sys\nwhile True: sys.stdout.write('x' * 8192)"
+        with self.assertRaises(apps.EvidenceCaptureError) as raised:
+            apps.run_captured(["python3", "-c", flood], self.root, {}, stdout, stderr, 60)
+        self.assertEqual(raised.exception.code, "CAPTURE_LIMIT")
+        self.assertLessEqual(stdout.stat().st_size, apps.CAPTURE_LIMIT_BYTES)
+
+    def test_captured_log_normalization_stops_at_the_cap(self):
+        source = self.root / "flood.log"
+        source.write_text("line\n" * (apps.CAPTURE_LIMIT_BYTES // 4))
+        destination = self.root / "normalized.log"
+        written, truncated = apps.normalize_capture(source, destination, lambda line: line)
+        self.assertTrue(truncated)
+        self.assertLessEqual(written, apps.CAPTURE_LIMIT_BYTES)
+        self.assertEqual(destination.stat().st_size, written)
+
     def test_missing_static_archive_and_mutated_bytes_fail_inventory(self):
+
         installed = self.root / "installed"
         records = []
         for name in apps.NATIVE_ARCHIVES:

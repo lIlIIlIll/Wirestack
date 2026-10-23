@@ -4,6 +4,7 @@ import std.fs.*
 import std.console.Console
 import std.convert.*
 import std.collection.ArrayList
+import std.collection.HashMap
 import std.sync.*
 import wirestack as api
 import wirestack.http.*
@@ -44,6 +45,9 @@ class Gate {
         }
         cancelled.store(owner.isCancellationRequested())
     }
+}
+func budgetExpired(operation: OperationContext): Bool {
+    operation.isCancellationRequested() || operation.isDeadlineExceeded()
 }
 class ServiceHandler <: HttpServerHandler {
     let graceful = Gate()
@@ -88,7 +92,7 @@ class ServiceHandler <: HttpServerHandler {
         }
         // A body EOF can race the watchdog; an expired or cancelled operation must not reach a
         // side-effecting route or report success.
-        if (operation.isCancellationRequested() || operation.isDeadlineExceeded()) {
+        if (budgetExpired(operation)) {
             return HttpServerResponse(HttpResponse(408, "Request Timeout", ResponseBody.empty()))
         }
         if (request.target == "/upload") {
@@ -98,6 +102,9 @@ class ServiceHandler <: HttpServerHandler {
         if (request.target == "/graceful") { graceful.hold(operation) }
         if (request.target == "/security") { security.hold(operation) }
         if (request.target == "/drain") { draining.hold(operation) }
+        // A blocking route returns as soon as the shortened operation expires, so the budget is
+        // rechecked before any success path; an expired --budget-ms must never report success.
+        if (budgetExpired(operation)) { return HttpServerResponse(HttpResponse(408, "Request Timeout", ResponseBody.empty())) }
         if (request.target == "/stream" || request.target == "/hold") {
             let writer = SseWriter(maximumBufferBytes: 128, context: operation)
             producers.fetchAdd(1)
@@ -121,6 +128,42 @@ class ServiceHandler <: HttpServerHandler {
         HttpServerResponse(HttpResponse(200, "OK", ResponseBody(RequestBody.string("download").open())))
     }
     // DOC-END service-handler
+}
+func budgetRouteExpiry(material: HttpServerTlsConfig, trust: HttpClientTlsConfig): Unit {
+    // The shortened request budget must stay enforced after a blocking route returns: a held
+    // /graceful, /security or /drain that outlives --budget-ms can never report success.
+    let handler = ServiceHandler(250)
+    let server = serverFor(handler, material, 0u16, 4, 4)
+    let serving = spawn { server.serve() }
+    let client = clientFor(server, trust)
+    let base = "https://example.test:${server.localEndpoint.port}"
+    try {
+        for target in ["/graceful", "/security", "/drain"] {
+            let response = client.get(base + target, context: context(ms: 5000))
+            try { require(response.status == 408) } finally { response.close() }
+            waitFor({ => server.resourceSnapshot().activeRequests == 0 })
+        }
+        require(!handler.graceful.cancelled.load() && !handler.security.cancelled.load() && !handler.draining.cancelled.load())
+        println("RESOURCE service_budget_expired routes=3 status=408")
+    } finally {
+        handler.graceful.released.store(true); handler.security.released.store(true); handler.draining.released.store(true)
+        client.close()
+        require(server.shutdown(context: context()).activeAtReturn == 0)
+        serving.get(3 * Duration.second); server.close()
+    }
+}
+func rejectsUnknownOptions(): Unit {
+    // A misspelled resource limit must not silently fall back to the default.
+    for (args in [["serve", "--max-request", "1"], ["serve", "--max-requests", "1", "--max-request", "2"],
+        ["serve", "--max-requests", "1", "--max-requests", "2"], ["serve", "--max-requests"],
+        ["serve", "--unknown-flag", "1"]]) {
+        var rejected = false
+        try { let _ = parseServeOptions(args) } catch (_: IllegalArgumentException) { rejected = true }
+        require(rejected)
+    }
+    let parsed = parseServeOptions(["serve", "--max-requests", "1", "--budget-ms", "250"])
+    require(option(parsed, "--max-requests", "16") == "1" && option(parsed, "--budget-ms", "10000") == "250" &&
+        option(parsed, "--max-streams", "16") == "16")
 }
 func limits(requests: Int64, streams: Int64): HttpResourceLimits {
     HttpResourceLimits(maximumRequests: requests, maximumRequestsPerRoute: requests,
@@ -180,6 +223,7 @@ func cancelled(code: ?api.NetworkErrorCode): Bool {
     match (code) { case Some(api.NetworkErrorCode.Cancelled) => true; case _ => false }
 }
 func selfCheck(cert: Array<Byte>, key: Array<Byte>, untrusted: Array<Byte>): Unit {
+    rejectsUnknownOptions()
     let material = HttpServerTlsConfig([cert], key)
     let trust = HttpClientTlsConfig([cert])
     let identity = HttpClientTlsConfig([cert], clientCertificateChainDer: [cert], clientPrivateKeyPkcs8Der: key)
@@ -264,6 +308,7 @@ func selfCheck(cert: Array<Byte>, key: Array<Byte>, untrusted: Array<Byte>): Uni
             require(deadline)
         } finally { timed.close() }
         check("deadline")
+        budgetRouteExpiry(material, trust); check("budget_route_expiry")
         let capacity = clientFor(server, trust, cap: 1)
         try {
             let held = SseSession.eventSource(capacity, HttpUrl.parse("${base}/hold"), context: context())
@@ -368,6 +413,7 @@ func selfCheck(cert: Array<Byte>, key: Array<Byte>, untrusted: Array<Byte>): Uni
             require(shutdown.get(3 * Duration.second).activeAtReturn == 0)
             serving.get(3 * Duration.second); clean(server, handler); check("graceful_stop")
         } finally { authenticated.close() }
+        check("unknown_option")
         check("cleanup"); println("APP_ACCEPTANCE_PASS")
     } finally {
         handler.graceful.released.store(true); handler.security.released.store(true); handler.draining.released.store(true)
@@ -384,18 +430,34 @@ func command(): String {
     }
     "stop"
 }
-func option(args: Array<String>, name: String, fallback: String): String {
-    for (i in 1..args.size) { if (args[i] == name) { require(i + 1 < args.size); return args[i + 1] } }
-    fallback
+let OPTION_NAMES = ["--port", "--certificate", "--key", "--max-requests", "--max-streams", "--budget-ms"]
+func parseServeOptions(args: Array<String>): HashMap<String, String> {
+    // Every argument is consumed exactly once. An unknown, repeated or dangling option fails
+    // closed instead of silently falling back to a default resource limit.
+    let parsed = HashMap<String, String>()
+    var index: Int64 = 1
+    while (index < args.size) {
+        let flag = args[index]
+        if (!OPTION_NAMES.contains(flag)) { throw IllegalArgumentException("unknown service option") }
+        if (parsed.contains(flag)) { throw IllegalArgumentException("repeated service option") }
+        if (index + 1 >= args.size) { throw IllegalArgumentException("dangling service option") }
+        parsed[flag] = args[index + 1]
+        index += 2
+    }
+    parsed
+}
+func option(args: HashMap<String, String>, name: String, fallback: String): String {
+    match (args.get(name)) { case Some(value) => value; case None => fallback }
 }
 func serve(args: Array<String>): Unit {
-    let cert = materialBytes(option(args, "--certificate", ""))
-    let key = materialBytes(option(args, "--key", ""))
-    let budget = Int64.parse(option(args, "--budget-ms", "10000")); require(budget > 0 && budget <= 600000)
+    let options = parseServeOptions(args)
+    let cert = materialBytes(option(options, "--certificate", ""))
+    let key = materialBytes(option(options, "--key", ""))
+    let budget = Int64.parse(option(options, "--budget-ms", "10000")); require(budget > 0 && budget <= 600000)
     let material = HttpServerTlsConfig([cert], key)
     let handler = ServiceHandler(budget)
-    let server = try { serverFor(handler, material, UInt16.parse(option(args, "--port", "8443")),
-        Int64.parse(option(args, "--max-requests", "16")), Int64.parse(option(args, "--max-streams", "16"))) }
+    let server = try { serverFor(handler, material, UInt16.parse(option(options, "--port", "8443")),
+        Int64.parse(option(options, "--max-requests", "16")), Int64.parse(option(options, "--max-streams", "16"))) }
         catch (error: Exception) { material.close(); throw error }
     let serving: Future<Unit> = spawn { server.serve() }
     try {
@@ -426,5 +488,8 @@ main(args: Array<String>): Int64 {
             require(args.size == 4); selfCheck(materialBytes(args[1]), materialBytes(args[2]), materialBytes(args[3]))
         } else { require(args[0] == "serve"); serve(args) }
         0
-    } catch (_: Exception) { Console.stdErr.write("ERROR category=service phase=operation code=1\n".toArray()); 1 }
+    } catch (_: IllegalArgumentException) {
+        Console.stdErr.write("ERROR category=usage phase=option code=2\n".toArray()); 2
+    }
+    catch (_: Exception) { Console.stdErr.write("ERROR category=service phase=operation code=1\n".toArray()); 1 }
 }

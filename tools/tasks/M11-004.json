@@ -127,6 +127,8 @@
     "tools/tests/test_m11_004_installed_consumers.py",
     "tools/tasks/M11-004.json",
     "README.md",
-    "docs/guides/installed-applications-linux.md"
+    "docs/guides/installed-applications-linux.md",
+    "docs/planning/status.md",
+    "docs/evidence/M11-004/dependencies.json"
   ]
 }

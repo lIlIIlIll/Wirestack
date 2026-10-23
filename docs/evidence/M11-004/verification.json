@@ -3,7 +3,7 @@
   "task_id": "M11-004",
   "status": "BLOCKED",
   "status_detail": {
-    "reason": "No committed native run binds the tracked sources of this review revision.",
+    "reason": "Review fixes for issues #283-#289 changed the tracked application, runner and guide sources after every committed installed report; no committed native run binds this revision, so the task cannot be COMPLETE.",
     "pre_review_reports": [
       "docs/evidence/M11-004/installed/report.json",
       "docs/evidence/M11-004/installed-sdk113/report.json"
@@ -16,31 +16,64 @@
     "review_round_runner_digest": "05daa6700304e698e309cacfdff33b2e078162771e47933cbdf3461587792f9f",
     "changed_after_review_round_reports": [
       "examples/linux/m11_004/streams/src/fixture.cj",
+      "examples/linux/m11_004/streams/src/acceptance.cj",
+      "examples/linux/m11_004/streams/src/main.cj",
       "examples/linux/m11_004/service/src/main.cj",
-      "docs/guides/installed-applications-linux.md"
+      "tools/m11_004_installed_consumers.py",
+      "tools/tests/test_m11_004_installed_consumers.py",
+      "docs/guides/installed-applications-linux.md",
+      "tools/tasks/M11-004.json",
+      "docs/planning/status.md",
+      "docs/evidence/M11-004/dependencies.json"
     ],
     "stale_against_this_file": [
       "examples/linux/m11_004/cli/src/main.cj",
       "examples/linux/m11_004/decoded/src/main.cj",
       "examples/linux/m11_004/streams/src/main.cj",
+      "examples/linux/m11_004/streams/src/acceptance.cj",
       "examples/linux/m11_004/streams/src/fixture.cj",
       "examples/linux/m11_004/service/src/main.cj",
       "tools/m11_004_installed_consumers.py",
       "tools/tests/test_m11_004_installed_consumers.py",
-      "docs/guides/installed-applications-linux.md"
+      "docs/guides/installed-applications-linux.md",
+      "docs/planning/status.md",
+      "tools/tasks/M11-004.json"
     ],
     "working_tree_contract_check": {
-      "argv": ["python3", "tools/m11_004_installed_consumers.py", "--validate-only"],
+      "argv": [
+        "python3",
+        "tools/m11_004_installed_consumers.py",
+        "--validate-only"
+      ],
       "result": "M11_004_APPLICATION_CONTRACT_PASS",
-      "scope": "Working tree only; not a substitute for regenerated installed reports."
+      "dependency_result": "M11_004_DEPENDENCY_BLOCKED tasks=M10-003,M11-001",
+      "scope": "Working tree contract only, with the dependency record fail-closed; not a substitute for regenerated installed reports."
     },
     "required_before_complete": [
-      "Run the installed consumer runner on the default SDK profile and on the qualified SDK 1.1.3 profile on Linux x86_64 glibc.",
-      "Regenerate docs/evidence/M11-004/installed/report.json with python3 tools/m11_004_installed_consumers.py.",
-      "Regenerate docs/evidence/M11-004/installed-sdk113/report.json with python3 tools/m11_004_installed_consumers.py --include-m9 --output docs/evidence/M11-004/installed-sdk113.",
+      "Regenerate docs/evidence/M11-004/installed/report.json with python3 tools/m11_004_installed_consumers.py on the default SDK.",
+      "Regenerate docs/evidence/M11-004/installed-sdk113/report.json with python3 tools/m11_004_installed_consumers.py --include-m9 --output docs/evidence/M11-004/installed-sdk113 on the qualified SDK 1.1.3.",
       "Run scripts/check-task M11-004 --json --output docs/evidence/M11-004/task-gate.json.",
-      "Rebuild this file from the regenerated reports and restore a source-bound COMPLETE status."
-    ]
+      "Restore M10-003 and M11-001 to COMPLETE with current revision-bound evidence; both are BLOCKED now.",
+      "Rebuild this file from the regenerated reports and only then record a COMPLETE status."
+    ],
+    "review_fix_issues": [
+      283,
+      284,
+      285,
+      286,
+      287,
+      288,
+      289
+    ],
+    "review_fix_branch": "fix/M11-004-stack200-findings",
+    "source_digests_scope": "Working tree at the review-fix revision. They are not bound to any committed installed or SDK1.1.3 run; regenerate both profiles before claiming COMPLETE.",
+    "blocked_by_dependencies": [
+      "M10-003",
+      "M11-001"
+    ],
+    "dependency_status_binding": "docs/evidence/M11-004/dependencies.json is copied from docs/planning/status.md (digest-bound); M10-003 and M11-001 remain BLOCKED there and are recorded as blocked, not COMPLETE.",
+    "review_fix_contract_checks": "21 unittest cases present in tools/tests/test_m11_004_installed_consumers.py; not claimed as committed evidence.",
+    "stale_scope": "Every installed/SDK1.1.3 report below binds an earlier digest of these files. source_digests here were recomputed for the working tree only; they do not bind any native run."
   },
   "platform": {
     "os": "linux",
@@ -206,7 +239,7 @@
     },
     "examples/linux/m11_004/cli/src/main.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b1458c6f1717c0e843f3121592853553a9ed94c767a4c9778692a9645f80d876"
+      "sha256": "b22b130fbafc91c8e867ddb0cc08e8c8c3df2a66ea6cc416d0898a99bc1ad8a3"
     },
     "examples/linux/m11_004/cli/src/acceptance.cj": {
       "domain": "text-utf8-lf-v1",
@@ -218,7 +251,7 @@
     },
     "examples/linux/m11_004/decoded/src/main.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9237ba16adcd47a089a700f9c9370fdf8e1a6ff59af4ee36b1ce71000c0fab1b"
+      "sha256": "eee04efd771bebfddd802ba58051a2d97b9ceb7ce81610b33891557f620886fb"
     },
     "examples/linux/m11_004/decoded/src/acceptance.cj": {
       "domain": "text-utf8-lf-v1",
@@ -230,15 +263,15 @@
     },
     "examples/linux/m11_004/streams/src/main.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "751177c08d2aa594f3e09b203db3052c8852a5925c690943c5f5c95a58b4f16e"
+      "sha256": "0f6dc352f0866e5937c32a4e581848f488879a900417f0fbd10dcf6ba7196ff0"
     },
     "examples/linux/m11_004/streams/src/acceptance.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "bda1f56253aecbd41b4c9f26df927b457f3a0c3c81a69054638503f994e734a6"
+      "sha256": "da4c42620474f2aa24c6ce9ade3fcc4df3cb284a710221c4cc90f4dcaad46848"
     },
     "examples/linux/m11_004/streams/src/fixture.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "11d49b86bc0ae249cd95e1fba7a4b4d4ce29bedd6637c3ee9ccbc5e4ccd23b68"
+      "sha256": "6d279dda99f6e65a0458352f6fc636c59c0f706fe668e212b276aa36f2982372"
     },
     "examples/linux/m11_004/service/cjpm.toml": {
       "domain": "text-utf8-lf-v1",
@@ -246,19 +279,19 @@
     },
     "examples/linux/m11_004/service/src/main.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c1751c4a543ac47bbc2c50801fd2eb34a0d1e03f4f1c9986446532fd2c574701"
+      "sha256": "87830612ef4594b2c7ef24b6214536d126f61973cdbcd8b034239553af7d2167"
     },
     "tools/m11_004_installed_consumers.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "fbaff2577108a890fb0c6ffadbee9f1bae4eb2f37ab35d4c9d768c886e3c89dd"
+      "sha256": "84484eaa079cddcfa75744c8cfb07525dd6952edc79e864a9e5fee33ab24f86f"
     },
     "tools/tests/test_m11_004_installed_consumers.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "7a52749abb3d59bdfca24056b0c73c954bf11e294bb78a4b06743c174d1e101e"
+      "sha256": "312eca63346bc911cb20134139adffbd361a6bfe231bddd71d3016af065f5e11"
     },
     "tools/tasks/M11-004.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "1a6f0f92c2fbfde1c2c0911211f38a83d92e5e61eef2fc7f386c51e41b7d00dc"
+      "sha256": "37127ee61b2a7096179fbdebdeb55a4bde57d1ef8a524a73b6ec3404b40907de"
     },
     "README.md": {
       "domain": "text-utf8-lf-v1",
@@ -266,11 +299,23 @@
     },
     "docs/guides/installed-applications-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "012722a95228f3e8123574890e58dd548b044c10882c303de73189957b451389"
+      "sha256": "b676a8feaa03959adc034f6d7e1d25b94fbf00ed84e522965d56a2a5a488bbbe"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05d96a1efd0d20f02cdf0529f0d3788b521f9d8b3e683d0dab1b314133542bcb"
+    },
+    "docs/evidence/M11-004/dependencies.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "440c36fe497e237574cebe719cd3534db944d2c6a885d3591831a624f03eff06"
     }
   },
   "compiled_documentation_regions": 6,
-  "negative_gate_tests": 9,
+  "negative_gate_tests": {
+    "suite_checks": 21,
+    "status": "NOT_RECORDED_AS_EVIDENCE",
+    "reason": "Review-fix checks were added but no committed post-commit run is recorded here; the historical 11-check log is not reused."
+  },
   "release_api_and_consumer_tests": 57,
   "peer_abort_outcome": "SDK1.1.3 produced typed HttpException.ProtocolViolation after real producer admission and server close. Accepted as protocol failure, not relabelled as EOF/reset; output and resource invariants remain mandatory.",
   "network_fixture": "Private user/network namespace; owned TAP descriptor, link-local documentation address, real native multicast packet; no host route/interface mutation or module loading.",
@@ -394,5 +439,9 @@
       "exit_code": 0,
       "log": "docs/evidence/M11-004/contracts.log"
     }
+  ],
+  "dependency_blockers": [
+    "M10-003",
+    "M11-001"
   ]
 }
