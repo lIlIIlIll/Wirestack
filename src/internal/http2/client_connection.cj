@@ -874,8 +874,9 @@ class Http2ClientExchange <: ResponseBodyObserver & Http2StreamResetListener {
         let decoded = decodeClientData(frame, streamId)
         let endStream = frame.header.flags.isEndStream()
         sequence.acceptData(decoded.length, endStream)
+        // Keep body EOF behind the stream-registry transition.
         channel.offerView(
-            decoded.data, decoded.offset, decoded.length, Int64(frame.header.length), endStream,
+            decoded.data, decoded.offset, decoded.length, Int64(frame.header.length), false,
             frame.takeReceivedBufferReservation()
         )
         if (endStream) {
