@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "revision": "b521751c98419c2e29478db4ea288b345debe2d6",
+  "platform": "linux-x86_64-glibc",
+  "status": "BLOCKED",
+  "scope": "Current-source M10-002 acceptance, including Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
+  "q4_buffer_before_flow_permit": {
+    "criterion": "Acquire the bounded DATA buffer lease before obtaining flow-control permit; keep no permit during a blocked buffer wait; recheck available stream credit after lease acquisition and release/retry if credit shrinks.",
+    "http2_resource_profiles": {
+      "status": "PASS",
+      "profiles": [
+        { "limit": "RLIMIT_NOFILE=64", "tests": "219/219", "exit_code": 0 },
+        { "limit": "RLIMIT_DATA=1073741824 bytes", "tests": "219/219", "exit_code": 0 },
+        { "limit": "RLIMIT_AS=4294967296 bytes", "tests": "219/219", "exit_code": 0 }
+      ],
+      "result": "Q4 scheduler cases are included in the HTTP/2 suite and passed in each listed profile."
+    },
+    "full_native_regression": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "total": 1114,
+      "passed": 1085,
+      "skipped": 28,
+      "errors": 1,
+      "failing_case": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill",
+      "note": "The isolated exact-filter rerun passed 1/1; this does not erase the full-suite error."
+    },
+    "single_cpu_profile": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "total": 219,
+      "passed": 218,
+      "failed": 1,
+      "failing_case": "peerGoAwayDrainsConnectionWithoutFailingAcceptedStream",
+      "observed": "expected activeStreamCount 0, got 1"
+    }
+  },
+  "other_task_acceptance": {
+    "task_gate": "INVALID before acceptance commands: M10-003 dependency is not COMPLETE: M10-002",
+    "repository_check": "FAIL: scripts/check exit 1; tooling unittest run reported 584 tests, 27 failures, 16 errors, 4 skipped.",
+    "documentation": "PASS: scripts/check-docs exit 0; 40 commands passed; combined API symbol and parameter documentation coverage 100%.",
+    "architecture_network_build": "PASS: architecture guard, network capability contract, cjpm check, cjpm build, and Linux resolver build all exit 0."
+  },
+  "qualification": "Do not mark COMPLETE or ready while the task gate is invalid and full regression/resource-profile failures remain."
+}
