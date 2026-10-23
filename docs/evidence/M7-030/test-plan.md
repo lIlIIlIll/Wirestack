@@ -135,7 +135,7 @@ synthetic provider fixture is a released AWS-LC update.
 | T017 | S015,S021 | P018,P024 | Wrong tag, digest, latest selector and download/validation order injected into hosted workflow | FAIL | Static contract binds one exact draft asset retrieval and requires digest check before supply-chain validation | CI,supply-chain,fault-injection |
 | T018 | S015,S022 | P018,P025 | Inject OIDC into staging job or contents write into attestation job | FAIL | Static contract requires two jobs, isolated permissions and SHA-256 checks before and after bounded transfer | CI,permissions,fault-injection |
 | T019 | S016,S023 | P019,P026 | Replace full signer workflow identity with a relative path | FAIL | Static contract requires the exact repository-qualified identity three times; published artifact bundle verifies with that identity | CI,identity,fault-injection |
-| T020 | S024 | P027 | Absent, renamed, truncated, byte-mutated and stubbed-download frozen artifacts | FAIL/PASS | Each negative raises its stable code, failed retrieval writes nothing, and the exact bytes stage once and re-verify | supply-chain,negative,fault-injection |
+| T020 | S024 | P027 | Absent, renamed, truncated, byte-mutated and stubbed-download frozen artifacts | FAIL/PASS | Each negative raises its stable code, failed retrieval writes nothing, the committed `docs/evidence/M7-030/frozen-artifact.json` receipt is left byte-identical, the gate stages under ignored `build/m7-030/`, and the exact bytes stage once and re-verify | supply-chain,negative,fault-injection |
 
 ## Coverage and gap review
 

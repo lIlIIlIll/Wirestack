@@ -2,12 +2,15 @@
 
 Status: **BLOCKED**
 
-The release mechanics below are implemented and rehearsed, but three M7-030
-acceptance commands cannot reach PASS on the current tree. See
+The release mechanics below are implemented and rehearsed, but the M7-030 task
+check is FAIL on the current tree: of its six commands, `supply-chain-inputs`
+and `github-hosted-attestations` fail and the other four pass. See
 [Current blockers](#current-blockers); the 2026-08-30 results in
 `local-rehearsal.json`, `hosted-validation.json`, `github-attestation.json`,
 `workflow-contract.json`, `task-check.json` and `test-results.md` are retained
-unchanged as history and are **not** restated as current.
+unchanged as history and are **not** restated as current. The seal in
+`evidence.json` predates the current manifest and is stale; it is not resealed
+by this change.
 
 M7-030 has a fail-closed local signing and update rehearsal plus a pinned
 GitHub OIDC/Sigstore workflow. The local gate signs the exact M7-021 artifact,
@@ -89,11 +92,18 @@ SHA-256
 bytes are absent, `fetch-frozen-artifact` retrieves them from the single pinned
 draft-Release tag `m7-030-frozen-artifact-c0988f62` — no `--latest` fallback —
 verifies them, and only then publishes the file. A failed download or a digest
-mismatch publishes nothing. `scripts/check-m7-030-release` stages
-`frozen-artifact.json` before rehearsing, so a clean checkout either reproduces
-the exact reviewed bytes or fails closed with `FROZEN_ASSET_NAME`,
-`FROZEN_ASSET_MISSING`, `FROZEN_ASSET_SIZE`, `FROZEN_ASSET_DIGEST` or
-`FROZEN_ASSET_DOWNLOAD`.
+mismatch publishes nothing. `scripts/check-m7-030-release` stages its
+receipt under the Git-ignored `build/m7-030/` work directory before rehearsing,
+so a clean checkout either reproduces the exact reviewed bytes or fails closed
+with `FROZEN_ASSET_NAME`, `FROZEN_ASSET_MISSING`, `FROZEN_ASSET_SIZE`,
+`FROZEN_ASSET_DIGEST` or `FROZEN_ASSET_DOWNLOAD`. The staging target is never
+`docs/evidence/M7-030/frozen-artifact.json`: a failed staging run must not
+replace the committed PASS receipt, and `main` refuses to write a failure
+payload to that receipt at all. The committed receipt records
+`"mode": "verified-existing-artifact"` from a run against an already staged
+artifact and is bound in the task manifest's `source_paths` and
+`required_evidence`, so deleting or tampering with it fails the evidence gate;
+no downloaded-mode capture is claimed for the current tree.
 
 ## Current blockers
 
@@ -117,11 +127,17 @@ the exact reviewed bytes or fails closed with `FROZEN_ASSET_NAME`,
    `.github/workflows/linux-release-attestation.yml` is intentionally retired —
    `on: workflow_dispatch` with an explicit no-op and M8-007 is the active
    signer — so this task must not reactivate it or mint new attestations.
-3. `check-task` — `scripts/check-task M7-030 --json` returns INVALID with
-   `DEPENDENCY_INCOMPLETE: M10-004 dependency is not COMPLETE: M10-003`. The
-   edge is unrelated to M7-030; P1-012 scopes dependency readiness to the
-   requested task closure. M7-030's own dependencies, M7-022, M7-025 and M7-029,
-   are COMPLETE.
+3. `check-task` — on this stacked branch, where P1-012 scopes dependency
+   readiness to the requested task closure, `scripts/check-task M7-030 --json`
+   runs all six commands and reports `status: FAIL` with exactly the two failing
+   commands above and `issues: []`. The unscoped repository-wide readiness gate
+   additionally reports `DEPENDENCY_INCOMPLETE` on the unrelated
+   `M10-004 → M10-003` edge; M7-030's own dependencies, M7-022, M7-025 and
+   M7-029, are COMPLETE. In a fresh clean checkout with no `dist/` directory,
+   `supply-chain-inputs` fails earlier with `release artifact is absent` because
+   `scripts/generate-m7-025-linux-supply-chain --validate-only` has no artifact
+   to inspect; the stale-generator-fingerprint diagnosis only applies once a
+   staged artifact exists.
 4. Downstream, this row is the only dependency M7-031 has on a non-COMPLETE
    task, so the BLOCKED classification propagates. This task does not edit
    M7-031's row, tooling or evidence — that is M7-031's own scope — but the
@@ -144,3 +160,12 @@ the exact reviewed bytes or fails closed with `FROZEN_ASSET_NAME`,
 frozen-artifact prerequisite in place, and the rehearsal now records the
 hosted-attestation blocker as `productionAttestation: {"decision": "FAIL",
 "detail": "HOSTED_REPORT_SUBJECT"}` rather than inheriting the historical PASS.
+
+A gate run has three evidence-report side effects, not two. Before this
+change it rewrote `docs/evidence/M7-030/frozen-artifact.json`,
+`local-rehearsal.json` and `hosted-validation.json` in place, so a checkout
+showed all three as modified afterwards. The receipt staging target now lives
+under the Git-ignored `build/m7-030/`, so `frozen-artifact.json` is no longer a
+run target and only `local-rehearsal.json` and `hosted-validation.json` are
+rewritten in place; the committed receipt is only replaced deliberately, never
+by a failing run.
