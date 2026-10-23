@@ -382,5 +382,24 @@
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     }
+  },
+  "stack200_review_fixes": {
+    "path": "docs/evidence/M12-001/stack200-review-fixes.json",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "59761ea5f1e12c6d7eef1b1bfc4022343f7683124c661520277e882b77e5a313"
+    },
+    "issues": [
+      291,
+      292,
+      293,
+      294
+    ],
+    "status": "IMPLEMENTED_PENDING_VERIFICATION",
+    "task_status": "BLOCKED",
+    "retained_report_schema_version": 2,
+    "historical_corpus_accepted_after_change": false,
+    "native_rerun": "NOT_RUN",
+    "reason": "Report schema 2 binds TLS provider identity, environment metadata commands, per-sample binary digests and per-scenario work contracts. The retained schema-1 corpus predates those bindings, so `verify` now rejects it with 'retained report does not carry the bound-evidence schema'. Current source status stays BLOCKED until a native capture is rerun on the qualified SDK with the M11-004 dependency evidence available."
   }
 }

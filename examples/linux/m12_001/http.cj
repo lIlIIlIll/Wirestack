@@ -197,6 +197,8 @@ func limitsPerf(connections: Int64, requests: Int64, waiters: Int64, singleRoute
         maximumManagedBufferBytesPerOrigin: 16711680u64, maximumWaiters: waiters, maximumOwners: 8)
 }
 main(args: Array<String>): Int64 {
+    // The runner reads the measured provider identity from this executable.
+    if (isTlsIdentityRequest(args)) { println(tlsIdentityLine()); return 0 }
     perfRequire(args.size == 3 || args.size == 4, "usage: http scenario certificate.der key.pk8 [enabled|disabled]")
     let scenario = args[0]
     let cases = ["h1_short_reuse", "h1_new_connection", "h1_bulk_4096", "h1_bulk_32768", "h1_concurrent",

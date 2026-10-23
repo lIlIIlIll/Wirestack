@@ -298,6 +298,8 @@ func runFailure(count: Int64, setup: TlsSetup): Unit {
         expectedRejections: count, metrics: "{\"cleanup_owners\":0,\"handshake_timeout_count\":${count},\"close_latency_ns\":${closeNs},\"native_connection_count\":${count + 2}}")
 }
 main(args: Array<String>): Int64 {
+    // The runner reads the measured provider identity from this executable.
+    if (isTlsIdentityRequest(args)) { println(tlsIdentityLine()); return 0 }
     perfRequire(args.size >= 1, "scenario required")
     let name = args[0]
     let defaultCount = if (name == "tls_full" || name == "tls_resumed" || name == "tls_failure") { 64 } else { 256 }

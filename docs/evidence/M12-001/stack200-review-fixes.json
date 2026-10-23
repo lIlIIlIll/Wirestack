@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "task_id": "M12-001",
+  "kind": "stack-200-review-fixes",
+  "status": "IMPLEMENTED_PENDING_VERIFICATION",
+  "task_status": "BLOCKED",
+  "release_qualification": "NOT_QUALIFIED",
+  "native_measurement_rerun": "NOT_RUN",
+  "performance_claim": "NONE",
+  "scope": {
+    "branch": "fix/M12-001-stack200-findings",
+    "source_baseline": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+    "historical_pull_request": 208,
+    "historical_pull_request_state": "MERGED; not rewritten by this change",
+    "issues": [
+      291,
+      292,
+      293,
+      294
+    ],
+    "parent_issue": 182,
+    "summary": "Repair the confirmed Stack #200 findings against current source. No capture, promotion, merge, or readiness transition is claimed."
+  },
+  "changes": [
+    {
+      "issue": 291,
+      "finding": "Derive TLS identity from the measured binary",
+      "repair": [
+        "Each compiled layer consumer answers a `tls-identity` request from `TlsRuntime.info()`; capture records that record per layer as `artifact.<layer>.tls_provider` and as the report-level `tls_provider`.",
+        "The former hard-coded environment `TLS` string is removed; comparison uses `environment.tls_provider` plus the recorded provider command output.",
+        "`validate_environment()` reconstructs `cjc`, `cjpm`, `cpu`, `uname`, `kernel`, `compiler_digest`, `runtime_binaries` and `runtime_environment` from retained metadata commands, including the `environment-witness` subcommand, and rejects an edited block.",
+        "Every sample records the digest of the executed binary; its `argv[0]` must equal the recorded layer `command_path`, so an unrecorded executable cannot be attributed to the recorded build.",
+        "`cjpm` participates in the compared environment identity.",
+        "Comparison additionally requires identical `probe_sources`, `task_source_digests`, `workload_counts`, `scenario_contracts` and `tls_provider`; any mismatch is `INCONCLUSIVE`."
+      ]
+    },
+    {
+      "issue": 292,
+      "finding": "Validate work counts for every benchmark scenario",
+      "repair": [
+        "`SCENARIO_CONTRACTS` declares operations, expected rejections and regime for all 33 scenarios, recorded as `scenario_contracts` and rechecked on load.",
+        "`validate_workload_sample()` no longer returns early for HTTP/SSE/WebSocket cases; it validates command arguments and sample accounting for every scenario.",
+        "`http_observed` requires `enabled` plus `metrics.observation_enabled == true`; `http_unobserved` requires `disabled` plus the false metric.",
+        "`warmup_process_rounds` is enforced for every scenario in every declared warmup round.",
+        "`process_peak_rss_kib`, `process_peak_fds` and `process_peak_threads` are recomputed from retained `process_samples`.",
+        "`regime` is part of `summarize().contract`, so regime mismatch yields `INCONCLUSIVE`."
+      ]
+    },
+    {
+      "issue": 293,
+      "finding": "Reject repeated raw executions within one report",
+      "repair": [
+        "Execution identity is the canonical digest of the validated native JSON record (`canonical_execution_identity`).",
+        "A capture log must contain exactly one line; appended diagnostics are rejected instead of changing the identity.",
+        "Duplicate raw executions inside one report are rejected; cross-report overlap uses the same canonical identities and must be disjoint.",
+        "`evaluate_read_buffer()` pairs the two cohorts by recorded `round`, so serialized order cannot change the sign test."
+      ]
+    },
+    {
+      "issue": 294,
+      "finding": "Handle truncated command arrays as inconclusive",
+      "repair": [
+        "Report loading validates `argv` length and scenario arguments before indexing; truncated arrays raise `ValueError` rather than `IndexError`.",
+        "CPU/environment metadata is validated while loading the report, before any comparison.",
+        "The whole compare path, including environment comparison and classification, runs inside the guarded block, which now also catches `IndexError` and `AttributeError`, and always writes the documented `INCONCLUSIVE` decision file."
+      ]
+    }
+  ],
+  "regressions": {
+    "command": "python3 -m unittest tools.benchmarks.tests.test_m12_001_end_to_end",
+    "status": "ADDED_NO_COMMITTED_EXECUTION_RECEIPT",
+    "reason": "Mid-flight repair revision. The regressions are committed with the fix but no executed-gate log is retained here; the integration owner runs the task gate and retained-evidence verification once after integration.",
+    "cases": [
+      "RawEvidenceBinding.test_bound_fixture_is_accepted",
+      "RawEvidenceBinding.test_declared_scenario_contract_must_match_configured_workload",
+      "RawEvidenceBinding.test_removed_warmup_samples_cannot_keep_the_claim",
+      "RawEvidenceBinding.test_partial_warmup_coverage_is_rejected",
+      "RawEvidenceBinding.test_cloned_execution_with_new_command_identity_is_rejected",
+      "RawEvidenceBinding.test_log_padding_cannot_create_an_independent_execution",
+      "RawEvidenceBinding.test_forged_environment_block_is_rejected",
+      "RawEvidenceBinding.test_environment_block_without_metadata_commands_is_rejected",
+      "RawEvidenceBinding.test_edited_cpu_metadata_is_rejected",
+      "RawEvidenceBinding.test_tls_identity_must_be_the_measured_binary_record",
+      "RawEvidenceBinding.test_provider_change_makes_reports_non_comparable",
+      "RawEvidenceBinding.test_substituted_executable_cannot_be_attributed_to_the_recorded_layer",
+      "RawEvidenceBinding.test_sample_binary_digest_must_match_the_recorded_layer",
+      "RawEvidenceBinding.test_edited_process_peak_cannot_understate_resources",
+      "RawEvidenceBinding.test_required_warmup_round_count_must_be_declared",
+      "RawEvidenceBinding.test_observation_mode_must_match_the_native_metric",
+      "ConfiguredWorkload.test_feature_scenarios_are_bound_to_their_declared_work",
+      "ConfiguredWorkload.test_feature_scenario_with_unexpected_argument_is_rejected",
+      "ConfiguredWorkload.test_scenario_without_declared_contract_cannot_be_bound",
+      "ConfiguredWorkload.test_observed_and_unobserved_modes_require_their_own_argument_and_metric",
+      "ConfiguredWorkload.test_regime_is_part_of_the_declared_contract",
+      "EnvironmentMatching.test_package_manager_change_cannot_match",
+      "EnvironmentMatching.test_different_tls_identity_cannot_match",
+      "EnvironmentMatching.test_malformed_cpu_metadata_is_an_invalid_environment",
+      "ComparisonExecutionIdentity.test_unverified_report_cannot_supply_an_execution_identity",
+      "ComparisonExecutionIdentity.test_log_padding_does_not_change_native_execution_identity",
+      "ReadBufferPairing.test_reordered_identical_cohorts_keep_the_decision",
+      "ReadBufferPairing.test_reordering_cannot_flip_a_rejected_candidate",
+      "ReadBufferPairing.test_unpaired_rounds_cannot_be_evaluated",
+      "ComparisonCommand.test_identical_report_reuse_is_inconclusive",
+      "ComparisonCommand.test_truncated_argv_is_inconclusive_not_a_traceback",
+      "ComparisonCommand.test_truncated_argv_that_keeps_its_binary_is_inconclusive",
+      "ComparisonCommand.test_missing_cpu_metadata_is_inconclusive_not_a_traceback"
+    ]
+  },
+  "retained_report_compatibility": {
+    "historical_report_schema_version": 1,
+    "current_report_schema_version": 2,
+    "historical_corpus_accepted": false,
+    "reason": "The retained corpus predates the bound-evidence schema: it has no measured TLS provider record, no environment witness or `uname` command, no per-sample binary digest, and no `scenario_contracts`. It is historical evidence only and cannot be re-sealed by this change."
+  },
+  "current_qualification": {
+    "task_gate": "NOT_RUN",
+    "retained_evidence_verify": "EXPECTED_FAIL",
+    "retained_evidence_verify_reason": "retained report does not carry the bound-evidence schema",
+    "native_capture": "NOT_RUN",
+    "note": "M11-004 dependency evidence and the qualified SDK native inputs are not available at this revision; the task remains BLOCKED and no performance result is claimed."
+  },
+  "privacy": {
+    "machine_paths_in_committed_text": false,
+    "note": "Repository-relative paths only; no host name, user, private IP, SDK path or scratch path is recorded."
+  }
+}

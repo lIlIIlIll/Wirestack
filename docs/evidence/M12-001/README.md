@@ -1,5 +1,14 @@
 # M12-001 — native end-to-end performance evidence
-Current status: BLOCKED. The source-bound verify command exits 1 because current production/probe source differs from the measured native source. All measurement results below are historical; rerun the baseline on exact current sources with STS 1.1.3 before marking COMPLETE. The current review suite passes 28/28 tests, including optional `cjprof` handling ([log](review-unit-tests.log)); it does not clear the source-binding failure. Clean-checkout archive reproduction is still unproved: reconstruction needs generated native inputs, while the exact historical archive remains withheld because its provider debug data embeds private machine paths.
+Current status: BLOCKED. The source-bound verify command exits 1. Stack #200 findings #291-#294 are
+repaired in the runner and probes ([review-fix record](stack200-review-fixes.json)): the retained-corpus
+verifier now requires measured TLS provider identity, environment metadata commands, per-sample binary
+digests, declared per-scenario work contracts, complete warmup rounds and recomputed process peaks. The
+retained report below predates that bound-evidence schema, so `verify` rejects it with `retained report does
+not carry the bound-evidence schema` instead of silently trusting asserted fields. All measurement results
+below remain historical; rerun the baseline on exact current sources with STS 1.1.3 before marking COMPLETE.
+The added regressions carry no committed execution receipt in this repair revision ([record](stack200-review-fixes.json));
+the task gate executes them at integration, and they do not clear the source-binding failure. The earlier 28/28 run
+([log](review-unit-tests.log)) describes the pre-repair suite. Clean-checkout archive reproduction is still unproved: reconstruction needs generated native inputs, while the exact historical archive remains withheld because its provider debug data embeds private machine paths.
 
 **Historical measurement: development measurement and candidate evaluation.** Not release qualification or proof of a performance gain.
 

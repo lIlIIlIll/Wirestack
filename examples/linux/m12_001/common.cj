@@ -1,7 +1,40 @@
 package wirestack_m12_001
 
+import std.collection.ArrayList
 import std.runtime.{getAllocatedHeapSize, getGCCount}
 import wirestack as api
+import wirestack.tls.TlsRuntime
+
+// Prefix the runner uses to read the provider identity observed from this exact binary.
+let tlsIdentityPrefix = "TLS_IDENTITY "
+let tlsIdentityRequest = "tls-identity"
+
+func jsonString(value: String): String {
+    let escaped = ArrayList<Byte>(value.size + 2)
+    escaped.append(34u8)
+    for (b in value.toArray()) {
+        if (b == 34u8 || b == 92u8) { escaped.append(92u8) }
+        escaped.append(b)
+    }
+    escaped.append(34u8)
+    String.fromUtf8(escaped.toArray())
+}
+
+// Emitted by the measured executable so capture identity never depends on a literal in the runner.
+func tlsIdentityLine(): String {
+    let info = TlsRuntime.info()
+    tlsIdentityPrefix + "{" +
+        "\"provider\":" + jsonString(info.tlsProvider) + "," +
+        "\"version\":" + jsonString(info.tlsProviderVersion) + "," +
+        "\"build_fingerprint\":" + jsonString(info.buildFingerprint) + "," +
+        "\"target_triple\":" + jsonString(info.targetTriple) + "," +
+        "\"external_openssl\":" + "${info.externalOpenSslDependency}" + "," +
+        "\"trust_backend\":" + jsonString(info.trustBackend) + "}"
+}
+
+func isTlsIdentityRequest(args: Array<String>): Bool {
+    args.size == 1 && args[0] == tlsIdentityRequest
+}
 
 func perfRequire(value: Bool, message: String): Unit {
     if (!value) { throw IllegalStateException(message) }

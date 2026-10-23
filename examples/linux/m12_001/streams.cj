@@ -153,6 +153,8 @@ func streamSample(client: HttpClient, server: HttpServer): UInt64 {
     c.highWaterManagedBufferBytes + s.highWaterManagedBufferBytes
 }
 main(args: Array<String>): Int64 {
+    // The runner reads the measured provider identity from this executable.
+    if (isTlsIdentityRequest(args)) { println(tlsIdentityLine()); return 0 }
     perfRequire(args.size == 3, "usage: streams scenario certificate.der key.pk8")
     let scenario = args[0]
     perfRequire(["sse_h1", "sse_h2", "sse_slow", "sse_cancel", "websocket_h1", "websocket_h2",

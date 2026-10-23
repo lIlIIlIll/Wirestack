@@ -39,11 +39,52 @@ inventory, so a changed runner, test, task contract or document cannot reuse an
 older capture. The prior P1-015 archive could not be reconstructed exactly;
 it is not substituted or presented as a measured before-version.
 
+## Bound identity
+
+Report schema 2 records identity that the raw evidence proves, not fields the
+report merely asserts:
+
+- The TLS provider identity (`provider`, `version`, `build_fingerprint`,
+  `target_triple`, `external_openssl`, `trust_backend`) is read by invoking each
+  compiled consumer with `tls-identity`. It comes from `TlsRuntime.info()` inside
+  the measured executable, so a provider, version, or build change alters the
+  compared identity without any runner edit. `tls_provider` must also appear on
+  every layer binding and in the environment block.
+- The environment block (`cjc`, `cjpm`, `cpu`, `uname`, `compiler_digest`,
+  `runtime_binaries`, `runtime_environment`) is reconstructed from retained
+  metadata commands, including an `environment-witness` invocation of this
+  runner. Editing the report's environment without changing those logs is
+  rejected. `cjpm` participates in comparison; CPU scaling state does not.
+- Every sample carries the digest of the executable that produced it, and its
+  command's `argv[0]` must equal the recorded layer `command_path`.
+- One sample record per execution log: additional stdout lines are rejected, and
+  execution uniqueness inside a report and overlap between compared reports are
+  computed from the validated native JSON record, not from whole-log digests.
+- `warmup_process_rounds` is enforced: every scenario must appear in every
+  declared warmup round.
+- `process_peak_rss_kib`, `process_peak_fds` and `process_peak_threads` are
+  recomputed from the retained `process_samples` before the report is accepted.
+- `scenario_contracts` declares, per scenario, the operation count, expected
+  rejections and regime. Every scenario is validated, including HTTP, SSE and
+  WebSocket work that the consumer fixes internally; `http_observed` requires
+  `enabled` plus `metrics.observation_enabled=true`, and `http_unobserved`
+  requires `disabled` plus the corresponding false metric.
+- `regime` is part of the compared contract, so `normal`, `slow`, `overload`,
+  `failure` and `cleanup` runs are never classified against each other.
+- Comparison requires identical `probe_sources`, `task_source_digests`,
+  `workload_counts`, `scenario_contracts` and `tls_provider`; any mismatch makes
+  the decision `INCONCLUSIVE`.
+- Malformed retained evidence (truncated `argv`, missing or malformed CPU or
+  environment metadata) always yields the documented `INCONCLUSIVE` decision
+  file; `compare` never exits on a traceback after verification began.
+
 ## Work and accounting
 
 Thirty-three scenarios execute sequentially, with two complete process warmup
 rounds and 14 measured rounds in alternating forward/reverse order. Each process
-also performs its documented native operation warmups. Every measured operation,
+also performs its documented native operation warmups. Every scenario, including
+the HTTP, SSE and WebSocket cases, is checked against its declared operation and
+expected-rejection contract rather than only the transport/TLS cases. Every measured operation,
 including expected cancellation, timeout and rejection, has a positive raw
 latency. Successes, unexpected failures and expected rejections are separate.
 Successful byte throughput never counts failed operations.
