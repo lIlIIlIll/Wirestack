@@ -84,7 +84,7 @@ class M7031DependencyReadinessTests(unittest.TestCase):
         for task_id in unmet:
             self.assertIn(task_id, readme)
 
-    def test_current_receipts_are_bound_by_the_task_manifest(self) -> None:
+    def test_blocked_current_receipts_are_source_bound_not_required_evidence(self) -> None:
         manifest = json.loads(
             (ROOT / "tools/tasks/M7-031.json").read_text(encoding="utf-8")
         )
@@ -92,8 +92,10 @@ class M7031DependencyReadinessTests(unittest.TestCase):
             "docs/evidence/M7-031/task-check-current.json",
             "docs/evidence/M7-031/evidence-check-current.json",
         }
-        self.assertEqual(receipts, receipts & set(manifest["source_paths"]))
-        self.assertEqual(receipts, receipts & set(manifest["required_evidence"]))
+        source_paths = set(manifest["source_paths"])
+        required_evidence = set(manifest["required_evidence"])
+        self.assertEqual(receipts, receipts & source_paths)
+        self.assertFalse(receipts & required_evidence)
         for relative in sorted(receipts):
             self.assertTrue((ROOT / relative).is_file(), relative)
 

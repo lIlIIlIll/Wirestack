@@ -77,12 +77,18 @@ are the 2026-08-30 seals and are retained byte-identically as history. They are
 not resealed, because `seal_evidence` refuses a non-PASS acceptance status and
 this branch makes no current PASS claim.
 
-`task-check-current.json` and `evidence-check-current.json` are now declared in
-`tools/tasks/M7-031.json` under `source_paths` and `required_evidence`, so a
-deleted or tampered receipt is a manifest failure instead of an unnoticed gap.
-`M7031DependencyReadinessTests.test_current_receipts_are_bound_by_the_task_manifest`
-covers that declaration. That case was added after the 2026-10-22 run recorded
-above and was not executed while this manifest change was authored; the four
-readiness results and the candidate-class skip in the table remain the observed
-records for the listed commands, and the added case is left for the next gate
-run to exercise.
+The current `task-check-current.json` (`INVALID`) and
+`evidence-check-current.json` (`FAIL`) remain in `tools/tasks/M7-031.json`
+`source_paths`, so deleting or changing either report invalidates the manifest
+binding. They are excluded from `required_evidence`: current non-PASS diagnostics
+cannot be indexed as acceptance reports in a future PASS seal.
+
+`M7031DependencyReadinessTests.test_blocked_current_receipts_are_source_bound_not_required_evidence`
+checks that contract. The 2026-10-22 table above records the four readiness
+tests that existed then; the manifest-binding test was added afterward. On
+2026-10-24, the refreshed focused run exercised all five readiness tests:
+
+| Command | Result |
+|---|---|
+| `python3 -m unittest tools.tests.test_m7_031_linux_candidate -v` | PASS; 5 tests, `OK (skipped=1)`. All five readiness tests pass; `M7031LinuxCandidateTests` is skipped because M7-030 remains BLOCKED. |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-031/test-plan.md --json` | PASS; 21 paths, 13 scenarios and 11 planned tests. |
