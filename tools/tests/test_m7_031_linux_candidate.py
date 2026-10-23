@@ -84,6 +84,19 @@ class M7031DependencyReadinessTests(unittest.TestCase):
         for task_id in unmet:
             self.assertIn(task_id, readme)
 
+    def test_current_receipts_are_bound_by_the_task_manifest(self) -> None:
+        manifest = json.loads(
+            (ROOT / "tools/tasks/M7-031.json").read_text(encoding="utf-8")
+        )
+        receipts = {
+            "docs/evidence/M7-031/task-check-current.json",
+            "docs/evidence/M7-031/evidence-check-current.json",
+        }
+        self.assertEqual(receipts, receipts & set(manifest["source_paths"]))
+        self.assertEqual(receipts, receipts & set(manifest["required_evidence"]))
+        for relative in sorted(receipts):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+
 
 class M7031LinuxCandidateTests(unittest.TestCase):
     @classmethod

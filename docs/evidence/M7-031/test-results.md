@@ -76,3 +76,13 @@ previous collection error while preserving the blocked prerequisite. The four
 are the 2026-08-30 seals and are retained byte-identically as history. They are
 not resealed, because `seal_evidence` refuses a non-PASS acceptance status and
 this branch makes no current PASS claim.
+
+`task-check-current.json` and `evidence-check-current.json` are now declared in
+`tools/tasks/M7-031.json` under `source_paths` and `required_evidence`, so a
+deleted or tampered receipt is a manifest failure instead of an unnoticed gap.
+`M7031DependencyReadinessTests.test_current_receipts_are_bound_by_the_task_manifest`
+covers that declaration. That case was added after the 2026-10-22 run recorded
+above and was not executed while this manifest change was authored; the four
+readiness results and the candidate-class skip in the table remain the observed
+records for the listed commands, and the added case is left for the next gate
+run to exercise.

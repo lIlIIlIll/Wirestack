@@ -49,6 +49,13 @@ old pass.
   `INVALID` task gate with zero commands because M7-030 is BLOCKED;
   [`evidence-check-current.json`](evidence-check-current.json) records the
   corresponding current evidence-freshness failure. Neither is a PASS seal.
+- Both current receipts are declared in `tools/tasks/M7-031.json` under
+  `source_paths` and `required_evidence`. Deleting either file therefore fails
+  manifest validation with `PATH_MISSING` instead of quietly shrinking the
+  task's surface, and a future reseal has to digest them. The 2026-08-30 seal
+  predates that manifest change, so its `source_sha256` inventory is stale and
+  is not resealed here; the current gate receipts stay as the record of the
+  blocked state.
 
 ## Reused long-running evidence
 

@@ -103,7 +103,7 @@ discovery stays meaningful while a prerequisite is blocked.
 | T008 | S009 | P015,P016 | Current M7-032 and historical or leaking API inventories | PASS or FAIL | Zero internal aliases and pre-1.0 policy | fault-injection,API |
 | T009 | S010 | P019,P020 | Injected atomic replace failure | FAIL | Prior bytes preserved | fault-injection,persistence |
 | T010 | S001,S012 | P017,P019 | End-to-end repository evidence | PASS | 22-row report, exact release identity, known limitations, deterministic JSON | integration,release |
-| T011 | S002,S013 | P003,P004,P021 | Temporary `status.md` fixtures with COMPLETE, BLOCKED, IN_PROGRESS, READY, and absent prerequisite rows plus the repository's own status table | PASS, FAIL, or skip | Unmet dependencies are named in declaration order, `validate_dependency_status` raises `DEPENDENCY_INCOMPLETE`, the readiness suite runs unconditionally, and the candidate suite skips while the declared status agrees across the README and both planning tables | fault-injection,evidence | P0 |
+| T011 | S002,S013 | P003,P004,P021 | Temporary `status.md` fixtures with COMPLETE, BLOCKED, IN_PROGRESS, READY, and absent prerequisite rows plus the repository's own status table | PASS, FAIL, or skip | Unmet dependencies are named in declaration order, `validate_dependency_status` raises `DEPENDENCY_INCOMPLETE`, the readiness suite runs unconditionally, the candidate suite skips while the declared status agrees across the README and both planning tables, and the retained current gate receipts stay declared in the manifest `source_paths` and `required_evidence` so deleting either fails validation | fault-injection,evidence | P0 |
 
 ## Coverage and gap review
 
