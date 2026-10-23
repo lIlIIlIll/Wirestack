@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "<repo>/tools/m12_002_deployment.py", line 164, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "<repo>/tools/m12_002_deployment.py", line 155, in main
+    verify_snapshot(EVIDENCE / 'verification.json')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_deployment.py", line 92, in verify_snapshot
+    require(snapshot['source_digests'].keys() == set(task['source_paths']), 'task source inventory is incomplete')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/m12_002_deployment.py", line 28, in require
+    raise ValueError(message)
+ValueError: task source inventory is incomplete

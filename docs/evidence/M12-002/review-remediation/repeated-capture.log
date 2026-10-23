@@ -1,0 +1,80 @@
+# Finding 6256888222: a repeated capture must scan the archive it selected.
+# Baseline code under test (git show d496a242:tools/m12_002_binary.py, lines 295-297):
+#             extracted = release.extract_archive(args.archive.resolve(), work / 'install')
+#             installed = work / 'wirestack'
+#             if not installed.exists(): extracted.rename(installed)
+
+# Hardened code under test (tools/m12_002_binary.py):
+#     def install_selected_archive(archive: Path, work: Path) -> Path:
+#         """Install the selected archive, never letting a previous attempt's tree stand in for it."""
+#         installed = work / 'wirestack'
+#         for stale in (work / 'install', installed):
+#             if stale.is_symlink() or stale.is_file():
+#                 stale.unlink()
+#             elif stale.exists():
+#                 shutil.rmtree(stale)
+#         release.extract_archive(archive.resolve(), work / 'install').rename(installed)
+#         return installed
+
+# Reproduction (run from the repository root with disk-backed TMPDIR); each run uses one scratch
+# with two selected archives and installs the first, then the second:
+#   """Reproduce finding 6256888222: a repeated capture scans the previous attempt's tree."""
+#   import json
+#   import sys
+#   import tempfile
+#   from pathlib import Path
+#   
+#   ROOT = Path(sys.argv[1]).resolve()
+#   sys.path.insert(0, str(ROOT))
+#   from tools import m7_021_linux_release as release
+#   
+#   
+#   def archive(directory: Path, name: str, marker: str) -> Path:
+#       files = {'src/wirestack/probe.cj': f'package wirestack.probe\n// {marker}\n'.encode()}
+#       entries = [{'path': path, 'bytes': len(data), 'sha256': release.artifact_payload_sha256(data)}
+#                  for path, data in sorted(files.items())]
+#       fingerprint = release.evidence_digest.text_evidence_bytes_sha256(release.canonical_json(entries))
+#       manifest = {'schema_version': 2, 'package': 'wirestack', 'version': release.VERSION,
+#                   'payload': entries, 'payload_sha256': fingerprint,
+#                   'artifactBuildFingerprint': fingerprint}
+#       path = directory / name
+#       release.write_reproducible_archive(path, {**files, 'release-manifest.json': release.canonical_json(manifest)})
+#       return path
+#   
+#   
+#   def baseline_install(selected: Path, work: Path) -> Path:
+#       """The exact baseline capture lines: extract, then keep any pre-existing work/wirestack."""
+#       extracted = release.extract_archive(selected.resolve(), work / 'install')
+#       installed = work / 'wirestack'
+#       if not installed.exists():
+#           extracted.rename(installed)
+#       return installed
+#   
+#   
+#   def hardened_install(selected: Path, work: Path) -> Path:
+#       from tools.m12_002_binary import install_selected_archive
+#       return install_selected_archive(selected, work)
+#   
+#   
+#   def observed(installer, label: str) -> None:
+#       with tempfile.TemporaryDirectory(prefix='m12-repeat-') as directory:
+#           work = Path(directory)
+#           first = archive(work, 'first.tar.gz', 'first')
+#           second = archive(work, 'second.tar.gz', 'second')
+#           installer(first, work)
+#           installed = installer(second, work)
+#           payload = (installed / 'src/wirestack/probe.cj').read_text().strip().split('// ')[1]
+#           selected = json.loads((installed / 'release-manifest.json').read_text())['payload_sha256']
+#           _, expected = release.read_verified_payload(second)
+#           state = 'PASS' if selected == expected['payload_sha256'] else 'STALE'
+#           print(f'{label}: selected archive is second, scanned source marker={payload!r}, '
+#                 f'installed manifest is the selected archive={state}')
+#   
+#   
+#   observed(baseline_install, 'baseline capture')
+#   observed(hardened_install, 'hardened capture')
+
+# Observed:
+baseline capture: selected archive is second, scanned source marker='first', installed manifest is the selected archive=STALE
+hardened capture: selected archive is second, scanned source marker='second', installed manifest is the selected archive=PASS
+exit=0

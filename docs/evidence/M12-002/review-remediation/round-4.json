@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "kind": "m12-002-review-remediation-round",
+  "source_task": "M12-002",
+  "round": 4,
+  "recorded_at_utc": "2026-10-23T16:55:48Z",
+  "source_base_commit": "c0906d4bf374637d2fcd87cd658b26366a6ca074",
+  "status": "BLOCKED",
+  "completion_claim": false,
+  "release_qualification": "NOT_QUALIFIED",
+  "changes": [
+    {
+      "area": "resumed source capture",
+      "files": ["tools/m12_002_source_sdk.py", "tools/tests/test_m12_002_source_sdk.py"],
+      "result": "Resume filters out operational listener/client commands and retains only successful records."
+    },
+    {
+      "area": "hidden namespace contract",
+      "files": ["tools/m12_002_source_sdk.py", "tools/tests/test_m12_002_source_sdk.py"],
+      "result": "The optional /etc/pki mount is asserted at the position used by Capture.hidden() after /etc/ssl namespace setup and before the optional CA bind."
+    },
+    {
+      "area": "binary scanner exit status",
+      "files": ["tools/m12_002_binary.py", "tools/tests/test_m12_002_binary.py"],
+      "result": "nm -g --defined-only accepts expected statuses 0 and 1; unexpected status 2 is rejected by the verifier."
+    },
+    {
+      "area": "deployment contracts selector",
+      "files": ["tools/m12_002_deployment.py", "tools/tests/test_m12_002_deployment.py"],
+      "result": "The contracts entry point validates and exports WIRESTACK_SOURCE_CAPTURE_ROOT before suite execution and refuses with the exact retained-profile-scratch message when absent."
+    },
+    {
+      "area": "evidence and operator guidance",
+      "files": ["docs/evidence/M12-002/README.md", "docs/evidence/M12-002/requalification-status.json", "docs/evidence/M12-002/review-remediation/report.json", "docs/planning/status.md", "docs/guides/linux-source-sdk-compatibility.md", "docs/guides/linux-deployment-matrix.md"],
+      "result": "Corrected the optional-archive count and archive-0-headers explanation, recorded the task-gate and selector-refusal outcomes, and preserved BLOCKED/NOT_QUALIFIED status."
+    }
+  ],
+  "verification": {
+    "focused_suite": {
+      "command": "python3 -m unittest tools.tests.test_m12_002_source_sdk tools.tests.test_m12_002_binary tools.tests.test_m12_002_platform tools.tests.test_m12_002_deployment -v",
+      "exit_code": 0,
+      "result": "Ran 196 tests in 6.865s; OK (skipped=1).",
+      "skip": "Evidence-dependent source SDK test requires retained captured SDK report, SDK root and source-capture root; those inputs are unavailable."
+    },
+    "architecture_guard": {
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0,
+      "result": "architecture guard: PASS"
+    },
+    "task_gate": {
+      "command": "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/round-4-task-gate.json",
+      "exit_code": 2,
+      "result": "INVALID before task commands: DEPENDENCY_INCOMPLETE; M10-004 depends on M10-003, which is not COMPLETE. The report has commands: []."
+    },
+    "contracts_selector_smoke": {
+      "command": "WIRESTACK_STABLE_SDK_ROOT=. WIRESTACK_CANDIDATE_SDK_ROOT=. python3 tools/m12_002_deployment.py contracts",
+      "exit_code": 1,
+      "result": "Refused before suite execution: WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch. This was a selector-refusal smoke, not contracts acceptance."
+    },
+    "unrelated_public_api_gate": {
+      "command": "scripts/check-m7-032-public-api --json",
+      "exit_code": 1,
+      "result": "Committed M7-032 public API inventory is stale; owned by M7-032."
+    }
+  },
+  "not_run": [
+    "source and binary profile recapture",
+    "collect",
+    "verify after round-four source changes",
+    "full contracts acceptance with authorized exact SDKs",
+    "native platform qualification"
+  ],
+  "blocking_inputs": [
+    "docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is absent",
+    "only the stable sts 1.1.3 SDK is installed and authorized; candidate SDK is unavailable",
+    "retained private source and binary capture roots are unavailable",
+    "no KVM guest with the selected glibc 2.44 runtime is retained",
+    "the raw archive-0 disassembly is bound to unavailable private scratch; ISA counts cannot be recomputed"
+  ],
+  "status_effect": "No qualification status change. M12-002 remains BLOCKED and NOT_QUALIFIED."
+}

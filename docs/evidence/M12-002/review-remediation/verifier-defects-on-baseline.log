@@ -1,0 +1,8 @@
+baseline has scan_fields: False | verify_consumers: False
+D2 ABI: duplicate coordinate accepted -> DEFECT PRESENT
+D2 scanner bound in report: False
+D2 helper_sources present in binary report: False
+D1 helper binding rejected: AttributeError module 'tools.m12_002_source_sdk' has no attribute 'verify_helper_sources'
+D1 command inventory gate present: False
+D3 transferred_sources present in platform report: False
+D3 platform command ids: 25

@@ -76,22 +76,28 @@ The capture uses its private namespace to install a controlled PEM at `/etc/ssl/
 
 ## 4. Reject stale evidence
 
-Verify a retained successful report against the archive and the currently selected SDK bits:
+Verify a retained successful report against the archive, the currently selected SDK bits and the retained capture root:
 
 ```bash
+export WIRESTACK_SOURCE_CAPTURE_ROOT=<disk-backed-source-capture-root>
 python3 tools/m12_002_source_sdk.py \
   --sdk-root "$SDK_ROOT" \
   --archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz \
   --verify docs/evidence/M12-002/source-sdk/stable-rebuild/report.json
 ```
 
-The success signal is `M12_002_SOURCE_SDK_VERIFY_PASS`. A changed archive, compiler, CJPM, runtime, import metadata, runner, consumer source or normalized command log invalidates the report. Rebuild and rerun the matching source profile after such changes. Provider and native toolchain changes require the existing release gates as well; this source capture is not release qualification.
+The success signal is `M12_002_SOURCE_SDK_VERIFY_PASS`. A changed archive, compiler, CJPM, runtime, import metadata, runner, consumer source or normalized command log invalidates the report.
+
+`WIRESTACK_SOURCE_CAPTURE_ROOT` is the private capture root passed to the capture's `--scratch`; the verifier reads `<root>/<profile>/` from it. The report carries only artifact-byte digests of the seven TLS fixture files, so the verifier re-hashes `certificate.key`, `certificate.pem`, `certificate.der`, `untrusted.key`, `untrusted.pem`, `untrusted.der` and `key.der` in that directory and rejects a missing, mutated, swapped or foreign-profile file. Without the selector the verifier refuses with `WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch`; retaining a report alone never satisfies the fixture binding.
+
+**Private-key boundary.** These fixtures include generated private keys. They stay in the private task scratch root and are never committed to the repository or attached to evidence. Only their typed digests are published, and the digest alone does not let anyone reconstruct a key. A capture root that keeps key material under version control defeats this boundary and is not acceptable retained evidence. Rebuild and rerun the matching source profile after such changes. Provider and native toolchain changes require the existing release gates as well; this source capture is not release qualification.
 
 The focused verifier regression tests use real retained evidence:
 
 ```bash
 export WIRESTACK_SOURCE_SDK_REPORT=docs/evidence/M12-002/source-sdk/stable-rebuild/report.json
 export WIRESTACK_SOURCE_SDK_ROOT="$SDK_ROOT"
+export WIRESTACK_SOURCE_CAPTURE_ROOT=<private-source-capture-root>
 python3 -m unittest tools.tests.test_m12_002_source_sdk
 ```
 
