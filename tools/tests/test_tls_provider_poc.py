@@ -267,32 +267,21 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_canonical_spec_and_matrix_reject_stale_license_digests(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
-        # The committed matrix promotes no cell: every desktop cell is BLOCKED
-        # because its retained result binds a superseded security-update object.
-        self.assertEqual(
-            set(), {cell["status"] for cell in self.matrix["cells"]} & {"PASS", "PARTIAL"})
+        # Every retained result and license bundle stays bound even while its
+        # cell is BLOCKED, so a missing or corrupted historical artifact is
+        # still detected instead of silently disappearing from validation.
         validator.validate_retained_results(self.matrix, self.spec, ROOT)
-        # Promoting a superseded retained result must still fail closed, so the
-        # block is enforced by validation rather than by the matrix edit alone.
-        stale = copy.deepcopy(self.matrix)
-        cell = next(item for item in stale["cells"]
-                    if (item["provider"], item["platform"]) ==
-                    ("aws-lc", "linux-glibc-x86_64"))
-        cell.update({
-            "status": "PASS",
-            "result": "docs/evidence/M0-016/results/linux-glibc-x86_64/aws-lc.json",
-            "sha256": "95b03d7f262b99823b78a583c6fcadf813d381026a04351965fae3c251a07a50",
-            "license_bundle": {
-                "manifest": ("docs/evidence/M0-016/license-bundles/"
-                             "linux-glibc-x86_64/aws-lc/manifest.json"),
-                "sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
-            },
-        })
-        with self.assertRaisesRegex(validator.ValidationError,
-                                    "security-update disposition mismatch"):
-            validator.validate_retained_results(stale, self.spec, ROOT)
+        retained = [cell for cell in self.matrix["cells"] if cell.get("result")]
+        self.assertTrue(retained)
+        for cell in retained:
+            self.assertEqual("BLOCKED", cell["status"])
+            self.assertIn("license_bundle", cell)
+            self.assertIn("sha256", cell)
         # A retained license payload that drifts from its manifest must still
         # be rejected on the license digest itself.
+        cell = next(item for item in retained
+                    if (item["provider"], item["platform"]) ==
+                    ("aws-lc", "linux-glibc-x86_64"))
         result_path = ROOT / cell["result"]
         result = json.loads(result_path.read_text())
         source_bundle = ROOT / cell["license_bundle"]["manifest"]
@@ -311,6 +300,77 @@ class ProviderPocValidationTests(unittest.TestCase):
         for provider in self.spec["providers"]:
             workflow = provider["security_update"]["update_workflow"]
             self.assertTrue((ROOT / workflow).is_file())
+
+    def test_blocked_cell_still_binds_retained_artifacts(self):
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell.pop("result")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "retained artifact binding removed"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell["sha256"] = "0" * 64
+        with self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell["result"] = "docs/evidence/M0-016/results/missing.json"
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "retained result is missing"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell["license_bundle"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "provider license manifest matrix digest mismatch"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+    def test_future_requalification_cell_passes_with_current_disposition(self):
+        # A cell may become eligible again without changing this test: a
+        # promoted cell whose retained result binds the current security-update
+        # object and a not-affected pin validates, and the same cell fails when
+        # its provider is affected or its disposition is stale.
+        eligible = copy.deepcopy(self.spec)
+        next(provider for provider in eligible["providers"]
+             if provider["id"] == "aws-lc")["security_update"][
+                 "advisory_disposition"]["status"] = "not-affected"
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"]
+                    if (item["provider"], item["platform"]) ==
+                    ("aws-lc", "linux-glibc-x86_64"))
+        result = complete_result(
+            eligible, provider="aws-lc", platform="linux-glibc-x86_64")
+        result["build"]["license_bundle"]["sha256"] = cell["license_bundle"]["sha256"]
+        cell["status"] = "PASS"
+        with mock.patch.object(validator, "load", return_value=result), \
+                mock.patch.object(validator, "validate_license_bundle"):
+            validator.validate_retained_results(value, eligible, ROOT)
+
+        stale = copy.deepcopy(result)
+        stale["source"]["security_update"]["advisory_disposition"][
+            "reviewed_advisory_ids"].append("CVE-2099-0001")
+        with mock.patch.object(validator, "load", return_value=stale), \
+                mock.patch.object(validator, "validate_license_bundle"), \
+                self.assertRaisesRegex(validator.ValidationError,
+                                       "security-update disposition mismatch"):
+            validator.validate_retained_results(value, eligible, ROOT)
+
+        affected = copy.deepcopy(eligible)
+        affected_provider = next(provider for provider in affected["providers"]
+                                 if provider["id"] == "aws-lc")
+        affected_provider["security_update"]["advisory_disposition"].update({
+            "status": "affected",
+            "affected_advisory_ids": ["GHSA-3jrg-j22w-mpmc"],
+        })
+        with mock.patch.object(validator, "load", return_value=result), \
+                mock.patch.object(validator, "validate_license_bundle"), \
+                self.assertRaisesRegex(validator.ValidationError,
+                                       "known affected provider pin blocks promotion"):
+            validator.validate_retained_results(value, affected, ROOT)
 
     def test_matrix_contract_only_does_not_promote_stale_retained_results(self):
         matrix = ROOT / "docs/evidence/M0-016/platform-matrix.json"
