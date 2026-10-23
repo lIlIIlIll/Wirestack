@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Stage the receipt under the ignored task work directory: a failed fetch must
+# never replace the committed docs/evidence/M7-030/frozen-artifact.json record.
 python3 "$repo_root/tools/m7_030_linux_release.py" fetch-frozen-artifact \
-  --output "$repo_root/docs/evidence/M7-030/frozen-artifact.json"
+  --output "$repo_root/build/m7-030/frozen-artifact.json"
 exec python3 "$repo_root/tools/m7_030_linux_release.py" rehearse \
   --work-dir "$repo_root/build/m7-030" \
   --output "$repo_root/docs/evidence/M7-030/local-rehearsal.json"

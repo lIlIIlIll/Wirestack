@@ -640,6 +640,86 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             release.fetch_frozen_artifact(root / "fourth" / release.FROZEN_ARTIFACT_NAME,
                                           runner=failed)
 
+    def test_failed_staging_never_replaces_the_committed_receipt(self) -> None:
+        """A failed fetch must leave the PASS receipt byte-identical."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.frozen_fixture(root):
+                payload = release.ARTIFACT.read_bytes()
+                receipt = root / "evidence" / "frozen-artifact.json"
+                previous = (release.ROOT / "docs/evidence/M7-030/frozen-artifact.json").read_bytes()
+                receipt.parent.mkdir(parents=True, exist_ok=True)
+                receipt.write_bytes(previous)
+
+                def download_failure(argv):
+                    return release.subprocess.CompletedProcess(argv, 1, b"", b"not found")
+
+                def short_asset(argv):
+                    directory_argument = Path(argv[argv.index("--dir") + 1])
+                    directory_argument.mkdir(parents=True, exist_ok=True)
+                    (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(payload[:-1])
+                    return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+
+                def flipped_asset(argv):
+                    directory_argument = Path(argv[argv.index("--dir") + 1])
+                    directory_argument.mkdir(parents=True, exist_ok=True)
+                    (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(
+                        payload[:-1] + bytes([payload[-1] ^ 1])
+                    )
+                    return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+
+                for runner, code in (
+                    (download_failure, "FROZEN_ASSET_DOWNLOAD"),
+                    (short_asset, "FROZEN_ASSET_SIZE"),
+                    (flipped_asset, "FROZEN_ASSET_DIGEST"),
+                ):
+                    release.ARTIFACT.unlink(missing_ok=True)
+                    stdout = io.StringIO()
+                    with unittest.mock.patch.object(release, "_run_download", runner), \
+                            unittest.mock.patch("sys.stdout", stdout):
+                        self.assertEqual(
+                            1, release.main(["fetch-frozen-artifact", "--output", str(receipt)])
+                        )
+                    self.assertEqual(code, json.loads(stdout.getvalue())["code"])
+                    self.assertEqual(previous, receipt.read_bytes(), code)
+                    self.assertEqual([], list(receipt.parent.glob(f".{receipt.name}.*")), code)
+                    self.assertFalse(release.ARTIFACT.exists(), code)
+
+                def good(argv):
+                    directory_argument = Path(argv[argv.index("--dir") + 1])
+                    directory_argument.mkdir(parents=True, exist_ok=True)
+                    (directory_argument / release.FROZEN_ARTIFACT_NAME).write_bytes(payload)
+                    return release.subprocess.CompletedProcess(argv, 0, b"", b"")
+
+                stdout = io.StringIO()
+                with unittest.mock.patch.object(release, "_run_download", good), \
+                        unittest.mock.patch("sys.stdout", stdout):
+                    self.assertEqual(
+                        0, release.main(["fetch-frozen-artifact", "--output", str(receipt)])
+                    )
+                written = release.load_json(receipt)
+                self.assertEqual("PASS", written["decision"])
+                self.assertEqual("downloaded-and-verified-frozen-artifact", written["mode"])
+                self.assertEqual(release.FROZEN_ARTIFACT_SHA256, written["sha256"])
+
+    def test_manifest_binds_the_committed_receipt(self) -> None:
+        """Deleting or tampering with the receipt must be detected, not ignored."""
+        manifest = release.load_json(release.ROOT / "tools/tasks/M7-030.json")
+        receipt = "docs/evidence/M7-030/frozen-artifact.json"
+        self.assertIn(receipt, manifest["source_paths"])
+        self.assertIn(receipt, manifest["required_evidence"])
+
+    def test_canonical_gate_stages_the_receipt_outside_evidence(self) -> None:
+        """The gate must not point its staging output at the tracked receipt."""
+        script = (release.ROOT / "scripts/check-m7-030-release").read_text(encoding="utf-8")
+        fetch = script.split("fetch-frozen-artifact", 1)[1].split("rehearse", 1)[0]
+        outputs = [
+            line.split('"')[1]
+            for line in fetch.splitlines()
+            if line.strip().startswith("--output")
+        ]
+        self.assertEqual(["$repo_root/build/m7-030/frozen-artifact.json"], outputs)
+
     def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             with self.frozen_fixture(Path(directory)):
