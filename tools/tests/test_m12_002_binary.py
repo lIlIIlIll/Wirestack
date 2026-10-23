@@ -691,6 +691,34 @@ class ScanVerdictTests(unittest.TestCase):
     def test_real_scanner_output_satisfies_the_recorded_verdicts(self):
         verify_scan_verdicts(self.report, self.root, self.scratch)
 
+    def test_capture_and_verifier_accept_nm_exit_one(self):
+        evidence = self.root / 'docs/evidence/M12-002/binary'
+        evidence.mkdir(parents=True, exist_ok=True)
+        capture = Capture(evidence, self.scratch, [])
+        original_run = subprocess.run
+
+        def nm_exit_one(argv, *args, **kwargs):
+            result = original_run(argv, *args, **kwargs)
+            if argv[0] == 'nm':
+                return subprocess.CompletedProcess(result.args, 1, result.stdout, result.stderr)
+            return result
+
+        with patch('tools.m12_002_binary.ROOT', self.root), \
+                patch('tools.m12_002_binary.subprocess.run', side_effect=nm_exit_one):
+            scan = capture.scan('captured', self.binary)
+        report = {'scans': {'captured': scan}, 'commands': capture.commands}
+        symbol_command = next(command for command in capture.commands
+            if command['id'] == 'captured-symbols')
+        self.assertEqual(symbol_command['exit_code'], 1)
+        verify_scan_verdicts(report, self.root, self.scratch)
+
+    def test_nm_exit_two_is_rejected(self):
+        command = next(command for command in self.report['commands']
+            if command['id'] == 'probe-symbols')
+        command['exit_code'] = 2
+        with self.assertRaisesRegex(ValueError, 'scan command did not complete: probe-symbols'):
+            verify_scan_verdicts(self.report, self.root, self.scratch)
+
     def test_altered_loader_verdict_is_rejected(self):
         self.report['scans']['probe']['needed'] = ['libtls.so.6']
         with self.assertRaisesRegex(ValueError, 'scan verdict differs from its captured output: probe/needed'):

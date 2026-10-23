@@ -110,7 +110,8 @@ def binary_verification_arguments(binary: dict, binary_inputs: dict[str, Path],
 def selected_source_capture_root() -> Path:
     """Retained private source captures hold the TLS fixtures the reports only digest."""
     root = source_capture_root()
-    require(root is not None, 'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained source captures')
+    require(root is not None,
+        'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch')
     require(root.is_dir(), 'source capture root selection is not a directory: ' + str(root))
     return root
 
@@ -205,8 +206,10 @@ def collect(binary_report: Path) -> dict:
 
 def contracts() -> int:
     import unittest
-    os.environ['WIRESTACK_SOURCE_SDK_ROOT'] = str(selected_sdks()['stable'])
+    sdks = selected_sdks()
+    os.environ['WIRESTACK_SOURCE_SDK_ROOT'] = str(sdks['stable'])
     os.environ['WIRESTACK_SOURCE_SDK_REPORT'] = str(SOURCE_REPORTS['stable'])
+    os.environ['WIRESTACK_SOURCE_CAPTURE_ROOT'] = str(selected_source_capture_root())
     suite = unittest.defaultTestLoader.loadTestsFromNames(('tools.tests.test_m12_002_source_sdk',
         'tools.tests.test_m12_002_platform', 'tools.tests.test_m12_002_binary',
         'tools.tests.test_m12_002_deployment'))

@@ -139,8 +139,16 @@ class BinaryInputSelectionTests(unittest.TestCase):
             if key != 'WIRESTACK_SOURCE_CAPTURE_ROOT'}
         with patch.dict(os.environ, without, clear=True):
             with self.assertRaisesRegex(ValueError,
-                    'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained source captures'):
+                    'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch'):
                 deployment.selected_source_capture_root()
+
+    def test_contracts_refuses_before_running_without_source_capture(self):
+        selections = {'WIRESTACK_STABLE_SDK_ROOT': str(self.root / 'stable'),
+            'WIRESTACK_CANDIDATE_SDK_ROOT': str(self.root / 'candidate')}
+        with patch.dict(os.environ, selections, clear=True):
+            with self.assertRaisesRegex(ValueError,
+                    'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch'):
+                deployment.contracts()
 
     def test_a_missing_source_capture_directory_is_rejected(self):
         absent = dict(self.environment, WIRESTACK_SOURCE_CAPTURE_ROOT=str(self.root / 'absent'))

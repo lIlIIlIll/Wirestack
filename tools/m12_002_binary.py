@@ -434,7 +434,8 @@ class Capture:
         return text
 
     def run(self, label: str, argv: list[str], cwd: Path | None = None,
-            *, hidden: bool = False, env: dict | None = None, allow_failure: bool = False, timeout=600) -> str:
+            *, hidden: bool = False, env: dict | None = None, allow_failure: bool = False,
+            accepted_exit_codes: tuple[int, ...] | None = None, timeout=600) -> str:
         label = self.prefix + label
         cwd = cwd or self.work
         if hidden:
@@ -464,8 +465,11 @@ class Capture:
                     target.write('Complete disassembly retained in private scratch; raw output binding: '+json.dumps(artifact_byte_digest(path).to_json())+'\n')
             record[key]['digest'] = text_evidence_digest(destination).to_json()
         self.commands.append(record)
-        if record['exit_code'] != 0 and not allow_failure:
-            raise RuntimeError(f'{label} failed, retained diagnostics')
+        if accepted_exit_codes is None and not allow_failure:
+            accepted_exit_codes = (0,)
+        if accepted_exit_codes is not None and record['exit_code'] not in accepted_exit_codes:
+            raise RuntimeError(f'{label} failed with exit code {record["exit_code"]}; '
+                f'accepted {accepted_exit_codes}')
         return (self.output / f'{label}.stdout.log').read_text()
 
     def scan(self, label: str, path: Path) -> dict:
@@ -510,7 +514,8 @@ class Capture:
         dynamic = self.run(label+'-dynamic', ['readelf', '-dW', str(path)])
         symbol_versions = self.run(label+'-versions', ['readelf', '-VW', str(path)])
         notes = self.run(label+'-notes', ['readelf', '-nW', str(path)])
-        symbols = self.run(label+'-symbols', ['nm', '-g', '--defined-only', str(path)], allow_failure=True)
+        symbols = self.run(label+'-symbols', ['nm', '-g', '--defined-only', str(path)],
+            accepted_exit_codes=(0, 1))
         self.run(label+'-disassembly', ['objdump', '-d', '--no-show-raw-insn', str(path)])
         disassembly = self.commands[-1]
         raw = self.work / f"{disassembly['id']}.stdout.raw"

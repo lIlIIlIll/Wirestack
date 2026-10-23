@@ -45,7 +45,7 @@
         "validate_abi_matrix requires the complete built/runtime Cartesian product exactly once in addition to passing cells",
         "scan_fields is the single derivation shared by capture and verification, so every ELF, loader, version and ISA verdict is recomputed from the bound scanner output",
         "scanner_digest binds the scanner implementation, and helper_sources binds the imported helpers",
-        "verify_consumers requires exactly stable-native and candidate-native for cli, decoded, streams, service and trust with the ten compiled optional archives",
+        "verify_consumers requires exactly stable-native and candidate-native for cli, decoded, streams, service and trust with the thirty compiled optional archives",
         "--consumer takes a strict <profile>/<app>=<path> identity and is required for every declared coordinate",
         "install_selected_archive replaces any previous attempt's work/install and work/wirestack and returns the tree it extracted, and verify rebinds the reported payload to the selected archive, so a repeated capture cannot scan or validate a stale installation",
         "the deployment collector compares a retained profile's production key set with release.production_sources(ROOT) before comparing bytes, so a profile cannot qualify by dropping or substituting a source"
@@ -129,9 +129,10 @@
     "docs/evidence/M12-002/binary/report.json": "The record has no helper_sources, no per-scan scanner digest, no installed consumer identity inventory and an ABI matrix without coordinate validation.",
     "docs/evidence/M12-002/platform/westmere-glibc244/report.json": "The record has no transferred_sources inventory, so the transferred consumer sources cannot be shown to match the source qualification before rebuild.",
     "retained source-sdk stable-native": "verify_command_inventory accepts the retained 39-command inventory and CA diagnostics, but verify_helper_sources rejects it: 'evidence helper inventory changed; recapture required' because the committed report records an empty helper_sources map.",
-    "retained binary report": "verify_command_inventory rejects it with 'scanner command bases are not unique' and verify_scan_verdicts with 'command evidence is missing: archive-0-headers'; the record predates the per-scan scanner command scheme and carries no consumer identities.",
+    "retained binary report": "The report contains the archive-0-headers command and log, but raw disassembly remains bound to unavailable private scratch, so verify_scan_verdicts cannot reconstruct ISA counts; the record predates per-scan scanner identities and carries no consumer identities.",
     "retained platform westmere-glibc244": "verify_commands accepts all 25 bound commands and observed_platform re-derives 'Westmere E56xx/L56xx/X56xx (Nehalem-C)' from the captured lscpu output, but the record still has no transferred_sources inventory."
   },
+  "latest_round": "docs/evidence/M12-002/review-remediation/round-4.json",
   "missing_inputs": [
     {
       "input": "selected development archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz",

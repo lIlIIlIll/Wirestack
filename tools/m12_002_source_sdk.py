@@ -41,6 +41,9 @@ EXPECTED_COMMANDS = {
     'explicit-ca': 0, 'missing-explicit-ca': 1, 'incorrect-explicit-ca': 1,
     'system-ca-installed': 0, 'system-ca-missing': 1, 'system-ca-incorrect': 1,
     'streams-operational': 0, 'sse-operational': 0, 'wss-operational': 0}
+# Live listener commands use ephemeral ports and must run again on resume.
+RESUME_LIVE_COMMANDS = frozenset({
+    'service-operational', 'streams-operational', 'sse-operational', 'wss-operational'})
 CA_CHECKS = ('explicit-ca', 'missing-explicit-ca', 'incorrect-explicit-ca',
     'system-ca-installed', 'system-ca-missing', 'system-ca-incorrect')
 # The exact terminal diagnostic each CA scenario must reproduce. The capture refuses to
@@ -156,7 +159,11 @@ def _contracts() -> dict[str, tuple[tuple[str, list[str]], ...]]:
         shape = _wrapped(CONSUMER_DIRECTORY + 'trust', mount, argv)
         fixed(name, shape)
         if name.startswith('system-ca-'):
-            table[name] += (_wrapped(CONSUMER_DIRECTORY + 'trust', (*mount, *HOST_CA_MOUNT), argv),)
+            # Match hidden(): mount /etc/pki after isolating /etc/ssl but before
+            # optionally binding the installed CA bundle.
+            insertion = mount.index('--ro-bind') if '--ro-bind' in mount else len(mount)
+            with_host_ca = (*mount[:insertion], *HOST_CA_MOUNT, *mount[insertion:])
+            table[name] += (_wrapped(CONSUMER_DIRECTORY + 'trust', with_host_ca, argv),)
     fixed('service-operational', _wrapped(CONSUMER_DIRECTORY + 'service', relocated,
         consumer('service', 'serve', '--port', '0', '--certificate', CERTIFICATES[0],
             '--key', CERTIFICATES[1], '--budget-ms', '60000')))
@@ -416,6 +423,13 @@ def verify_retained_commands(commands: list[dict], evidence: Path) -> None:
         verify_command_contract(command)
 
 
+def retained_resume_commands(commands: list[dict]) -> list[dict]:
+    """Keep completed static commands; listeners and their client probes need fresh ports."""
+    return [command for command in commands
+        if command['id'] not in RESUME_LIVE_COMMANDS
+        and command['exit_code'] == command['expected_exit_code']]
+
+
 def verify_retained_binary(recorded: dict, binary: Path) -> None:
     """A retained consumer result only stands while its installed executable is unchanged."""
     if not binary.is_file():
@@ -605,7 +619,7 @@ def capture(args) -> dict:
                     report[key] = previous[key]
             for name, record in report['consumers'].items():
                 verify_retained_binary(record, work / 'relocated/consumers' / name / 'target/release/bin/main')
-            retained = [c for c in previous["commands"] if c["id"] != "service-operational" and c["exit_code"] == c["expected_exit_code"]]
+            retained = retained_resume_commands(previous['commands'])
             run.commands.extend(retained)
             report["resumed_from"] = text_evidence_digest(output / "report.json").to_json()
             backup = output / ("prior-report-" + str(time.time_ns()) + ".json")

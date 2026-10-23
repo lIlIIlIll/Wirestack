@@ -9,11 +9,12 @@ import unittest
 from unittest.mock import patch
 
 from tools.m12_002_source_sdk import (CA_CHECKS, CA_DIAGNOSTICS, CAPTURE_ENVIRONMENT, COMMAND_CONTRACTS,
-    EXPECTED_COMMANDS, HELPER_SOURCES, HOST_CA_MOUNT, PORT, ROOT, TLS_FIXTURE_FILES, Capture,
-    capture_root, consumer_source_digests, helper_sources,
-    native_compiler, validate_resume, verify_ca_checks, verify_command_inventory,
-    verify_consumer_sources, verify_helper_sources, verify_report, verify_retained_binary,
-    verify_retained_commands, verify_tls_fixtures)
+    EXPECTED_COMMANDS, HELPER_SOURCES, HOST_CA_MOUNT, PORT, RESUME_LIVE_COMMANDS, ROOT,
+    TLS_FIXTURE_FILES, Capture, capture_root, consumer_source_digests, helper_sources,
+    native_compiler, retained_resume_commands, validate_resume, verify_ca_checks,
+    verify_command_contract, verify_command_inventory, verify_consumer_sources,
+    verify_helper_sources, verify_report, verify_retained_binary, verify_retained_commands,
+    verify_tls_fixtures)
 from tools.evidence_digest import (artifact_byte_digest, artifact_byte_digest_bytes,
     text_evidence_digest)
 
@@ -108,6 +109,14 @@ class ResumeDriftTests(unittest.TestCase):
         current['consumer_sources']['examples/linux/m11_004/decoded/src/main.cj'] = text_digest('c')
         with self.assertRaisesRegex(ValueError, 'consumer sources'):
             validate_resume(previous, current)
+
+
+    def test_live_operational_commands_are_rerun_after_resume(self):
+        commands = [{'id': name, 'exit_code': expected, 'expected_exit_code': expected}
+            for name, expected in EXPECTED_COMMANDS.items()]
+        retained = retained_resume_commands(commands)
+        self.assertEqual({command['id'] for command in retained},
+            set(EXPECTED_COMMANDS) - RESUME_LIVE_COMMANDS)
 
 
 class TlsFixtureBindingTests(unittest.TestCase):
@@ -258,6 +267,28 @@ class CaptureEnvironmentTests(unittest.TestCase):
             self.assertEqual(capture.commands[0]['environment'], CAPTURE_ENVIRONMENT)
 
 
+class CaptureCommandAssemblyTests(unittest.TestCase):
+    def test_host_pki_mount_matches_the_installed_ca_command_contract(self):
+        with tempfile.TemporaryDirectory(prefix='m12-source-mount-') as directory:
+            root = Path(directory)
+            work, output = root / 'scratch', root / 'evidence'
+            work.mkdir()
+            output.mkdir()
+            certificate = work / 'certificate.pem'
+            certificate.write_text('fixture\n')
+            capture = Capture(work, output, root / 'sdk')
+            cwd, template = COMMAND_CONTRACTS['system-ca-installed'][1]
+            cwd = Path(cwd.replace('<scratch>', str(work)))
+            argv = [value.replace('<scratch>', str(work)).replace(PORT, '44595')
+                for value in template]
+            inner = argv[argv.index('--') + 1:]
+            with patch('tools.m12_002_source_sdk.Path.exists', return_value=True):
+                actual = capture.hidden(inner, cwd, ca=certificate, old=work / 'original')
+            command = {'id': 'system-ca-installed', 'argv': [capture.normalize(value) for value in actual],
+                'cwd': capture.normalize(str(cwd)), 'environment': CAPTURE_ENVIRONMENT}
+            verify_command_contract(command)
+
+
 class CommandInventoryTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory(prefix='m12-source-commands-')
@@ -372,14 +403,18 @@ class CommandContractTests(CommandInventoryTests):
             with self.subTest(name=name):
                 changed = self.changed()
                 argv = next(c for c in changed if c['id'] == name)['argv']
-                insertion = argv.index('--chdir')
+                ssl = argv.index('/etc/ssl')
+                insertion = next((index for index in range(ssl + 1, len(argv))
+                    if argv[index] == '--ro-bind'), argv.index('--chdir'))
                 argv[insertion:insertion] = HOST_CA_MOUNT
                 verify_command_inventory(changed, self.evidence)
 
     def test_unrelated_mount_is_rejected_with_optional_host_ca_mount(self):
         changed = self.changed()
         argv = next(c for c in changed if c['id'] == 'system-ca-missing')['argv']
-        insertion = argv.index('--chdir')
+        ssl = argv.index('/etc/ssl')
+        insertion = next((index for index in range(ssl + 1, len(argv))
+            if argv[index] == '--ro-bind'), argv.index('--chdir'))
         argv[insertion:insertion] = [*HOST_CA_MOUNT, '--tmpfs', '/etc/other']
         with self.assertRaisesRegex(ValueError, 'command shape changed: system-ca-missing'):
             verify_command_inventory(changed, self.evidence)
