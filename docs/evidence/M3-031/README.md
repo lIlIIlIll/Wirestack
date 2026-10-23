@@ -21,90 +21,80 @@ claim mobile device support.
 
 ## Retained evidence
 
-The following files preserve the historical acceptance run and its exact
-artifacts:
+The historical acceptance records remain available:
 
-- `core-prerequisite-audit.json`
-- `windows-x86_64/provider-result.json`
-- `windows-x86_64/validation.json`
-- `windows-x86_64/license-bundle/manifest.json` and its 11 digest-bound files
-- `macos-arm64/provider-result.json`
-- `macos-arm64/validation.json`
-- `macos-arm64/license-bundle/manifest.json` and its 11 digest-bound files
-- `desktop-provider-matrix.json`
+- `historical-acceptance-evidence.json` preserves the former PASS index.
+- `task-check.json`, `core-prerequisite-audit.json`, and
+  `desktop-provider-matrix.json` describe the September 1, 2026 historical run
+  at revision `6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`.
+- `requalification-blocker-2026-10-22.json` records why that earlier hosted
+  receipt was stale; it is not the current blocker.
+
+The refreshed native run and current source-bound checks are recorded in:
+
 - `hosted-run.json`
-- `task-check.json`
-- `evidence.json`
+- `windows-x86_64/provider-result.json` and `validation.json`
+- `windows-x86_64/license-bundle/manifest.json` and its 11 digest-bound files
+- `macos-arm64/provider-result.json` and `validation.json`
+- `macos-arm64/license-bundle/manifest.json` and its 11 digest-bound files
+- `windows-validation-f5cb82.json`
+- `macos-validation-f5cb82.json`
+- `task-check-current-f5cb82.json`
+- `core-prerequisite-audit-current-f5cb82.json`
+- `current-verification-f5cb82.json`
 
-`hosted-run.json`, `desktop-provider-matrix.json`, and `task-check.json`
-record the historical PASS at revision
-`6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`. Their PASS fields do not establish
-current M3-031 acceptance.
+`evidence.json` remains a schema-v2 `BLOCKED` index. The current native
+provider receipts do not imply full task acceptance or a PASS seal.
 
-`evidence.json` is now a schema-v2 `BLOCKED` index; the former PASS index is
-preserved verbatim in
-[`historical-acceptance-evidence.json`](historical-acceptance-evidence.json).
-`seal-evidence` refuses a non-PASS index, so this is an explicit blocker record
-rather than a fabricated qualification.
+## Current hosted and local status
 
-`requalification-blocker-2026-10-22.json` records the current source-bound gate
-failure.
+GitHub Actions run
+[`40005174235`](https://github.com/lIlIIlIll/Wirestack/actions/runs/40005174235)
+passed both native provider jobs at revision
+`f5cb82cdc780bef905f436435470952a1a1acbb5`. Windows x86_64 and macOS arm64
+each report all 18 AWS-LC 5.5.0 capabilities PASS, 10,000 cleanup cycles, and
+two external signer calls. The hosted-run validator and both retained provider
+receipt validators pass for this exact revision.
 
-## Current status and blocker
+The task is still blocked by repository-level acceptance:
 
-The historical GitHub Actions run
-[`33461712135`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135)
-passed both native jobs at revision
-`6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2`. Windows Server 2025 x86_64 and
-macOS 15 arm64 each passed all 18 schema-v11 capabilities with AWS-LC 5.5.0.
-Those results remain valid for the provider inputs they tested.
+- `scripts/check-m3-031-desktop-tls-adoption` exits 1 with
+  `RETAINED_EVIDENCE`: `docs/evidence/M3-030/linux-aws-lc-results.json` has
+  invalid report semantics. The current M3-031 Windows/macOS receipts validate,
+  but the aggregate gate cannot pass its M3-030 prerequisite audit.
+- `scripts/check-task M3-031 --json` exits 2 with `INVALID` before executing
+  commands because M10-004 is recorded COMPLETE while M10-003 is BLOCKED.
+- The exact Python acceptance suite runs 114 tests: 113 pass and
+  `test_evolution_status_matches_readiness_classification` fails on that same
+  M10-004/M10-003 status contradiction.
+- The provider-neutral TLS/trust Cangjie suite passes 83/83; this does not
+  override the failed Python suite or invalid task preflight.
 
-Four hosted provider inputs are stale relative to the historical run. The
-complete per-input inventory, with hosted, base and current digests plus the
-commit that last changed each file, is in
-[`requalification-blocker-2026-10-22.json`](requalification-blocker-2026-10-22.json).
-
-| Input | At base `d496a242` | Changed by #236 | Current digest differs from hosted |
-|---|---|---|---|
-| `providers.json` | same as current | yes (`5550cd4a`) | yes |
-| `run.py` | already differed | no (`1c2e3536`) | yes |
-| `validate.py` | already differed | no (`f43f36b3`) | yes |
-| `openssl_memory_poc.c` | identical | no (`997d0d3d`) | no |
-
-`providers.json` hosted SHA-256 is
-`600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429`; the current
-file binds `bdd5bdc65132bdedd41ce2e0120cb12770963acea7144a3559b9f118511bdc1e`.
-`run.py` and `validate.py` were already stale at the M3-031 base, before the
-M0-016 advisory review changed anything, so this requalification gap is not
-attributable to #236 alone.
-
-`checked_source_revision` is the revision whose inputs were inspected. It is
-not the current head and not the parent pull-request head: the record binds its
-inputs by digest, so an unrelated later commit leaves it valid and any changed
-input invalidates it.
-
-ADR-0007 requires both native provider jobs to be rerun when a provider source
-input changes.
-
-Current command `scripts/check-m3-031-desktop-tls-adoption` exits 1 with
-`STALE_SOURCE: hosted provider inputs differ from retained run`. The complete
-observed result is recorded in
-[`requalification-blocker-2026-10-22.json`](requalification-blocker-2026-10-22.json).
-No fresh Windows or macOS hosted job was launched; the retained PASS results
-are not promoted to current acceptance.
+Exact current results and source identities are in
+[`current-verification-f5cb82.json`](current-verification-f5cb82.json). No full
+M3-031 task acceptance or PASS seal is claimed.
 
 ## Boundaries and remaining work
 
-- The audit passes only the desktop-applicable Core projection. It records the
-  six-platform target-build condition and mobile conditions as `NOT_EVALUATED`.
-- Historical M3 task statuses are unchanged.
+- The audit covers only the desktop-applicable Core projection. Six-platform
+  target-build and mobile conditions remain `NOT_EVALUATED`.
 - M3-014, M3-015, M3-019 and M3-020 still own the production Windows/macOS
   trust and non-exportable-key adapters.
-- No iOS device, Android device, HarmonyOS device, one-hour profile or 86,400
-  second soak was run. None is an M3-031 acceptance command.
+- No iOS, Android, or HarmonyOS device, one-hour profile, or 86,400-second soak
+  was run; none is an M3-031 acceptance command.
+- Restore full task acceptance only after the M3-030 retained evidence and the
+  M10-004/M10-003 dependency-status blockers are corrected by their owners.
 
 ## Current verification
 
-The stored `task-check.json` describes the historical run only. The current
-M3-031 task gate is blocked at hosted-input validation until both native
-provider jobs are rerun against the reviewed source revision.
+| Check | Result |
+|---|---|
+| Test-plan matrix | PASS: 17 paths, 16 scenarios, 17 tests |
+| Desktop adoption/provider Python suite | FAIL: 113/114 |
+| Hosted/provider receipt validators | PASS: Windows x86_64 and macOS arm64 at `f5cb82cdc780bef905f436435470952a1a1acbb5` |
+| Stored desktop-provider aggregate | FAIL: invalid retained M3-030 report semantics |
+| Task gate | INVALID before commands: M10-004 depends on BLOCKED M10-003 |
+| Provider-neutral TLS/trust Cangjie tests | PASS: 83/83 |
+
+`task-check.json` is historical. The current preflight result is
+[`task-check-current-f5cb82.json`](task-check-current-f5cb82.json).

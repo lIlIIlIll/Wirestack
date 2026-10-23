@@ -116,7 +116,7 @@ milestone.
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M3-031 | BLOCKED | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md), [`requalification-blocker-2026-10-22.json`](../evidence/M3-031/requalification-blocker-2026-10-22.json), [`hosted-run.json`](../evidence/M3-031/hosted-run.json) | Historical Windows/macOS PASS evidence binds the pre-review `providers.json` digest. M0-016 PR #236 changes that input, so the current task gate returns `STALE_SOURCE`; native Windows and macOS reruns are required before M3-031 can complete. |
+| M3-031 | BLOCKED | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md); [`current verification`](../evidence/M3-031/current-verification-f5cb82.json); [`hosted run`](../evidence/M3-031/hosted-run.json) | Current Windows/macOS AWS-LC 5.5.0 hosted receipts pass at `f5cb82cdc780bef905f436435470952a1a1acbb5` (run 40005174235). Full acceptance remains blocked: M3-030 retained Linux evidence has invalid semantics; task preflight is INVALID at M10-004 → M10-003; Python acceptance is 113/114 with the matching status-graph contradiction. No full PASS or seal is claimed. |
 
 ## Future upstream enhancements
 

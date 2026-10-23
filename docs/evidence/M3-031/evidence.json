@@ -1,7 +1,7 @@
 {
   "acceptance_status": "BLOCKED",
-  "blocker": "docs/evidence/M3-031/requalification-blocker-2026-10-22.json",
-  "generated_at_utc": "2026-10-23T00:00:00Z",
+  "blocker": "docs/evidence/M3-031/current-verification-f5cb82.json",
+  "generated_at_utc": "2026-10-23T19:35:12Z",
   "historical_index": "docs/evidence/M3-031/historical-acceptance-evidence.json",
   "platform": {
     "libc": "glibc",
@@ -9,11 +9,11 @@
     "machine": "x86_64",
     "system": "Linux"
   },
-  "reason": "No current acceptance: the historical hosted PASS binds superseded provider inputs and no native Windows/macOS rerun has been made. No PASS is claimed.",
+  "reason": "Current Windows and macOS hosted provider receipts pass at f5cb82cdc780bef905f436435470952a1a1acbb5, but full acceptance remains blocked by invalid retained M3-030 evidence, the M10-004/M10-003 dependency-status contradiction, and one failing M7 task-graph regression. No PASS is claimed.",
   "schema_version": 2,
   "source_task": "M3-031",
   "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-    "cjpm": "Cangjie Project Manager: 1.1.3"
+    "cjc": "Cangjie Compiler: 1.3.0-alpha.20261020001052 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.3.0-alpha.07"
   }
 }

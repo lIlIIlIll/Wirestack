@@ -3412,8 +3412,8 @@
           "--version"
         ],
         "exit_code": 0,
-        "output": "cmake version 4.4.0\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
-        "output_sha256": "5653b0e86a9aaa0907f014dc4f3b8928607709eedc49d400b055bc9ce9266fa6"
+        "output": "cmake version 4.4.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+        "output_sha256": "74d0fc9e7ef3e40d8870ede13815452387844cf67fda196956eb7efb88eae2f2"
       },
       "compiler": {
         "argv": [
@@ -3480,17 +3480,17 @@
       {
         "bytes": 4090424,
         "name": "libcrypto.a",
-        "sha256": "e2a2f79c4ff6fc2443e49effb6ad6780911e88e130b84a9424bd8fc50dec801a"
+        "sha256": "b0a9e781ff57eb896d4e7e701b6369363a53827db2ae8e561fb597fff9d91851"
       },
       {
         "bytes": 668872,
         "name": "libssl.a",
-        "sha256": "73bf26d73dbba6e0302e765a5c91c14beee51173c4d9aab45f256f087c68cdb5"
+        "sha256": "1a1eca624b7fdb26600b4e0a619e9dd960637f74fafd12cbb63d13342d5b0b0c"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "0ab722fa52fc7d06928bf32532cd7c0f4ca8f89f2fe34f19d5e033036b5ab2a2",
+  "build_log_sha256": "12f7314484d23f8a2a98aad58a24d29ec066c2b5966912cd9b7fff6273414085",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3514,18 +3514,18 @@
   "execution": {
     "container_image": "",
     "image_os": "macos15",
-    "image_version": "20260727.0256.1",
-    "python": "3.14.6",
-    "repository_revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+    "image_version": "20260907.0337.1",
+    "python": "3.14.7",
+    "repository_revision": "f5cb82cdc780bef905f436435470952a1a1acbb5",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-09-01T02:15:24.861802+00:00",
+  "finished_at": "2026-10-23T18:45:37.047140+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 19,
+    "cancellation_latency_us": 46,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
@@ -3533,16 +3533,16 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 4325376,
+    "memory_profile_peak_resident_bytes": 4194304,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1375528772,
+    "provider_allocation_bytes": 1375732980,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10286665,
+    "provider_allocation_calls": 10286847,
     "provider_allocation_live_after_cleanup_bytes": 154180,
     "provider_allocation_live_before_cleanup_bytes": 154180,
-    "provider_allocation_peak_live_bytes": 220766,
+    "provider_allocation_peak_live_bytes": 219774,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3554,21 +3554,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 19,
+      "latency_us": 46,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 4325376,
+      "peak_resident_bytes": 4194304,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1375528772,
+      "provider_allocation_bytes": 1375732980,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10286665,
+      "provider_allocation_calls": 10286847,
       "provider_allocation_live_after_cleanup_bytes": 154180,
       "provider_allocation_live_before_cleanup_bytes": 154180,
-      "provider_allocation_peak_live_bytes": 220766,
+      "provider_allocation_peak_live_bytes": 219774,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -3577,7 +3577,7 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "851fdc5e9c2ac7d983437da9ba6d941c59dca00a3581ba8fad2f8b2d5df6dac3",
+      "output_sha256": "2e5ed0c7182adbf86d752add578da235428d0708a82c33b6ad4644ab5eb4f979",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -3606,8 +3606,8 @@
             "--version"
           ],
           "exit_code": 0,
-          "output": "cmake version 4.4.0\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
-          "output_sha256": "5653b0e86a9aaa0907f014dc4f3b8928607709eedc49d400b055bc9ce9266fa6"
+          "output": "cmake version 4.4.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+          "output_sha256": "74d0fc9e7ef3e40d8870ede13815452387844cf67fda196956eb7efb88eae2f2"
         },
         "compiler": {
           "argv": [
@@ -3678,12 +3678,12 @@
         {
           "bytes": 21200184,
           "name": "libcrypto.a",
-          "sha256": "51d595b912c7e61f8d5ee806bf18b810048aeb7fac33dffeb8994159b4e3a8b6"
+          "sha256": "221f9a26124a71d54b6d7d3300a68074807fb22a763a0d944fd2fa5458570a42"
         },
         {
           "bytes": 16586408,
           "name": "libssl.a",
-          "sha256": "60656fbe1f752fb3cabdc66bf8103fd729c6038500fc9359e198c6402b314bee"
+          "sha256": "9a2f59e72647a414cc0cd7674c83550e7152dd86a5be5955709503a637794b66"
         }
       ],
       "status": "PASS",
@@ -3709,7 +3709,7 @@
           "GHSA-jchq-39cv-q4wj",
           "GHSA-q87m-xr7j-vrww"
         ],
-        "reviewed_through": "2026-08-31T17:30:00Z",
+        "reviewed_through": "2026-10-22T02:23:00Z",
         "status": "not-affected"
       },
       "advisory_urls": [
@@ -3721,7 +3721,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-09-01T02:13:20.995277+00:00",
+  "started_at": "2026-10-23T18:43:06.569291+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
