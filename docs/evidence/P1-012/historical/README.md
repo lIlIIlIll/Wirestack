@@ -17,11 +17,20 @@ python3 tools/repository/repository_tooling.py --root . validate-tasks --json --
 executed at `c1d908a5d1f3a53f8b6e038cc0eacd2bb1e9e50a`, the first revision of
 this branch. It records PASS for 41 task IDs.
 
-That PASS cannot recur at the final revision. The cause is the status of
-P1-012's own branch, not the M10-004 row: `c1d908a5` still carried
-`P1-012 COMPLETE`, while this branch now records `P1-012 BLOCKED`. `M10-004`
-is `COMPLETE` at `c1d908a5`, at `origin/main` (`d496a242`), and at this
-branch's head, so it contributes no failure at any of the three revisions.
+That PASS cannot recur at the final revision, but not because P1-012's own row
+changed. At `c1d908a5` `validate-tasks` called the repository validator without
+a requested task, and that revision checked dependency completeness only inside
+the `requested is not None` branch. No status row therefore gated the global
+run, which is consistent with the retained PASS over the 41 manifests present
+at that revision. `M10-004` itself is `COMPLETE` at `c1d908a5`, at
+`origin/main` (`d496a242`), and at this branch's head, but that is not what the
+historical run tested.
+
+The current validator applies the completeness check across the whole manifest
+graph. At this branch's head `M10-004` is still `COMPLETE`, yet its dependency
+`M10-003` is `BLOCKED`, so the `M10-004 -> M10-003` edge already fails. The
+non-recurrence therefore comes from the new global status check plus every
+failing edge below, not from P1-012's reclassification alone.
 
 Repository-wide validation is strict over the whole manifest graph
 regardless of any supplied task ID, so at head it rejects on seven dependency

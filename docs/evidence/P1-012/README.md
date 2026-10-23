@@ -175,10 +175,14 @@ this branch changes only P1-012.
 
 [`historical/validate-tasks-c1d908a5.json`](historical/validate-tasks-c1d908a5.json)
 is the byte-exact `validate-tasks` PASS from `c1d908a5`. It cannot be
-reproduced at head because that earlier revision recorded `P1-012 COMPLETE`
-while this branch records it BLOCKED; `M10-004` is COMPLETE at `c1d908a5`, at
-`origin/main`, and at head, so it is not the cause. At head the global
-validator rejects seven edges, and completing `M10-003` alone leaves three
+reproduced at head because the validator changed, not because P1-012's row
+changed: `c1d908a5` checked dependency completeness only inside the
+`requested is not None` branch, and the `validate-tasks` command passes no
+requested task, so no status row gated that run. The current validator applies
+the check across the whole manifest graph, where `M10-004 -> M10-003` already
+fails even though `M10-004` is COMPLETE at `c1d908a5`, at `origin/main`, and at
+head. At head the global validator rejects seven edges, and completing
+`M10-003` alone leaves three
 (`M11-004 -> M11-001`, `P1-013 -> P1-012`, `P1-014 -> P1-012`) until every
 depended-upon row is COMPLETE. It is retained as history and referenced by no
 acceptance command; see [`historical/README.md`](historical/README.md), which
