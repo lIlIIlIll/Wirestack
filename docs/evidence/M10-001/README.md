@@ -101,6 +101,14 @@ and baseline-reproduction limit are in
 [`review-deadline-regressions.md`](review-deadline-regressions.md) and
 [`review-regressions.json`](stack-200-review/review-regressions.json).
 
+On current M10-001 review candidate `501f21af0fbd2e6937fd17fadb87715be3d043b0`,
+the prefix deadline regression passed in the hosted Clean Cangjie Build
+([run #39947353734](https://github.com/lIlIIlIll/Wirestack/actions/runs/39947353734)).
+The test confirms a rejected read leaves the six parser-prefix bytes available
+to a subsequent read. `check task M10-001` remains INVALID before commands
+because M10-004 depends on incomplete M10-003; this does not requalify the
+original task or produce a current task seal.
+
 ## Workspace snapshot (initial task capture; historical)
 
 - GitButler workspace view: `gitbutler/workspace`; the M10-001 changes remain uncommitted in the workspace, and the named `m10-001-unified-deadline` branch has no task commits. HEAD: `b2ab351ab3ee`; merge base with `main`: `00d6864f5d`.

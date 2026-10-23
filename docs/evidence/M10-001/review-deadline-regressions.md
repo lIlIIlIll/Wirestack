@@ -223,7 +223,7 @@ The task-gate preflight on `18a2b9a79b0b8886db8bfae3fdd48184ff45d23c` returned
 `INVALID` (exit 2) before executing commands: M10-004 is not COMPLETE because
 M10-003 is BLOCKED. This is a dependency blocker, not a passing task acceptance.
 
-## Additional review regressions at source `3e65a74dfa1db865c78a3cce91c547eb02a110fb`
+## Additional review regressions on composite source `7468ec68de9a169ad87e36b5464f246cc28d5cd9`
 
 The review follow-up now checks three missing boundaries:
 
@@ -257,3 +257,30 @@ ignored provider checkout was empty. After materializing the exact pinned
 provider in task-owned temporary storage, the focused replay above passed on
 the fixed source. No failing-before assertion is claimed. This replay does not
 run the full HTTP suite, `scripts/check`, or the M10-001 task gate.
+
+## Prefix deadline rejection preserves the buffered bytes
+
+Source candidate: `501f21af0fbd2e6937fd17fadb87715be3d043b0` (Linux x86_64 glibc).
+`Http1PrefixedTransport.readSome` checks the context before reading the prefix
+and again after copying, before advancing its offset. The regression test
+`Http1UpgradedReadBudgetReviewTest.prefixBytesReturnedAfterStreamIdleExpiryAreRejected`
+advances the fake stream-idle clock from the `StageStarted` observer. The first
+call reports `DeadlineExceeded`; the next read returns exactly the original
+six-byte `prefix`, proving the rejected read did not consume the parser
+remainder.
+
+The hosted Clean Cangjie Build workflow passed at source candidate
+`501f21af0fbd2e6937fd17fadb87715be3d043b0`:
+[run #39947353734](https://github.com/lIlIIlIll/Wirestack/actions/runs/39947353734).
+Its `scripts/check-code` step includes architecture and network-capability
+checks, Linux resolver build, strict docs, `cjpm check`, `cjpm build`, and the
+full non-Performance test suite; the installed public-consumer check also
+passed. The workflow pins Cangjie/CJPM 1.1.3. It does not produce a current
+M10-001 task seal.
+
+The separate task-gate command
+`python3 tools/repository/repository_tooling.py --root . check task M10-001 --json`
+exits 2 with `INVALID`, zero commands, because M10-004 depends on incomplete
+M10-003. The full task gate remains blocked; no COMPLETE requalification is
+claimed.
+
