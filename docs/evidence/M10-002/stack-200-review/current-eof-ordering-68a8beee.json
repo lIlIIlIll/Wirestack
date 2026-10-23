@@ -76,23 +76,25 @@
       "caseElapsedNanoseconds": 1301580
     },
     {
-      "command": "GitHub Actions exact-head checks at 2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "command": "GitHub Actions exact PR-head checks at 16ca11887edcadd1bcba5e00a15a26eced2ff4e3; production code revision 2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "observedAtRevision": "16ca11887edcadd1bcba5e00a15a26eced2ff4e3",
       "status": "PASS",
       "runCount": 9,
       "passed": 9,
       "failed": 0,
       "runIds": [
-        "40031943365",
-        "40031942776",
-        "40031942649",
-        "40031943111",
-        "40031942885",
-        "40031943252",
-        "40031943047",
-        "40031942745",
-        "40031942750"
+        "40035444754",
+        "40035444712",
+        "40035444795",
+        "40035444697",
+        "40035444700",
+        "40035444801",
+        "40035444824",
+        "40035444695",
+        "40035444885"
       ],
-      "cleanCangjieBuildRunId": "40031942750",
+      "cleanCangjieBuildRunId": "40035444885",
+      "documentationRunId": "40035444695",
       "note": "The prior Clean Cangjie Build run 40027989864 at 7ba855fec295952a4877d09edc73a2c76dca223d timed out at src/internal/http1/http2_connection_pool_test.cj:456 in saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill; pool closure after test cleanup produced the nested closed-pool error. Queue admission now signals the shared waiter condition; the case passes locally, and all exact-head hosted workflows pass."
     },
     {
