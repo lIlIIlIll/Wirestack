@@ -132,12 +132,21 @@ public class GzipLimits {
 }
 
 internal func checkGzipContext(context: OperationContext): Unit {
+    checkGzipStageContext(context, NetworkPhase.HttpBody, "gzip decoding")
+}
+
+/** Pre-submission checks report the admission phase; response-body processing has not begun. */
+internal func checkGzipAdmissionContext(context: OperationContext): Unit {
+    checkGzipStageContext(context, NetworkPhase.PoolAcquire, "gzip request admission")
+}
+
+private func checkGzipStageContext(context: OperationContext, phase: NetworkPhase, scope: String): Unit {
     if (context.isCancellationRequested()) {
-        throw NetworkException(NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody,
-            NetworkErrorCode.Cancelled, "gzip decoding cancelled", retryability: Retryability.Never)
+        throw NetworkException(NetworkErrorCategory.Cancelled, phase,
+            NetworkErrorCode.Cancelled, "${scope} cancelled", retryability: Retryability.Never)
     }
     if (context.isDeadlineExceeded()) {
-        throw NetworkException(NetworkErrorCategory.DeadlineExceeded, NetworkPhase.HttpBody,
-            NetworkErrorCode.TimedOut, "gzip decoding deadline exceeded", retryability: Retryability.Temporary)
+        throw NetworkException(NetworkErrorCategory.DeadlineExceeded, phase,
+            NetworkErrorCode.TimedOut, "${scope} deadline exceeded", retryability: Retryability.Temporary)
     }
 }

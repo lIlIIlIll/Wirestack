@@ -43,7 +43,10 @@ body has unknown `contentLength`.
 For decoded responses, `response.headers` removes `Content-Encoding`,
 `Content-Length` and `Transfer-Encoding`. It also removes representation
 validators `Content-MD5`, `Content-Digest`, `Digest` and `ETag`: wire validators
-must not be presented as validators for the decoded bytes. Other headers remain.
+must not be presented as validators for the decoded bytes. `Content-Range` is
+removed as well, because a gzip-coded `206 Partial Content` describes offsets and
+a total length in the coded representation that no longer apply to decoded
+bytes; it remains available unchanged in `wireHeaders`. Other headers remain.
 Raw responses keep their headers unchanged.
 
 **HTTP trailers currently remain wire metadata.** After successful gzip
@@ -65,8 +68,11 @@ ISIZE must match, and the decoder must reach the physical EOF of the compressed
 HTTP body, before `integrityVerified` becomes true. Reaching the declared wire
 length or producing the expected decoded length is not enough. Keep reading
 with a nonempty destination until a read returns zero and integrity is verified.
-An empty destination returns zero without proving EOF. Do not publish a complete
-trusted artifact from a prefix that may later fail integrity checks.
+An empty destination returns zero without proving EOF, failing, or closing the
+owned source. Once verified EOF has been observed a later deadline or cancellation
+does not rewrite it: subsequent reads with a nonempty destination keep returning
+zero. Do not publish a complete trusted artifact from a prefix that may later
+fail integrity checks.
 
 `encodedBytesRead`, `decodedBytes` and `memberCount` report actual progress.
 Decoded-byte counts include provisional output. Raw `GzipResponse` views report
@@ -117,6 +123,13 @@ control and cleanup reserves are not available to the decoder. The standalone
 `GzipBodyStream` bounds its own storage but does not obtain an HTTP-client
 ledger lease.
 
+Incoming HTTP/2 DATA is charged to the same route/origin owner, so a reservation
+that would leave less than one minimum 16 KiB DATA frame of headroom is refused
+before submission with a typed `ResourceExhausted`/`PoolAcquire` error instead of
+deadlocking the stream. `HttpClient.reserveResponseBuffer` applies the same rule
+to every managed response-buffer consumer, so a later HTTP/2 DATA frame for that
+owner is still admissible at exactly the configured route or origin capacity.
+
 ## Share time and cancellation
 
 The wrapper uses one monotonic absolute `OperationContext` for admission,
@@ -134,6 +147,14 @@ source that blocks outside the context contract can take longer.
 
 One read may be active at a time. An overlapping read raises
 `GzipException(ConcurrentOperation)` rather than starting another decoder.
+
+The wrapper links the caller context and every supplied typed handle before data
+admission, so a cancelled handle wakes a blocked admission wait instead of
+leaving it pending, and cancellation stays observable through
+`response.operationContext` until decoded EOF or close, even after the compressed
+wire body is fully drained. A cancellation or expiry observed before admission or
+submission is classified as `NetworkPhase.PoolAcquire`, because no response body
+processing has started yet; later body-read failures keep `HttpBody`.
 
 ## Handle terminal errors
 
@@ -153,8 +174,10 @@ Use typed codes, not exception messages. `GzipException` reports phase
 Cancellation and deadline expiry remain typed `NetworkException` results,
 separate from local `Closed` and gzip `UnexpectedEof`. Underlying HTTP framing
 EOF and TLS truncation retain their transport/network errors; neither becomes
-successful decoded EOF. A contextual error can retain the interrupted failure
-as its cause.
+successful decoded EOF. When a transport failure races an observable cancellation
+or expiry, the contextual classification wins but the transport error's native
+code, local endpoint and remote endpoint are preserved and the transport error
+remains the cause.
 
 A limit or decode failure is terminal and closes the owned source. Cancellation
 also ends that decoded response. You cannot retry reads to resume it or replay a

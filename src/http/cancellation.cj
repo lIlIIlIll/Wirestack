@@ -129,6 +129,9 @@ public class HttpCancellationHandles {
     /** Retains one cleanup callback on every supplied typed handle for an extended body lifetime.
      * The callback runs at most once when any supplied handle is cancelled, and runs immediately
      * when a supplied handle was already cancelled before this call.
+     * If a later registration or its immediate invocation fails, every registration accumulated so
+     * far is removed and the original callback failure is rethrown, so no callback stays attached
+     * to a lifetime the caller never received.
      * @param callback Cleanup that closes the extended body and releases its owned resources.
      * @return An idempotent lifetime; close it when the extended body reaches EOF or terminal cleanup.
      */
@@ -140,17 +143,22 @@ public class HttpCancellationHandles {
             if (claimed.compareAndSwap(false, true)) { callback() }
         }
         let registrations = ArrayList<CancellationRegistration>()
-        match (request) {
-            case Some(value) => registrations.add(value.cancellationToken.register(once))
-            case None => ()
-        }
-        match (connection) {
-            case Some(value) => registrations.add(value.cancellationToken.register(once))
-            case None => ()
-        }
-        match (stream) {
-            case Some(value) => registrations.add(value.cancellationToken.register(once))
-            case None => ()
+        try {
+            match (request) {
+                case Some(value) => registrations.add(value.cancellationToken.register(once))
+                case None => ()
+            }
+            match (connection) {
+                case Some(value) => registrations.add(value.cancellationToken.register(once))
+                case None => ()
+            }
+            match (stream) {
+                case Some(value) => registrations.add(value.cancellationToken.register(once))
+                case None => ()
+            }
+        } catch (error: Exception) {
+            for (registration in registrations) { registration.unregister() }
+            throw error
         }
         HttpRetainedCancellationLifetime(registrations.toArray())
     }

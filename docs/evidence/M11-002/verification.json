@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "task_id": "M11-002",
-  "status": "PASS",
-  "task_status": "COMPLETE",
+  "status": "BLOCKED",
+  "task_status": "BLOCKED",
   "release_qualification": "NOT_QUALIFIED",
   "candidate_committed": false,
-  "evidence_kind": "SOURCE_BOUND_WORKING_TREE_ACCEPTANCE",
+  "evidence_kind": "STALE_SOURCE_BOUND_WORKING_TREE_ACCEPTANCE",
   "workspace_safety": {
     "root": "<repo>",
     "physical_branch": "gitbutler/workspace",
@@ -215,8 +215,9 @@
       "evidence": "docs/evidence/M10-002/verification.json"
     },
     "M10-003": {
-      "status": "COMPLETE",
-      "evidence": "docs/evidence/M10-003/verification.json"
+      "status": "BLOCKED",
+      "evidence": "docs/evidence/M10-003/verification.json",
+      "note": "Recorded dependency; docs/planning/status.md still records M10-003 as BLOCKED without revision-bound evidence."
     }
   },
   "acceptance": [
@@ -672,7 +673,8 @@
     "No commit/revision seal, push, PR, merge or issue mutation.",
     "No release signing, formal M7/M8 qualification, long soak or non-Linux platform support.",
     "Output before fully validated EOF is provisional; HTTP trailers remain explicitly documented wire metadata.",
-    "No new encoder, server compression, runtime codec fallback, stacked coding decoder or WebSocket compression."
+    "No new encoder, server compression, runtime codec fallback, stacked coding decoder or WebSocket compression.",
+    "The results, commands and source digests recorded here predate the Stack #200 repairs and do not support a COMPLETE status; 17 of 31 recorded source digests are stale."
   ],
   "next_ready_task_ids": [
     "M11-003"
@@ -785,5 +787,21 @@
       "domain": "text-utf8-lf-v1",
       "sha256": "184972a403a5df3a21beee239446af5f3683126b5b0a10e0844e02bc20f6c15f"
     }
+  },
+  "review_fixes": {
+    "status": "REPAIRED_NOT_ACCEPTED",
+    "detail": "docs/evidence/M11-002/review-fixes.json",
+    "issues": [
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275,
+      276,
+      277
+    ],
+    "note": "The nine Stack #200 findings are repaired on fix/M11-002-stack200-findings. The results, commands and digests in this file still describe an earlier working tree and were not rerun."
   }
 }

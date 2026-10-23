@@ -57,22 +57,32 @@ public class GzipClient {
     public func send(request: HttpRequest, context!: OperationContext = OperationContext.background(),
         cancellation!: HttpCancellationHandles = HttpCancellationHandles()): GzipResponse {
         let operation = client.contextForRequest(context: context)
-        checkGzipContext(operation)
-        checkGzipHandles(cancellation)
-        // Header rebuilds must accept everything the wrapped client accepts, not the
-        // library defaults; otherwise a larger configured limit turns into a local reject.
-        let headerLimits = client.configuredLimits()
-        let outgoing = requestWithGzipAcceptEncoding(request, headerLimits)
+        // One published source links the caller context and every typed handle. It also
+        // outlives raw wire completion, because data admission runs before sendControlled
+        // links the typed handles and decoded bytes can remain after the raw body is drained.
+        let published = CancellationSource()
+        let linked = operation.withCancellation(published.token)
+        var handlesLifetime = None<Resource>
+        var parentRegistration = None<CancellationRegistration>
         var lease = None<Resource>
         var opened = None<HttpResponse>
         var decodedStream = None<GzipBodyStream>
         var transferred = false
         try {
+            handlesLifetime = Some(cancellation.retainCancellation({ => published.cancel() }))
+            parentRegistration = Some(operation.cancellation.register({ => published.cancel() }))
+            // Nothing has been admitted or submitted yet, so this is an admission failure.
+            checkGzipAdmissionContext(linked)
+            // Header rebuilds must accept everything the wrapped client accepts, not the
+            // library defaults; otherwise a larger configured limit turns into a local reject.
+            let headerLimits = client.configuredLimits()
+            let outgoing = requestWithGzipAcceptEncoding(request, headerLimits)
             if (request.method != HttpMethod("HEAD")) {
+                checkGzipReceiveHeadroom(client, limits.maximumRetainedBytes)
                 lease = Some(client.reserveResponseBuffer(request.url, limits.maximumRetainedBytes,
-                    context: operation.forStage(OperationTimeoutStage.RequestAdmission)))
+                    context: linked.forStage(OperationTimeoutStage.RequestAdmission)))
             }
-            let raw = client.sendControlled(outgoing, cancellation, context: operation)
+            let raw = client.sendControlled(outgoing, cancellation, context: linked)
             opened = Some(raw)
             let bodyless = request.method == HttpMethod("HEAD") || raw.status < 200 ||
                 raw.status == 204 || raw.status == 205 || raw.status == 304
@@ -94,25 +104,29 @@ public class GzipClient {
                         let previous = lease.getOrThrow()
                         previous.close()
                         lease = None<Resource>
+                        checkGzipReceiveHeadroom(client, limits.maximumRetainedBytes)
                         lease = Some(client.reserveResponseBuffer(value, limits.maximumRetainedBytes,
-                            context: operation.forStage(OperationTimeoutStage.RequestAdmission)))
+                            context: linked.forStage(OperationTimeoutStage.RequestAdmission)))
                     }
                 case None => ()
             }
             let retained = lease.getOrThrow()
             let effective = match (raw.operationContext) { case Some(value) => value; case None => operation }
-            let stream = GzipBodyStream(GzipResponseSource(raw.body), limits, effective, operation,
-                { => checkGzipContext(operation); checkGzipHandles(cancellation) }, retained)
+            // Publish the linked token, not the request operation's own token: that operation
+            // releases its links when the raw body ends, but decoded output may continue.
+            let publishedContext = effective.withCancellation(published.token)
+            let stream = GzipBodyStream(GzipResponseSource(raw.body), limits, publishedContext, retained)
             decodedStream = Some(stream)
             lease = None<Resource>
-            // Decoded output can outlive the compressed wire body, so the typed cancellation
-            // handles must stay linked until this decoded body reaches EOF or terminal cleanup.
-            stream.attachCancellation(cancellation.retainCancellation({ => stream.close() }))
+            // Both lifetimes stay attached until decoded EOF or terminal cleanup, so handle
+            // and parent cancellation remain observable through the published context.
+            if (let Some(value) <- handlesLifetime) { stream.attachCancellation(value); handlesLifetime = None<Resource> }
+            if (let Some(value) <- parentRegistration) { stream.attachRegistration(value); parentRegistration = None<CancellationRegistration> }
             let headers = decodedGzipResponseHeaders(raw.headers, headerLimits)
             let view = HttpResponse(raw.status, raw.reason,
                 ResponseBody(stream, trailerProvider: { => if (stream.integrityVerified) { raw.body.trailer } else { None<HttpTrailer> } },
                     completeAtDeclaredLength: false), version: raw.version, headers: headers,
-                pushes: raw.pushes, operationContext: Some(effective))
+                pushes: raw.pushes, operationContext: Some(publishedContext))
             transferred = true
             GzipResponse(view, raw, Some(stream))
         } finally {
@@ -121,7 +135,31 @@ public class GzipClient {
                 finally { if (let Some(value) <- opened) { value.close() } }
             }
             if (let Some(value) <- lease) { value.close() }
+            if (let Some(value) <- handlesLifetime) { value.close() }
+            if (let Some(value) <- parentRegistration) { value.unregister() }
         }
+    }
+}
+
+/** RFC 7540 peers may send DATA frames of at least this size without a settings change. */
+private let gzipMinimumDataFrameBytes: UInt64 = 16384u64
+
+/** Rejects a decoder reservation that consumes the whole HTTP/2 receive allowance of its owner.
+ * Incoming DATA is charged to the same route/origin owner, so reserving all of it would refuse
+ * the first DATA frame even though no competing request exists. Fail before submission with a
+ * stable typed limit error instead of leaving the stream permanently unreadable.
+ */
+private func checkGzipReceiveHeadroom(client: HttpClient, bytes: UInt64): Unit {
+    let resourceLimits = client.resourceSnapshot().limits
+    let dataCapacity = resourceLimits.maximumManagedBufferBytes -
+        resourceLimits.reservedControlBufferBytes - UInt64(resourceLimits.maximumConnections) * 65535u64
+    let ownerCapacity = min(dataCapacity, min(resourceLimits.maximumManagedBufferBytesPerRoute,
+        resourceLimits.maximumManagedBufferBytesPerOrigin))
+    if (bytes > ownerCapacity - min(ownerCapacity, gzipMinimumDataFrameBytes)) {
+        throw NetworkException(NetworkErrorCategory.ResourceExhausted, NetworkPhase.PoolAcquire,
+            NetworkErrorCode.ResourceExhausted,
+            "gzip decoder reservation leaves no HTTP/2 receive headroom",
+            retryability: Retryability.Temporary)
     }
 }
 
@@ -132,15 +170,6 @@ private func selectedGzipCoding(headers: HttpHeaders): Int64 {
     let value = values[0].trimAscii().toAsciiLower()
     if (value == "identity") { 0 } else if (value == "gzip") { 1 } else { 2 }
 }
-private func checkGzipHandles(handles: HttpCancellationHandles): Unit {
-    let cancelled = match (handles.request) { case Some(value) => value.isCancellationRequested; case None => false } ||
-        match (handles.connection) { case Some(value) => value.isCancellationRequested; case None => false } ||
-        match (handles.stream) { case Some(value) => value.isCancellationRequested; case None => false }
-    if (cancelled) {
-        throw NetworkException(NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody,
-            NetworkErrorCode.Cancelled, "gzip request cancelled", retryability: Retryability.Never)
-    }
-}
 
 /** Adds the explicit gzip offer using the wrapped client's header limits; caller values win. */
 internal func requestWithGzipAcceptEncoding(request: HttpRequest, limits: HttpLimits): HttpRequest {
@@ -150,13 +179,17 @@ internal func requestWithGzipAcceptEncoding(request: HttpRequest, limits: HttpLi
     request.withHeaders(builder.add("Accept-Encoding", "gzip").build())
 }
 
-/** Builds the decoded response view under the wrapped client's header limits. */
+/** Builds the decoded response view under the wrapped client's header limits.
+ * `Content-Range` describes the coded representation's offsets and total length, so it is
+ * removed from the decoded view and stays available only through `wireHeaders`.
+ */
 internal func decodedGzipResponseHeaders(original: HttpHeaders, limits: HttpLimits): HttpHeaders {
     let builder = HttpHeaders.builder(limits: limits)
     for (entry in original.entries) {
         let name = entry.name.toAsciiLower()
         if (name != "content-encoding" && name != "content-length" && name != "transfer-encoding" &&
-            name != "content-md5" && name != "content-digest" && name != "digest" && name != "etag") {
+            name != "content-md5" && name != "content-digest" && name != "digest" && name != "etag" &&
+            name != "content-range") {
             builder.add(entry.name, entry.value)
         }
     }

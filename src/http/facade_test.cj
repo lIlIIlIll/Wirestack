@@ -227,6 +227,44 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func retainCancellationRemovesEarlierRegistrationWhenImmediateCallbackThrows(): Unit {
+        // The request handle stays live; the stream handle is cancelled first, so its
+        // registration invokes the callback synchronously and that callback throws.
+        let request = HttpRequestCancellationHandle()
+        let stream = HttpStreamCancellationHandle()
+        @Expect(stream.cancel())
+        let handles = HttpCancellationHandles(request: Some(request), stream: Some(stream))
+        var attempts = 0
+        let _ = @AssertThrows[IllegalStateException](handles.retainCancellation {
+            attempts++
+            throw IllegalStateException("gzip cleanup close failed")
+        })
+        @Expect(attempts, 1)
+        // The earlier registration must not survive a failed construction.
+        @Expect(request.cancellationToken.registeredCallbackCount, 0)
+        @Expect(stream.cancellationToken.registeredCallbackCount, 0)
+        // Cancelling the earlier handle must not reach cleanup the caller never received.
+        @Expect(request.cancel())
+        @Expect(attempts, 1)
+    }
+
+    @TestCase
+    func retainCancellationReleasesEveryRegistrationWhenLifetimeCloses(): Unit {
+        let request = HttpRequestCancellationHandle()
+        let stream = HttpStreamCancellationHandle()
+        let handles = HttpCancellationHandles(request: Some(request), stream: Some(stream))
+        var calls = 0
+        let lifetime = handles.retainCancellation { calls++ }
+        @Expect(request.cancellationToken.registeredCallbackCount, 1)
+        @Expect(stream.cancellationToken.registeredCallbackCount, 1)
+        lifetime.close()
+        lifetime.close()
+        @Expect(request.cancellationToken.registeredCallbackCount, 0)
+        @Expect(stream.cancellationToken.registeredCallbackCount, 0)
+        @Expect(calls, 0)
+    }
+
+    @TestCase
     func publicHttp1ConnectionHandleCancelsBodyAndLeavesClientReusable(): Unit {
         let handler = PublicCancellationHandler()
         let server = HttpServer.builder()

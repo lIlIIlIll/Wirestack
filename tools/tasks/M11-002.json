@@ -9,6 +9,8 @@
   ],
   "allowed_paths": [
     "src/http/client.cj",
+    "src/cancellation.cj",
+    "docs/guides/sse-linux.md",
     "src/http/cancellation.cj",
     "src/http_message.cj",
     "src/gzip/model.cj",
@@ -149,6 +151,7 @@
   "long_running_gate": false,
   "source_paths": [
     "src/http/client.cj",
+    "src/cancellation.cj",
     "src/http/cancellation.cj",
     "src/http_message.cj",
     "src/gzip/model.cj",

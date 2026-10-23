@@ -49,6 +49,9 @@ public class CancellationToken {
     /** Internal hot-path check; permanently active tokens need no linking allocation. */
     internal prop canBeCancelled: Bool { get() { !permanentlyActive } }
 
+    /** Internal diagnostic: number of callbacks currently attached to this token. */
+    internal prop registeredCallbackCount: Int64 { get() { state.registeredCallbackCount } }
+
 /**
  * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
@@ -104,6 +107,12 @@ internal class CancellationState {
     internal prop isCancellationRequested: Bool {
         get() {
             cancelled.load()
+        }
+    }
+
+    internal prop registeredCallbackCount: Int64 {
+        get() {
+            synchronized(mutex) { Int64(callbacks.size) }
         }
     }
 

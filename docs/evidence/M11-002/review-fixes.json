@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "task_id": "M11-002",
+  "status": "BLOCKED",
+  "status_detail": {
+    "reason": "Repairs are committed on fix/M11-002-stack200-findings, but no acceptance gate was executed against this revision and M10-003 is still BLOCKED without revision-bound evidence.",
+    "not_complete_because": [
+      "docs/evidence/M11-002/verification.json still binds an earlier working tree; 17 of its 31 recorded source digests no longer match the current sources.",
+      "scripts/check-task M11-002, the native gzip suite, the installed consumers, the supply-chain generator and the strict documentation gate were not rerun for this revision.",
+      "The task manifest declares M10-003 (#175) as a dependency and docs/planning/status.md still records M10-003 as BLOCKED."
+    ],
+    "historical_owner_pr": {
+      "number": 205,
+      "state": "MERGED_PRESERVED",
+      "note": "Not reopened, rewritten or force-updated."
+    }
+  },
+  "source_baseline": {
+    "commit": "d496a242fec98cc3271f8f71b5a79a3aba60feea",
+    "branch": "fix/M11-002-stack200-findings"
+  },
+  "review_findings": [
+    {
+      "issue": 269,
+      "title": "Strip Content-Range from decoded responses",
+      "status": "REPAIRED",
+      "implementation": "decodedGzipResponseHeaders removes Content-Range from the decoded view; wireHeaders keeps it unchanged.",
+      "regressions": ["src/gzip/native_test.cj: gzipPartialContentDropsWireRangeFromDecodedView"]
+    },
+    {
+      "issue": 270,
+      "title": "Return terminal EOF and empty reads before checking the operation context",
+      "status": "REPAIRED",
+      "implementation": "GzipBodyStream.read returns zero for an empty destination first, treats verified EOF as terminal before any context poll, and no longer re-polls the context after a verified zero-length decode.",
+      "regressions": [
+        "src/gzip/codec_test.cj: verifiedEofSurvivesLaterDeadlineExpiry",
+        "src/gzip/codec_test.cj: emptyReadReturnsZeroBeforeContextAndKeepsOwnedSource"
+      ]
+    },
+    {
+      "issue": 271,
+      "title": "Preserve transport diagnostics when contextual cancellation wins",
+      "status": "REPAIRED",
+      "implementation": "gzipContextualFailure keeps the contextual category/phase/code but copies nativeCode, localEndpoint and remoteEndpoint from the racing NetworkException and retains it as the cause.",
+      "regressions": ["src/gzip/codec_test.cj: contextualCancellationKeepsTransportDiagnostics"]
+    },
+    {
+      "issue": 272,
+      "title": "Unregister partial callbacks when immediate invocation throws",
+      "status": "REPAIRED",
+      "implementation": "HttpCancellationHandles.retainCancellation unregisters every accumulated registration when a later registration or its synchronous invocation throws, then rethrows the original failure.",
+      "regressions": [
+        "src/http/facade_test.cj: retainCancellationRemovesEarlierRegistrationWhenImmediateCallbackThrows",
+        "src/http/facade_test.cj: retainCancellationReleasesEveryRegistrationWhenLifetimeCloses"
+      ]
+    },
+    {
+      "issue": 273,
+      "title": "Link typed cancellation into decoder admission",
+      "status": "REPAIRED",
+      "implementation": "GzipClient.send links the caller context and every typed handle into one published CancellationSource before buffer admission, and passes that token as the admission context. The same token is published as response.operationContext, so a cancelled handle wakes the blocked admission waiter as a classified cancellation.",
+      "regressions": ["src/gzip/native_test.cj: cancelledHandleWakesExhaustedDataAdmission"]
+    },
+    {
+      "issue": 274,
+      "title": "Keep the published context linked through decoded EOF",
+      "status": "REPAIRED",
+      "implementation": "The decoded response publishes the linked token instead of the request operation's own token, and retains the parent registration plus the typed-handle lifetime until the decoded body reaches EOF, failure or close.",
+      "regressions": ["src/gzip/native_test.cj: publishedContextStaysLinkedUntilDecodedEof"]
+    },
+    {
+      "issue": 275,
+      "title": "Classify pre-submission cancellation as admission",
+      "status": "REPAIRED",
+      "implementation": "checkGzipAdmissionContext reports NetworkPhase.PoolAcquire for the pre-admission/pre-submission cancellation and deadline checks; body-phase checks keep NetworkPhase.HttpBody.",
+      "regressions": ["src/gzip/native_test.cj: preSubmissionContextAndHandleFailuresReportAdmission"]
+    },
+    {
+      "issue": 276,
+      "title": "Preserve HTTP/2 receive headroom when reserving gzip storage",
+      "status": "REPAIRED",
+      "implementation": "checkGzipReceiveHeadroom rejects a decoder reservation that leaves less than one 16 KiB minimum DATA frame in the route/origin/instance DATA capacity, before submission, with a typed ResourceExhausted/PoolAcquire error.",
+      "regressions": ["src/gzip/native_test.cj: forcedGzipDecodeReservesReceiveHeadroomAtTheOwnerCapacity"]
+    },
+    {
+      "issue": 277,
+      "title": "Keep M11-002 blocked until M10-003 completes and evidence is regenerated",
+      "status": "REPAIRED",
+      "implementation": "docs/planning/status.md records M11-002 as BLOCKED, this file records the missing current-source evidence and the unresolved M10-003 dependency, and the manifest now covers src/cancellation.cj, which these repairs changed.",
+      "regressions": []
+    }
+  ],
+  "non_claims": [
+    "No gate, build, formatter or test was executed for this revision; regressions were added but not run.",
+    "No current-source native, installed-consumer, supply-chain, documentation or whole-tree result is claimed.",
+    "No committed-candidate scripts/verify verdict and no release qualification is claimed.",
+    "M10-003 remains BLOCKED, so the declared dependency is still unsatisfied."
+  ],
+  "verification_commands": [
+    "TMPDIR=<scratch> TMP=<scratch> TEMP=<scratch> cjHeapSize=1GB scripts/check-task M11-002 --output docs/evidence/M11-002/task-gate.json",
+    "python3 tools/m11_002_native_gzip.py --scratch-parent <scratch>",
+    "python3 tools/architecture_guard.py --root . --format text",
+    "scripts/check-m7-032-public-api --json",
+    "scripts/check-docs --html --output docs/evidence/M11-002/docs/report.json",
+    "python3 tools/repository/repository_tooling.py --root . verify-evidence --task M11-002 --json",
+    "python3 - <<'PY'\nimport json, sys\nsys.path.insert(0, 'tools')\nfrom pathlib import Path\nfrom evidence_digest import text_evidence_sha256\nrecorded = json.load(open('docs/evidence/M11-002/verification.json'))['source_sha256']\nstale = [p for p, v in recorded.items() if text_evidence_sha256(Path(p)) != v['sha256']]\nprint(len(stale), 'stale of', len(recorded))\nPY"
+  ]
+}

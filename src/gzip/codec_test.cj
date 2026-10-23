@@ -179,6 +179,94 @@ class GzipCodecTest {
         @Expect(body.decodedBytes, 3)
     }
     @TestCase
+    func verifiedEofSurvivesLaterDeadlineExpiry(): Unit {
+        let clock = GzipCodecClock()
+        let source = GzipFixtureSource(gzipHex(gzipFixtureFixed))
+        let body = GzipBodyStream(source, context: OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock))))
+        @Expect(String.fromUtf8(gzipDrain(body)), "hello gzip")
+        @Expect(body.integrityVerified)
+        clock.advance(2 * Duration.second)
+        // Terminal EOF is a state, not a context observation: a later expiry must not rewrite it.
+        @Expect(body.read(Array<Byte>(1, repeat: 0u8)), 0)
+        @Expect(body.integrityVerified)
+        @Expect(body.isClosed())
+    }
+    @TestCase
+    func emptyReadReturnsZeroBeforeContextAndKeepsOwnedSource(): Unit {
+        // An expired deadline is observable without closing the body: an empty read must not
+        // fail, must not read the source, and must not terminally close it.
+        let clock = GzipCodecClock()
+        let deadlineSource = GzipFixtureSource(gzipHex(gzipFixtureFixed))
+        let deadlineBody = GzipBodyStream(deadlineSource, context: OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock))))
+        clock.advance(Duration.second)
+        let reads = deadlineSource.reads
+        @Expect(deadlineBody.read(Array<Byte>()), 0)
+        @Expect(deadlineSource.reads, reads)
+        @Expect(!deadlineSource.isClosed())
+        @Expect(!deadlineBody.isClosed())
+        @Expect(!deadlineBody.integrityVerified)
+
+        // Cancellation closes the owned body, but an empty destination is still a no-op
+        // that reports zero rather than a contextual or Closed failure.
+        let cancellation = CancellationSource()
+        let cancelledSource = GzipFixtureSource(gzipHex(gzipFixtureFixed))
+        let cancelledBody = GzipBodyStream(cancelledSource, context: OperationContext(
+            cancellation: cancellation.token))
+        cancellation.cancel()
+        @Expect(cancelledSource.isClosed())
+        @Expect(cancelledBody.read(Array<Byte>()), 0)
+        @Expect(!cancelledBody.integrityVerified)
+    }
+    @TestCase
+    func contextualCancellationKeepsTransportDiagnostics(): Unit {
+        let clock = GzipCodecClock()
+        let local = NetworkEndpoint.Internet(SocketEndpoint(
+            IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 40512u16))
+        let remote = NetworkEndpoint.Internet(SocketEndpoint(
+            IpAddress(IpAddressFamily.Ipv4, [192u8, 0u8, 2u8, 1u8]), 443u16))
+        let source = GzipFixtureSource(gzipHex(gzipFixtureFixed))
+        // The transport failure and the deadline become observable in the same read.
+        source.beforeRead = { =>
+            clock.advance(2 * Duration.second)
+            throw NetworkException(NetworkErrorCategory.TcpRead, NetworkPhase.TcpRead,
+                NetworkErrorCode.ConnectionReset, "peer reset during gzip read",
+                retryability: Retryability.Unknown, nativeCode: Some<Int64>(104),
+                localEndpoint: local, remoteEndpoint: remote)
+        }
+        let body = GzipBodyStream(source, context: OperationContext(
+            deadline: Some(Deadline.after(Duration.second, clock: clock))))
+        let error = @AssertThrows[NetworkException](body.read(Array<Byte>(1, repeat: 0u8)))
+        // The contextual classification wins, but the transport diagnostics survive.
+        match (error.category) {
+            case NetworkErrorCategory.DeadlineExceeded => ()
+            case _ => @Fail("contextual deadline must win the classification")
+        }
+        match (error.phase) { case NetworkPhase.HttpBody => (); case _ => @Fail("contextual failure must report body phase") }
+        match (error.code) { case NetworkErrorCode.TimedOut => (); case _ => @Fail("contextual failure must keep its timeout code") }
+        @Expect(error.nativeCode, Some<Int64>(104))
+        var localPort: Int64 = 0
+        match (error.localEndpoint) {
+            case Some(NetworkEndpoint.Internet(endpoint)) => localPort = Int64(endpoint.port)
+            case _ => ()
+        }
+        @Expect(localPort, 40512)
+        var remotePort: Int64 = 0
+        match (error.remoteEndpoint) {
+            case Some(NetworkEndpoint.Internet(endpoint)) => remotePort = Int64(endpoint.port)
+            case _ => ()
+        }
+        @Expect(remotePort, 443)
+        match (error.cause) {
+            case Some(cause: NetworkException) =>
+                @Expect(cause.nativeCode, Some<Int64>(104))
+            case _ => @Fail("transport failure must be retained as the cause")
+        }
+        @Expect(source.isClosed())
+        @Expect(body.isClosed())
+    }
+    @TestCase
     func preReadDeadlineClosesSourceWithoutReading(): Unit {
         for (partial in [false, true]) {
             let clock = GzipCodecClock()

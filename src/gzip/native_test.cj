@@ -359,7 +359,9 @@ class GzipNativeTest {
             let fixture = GzipNativeFixture(resourceLimits: resourceLimits, requestTimeout: 200 * Duration.millisecond)
             let capacity = resourceLimits.maximumManagedBufferBytes - resourceLimits.reservedControlBufferBytes -
                 UInt64(resourceLimits.maximumConnections) * 65535u64
-            let lease = fixture.client.reserveResponseBuffer(fixture.url("/gzip"), capacity)
+            // Hold all but one minimum DATA frame, so the codec reservation must wait for admission.
+            let held = capacity - 16384u64
+            let lease = fixture.client.reserveResponseBuffer(fixture.url("/gzip"), held)
             let source = CancellationSource()
             try {
                 let sending = spawn {
@@ -380,11 +382,149 @@ class GzipNativeTest {
                 @Expect(sending.get(Duration.second))
                 @Expect(fixture.handler.gzipRequests.load(), 0)
                 @Expect(fixture.client.resourceSnapshot().admissionWaiters, 0)
-                @Expect(fixture.client.resourceSnapshot().managedBufferBytes, capacity)
+                @Expect(fixture.client.resourceSnapshot().managedBufferBytes, held)
                 lease.close()
                 gzipNativeExpectReleased(fixture.client)
             } finally { lease.close(); fixture.close() }
         }
+    }
+
+    @TestCase
+    func publishedContextStaysLinkedUntilDecodedEof(): Unit {
+        for (tls in [false, true]) {
+            let fixture = GzipNativeFixture(tls: tls)
+            let handle = HttpRequestCancellationHandle()
+            let response = GzipClient(fixture.client).send(
+                fixture.request("/gzip"), cancellation: HttpCancellationHandles(request: Some(handle)))
+            try {
+                let published = response.response.operationContext.getOrThrow()
+                let buffer = Array<Byte>(1, repeat: 0u8)
+                // Small decoded reads buffer the whole compressed wire body before decoded EOF.
+                @Expect(response.response.body.read(buffer), 1)
+                @Expect(response.integrityVerified, false)
+                @Expect(handle.cancel())
+                // The advertised canonical context must observe cancellation even though the
+                // raw wire body already reached its declared length.
+                @Expect(published.isCancellationRequested())
+                let error = @AssertThrows[NetworkException](response.response.body.read(buffer))
+                match (error.code) {
+                    case NetworkErrorCode.Cancelled => ()
+                    case _ => @Fail("published context must remain linked through decoded EOF")
+                }
+                gzipNativeExpectReleased(fixture.client)
+            } finally { response.close(); fixture.close() }
+        }
+    }
+
+    @TestCase
+    func gzipPartialContentDropsWireRangeFromDecodedView(): Unit {
+        for (tls in [false, true]) {
+            let fixture = GzipNativeFixture(tls: tls)
+            let response = GzipClient(fixture.client).send(fixture.request("/partial"))
+            try {
+                @Expect(response.response.status, 206)
+                @Expect(response.wireHeaders.getFirst("content-range"), Some("bytes 0-29/30"))
+                @Expect(response.response.headers.getFirst("content-range"), None<String>)
+                @Expect(String.fromUtf8(gzipNativeRead(response.response.body)), "hello gzip")
+                @Expect(response.integrityVerified)
+            } finally { response.close(); fixture.close() }
+        }
+    }
+
+    @TestCase
+    func preSubmissionContextAndHandleFailuresReportAdmission(): Unit {
+        let fixture = GzipNativeFixture()
+        try {
+            let expired = @AssertThrows[NetworkException](GzipClient(fixture.client).send(
+                fixture.request("/gzip"), context: OperationContext(deadline: Some(Deadline.after(Duration.Zero)))))
+            match (expired.phase) { case NetworkPhase.PoolAcquire => (); case _ => @Fail("pre-submission context must report admission") }
+            match (expired.code) { case NetworkErrorCode.TimedOut => (); case _ => @Fail("expired context must time out") }
+            let source = CancellationSource()
+            source.cancel()
+            let cancelled = @AssertThrows[NetworkException](GzipClient(fixture.client).send(
+                fixture.request("/gzip"), context: OperationContext(cancellation: source.token)))
+            match (cancelled.phase) { case NetworkPhase.PoolAcquire => (); case _ => @Fail("pre-submission cancellation must report admission") }
+            match (cancelled.code) { case NetworkErrorCode.Cancelled => (); case _ => @Fail("cancelled context must be classified as cancelled") }
+            let handle = HttpRequestCancellationHandle()
+            @Expect(handle.cancel())
+            let typed = @AssertThrows[NetworkException](GzipClient(fixture.client).send(
+                fixture.request("/gzip"), cancellation: HttpCancellationHandles(request: Some(handle))))
+            match (typed.phase) { case NetworkPhase.PoolAcquire => (); case _ => @Fail("typed pre-submission cancellation must report admission") }
+            match (typed.code) { case NetworkErrorCode.Cancelled => (); case _ => @Fail("typed cancellation must be classified as cancelled") }
+            @Expect(fixture.handler.gzipRequests.load(), 0)
+            @Expect(fixture.client.resourceSnapshot().managedBufferBytes, 0u64)
+            @Expect(fixture.client.resourceSnapshot().admissionWaiters, 0)
+        } finally { fixture.close() }
+    }
+
+    @TestCase
+    func forcedGzipDecodeReservesReceiveHeadroomAtTheOwnerCapacity(): Unit {
+        let maximumRetained = GzipLimits().maximumRetainedBytes
+        // Route capacity equal to the codec reservation leaves no room for incoming DATA.
+        let noHeadroom = HttpResourceLimits(maximumConnections: 8, maximumConnectionsPerRoute: 8,
+            maximumConnectionsPerOrigin: 8, maximumManagedBufferBytes: 8u64 * 1024u64 * 1024u64,
+            maximumManagedBufferBytesPerRoute: maximumRetained,
+            maximumManagedBufferBytesPerOrigin: maximumRetained)
+        let rejected = GzipNativeFixture(resourceLimits: noHeadroom)
+        try {
+            let error = @AssertThrows[NetworkException](GzipClient(rejected.client).send(
+                rejected.request("/gzip")))
+            match (error.category) { case NetworkErrorCategory.ResourceExhausted => (); case _ => @Fail("headroom loss must be a typed limit error") }
+            match (error.phase) { case NetworkPhase.PoolAcquire => (); case _ => @Fail("headroom loss must report admission") }
+            @Expect(rejected.handler.gzipRequests.load(), 0)
+            @Expect(rejected.client.resourceSnapshot().managedBufferBytes, 0u64)
+            @Expect(rejected.client.resourceSnapshot().admissionWaiters, 0)
+        } finally { rejected.close() }
+
+        // Exactly one minimum DATA frame of headroom must still admit the first frame.
+        let minimumHeadroom = HttpResourceLimits(maximumConnections: 8, maximumConnectionsPerRoute: 8,
+            maximumConnectionsPerOrigin: 8, maximumManagedBufferBytes: 8u64 * 1024u64 * 1024u64,
+            maximumManagedBufferBytesPerRoute: maximumRetained + 16384u64,
+            maximumManagedBufferBytesPerOrigin: maximumRetained + 16384u64)
+        let fixture = GzipNativeFixture(tls: true, resourceLimits: minimumHeadroom)
+        try {
+            let response = GzipClient(fixture.client).send(fixture.request("/gzip"),
+                context: OperationContext(deadline: Some(Deadline.after(5 * Duration.second))))
+            try {
+                @Expect(response.response.version, HttpVersion.Http2)
+                @Expect(String.fromUtf8(gzipNativeRead(response.response.body)), "hello gzip")
+                @Expect(response.integrityVerified)
+            } finally { response.close() }
+            gzipNativeExpectReleased(fixture.client)
+        } finally { fixture.close() }
+    }
+
+    @TestCase
+    func cancelledHandleWakesExhaustedDataAdmission(): Unit {
+        let resourceLimits = HttpResourceLimits(maximumConnections: 8, maximumConnectionsPerRoute: 8,
+            maximumConnectionsPerOrigin: 8, maximumManagedBufferBytes: 8u64 * 1024u64 * 1024u64,
+            maximumManagedBufferBytesPerRoute: 8u64 * 1024u64 * 1024u64,
+            maximumManagedBufferBytesPerOrigin: 8u64 * 1024u64 * 1024u64)
+        let fixture = GzipNativeFixture(resourceLimits: resourceLimits)
+        let capacity = resourceLimits.maximumManagedBufferBytes - resourceLimits.reservedControlBufferBytes -
+            UInt64(resourceLimits.maximumConnections) * 65535u64
+        // Leave only one minimum DATA frame free, so the codec reservation must wait.
+        let lease = fixture.client.reserveResponseBuffer(fixture.url("/gzip"), capacity - 16384u64)
+        let handle = HttpStreamCancellationHandle()
+        try {
+            let sending = spawn {
+                try {
+                    let response = GzipClient(fixture.client).send(fixture.request("/gzip"), cancellation:
+                        HttpCancellationHandles(stream: Some(handle)),
+                        context: OperationContext(deadline: Some(Deadline.after(5 * Duration.second))))
+                    response.close(); false
+                } catch (error: NetworkException) {
+                    match (error.code) { case NetworkErrorCode.Cancelled => true; case _ => false }
+                }
+            }
+            gzipNativeAwait({ => fixture.client.resourceSnapshot().admissionWaiters == 1 })
+            @Expect(handle.cancel())
+            @Expect(sending.get(Duration.second))
+            @Expect(fixture.handler.gzipRequests.load(), 0)
+            @Expect(fixture.client.resourceSnapshot().admissionWaiters, 0)
+            lease.close()
+            gzipNativeExpectReleased(fixture.client)
+        } finally { lease.close(); fixture.close() }
     }
 
     @TestCase
@@ -548,10 +688,15 @@ private class GzipNativeHandler <: HttpServerHandler {
         let coding = if (target == "/unknown") { "br" } else if (target == "/multi") { "gzip, identity" } else { "gzip" }
         let headers = HttpHeaders.builder().add("Content-Encoding", coding).add("Content-Length", bytes.size.toString())
         if (target == "/repeated-coding") { headers.add("Content-Encoding", "gzip") }
+        if (target == "/partial") {
+            headers.add("Content-Range", "bytes 0-${bytes.size - 1}/${bytes.size}")
+            return reply(bytes, headers.build(), status: 206, reason: "Partial Content")
+        }
         reply(bytes, headers.build())
     }
-    private func reply(bytes: Array<Byte>, headers: HttpHeaders): HttpServerResponse {
-        HttpServerResponse(HttpResponse(200, "OK", ResponseBody(RequestBody.bytes(bytes).open()), headers: headers))
+    private func reply(bytes: Array<Byte>, headers: HttpHeaders,
+        status!: Int64 = 200, reason!: String = "OK"): HttpServerResponse {
+        HttpServerResponse(HttpResponse(status, reason, ResponseBody(RequestBody.bytes(bytes).open()), headers: headers))
     }
 }
 

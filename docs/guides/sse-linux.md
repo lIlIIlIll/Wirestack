@@ -92,9 +92,13 @@ cancellation and failure release it.
 `HttpClient.reserveResponseBuffer(url, bytes, context:)` also admits other
 bounded response consumers through the existing bounded admission queue.
 Zero bytes or a reservation larger than the instance DATA, route or origin
-capacity fails immediately instead of waiting for impossible capacity.
-HTTP/2 control/cleanup reserves are unavailable to consumers. Release the
-returned `HttpResourceLease` in ownership cleanup; repeated close is safe.
+capacity fails immediately instead of waiting for impossible capacity. A
+reservation that leaves less than one minimum 16 KiB HTTP/2 DATA frame of
+route/origin headroom is refused with a typed `ResourceExhausted`
+`NetworkException` reporting `PoolAcquire`, because incoming DATA is charged to
+the same owner. HTTP/2 control/cleanup reserves are unavailable to consumers.
+Release the returned `HttpResourceLease` in ownership cleanup; repeated close is
+safe.
 
 ## Publish a server stream
 
