@@ -6,6 +6,7 @@ import copy
 import datetime as dt
 import importlib.util
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -263,15 +264,191 @@ class ProviderPocValidationTests(unittest.TestCase):
         cls.spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
         cls.matrix = json.loads((ROOT / "docs/evidence/M0-016/platform-matrix.json").read_text())
 
+    def _advisory_review_fixture(self):
+        return json.loads(
+            (ROOT / validator.ADVISORY_REVIEW_PATH).read_text(encoding="utf-8"))
+
+    def _git_ancestry_outputs(self, review):
+        aws_lc = next(provider for provider in self.spec["providers"]
+                      if provider["id"] == "aws-lc")
+        outputs = ["", "", aws_lc["commit"]]
+        for item in review["dispositions"]["aws-lc"]["ancestry"]:
+            outputs.extend([
+                item["patched_commit"],
+                f"{item['behind_patched']}\t{item['ahead_of_patched']}",
+            ])
+        return outputs
+
+    def test_advisory_review_verifies_upstream_tag_and_commit_ancestry(self):
+        review = self._advisory_review_fixture()
+        with mock.patch.object(
+                validator, "_run_git",
+                side_effect=self._git_ancestry_outputs(review)) as git:
+            validator.validate_advisory_review(review, self.spec, self.matrix, ROOT)
+        self.assertEqual(3 + 2 * len(review["dispositions"]["aws-lc"]["ancestry"]),
+                         git.call_count)
+        fetch_args = git.call_args_list[1].args[1]
+        self.assertIn("https://github.com/aws/aws-lc.git", fetch_args)
+        self.assertIn("--filter=tree:0", fetch_args)
+        self.assertIn("--depth=512", fetch_args)
+        for item in review["dispositions"]["aws-lc"]["ancestry"]:
+            self.assertIn(
+                f"+refs/tags/{item['patched_tag']}:refs/wirestack/tags/{item['patched_tag']}",
+                fetch_args)
+
+    def test_advisory_review_rejects_unrelated_claimed_tag_commit(self):
+        review = self._advisory_review_fixture()
+        item = review["dispositions"]["aws-lc"]["ancestry"][0]
+        actual_commit = item["patched_commit"]
+        item["patched_commit"] = "d" * 40
+        outputs = self._git_ancestry_outputs(review)
+        outputs[3] = actual_commit
+        with mock.patch.object(validator, "_run_git", side_effect=outputs):
+            with self.assertRaisesRegex(
+                    validator.ValidationError,
+                    "patched tag does not resolve to the recorded commit"):
+                validator.validate_advisory_review(
+                    review, self.spec, self.matrix, ROOT)
+
+    def test_advisory_review_rejects_diverged_upstream_graph(self):
+        review = self._advisory_review_fixture()
+        outputs = self._git_ancestry_outputs(review)
+        outputs[4] = "1\t244"
+        with mock.patch.object(validator, "_run_git", side_effect=outputs):
+            with self.assertRaisesRegex(
+                    validator.ValidationError,
+                    "patched tag is not a strict ancestor"):
+                validator.validate_advisory_review(
+                    review, self.spec, self.matrix, ROOT)
+
+    def test_advisory_review_rejects_unapproved_source_repository(self):
+        review = self._advisory_review_fixture()
+        spec = copy.deepcopy(self.spec)
+        next(provider for provider in spec["providers"]
+             if provider["id"] == "aws-lc")["url"] = "https://example.test/fork.git"
+        with mock.patch.object(validator, "_run_git") as git:
+            with self.assertRaisesRegex(
+                    validator.ValidationError, "source repository mismatch"):
+                validator.validate_advisory_review(review, spec, self.matrix, ROOT)
+        git.assert_not_called()
+
     def test_canonical_spec_and_matrix_reject_stale_license_digests(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
-        with self.assertRaisesRegex(
-                validator.ValidationError, "provider license file digest mismatch"):
-            validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        # Every retained result and license bundle stays bound even while its
+        # cell is BLOCKED, so a missing or corrupted historical artifact is
+        # still detected instead of silently disappearing from validation.
+        validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        retained = [cell for cell in self.matrix["cells"] if cell.get("result")]
+        self.assertTrue(retained)
+        for cell in retained:
+            self.assertEqual("BLOCKED", cell["status"])
+            self.assertIn("license_bundle", cell)
+            self.assertIn("sha256", cell)
+        # A retained license payload that drifts from its manifest must still
+        # be rejected on the license digest itself.
+        cell = next(item for item in retained
+                    if (item["provider"], item["platform"]) ==
+                    ("aws-lc", "linux-glibc-x86_64"))
+        result_path = ROOT / cell["result"]
+        result = json.loads(result_path.read_text())
+        source_bundle = ROOT / cell["license_bundle"]["manifest"]
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "license-bundle"
+            shutil.copytree(source_bundle.parent, bundle)
+            manifest = bundle / "manifest.json"
+            first = json.loads(manifest.read_text())["files"][0]["path"]
+            target = bundle / "files" / first
+            raw = bytearray(target.read_bytes())
+            raw[0] = ord("X") if raw[0] != ord("X") else ord("Y")
+            target.write_bytes(bytes(raw))
+            with self.assertRaisesRegex(
+                    validator.ValidationError, "provider license file digest mismatch"):
+                validator.validate_license_bundle(result_path, result, manifest)
         for provider in self.spec["providers"]:
             workflow = provider["security_update"]["update_workflow"]
             self.assertTrue((ROOT / workflow).is_file())
+
+    def test_blocked_cell_still_binds_retained_artifacts(self):
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell.pop("result")
+        cell.pop("sha256")
+        cell.pop("license_bundle")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "retained artifact binding removed"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell["sha256"] = "0" * 64
+        with self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell["result"] = "docs/evidence/M0-016/results/missing.json"
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "retained result is missing"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"] if item.get("result"))
+        cell["license_bundle"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "provider license manifest matrix digest mismatch"):
+            validator.validate_retained_results(value, self.spec, ROOT)
+
+    def test_future_requalification_cell_passes_with_current_disposition(self):
+        # A cell may become eligible again without changing this test: a
+        # promoted cell whose retained result binds the current security-update
+        # object and a not-affected pin validates, and the same cell fails when
+        # its provider is affected or its disposition is stale.
+        eligible = copy.deepcopy(self.spec)
+        next(provider for provider in eligible["providers"]
+             if provider["id"] == "aws-lc")["security_update"][
+                 "advisory_disposition"]["status"] = "not-affected"
+        value = copy.deepcopy(self.matrix)
+        cell = next(item for item in value["cells"]
+                    if (item["provider"], item["platform"]) ==
+                    ("aws-lc", "linux-glibc-x86_64"))
+        # This scenario validates one promoted cell; unrelated retained results
+        # must keep their own provider/platform fixture identity.
+        value["cells"] = [cell]
+        result = complete_result(
+            eligible, provider="aws-lc", platform="linux-glibc-x86_64")
+        result["build"]["license_bundle"]["sha256"] = cell["license_bundle"]["sha256"]
+        cell["status"] = "PASS"
+        with mock.patch.object(validator, "load", return_value=result), \
+                mock.patch.object(validator, "validate_license_bundle"):
+            validator.validate_retained_results(value, eligible, ROOT)
+
+        stale = copy.deepcopy(result)
+        stale["source"]["security_update"]["advisory_disposition"][
+            "reviewed_advisory_ids"].append("CVE-2099-0001")
+        with mock.patch.object(validator, "load", return_value=stale), \
+                mock.patch.object(validator, "validate_license_bundle"), \
+                self.assertRaisesRegex(validator.ValidationError,
+                                       "security-update disposition mismatch"):
+            validator.validate_retained_results(value, eligible, ROOT)
+
+        affected = copy.deepcopy(eligible)
+        affected_provider = next(provider for provider in affected["providers"]
+                                 if provider["id"] == "aws-lc")
+        affected_provider["security_update"]["advisory_disposition"].update({
+            "status": "affected",
+            "affected_advisory_ids": ["GHSA-3jrg-j22w-mpmc"],
+        })
+        affected_result = copy.deepcopy(result)
+        affected_result["source"]["security_update"] = copy.deepcopy(
+            affected_provider["security_update"])
+        with mock.patch.object(
+                validator, "load", return_value=affected_result), \
+                mock.patch.object(validator, "validate_license_bundle"), \
+                self.assertRaisesRegex(
+                    validator.ValidationError,
+                    "known affected provider pin blocks promotion"):
+            validator.validate_retained_results(value, affected, ROOT)
 
     def test_matrix_contract_only_does_not_promote_stale_retained_results(self):
         matrix = ROOT / "docs/evidence/M0-016/platform-matrix.json"
@@ -595,12 +772,18 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.spec, provider=cell["provider"], platform=cell["platform"],
             status="PARTIAL",
         )
-        with mock.patch.object(validator, "load", return_value=result), \
-             mock.patch.object(
-                 validator.evidence_digest, "text_evidence_sha256", return_value="1" * 64
-             ), \
-             self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
-            validator.validate_retained_results(value, self.spec, ROOT)
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            (repository / "synthetic-result.json").write_text(
+                "{}", encoding="utf-8")
+            with mock.patch.object(validator, "load", return_value=result), \
+                 mock.patch.object(
+                     validator.evidence_digest, "text_evidence_sha256",
+                     return_value="1" * 64
+                 ), \
+                 self.assertRaisesRegex(
+                     validator.ValidationError, "sha256 mismatch"):
+                validator.validate_retained_results(value, self.spec, repository)
 
     def test_blocked_capability_cannot_pass(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}

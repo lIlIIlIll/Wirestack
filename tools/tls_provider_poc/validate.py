@@ -7,7 +7,7 @@ if __package__ in {None, ""}:
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools import evidence_digest
-import argparse, datetime as dt, json, re, sys
+import argparse, datetime as dt, json, os, re, subprocess, sys, tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -46,6 +46,12 @@ FAILURE_STAGES = {
 }
 ADVISORY_DISPOSITIONS = {"not-affected", "affected"}
 ADVISORY_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$")
+ADVISORY_VERSION_RE = re.compile(r"^v[0-9]+(?:\.[0-9]+)+$")
+ADVISORY_REVIEW_PATH = Path("docs/evidence/M0-016/advisory-review-2026-10-22.json")
+AWS_LC_REPOSITORY_URL = "https://github.com/aws/aws-lc.git"
+MAX_GIT_OUTPUT_BYTES = 64 * 1024
+MAX_ANCESTRY_DEPTH = 512
+GIT_TIMEOUT_SECONDS = 60
 
 class ValidationError(RuntimeError):
     pass
@@ -548,8 +554,9 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
 
 
 def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
-                            manifest_override: Path | None = None) -> None:
-    if result.get("status") not in {"PASS", "PARTIAL"}:
+                            manifest_override: Path | None = None,
+                            *, retained: bool = False) -> None:
+    if result.get("status") not in {"PASS", "PARTIAL"} and not retained:
         return
     info = result["build"]["license_bundle"]
     root = result_path.parent.resolve()
@@ -601,12 +608,242 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
             raise ValidationError("provider license file is not valid UTF-8") from error
         size = len(raw)
         require(size == entry.get("bytes"), "provider license file size mismatch")
-        require(evidence_digest.schema_text_sha256_equal(
-                    evidence_digest.text_evidence_bytes_sha256(raw), entry.get("sha256")),
+        # A license payload is a verbatim file. The manifest records exactly one
+        # of the two unambiguous payload digests: the normalized text digest
+        # used by current captures, or the raw-byte digest recorded by bundles
+        # captured before the text-digest boundary fix. Rewriting those
+        # manifests would invalidate their committed result and matrix
+        # bindings, so both domains remain acceptable while any altered payload
+        # still matches neither and fails closed.
+        text_digest = evidence_digest.text_evidence_bytes_sha256(raw)
+        byte_digest = evidence_digest.artifact_bytes_sha256(raw)
+        require(evidence_digest.schema_text_sha256_equal(text_digest, entry.get("sha256")) or
+                evidence_digest.schema_artifact_sha256_equal(byte_digest, entry.get("sha256")),
                 "provider license file digest mismatch")
         observed_bytes += size
     require(observed_bytes == info["total_bytes"],
             "provider license bundle total bytes mismatch")
+
+def _run_git(git_dir: Path | None, arguments: Sequence[str]) -> str:
+    command = ["git", "-c", "protocol.version=2"]
+    if git_dir is not None:
+        command.append(f"--git-dir={git_dir}")
+    command.extend(arguments)
+    environment = os.environ.copy()
+    environment.update({
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TERMINAL_PROMPT": "0",
+        "GIT_LFS_SKIP_SMUDGE": "1",
+    })
+    environment.pop("LD_LIBRARY_PATH", None)
+    try:
+        result = subprocess.run(
+            command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, env=environment,
+            timeout=GIT_TIMEOUT_SECONDS, check=False)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ValidationError("aws-lc: bounded upstream git verification failed") from error
+    require(result.returncode == 0,
+            "aws-lc: upstream git ancestry verification failed")
+    require(len(result.stdout) <= MAX_GIT_OUTPUT_BYTES,
+            "aws-lc: upstream git output exceeds its bound")
+    try:
+        return result.stdout.decode("ascii").strip()
+    except UnicodeDecodeError as error:
+        raise ValidationError("aws-lc: upstream git output is invalid") from error
+
+def _verify_aws_lc_tag_ancestry(ancestry: Sequence[Mapping[str, Any]],
+                                pinned_tag: str, pinned_commit: str) -> None:
+    require(ADVISORY_VERSION_RE.fullmatch(pinned_tag) is not None,
+            "aws-lc: pinned source tag is invalid")
+    tags = {pinned_tag}
+    for item in ancestry:
+        tag = str(item.get("patched_tag", ""))
+        require(ADVISORY_VERSION_RE.fullmatch(tag) is not None,
+                "aws-lc: patched source tag is invalid")
+        tags.add(tag)
+
+    with tempfile.TemporaryDirectory(prefix="wirestack-aws-lc-") as directory:
+        git_dir = Path(directory) / "repo.git"
+        _run_git(None, ["init", "--bare", "--quiet", str(git_dir)])
+        refspecs = [
+            f"+refs/tags/{tag}:refs/wirestack/tags/{tag}"
+            for tag in sorted(tags)
+        ]
+        _run_git(git_dir, [
+            "fetch", "--quiet", "--filter=tree:0",
+            f"--depth={MAX_ANCESTRY_DEPTH}", "--no-tags",
+            AWS_LC_REPOSITORY_URL, *refspecs,
+        ])
+        pin_ref = f"refs/wirestack/tags/{pinned_tag}"
+        fetched_pin = _run_git(git_dir, ["rev-parse", f"{pin_ref}^{{commit}}"])
+        require(fetched_pin == pinned_commit,
+                "aws-lc: pinned source tag does not resolve to provider commit")
+        for item in ancestry:
+            tag = str(item["patched_tag"])
+            patched_commit = str(item["patched_commit"])
+            ahead = item.get("ahead_of_patched")
+            behind = item.get("behind_patched")
+            require(type(ahead) is int and 0 < ahead < MAX_ANCESTRY_DEPTH and
+                    type(behind) is int and behind == 0,
+                    "aws-lc: recorded ancestry count is outside its bound")
+            tag_ref = f"refs/wirestack/tags/{tag}"
+            fetched_patch = _run_git(
+                git_dir, ["rev-parse", f"{tag_ref}^{{commit}}"])
+            require(fetched_patch == patched_commit,
+                    "aws-lc: patched tag does not resolve to the recorded commit")
+            counts = _run_git(
+                git_dir, ["rev-list", "--left-right", "--count",
+                          f"{tag_ref}^{{commit}}...{pin_ref}^{{commit}}"])
+            values = counts.split()
+            require(len(values) == 2 and all(value.isdecimal() for value in values),
+                    "aws-lc: upstream ancestry count output is invalid")
+            actual_behind, actual_ahead = (int(value) for value in values)
+            require(actual_behind == 0 and actual_ahead > 0,
+                    "aws-lc: patched tag is not a strict ancestor of the provider pin")
+            require(actual_ahead == ahead and actual_behind == behind,
+                    "aws-lc: recorded ancestry counts do not match the upstream graph")
+
+
+def validate_advisory_review(review: Mapping[str, Any], spec: Mapping[str, Any],
+                             matrix: Mapping[str, Any], repo: Path) -> None:
+    """Bind the review document to the provider spec and the evidence matrix."""
+    repo = repo.resolve()
+    require(review.get("schema_version") == 1, "advisory review schema")
+    require(review.get("task_id") == "M0-016", "advisory review task_id")
+    require(review.get("review_id") == "advisory-review-2026-10-22",
+            "advisory review id")
+    try:
+        reviewed_through = dt.datetime.fromisoformat(
+            str(review.get("reviewed_through_utc", "")).replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ValidationError("advisory review timestamp") from error
+    review_age = dt.datetime.now(dt.timezone.utc) - reviewed_through
+    require(-dt.timedelta(days=1) <= review_age <= dt.timedelta(days=31),
+            "advisory review is stale")
+    require(isinstance(review.get("review_method"), str) and
+            review["review_method"], "advisory review method")
+    matrix_relative = "docs/evidence/M0-016/platform-matrix.json"
+    providers_relative = "tools/tls_provider_poc/providers.json"
+    for name, relative in (("providers_sha256", providers_relative),
+                           ("matrix_sha256", matrix_relative)):
+        require(evidence_digest.schema_text_sha256_equal(
+                    review.get(name),
+                    evidence_digest.text_evidence_sha256(repo / relative)),
+                f"advisory review {name} mismatch")
+    superseded = review.get("superseded_retained_results")
+    require(isinstance(superseded, dict), "advisory review retained inventory")
+    require(superseded.get("matrix") == matrix_relative,
+            "advisory review matrix path")
+    require(isinstance(superseded.get("reason"), str) and superseded["reason"],
+            "advisory review superseded reason")
+
+    providers = {provider["id"]: provider for provider in spec["providers"]}
+    pins = review.get("pins")
+    dispositions = review.get("dispositions")
+    sources = review.get("sources")
+    require(isinstance(pins, dict) and set(pins) == set(providers),
+            "advisory review pin inventory")
+    require(isinstance(dispositions, dict) and set(dispositions) == set(providers),
+            "advisory review disposition inventory")
+    require(isinstance(sources, dict) and set(sources) == set(providers),
+            "advisory review source inventory")
+    for provider_id, provider in providers.items():
+        security = provider["security_update"]
+        disposition = security["advisory_disposition"]
+        pin = pins[provider_id]
+        require(isinstance(pin, dict), f"{provider_id}: advisory review pin")
+        require(pin.get("version") == provider["version"],
+                f"{provider_id}: advisory review pin version")
+        require(pin.get("commit") == provider["commit"],
+                f"{provider_id}: advisory review pin commit")
+        if provider["source_kind"] == "archive":
+            require(evidence_digest.schema_artifact_sha256_equal(
+                        pin.get("sha256"), provider["sha256"]),
+                    f"{provider_id}: advisory review archive digest")
+        recorded = dispositions[provider_id]
+        require(isinstance(recorded, dict), f"{provider_id}: advisory disposition")
+        require(recorded.get("status") == disposition["status"],
+                f"{provider_id}: advisory review disposition status")
+        require(recorded.get("reviewed") == len(disposition["reviewed_advisory_ids"]),
+                f"{provider_id}: advisory review reviewed count")
+        require(sorted(recorded.get("affected") or []) ==
+                disposition["affected_advisory_ids"],
+                f"{provider_id}: advisory review affected set")
+        basis = recorded.get("affected_basis", {})
+        require(isinstance(basis, dict), f"{provider_id}: affected basis")
+        require(set(basis) == set(disposition["affected_advisory_ids"]),
+                f"{provider_id}: affected basis coverage")
+        require(isinstance(recorded.get("basis"), str) and recorded["basis"],
+                f"{provider_id}: disposition basis")
+        source = sources[provider_id]
+        require(isinstance(source, dict), f"{provider_id}: advisory source")
+        require(source.get("channel") == security["advisory_urls"][0],
+                f"{provider_id}: advisory review channel")
+        reviewed = disposition["reviewed_advisory_ids"]
+        review_details = recorded.get("reviewed_not_affected_basis", {})
+        require(isinstance(review_details, dict),
+                f"{provider_id}: reviewed-not-affected basis")
+        require(set(review_details) <= set(reviewed),
+                f"{provider_id}: reviewed-not-affected ids")
+        if provider_id == "aws-lc":
+            advisories = source.get("advisories")
+            require(isinstance(advisories, list) and advisories,
+                    f"{provider_id}: advisory inventory")
+            require(sorted(str(item.get("id")) for item in advisories) == reviewed,
+                    f"{provider_id}: advisory inventory ids")
+            require(all(str(item.get("fixed_in", "")).startswith("v") and
+                        ADVISORY_VERSION_RE.fullmatch(str(item.get("fixed_in"))) is not None
+                        for item in advisories),
+                    f"{provider_id}: advisory fix versions")
+            ancestry = recorded.get("ancestry")
+            require(isinstance(ancestry, list) and ancestry,
+                    f"{provider_id}: advisory ancestry")
+            require(sorted(item.get("patched_tag") for item in ancestry) ==
+                    sorted({str(item["fixed_in"]) for item in advisories}),
+                    f"{provider_id}: advisory ancestry coverage")
+            require(provider.get("url") == AWS_LC_REPOSITORY_URL,
+                    "aws-lc: advisory source repository mismatch")
+            for item in ancestry:
+                require(COMMIT_RE.fullmatch(str(item.get("patched_commit", ""))) is not None,
+                        f"{provider_id}: ancestry commit")
+                require(type(item.get("behind_patched")) is int and
+                        item["behind_patched"] == 0,
+                        f"{provider_id}: ancestry behind count")
+                ahead = item.get("ahead_of_patched")
+                require(type(ahead) is int and 0 < ahead < MAX_ANCESTRY_DEPTH,
+                        "aws-lc: ancestry ahead count outside its bound")
+            require(disposition["status"] == "not-affected",
+                    f"{provider_id}: ancestry proof requires a not-affected pin")
+            _verify_aws_lc_tag_ancestry(
+                ancestry, str(provider["tag"]), str(provider["commit"]))
+        else:
+            require(source.get("reviewed_advisory_ids") == reviewed,
+                    f"{provider_id}: reviewed advisory inventory")
+    require(dispositions["aws-lc"].get("status") == "not-affected",
+            "advisory review AWS-LC disposition")
+    require(dispositions["aws-lc"].get("affected") == [],
+            "advisory review AWS-LC affected set")
+
+    retained = sorted(
+        f"{cell['provider']}/{cell['platform']}"
+        for cell in matrix["cells"] if "result" in cell)
+    require(superseded.get("affected_cells") == len(retained),
+            "advisory review retained cell count")
+    require(superseded.get("cells") == retained,
+            "advisory review retained cell inventory")
+    for cell in matrix["cells"]:
+        if "result" in cell:
+            require(cell["status"] == "BLOCKED",
+                    f"{cell['provider']}/{cell['platform']}: retained cell must be BLOCKED")
+    missing_platforms = sorted(
+        {cell["platform"] for cell in matrix["cells"] if "result" not in cell})
+    missing_review = review.get("native_device_cells_missing")
+    require(isinstance(missing_review, list) and
+            len(missing_review) == len(set(missing_review)) and
+            sorted(missing_review) == missing_platforms,
+            "advisory review native-device inventory")
 
 def validate_matrix(matrix: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
     validate_spec(spec)
@@ -623,50 +860,80 @@ def validate_matrix(matrix: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
         status = cell.get("status")
         require(status in MATRIX_STATUSES, f"{key}: invalid status")
         require(isinstance(cell.get("reason"), str) and cell["reason"], f"{key}: reason required")
-        if status in {"PASS", "PARTIAL", "FAIL"}:
+        # A BLOCKED cell may only drop its bindings when no retained artifact
+        # exists at all. Any retained result stays bound, so a later promotion
+        # cannot point at an unverified or missing artifact.
+        if status != "BLOCKED":
             require(isinstance(cell.get("result"), str) and cell["result"],
                     f"{key}: retained result path required")
+        if "result" in cell or status != "BLOCKED":
             require(SHA256_RE.fullmatch(str(cell.get("sha256", ""))) is not None,
                     f"{key}: retained result sha256 required")
-            if status in {"PASS", "PARTIAL"}:
-                bundle = cell.get("license_bundle")
-                require(isinstance(bundle, dict),
-                        f"{key}: retained license bundle required")
-                require(isinstance(bundle.get("manifest"), str) and bundle["manifest"],
-                        f"{key}: retained license manifest path required")
-                require(SHA256_RE.fullmatch(str(bundle.get("sha256", ""))) is not None,
-                        f"{key}: retained license manifest sha256 required")
+            bundle = cell.get("license_bundle")
+            require(isinstance(bundle, dict),
+                    f"{key}: retained license bundle required")
+            require(isinstance(bundle.get("manifest"), str) and bundle["manifest"],
+                    f"{key}: retained license manifest path required")
+            require(SHA256_RE.fullmatch(str(bundle.get("sha256", ""))) is not None,
+                    f"{key}: retained license manifest sha256 required")
     require(observed == expected, f"matrix coverage mismatch: missing={sorted(expected-observed)}, extra={sorted(observed-expected)}")
 
 def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any], repo: Path) -> None:
+    """Bind every retained artifact, including cells that are currently BLOCKED.
+
+    A BLOCKED cell keeps its retained result and license bundle so that a later
+    promotion cannot silently point at a missing or corrupted artifact. Only the
+    promotion decision (status) is withheld, not the artifact integrity check.
+    """
+    repo_root = repo.resolve()
     for cell in matrix["cells"]:
-        if cell["status"] not in {"PASS", "PARTIAL", "FAIL"}:
+        key = f"{cell.get('provider')}/{cell.get('platform')}"
+        if "result" not in cell:
+            require(cell["status"] == "BLOCKED",
+                    f"{key}: a cell without a retained result must be BLOCKED")
+            require("license_bundle" not in cell and "sha256" not in cell,
+                    f"{key}: a cell without a retained result must not claim a license bundle")
+            # `retained_status` records that a historical artifact existed. Its
+            # presence without the bindings means the binding was removed.
+            require("retained_status" not in cell,
+                    f"{key}: retained artifact binding removed")
             continue
         result_path = repo / cell["result"]
-        result = load(result_path)
-        validate_result(result, spec)
-        require(result["provider"] == cell["provider"], f"{result_path}: provider mismatch")
-        require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
-        require(result["status"] == cell["status"], f"{result_path}: status mismatch")
+        require(result_path.is_file(), f"{result_path}: retained result is missing")
         require(evidence_digest.schema_text_sha256_equal(
                     evidence_digest.text_evidence_sha256(result_path), cell["sha256"]),
                 f"{result_path}: sha256 mismatch")
+        result = load(result_path)
+        require(result["provider"] == cell["provider"], f"{result_path}: provider mismatch")
+        require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
+        retained_status = cell.get("retained_status", cell["status"])
+        require(result["status"] == retained_status,
+                f"{result_path}: status mismatch")
+        require(cell["status"] == "BLOCKED" or retained_status == cell["status"],
+                f"{result_path}: retained status does not match cell status")
+        manifest_path = (repo_root / cell["license_bundle"]["manifest"]).resolve()
+        require(repo_root == manifest_path or repo_root in manifest_path.parents,
+                f"{result_path}: provider license manifest path escapes repository")
+        require(manifest_path.is_file(),
+                f"{result_path}: provider license manifest is missing")
+        require(evidence_digest.schema_text_sha256_equal(
+                    evidence_digest.text_evidence_sha256(manifest_path),
+                    cell["license_bundle"]["sha256"]),
+                f"{result_path}: provider license manifest matrix digest mismatch")
+        require(evidence_digest.schema_text_sha256_equal(
+                    result["build"]["license_bundle"]["sha256"],
+                    cell["license_bundle"]["sha256"]),
+                f"{result_path}: provider license manifest result digest mismatch")
+        validate_license_bundle(result_path, result, manifest_path, retained=True)
         if cell["status"] in {"PASS", "PARTIAL"}:
-            repo_root = repo.resolve()
-            manifest_path = (repo_root / cell["license_bundle"]["manifest"]).resolve()
-            require(repo_root == manifest_path or repo_root in manifest_path.parents,
-                    f"{result_path}: provider license manifest path escapes repository")
-            require(manifest_path.is_file(),
-                    f"{result_path}: provider license manifest is missing")
-            require(evidence_digest.schema_text_sha256_equal(
-                        evidence_digest.text_evidence_sha256(manifest_path),
-                        cell["license_bundle"]["sha256"]),
-                    f"{result_path}: provider license manifest matrix digest mismatch")
-            require(evidence_digest.schema_text_sha256_equal(
-                        result["build"]["license_bundle"]["sha256"],
-                        cell["license_bundle"]["sha256"]),
-                    f"{result_path}: provider license manifest result digest mismatch")
-            validate_license_bundle(result_path, result, manifest_path)
+            # Promotion additionally requires the retained result to match the
+            # current provider security-update disposition.
+            validate_result(result, spec)
+            cell_security = result["source"].get("security_update")
+            provider_spec = next(provider for provider in spec["providers"]
+                                 if provider["id"] == cell["provider"])
+            require(cell_security == provider_spec["security_update"],
+                    "security-update disposition mismatch")
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -676,6 +943,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--matrix-contract-only", action="store_true")
     parser.add_argument("--expected-revision")
     args = parser.parse_args(argv)
+    repo = Path(__file__).resolve().parents[2]
     try:
         spec = load(args.spec)
         validate_spec(spec)
@@ -689,7 +957,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             matrix = load(args.matrix)
             validate_matrix(matrix, spec)
             if not args.matrix_contract_only:
-                validate_retained_results(matrix, spec, Path(__file__).resolve().parents[2])
+                validate_retained_results(matrix, spec, repo)
+                validate_advisory_review(
+                    load(repo / ADVISORY_REVIEW_PATH), spec, matrix, repo)
         elif args.matrix_contract_only:
             raise ValidationError("--matrix-contract-only requires --matrix")
     except ValidationError as error:

@@ -2,11 +2,54 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
-desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl,
-Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+M0-016 is **BLOCKED** at the full cross-platform task level and no desktop cell
+is currently promotable either. The 2026-10-22 advisory review replaced every
+provider `security_update` object, so all 12 retained desktop results bind a
+superseded disposition and
+`docs/evidence/M0-016/platform-matrix.json` records them as `BLOCKED`.
+`validate_retained_results` still rejects any attempt to promote one of those
+results. A desktop cell returns to PASS or PARTIAL only by rerunning the hosted
+workflow against the requalified pin. The primary sources, per-file advisory
+section counts, review basis, and the superseded cell list are recorded in
+[`advisory-review-2026-10-22.json`](advisory-review-2026-10-22.json).
+
+The reviewed dispositions are:
+
+| Provider | Pin | Disposition | Basis |
+|---|---|---|---|
+| AWS-LC | 5.5.0 `991e67f` | `not-affected` | The patched tags `v1.69.0` (`37d8646`) and `v1.71.0` (`4738958`) are both strict ancestors of the pin; `v1.71.0...v5.5.0` is ahead 195, behind 0, so every advisory fix is contained. |
+| Mbed TLS | 4.2.0 | `affected` | `CVE-2025-66442` affects "All versions of Mbed TLS and TF-PSA-Crypto" and upstream states "No fix is available at this time". |
+| OpenSSL control | 3.6.4 | `affected` | 13 reviewed advisories have no 3.6-line fix before 3.6.5. |
+
+Android, iOS, and HarmonyOS or OpenHarmony still lack native-device evidence;
+cross-compilation does not satisfy those cells. The AWS-LC ancestry proof is
+recorded because `v5.5.0` and `v1.69.0`/`v1.71.0` are different tag schemes and
+their version numbers are not comparable directly.
+
+Full matrix validation fetches the AWS-LC fixed tags and provider pin from
+`https://github.com/aws/aws-lc.git` into a temporary bare repository. It uses
+`--filter=tree:0` and a depth of 512 commits for each ref. The validator
+resolves each tag and checks strict ancestry and the recorded ahead/behind
+counts in the commit graph. Each Git command has a 60-second timeout. The
+validator rejects captured stdout larger than 64 KiB. Fetch, tag, or graph
+mismatches fail validation.
+
+## Advisory ancestry verification
+
+The review validator now checks the real upstream commit graph. The unit suite
+passed 81 tests. Run the live check from the repository root with `TMPDIR`,
+`TMP`, and `TEMP` set to a disk-backed task directory:
+
+```sh
+python3 -m unittest tools.tests.test_tls_provider_poc
+python3 tools/tls_provider_poc/validate.py \
+  --matrix docs/evidence/M0-016/platform-matrix.json
+```
+
+The full matrix command returned `M0-016 validation: PASS`. It resolved both
+patched tags and the pin; the verified counts were 245 ahead/0 behind for
+`v1.69.0` and 195 ahead/0 behind for `v1.71.0`. These checks do not remove the
+native-device or human-approval blockers.
 
 Schema v11 retains all prior native evidence plus the exact successful NASM
 identity for a Windows AWS-LC build. Its workflow fallback is pinned to
@@ -52,7 +95,14 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v11 desktop runs
+## Superseded schema-v11 desktop runs
+
+These runs were valid when captured. The 2026-10-22 advisory review replaced the
+provider `security_update` objects, so every result below now mismatches its pin
+and the matrix marks the corresponding cell `BLOCKED`. The `Status` column
+records the outcome observed at capture time, not a current task outcome.
+Rerunning both hosted workflows against the requalified pin is what restores a
+desktop PASS or PARTIAL.
 
 [TLS Provider PoC run
 33455645644](https://github.com/lIlIIlIll/Wirestack/actions/runs/33455645644)
@@ -90,6 +140,43 @@ The Unix artifacts expire on 2026-11-30. The Windows artifacts expire on
 license payload, matrix digest, normalized build provenance, or source
 identity.
 
+## Current hosted qualification evidence
+
+The latest provider workflows ran on PR #236 head
+`9f7121714e62bc75809efc80916483f7abd596eb`; their `result.json` receipts bind
+GitHub's synthetic pull-request execution revision
+`96c12b9c40ac631c3be05c7e72284f937ad59061`. The exact job IDs, outcomes and
+artifact names are in
+[`hosted-validation-9f712171.json`](hosted-validation-9f712171.json).
+
+- [`TLS Provider PoC` run 40004184226](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184226)
+  and [`M0-016 Windows Provider PoC` run 40004184420](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184420)
+  produced 12 result receipts. The four AWS-LC receipts validate PASS. The
+  eight Mbed TLS/OpenSSL receipts fail closed with
+  `known affected provider pin blocks promotion`.
+- All 12 downloaded receipts were checked with
+  `tools/tls_provider_poc/validate.py --result <receipt> --expected-revision
+  96c12b9c40ac631c3be05c7e72284f937ad59061`. The four AWS-LC results are not
+  copied into or promoted by `platform-matrix.json`; all retained matrix cells
+  remain BLOCKED.
+- [`clean-cangjie-build` run 40004184235](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184235),
+  [`docs build and generation` run 40004184211](https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184211),
+  architecture guard, CodeQL, gate harness and network harness checks pass.
+  Main-documentation deployment is skipped on this non-main run.
+
+The earlier [`hosted-validation-616cf4a.json`](hosted-validation-616cf4a.json)
+and its 77 local provider tests remain bound to source revision
+`616cf4a564db1b36aeeccad33b47848fcc139596`; they are historical, not results
+for PR head `9f712171`. No provider result or license bundle was promoted.
+Native Android, iOS and HarmonyOS/OpenHarmony evidence and human advisory-review
+approval are absent. M0-016 remains **BLOCKED** and PR #236 remains draft.
+
+`tools/tasks/M0-016.json` does not exist. It is not added: the repository's
+unscoped `validate-tasks` gate would then gain a new
+`M0-017 -> M0-016` incomplete-dependency edge, and M0-016 has no sealed
+`evidence.json` acceptance index to declare. The advisory review is instead
+machine-checked by `validate_advisory_review` above.
+
 ## Pinned sources
 
 | Provider | Version | Source identity |
@@ -111,10 +198,26 @@ repository root:
 
     python3 -m unittest tools.tests.test_tls_provider_poc
 
-Matrix validation rehashes every retained result, license manifest, and license
-file. Missing files, path escape, digest drift, unsupported schema, stale
-execution revision, skipped diagnostics presented as PASS, or incomplete
-capabilities presented as PASS all fail validation.
+Matrix validation checks the contract and every retained cell. Every cell that
+still has a retained artifact keeps that result, its SHA-256 and its
+license-bundle manifest binding even while it is `BLOCKED`, so a deleted or
+corrupted historical artifact is detected immediately. A `BLOCKED` cell may
+not drop a binding it previously had, and a cell with no artifact may not
+claim one.
+
+A promoted cell (PASS or PARTIAL) additionally reruns the full result contract:
+missing files, path escape, digest drift, unsupported schema, stale execution
+revision, skipped diagnostics presented as PASS, an incomplete capability set
+presented as PASS, a bound `security_update` object that no longer matches the
+reviewed disposition, and a known affected provider pin are all rejected.
+
+`validate_advisory_review` binds
+[`advisory-review-2026-10-22.json`](advisory-review-2026-10-22.json) to
+`providers.json` and this matrix by digest. It checks per-provider pin, version
+and archive identity, the disposition status and affected sets against
+`providers.json`, that the AWS-LC ancestry proof covers every advisory fix tag
+with `behind=0`, and that the superseded-cell list equals the matrix's retained
+cells exactly.
 
 ## Evidence rules
 

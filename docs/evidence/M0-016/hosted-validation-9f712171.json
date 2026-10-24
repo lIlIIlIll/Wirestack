@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-016",
+  "captured_at": "2026-10-24",
+  "decision": "BLOCKED",
+  "pr_head_revision": "9f7121714e62bc75809efc80916483f7abd596eb",
+  "execution_revision": "96c12b9c40ac631c3be05c7e72284f937ad59061",
+  "note": "Provider jobs ran for pull-request head 9f7121714e62bc75809efc80916483f7abd596eb and their result.json receipts bind GitHub's synthetic PR execution revision 96c12b9c40ac631c3be05c7e72284f937ad59061. All 12 downloaded result receipts were checked with tools/tls_provider_poc/validate.py --result <receipt> --expected-revision 96c12b9c40ac631c3be05c7e72284f937ad59061.",
+  "hosted": {
+    "linux_macos_provider_matrix": {
+      "run_id": 40004184226,
+      "conclusion": "FAILURE",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184226",
+      "validate_contract_job": { "job_id": 120587764228, "conclusion": "SUCCESS" },
+      "cells": {
+        "linux-glibc (aws-lc)": { "job_id": 120587864325, "conclusion": "SUCCESS", "receipt_validation": "PASS" },
+        "linux-glibc (mbedtls)": { "job_id": 120587864187, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" },
+        "linux-glibc (openssl)": { "job_id": 120587864214, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" },
+        "linux-musl (aws-lc)": { "job_id": 120587864155, "conclusion": "SUCCESS", "receipt_validation": "PASS" },
+        "linux-musl (mbedtls)": { "job_id": 120587864168, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" },
+        "linux-musl (openssl)": { "job_id": 120587864159, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" },
+        "macos-arm64 (aws-lc)": { "job_id": 120587864190, "conclusion": "SUCCESS", "receipt_validation": "PASS" },
+        "macos-arm64 (mbedtls)": { "job_id": 120587864195, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" },
+        "macos-arm64 (openssl)": { "job_id": 120587864224, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" }
+      },
+      "artifacts": [
+        "m0-016-linux-glibc-aws-lc",
+        "m0-016-linux-glibc-mbedtls",
+        "m0-016-linux-glibc-openssl",
+        "m0-016-linux-musl-aws-lc",
+        "m0-016-linux-musl-mbedtls",
+        "m0-016-linux-musl-openssl",
+        "m0-016-macos-arm64-aws-lc",
+        "m0-016-macos-arm64-mbedtls",
+        "m0-016-macos-arm64-openssl"
+      ]
+    },
+    "windows_provider_matrix": {
+      "run_id": 40004184420,
+      "conclusion": "FAILURE",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184420",
+      "cells": {
+        "windows-x86-64 (aws-lc)": { "job_id": 120587764113, "conclusion": "SUCCESS", "receipt_validation": "PASS" },
+        "windows-x86-64 (mbedtls)": { "job_id": 120587764544, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" },
+        "windows-x86-64 (openssl)": { "job_id": 120587764755, "conclusion": "FAILURE", "receipt_validation": "FAIL: known affected provider pin blocks promotion" }
+      },
+      "artifacts": [
+        "m0-016-windows-x86-64-aws-lc-96c12b9c40ac631c3be05c7e72284f937ad59061",
+        "m0-016-windows-x86-64-mbedtls-96c12b9c40ac631c3be05c7e72284f937ad59061",
+        "m0-016-windows-x86-64-openssl-96c12b9c40ac631c3be05c7e72284f937ad59061"
+      ]
+    },
+    "clean_cangjie_build": {
+      "run_id": 40004184235,
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184235"
+    },
+    "docs_build_and_generation": {
+      "run_id": 40004184211,
+      "conclusion": "SUCCESS",
+      "deploy_latest_main_documentation": "SKIPPED",
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/40004184211"
+    },
+    "architecture_guard": { "run_id": 40004184361, "conclusion": "SUCCESS" },
+    "codeql": { "run_id": 40004181344, "conclusion": "SUCCESS" },
+    "gate_and_network_harnesses": "SUCCESS"
+  },
+  "result_summary": {
+    "aws_lc_receipts": { "total": 4, "validation_pass": 4 },
+    "mbedtls_receipts": { "total": 4, "validation_fail_policy": 4 },
+    "openssl_receipts": { "total": 4, "validation_fail_policy": 4 },
+    "platform_matrix_promotions": 0
+  },
+  "blockers": [
+    "The eight Mbed TLS 4.2.0 and OpenSSL 3.6.4 cells fail closed because the reviewed pins are affected; none is promoted.",
+    "The four current AWS-LC receipts validate, but the committed platform matrix still retains all 12 superseded cells as BLOCKED and no promotion is recorded.",
+    "Native Android, iOS, and HarmonyOS/OpenHarmony evidence remains absent; cross-compilation is insufficient.",
+    "No human advisory-review approval is recorded."
+  ]
+}
