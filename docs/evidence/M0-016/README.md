@@ -26,6 +26,31 @@ cross-compilation does not satisfy those cells. The AWS-LC ancestry proof is
 recorded because `v5.5.0` and `v1.69.0`/`v1.71.0` are different tag schemes and
 their version numbers are not comparable directly.
 
+Full matrix validation fetches the AWS-LC fixed tags and provider pin from
+`https://github.com/aws/aws-lc.git` into a temporary bare repository. It uses
+`--filter=tree:0` and a depth of 512 commits for each ref. The validator
+resolves each tag and checks strict ancestry and the recorded ahead/behind
+counts in the commit graph. Each Git command has a 60-second timeout. The
+validator rejects captured stdout larger than 64 KiB. Fetch, tag, or graph
+mismatches fail validation.
+
+## Advisory ancestry verification
+
+The review validator now checks the real upstream commit graph. The unit suite
+passed 81 tests. Run the live check from the repository root with `TMPDIR`,
+`TMP`, and `TEMP` set to a disk-backed task directory:
+
+```sh
+python3 -m unittest tools.tests.test_tls_provider_poc
+python3 tools/tls_provider_poc/validate.py \
+  --matrix docs/evidence/M0-016/platform-matrix.json
+```
+
+The full matrix command returned `M0-016 validation: PASS`. It resolved both
+patched tags and the pin; the verified counts were 245 ahead/0 behind for
+`v1.69.0` and 195 ahead/0 behind for `v1.71.0`. These checks do not remove the
+native-device or human-approval blockers.
+
 Schema v11 retains all prior native evidence plus the exact successful NASM
 identity for a Windows AWS-LC build. Its workflow fallback is pinned to
 Chocolatey package `nasm` 2.16.3. The current hosted image supplied NASM

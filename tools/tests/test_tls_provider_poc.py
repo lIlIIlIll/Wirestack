@@ -264,6 +264,74 @@ class ProviderPocValidationTests(unittest.TestCase):
         cls.spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
         cls.matrix = json.loads((ROOT / "docs/evidence/M0-016/platform-matrix.json").read_text())
 
+    def _advisory_review_fixture(self):
+        return json.loads(
+            (ROOT / validator.ADVISORY_REVIEW_PATH).read_text(encoding="utf-8"))
+
+    def _git_ancestry_outputs(self, review):
+        aws_lc = next(provider for provider in self.spec["providers"]
+                      if provider["id"] == "aws-lc")
+        outputs = ["", "", aws_lc["commit"]]
+        for item in review["dispositions"]["aws-lc"]["ancestry"]:
+            outputs.extend([
+                item["patched_commit"],
+                f"{item['behind_patched']}\t{item['ahead_of_patched']}",
+            ])
+        return outputs
+
+    def test_advisory_review_verifies_upstream_tag_and_commit_ancestry(self):
+        review = self._advisory_review_fixture()
+        with mock.patch.object(
+                validator, "_run_git",
+                side_effect=self._git_ancestry_outputs(review)) as git:
+            validator.validate_advisory_review(review, self.spec, self.matrix, ROOT)
+        self.assertEqual(3 + 2 * len(review["dispositions"]["aws-lc"]["ancestry"]),
+                         git.call_count)
+        fetch_args = git.call_args_list[1].args[1]
+        self.assertIn("https://github.com/aws/aws-lc.git", fetch_args)
+        self.assertIn("--filter=tree:0", fetch_args)
+        self.assertIn("--depth=512", fetch_args)
+        for item in review["dispositions"]["aws-lc"]["ancestry"]:
+            self.assertIn(
+                f"+refs/tags/{item['patched_tag']}:refs/wirestack/tags/{item['patched_tag']}",
+                fetch_args)
+
+    def test_advisory_review_rejects_unrelated_claimed_tag_commit(self):
+        review = self._advisory_review_fixture()
+        item = review["dispositions"]["aws-lc"]["ancestry"][0]
+        actual_commit = item["patched_commit"]
+        item["patched_commit"] = "d" * 40
+        outputs = self._git_ancestry_outputs(review)
+        outputs[3] = actual_commit
+        with mock.patch.object(validator, "_run_git", side_effect=outputs):
+            with self.assertRaisesRegex(
+                    validator.ValidationError,
+                    "patched tag does not resolve to the recorded commit"):
+                validator.validate_advisory_review(
+                    review, self.spec, self.matrix, ROOT)
+
+    def test_advisory_review_rejects_diverged_upstream_graph(self):
+        review = self._advisory_review_fixture()
+        outputs = self._git_ancestry_outputs(review)
+        outputs[4] = "1\t244"
+        with mock.patch.object(validator, "_run_git", side_effect=outputs):
+            with self.assertRaisesRegex(
+                    validator.ValidationError,
+                    "patched tag is not a strict ancestor"):
+                validator.validate_advisory_review(
+                    review, self.spec, self.matrix, ROOT)
+
+    def test_advisory_review_rejects_unapproved_source_repository(self):
+        review = self._advisory_review_fixture()
+        spec = copy.deepcopy(self.spec)
+        next(provider for provider in spec["providers"]
+             if provider["id"] == "aws-lc")["url"] = "https://example.test/fork.git"
+        with mock.patch.object(validator, "_run_git") as git:
+            with self.assertRaisesRegex(
+                    validator.ValidationError, "source repository mismatch"):
+                validator.validate_advisory_review(review, spec, self.matrix, ROOT)
+        git.assert_not_called()
+
     def test_canonical_spec_and_matrix_reject_stale_license_digests(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)

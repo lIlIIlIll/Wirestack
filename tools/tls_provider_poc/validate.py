@@ -7,7 +7,7 @@ if __package__ in {None, ""}:
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools import evidence_digest
-import argparse, datetime as dt, json, re, sys
+import argparse, datetime as dt, json, os, re, subprocess, sys, tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -48,6 +48,10 @@ ADVISORY_DISPOSITIONS = {"not-affected", "affected"}
 ADVISORY_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$")
 ADVISORY_VERSION_RE = re.compile(r"^v[0-9]+(?:\.[0-9]+)+$")
 ADVISORY_REVIEW_PATH = Path("docs/evidence/M0-016/advisory-review-2026-10-22.json")
+AWS_LC_REPOSITORY_URL = "https://github.com/aws/aws-lc.git"
+MAX_GIT_OUTPUT_BYTES = 64 * 1024
+MAX_ANCESTRY_DEPTH = 512
+GIT_TIMEOUT_SECONDS = 60
 
 class ValidationError(RuntimeError):
     pass
@@ -620,6 +624,88 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
     require(observed_bytes == info["total_bytes"],
             "provider license bundle total bytes mismatch")
 
+def _run_git(git_dir: Path | None, arguments: Sequence[str]) -> str:
+    command = ["git", "-c", "protocol.version=2"]
+    if git_dir is not None:
+        command.append(f"--git-dir={git_dir}")
+    command.extend(arguments)
+    environment = os.environ.copy()
+    environment.update({
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TERMINAL_PROMPT": "0",
+        "GIT_LFS_SKIP_SMUDGE": "1",
+    })
+    environment.pop("LD_LIBRARY_PATH", None)
+    try:
+        result = subprocess.run(
+            command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, env=environment,
+            timeout=GIT_TIMEOUT_SECONDS, check=False)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ValidationError("aws-lc: bounded upstream git verification failed") from error
+    require(result.returncode == 0,
+            "aws-lc: upstream git ancestry verification failed")
+    require(len(result.stdout) <= MAX_GIT_OUTPUT_BYTES,
+            "aws-lc: upstream git output exceeds its bound")
+    try:
+        return result.stdout.decode("ascii").strip()
+    except UnicodeDecodeError as error:
+        raise ValidationError("aws-lc: upstream git output is invalid") from error
+
+def _verify_aws_lc_tag_ancestry(ancestry: Sequence[Mapping[str, Any]],
+                                pinned_tag: str, pinned_commit: str) -> None:
+    require(ADVISORY_VERSION_RE.fullmatch(pinned_tag) is not None,
+            "aws-lc: pinned source tag is invalid")
+    tags = {pinned_tag}
+    for item in ancestry:
+        tag = str(item.get("patched_tag", ""))
+        require(ADVISORY_VERSION_RE.fullmatch(tag) is not None,
+                "aws-lc: patched source tag is invalid")
+        tags.add(tag)
+
+    with tempfile.TemporaryDirectory(prefix="wirestack-aws-lc-") as directory:
+        git_dir = Path(directory) / "repo.git"
+        _run_git(None, ["init", "--bare", "--quiet", str(git_dir)])
+        refspecs = [
+            f"+refs/tags/{tag}:refs/wirestack/tags/{tag}"
+            for tag in sorted(tags)
+        ]
+        _run_git(git_dir, [
+            "fetch", "--quiet", "--filter=tree:0",
+            f"--depth={MAX_ANCESTRY_DEPTH}", "--no-tags",
+            AWS_LC_REPOSITORY_URL, *refspecs,
+        ])
+        pin_ref = f"refs/wirestack/tags/{pinned_tag}"
+        fetched_pin = _run_git(git_dir, ["rev-parse", f"{pin_ref}^{{commit}}"])
+        require(fetched_pin == pinned_commit,
+                "aws-lc: pinned source tag does not resolve to provider commit")
+        for item in ancestry:
+            tag = str(item["patched_tag"])
+            patched_commit = str(item["patched_commit"])
+            ahead = item.get("ahead_of_patched")
+            behind = item.get("behind_patched")
+            require(type(ahead) is int and 0 < ahead < MAX_ANCESTRY_DEPTH and
+                    type(behind) is int and behind == 0,
+                    "aws-lc: recorded ancestry count is outside its bound")
+            tag_ref = f"refs/wirestack/tags/{tag}"
+            fetched_patch = _run_git(
+                git_dir, ["rev-parse", f"{tag_ref}^{{commit}}"])
+            require(fetched_patch == patched_commit,
+                    "aws-lc: patched tag does not resolve to the recorded commit")
+            counts = _run_git(
+                git_dir, ["rev-list", "--left-right", "--count",
+                          f"{tag_ref}^{{commit}}...{pin_ref}^{{commit}}"])
+            values = counts.split()
+            require(len(values) == 2 and all(value.isdecimal() for value in values),
+                    "aws-lc: upstream ancestry count output is invalid")
+            actual_behind, actual_ahead = (int(value) for value in values)
+            require(actual_behind == 0 and actual_ahead > 0,
+                    "aws-lc: patched tag is not a strict ancestor of the provider pin")
+            require(actual_ahead == ahead and actual_behind == behind,
+                    "aws-lc: recorded ancestry counts do not match the upstream graph")
+
+
 def validate_advisory_review(review: Mapping[str, Any], spec: Mapping[str, Any],
                              matrix: Mapping[str, Any], repo: Path) -> None:
     """Bind the review document to the provider spec and the evidence matrix."""
@@ -717,16 +803,21 @@ def validate_advisory_review(review: Mapping[str, Any], spec: Mapping[str, Any],
             require(sorted(item.get("patched_tag") for item in ancestry) ==
                     sorted({str(item["fixed_in"]) for item in advisories}),
                     f"{provider_id}: advisory ancestry coverage")
+            require(provider.get("url") == AWS_LC_REPOSITORY_URL,
+                    "aws-lc: advisory source repository mismatch")
             for item in ancestry:
                 require(COMMIT_RE.fullmatch(str(item.get("patched_commit", ""))) is not None,
                         f"{provider_id}: ancestry commit")
-                require(item.get("behind_patched") == 0,
+                require(type(item.get("behind_patched")) is int and
+                        item["behind_patched"] == 0,
                         f"{provider_id}: ancestry behind count")
-                require(isinstance(item.get("ahead_of_patched"), int) and
-                        item["ahead_of_patched"] > 0,
-                        f"{provider_id}: ancestry ahead count")
+                ahead = item.get("ahead_of_patched")
+                require(type(ahead) is int and 0 < ahead < MAX_ANCESTRY_DEPTH,
+                        "aws-lc: ancestry ahead count outside its bound")
             require(disposition["status"] == "not-affected",
                     f"{provider_id}: ancestry proof requires a not-affected pin")
+            _verify_aws_lc_tag_ancestry(
+                ancestry, str(provider["tag"]), str(provider["commit"]))
         else:
             require(source.get("reviewed_advisory_ids") == reviewed,
                     f"{provider_id}: reviewed advisory inventory")
