@@ -15,7 +15,11 @@
     "branch": "fix/P1-012-task-dependency-scope",
     "commit": "5c37650511b542b2671b1ba76823189521c6ee27",
     "included_in_local_pr_216_ancestry": true,
-    "status": "Integrated in local #216 ancestry; #220 remains a separate draft PR and no merge is claimed."
+    "included_in_pushed_pr_216_ancestry": true,
+    "pr_216_head": "19da6e4b44974dff19aa1c2d1dd1366761eea9d2",
+    "commit_is_ancestor_of_pr_216_head": true,
+    "pr_220_state": "OPEN/DRAFT",
+    "status": "P1-012 is included in pushed #216 ancestry; #220 remains a separate draft PR and no merge is claimed."
   },
   "provider_source": {
     "name": "AWS-LC",
@@ -229,8 +233,19 @@
   },
   "result": "M10-002 remains BLOCKED: its direct dependency M9-001 is BLOCKED; the complete native suite and repository-wide check also fail, despite successful focused resource profiles, build/check, and strict docs. No platform-native network qualification or release qualification is claimed.",
   "pr_state": {
-    "pr_216": "Keep OPEN and DRAFT; do not mark ready or merge.",
-    "issue_174": "Keep open and unchanged.",
-    "issue_175": "Keep open and unchanged; M10-003 has not started."
+    "pr_216": {
+      "state": "OPEN",
+      "draft": true,
+      "head_sha": "19da6e4b44974dff19aa1c2d1dd1366761eea9d2",
+      "description": "REFRESHED",
+      "updated_at_utc": "2026-10-29T14:45:09Z"
+    },
+    "pr_220": {
+      "state": "OPEN",
+      "draft": true,
+      "head_sha": "5c37650511b542b2671b1ba76823189521c6ee27"
+    },
+    "issue_174": "OPEN and unchanged",
+    "issue_175": "OPEN and unchanged; M10-003 has not started"
   }
 }
