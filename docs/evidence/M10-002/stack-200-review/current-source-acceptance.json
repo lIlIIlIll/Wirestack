@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "tested_source_revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
+  "status": "BLOCKED",
+  "scope": "Current #216 source acceptance, including Q4 buffer-lease-before-flow-control-permit ordering and the integrated P1-012 dependency-scope correction.",
+  "platform": "linux-x86_64-glibc",
+  "toolchain": {
+    "cangjie_sdk": "1.1.3 STS",
+    "cjpm": "1.1.3",
+    "cjdoc": "0.7.2"
+  },
+  "stack_integration": {
+    "pull_request": 220,
+    "branch": "fix/P1-012-task-dependency-scope",
+    "commit": "5c37650511b542b2671b1ba76823189521c6ee27",
+    "included_in_local_pr_216_ancestry": true,
+    "status": "Integrated in local #216 ancestry; #220 remains a separate draft PR and no merge is claimed."
+  },
+  "provider_source": {
+    "name": "AWS-LC",
+    "version": "5.5.0",
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478"
+  },
+  "acceptance_commands": [
+    {
+      "id": "architecture-guard",
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "architecture guard: PASS"
+    },
+    {
+      "id": "network-capability-contract",
+      "command": "python3 tools/check_network_capabilities.py --check",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "86 contract rows pass; native platform evidence is NOT_RUN and is not qualified by this check."
+    },
+    {
+      "id": "cjpm-check",
+      "command": "cjpm check",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "cjpm check success with the pinned AWS-LC source override."
+    },
+    {
+      "id": "cjpm-build",
+      "command": "cjpm build",
+      "exit_code": 0,
+      "status": "PASS",
+      "result": "cjpm build success with the pinned AWS-LC source override."
+    },
+    {
+      "id": "full-native-regression",
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "status": "FAIL_INTERMITTENT",
+      "runs": [
+        {
+          "run": 1,
+          "exit_code": 1,
+          "total": 1114,
+          "passed": 1085,
+          "skipped": 28,
+          "errors": 1,
+          "failed": 0,
+          "first_failure": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill timed out; stderr reported HTTP/2 connection pool closed."
+        },
+        {
+          "run": 2,
+          "exit_code": 1,
+          "total": 1114,
+          "passed": 1085,
+          "skipped": 28,
+          "errors": 0,
+          "failed": 1,
+          "first_failure": "HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission asserted secondRejected == true."
+        }
+      ],
+      "isolated_replays": [
+        {
+          "command": "cjpm test --filter='Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill' --parallel 1 --no-progress --no-color src/internal/http1",
+          "exit_code": 0,
+          "passed": 1,
+          "skipped": 173,
+          "errors": 0,
+          "failed": 0
+        },
+        {
+          "command": "cjpm test --filter='HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission' --parallel 1 --no-progress --no-color src/http",
+          "exit_code": 0,
+          "passed": 1,
+          "skipped": 165,
+          "errors": 0,
+          "failed": 0
+        }
+      ],
+      "result": "The full native suite did not pass in either run; two distinct failures occurred. Isolated replays passed but do not replace the full-suite acceptance gate."
+    },
+    {
+      "id": "resource-profile-nofile-64",
+      "command": "bash -c 'ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-data-1g",
+      "command": "bash -c 'ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-as-4g",
+      "command": "bash -c 'ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2'",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "resource-profile-single-cpu",
+      "command": "taskset -c 0 cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 219,
+      "passed": 219,
+      "skipped": 0,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "id": "documentation-check",
+      "command": "env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "exit_code": 0,
+      "status": "PASS",
+      "cjdoc": "0.7.2",
+      "symbols": {
+        "documented": 1873,
+        "total": 1873
+      },
+      "parameters": {
+        "documented": 950,
+        "total": 950
+      },
+      "docs_sha256": "5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099"
+    },
+    {
+      "id": "repository-check",
+      "command": "scripts/check",
+      "exit_code": 1,
+      "status": "FAIL",
+      "tests_total": 584,
+      "failures": 24,
+      "errors": 16,
+      "skipped": 4,
+      "failure_families": [
+        {
+          "owner": "M0-016",
+          "family": "stale AWS-LC advisory disposition masks provider validation assertions",
+          "failures": 19,
+          "errors": 6
+        },
+        {
+          "owner": "M3-031",
+          "family": "desktop provider fixtures and expected validation order",
+          "failures": 4,
+          "errors": 2
+        },
+        {
+          "owner": "M7-030",
+          "family": "release/evidence tests require the absent frozen release artifact",
+          "failures": 0,
+          "errors": 8
+        },
+        {
+          "owner": "M12-002",
+          "family": "platform-support source digest mismatch",
+          "failures": 1,
+          "errors": 0
+        }
+      ],
+      "task_graph": "The M7 task-graph tests pass after restoring the required issue links and marking M12-002 BLOCKED."
+    },
+    {
+      "id": "task-graph-status-regression",
+      "command": "python3 -m unittest tools.tests.test_m7_linux_task_graph -v",
+      "exit_code": 0,
+      "status": "PASS",
+      "tests": 6
+    }
+  ],
+  "task_gate": {
+    "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current.json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "commands": [],
+    "issues": [
+      {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "M10-002 dependency is not COMPLETE: M9-001"
+      }
+    ]
+  },
+  "repository_task_validation": {
+    "command": "python3 tools/repository/repository_tooling.py --root . validate-tasks --json --output docs/evidence/M10-002/stack-200-review/validate-tasks-current.json",
+    "exit_code": 2,
+    "status": "INVALID",
+    "issues": [
+      {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "M10-001 dependency is not COMPLETE: M9-001"
+      }
+    ]
+  },
+  "result": "M10-002 remains BLOCKED: its direct dependency M9-001 is BLOCKED; the complete native suite and repository-wide check also fail, despite successful focused resource profiles, build/check, and strict docs. No platform-native network qualification or release qualification is claimed.",
+  "pr_state": {
+    "pr_216": "Keep OPEN and DRAFT; do not mark ready or merge.",
+    "issue_174": "Keep open and unchanged.",
+    "issue_175": "Keep open and unchanged; M10-003 has not started."
+  }
+}

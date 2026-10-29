@@ -1,0 +1,12 @@
+{
+  "issues": [
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "M10-001 dependency is not COMPLETE: M9-001"
+    }
+  ],
+  "kind": "task-contract-validation",
+  "schema_version": 1,
+  "status": "INVALID",
+  "task_ids": []
+}
