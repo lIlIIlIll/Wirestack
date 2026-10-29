@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Sequence
 from unittest import mock
 
 from tools.evidence_digest import text_evidence_digest
@@ -44,8 +45,19 @@ class RepositoryToolingTests(unittest.TestCase):
         )
 
 
-    def write_planning(self, statuses: dict[str, str]) -> None:
-        rows = "\n".join(f"| {task_id} | task | source | condition |" for task_id in statuses)
+    def write_planning(self, statuses: dict[str, str],
+                       dependencies: dict[str, str] | None = None,
+                       *, backlog_only: Sequence[str] = ()) -> None:
+        backlog_rows = list(statuses) + [task_id for task_id in backlog_only if task_id not in statuses]
+        if dependencies is None:
+            rows = "\n".join(f"| {task_id} | task | source | condition |" for task_id in backlog_rows)
+        else:
+            header = "| ID | task | area | complexity | 依赖 | trace | condition |"
+            cells = "\n".join(
+                f"| {task_id} | task | area | C1 | {dependencies.get(task_id, '—')} | PRD | condition |"
+                for task_id in backlog_rows
+            )
+            rows = f"{header}\n{cells}"
         (self.root / "docs/planning/implementation-backlog.md").write_text(rows + "\n", encoding="utf-8")
         status_rows = "\n".join(f"| {task_id} | {status} | evidence | note |" for task_id, status in statuses.items())
         (self.root / "docs/planning/status.md").write_text(status_rows + "\n", encoding="utf-8")
@@ -291,26 +303,164 @@ class RepositoryToolingTests(unittest.TestCase):
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
 
     def test_selected_task_rejects_incomplete_plan_only_transitive_leaf(self) -> None:
-        self.write_planning({
-            "TEST-001": "READY",
-            "MID-001": "COMPLETE",
-            "LEAF-001": "BLOCKED",
-        })
+        self.write_planning(
+            {
+                "TEST-001": "READY",
+                "MID-001": "COMPLETE",
+                "LEAF-001": "BLOCKED",
+            },
+            {"MID-001": "LEAF-001"},
+        )
         self.write_manifest(self.manifest("TEST-001", ["MID-001"]))
-        self.write_manifest(self.manifest("MID-001", ["LEAF-001"]))
 
         with self.assertRaises(tooling.ContractError) as caught:
             tooling.validate_repository_tasks(self.root, "TEST-001")
         self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
         self.assertIn("LEAF-001", caught.exception.detail)
 
-    def test_selected_task_evidence_passes_while_unrelated_task_blocks_global(self) -> None:
-        self.write_planning({
-            "TEST-001": "READY",
-            "BASE-001": "COMPLETE",
-            "OTHER-001": "READY",
-            "BLOCKED-001": "BLOCKED",
-        })
+    def test_selected_task_walks_complete_plan_only_dependency_to_incomplete_ancestor(self) -> None:
+        self.write_planning(
+            {
+                "TEST-001": "READY",
+                "PLAN-001": "COMPLETE",
+                "MID-002": "COMPLETE",
+                "BASE-001": "COMPLETE",
+                "BASE-002": "BLOCKED",
+            },
+            {
+                "PLAN-001": "MID-002",
+                "MID-002": "BASE-001..BASE-002",
+            },
+        )
+        self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        self.assertIn("BASE-002", caught.exception.detail)
+
+        report = tooling.check(self.root, "task", "TEST-001")
+        self.assertEqual("INVALID", report["status"])
+        self.assertEqual([], report["commands"])
+        self.assertIn("BASE-002", report["issues"][0]["detail"])
+
+    def test_selected_task_traverses_plan_only_row_absent_from_status(self) -> None:
+        self.write_planning(
+            {
+                "TEST-001": "READY",
+                "MID-001": "COMPLETE",
+                "BASE-002": "BLOCKED",
+            },
+            {
+                "MID-001": "PLAN-001",
+                "PLAN-001": "BASE-002",
+            },
+            backlog_only=["PLAN-001"],
+        )
+        self.write_manifest(self.manifest("TEST-001", ["MID-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_INCOMPLETE", caught.exception.code)
+        self.assertTrue(caught.exception.detail.endswith("BASE-002"), caught.exception.detail)
+
+    def test_plan_only_exact_dependency_requires_backlog_row(self) -> None:
+        self.write_planning(
+            {
+                "TEST-001": "READY",
+                "PLAN-001": "COMPLETE",
+            },
+            {"PLAN-001": "MISS-001"},
+        )
+        self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_MISSING", caught.exception.code)
+        self.assertIn("MISS-001", caught.exception.detail)
+
+    def test_plan_only_ranges_reject_invalid_numeric_and_milestone_ranges(self) -> None:
+        cases = (
+            ("BASE-001..MID-001", "DEPENDENCY_INVALID", "crosses prefixes"),
+            ("BASE-003..BASE-001", "DEPENDENCY_INVALID", "descends"),
+            ("M6..M1", "DEPENDENCY_INVALID", "descends"),
+            ("BASE-001..BASE-003", "DEPENDENCY_MISSING", "BASE-002"),
+        )
+        for cell, expected_code, expected_detail in cases:
+            with self.subTest(cell=cell):
+                self.write_planning(
+                    {
+                        "TEST-001": "READY",
+                        "PLAN-001": "COMPLETE",
+                        "BASE-001": "COMPLETE",
+                        "BASE-003": "COMPLETE",
+                    },
+                    {"PLAN-001": cell},
+                )
+                self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+
+                with self.assertRaises(tooling.ContractError) as caught:
+                    tooling.validate_repository_tasks(self.root, "TEST-001")
+                self.assertEqual(expected_code, caught.exception.code)
+                self.assertIn(expected_detail, caught.exception.detail)
+
+    def test_plan_only_ranges_expand_complete_member_sets(self) -> None:
+        self.write_planning(
+            {
+                "TEST-001": "READY",
+                "PLAN-001": "COMPLETE",
+                "BASE-001": "COMPLETE",
+                "BASE-002": "COMPLETE",
+                "BASE-003": "COMPLETE",
+            },
+            {"PLAN-001": "BASE-001..BASE-002,BASE-002..BASE-003"},
+        )
+        self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+
+        self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root, "TEST-001"))
+
+    def test_selected_task_rejects_mixed_cycle_through_plan_only_row(self) -> None:
+        self.write_planning(
+            {
+                "TEST-001": "COMPLETE",
+                "PLAN-001": "COMPLETE",
+                "PLAN-002": "COMPLETE",
+            },
+            {
+                "PLAN-001": "PLAN-002",
+                "PLAN-002": "TEST-001",
+            },
+        )
+        self.write_manifest(self.manifest("TEST-001", ["PLAN-001"]))
+
+        # The manifest-only graph is acyclic, so global validation still sees
+        # only the manifest edge and accepts it.
+        self.assertIn("TEST-001", tooling.validate_repository_tasks(self.root))
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_repository_tasks(self.root, "TEST-001")
+        self.assertEqual("DEPENDENCY_CYCLE", caught.exception.code)
+        self.assertEqual(
+            "TEST-001 -> PLAN-001 -> PLAN-002 -> TEST-001",
+            caught.exception.detail,
+        )
+
+        report = tooling.check(self.root, "task", "TEST-001")
+        self.assertEqual("INVALID", report["status"])
+        self.assertEqual([], report["commands"])
+        self.assertEqual("DEPENDENCY_CYCLE", report["issues"][0]["code"])
+
+    def test_selected_evidence_ignores_unrelated_bad_plan_cell(self) -> None:
+        self.write_planning(
+            {
+                "TEST-001": "READY",
+                "BASE-001": "COMPLETE",
+                "OTHER-001": "READY",
+                "BLOCKED-001": "BLOCKED",
+                "PLAN-009": "COMPLETE",
+                "BASE-003": "COMPLETE",
+            },
+            {"PLAN-009": "BASE-003..BASE-001"},
+        )
         self.write_manifest(self.manifest("OTHER-001", ["BLOCKED-001"]))
         self.evidence()
 
