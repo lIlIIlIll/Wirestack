@@ -470,7 +470,7 @@
     "head_branch": "fix/M10-002-resource-owner-backpressure",
     "head_sha_at_description_refresh": "19da6e4b44974dff19aa1c2d1dd1366761eea9d2",
     "tested_source_revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
-    "tested_source_is_ancestor_of_description_refresh_head": true,
+    "tested_production_source_matches_description_refresh_head": true,
     "historical_previous_reviewed_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
     "body_status": "CURRENT_FOR_TESTED_SOURCE_REVISION",
     "description_updated_at_utc": "2026-10-29T14:45:09Z",
