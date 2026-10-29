@@ -1,0 +1,14 @@
+{
+  "commands": [],
+  "issues": [
+    {
+      "code": "DEPENDENCY_INCOMPLETE",
+      "detail": "M10-004 dependency is not COMPLETE: M10-003"
+    }
+  ],
+  "kind": "repository-check",
+  "mode": "full",
+  "schema_version": 1,
+  "status": "INVALID",
+  "task_id": null
+}

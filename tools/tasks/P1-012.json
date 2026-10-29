@@ -45,8 +45,7 @@
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [
     "docs/evidence/P1-012/evidence.json",
-    "docs/evidence/P1-012/task-check.json",
-    "docs/evidence/P1-012/full-check.json"
+    "docs/evidence/P1-012/test-plan-validation.json"
   ],
   "schema_version": 1,
   "source_paths": [
