@@ -464,18 +464,18 @@
   },
   "pr_description": {
     "status": "REFRESHED",
-    "state": "OPEN",
-    "draft": true,
+    "state_at_description_refresh": "OPEN",
+    "draft_at_description_refresh": true,
     "base_branch": "fix/M10-001-terminal-deadline-checks",
     "head_branch": "fix/M10-002-resource-owner-backpressure",
-    "head_sha": "19da6e4b44974dff19aa1c2d1dd1366761eea9d2",
+    "head_sha_at_description_refresh": "19da6e4b44974dff19aa1c2d1dd1366761eea9d2",
     "tested_source_revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
-    "tested_source_is_ancestor_of_head": true,
+    "tested_source_is_ancestor_of_description_refresh_head": true,
     "historical_previous_reviewed_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
-    "body_status": "CURRENT_FOR_PUSHED_HEAD",
-    "updated_at_utc": "2026-10-29T14:45:09Z",
+    "body_status": "CURRENT_FOR_TESTED_SOURCE_REVISION",
+    "description_updated_at_utc": "2026-10-29T14:45:09Z",
     "p1_012_dependency_commit": "5c37650511b542b2671b1ba76823189521c6ee27",
-    "p1_012_commit_is_ancestor_of_head": true
+    "p1_012_commit_is_ancestor_of_description_refresh_head": true
   },
   "full_suite_stability": {
     "tested_source_revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
