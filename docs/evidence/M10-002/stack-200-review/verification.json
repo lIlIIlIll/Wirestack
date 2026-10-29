@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M10-002",
-  "revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+  "revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
   "status": "BLOCKED",
   "acceptance_status": "BLOCKED",
   "scope": "Current-source M10-002 acceptance, including PR #216 Q4 outbound HTTP/2 DATA buffer-before-flow-control ordering.",
@@ -11,7 +11,8 @@
     "cjpm": "1.1.3",
     "cjdoc": "0.7.2"
   },
-  "checks": [
+  "current_source_acceptance": "docs/evidence/M10-002/stack-200-review/current-source-acceptance.json",
+  "historical_checks": [
     {
       "id": "architecture-guard",
       "command": "python3 tools/architecture_guard.py --root . --format text",
@@ -183,20 +184,20 @@
       "note": "Re-run after the P1-012 CLI regression update. The gate still fails in the initial tooling unittest stage before scripts/check-code; the same five unrelated owner families remain. No stale security disposition, historical artifact, task-status, or foreign-task fixture was rewritten."
     }
   ],
-  "repository_check_diagnostic": "docs/evidence/M10-002/stack-200-review/repository-check-diagnostic.json",
+  "historical_repository_check_diagnostic": "docs/evidence/M10-002/stack-200-review/repository-check-diagnostic.json",
   "task_gate": {
     "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current.json",
     "exit_code": 2,
     "status": "INVALID",
     "report": "docs/evidence/M10-002/stack-200-review/task-check-current.json",
+    "commands": [],
     "issues": [
       {
         "code": "DEPENDENCY_INCOMPLETE",
-        "detail": "P1-013 dependency is not COMPLETE: P1-012"
+        "detail": "M10-002 dependency is not COMPLETE: M9-001"
       }
     ],
-    "shared_validator_revision": "e33894a6f1fab9fdb257104c580ba92b3076a5d9",
-    "note": "The scoped-readiness check was run in the combined workspace with P1-012 revision e33894a6f1fab9fdb257104c580ba92b3076a5d9. The published #216 validator preflights the unrelated global M10-004 -> M10-003 edge; the scoped validator avoids that rejection but returns DEPENDENCY_INCOMPLETE on M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012 because it sees P1-012 as not COMPLETE, despite docs/planning/status.md listing P1-012 and P1-013 as COMPLETE. This task-status/gate mismatch and global readiness edge require reconciliation by their owners. No M10-002 acceptance command ran. The shared-validator change is in draft PR #220 and is not integrated into published PR #216; no task-gate PASS is claimed."
+    "note": "The P1-012 dependency-scope correction is included in the local #216 ancestry. The current selected-task gate now reaches the declared direct dependency M9-001 and exits before running acceptance commands because M9-001 is BLOCKED."
   },
   "github_ci": {
     "initial_clean_build": {
@@ -435,7 +436,7 @@
       }
     ]
   },
-  "all_draft_review": {
+  "historical_all_draft_review": {
     "status": "NO_FINDINGS",
     "reviews": [
       {
@@ -462,38 +463,61 @@
     "method": "Four independent read-only subagents reviewed the exact heads of all open draft PRs. No new findings were reported."
   },
   "pr_description": {
-    "status": "UPDATED",
-    "reviewed_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
-    "head_source_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
-    "body_status": "CURRENT",
+    "status": "REFRESH_PENDING",
+    "previous_reviewed_head": "e6590ee111449977fb732edaf42164ffb7c265a3",
+    "tested_source_revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
+    "body_status": "PENDING_REFRESH",
     "base_branch": "fix/M10-001-terminal-deadline-checks",
     "draft": true,
-    "reason": "Refreshed through authenticated GitHub CLI with current repository and task-gate results, current blocker ownership, exact evidence links, and explicit separation of #216 from the shared validator in #220.",
-    "next_action": "Keep #216 OPEN and DRAFT while repository and task-gate blockers remain. M10-003/#175 remains open and not ready."
+    "reason": "The evidence refresh is current for the local #216 candidate; update the GitHub body after the evidence commit is pushed.",
+    "next_action": "Keep #216 OPEN and DRAFT. Do not mark ready or merge; #174 remains open and #175 remains unchanged."
   },
   "full_suite_stability": {
-    "earlier_run": {
-      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
-      "exit_code": 1,
-      "total": 1099,
-      "passed": 1070,
-      "skipped": 28,
-      "errors": 1,
-      "failed": 0,
-      "error": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill timed out awaiting cross-origin refill; stderr reported HTTP/2 connection pool closed."
-    },
-    "isolated_case": {
-      "command": "cjpm test --filter='Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill' --parallel 1 --no-progress --no-color src/internal/http1",
-      "exit_code": 0,
-      "total": 170,
-      "passed": 1,
-      "skipped": 169,
-      "errors": 0,
-      "failed": 0
-    },
-    "interpretation": "The current complete native run on e72bbb3c8a10670b716dcf263cdafff052102b84 passed 1,082/1,110 with 28 skips and no errors or failures. All four HTTP/2 resource profiles passed 218/218 on the first attempt. Earlier full-suite pool-fairness and CPU-affinity failures remain historical stability risks; the isolated/retry outcomes are recorded above."
+    "tested_source_revision": "e7c4bba5faf568317edd580e26eef118cc59057d",
+    "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+    "runs": [
+      {
+        "run": 1,
+        "exit_code": 1,
+        "total": 1114,
+        "passed": 1085,
+        "skipped": 28,
+        "errors": 1,
+        "failed": 0,
+        "result": "Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill timed out; stderr reported HTTP/2 connection pool closed."
+      },
+      {
+        "run": 2,
+        "exit_code": 1,
+        "total": 1114,
+        "passed": 1085,
+        "skipped": 28,
+        "errors": 0,
+        "failed": 1,
+        "result": "HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission asserted secondRejected == true."
+      }
+    ],
+    "isolated_replays": [
+      {
+        "command": "cjpm test --filter='Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill' --parallel 1 --no-progress --no-color src/internal/http1",
+        "exit_code": 0,
+        "passed": 1,
+        "skipped": 173,
+        "errors": 0,
+        "failed": 0
+      },
+      {
+        "command": "cjpm test --filter='HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission' --parallel 1 --no-progress --no-color src/http",
+        "exit_code": 0,
+        "passed": 1,
+        "skipped": 165,
+        "errors": 0,
+        "failed": 0
+      }
+    ],
+    "interpretation": "The current full native suite failed in two consecutive runs on different tests. Each failing test passed in isolated replay; this does not satisfy full-suite acceptance."
   },
-  "noncanonical_attempts": [
+  "historical_noncanonical_attempts": [
     {
       "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2 with an extra cjHeapSize=1GB override",
       "exit_code": 134,
@@ -501,7 +525,7 @@
       "result": "Cangjie runtime allocator reported 'allocate create page failed' under the added heap-size override. The earlier manifest-equivalent run with the default heap passed 213/213; this noncanonical attempt is not counted as acceptance evidence."
     }
   ],
-  "intermediate_regression_run": {
+  "historical_intermediate_regression_run": {
     "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
     "exit_code": 1,
     "status": "FAILED_THEN_FIXED",
@@ -514,7 +538,7 @@
   },
   "decision": {
     "task_status": "BLOCKED",
-    "pr_216": "Remain OPEN and DRAFT. Q4 source is e72bbb3c8a10670b716dcf263cdafff052102b84. All 10 workflows passed on source-bearing head 02699b42892e2a2b0b67042b60552fc742422f54; evidence-only PR-head checks are reported in the PR description. Refreshed scripts/check and task-gate blockers remain; do not mark ready.",
+    "pr_216": "Remain OPEN and DRAFT. Tested source revision is e7c4bba5faf568317edd580e26eef118cc59057d; the full native suite failed in two runs on different tests, scripts/check failed with 24 failures and 16 errors, and the direct task gate is INVALID on M9-001. Do not mark ready or merge.",
     "issue_174": "Remains open and untouched.",
     "m10_003_issue_175": "Remains open, not ready, and not started or modified because M10-002 remains BLOCKED."
   }

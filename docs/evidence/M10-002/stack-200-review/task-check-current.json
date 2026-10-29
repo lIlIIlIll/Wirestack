@@ -3,7 +3,7 @@
   "issues": [
     {
       "code": "DEPENDENCY_INCOMPLETE",
-      "detail": "P1-013 dependency is not COMPLETE: P1-012"
+      "detail": "M10-002 dependency is not COMPLETE: M9-001"
     }
   ],
   "kind": "repository-check",

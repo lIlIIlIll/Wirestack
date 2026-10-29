@@ -1,91 +1,35 @@
 # M10-002 current-source acceptance follow-up
 
-This report records the current PR #216 candidate, including Q4 outbound HTTP/2 DATA admission. It supersedes the earlier Stack #200 follow-up results for this candidate. The historical report at `docs/evidence/M10-002/verification.json` remains unchanged and is not evidence for this source revision.
+This report records the current #216 Q4 source and its acceptance blockers. The P1-012 dependency-scope correction from PR #220 is integrated into the local #216 ancestry; #220 remains a separate draft PR and no merge is claimed. The tested production-source revision is `e7c4bba5faf568317edd580e26eef118cc59057d`; later changes in this follow-up update evidence and task-status records only.
 
-## Current published candidate
+## Scope and dependency state
 
-- Published PR #216 head: `c0a19b4bc6288803ccdf5937d0ba73115e4c69d6`.
-- All nine GitHub workflows concluded successfully. Clean Cangjie Build #39966657771 ran `scripts/check-code` and the non-Performance Cangjie suite, including `failedBufferReservationCancelsGrantedFlowPermitBeforeRetry`. M7-033 docs #39966658137 passed; main-document deployment was skipped.
-- `check task M10-002` and `validate-tasks` both exited 2 before running commands. The exact error is `DEPENDENCY_INCOMPLETE: M10-003 dependency is not COMPLETE: M10-002`; see [published task check](stack-200-review/task-check-published-c0a19b4.json), [published graph validation](stack-200-review/validate-tasks-published-c0a19b4.json), and [current PR-head report](stack-200-review/current-pr-head-verification.json).
-- `task-check-current.json` is a distinct combined-review result using PR #220's scoped validator; it reports the P1-013 → P1-012 edge and does not describe the published #216 task check.
-- `scripts/check` was not rerun at c0a19b4. The 584-test failure recorded below belongs to the earlier e72bbb3 source.
-- M10-002 remains **BLOCKED**. Keep #216 OPEN/DRAFT, #174 open, and #175 untouched. No task-gate acceptance command ran.
+M10-002 implements bounded resource ownership and HTTP/2 Q4 outbound DATA admission. For positive stream flow credit, the sender caps the DATA frame to current credit, waits for a suitably sized managed-buffer lease, rechecks credit, then acquires the flow-control permit. A blocked buffer wait holds no flow permit; if SETTINGS reduces credit after the lease is acquired, the lease is released before retry. Zero flow credit waits without retaining a managed buffer. Stream/controller termination cancels pending lease waiters. Classic CONNECT without `:scheme` uses the actual `http` or `https` transport scheme for resource ownership. No public API was added or changed.
 
-The source-bound local acceptance details below describe the earlier candidate `e72bbb3c8a10670b716dcf263cdafff052102b84`; they are retained as historical evidence and do not qualify c0a19b4.
+The M10-002 task gate is `INVALID` (exit 2, `commands: []`) because its declared dependency M9-001 is BLOCKED. M9-001 is blocked by P1-015. The P1-012 validator fix is now in the local #216 ancestry, so the task check reaches M9-001 rather than the former plan-only prerequisite mismatch. Repository-wide `validate-tasks` is also `INVALID` (exit 2, no task IDs) at `M10-001 dependency is not COMPLETE: M9-001`.
 
-## Candidate and scope
+Related task-status edges were refreshed without marking blocked tasks complete. The evolution-task status graph now has the expected issue links and BLOCKED classifications; `python3 -m unittest tools.tests.test_m7_linux_task_graph -v` passes all 6 tests. M12-002 remains BLOCKED because M9-001 is incomplete. P1-012 remains BLOCKED because current global readiness is not established. M10-003 / #175 remains BLOCKED and unchanged.
 
-- Historical source revision: `e72bbb3c8a10670b716dcf263cdafff052102b84` (Q4 source and regression tests).
-- Platform: Linux x86_64 glibc.
-- Toolchain: Cangjie 1.1.3, CJPM 1.1.3, cjdoc 0.7.2.
-- Q4 behavior: for positive current flow credit, cap the DATA frame to that credit, wait for the exact owner-buffer lease, recheck credit, then acquire the flow-control permit. If credit is zero, wait without retaining a managed buffer; after credit returns, acquire a lease non-blockingly or release the permit and retry through the buffer-first wait path. Stream/controller termination cancels pending lease waiters. Classic CONNECT without `:scheme` uses the actual `http` or `https` transport scheme for resource ownership.
-- No public API was added or changed.
+## Current-source acceptance
 
-Commit `e72bbb3c8a10670b716dcf263cdafff052102b84` contains the earlier Q4 source and regression-test fixes. No public API or M10-003/downstream task manifest changed.
+Detailed machine-readable results: [`current-source-acceptance.json`](stack-200-review/current-source-acceptance.json). The updated scenario matrix and verification summary are [`scenario-matrix.json`](stack-200-review/scenario-matrix.json) and [`verification.json`](stack-200-review/verification.json).
 
-The earlier revision-bound local results are in `docs/evidence/M10-002/stack-200-review/verification.json`; scenario coverage is in `scenario-matrix.json`. The strict documentation report is `docs-report.json` (CJDoc 0.7.2, PASS: 1,873/1,873 symbols and 950/950 parameters). These reports remain bound to e72bbb3; they are not evidence for the published c0a19b4 head.
-
-## Review finding closure
-
-The earlier P2 finding was that the 10-byte DATA lease minimum could not fit a route or origin cap of 9; the previous code waited and retained a waiter and owner. Commit `e82743ee2bfa16ee6160d3e0236d340cf2ad0b87` rejects that impossible minimum as `ResourceExhausted / PoolAcquire / Retryability.Never` before cancellation registration, waiter creation, or owner allocation. The pre-fix route-cap and origin-cap regression timed out; the post-fix run passed 1/16 with 15 skipped and confirmed exact 10-byte capacity succeeds.
-
-The new P2 source finding was that `tryReserveSend` did not retain the caller `OperationContext` on its fast-path permit. After a peer SETTINGS shrink, the background writer emitted backpressure events without caller observation identifiers. Commit `5d6b2c7358e08169ede6198b472b37d773e017d` assigns `observationContext` when the caller has an event sink, before transferring the buffer lease. The focused regression failed before the fix (0 passed, 215 skipped, 1 failed) and passed after it (1 passed, 215 skipped). Start/completion events retained the caller trace, request, attempt, connection, stream, and `RequestWrite` stage; permit and managed-buffer usage returned to zero.
-
-The other P2 finding was that `src/internal/http_resource_budget_test.cj` was missing from the M10-002 `allowed_paths` and `source_paths`. Both inventories now include it. Independent read-only subagents `Q4PermitReview` and `Q4EvidenceBindingReview` inspected the fixed source, test, and manifest diff; both reported no new findings and ran no builds or tests.
-
-The repaired #216 Q4 source-review findings are:
-
-- The DATA slice is capped to currently feasible stream credit before a blocking owner-buffer lease wait. The strengthened regression fills the owner budget to 34,422 of 34,431 bytes, leaving less than the 10-byte minimum; it proves the blocked write does not hold flow credit and is admitted at 16,384 bytes after capacity returns.
-- A pending owner-buffer waiter is linked to stream/controller termination. Existing deterministic tests prove stream close and flow-controller close wake the waiter and leave no retained admission state.
-- Classic CONNECT omits `:scheme`; a real in-memory client/server test now verifies owner origins use the actual `http` or `https` transport scheme.
-
-The full HTTP/2 suite includes these cases; all 218 cases pass under each required resource profile.
-
-## Draft PR re-review
-
-Four independent read-only subagents reviewed all four open draft PRs at these exact heads. Each reported no findings.
-
-| PR | Reviewed head | Result |
-|---|---|---|
-| #215 | `2a04a1c1fa2fc2bdc8d6433aac6f253004b4f81d` | No findings |
-| #216 | `e6590ee111449977fb732edaf42164ffb7c265a3` | No findings |
-| #220 | `a1dd89c4364de272d4ff79e3332ed9e6bb340475` | No findings |
-| #221 | `e76c3ba4301472fd2272aed3a96e7dc64dac5bf6` | No findings |
-
-The re-review did not clear the repository/tooling or task-dependency blockers.
-
-## Current acceptance results
-
-| Gate | Result |
+| Gate | Current result |
 |---|---|
 | `python3 tools/architecture_guard.py --root . --format text` | Exit 0; PASS. |
-| `python3 tools/check_network_capabilities.py --check` | Exit 0; static contract PASS. Native capability execution was not run by this check. |
-| `cjpm check` | Exit 0; PASS. |
-| `cjpm build` | Exit 0; PASS; compiler emitted unreachable-block warnings, no build errors. |
-| `cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color` | Exit 0; 1,082 passed, 28 skipped, 0 errors, 0 failures (1,110 total). |
-| HTTP/2 resource profiles | `RLIMIT_NOFILE=64`, `RLIMIT_DATA=1 GiB`, `RLIMIT_AS=4 GiB`, and CPU affinity 0 each passed 218/218 with no skips, errors, or failures on the first attempt. |
-| Strict generated documentation | `env cjHeapSize=1GB scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json` — PASS; 1,873/1,873 symbols and 950/950 parameters documented. |
-| `scripts/check` | Exit 1 in the initial tooling unittest stage: 584 tests, 25 failures, 16 errors, 4 skipped. Re-run after the P1-012 CLI regression; the same five families remain: stale AWS-LC advisory, M3-031 provider fixtures/error codes, M7-030 release/evidence digests, M12-002 platform-support source, and M7 task-graph expectations. |
-| M10-002 task gate | Published #216 validator: exit 2, `INVALID` on global M10-004 → M10-003 readiness. In the combined workspace with P1-012 scoped-validator revision `e33894a6f1fab9fdb257104c580ba92b3076a5d9`, the gate still exits 2 with `DEPENDENCY_INCOMPLETE` on `M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012`; it rejects P1-012 as not COMPLETE even though `docs/planning/status.md` lists P1-012 and P1-013 as COMPLETE. Zero M10-002 acceptance commands ran. The status/gate discrepancy and global edge require reconciliation by their owners; the shared validator remains in draft #220 and is not integrated into #216. |
+| `python3 tools/check_network_capabilities.py --check` | Exit 0; 86 contract rows pass. Native capability evidence is NOT_RUN; no platform qualification claim. |
+| `cjpm check` / `cjpm build` | Both exit 0; PASS with the pinned AWS-LC 5.5.0 source. |
+| `cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color` | FAIL in two runs. Run 1: 1,085 passed, 28 skipped, 1 error, 0 failures (1,114 total); HTTP/2 connection-pool waiter refill timed out. Run 2: 1,085 passed, 28 skipped, 0 errors, 1 failure; stalled connector admission expected `secondRejected == true`. Each exact failing test passed in isolated replay; isolated passes do not replace the full-suite gate. |
+| HTTP/2 resource profiles | RLIMIT_NOFILE=64, RLIMIT_DATA=1 GiB, RLIMIT_AS=4 GiB, and CPU affinity 0 each pass 219/219. |
+| Strict generated documentation | Exit 0; cjdoc 0.7.2; 1,873/1,873 symbols and 950/950 parameters. Generated docs digest: `5cc77ecbb5432b68e71062e41a8744341f859ca19d43fb2179ff020044b3a099`. |
+| `scripts/check` | FAIL, exit 1: 584 tests, 24 failures, 16 errors, 4 skipped. Families: M0-016 stale AWS-LC advisory disposition (19 failures, 6 errors); M3-031 desktop-provider fixture/validation-order issues (4 failures, 2 errors); M7-030 missing frozen release artifact (8 errors); M12-002 stale platform-support source digest (1 failure). The M7 task-graph tests pass after status-edge correction. |
+| `scripts/check-task M10-002 --json` | INVALID, exit 2, no commands; direct dependency M9-001 is not COMPLETE. |
+| Repository `validate-tasks` | INVALID, exit 2, no task IDs; M10-001 dependency M9-001 is not COMPLETE. |
 
-Targeted diagnostics for the five reported owner families at PR head
-`b872f1b8304a16a769a517efa8cdf566e20ff963` ran 122 tests and reproduced 25
-failures and 16 errors (exit 1). The exact symptoms are recorded in
-[`repository-check-diagnostic.json`](stack-200-review/repository-check-diagnostic.json).
-No foreign advisory, platform, release, or task-status evidence was altered;
-this does not claim a `scripts/check` PASS.
-Detailed root causes and owner boundaries, including the task-gate closure, are in
-[`blocker-root-causes.md`](stack-200-review/blocker-root-causes.md). The scratch
-repair simulation is diagnostic only; it does not clear either acceptance gate.
+The current task gate cannot complete, and the full native suite and repository-wide check fail. M10-002 remains **BLOCKED** despite the successful architecture, build/check, strict-doc, and constrained-resource gates. The exact current commands, statuses, failure names, and dependency details are in the machine-readable report above.
 
-The earlier clean-build run `39448838666` failed source-tree mutation rejection at `b031cfd545e375b3a13f747c8eafe616bee5309e`: checked-in `docs.json` differed from the exact CI-pinned CJDoc output. The output was regenerated and committed at `2eb92251a0a600c974dc6c59b2313c806e660e5e`. All 10 workflows passed on later heads `e82743ee2bfa16ee6160d3e0236d340cf2ad0b87` and `f4034849f9d74c3301ccd0a1f3527909d057886f`. On exact source-bearing PR head `e6590ee111449977fb732edaf42164ffb7c265a3`, all 10 workflows passed, including Clean Cangjie Build and M7-033 Developer Documentation. The current strict local documentation check also passed on source revision `e72bbb3c8a10670b716dcf263cdafff052102b84`; earlier combined-check allocation failures are historical and do not supersede this direct pass.
+## Evidence boundaries and PR state
 
-The earlier full-suite pool-fairness timeout passed when rerun as an isolated case. An earlier single-CPU profile also had a GOAWAY `activeStreamCount` failure before an identical retry passed. Those are historical stability risks; the current full native run passed 1,082/1,110, and all current resource profiles passed 218/218 on the first attempt.
+Prior independent reviews reported no findings on earlier PR heads; they are historical and are not a review of the refreshed #216 head. Previous published CI results likewise do not replace this local current-source acceptance.
 
-The noncanonical data-limit attempt with an extra `cjHeapSize=1GB` override exited 134 before tests because the runtime allocator could not create a page. An earlier default-heap profile passed 213/213; it is historical and is not counted as current-source evidence.
-
-An intermediate full run before correcting newly added scheduler test budgets exited 1 with 1,073 passed, 28 skipped, and three errors. Those tests exhausted their reserved inbound-window budget; the test limits were corrected. The later e82743ee2bfa16ee6160d3e0236d340cf2ad0b87 full run passed 1,079/1,107; the 5d6b2c7358e08169ede6198b472b37d773e017d run passed 1,080/1,108; the current e72bbb3c8a10670b716dcf263cdafff052102b84 run passed 1,082/1,110.
-
-## Status and boundaries
-
-M10-002 remains **BLOCKED**. Current-source Cangjie checks, full native tests, four HTTP/2 resource profiles, strict docs, and all 10 workflows on the source-bearing PR head pass. The refreshed `scripts/check` still fails with 584 tests, 25 failures, 16 errors, and 4 skips in five unrelated owner families. Task-gate validation with the P1-012 scoped-readiness revision returns `INVALID` on the genuine transitive dependency `M10-002 -> M9-001 -> P1-015 -> P1-013 -> P1-012`; P1-012 remains BLOCKED because global readiness sees M10-004 -> M10-003. PR #220 is open/draft and not integrated into #216; PR #216 remains OPEN/DRAFT. Issue #174 remains open. M10-003 / #175 was not started or modified. No non-Linux qualification is claimed.
+Keep PR #216 **OPEN and DRAFT**; do not mark it ready or merge it. Keep issue #174 open. Leave #175 open and unchanged; M10-003 has not started. Refresh the #216 description with the current report links and blockers. Reassess readiness only after M9-001 and all required acceptance gates are complete on the exact candidate.
