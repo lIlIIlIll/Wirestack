@@ -45,7 +45,69 @@ The deadline path does not allocate a scheduled timer handle: it passes the rema
 
 ## Review follow-up
 
-The review regression run covers literal proxy TCP-connect budgets, reuse of one response-header budget across a `100-continue` body write, HTTP/2 flow-control updates under the total deadline, and retention of flow-control update-write failures. Exact commands and results: [review-deadline-regressions.md](review-deadline-regressions.md).
+The Stack #200 regressions cover post-read deadlines, terminal HTTP/2 ticket waits, late proxy success, one HTTP/1 `requestWrite` budget across the request head and body, and cancellation context on transferred pushes.
+
+The focused T1–T5 replay on pinned SDK 1.1.3 is recorded in [revision-bound review regressions](stack-200-review/review-regressions.json). Red/green commands and outcomes are in [review-deadline-regressions.md](review-deadline-regressions.md).
+
+Root issues:
+
+- T1, [#226](https://github.com/lIlIIlIll/Wirestack/issues/226)
+- T2, [#223](https://github.com/lIlIIlIll/Wirestack/issues/223)
+- T3, [#222](https://github.com/lIlIIlIll/Wirestack/issues/222)
+- T4, [#225](https://github.com/lIlIIlIll/Wirestack/issues/225)
+- T5, [#224](https://github.com/lIlIIlIll/Wirestack/issues/224)
+
+The earlier alpha-toolchain run remains historical smoke evidence. The pinned SDK replay does not replace or repeat the original full task acceptance.
+
+### Current-source follow-up
+
+The supplemental replay addresses finding 6: when an HTTP/1 final response
+arrives after the `100-continue` wait deadline but within the response-header
+budget, the client returns that response and sends no request-body bytes.
+The replacement regression passed 1/171 tests on source
+`18a2b9a79b0b8886db8bfae3fdd48184ff45d23c`.
+
+The latest full HTTP package run on that source exited 1: 531 passed, 6 skipped,
+and 1 error (538 total). The error is a timeout in
+`Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill`,
+owned by the M10-003 connection-pool fairness work. A prior run at
+`97cac410c727b301e1f85a0b8e61595980292287` passed 532/538, but it does not
+supersede this later failure. The earlier
+`HttpClientExtensionsTest.closingClientWakesStalledConnectorConnectionAdmission`
+full-suite failure at `935351da4880f2d4e1be963100ca19146ea8b6f5` also remains
+unexplained.
+
+The strict documentation check at source `97cac410c727b301e1f85a0b8e61595980292287`
+passed after setting the CJDoc heap to 1 GiB; the task manifest records that
+command.
+The M10-001 task gate returned `INVALID` because M10-004 depends on BLOCKED M10-003.
+This follow-up does not claim full current task acceptance. The original
+M10-001 COMPLETE status remains based on its historical acceptance evidence.
+
+Exact commands and results are in
+[review-deadline-regressions.md](review-deadline-regressions.md) and the
+revision-bound report at
+[review-regressions.json](stack-200-review/review-regressions.json).
+
+### Additional review regressions — composite source `7468ec68de9a169ad87e36b5464f246cc28d5cd9`
+
+The 13-case focused replay ran on the composite M10-002 source, not on M10-001
+commit `3e65a74dfa1db865c78a3cce91c547eb02a110fb`. Its 558-test total is 541
+M10-001 cases plus 17 M10-002 cases. The run used Cangjie
+1.3.0-alpha.20261020001052 / CJPM 1.3.0-alpha.07 and AWS-LC 5.5.0. This is
+focused smoke evidence only; it neither requalifies the current M10-001 branch
+nor replaces the original M10-001 acceptance. The exact source, command, counts,
+and baseline-reproduction limit are in
+[`review-deadline-regressions.md`](review-deadline-regressions.md) and
+[`review-regressions.json`](stack-200-review/review-regressions.json).
+
+On current M10-001 review candidate `501f21af0fbd2e6937fd17fadb87715be3d043b0`,
+the prefix deadline regression passed in the hosted Clean Cangjie Build
+([run #39947353734](https://github.com/lIlIIlIll/Wirestack/actions/runs/39947353734)).
+The test confirms a rejected read leaves the six parser-prefix bytes available
+to a subsequent read. `check task M10-001` remains INVALID before commands
+because M10-004 depends on incomplete M10-003; this does not requalify the
+original task or produce a current task seal.
 
 ## Workspace snapshot (initial task capture; historical)
 

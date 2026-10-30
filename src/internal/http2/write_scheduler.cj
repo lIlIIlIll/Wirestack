@@ -60,6 +60,7 @@ public class Http2WriteTicket {
                         case None => changed.wait()
                     }
                 }
+                checkTicketWaitContext(context)
                 current
             }
         } finally {

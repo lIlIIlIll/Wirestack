@@ -350,6 +350,14 @@ private func connectProxy(endpoint: Http1ProxyEndpoint, connector: HappyEyeballs
                 connectionAttemptIndex: Some(1)))
             try {
                 let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), connectContext)
+                try {
+                    checkProxyTcpConnectContext(connectContext)
+                } catch (error: NetworkException) {
+                    try {
+                        connected.abort(reason: Some(proxyTcpConnectAbortReason(connectContext)))
+                    } catch (_: Exception) {}
+                    throw error
+                }
                 emitNetworkEvent(connectContext, NetworkEvent(NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Succeeded,
                     connectionAttemptIndex: Some(1)))
                 emitProxyTcpConnected(connectContext)
@@ -361,6 +369,27 @@ private func connectProxy(endpoint: Http1ProxyEndpoint, connector: HappyEyeballs
             }
         case None => connector.connect(endpoint.hostName.getOrThrow(), endpoint.port, context: context).transport
     }
+}
+
+private func checkProxyTcpConnectContext(context: OperationContext): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled, NetworkPhase.TcpConnect, NetworkErrorCode.Cancelled,
+            "proxy TCP connect cancelled", retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded, NetworkPhase.TcpConnect, NetworkErrorCode.TimedOut,
+            "proxy TCP connect deadline exceeded", retryability: Retryability.Temporary
+        )
+    }
+}
+
+private func proxyTcpConnectAbortReason(context: OperationContext): AbortReason {
+    if (context.isCancellationRequested()) { AbortReason.Cancelled }
+    else if (context.isDeadlineExceeded()) { AbortReason.DeadlineExceeded }
+    else { AbortReason.ApplicationAbort }
 }
 
 private func emitProxyTcpConnected(context: OperationContext): Unit {
