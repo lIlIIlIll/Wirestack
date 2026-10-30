@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M10-002",
+  "status": "BLOCKED",
+  "pullRequest": 216,
+  "testedCodeRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+  "source": {
+    "path": "src/internal/http2/client_connection.cj",
+    "sha256": "30f648fb8f2b5377d30f001ff3f9f2dab60d60281c75c036483cf41de52f7007"
+  },
+  "additionalSource": {
+    "path": "src/internal/http1/http2_connection_pool.cj",
+    "sha256": "557789243a42a91dbe1770d374a9897c254bab2485628a20f080a4a1a3fa15db",
+    "change": "After a waiter is enqueued and the waiter count changes, notifyAll now signals the shared condition so waitUntilWaiters observers re-check promptly."
+  },
+  "change": "Inbound END_STREAM DATA is queued without publishing body EOF; peerEnd updates the stream registry before channel.finish publishes EOF. The existing Q4 buffer-lease-before-flow-control-permit order is unchanged.",
+  "environment": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "libc": "glibc",
+    "target": "x86_64-unknown-linux-gnu",
+    "cangjieCompiler": "1.3.0-alpha.20261020001052 (cjnative)",
+    "cjpm": "1.3.0-alpha.07"
+  },
+  "checks": [
+    {
+      "command": "python3 tools/architecture_guard.py --root . --format text && python3 tools/check_network_capabilities.py --check",
+      "observedAtRevision": "68a8beee03987685e09414cec020c0c5deefaaaa",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "Architecture guard passed; network contract passed with 86 rows."
+    },
+    {
+      "command": "scripts/build-linux-resolver --quiet",
+      "observedAtRevision": "68a8beee03987685e09414cec020c0c5deefaaaa",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "cjpm check (through codex_cangjie_env)",
+      "observedAtRevision": "68a8beee03987685e09414cec020c0c5deefaaaa",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "cjpm build (through codex_cangjie_env)",
+      "observedAtRevision": "68a8beee03987685e09414cec020c0c5deefaaaa",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 0,
+      "status": "PASS",
+      "total": 1114,
+      "passed": 1086,
+      "skipped": 28,
+      "errors": 0,
+      "failed": 0,
+      "regressionCases": [
+        "peerGoAwayDrainsConnectionWithoutFailingAcceptedStream",
+        "saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill"
+      ]
+    },
+    {
+      "command": "cjpm test --filter=Http2ConnectionPoolTest.saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill --parallel 1 --no-progress --no-color src/internal/http1",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 0,
+      "status": "PASS",
+      "total": 174,
+      "passed": 1,
+      "skipped": 173,
+      "errors": 0,
+      "failed": 0,
+      "caseElapsedNanoseconds": 1301580
+    },
+    {
+      "command": "GitHub Actions exact PR-head checks at 16ca11887edcadd1bcba5e00a15a26eced2ff4e3; production code revision 2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "observedAtRevision": "16ca11887edcadd1bcba5e00a15a26eced2ff4e3",
+      "status": "PASS",
+      "runCount": 9,
+      "passed": 9,
+      "failed": 0,
+      "runIds": [
+        "40035444754",
+        "40035444712",
+        "40035444795",
+        "40035444697",
+        "40035444700",
+        "40035444801",
+        "40035444824",
+        "40035444695",
+        "40035444885"
+      ],
+      "cleanCangjieBuildRunId": "40035444885",
+      "documentationRunId": "40035444695",
+      "note": "The prior Clean Cangjie Build run 40027989864 at 7ba855fec295952a4877d09edc73a2c76dca223d timed out at src/internal/http1/http2_connection_pool_test.cj:456 in saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill; pool closure after test cleanup produced the nested closed-pool error. Queue admission now signals the shared waiter condition; the case passes locally, and all exact-head hosted workflows pass."
+    },
+    {
+      "command": "taskset -c 0 cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "ulimit -n 64 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "ulimit -d 1048576 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "ulimit -v 4194304 && cjpm test --skip-build --exclude-tags=Performance --parallel 1 --no-progress --no-color src/internal/http2",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 0,
+      "status": "PASS",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "command": "scripts/check-docs --json --output docs/evidence/M10-002/stack-200-review/docs-report.json (through codex_cangjie_env)",
+      "observedAtRevision": "68a8beee03987685e09414cec020c0c5deefaaaa",
+      "exitCode": 0,
+      "status": "PASS",
+      "report": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+      "combinedApiEntries": 1873,
+      "documentedSymbolsPercent": 100,
+      "documentedParametersPercent": 100
+    },
+    {
+      "command": "scripts/check (through codex_cangjie_env; last run at source 68a8beee)",
+      "exitCode": 1,
+      "status": "FAIL",
+      "pythonTestsRun": 584,
+      "failures": 25,
+      "errors": 16,
+      "skipped": 4,
+      "blockerExamples": [
+        "test_evolution_status_matches_readiness_classification reports a M10-004 status mismatch (expected COMPLETE, observed BLOCKED)",
+        "M3-031 raw evidence fixtures return RAW_RESULT instead of the expected validation codes",
+        "TLS provider evidence fixtures reject stale AWS-LC advisory dispositions"
+      ]
+    },
+    {
+      "command": "scripts/check-task M10-002 --json --output docs/evidence/M10-002/stack-200-review/task-check-current-eof-ordering.json",
+      "observedAtRevision": "2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8",
+      "exitCode": 2,
+      "status": "INVALID",
+      "acceptanceCommandsExecuted": 0,
+      "report": "docs/evidence/M10-002/stack-200-review/task-check-current-eof-ordering.json",
+      "issue": {
+        "code": "DEPENDENCY_INCOMPLETE",
+        "detail": "M10-003 dependency is not COMPLETE: M10-002"
+      }
+    }
+  ],
+  "documentationGateReport": "docs/evidence/M10-002/stack-200-review/docs-report.json",
+  "decision": "Keep M10-002 BLOCKED and PR #216 OPEN/DRAFT. Full local Cangjie regression, the targeted waiter case, and all nine exact-head hosted workflows pass; repository-level and task-gate blockers remain.",
+  "remainingBlockers": [
+    "The task validator still evaluates the downstream M10-003 dependency while checking M10-002; the scoped-check correction is tracked separately in PR #220 (P1-012).",
+    "The repository-wide Python suite last run before the waiter fix had 25 failures and 16 errors across M3-031 fixtures, M10-004 readiness classification, and TLS provider advisory fixtures; the Cangjie-only change does not alter those fixtures.",
+    "The status table's M10-004 COMPLETE/readiness BLOCKED mismatch is tracked separately in PR #230."
+  ],
+  "historicalNote": "The prior hosted SDK 1.1.3 run at 7ba855fec295952a4877d09edc73a2c76dca223d timed out at otherOrigin.get in saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill after the two waiter-observation calls each could sleep until a one-second deadline. Enqueue now signals the shared condition; the focused local case passes in 1.30 ms, the full local suite passes 1086/1114 with 28 skipped, and all nine hosted workflows pass on 2e76267ff37eba0c1569b0dc5fe1f8ef7fd42bc8."
+}

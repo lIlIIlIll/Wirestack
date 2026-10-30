@@ -10,6 +10,7 @@ import wirestack.internal as internal
 public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerControlSink & Resource {
     private let transport: DuplexTransport
     private let handler: Http2ServerHandler
+    private let transportScheme: String
     private let machine: Http2ConnectionStateMachine
     private let writer: Http2WriteScheduler
     private let flow: Http2FlowController
@@ -22,7 +23,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     private let http2Limits: Http2Limits
     private let resourceBudget: ?internal.HttpResourceBudget
     private let resourceOwner: ?internal.HttpResourceOwnerKey
-    private let requestOwnerFactory: Option<(String) -> internal.HttpResourceOwnerKey>
+    private let requestOwnerFactory: Option<(String, String) -> internal.HttpResourceOwnerKey>
     private let streamBufferOwners: ?Http2StreamBufferOwners
     private let mutex = Mutex()
     private let pushAdmissionMutex = Mutex()
@@ -42,15 +43,17 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
     public init(
         transport: DuplexTransport,
         handler: Http2ServerHandler,
+        transportScheme: String,
         limits!: HttpLimits = HttpLimits(),
         http2Limits!: Http2Limits = Http2Limits(),
         resourceBudget!: ?internal.HttpResourceBudget = None<internal.HttpResourceBudget>,
         resourceOwner!: ?internal.HttpResourceOwnerKey = None<internal.HttpResourceOwnerKey>,
-        requestOwnerFactory!: Option<(String) -> internal.HttpResourceOwnerKey> =
-            None<(String) -> internal.HttpResourceOwnerKey>
+        requestOwnerFactory!: Option<(String, String) -> internal.HttpResourceOwnerKey> =
+            None<(String, String) -> internal.HttpResourceOwnerKey>
     ) {
         this.transport = transport
         this.handler = handler
+        this.transportScheme = transportScheme
         this.limits = limits
         this.http2Limits = http2Limits
         this.resourceBudget = resourceBudget
@@ -102,17 +105,23 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
      * Resolves the aggregate-budget owner for one validated request authority.
      * Connections and connection buffers stay owned by the listener.
      */
-    private func requestOwner(authority: String): internal.HttpResourceOwnerKey {
+    private func requestOwner(
+        scheme: String,
+        authority: String
+    ): internal.HttpResourceOwnerKey {
         match (requestOwnerFactory) {
-            case Some(factory) => factory(authority)
+            case Some(factory) => factory(scheme, authority)
             case None => resourceOwner.getOrThrow()
         }
     }
 
     /** Resolves the authority-scoped DATA-buffer owner, or None for listener-owned internals. */
-    private func streamBufferOwner(authority: String): ?internal.HttpResourceOwnerKey {
+    private func streamBufferOwner(
+        scheme: String,
+        authority: String
+    ): ?internal.HttpResourceOwnerKey {
         match (requestOwnerFactory) {
-            case Some(factory) => Some(factory(authority))
+            case Some(factory) => Some(factory(scheme, authority))
             case None => None<internal.HttpResourceOwnerKey>
         }
     }
@@ -299,11 +308,15 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                         )
                     }
                 }
-                let exchangeBufferOwner = streamBufferOwner(requestHead.authority)
+                let requestScheme = match (requestHead.scheme) {
+                    case Some(value) => value
+                    case None => transportScheme
+                }
+                let exchangeBufferOwner = streamBufferOwner(requestScheme, requestHead.authority)
                 var requestLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
                 var streamLease: ?internal.HttpResourceLease = None<internal.HttpResourceLease>
                 if (let Some(budget) <- resourceBudget) {
-                    let owner = requestOwner(requestHead.authority)
+                    let owner = requestOwner(requestScheme, requestHead.authority)
                     if (let Some(owners) <- streamBufferOwners) {
                         owners.bind(Int64(block.streamId.value), owner)
                     }
@@ -442,10 +455,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             let body = plan.openBody()
             try {
                 while (true) {
-                    let event = body.next(context: context)
+                    let event = body.next()
                     match (event.kind) {
                         case Http2ServerBodyEventKind.Data =>
-                            waitWrite(event.enqueueData(writer), context: context)
+                            waitWrite(event.enqueueData(writer, context), context: context)
                         case Http2ServerBodyEventKind.EndData =>
                             waitWrite(enqueueActiveServerControl(Http2Frame(
                                 Http2FrameHeader(
@@ -522,9 +535,15 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             slotOwned = true
             match ((resourceBudget, resourceOwner)) {
                 case (Some(budget), Some(_)) =>
-                    streamLease = Some(budget.acquireStream(
-                        requestOwner(parentOrigin.authority), context
-                    ))
+                    let owner = requestOwner(parentOrigin.scheme, parentOrigin.authority)
+                    match (budget.tryAcquireStream(owner)) {
+                        case Some(lease) => streamLease = Some(lease)
+                        case None =>
+                            budget.recordAdmissionRejection()
+                            throw Http2StreamLimitException(
+                                "HTTP/2 aggregate stream limit is exhausted"
+                            )
+                    }
                 case _ => ()
             }
             // Reserve the promised id first, then perform response mapping
@@ -540,7 +559,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
             let streamId = promised.getOrThrow()
             flow.openStream(streamId)
             if (let Some(owners) <- streamBufferOwners) {
-                owners.bind(Int64(streamId.value), requestOwner(parentOrigin.authority))
+                owners.bind(
+                    Int64(streamId.value),
+                    requestOwner(parentOrigin.scheme, parentOrigin.authority)
+                )
             }
             if (let Some(lease) <- streamLease) { lease.activate() }
             let responsePlan = mapHttp2ServerResponse(
@@ -617,10 +639,10 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
         let body = plan.openBody()
         try {
             while (true) {
-                let event = body.next(context: context)
+                let event = body.next()
                 match (event.kind) {
                     case Http2ServerBodyEventKind.Data =>
-                        waitWrite(event.enqueueData(writer), context: context)
+                        waitWrite(event.enqueueData(writer, context), context: context)
                     case Http2ServerBodyEventKind.EndData =>
                         var terminalTicket: ?Http2WriteTicket = None<Http2WriteTicket>
                         synchronized(pushAdmissionMutex) {

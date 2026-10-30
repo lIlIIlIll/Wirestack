@@ -585,30 +585,26 @@ private func http1ServerRequestAuthority(request: http1.Http1ServerRequest): Str
  * The parser has already validated the spelling; normalization lower-cases the
  * host, omits the scheme's default port, and keeps IPv6 brackets.
  * @param authority Parser-validated Host or :authority text.
- * @param secured Whether the request arrived over TLS.
+ * @param scheme Request :scheme or the HTTP/1 transport scheme.
  */
-internal func canonicalServerAuthority(authority: String, secured: Bool): String {
+internal func canonicalServerAuthority(authority: String, scheme: String): String {
     if (authority.isEmpty()) { return "" }
-    let scheme = if (secured) { "https" } else { "http" }
-    let defaultPort: UInt16 = if (secured) { 443u16 } else { 80u16 }
-    let parsed = HttpUrl.parse("${scheme}://${authority}/")
+    let normalizedScheme = scheme.toAsciiLower()
+    let defaultPort: UInt16 = if (normalizedScheme == "https") { 443u16 } else { 80u16 }
+    let parsed = HttpUrl.parse("${normalizedScheme}://${authority}/")
     let host = if (parsed.host.contains(":")) { "[${parsed.host}]" } else { parsed.host }
     if (parsed.explicitPort && parsed.port != defaultPort) { "${host}:${parsed.port}" } else { host }
 }
 
-/** Derives request and stream budget owners from the validated request authority. */
+/** Derives request and stream budget owners from the validated request authority and scheme. */
 private func publicServerRequestOwner(
     authority: String,
-    secured: Bool
+    scheme: String
 ): internal.HttpResourceOwnerKey {
-    let canonical = canonicalServerAuthority(authority, secured)
-    let origin = if (canonical.isEmpty()) { "server" } else { canonical }
+    let normalizedScheme = scheme.toAsciiLower()
+    let canonical = canonicalServerAuthority(authority, normalizedScheme)
+    let origin = if (canonical.isEmpty()) { "server" } else { "${normalizedScheme}://${canonical}" }
     internal.HttpResourceOwnerKey(origin, "listener")
-}
-
-
-private func publicServerRequestOwner(authority: String): internal.HttpResourceOwnerKey {
-    publicServerRequestOwner(authority, false)
 }
 
 private class PublicHttp1Handler <: http1.Http1ServerHandler {
@@ -637,7 +633,9 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
         context: transport.OperationContext): http1.Http1ServerResponse {
         let operation = observedRequestContext(context, delegate is ServiceHookHandler)
         emitHttpObservation(operation, NetworkEventKind.RequestStarted, NetworkEventOutcome.Started)
-        let requestOwner = publicServerRequestOwner(http1ServerRequestAuthority(request), false)
+        let requestOwner = publicServerRequestOwner(
+            http1ServerRequestAuthority(request), if (secured) { "https" } else { "http" }
+        )
         let requestLease = match (resourceBudget.tryAcquireRequest(requestOwner)) {
             case Some(value) => value
             case None =>
@@ -825,12 +823,13 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
             lease = Some(acquired)
             acquired.activate()
             match (admitted.generation) {
-                case None => serveHttp1(value, operation, admitted)
+                case None => serveHttp1(value, operation, admitted, false)
                 case Some(current) =>
                     let negotiated = current.handshaker.handshakeNegotiated(value, operation)
                     if (!admitted.promote(negotiated.transport)) { return }
                     match (negotiated.protocol) {
-                        case http1.HttpServerNegotiatedProtocol.Http11 => serveHttp1(negotiated.transport, operation, admitted)
+                        case http1.HttpServerNegotiatedProtocol.Http11 =>
+                            serveHttp1(negotiated.transport, operation, admitted, true)
                         case http1.HttpServerNegotiatedProtocol.Http2 => serveHttp2(negotiated.transport, operation, admitted)
                     }
             }
@@ -876,18 +875,23 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
     /** Reports whether dispatcher ownership ended. */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
-    private func serveHttp1(value: transport.DuplexTransport, context: transport.OperationContext,
-        entry: PublicServerConnectionEntry): Unit {
+    private func serveHttp1(
+        value: transport.DuplexTransport,
+        context: transport.OperationContext,
+        entry: PublicServerConnectionEntry,
+        secured: Bool
+    ): Unit {
         let cancellation = entry.connectionCancellation
-        let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-            publicServerRequestOwner(authority, false)
+        let registration = cancellation.cancellationToken.register { =>
+            value.abort(reason: Some(transport.AbortReason.Cancelled))
         }
-        let registration = cancellation.cancellationToken.register { => value.abort(reason: Some(transport.AbortReason.Cancelled)) }
         let control = http1.Http1ServerDrainControl(value)
         entry.installHttp1(control)
         try {
-            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(publicHandler, resourceBudget, false,
-                connectionCancellation: cancellation), context: context, limits: limits,
+            let _ = http1.serveHttp1Connection(value, PublicHttp1Handler(
+                publicHandler, resourceBudget, secured,
+                connectionCancellation: cancellation
+            ), context: context, limits: limits,
                 maximumRequests: maximumHttp1Requests, drainControl: Some(control))
         } finally { registration.unregister() }
     }
@@ -895,12 +899,15 @@ internal class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHan
     private func serveHttp2(value: transport.DuplexTransport, context: transport.OperationContext,
         entry: PublicServerConnectionEntry): Unit {
         let cancellation = entry.connectionCancellation
-                let requestOwnerFactory: (String) -> internal.HttpResourceOwnerKey = { authority =>
-            publicServerRequestOwner(authority, false)
+        let requestOwnerFactory: (String, String) -> internal.HttpResourceOwnerKey = {
+            scheme, authority => publicServerRequestOwner(authority, scheme)
         }
-let created = http2.Http2ServerConnection(value, PublicHttp2Handler(publicHandler, cancellation),
-            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget), resourceOwner: Some(resourceOwner),
-            requestOwnerFactory: Some(requestOwnerFactory))
+        let transportScheme = if (entry.generation.isSome()) { "https" } else { "http" }
+        let created = http2.Http2ServerConnection(
+            value, PublicHttp2Handler(publicHandler, cancellation), transportScheme,
+            limits: limits, http2Limits: http2Limits, resourceBudget: Some(resourceBudget),
+            resourceOwner: Some(resourceOwner), requestOwnerFactory: Some(requestOwnerFactory)
+        )
         let registration = cancellation.cancellationToken.register { => created.abort() }
         entry.installHttp2(created)
         try { created.serve(context: context) }

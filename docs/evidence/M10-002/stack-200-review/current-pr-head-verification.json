@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "revision": "c0a19b4bc6288803ccdf5937d0ba73115e4c69d6",
+  "platform": "GitHub-hosted Linux x86_64",
+  "source_test_scope": "The Clean Cangjie Build workflow ran scripts/check-code and the non-Performance Cangjie regression suite, including the Q4 scheduler regression. This is hosted CI evidence, not the M10-002 task-gate acceptance.",
+  "ci": {
+    "workflow_count": 9,
+    "all_conclusions": "success",
+    "workflows": [
+      { "name": "Clean Cangjie Build", "run_id": 39966657771, "conclusion": "success", "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39966657771" },
+      { "name": "M7-033 docs", "run_id": 39966658137, "conclusion": "success", "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/39966658137" },
+      { "name": "Architecture", "conclusion": "success" },
+      { "name": "Gate Harness", "conclusion": "success" },
+      { "name": "DNS carrier", "conclusion": "success" },
+      { "name": "NET-01", "conclusion": "success" },
+      { "name": "NET-02", "conclusion": "success" },
+      { "name": "NET-03", "conclusion": "success" },
+      { "name": "Threat Model", "conclusion": "success" }
+    ],
+    "main_document_deployment": "skipped"
+  },
+  "task_gate": {
+    "status": "INVALID",
+    "commands_executed": 0,
+    "task_check_report": "task-check-published-c0a19b4.json",
+    "global_validation_report": "validate-tasks-published-c0a19b4.json",
+    "blocker": "DEPENDENCY_INCOMPLETE: M10-003 dependency is not COMPLETE: M10-002"
+  },
+  "repository_check": {
+    "status": "NOT_RERUN_AT_THIS_REVISION",
+    "historical_revision": "e72bbb3c8a10670b716dcf263cdafff052102b84",
+    "historical_result": "scripts/check exited 1 in tooling tests: 584 tests, 25 failures, 16 errors, 4 skipped; this is not a result for c0a19b4."
+  },
+  "qualification_status": "BLOCKED",
+  "pr_state": "OPEN_DRAFT",
+  "issue_174": "OPEN",
+  "issue_175": "NOT_STARTED_OR_MODIFIED"
+}
