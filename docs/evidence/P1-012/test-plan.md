@@ -16,8 +16,11 @@ change product networking behavior.
 | P003 | Only an optional capability or clean-worktree condition is absent | Doctor reports DEGRADED without claiming PASS |
 | P004 | Task manifest uses schema v1, safe repository-relative paths and complete typed fields | Contract is accepted |
 | P005 | Manifest has an unknown schema/field, missing task, escaping path or invalid timeout | Contract fails closed |
-| P006 | Declared dependencies are present in backlog/status and acyclic | Dependency graph is accepted |
+| P006 | Declared dependency IDs exist in backlog/status and the complete manifest graph is acyclic | Contract validation accepts the structural graph |
 | P007 | A dependency is absent or manifests form a cycle | Contract validation fails closed |
+| P017 | A requested task has a complete transitive dependency closure while unrelated tasks may remain blocked | The selected task is not rejected by unrelated dependency state |
+| P018 | Repository-wide validation or check runs while any declared dependency is incomplete | Global mode returns INVALID before selecting or executing acceptance commands |
+| P019 | An explicit task ID accompanies a repository-wide fast/full check | Repository-wide dependency strictness is unchanged and the supplied ID is still validated |
 | P008 | Fast/task/full validation selects only non-long commands | Selected commands execute with bounded capture and stable status/exit |
 | P009 | A long command is reachable from fast/full or a task command has inconsistent long metadata | Validation rejects the contract before execution |
 | P010 | Long validation explicitly selects a task's long commands | Only long commands execute; no implicit fallback |
@@ -53,10 +56,16 @@ change product networking behavior.
 | S004 | Unknown schema/field, missing task, path escape or invalid timeout | P005 | Validation fails before command execution | Assert stable INVALID result and exact structured issue code | boundary,error | P0 |
 | S005 | Missing dependency and two manifests with a dependency cycle | P007 | Validation fails closed | Assert missing ID or cycle members are reported | error,regression | P0 |
 | S006 | Fast, task and full selection over mixed command metadata | P008,P009 | Fast/full never select long commands and malformed long placement is rejected | Assert selected command IDs and zero long executions | safety,regression | P0 |
+| S013 | Requested task has a COMPLETE transitive dependency closure; unrelated task has a BLOCKED dependency | P006,P017 | Only the requested task's dependency closure determines dependency readiness | Assert selected task passes; selecting the blocked task fails with DEPENDENCY_INCOMPLETE | boundary,regression | P0 |
+| S014 | An unrelated manifest has a BLOCKED dependency; invoke global and selected-task modes | P006,P017,P018 | Global validation/check/all-task evidence reject before command execution; selected-task readiness depends only on its transitive closure | Assert global modes report DEPENDENCY_INCOMPLETE with no command results; selected task passes only with a complete closure | global-readiness,regression | P0 |
+| S015 | Invoke the real task-check CLI with `check task TEST-001 --json --output receipt` for a selected task while an unrelated task has a BLOCKED dependency | P006,P016,P017 | The selected command executes and the receipt records PASS without running the unrelated task | Assert CLI exit, receipt status, selected command output, and absent unrelated-command marker | integration,regression | P0 |
+| S016 | The selected task's dependency exists only in the backlog and status with COMPLETE, or a transitive plan-only leaf is BLOCKED; a dependency-only ID appears in planning rows without a manifest | P006,P017 | A COMPLETE plan-only leaf satisfies the selected closure; a BLOCKED plan-only leaf rejects the selected task | Assert selected acceptance and DEPENDENCY_INCOMPLETE detail naming the leaf | boundary,regression | P0 |
+| S017 | The selected task's own evidence is current (source-bound PASS evidence for the selected task) while an unrelated task has a BLOCKED dependency | P012,P017,P018 | Selected-task freshness passes while repository-wide freshness rejects before selecting tasks | Assert PASS for the selected task and FAIL with zero task results globally | regression,security | P0 |
+| S018 | Fast/full check invoked with an unknown ID, and with a known ID whose repository graph is invalid | P018,P019 | An unknown ID is rejected as TASK_MISSING; a known ID leaves the global dependency verdict unchanged | Assert TASK_MISSING detail names the ID, and assert the known-ID run reports the same global DEPENDENCY_INCOMPLETE with zero commands | boundary,regression | P0 |
 | S007 | Explicit long selection for a task with or without long commands | P010 | Only declared long commands run; no-long task returns stable SKIPPED | Assert command inventory and exit code | boundary | P1 |
 | S008 | PASS/nonzero/timeout command through shared command runner | P008,P015,P016 | Result, duration, bounded excerpts and full log paths are retained | Assert stable exit mapping and truncation flags | normal,error | P0 |
 | S009 | Existing report with injected failure before replace, followed by success | P011 | Existing report survives failure; success atomically replaces it | Assert old bytes remain then complete JSON appears | fault-injection | P0 |
-| S010 | Current P1-012 evidence index and unchanged files | P012 | Single-task and `--all` freshness checks PASS | Assert report SHA, source SHA, task/platform/toolchain and acceptance PASS | normal | P0 |
+| S010 | A valid source-bound evidence index and unchanged candidate files | P012 | Selected-task freshness check passes | Assert report/source digests, task/platform/toolchain, and PASS acceptance match | normal | P0 |
 | S011 | Escaping/missing report, stale report digest or changed source | P013 | Check returns FAIL for contract faults or STALE for drift | Assert no old PASS is reused and affected path is named | boundary,regression | P0 |
 | S012 | Evidence index or acceptance report says SKIPPED while summary says PASS | P014 | Check fails closed | Assert SKIPPED cannot satisfy PASS | security,regression | P0 |
 
@@ -72,13 +81,21 @@ change product networking behavior.
 | T006 | S009 | P011 | Injected atomic-write failure | No partial report replacement | Assert byte-for-byte preservation and later valid JSON | unit,fault-injection |
 | T007 | S010,S011 | P012,P013 | Current evidence, stale digest, missing/escaping report and source drift | PASS then STALE/FAIL | Assert drift category and nonzero exit | unit,regression |
 | T008 | S012 | P014 | SKIPPED acceptance disguised by PASS summary | FAIL | Assert successful acceptance requires every report PASS | unit,security |
-| T009 | S003,S006,S010 | P004,P006,P008,P012 | Public scripts against repository P1-012 | Task check and freshness check PASS | Assert machine reports and stable zero exits | integration |
-| T010 | S001,S006,S008 | P001,P008,P009,P015 | `scripts/check-fast` and `scripts/check-full` | Both exclude long profiles; full delegates to existing `scripts/check` | Assert command inventory and no soak/profile command | integration |
+| T009 | S003,S006,S014 | P004,P006,P008,P018 | Public scripts against P1-012 with M10-004 → M10-003 incomplete | Task check passes; global validation, fast/full, and all-task evidence fail before execution | Assert task PASS and global DEPENDENCY_INCOMPLETE with no selected commands; current evidence remains BLOCKED | integration,regression |
+| T010 | S001,S006,S008,S014 | P001,P008,P009,P015,P018 | `scripts/check-fast` and `scripts/check-full` with ready and incomplete dependency graphs | Ready graph excludes long commands; incomplete graph fails before selection; full delegates only after readiness passes | Assert no soak/profile command and zero command results on dependency failure | integration |
+| T011 | S013 | P006,P017 | Temporary manifests with unrelated and transitive incomplete dependencies | Selected task passes only when its full dependency closure is COMPLETE | Assert unrelated BLOCKED dependency does not reject selected task; transitive BLOCKED dependency is rejected | unit,regression |
+| T012 | S014 | P006,P017,P018 | Temporary manifests with a blocked unrelated dependency | `validate-tasks`, fast/full, and all-task evidence reject; selected-task checks retain closure scope | Assert global invalidity and zero commands, plus selected-closure behavior | unit,integration,regression |
+| T013 | S015 | P006,P016,P017 | Temporary manifests with a COMPLETE selected closure and unrelated BLOCKED closure | Actual CLI writes a PASS receipt and executes only selected commands | Assert exit 0, command log content, and no unrelated marker | integration,regression |
+| T014 | S016 | P006,P017 | Temporary manifests whose selected closure ends in a plan-only dependency ID | COMPLETE plan-only leaf accepted; BLOCKED plan-only leaf rejected | Assert selected validation passes and DEPENDENCY_INCOMPLETE names the leaf | unit,regression |
+| T016 | S018 | P018,P019 | Fast/full selection with an unknown task ID and with a known ID over a blocked unrelated graph | Unknown ID fails before execution; known ID keeps repository-wide rejection | Assert real CLI exit 2, receipt mode/task_id/issues, and no command results | unit,integration,regression |
+| T015 | S017 | P012,P017,P018 | Current source-bound evidence for the selected task and an unrelated blocked task | Selected freshness passes while global freshness rejects | Assert PASS status for one task and FAIL with empty task results globally | unit,regression |
 
 ## Evidence boundary
 
-The checked-in task report will describe only commands run for P1-012 on the
-native Linux glibc host. A digest change or source drift invalidates that PASS.
+The checked-in task report covers only P1-012's selected task commands on the
+native Linux glibc host. Global readiness is recorded separately; the active
+evidence index is BLOCKED and is not a PASS seal. A digest change or source
+drift invalidates any future PASS seal.
 The one-hour SSE profile, 24-hour soak, and all other explicitly long gates are
 outside this task and must remain unexecuted.
 

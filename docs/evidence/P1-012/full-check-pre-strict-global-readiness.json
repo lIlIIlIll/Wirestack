@@ -1,0 +1,15 @@
+{
+  "command": "scripts/check-full --json --output docs/evidence/P1-012/full-check.json",
+  "duration_ms": 28727.564,
+  "exit_code": 1,
+  "interpretation": "Observed in an earlier requalification before strict global dependency readiness. This summary is not current qualification; the original report remains in the earlier PR history.",
+  "kind": "pre-strict-global-readiness-full-check-summary",
+  "schema_version": 1,
+  "status": "FAIL",
+  "test_summary": {
+    "errors": 16,
+    "failures": 25,
+    "run": 584,
+    "skipped": 4
+  }
+}
