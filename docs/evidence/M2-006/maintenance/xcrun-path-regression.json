@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "task_id": "M2-006",
+  "status": "NOT_QUALIFIED",
+  "initial_native_run": {
+    "run_id": 41691126246,
+    "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41691126246",
+    "source_revision": "1893b29c716abaa19a4001c87e26d2e20f17d358",
+    "result": "FAIL",
+    "failed_stage": "build_test_link_stub",
+    "exception_type": "FileNotFoundError",
+    "requested_executable": "<XCODE_PATH>",
+    "selected_cases_executed": false
+  },
+  "source_change": {
+    "path": "tools/gates/m2_006_apple_resolver.py",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8ad3cf1c3ea27393728900520554abb9484593671c463d80a5d03b388cbc2b3e"
+    },
+    "boundary": "raw xcrun discovery output is operational; recorded command and log output remains sanitized"
+  },
+  "linux_real_compiler_consumer": {
+    "before": {
+      "exit_code": 1,
+      "result": {
+        "status": "FAIL",
+        "error_type": "FileNotFoundError",
+        "used_redacted_xcode_path": true,
+        "native_macos_qualification": "NOT_RUN"
+      }
+    },
+    "after": {
+      "exit_code": 0,
+      "result": {
+        "status": "PASS",
+        "actual_consumer_exit": 42,
+        "native_macos_qualification": "NOT_RUN"
+      }
+    },
+    "fixture": "xcrun returns an executable path under a task-local Applications/Xcode_26.app/Contents/Developer tree; the resolved real compiler builds a C executable whose exit status is 42"
+  },
+  "gate_unit_tests": {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tools.gates.tests.test_m2_006_apple_resolver",
+      "-v"
+    ],
+    "exit_code": 0,
+    "run": 14,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "current_macos_native_acceptance": "NOT_RUN",
+  "mobile_ios": "NOT_RUN"
+}
