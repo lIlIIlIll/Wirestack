@@ -32,6 +32,13 @@ exclude only the named generated report, validation receipt and five command
 logs from the cleanliness check. Other tracked or untracked changes still fail;
 an output path that overlaps a bound source input also fails.
 
+`xcrun` discovery returns raw operational compiler, archiver and SDK paths.
+Only recorded commands, diagnostics and logs are sanitized. A redacted
+`<XCODE_PATH>` is never used as an executable or sysroot.
+The [executable-path regression receipt](maintenance/xcrun-path-regression.json)
+retains the failed native stage and the real Linux compiler-consumer red/green
+proof. That smoke and the gate unit tests do not qualify native macOS behavior.
+
 The current desktop receipt location is
 `docs/evidence/M2-006/current-desktop/macos-arm64/`. A desktop PASS requires
 the native gate to record all eight named cases as passed with no failed or
