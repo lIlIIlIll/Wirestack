@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "source_task": "M12-002",
+  "kind": "consumer-normalization-regression",
+  "status": "PASS",
+  "task_status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "scope": "producer-normalized consumer and optional-archive paths roundtrip through the actual binary verifier with real compiled fixture bytes",
+  "before": {
+    "command_scope": "shared four-case review red execution",
+    "combined_exit_code": 1,
+    "target_case": "BinaryInputSelectionTests.test_capture_normalized_consumer_paths_roundtrip_with_actual_hashes",
+    "target_outcome": "ERROR",
+    "reason": "installed consumer differs from its capture: stable-native/service"
+  },
+  "after": {
+    "command_scope": "M3 plus all four M12 verifier modules",
+    "combined_exit_code": 1,
+    "combined_tests_run": 224,
+    "combined_failures": 3,
+    "combined_errors": 3,
+    "combined_skipped": 1,
+    "m12_scope_failures": 0,
+    "m12_scope_errors": 0,
+    "m12_scope_existing_skip": "SourceSdkEvidenceTests has no real SDK/capture selectors",
+    "target_case_outcome": "ok",
+    "unrelated_failure_scope": "M3 synthetic shared output omitted the required complete package/project summary structure; corrected separately"
+  },
+  "sources": {
+    "tools/m12_002_binary.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c6596275adfff3a96ff8b2e3336357109194ae72e604b238e055bca21289c380"
+    },
+    "tools/tests/test_m12_002_deployment.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69b186ea3d97fd56271b91d6abe5a7e269f392062959531c34b32f38e3a161d0"
+    }
+  },
+  "boundary": "The complete M12 module selection executed in the combined run and reported no M12 failure/error. Its overall command did not pass because the Core fixture failed. This receipt does not relabel that command as exit0 and does not claim a native SDK/platform matrix.",
+  "logs": [
+    {
+      "path": "docs/evidence/M12-002/blocker-maintenance/consumer-normalization-before.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a881d5984b10618b5a6fd523610be7ef7cf89c696c738f09dc97c650042245d0"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/blocker-maintenance/consumer-normalization-after-combined.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f40bf1e17511112150821f34a4203e7b10fc730515c39f23c7695fdf104709b1"
+      }
+    }
+  ]
+}

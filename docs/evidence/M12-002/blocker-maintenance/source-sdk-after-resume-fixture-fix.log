@@ -1,0 +1,94 @@
+test_ca_check_without_its_native_failure_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_ca_check_without_its_native_failure_is_rejected) ... ok
+test_changed_retained_log_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_changed_retained_log_is_rejected) ... ok
+test_complete_inventory_is_accepted (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_complete_inventory_is_accepted) ... ok
+test_diagnostic_on_stderr_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_diagnostic_on_stderr_is_rejected) ... ok
+test_duplicated_command_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_duplicated_command_is_rejected) ... ok
+test_incomplete_or_failed_ca_inventory_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_incomplete_or_failed_ca_inventory_is_rejected) ... ok
+test_omitted_command_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_omitted_command_is_rejected) ... ok
+test_reclassified_ca_claim_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_reclassified_ca_claim_is_rejected) ... ok
+test_reclassified_ca_expectation_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_reclassified_ca_expectation_is_rejected) ... ok
+test_success_scenario_that_merely_exits_zero_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_success_scenario_that_merely_exits_zero_is_rejected) ... ok
+test_timed_out_command_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_timed_out_command_is_rejected) ... ok
+test_wrong_negative_diagnostic_is_rejected (tools.tests.test_m12_002_source_sdk.CaDiagnosticTests.test_wrong_negative_diagnostic_is_rejected) ... ok
+test_host_pki_mount_matches_the_installed_ca_command_contract (tools.tests.test_m12_002_source_sdk.CaptureCommandAssemblyTests.test_host_pki_mount_matches_the_installed_ca_command_contract) ... ok
+test_capture_uses_only_the_allowlisted_environment_and_records_it (tools.tests.test_m12_002_source_sdk.CaptureEnvironmentTests.test_capture_uses_only_the_allowlisted_environment_and_records_it) ... ok
+test_absolute_evidence_path_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_absolute_evidence_path_is_rejected) ... ok
+test_ca_check_without_its_native_failure_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_ca_check_without_its_native_failure_is_rejected) ... ok
+test_changed_retained_log_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_changed_retained_log_is_rejected) ... ok
+test_command_without_environment_binding_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_command_without_environment_binding_is_rejected) ... ok
+test_complete_inventory_is_accepted (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_complete_inventory_is_accepted) ... ok
+test_duplicated_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_duplicated_command_is_rejected) ... ok
+test_every_declared_command_has_a_contract (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_every_declared_command_has_a_contract) ... ok
+test_evidence_path_outside_the_tree_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_evidence_path_outside_the_tree_is_rejected) ... ok
+test_hidden_probe_must_hide_the_checkout (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_hidden_probe_must_hide_the_checkout) ... ok
+test_missing_invocation_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_missing_invocation_is_rejected) ... ok
+test_negated_trust_scenario_must_pass_its_own_ca_file (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_negated_trust_scenario_must_pass_its_own_ca_file) ... ok
+test_omitted_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_omitted_command_is_rejected) ... ok
+test_optional_host_ca_mount_is_accepted_for_all_system_scenarios (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_optional_host_ca_mount_is_accepted_for_all_system_scenarios) ... ok
+test_reclassified_ca_expectation_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_reclassified_ca_expectation_is_rejected) ... ok
+test_relocated_consumer_must_not_run_from_the_hidden_tree (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_relocated_consumer_must_not_run_from_the_hidden_tree) ... ok
+test_symlinked_evidence_path_cannot_escape_tree (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_symlinked_evidence_path_cannot_escape_tree) ... ok
+test_system_ca_scenario_must_mount_its_own_store (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_system_ca_scenario_must_mount_its_own_store) ... ok
+test_timed_out_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_timed_out_command_is_rejected) ... ok
+test_uncontrolled_environment_is_rejected (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_uncontrolled_environment_is_rejected) ... ok
+test_unrelated_mount_is_rejected_with_optional_host_ca_mount (tools.tests.test_m12_002_source_sdk.CommandContractTests.test_unrelated_mount_is_rejected_with_optional_host_ca_mount) ... ok
+test_ca_check_without_its_native_failure_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_ca_check_without_its_native_failure_is_rejected) ... ok
+test_changed_retained_log_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_changed_retained_log_is_rejected) ... ok
+test_complete_inventory_is_accepted (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_complete_inventory_is_accepted) ... ok
+test_duplicated_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_duplicated_command_is_rejected) ... ok
+test_omitted_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_omitted_command_is_rejected) ... ok
+test_reclassified_ca_expectation_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_reclassified_ca_expectation_is_rejected) ... ok
+test_timed_out_command_is_rejected (tools.tests.test_m12_002_source_sdk.CommandInventoryTests.test_timed_out_command_is_rejected) ... ok
+test_changed_consumer_source_digest_is_rejected (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_changed_consumer_source_digest_is_rejected) ... ok
+test_complete_recorded_inventory_is_accepted (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_complete_recorded_inventory_is_accepted) ... ok
+test_inventory_contains_every_app_file_and_sdk_fixture (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_inventory_contains_every_app_file_and_sdk_fixture) ... ok
+test_missing_or_extra_consumer_source_is_rejected (tools.tests.test_m12_002_source_sdk.ConsumerSourceInventoryTests.test_missing_or_extra_consumer_source_is_rejected) ... ok
+test_changed_helper_is_rejected (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_changed_helper_is_rejected) ... ok
+test_every_imported_helper_is_bound (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_every_imported_helper_is_bound) ... ok
+test_missing_helper_is_rejected (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_missing_helper_is_rejected) ... ok
+test_unbound_helper_report_is_rejected (tools.tests.test_m12_002_source_sdk.HelperBindingTests.test_unbound_helper_report_is_rejected) ... ok
+test_missing_compiler_is_reported_instead_of_fabricated (tools.tests.test_m12_002_source_sdk.NativeCompilerTests.test_missing_compiler_is_reported_instead_of_fabricated) ... ok
+test_present_compiler_resolves_to_an_executable (tools.tests.test_m12_002_source_sdk.NativeCompilerTests.test_present_compiler_resolves_to_an_executable) ... ok
+test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates (tools.tests.test_m12_002_source_sdk.ResumeCaptureTests.test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates) ... ERROR
+test_added_consumer_source_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_added_consumer_source_is_rejected) ... ok
+test_changed_build_options_are_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_build_options_are_rejected) ... ok
+test_changed_capture_runner_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_capture_runner_is_rejected) ... ok
+test_changed_consumer_source_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_consumer_source_is_rejected) ... ok
+test_changed_helper_closure_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_helper_closure_is_rejected) ... ok
+test_changed_native_compiler_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_native_compiler_is_rejected) ... ok
+test_changed_tls_fixture_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_changed_tls_fixture_is_rejected) ... ok
+test_live_operational_commands_are_rerun_after_resume (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_live_operational_commands_are_rerun_after_resume) ... ok
+test_matching_retained_inputs_are_accepted (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_matching_retained_inputs_are_accepted) ... ok
+test_unbound_helper_closure_cannot_resume (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_unbound_helper_closure_cannot_resume) ... ok
+test_unbound_native_compiler_is_rejected (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_unbound_native_compiler_is_rejected) ... ok
+test_unbound_tls_fixture_cannot_resume (tools.tests.test_m12_002_source_sdk.ResumeDriftTests.test_unbound_tls_fixture_cannot_resume) ... ok
+test_retained_binary_must_still_match (tools.tests.test_m12_002_source_sdk.RetainedBinaryTests.test_retained_binary_must_still_match) ... ok
+setUpClass (tools.tests.test_m12_002_source_sdk.SourceSdkEvidenceTests) ... skipped 'Set WIRESTACK_SOURCE_SDK_REPORT, WIRESTACK_SOURCE_SDK_ROOT and WIRESTACK_SOURCE_CAPTURE_ROOT to real captured evidence'
+test_absent_capture_root_selector_is_unset (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_absent_capture_root_selector_is_unset) ... ok
+test_capture_root_selector_resolves_the_environment (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_capture_root_selector_resolves_the_environment) ... ok
+test_fixture_from_another_profile_cannot_stand_in (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_fixture_from_another_profile_cannot_stand_in)
+The report's declared profile selects the directory; a sibling profile is not read. ... ok
+test_fixture_must_carry_a_byte_digest (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_fixture_must_carry_a_byte_digest) ... ok
+test_malformed_byte_digest_is_rejected (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_malformed_byte_digest_is_rejected) ... ok
+test_missing_fixture_inventory_is_rejected (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_missing_fixture_inventory_is_rejected) ... ok
+test_mutated_fixture_is_rejected (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_mutated_fixture_is_rejected) ... ok
+test_one_file_cannot_stand_in_for_every_fixture (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_one_file_cannot_stand_in_for_every_fixture) ... ok
+test_removed_fixture_is_rejected (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_removed_fixture_is_rejected) ... ok
+test_retained_fixture_bytes_are_accepted (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_retained_fixture_bytes_are_accepted) ... ok
+test_swapped_fixtures_are_rejected (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_swapped_fixtures_are_rejected) ... ok
+test_unbound_fixture_is_rejected (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_unbound_fixture_is_rejected) ... ok
+test_unselected_capture_root_is_a_controlled_refusal (tools.tests.test_m12_002_source_sdk.TlsFixtureBindingTests.test_unselected_capture_root_is_a_controlled_refusal) ... ok
+
+======================================================================
+ERROR: test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates (tools.tests.test_m12_002_source_sdk.ResumeCaptureTests.test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_m12_002_source_sdk.py", line 243, in test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates
+    'native_cc_digest': native_cc,
+                        ^^^^^^^^^
+NameError: name 'native_cc' is not defined
+
+----------------------------------------------------------------------
+Ran 78 tests in 0.516s
+
+FAILED (errors=1, skipped=1)

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "source_task": "M12-002",
+  "kind": "blocker-maintenance-regression",
+  "status": "PASS",
+  "task_status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "source_state": "owner working files before integrated source freeze",
+  "sources": {
+    "tools/m12_002_source_sdk.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1281a75fa77713a4497b6e8c4f09a9cbe177e5456b1a3977123061c33b69b82e"
+    },
+    "tools/m12_002_binary.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2a2ee2a65a27dcbacdb058e4de8551817136beddfd00b749769be60af3cd670a"
+    },
+    "tools/m12_002_platform.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "190ab88fadb07e2ed9c31b86ad8df566b9a6e892757d2d881809caf45dd0dc8a"
+    },
+    "tools/m12_002_deployment.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a25dc1685963fd30ab3406e6e0603fd5cb47ea4f4c8cf83b3232bdead533a04a"
+    },
+    "tools/tests/test_m12_002_source_sdk.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dcd6e808c206ff8dc0b3f11c02e3c527394a6322c7a654a8ad677566f2778ecb"
+    },
+    "tools/tests/test_m12_002_binary.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8c3fe729615545d23c289226b1bd13927a225b2b640690aba44f119be30ed1ec"
+    },
+    "tools/tests/test_m12_002_platform.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "82902893cffac3fdd8bbcc26ad0a5f023915639fafe4974b92cdba032d0e35f6"
+    },
+    "tools/tests/test_m12_002_deployment.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "11e5bae582f4ce97f34b62795276fa8219173d3008b8b610e4e7b1b8176ae28e"
+    },
+    "tools/tasks/M12-002.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cdef6f3f069bbc85a457af40f839929bdade2ea02f88d9ed75ce2255c1dd32cb"
+    }
+  },
+  "result": {
+    "tests_run": 194,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skip_reason": "real source SDK/capture evidence selectors not supplied",
+    "current_live_verifier_exit": 1,
+    "current_live_verifier_reason": "task source inventory is incomplete"
+  },
+  "logs": [
+    {
+      "path": "docs/evidence/M12-002/blocker-maintenance/platform-owner.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5891fb232c06e5bc4e2357c3d384995fa5a51110f8978ce0ce7a0e7599f92557"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/blocker-maintenance/platform-owner-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4d4f1ebbe1930a8d7b4a2a1b522177a1bac6acc4b3c4711f0c11d9c52c9f825f"
+      }
+    },
+    {
+      "path": "docs/evidence/M12-002/blocker-maintenance/platform-current-refusal.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "82b429cacc112682aef1aaa0e7666c1fd5e0109f46df612d231564d37a656211"
+      }
+    }
+  ],
+  "boundary": "Behavioral fixture and verifier maintenance only. No historical report was requalified and no missing native platform, full SDK/VM matrix, security approval or release qualification is claimed."
+}
