@@ -32,13 +32,32 @@
     },
     {
       "argv": [
-        "scripts/check-fast",
-        "--json"
+        "python3",
+        "tools/architecture_guard.py",
+        "--root",
+        ".",
+        "--format",
+        "json"
       ],
       "gate": "task",
-      "id": "fast-repository-check",
+      "id": "architecture-guard",
       "long_running": false,
-      "timeout_seconds": 600
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/evidence_digest.py",
+        "--root",
+        ".",
+        "inventory",
+        "--output",
+        "docs/evidence/P1-014/digest-inventory.json"
+      ],
+      "gate": "task",
+      "id": "digest-callsite-inventory",
+      "long_running": false,
+      "timeout_seconds": 120
     },
     {
       "argv": [
