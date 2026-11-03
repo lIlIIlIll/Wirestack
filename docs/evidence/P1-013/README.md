@@ -2,7 +2,9 @@
 
 ## Status
 
-COMPLETE
+Current qualification requires the current canonical repository gate and a valid
+evidence seal. The records below describe historical acceptance and do not
+qualify a new source candidate.
 
 ## Scope
 
@@ -15,13 +17,18 @@ digest.
 The task also updates the native dependency regression expectation for the
 implemented Darwin resolver path. Unknown platforms must still fail closed.
 
+The focused development/release regression harness now establishes the same
+`tools` module search path as the candidate CLI before importing it. It can run
+independently of unittest discovery order. Structural fixture validation and
+strict current-source validation retain their separate behavior.
+
 ## Release boundary
 
 This task does not refresh M7-019 through M7-031 evidence and does not claim the
 current source tree is a qualified release candidate. No long-duration gate is
 part of P1-013.
 
-## Verification
+## Historical verification
 
 - The focused P1-013 regression suite passed 69 tests with no failures or
   errors.
@@ -34,7 +41,7 @@ part of P1-013.
   the current tree because their point-in-time release sources or artifact are
   stale. P1-013 does not refresh or promote them.
 
-The current-toolchain requalification used Cangjie
+That historical toolchain requalification used Cangjie
 `1.1.0-alpha.20260829040003`, CJPM `1.1.3` and Linux x86_64 glibc. It ran from
 the exact P1-012 requalification commit
 `f65893573d536aab46d05e8daf606c46c86eab24`.
