@@ -1,0 +1,2 @@
+{"case": "valid-license", "exit_code": 0, "stdout": "M0-016 validation: PASS\n", "stderr": ""}
+{"case": "same-length-license-mutation", "exit_code": 1, "stdout": "", "stderr": "M0-016 validation: FAIL: provider license file digest mismatch\n"}
