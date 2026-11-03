@@ -3,19 +3,28 @@ name: M2-004 Windows SystemResolver
 on:
   push:
     branches:
-      - task/M2-004-windows-system-resolver
+      - fix/M2-004-sts-requalification
     paths:
+      - ".gitignore"
       - "build.cj"
       - "cjpm.toml"
       - "native/resolver/windows/**"
-      - "src/internal/resolver/**"
+      - "src/**"
       - "tools/build_native_dependencies.py"
       - "tools/build_resolver.py"
       - "tools/build_windows_resolver.py"
+      - "tools/evidence_digest.py"
       - "tools/gates/m2_004_windows_resolver.py"
       - "tools/gates/native/m2_004_tls_link_stub.c"
       - "tools/gates/tests/test_m2_004_windows_resolver.py"
+      - "tools/gates/tests/test_sts_sdk_identity.py"
       - ".github/workflows/m2-004-windows-system-resolver.yml"
+      - "docs/evidence/M2-004/test-plan.md"
+      - "docs/references/m2-004-sts-sdk.json"
+      - "tools/gates/sts_sdk_identity.py"
+      - "tools/tasks/M2-004.json"
+      - "tools/tests/test_build_resolver.py"
+      - "tools/tests/test_m7_029_independent_security_review.py"
   workflow_dispatch:
 
 permissions:
@@ -27,54 +36,118 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out exact revision
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@v7
         with:
           clean: true
           fetch-depth: 1
 
-      - name: Resolve the latest complete Cangjie nightly
-        id: cangjie-nightly
+      - name: Install pinned Windows STS SDK
+        id: cangjie-sdk
         shell: pwsh
-        run: python tools/latest_cangjie_nightly.py --github-output $env:GITHUB_OUTPUT
-
-      - name: Install the resolved Cangjie toolchain
-        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
-        with:
-          channel: nightly
-          version: ${{ steps.cangjie-nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie.zip
+        run: |
+          $pin = Get-Content -Raw docs/references/m2-004-sts-sdk.json | ConvertFrom-Json
+          $archivePath = Join-Path $env:RUNNER_TEMP $pin.archive.name
+          $extractRoot = Join-Path $env:RUNNER_TEMP "m2-004-cangjie-sts-$($pin.version)"
+          Invoke-WebRequest -Uri $pin.archive.url -OutFile $archivePath
+          $verifyArchive = @'
+          import json, sys
+          from pathlib import Path
+          from tools import evidence_digest
+          pin = json.loads(Path("docs/references/m2-004-sts-sdk.json").read_text(encoding="utf-8"))
+          actual = evidence_digest.artifact_byte_digest(Path(sys.argv[1])).to_json()
+          expected = {"domain": evidence_digest.ARTIFACT_BYTE_DOMAIN, "sha256": pin["archive"]["sha256"]}
+          if not evidence_digest.artifact_byte_sha256_equal(actual, expected):
+              raise SystemExit("Official Cangjie SDK archive digest does not match the committed pin.")
+          '@
+          python -c $verifyArchive $archivePath
+          if ($LASTEXITCODE -ne 0) { throw "Pinned SDK archive digest verification failed." }
+          if ((Get-Item $archivePath).Length -ne [long]$pin.archive.size_bytes) {
+            throw "Official Cangjie SDK archive size does not match the committed pin."
+          }
+          Expand-Archive -Path $archivePath -DestinationPath $extractRoot -Force
+          $sdkRoot = Join-Path $extractRoot $pin.archive.archive_prefix
+          $envsetup = Join-Path $sdkRoot "envsetup.ps1"
+          if (-not (Test-Path -LiteralPath $envsetup -PathType Leaf)) {
+            throw "Pinned Windows STS archive does not contain the expected envsetup.ps1."
+          }
+          . $envsetup
+          $env:CANGJIE_HOME = $sdkRoot
+          $resolvedCjc = (Get-Command cjc -ErrorAction Stop).Source
+          $resolvedCjpm = (Get-Command cjpm -ErrorAction Stop).Source
+          $sdkRootPrefix = [IO.Path]::GetFullPath($sdkRoot) + [IO.Path]::DirectorySeparatorChar
+          foreach ($toolPath in @($resolvedCjc, $resolvedCjpm)) {
+            if (-not [IO.Path]::GetFullPath($toolPath).StartsWith(
+                $sdkRootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+              throw "Cangjie tool resolved outside the pinned SDK root."
+            }
+          }
+          $cjcVersion = cjc -v 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "Pinned cjc version probe failed." }
+          $cjpmVersion = cjpm --version 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "Pinned cjpm version probe failed." }
+          $versionPattern = "(?<![A-Za-z0-9.+-])$([regex]::Escape([string]$pin.version))(?![A-Za-z0-9.+-])"
+          $targetPattern = "(?m)^\s*Target:\s*$([regex]::Escape([string]$pin.platform.native_target))\s*$"
+          $prereleasePattern = "(?i)(nightly|alpha|beta|dev|snapshot)"
+          if ($cjcVersion -notmatch $versionPattern -or
+              $cjpmVersion -notmatch $versionPattern -or
+              $cjcVersion -match $prereleasePattern -or
+              $cjpmVersion -match $prereleasePattern) {
+            throw "Cangjie compiler and CJPM must both report official STS $($pin.version)."
+          }
+          if ($cjcVersion -notmatch $targetPattern) {
+            throw "Pinned cjc target does not match the official Windows SDK pin."
+          }
+          "CANGJIE_HOME=$sdkRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "M2_004_SDK_ARCHIVE=$archivePath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          @(
+            "$sdkRoot\bin"
+            "$sdkRoot\tools\bin"
+            "$sdkRoot\tools\lib"
+            "$sdkRoot\runtime\lib\windows_x86_64_cjnative"
+          ) | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          Write-Output $cjcVersion
+          Write-Output $cjpmVersion
 
       - name: Validate task tooling
         shell: pwsh
         run: |
           python -m unittest tools.tests.test_build_resolver -v
           python -m unittest tools.gates.tests.test_m2_004_windows_resolver -v
+          python -m unittest tools.gates.tests.test_sts_sdk_identity -v
           python tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M2-004/test-plan.md --json
 
       - name: Run native Windows resolver acceptance
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force build/gates/m2-004 | Out-Null
+          $evidenceRoot = "docs/evidence/M2-004/current-desktop/windows-x86_64"
+          New-Item -ItemType Directory -Force $evidenceRoot | Out-Null
           python tools/gates/m2_004_windows_resolver.py `
             --repo-root . `
+            --sdk-root $env:CANGJIE_HOME `
+            --sdk-archive $env:M2_004_SDK_ARCHIVE `
             --revision $env:GITHUB_SHA `
-            --output build/gates/m2-004/report.json
+            --output "$evidenceRoot/report.json"
 
-      - name: Validate exact-revision report
+      - name: Validate exact-source report and SDK installation
         shell: pwsh
         run: |
+          $evidenceRoot = "docs/evidence/M2-004/current-desktop/windows-x86_64"
           python tools/gates/m2_004_windows_resolver.py `
-            --validate-report build/gates/m2-004/report.json `
+            --repo-root . `
+            --sdk-root $env:CANGJIE_HOME `
+            --sdk-archive $env:M2_004_SDK_ARCHIVE `
+            --validate-report "$evidenceRoot/report.json" `
             --expected-revision $env:GITHUB_SHA `
-            --validation-output build/gates/m2-004/validation.json
+            --validation-output "$evidenceRoot/validation.json"
 
-      - name: Upload exact-revision evidence
+      - name: Upload exact-source STS evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v7
         with:
-          name: m2-004-windows-system-resolver-${{ github.sha }}
+          name: m2-004-windows-x86_64-sts-1.2.0-${{ github.sha }}
           path: |
-            build/gates/m2-004/report.json
-            build/gates/m2-004/validation.json
+            docs/evidence/M2-004/current-desktop/windows-x86_64/report.json
+            docs/evidence/M2-004/current-desktop/windows-x86_64/validation.json
+            docs/evidence/M2-004/current-desktop/windows-x86_64/logs/**
           if-no-files-found: error
           retention-days: 14
