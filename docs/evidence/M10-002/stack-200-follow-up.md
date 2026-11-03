@@ -1,6 +1,10 @@
 # M10-002 current-source acceptance follow-up
 
-This report records the current #216 Q4 source and its acceptance blockers. The P1-012 dependency-scope correction from PR #220 is integrated into the local #216 ancestry; #220 remains a separate draft PR and no merge is claimed. The tested production-source revision is `e7c4bba5faf568317edd580e26eef118cc59057d`; later changes in this follow-up update evidence and task-status records only.
+The retained acceptance below records the earlier #216 Q4 source and its
+failures. Current blocker maintenance is recorded separately in
+[`closure-regressions/proof.json`](stack-200-review/closure-regressions/proof.json).
+The maintenance source commit is `e05a13910c752417c3782b1d833bb27c761b58fc`;
+it is not yet a final integrated acceptance candidate.
 
 ## Scope and dependency state
 
@@ -8,9 +12,13 @@ M10-002 implements bounded resource ownership and HTTP/2 Q4 outbound DATA admiss
 
 The M10-002 task gate is `INVALID` (exit 2, `commands: []`) because its declared dependency M9-001 is BLOCKED. M9-001 is blocked by P1-015. The P1-012 validator fix is now in the local #216 ancestry, so the task check reaches M9-001 rather than the former plan-only prerequisite mismatch. Repository-wide `validate-tasks` is also `INVALID` (exit 2, no task IDs) at `M10-001 dependency is not COMPLETE: M9-001`.
 
-Related task-status edges were refreshed without marking blocked tasks complete. The evolution-task status graph now has the expected issue links and BLOCKED classifications; `python3 -m unittest tools.tests.test_m7_linux_task_graph -v` passes all 6 tests. M12-002 remains BLOCKED because M9-001 is incomplete. P1-012 remains BLOCKED because current global readiness is not established. M10-003 / #175 remains BLOCKED and unchanged.
+Related task-status edges were refreshed without marking blocked tasks complete.
+M12-002 and M10-003 / #175 remain BLOCKED. P1-012 task acceptance and a
+source-bound seal may PASS independently of global readiness when its own
+complete dependency closure passes. Its current qualification must still be
+regenerated; the historical global-readiness failure is not a PASS seal input.
 
-## Current-source acceptance
+## Retained acceptance before blocker maintenance
 
 Detailed machine-readable results: [`current-source-acceptance.json`](stack-200-review/current-source-acceptance.json). The updated scenario matrix and verification summary are [`scenario-matrix.json`](stack-200-review/scenario-matrix.json) and [`verification.json`](stack-200-review/verification.json).
 
@@ -33,3 +41,30 @@ The current task gate cannot complete, and the full native suite and repository-
 Prior independent reviews reported no findings on earlier PR heads; they are historical and are not a review of the refreshed #216 head. Previous published CI results likewise do not replace this local current-source acceptance.
 
 Keep PR #216 **OPEN and DRAFT**; do not mark it ready or merge it. Keep issue #174 open. Leave #175 open and unchanged; M10-003 has not started. Refresh the #216 description with the current report links and blockers. Reassess readiness only after M9-001 and all required acceptance gates are complete on the exact candidate.
+
+## Deterministic admission maintenance
+
+The pool now retains the outstanding waiter ID across off-lock connection
+discard. Only a successful reuse or reservation grants and removes that turn;
+exception cleanup has one scalar owner. The existing admission queue policy
+and the buffer-lease-before-flow-permit ordering are unchanged.
+
+A closed resource ledger now wins over cancellation or deadline for admission
+that has not completed. Open-ledger context semantics remain unchanged.
+The client regression waits for actual connector entry and aggregate queueing,
+checks structured `Closed` coordinates, joins both workers and verifies zero
+request, connection and waiter counts.
+
+The new pool interleaving failed before the production repair with zero
+retained waiters and same-key refill taking the slot first. The closed-ledger
+regression also failed before repair, while the open-ledger cancellation
+control passed. After repair, the pool, resource-budget and client-extension
+classes passed 23, 15 and 5 cases respectively with no errors or failures.
+Filter-excluded cases were not executed and are not qualification passes.
+Typed source and normalized log digests are retained in the proof report.
+
+These results prove the two specific defects. They do not identify which
+interleaving caused each historical full-suite failure and do not replace
+final integrated full-suite, installed-consumer, dependency or evidence gates.
+M10-002 remains BLOCKED pending those gates. No coverage or mutation claim is
+made.

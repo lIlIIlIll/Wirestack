@@ -50,13 +50,25 @@ class Handler <: HttpServerHandler {
             headers: HttpHeaders.builder().add("Content-Length", "7").build()))
     }
 }
-// The first failure is an actual refused TCP connection, not a synthetic exception.
+// Inject a real TCP failure before returning any request transport. The fixture
+// knows no HTTP bytes were submitted, even when the SDK exposes no native errno.
 class RetryConnector <: HttpConnector {
     private let calls = AtomicInt64(0)
     private let refused: SocketEndpoint
     init(port: UInt16) { refused = SocketEndpoint(loopback(), port) }
     public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
-        TcpStream.connect(if (calls.fetchAdd(1) == 0) { refused } else { endpoint }, context: context)
+        if (calls.fetchAdd(1) != 0) { return TcpStream.connect(endpoint, context: context) }
+        try {
+            let unexpected = TcpStream.connect(refused, context: context)
+            unexpected.close()
+        } catch (error: NetworkException) {
+            if (context.isCancellationRequested() || context.isDeadlineExceeded()) { throw error }
+            throw NetworkException(error.category, error.phase, error.code, error.message,
+                retryability: Retryability.SafeBeforeWrite, nativeCode: error.nativeCode,
+                localEndpoint: error.localEndpoint, remoteEndpoint: error.remoteEndpoint,
+                cause: Some(error))
+        }
+        throw IllegalStateException("controlled TCP refusal unexpectedly connected")
     }
 }
 // A caller-owned resolver deliberately supplies no resource-owner interface.

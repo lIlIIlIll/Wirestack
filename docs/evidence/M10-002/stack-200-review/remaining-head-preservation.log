@@ -1,0 +1,139 @@
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but apply origin/task/M3-031-provider-requalification
+Applied remote branch 'origin/task/M3-031-provider-requalification' to workspace
+$ but branch new evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb --above task/M3-031-provider-requalification
+Created branch 'evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb' above branch 'task/M3-031-provider-requalification'
+$ but move task/M3-031-provider-requalification --above evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+Stacked branch 'task/M3-031-provider-requalification' on top of branch 'evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb'
+$ but move lqy xyp ylq mtr vuv lwy qzv vml lny oql --branch evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+Moved lqy, xyp, ylq, mtr, vuv, lwy, qzv, vml, lny, oql to the tip of branch 'evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb'
+$ but push --dry-run evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+
+Dry run: Showing what would be pushed
+
+
+   Branch: evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+    → Would push to: origin/evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+    Commits: 10 unpushed commits
+
+
+Summary: Would push 10 commits across 1 branch
+
+Run without --dry-run to push these changes.
+$ git privacy-check
+$ $HOME/.config/git/hooks/pre-push origin https://github.com/lIlIIlIll/Wirestack.git
+[hook] running $HOME/.config/git/hooks/pre-push.d/10-privacy-check
+[hook] running $HOME/.config/git/hooks/pre-push.d/90-git-lfs
+$ but push evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+
+✓ Push completed successfully
+
+  evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb -> origin/evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb ((new branch) -> 2567b49b)
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but unapply evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb
+Unapplied stack with 'task/M3-031-provider-requalification', 'evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb' from workspace
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but apply origin/m7-030-frozen-artifact-prerequisite-stacked
+Applied remote branch 'origin/m7-030-frozen-artifact-prerequisite-stacked' to workspace
+$ but branch new evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f --above m7-030-frozen-artifact-prerequisite-stacked
+Created branch 'evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f' above branch 'm7-030-frozen-artifact-prerequisite-stacked'
+$ but move m7-030-frozen-artifact-prerequisite-stacked --above evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+Stacked branch 'm7-030-frozen-artifact-prerequisite-stacked' on top of branch 'evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f'
+$ but move yvz sru spq nsm pzn ylu tst uly owt qqn lqt pzv ssv xqz rwn wwz wkr pzq pvs mqv tzw rnp pzl wny --branch evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+Moved yvz, sru, spq, nsm, pzn, ylu, tst, uly, owt, qqn, lqt, pzv, ssv, xqz, rwn, wwz, wkr, pzq, pvs, mqv, tzw, rnp, pzl, wny to the tip of branch 'evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f'
+$ but push --dry-run evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+
+Dry run: Showing what would be pushed
+
+
+   Branch: evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+    → Would push to: origin/evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+    Commits: 24 unpushed commits
+
+
+Summary: Would push 24 commits across 1 branch
+
+Run without --dry-run to push these changes.
+$ git privacy-check
+$ $HOME/.config/git/hooks/pre-push origin https://github.com/lIlIIlIll/Wirestack.git
+[hook] running $HOME/.config/git/hooks/pre-push.d/10-privacy-check
+[hook] running $HOME/.config/git/hooks/pre-push.d/90-git-lfs
+$ but push evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+
+✓ Push completed successfully
+
+  evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f -> origin/evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f ((new branch) -> 812aec9c)
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but unapply evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f
+Unapplied stack with 'm7-030-frozen-artifact-prerequisite-stacked', 'evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f' from workspace
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but apply origin/fix/stack200-m12-002
+Applied remote branch 'origin/fix/stack200-m12-002' to workspace
+$ but branch new evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941 --above fix/stack200-m12-002
+Created branch 'evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941' above branch 'fix/stack200-m12-002'
+$ but move fix/stack200-m12-002 --above evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+Stacked branch 'fix/stack200-m12-002' on top of branch 'evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941'
+$ but move wrm uzy syp kxm ltw xyx nlr kwp prz wzm uzv szp nwv run xky onz uzw zkq tqq npm plw zwo mxk tps --branch evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+Moved wrm, uzy, syp, kxm, ltw, xyx, nlr, kwp, prz, wzm, uzv, szp, nwv, run, xky, onz, uzw, zkq, tqq, npm, plw, zwo, mxk, tps to the tip of branch 'evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941'
+$ but push --dry-run evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+
+Dry run: Showing what would be pushed
+
+
+   Branch: evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+    → Would push to: origin/evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+    Commits: 24 unpushed commits
+
+
+Summary: Would push 24 commits across 1 branch
+
+Run without --dry-run to push these changes.
+$ git privacy-check
+$ $HOME/.config/git/hooks/pre-push origin https://github.com/lIlIIlIll/Wirestack.git
+[hook] running $HOME/.config/git/hooks/pre-push.d/10-privacy-check
+[hook] running $HOME/.config/git/hooks/pre-push.d/90-git-lfs
+$ but push evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+
+✓ Push completed successfully
+
+  evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941 -> origin/evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941 ((new branch) -> bc20ad70)
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but unapply evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941
+Unapplied stack with 'fix/stack200-m12-002', 'evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941' from workspace
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+$ but apply origin/fix/M10-002-resource-owner-backpressure
+Applied remote branch 'origin/fix/M10-002-resource-owner-backpressure' to workspace
+$ but branch new evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0 --above fix/M10-002-resource-owner-backpressure
+Created branch 'evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0' above branch 'fix/M10-002-resource-owner-backpressure'
+$ but move fix/M10-002-resource-owner-backpressure --above evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0
+Stacked branch 'fix/M10-002-resource-owner-backpressure' on top of branch 'evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0'
+$ but move suo klx tom vry typ wyw wvv mkv xyq lyy yru zsx tnl qll slw svtn run vsz otq tmq vtk kms pms ols qpy nxm qpw svtl xnu wlk zlt yvm rln vtt nyu nsm mxl qsx rwx yqt zkq sxr zkz oyz nkn qnn mtw tvv uos szu ymr osr yno xym kyp nrs ysp kou xwy ull tzv uvx yxw kyu zqz zzo lqt pzv ssv xqz rwn wwz wkr pzq pvs mqv tzw rnp pzl wny --branch evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0
+Moved suo, klx, tom, vry, typ, wyw, wvv, mkv, xyq, lyy, yru, zsx, tnl, qll, slw, svt, run, vsz, otq, tmq, vtk, kms, pms, ols, qpy, nxm, qpw, svt, xnu, wlk, zlt, yvm, rln, vtt, nyu, nsm, mxl, qsx, rwx, yqt, zkq, sxr, zkz, oyz, nkn, qnn, mtw, tvv, uos, szu, ymr, osr, yno, xym, kyp, nrs, ysp, kou, xwy, ull, tzv, uvx, yxw, kyu, zqz, zzo, lqt, pzv, ssv, xqz, rwn, wwz, wkr, pzq, pvs, mqv, tzw, rnp, pzl, wny to the tip of branch 'evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0'
+$ but push --dry-run evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0
+
+Dry run: Showing what would be pushed
+
+
+   Branch: evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0
+    → Would push to: origin/evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0
+    Commits: 80 unpushed commits
+
+
+Summary: Would push 80 commits across 1 branch
+
+Run without --dry-run to push these changes.
+$ git privacy-check
+$ $HOME/.config/git/hooks/pre-push origin https://github.com/lIlIIlIll/Wirestack.git
+[hook] running $HOME/.config/git/hooks/pre-push.d/10-privacy-check
+[hook] running $HOME/.config/git/hooks/pre-push.d/90-git-lfs
+$ but push evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0
+
+✓ Push completed successfully
+
+  evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0 -> origin/evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0 ((new branch) -> fe773522)
+warning: redirecting to https://github.com/lIlIIlIll/Wirestack.git/
+{"preserved": 4, "new_commits_created": 0}
