@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "kind": "review-remediation-round",
+  "task_id": "M12-002",
+  "round": 3,
+  "status": "BLOCKED",
+  "completion_claim": false,
+  "release_qualification": "NOT_QUALIFIED",
+  "revision": {
+    "branch": "fix/stack200-m12-002",
+    "base_commit": "5f448b1ecdfc2cd297427b24457f0639ccd1aa65",
+    "publication": "PUBLISHED_TO_PR_229"
+  },
+  "scope": "Verifier contract, regression-test and documentation hardening only. No deployment profile was recaptured, no TLS fixture was regenerated, and no production runtime behavior changed. Tests were added and run for the edited Python modules; no native, SDK, VM or deployment acceptance was executed or claimed.",
+  "remediated_findings": [
+    {
+      "area": "deployment to binary verifier call contract",
+      "defect": "tools/m12_002_deployment.py called m12_002_binary.verify with five positional arguments while verify declares report, archive, sdks, fixture, work, wrapper, openssl_library, openssl_crypto_library and consumers. current_inputs() therefore raised TypeError, so no deployment verification could complete.",
+      "change": "selected_binary_inputs() requires WIRESTACK_BINARY_CAPTURE_ROOT, WIRESTACK_BINARY_WRAPPER, WIRESTACK_BINARY_OPENSSL_LIBRARY and WIRESTACK_BINARY_OPENSSL_CRYPTO_LIBRARY with no defaults, resolves them, requires the three file selections to exist and the two TLS libraries to be distinct, and passes all of them plus the report-declared installed consumers to verify() in its declared order. require_binary_tls_binding() re-checks that the selected SSL/crypto bytes equal the report's external_tls_fixture digests in the same verified path. selected_consumers() resolves each declared profile/app executable beneath the selected capture root and rejects a missing or undeclared identity.",
+      "tests": [
+        "BinaryInputSelectionTests.test_every_binary_input_is_an_explicit_selection",
+        "BinaryInputSelectionTests.test_a_missing_binary_selector_is_a_controlled_refusal",
+        "BinaryInputSelectionTests.test_a_selected_file_that_does_not_exist_is_rejected",
+        "BinaryInputSelectionTests.test_the_two_tls_libraries_must_be_distinct",
+        "BinaryInputSelectionTests.test_declared_consumers_resolve_under_the_selected_capture",
+        "BinaryInputSelectionTests.test_a_missing_installed_consumer_is_rejected",
+        "BinaryInputSelectionTests.test_undeclared_consumer_profiles_are_rejected",
+        "BinaryInputSelectionTests.test_call_shape_matches_the_binary_verifier_signature",
+        "BinaryInputSelectionTests.test_verify_is_called_with_the_selected_inputs",
+        "BinaryInputSelectionTests.test_a_tls_library_outside_the_report_is_rejected"
+      ]
+    },
+    {
+      "area": "published snapshot publication ordering",
+      "defect": "collect() wrote verification.json with status COMPLETE and only then called the verifier, so a refused verification left a COMPLETE snapshot behind.",
+      "change": "collect() builds the snapshot in memory, validates it through verify_snapshot() with the already-computed inputs, and only then publishes it with the repository atomic_json writer. A refused verification leaves the previous file untouched. verify_snapshot() now accepts an in-memory snapshot plus optional verified inputs and requires the recorded binary report to equal the verified one.",
+      "tests": [
+        "PublicationOrderingTests.test_a_valid_snapshot_is_accepted_in_memory",
+        "PublicationOrderingTests.test_failed_verification_publishes_no_snapshot",
+        "PublicationOrderingTests.test_collect_writes_nothing_when_verification_fails",
+        "PublicationOrderingTests.test_collect_publishes_after_the_snapshot_validates"
+      ],
+      "note": "The earlier review text reported that the COMPLETE write happened before the first binary verification. The actual order is current_inputs() (which includes the binary verifier) and then the COMPLETE write and verify_snapshot(); the defect that mattered was publishing before the snapshot itself validated, which is what this round fixes."
+    },
+    {
+      "area": "truncated disassembly capture/verifier contract",
+      "defect": "Capture.run published only the first 20 disassembly lines plus a truncation marker, Capture.scan derived raw_isa_presence from the complete raw output, and verify_scan_verdicts re-derived the counts from the truncated published log, which always returned UNAVAILABLE_TRUNCATED_DISASSEMBLY. Every capture was therefore rejected, and the raw-output digest in the marker was never used.",
+      "change": "Each disassembly command now declares disassembly_raw {truncated, digest}. Verification selects the retained complete raw output from the capture scratch directory, requires its bytes to match the declared digest, requires the published marker to agree with the declared truncation flag, and re-derives the mnemonic counts from the raw bytes. A missing raw file, a changed raw file, a dropped marker, a duplicated marker or a non-JSON marker all fail closed. Cached scan reuse additionally requires the prior raw output to still verify and copies it into the current attempt's namespace.",
+      "tests": [
+        "PublishedCaptureVerificationTests.test_captured_truncated_disassembly_is_accepted_by_the_verifier",
+        "PublishedCaptureVerificationTests.test_truncated_verdict_without_a_selected_raw_output_fails_closed",
+        "PublishedCaptureVerificationTests.test_missing_raw_disassembly_fails_closed",
+        "PublishedCaptureVerificationTests.test_changed_raw_disassembly_is_rejected",
+        "PublishedCaptureVerificationTests.test_raw_output_substitution_cannot_change_the_verdict",
+        "PublishedCaptureVerificationTests.test_published_log_cannot_drop_its_raw_binding",
+        "PublishedCaptureVerificationTests.test_two_raw_bindings_are_rejected",
+        "PublishedCaptureVerificationTests.test_malformed_raw_binding_is_rejected",
+        "RepeatedScanCacheTests.test_cached_scan_commands_are_rebound_to_current_attempt"
+      ]
+    },
+    {
+      "area": "retained TLS fixture binding",
+      "defect": "verify_tls_fixtures() compared each recorded TLS fixture digest with itself, which bound no fixture bytes at all and could never detect a mutated or swapped fixture.",
+      "change": "The digest objects are parsed into the typed artifact-byte domain, the seven fixtures must be pairwise distinct, and WIRESTACK_SOURCE_CAPTURE_ROOT must select the private capture root. The verifier re-hashes <root>/<profile>/<fixture> for the profile the report declares and rejects a missing, mutated, swapped or foreign-profile file. Private keys are never committed: only typed digests are published, and the fixture bytes stay in the private task scratch root.",
+      "tests": [
+        "TlsFixtureBindingTests.test_retained_fixture_bytes_are_accepted",
+        "TlsFixtureBindingTests.test_missing_fixture_inventory_is_rejected",
+        "TlsFixtureBindingTests.test_unbound_fixture_is_rejected",
+        "TlsFixtureBindingTests.test_one_file_cannot_stand_in_for_every_fixture",
+        "TlsFixtureBindingTests.test_fixture_must_carry_a_byte_digest",
+        "TlsFixtureBindingTests.test_malformed_byte_digest_is_rejected",
+        "TlsFixtureBindingTests.test_unselected_capture_root_is_a_controlled_refusal",
+        "TlsFixtureBindingTests.test_capture_root_selector_resolves_the_environment",
+        "TlsFixtureBindingTests.test_absent_capture_root_selector_is_unset",
+        "TlsFixtureBindingTests.test_mutated_fixture_is_rejected",
+        "TlsFixtureBindingTests.test_removed_fixture_is_rejected",
+        "TlsFixtureBindingTests.test_swapped_fixtures_are_rejected",
+        "TlsFixtureBindingTests.test_fixture_from_another_profile_cannot_stand_in",
+        "BinaryInputSelectionTests.test_the_source_capture_root_is_required",
+        "BinaryInputSelectionTests.test_a_missing_source_capture_directory_is_rejected"
+      ]
+    }
+  ],
+  "files_changed": [
+    "tools/m12_002_deployment.py",
+    "tools/m12_002_binary.py",
+    "tools/m12_002_source_sdk.py",
+    "tools/tests/test_m12_002_deployment.py",
+    "tools/tests/test_m12_002_binary.py",
+    "tools/tests/test_m12_002_source_sdk.py",
+    "docs/guides/linux-binary-compatibility.md",
+    "docs/guides/linux-source-sdk-compatibility.md",
+    "docs/guides/linux-deployment-matrix.md",
+    "docs/evidence/M12-002/README.md",
+    "docs/evidence/M12-002/review-remediation/round-3.json"
+  ],
+  "verification": [
+    {
+      "command": "python3 -m unittest tools.tests.test_m12_002_deployment tools.tests.test_m12_002_binary tools.tests.test_m12_002_source_sdk",
+      "result": "Run during this round: Ran 161 tests, OK (skipped=1). SourceSdkEvidenceTests skipped because the real captured source-SDK report and SDK root were not supplied.",
+      "scope": "Edited Python modules only; no capture, SDK, native VM or deployment acceptance."
+    },
+    {
+      "command": "python3 tools/architecture_guard.py --root . --format text",
+      "result": "architecture guard: PASS"
+    }
+  ],
+  "qualification_blockers": [
+    "M12-002 remains BLOCKED and NOT_QUALIFIED. No source, binary or native-platform profile was recaptured.",
+    "The selected M12-001 development archive, a second authorized supported SDK, the native KVM guest with the selected glibc 2.44 runtime, and the retained binary/source capture roots are unavailable in this clone.",
+    "The repository task gate still exits before running task commands because the dependency closure includes blocked M10-003."
+  ],
+  "not_run": [
+    "M12-002 source-SDK capture or --verify",
+    "M12-002 binary capture or --verify",
+    "M12-002 native-platform capture or --verify",
+    "python3 tools/m12_002_deployment.py collect",
+    "python3 tools/m12_002_deployment.py verify",
+    "python3 tools/m12_002_deployment.py contracts",
+    "scripts/check-task M12-002",
+    "scripts/check-m7-032-public-api"
+  ],
+  "publication": {
+    "pr": 229,
+    "known_state_before_push": "OPEN/DRAFT",
+    "result": "M12-002 verifier fixes, regression tests and documentation updates are pushed to the existing PR branch. PR #229 remains OPEN/DRAFT; no merge, ready transition or issue closure occurred. Issues #233, #234 and #235 remain open."
+  }
+}
