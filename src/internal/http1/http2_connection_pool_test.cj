@@ -433,6 +433,16 @@ class Http2ConnectionPoolTest {
     }
 
     @TestCase
+    func discardedConnectionCleanupPreservesCrossOriginAdmissionTurn(): Unit {
+        exerciseDiscardedWaiterOwnership(false)
+    }
+
+    @TestCase
+    func cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn(): Unit {
+        exerciseDiscardedWaiterOwnership(true)
+    }
+
+    @TestCase
     func saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill(): Unit {
         let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(
             maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2
@@ -442,29 +452,57 @@ class Http2ConnectionPoolTest {
         let otherKey = poolKey("other.example", "h2,http/1.1")
         let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)
         let second = pool.acquire(key, PoolNoopGoAwayListener(), factory)
-        @Expect(factory.createCalls.load(), 1)
-        let otherOrigin = spawn { pool.acquire(otherKey, PoolNoopGoAwayListener(), factory) }
-        @Expect(pool.waitUntilWaiters(1, Duration.second))
-        let refill = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory) }
-        @Expect(pool.waitUntilWaiters(2, Duration.second))
+        let acquired = PoolAdmissionGate()
+        let cancellation = CancellationSource()
+        let refillCompleted = AtomicBool(false)
+        var otherOrigin = None<Future<Unit>>
+        var refill = None<Future<Unit>>
         try {
+            @Expect(factory.createCalls.load(), 1)
+            otherOrigin = Some(spawn {
+                let replacement = pool.acquire(otherKey, PoolNoopGoAwayListener(), factory,
+                    context: OperationContext(cancellation: cancellation.token))
+                try {
+                    @Expect(replacement.connectionId != first.connectionId)
+                    acquired.enter()
+                } finally { factory.finish(replacement); pool.release(replacement) }
+            })
+            @Expect(pool.waitUntilWaiters(1, Duration.second))
+            refill = Some(spawn {
+                let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory,
+                    context: OperationContext(cancellation: cancellation.token))
+                try { refillCompleted.store(true) }
+                finally { factory.finish(lease); pool.release(lease) }
+            })
+            @Expect(pool.waitUntilWaiters(2, Duration.second))
             factory.finish(first)
             pool.release(first)
             factory.finish(second)
             pool.release(second)
-
-            let replacement = otherOrigin.get(Duration.second)
+            acquired.waitUntilEntered()
             @Expect(factory.createCalls.load(), 2)
-            @Expect(replacement.connectionId != first.connectionId)
             @Expect(factory.connection(0).closeCalls.load(), 1)
             @Expect(pool.waitUntilWaiters(1, Duration.second))
+            @Expect(!refillCompleted.load())
             @Expect(pool.snapshot().activeStreams, 1)
-
-            factory.finish(replacement)
-            pool.release(replacement)
+            acquired.release()
+            otherOrigin.getOrThrow().get(Duration.second)
+            refill.getOrThrow().get(Duration.second)
+            @Expect(refillCompleted.load())
+            @Expect(pool.snapshot().waiters, 0)
+            @Expect(pool.snapshot().activeStreams, 0)
         } finally {
-            pool.close()
-            try { let _ = refill.get(Duration.second) } catch (_: Exception) {}
+            acquired.release()
+            let _ = cancellation.cancel()
+            if (factory.connection(0).has(first.admission.stream.id)) { factory.finish(first) }
+            if (factory.connection(0).has(second.admission.stream.id)) { factory.finish(second) }
+            pool.release(first); pool.release(second)
+            try {
+                if (let Some(worker) <- otherOrigin) { worker.get(Duration.second) }
+            } finally {
+                try { if (let Some(worker) <- refill) { worker.get(Duration.second) } }
+                finally { pool.close() }
+            }
         }
     }
 
@@ -778,6 +816,148 @@ private class PoolFakeConnection <: Http2MultiplexedConnection {
         registry.peerEnd(id)
         let _ = flow.closeStream(id)
     }
+}
+
+private func exerciseDiscardedWaiterOwnership(cancelDuringClose: Bool): Unit {
+    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(
+        maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2
+    ))
+    let getterGate = PoolAdmissionGate()
+    let closeGate = PoolAdmissionGate()
+    let acquiredGate = PoolAdmissionGate()
+    let factory = PoolDiscardFactory(getterGate, closeGate)
+    let key = poolKey("origin.example", "h2")
+    let otherKey = poolKey("other.example", "h2")
+    let cancellation = CancellationSource()
+    let cleanup = CancellationSource()
+    let order = AtomicInt64(0)
+    let crossOrder = AtomicInt64(0)
+    let refillOrder = AtomicInt64(0)
+    var cross = None<Future<Bool>>
+    var refill = None<Future<Bool>>
+    let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+    let second = pool.acquire(key, PoolNoopGoAwayListener(), factory)
+    try {
+        cross = Some(spawn {
+            try {
+                let lease = pool.acquire(otherKey, PoolNoopGoAwayListener(), factory,
+                    context: OperationContext(cancellation: cancellation.token))
+                try {
+                    crossOrder.store(order.fetchAdd(1) + 1)
+                    acquiredGate.enter()
+                } finally {
+                    factory.finish(lease)
+                    pool.release(lease)
+                }
+                !cancelDuringClose
+            } catch (error: NetworkException) {
+                @Expect(match (error.phase) { case NetworkPhase.PoolAcquire => true; case _ => false })
+                @Expect(match (error.category) { case NetworkErrorCategory.Cancelled => true; case _ => false })
+                @Expect(match (error.code) { case NetworkErrorCode.Cancelled => true; case _ => false })
+                cancelDuringClose
+            }
+        })
+        @Expect(pool.waitUntilWaiters(1, Duration.second))
+        factory.finish(first)
+        // release reads ownedStreamCount once; the next getter belongs to the waiter.
+        factory.armGetter()
+        pool.release(first)
+        getterGate.waitUntilEntered()
+        factory.finish(second)
+        // Do not release the second pool lease until the off-lock close has begun.
+        getterGate.release()
+        closeGate.waitUntilEntered()
+        @Expect(pool.snapshot().waiters, 1)
+        refill = Some(spawn {
+            try {
+                let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory,
+                    context: OperationContext(cancellation: cleanup.token))
+                try { refillOrder.store(order.fetchAdd(1) + 1) }
+                finally { factory.finish(lease); pool.release(lease) }
+                true
+            } catch (_: NetworkException) { false }
+        })
+        @Expect(pool.waitUntilWaiters(2, Duration.second))
+        @Expect(factory.createCalls.load(), 1)
+        @Expect(refillOrder.load(), 0)
+        if (cancelDuringClose) { let _ = cancellation.cancel() }
+        closeGate.release()
+        if (!cancelDuringClose) {
+            acquiredGate.waitUntilEntered()
+            @Expect(crossOrder.load(), 1)
+            @Expect(refillOrder.load(), 0)
+            @Expect(pool.snapshot().waiters, 1)
+            acquiredGate.release()
+        }
+        @Expect(cross.getOrThrow().get(Duration.second))
+        @Expect(refill.getOrThrow().get(Duration.second))
+        @Expect(refillOrder.load(), if (cancelDuringClose) { 1 } else { 2 })
+        @Expect(pool.snapshot().waiters, 0)
+        @Expect(pool.observationSnapshot().reservedStreams, 0)
+        @Expect(pool.snapshot().activeStreams, 0)
+    } finally {
+        getterGate.release(); closeGate.release(); acquiredGate.release()
+        let _ = cancellation.cancel()
+        let _ = cleanup.cancel()
+        factory.finishInitialIfPresent(first)
+        factory.finishInitialIfPresent(second)
+        pool.release(first); pool.release(second)
+        try {
+            if (let Some(worker) <- cross) { let _ = worker.get(Duration.second) }
+        } finally {
+            try { if (let Some(worker) <- refill) { let _ = worker.get(Duration.second) } }
+            finally { pool.close() }
+        }
+    }
+}
+
+private class PoolDiscardFactory <: Http2MultiplexedConnectionFactory {
+    private let delegate = PoolFakeFactory(2u32)
+    private let first: PoolDiscardConnection
+    let createCalls = AtomicInt64(0)
+    init(getterGate: PoolAdmissionGate, closeGate: PoolAdmissionGate) {
+        first = PoolDiscardConnection(getterGate, closeGate)
+    }
+    public func create(key: HttpConnectionPoolKey, context: OperationContext,
+        lease: ?internal.HttpResourceLease): Http2MultiplexedConnection {
+        if (createCalls.fetchAdd(1) == 0) { first } else { delegate.create(key, context, lease) }
+    }
+    func finishInitialIfPresent(lease: Http2PoolLease): Unit {
+        if (first.has(lease.admission.stream.id)) { first.finish(lease.admission.stream.id) }
+    }
+    func armGetter(): Unit { first.armGetter() }
+    func finish(lease: Http2PoolLease): Unit {
+        if (first.has(lease.admission.stream.id)) { first.finish(lease.admission.stream.id) }
+        else { delegate.finish(lease) }
+    }
+}
+
+private class PoolDiscardConnection <: Http2MultiplexedConnection {
+    private let delegate = PoolFakeConnection(2u32)
+    private let getterGate: PoolAdmissionGate
+    private let closeGate: PoolAdmissionGate
+    private let getterCountdown = AtomicInt64(0)
+    init(getterGate: PoolAdmissionGate, closeGate: PoolAdmissionGate) {
+        this.getterGate = getterGate; this.closeGate = closeGate
+    }
+    func armGetter(): Unit { getterCountdown.store(2) }
+    public prop ownedStreamCount: Int64 {
+        get() {
+            if (getterCountdown.load() > 0 && getterCountdown.fetchSub(1) == 1) { getterGate.enter() }
+            delegate.ownedStreamCount
+        }
+    }
+    public prop activeStreamCount: Int64 { get() { delegate.activeStreamCount } }
+    public prop streamCapacity: UInt32 { get() { delegate.streamCapacity } }
+    public prop acceptingNewStreams: Bool { get() { delegate.acceptingNewStreams } }
+    public func openStream(listener: Http2GoAwayListener, endStream: Bool): Http2PoolStreamClaim {
+        delegate.openStream(listener, endStream)
+    }
+    public func close(): Unit { closeGate.enter(); delegate.close() }
+    public func isClosed(): Bool { delegate.isClosed() }
+    public func abort(reason!: AbortReason): Unit { delegate.abort(reason: reason) }
+    func has(id: Http2StreamId): Bool { delegate.has(id) }
+    func finish(id: Http2StreamId): Unit { delegate.finish(id) }
 }
 
 private class PoolNoopTransport <: DuplexTransport {
