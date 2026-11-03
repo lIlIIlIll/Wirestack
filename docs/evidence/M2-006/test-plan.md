@@ -4,9 +4,12 @@
 
 M2-006 supplies the Apple `SystemResolver` through the provider-neutral
 resolver contract and the existing bounded native worker-pool ABI. Completion
-requires native Cangjie execution on GitHub-hosted Apple runners at the exact
-repository revision. The macOS path runs on `macos-15`; the iOS path runs in an
-iOS Simulator using the official prebuilt Cangjie iOS SDK. Linux execution,
+requires native Cangjie execution at an exact repository revision on the
+desktop macOS arm64 target and separate iOS Simulator arm64 qualification. The
+desktop workflow uses the official STS 1.2.0 macOS arm64 archive pinned in
+`docs/references/m2-006-sts-sdk.json`. Its report binds the archive bytes,
+selected SDK tools, source inventory, and native test results. The current
+workflow does not run iOS; mobile/iOS remains unverified. Linux execution,
 cross-compilation, native-C-only probes, skipped cases, and stale reports are
 not Apple platform evidence.
 
@@ -22,8 +25,8 @@ native lookup so that network changes are observable without a process restart.
 
 | Path ID | Conditions and values | Runtime checks | Reachability | Notes |
 |---|---|---|---|---|
-| P001 | native macOS arm64 runner with Cangjie/CJPM and Xcode tools | platform, toolchain and revision identity | reachable | Only native macOS execution can satisfy the macOS half of M2-006. |
-| P002 | native iOS Simulator arm64 with the official prebuilt Cangjie iOS SDK | simulator, SDK and revision identity | reachable | Cross-compilation without simulator execution cannot PASS. |
+| P001 | clean exact-revision checkout on native macOS arm64 with the pinned STS 1.2.0 SDK and Xcode tools | platform, archive byte-count/digest, installed toolchain and revision identity | reachable | Only the desktop STS run can satisfy the macOS half of M2-006. |
+| P002 | native iOS Simulator arm64 with an official, separately pinned STS SDK | simulator, SDK and revision identity | unverified | The desktop workflow does not run iOS; no mobile evidence is accepted from nightly SDKs. |
 | P003 | Linux, cross-compile-only, missing tool, wrong platform, unknown schema, or stale SHA | fail-closed report validator | reachable error | Must not PASS or treat DEGRADED/SKIPPED as PASS. |
 | P004 | valid host, family and maximum-results bound | native resolver plus public contract assertions | reachable | Retain all returned candidates up to the bound. |
 | P005 | POSIX success and documented `getaddrinfo` failures | stable result and native-code mapping | reachable | No exception-message parsing. |
@@ -37,7 +40,7 @@ native lookup so that network changes are observable without a process restart.
 
 | Domain | Partitions and boundaries | Cross-constraints |
 |---|---|---|
-| platform | native macOS arm64; native iOS Simulator arm64; Linux x86_64; cross-compiled Apple; unsupported | Only matching native Apple execution satisfies the platform claim. |
+| platform | native macOS arm64 with pinned STS 1.2.0; native iOS Simulator arm64 with its separately qualified STS SDK; Linux x86_64; cross-compiled Apple; unsupported | Only matching native Apple execution satisfies its platform claim; mobile remains unverified. |
 | host | localhost; deterministic multi-address fixture; invalid/unknown; delayed; changing | Host input remains bounded to 253 bytes. |
 | family | any; IPv4; IPv6; unknown integer | Unknown family is rejected. |
 | results | 1; multiple; maximum 1024; oversized | Storage and output remain bounded. |
@@ -50,8 +53,8 @@ native lookup so that network changes are observable without a process restart.
 
 | Scenario ID | Input | Pre-state | Triggered path IDs | Expected behavior | Required assertions | Type | Priority |
 |---|---|---|---|---|---|---|---|
-| S001 | GitHub-hosted macOS capability | clean checkout | P001,P010 | select, build, and run the macOS resolver | OS, architecture, CJC, CJPM, Xcode and revision recorded | platform | P0 |
-| S002 | GitHub-hosted iOS Simulator capability | clean checkout and booted simulator | P002,P010 | select, build, install, and run the iOS resolver | simulator runtime, SDK, architecture and revision recorded | platform | P0 |
+| S001 | GitHub-hosted macOS capability | clean exact-revision checkout and verified STS 1.2.0 archive | P001,P010 | build and run the desktop resolver | OS, architecture, exact archive size and digest, SDK-root CJC/CJPM, source inventory and revision recorded | platform | P0 |
+| S002 | GitHub-hosted iOS Simulator capability | separate native iOS STS prerequisite | P002,P010 | qualify the iOS resolver on a separate native workflow | simulator runtime, SDK, architecture and revision recorded; this proof is not present | platform | P0 |
 | S003 | localhost and deterministic multi-address fixture | open pool | P004,P005,P008 | resolve through the public contract | all candidates/families, System source, no TTL, deduplication | integration | P0 |
 | S004 | family and result bounds | open pool | P004,P007 | respect caller bounds | IPv4/IPv6 filter and max-results enforced | boundary | P0 |
 | S005 | deterministic POSIX failures and unknown native error | open pool | P005 | map without text parsing | category, DNS phase, stable code and native code | fault-injection | P0 |
@@ -65,8 +68,8 @@ native lookup so that network changes are observable without a process restart.
 
 | Test ID | Scenario IDs | Path IDs | Input | Expected result | Assertions | Type |
 |---|---|---|---|---|---|---|
-| T001 | S001 | P001,P010 | build and toolchain probe on `macos-15` | PASS | native macOS identity and exact SHA | native-platform |
-| T002 | S002 | P002,P010 | build and execute on an iOS Simulator hosted by `macos-15` | PASS | native simulator identity, exact SHA, process exit and assertions | native-platform |
+| T001 | S001 | P001,P010 | build and run on `macos-15` with pinned STS 1.2.0 | PASS required; current capture pending | native macOS identity, exact archive size and checksum, SDK-root tool identity, exact source SHA, and eight cases with zero failures/errors/skips/timeouts | native-platform |
+| T002 | S002 | P002,P010 | build and execute on a native iOS Simulator using a separately qualified STS SDK | BLOCKED, mobile/iOS unverified | native simulator identity, exact SDK pin, process exit and assertions are still required for full M2-006 | native-platform |
 | T003 | S003,S004 | P004,P005,P008 | Apple Cangjie resolver suite | PASS | candidates, family, bounds, deduplication and no fake TTL | integration |
 | T004 | S005 | P005 | injected POSIX status matrix | PASS | stable error and native-code mapping | fault-injection |
 | T005 | S006 | P006,P008 | delayed lookup, cancellation and Deadline | PASS | terminal category and latency bound | concurrency |
@@ -74,11 +77,12 @@ native lookup so that network changes are observable without a process restart.
 | T007 | S008 | P009 | deterministic generation change between lookups | PASS | fresh native query returns changed result | integration |
 | T008 | S009 | P003 | schema/SHA/platform/skip/timeout mutations | FAIL | invalid evidence never reports PASS | unit,fault-injection |
 | T009 | S010 | P010 | Linux focused tests and repository checks | PASS | no Linux regression | regression |
-| T010 | S009 | P003 | atomic report replacement under injected write failure | PASS | no partial JSON or temporary-file residue | unit,fault-injection |
+| T010 | S009 | P003 | retained report and command logs with refreshed typed digests but a changed resolver-test output | FAIL | the log must match its command receipt, and skipped/case-inventory failures remain derived from retained output | unit,fault-injection |
 
 ## Excluded gates
 
 M2-006 does not run the one-hour SSE profile, the 86,400-second soak, TLS or
 HTTP protocol qualification, physical iPhone/iPad tests, Android, HarmonyOS,
-Windows, or performance gates. iOS Simulator execution is required by this
-task, but it does not establish physical-device or production iOS support.
+Windows, or performance gates. iOS Simulator execution remains required for
+full M2-006 completion, but it is outside this desktop STS qualification and
+is explicitly unverified.
