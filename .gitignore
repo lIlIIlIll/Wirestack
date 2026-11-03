@@ -113,6 +113,7 @@ Thumbs.db
 !docs/evidence/M7-030/blocker-maintenance/*.log
 !docs/evidence/M2-004/current-desktop/**/*.log
 !docs/evidence/M2-006/current-desktop/**/*.log
+!docs/evidence/M2-006/maintenance/*.json
 !docs/evidence/M2-003/linux_x86_64/*.log
 !docs/evidence/M2-005/linux_glibc_x86_64/*.log
 !docs/evidence/M7-022/linux_x86_64/*.log
