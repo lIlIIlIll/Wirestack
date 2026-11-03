@@ -1,0 +1,26 @@
+{
+  "archive": {
+    "archive_prefix": "cangjie",
+    "name": "cangjie-sdk-windows-x64-1.2.0.zip",
+    "sha256": "7bd5088ad56fb03c1214e73ea076de5ac08580cc419a8cbd46a524ee1ca250bf",
+    "size_bytes": 262872802,
+    "url": "https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-windows-x64-1.2.0.zip&objectKey=6ab1eafae4bd101f57762f5e"
+  },
+  "channel": "STS",
+  "platform": {
+    "machines": [
+      "AMD64",
+      "x86_64"
+    ],
+    "native_target": "x86_64-w64-mingw32",
+    "system": "Windows"
+  },
+  "release_date": "2026-09-22",
+  "schema_version": 1,
+  "sources": {
+    "download_page": "https://cangjie-lang.cn/download/1.2.0",
+    "install_guide": "https://cj-docs.gitcode.com/zh/1.2.0/dev-guide/source_zh_cn/first_understanding/install.html",
+    "release_notes": "https://cj-docs.gitcode.com/zh/1.2.0/release-notes/cangjie_1.2_release_notes.html"
+  },
+  "version": "1.2.0"
+}
