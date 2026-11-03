@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "source_task": "M7-030",
+  "kind": "blocker-maintenance-regression",
+  "status": "PASS",
+  "task_status": "BLOCKED",
+  "qualification": "NOT_QUALIFIED",
+  "source_state": "owner working files before integrated source freeze",
+  "sources": {
+    "tools/m7_030_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7189f16705bc285c52f7bf81afb1a42c4f0df0297017f420c5fee60727524ff3"
+    },
+    "tools/tests/test_m7_030_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bd723e931dcf75380d1853f89ca504b210ad54fe4874c00ea04344d90a6f93e3"
+    },
+    "tools/tasks/M7-030.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6743588e4c9f638bb7b7059efc311f72241a52aa825349f0938cac0ddbc39de7"
+    },
+    "scripts/check-m7-030-release": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d4b722bdf924bc55dd567eee9c5f2fea8b0518358ba9484962de19cffc9b2041"
+    }
+  },
+  "result": {
+    "tests_run": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "frozen_asset_bytes": 2499451,
+    "frozen_asset_sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+  },
+  "logs": [
+    {
+      "path": "docs/evidence/M7-030/blocker-maintenance/frozen-asset-owner.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9391cffed24a1300710e86e66dcdea3c90d8e2a8c1387dbcaace0438ea8e7797"
+      }
+    },
+    {
+      "path": "docs/evidence/M7-030/blocker-maintenance/frozen-asset-owner-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "85e38b84f083f0eb6b5725e0a415bf6e8bb67898a087d40403b17430495eaf91"
+      }
+    }
+  ],
+  "boundary": "Behavioral fixture and verifier maintenance only. No historical report was requalified and no missing native platform, full SDK/VM matrix, security approval or release qualification is claimed."
+}
