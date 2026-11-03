@@ -218,8 +218,8 @@ public class HttpResourceBudget {
         }
         if (minimumBytes > maximumConfiguredDataBufferBytes()) {
             synchronized(mutex) {
-                checkContext(context)
                 checkAdmissionOpen()
+                checkContext(context)
                 recordRejectionLocked()
                 throw resourceDataBufferMinimumUnreachable()
             }
@@ -227,8 +227,8 @@ public class HttpResourceBudget {
         let registration = context.cancellation.register { => wakeWaiters() }
         try {
             synchronized(mutex) {
-                checkContext(context)
                 checkAdmissionOpen()
+                checkContext(context)
                 if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) {
                     recordRejectionLocked()
                     throw resourceOwnersExhausted()
@@ -251,8 +251,8 @@ public class HttpResourceBudget {
                 changed.notifyAll()
                 try {
                     while (true) {
-                        checkContext(context)
                         checkAdmissionOpen()
+                        checkContext(context)
                         if (isNextWaiterLocked(waiter)) {
                             let grantBytes = maximumAcquireableDataBufferLocked(owner, maximumBytes)
                             if (grantBytes >= minimumBytes) {
@@ -534,8 +534,8 @@ public class HttpResourceBudget {
         let registration = context.cancellation.register { => wakeWaiters() }
         try {
             synchronized(mutex) {
-                checkContext(context)
                 checkAdmissionOpen()
+                checkContext(context)
                 if (findOwnerLocked(owner).isNone() && owners.size >= limits.maximumOwners) {
                     recordRejectionLocked()
                     throw resourceOwnersExhausted()
@@ -555,8 +555,8 @@ public class HttpResourceBudget {
                 changed.notifyAll()
                 try {
                     while (true) {
-                        checkContext(context)
                         checkAdmissionOpen()
+                        checkContext(context)
                         if (isNextWaiterLocked(waiter)) {
                             removeWaiterLocked(waiter)
                             let lease = grantLocked(kind, owner, amount, control, false)

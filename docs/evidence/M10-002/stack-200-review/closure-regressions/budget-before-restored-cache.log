@@ -1,0 +1,699 @@
+[33mwarning[0m: unreachable block in 'while' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:465:31:
+    [36m| [0m
+[36m465[0m [36m| [0m          while (requested > 0) {[0m
+    [36m| [0m [33m_[0m[33m______________________________^[0m
+[36m466[0m [36m| [0m[33m|[0m             checkWriterContext(context)[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m521[0m [36m| [0m[33m|[0m         }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________^ unreachable block in 'while' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:468:44:
+    [36m| [0m
+[36m468[0m [36m| [0m              if (availableBeforeBuffer > 0) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________^[0m
+[36m469[0m [36m| [0m[33m|[0m                 if (availableBeforeBuffer < requested) {[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m502[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:469:56:
+    [36m| [0m
+[36m469[0m [36m| [0m                  if (availableBeforeBuffer < requested) {[0m
+    [36m| [0m [33m_[0m[33m_______________________________________________________^[0m
+[36m470[0m [36m| [0m[33m|[0m                     requested = availableBeforeBuffer[0m
+[36m471[0m [36m| [0m[33m|[0m                 }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:500:44:
+    [36m| [0m
+[36m500[0m [36m| [0m                    if (!leaseTransferred) { releaseBufferLease(Some(bufferLease)) }[0m
+    [36m| [0m                                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:505:44:
+    [36m| [0m
+[36m505[0m [36m| [0m              if (permit.amount < requested) {[0m
+    [36m| [0m [33m_[0m[33m___________________________________________^[0m
+[36m506[0m [36m| [0m[33m|[0m                 requested = permit.amount[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m509[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/flow_control.cj:569:41:
+    [36m| [0m
+[36m569[0m [36m| [0m                    else if (succeeded) { NetworkEventOutcome.Succeeded } else { NetworkEventOutcome.Discarded },[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/server_connection.cj:613:28:
+    [36m| [0m
+[36m613[0m [36m| [0m            if (slotOwned) { releasePushSlot() }[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:689:32:
+    [36m| [0m
+[36m689[0m [36m| [0m            if (queueReserved) { releaseQueueCapacity(frames.size, totalBytes, false) }[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:742:32:
+    [36m| [0m
+[36m742[0m [36m| [0m            if (queueReserved) { releaseQueueCapacity(1, size, cleanupSlot) }[0m
+    [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http2/write_scheduler.cj:743:31:
+    [36m| [0m
+[36m743[0m [36m| [0m            if (!transferred) { releaseBufferLease(bufferLease) }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+10 warnings generated, 10 warnings printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/client_pipeline.cj:92:9:
+   [36m| [0m
+[36m92[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/server_connection.cj:166:23:
+    [36m| [0m
+[36m166[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool.cj:442:42:
+    [36m| [0m
+[36m442[0m [36m| [0m            if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool.cj:444:42:
+    [36m| [0m
+[36m444[0m [36m| [0m            if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/tls_client_pipeline.cj:869:9:
+    [36m| [0m
+[36m869[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+7 warnings generated, 7 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/http/client.cj:566:31:
+    [36m| [0m
+[36m566[0m [36m| [0m            if (!transferred) { lifetime.close() }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/http/client.cj:894:29:
+    [36m| [0m
+[36m894[0m [36m| [0m              if (!published) {[0m
+    [36m| [0m [33m_[0m[33m____________________________^[0m
+[36m895[0m [36m| [0m[33m|[0m                 direct.close()[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m897[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <repo>/src/http/client.cj:896:41:
+    [36m| [0m
+[36m896[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <repo>/src/http/client.cj:896:78:
+    [36m| [0m
+[36m896[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                                                             [33m^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/client.cj:119:31:
+    [36m| [0m
+[36m119[0m [36m| [0m              if (!transferred) {[0m
+    [36m| [0m [33m_[0m[33m______________________________^[0m
+[36m120[0m [36m| [0m[33m|[0m                 try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m122[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/client.cj:120:31:
+    [36m| [0m
+[36m120[0m [36m| [0m                try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/client.cj:123:21:
+    [36m| [0m
+[36m123[0m [36m| [0m            if (let Some(value) <- lease) { value.close() }[0m
+    [36m| [0m                    [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/body.cj:138:25:
+    [36m| [0m
+[36m138[0m [36m| [0m              if (failed) {[0m
+    [36m| [0m [33m_[0m[33m________________________^[0m
+[36m139[0m [36m| [0m[33m|[0m                 try { releaseIfTerminal() } catch (_: Exception) { /* Cleanup must not replace the read failure. */ }[0m
+[36m140[0m [36m| [0m[33m|[0m             } else { releaseIfTerminal() }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unused import 'std.sync.*'
+ [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:3:1:
+  [36m| [0m
+[36m3[0m [36m| [0mimport std.sync.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 17.54 */                    None < api.NetworkException >[0m
+   [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 17.1 */@Attribute[TEST_GENERATED] class HttpResourceObservationTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 17.2 */    @Attribute[TestCase_16][0m
+    [36m| [0m[34m|[0m /* 17.3 */    func actualWaiterRejectionsRecoverWithoutCountingProbesOrCancellationRequests(): Unit {[0m
+    [36m| [0m[34m|[0m /* 17.4 */        let budget = HttpResourceBudget(HttpResourceBudgetPolicy(1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 1))[0m
+    [36m| [0m[34m|[0m /* 17.5 */        let owner = HttpResourceOwnerKey("https://example.test:443", "direct")[0m
+    [36m| [0m[34m|[0m /* 17.6 */        let lease = budget.acquireRequest(owner, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.7 */        let source = api.CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 17.8 */        let waiting = spawn { budget.acquireRequest(owner, api.OperationContext(cancellation: source.token))[0m
+    [36m| [0m[34m|[0m /* 17.9 */        }[0m
+    [36m| [0m[34m|[0m /* 17.10 */        try {[0m
+    [36m| [0m[34m|[0m /* 17.11 */            observationLedgerWait({ =>[0m
+    [36m| [0m[34m|[0m /* 17.12 */                budget.snapshot().admissionWaiters == 1[0m
+    [36m| [0m[34m|[0m /* 17.13 */            })[0m
+    [36m| [0m[34m|[0m /* 17.14 */            expectEqual("budget.tryAcquireRequest(owner).isNone()", "true", budget.tryAcquireRequest(owner).isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.15 */            expectEqual("budget.snapshot().rejectedOperations", "0", budget.snapshot().rejectedOperations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.16 */            let error = try {[0m
+    [36m| [0m[34m|[0m /* 17.17 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.18 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.19 */                    budget.acquireRequest(owner, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.20 */                    fail("@AssertThrows: Expected 'api.NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.21 */                } catch(e: api.NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 17.22 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.23 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.24 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.25 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.26 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.27 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.28 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.29 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.30 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.31 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.32 */                }[0m
+    [36m| [0m[34m|[0m /* 17.33 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.34 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.35 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.36 */                }[0m
+    [36m| [0m[34m|[0m /* 17.37 */                assertCaughtUnexpectedE("@AssertThrows(api.NetworkException)", "api.NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.38 */            }[0m
+    [36m| [0m[34m|[0m /* 17.39 */            [0m
+    [36m| [0m[34m|[0m /* 17.40 */            match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 17.41 */                case api.NetworkErrorCode.ResourceExhausted =>()[0m
+    [36m| [0m[34m|[0m /* 17.42 */                case _ => fail("expected exhausted waiter limit")[0m
+    [36m| [0m[34m|[0m /* 17.43 */            }[0m
+    [36m| [0m[34m|[0m /* 17.44 */            expectEqual("budget.snapshot().rejectedOperations", "1", budget.snapshot().rejectedOperations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.45 */            expectEqual("budget.snapshot().completedCancellations", "0", budget.snapshot().completedCancellations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.46 */            expectEqual("budget.snapshot().lastCancellationCompletionLatency.isNone()", "true", budget.snapshot().lastCancellationCompletionLatency.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.47 */            let started = MonoTime.now()[0m
+    [36m| [0m[34m|[0m /* 17.48 */            source.cancel()[0m
+    [36m| [0m[34m|[0m /* 17.49 */            try {[0m
+    [36m| [0m[34m|[0m /* 17.50 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.51 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.52 */                    waiting.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 17.53 */                    failExpect("@ExpectThrows: Expected 'api.NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.54 */                    None < api.NetworkException >[0m
+    [36m| [0m[34m|[0m /* 17.55 */                } catch(e: api.NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 17.56 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.57 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.58 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.59 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.60 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.61 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.62 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.63 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.64 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.65 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.66 */                }[0m
+    [36m| [0m[34m|[0m /* 17.67 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.68 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.69 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.70 */                }[0m
+    [36m| [0m[34m|[0m /* 17.71 */                expectCaughtUnexpectedE("@ExpectThrows(api.NetworkException)", "api.NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.72 */                None < api.NetworkException >[0m
+    [36m| [0m[34m|[0m /* 17.73 */            }[0m
+    [36m| [0m[34m|[0m /* 17.74 */            expectEqual("budget.snapshot().completedCancellations", "0", budget.snapshot().completedCancellations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.75 */            budget.recordCancellationCompletion(MonoTime.now() - started)[0m
+    [36m| [0m[34m|[0m /* 17.76 */            expectEqual("budget.snapshot().completedCancellations", "1", budget.snapshot().completedCancellations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.77 */            expectEqual("budget.snapshot().lastCancellationCompletionLatency.isSome()", "true", budget.snapshot().lastCancellationCompletionLatency.isSome(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.78 */            try {[0m
+    [36m| [0m[34m|[0m /* 17.79 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.80 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.81 */                    budget.recordCancellationCompletion(- 1 * Duration.nanosecond)[0m
+    [36m| [0m[34m|[0m /* 17.82 */                    failExpect("@ExpectThrows: Expected 'IllegalArgumentException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.83 */                    None < IllegalArgumentException >[0m
+    [36m| [0m[34m|[0m /* 17.84 */                } catch(e: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 17.85 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.86 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.87 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.88 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.89 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.90 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.91 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.92 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.93 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.94 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.95 */                }[0m
+    [36m| [0m[34m|[0m /* 17.96 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.97 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.98 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.99 */                }[0m
+    [36m| [0m[34m|[0m /* 17.100 */                expectCaughtUnexpectedE("@ExpectThrows(IllegalArgumentException)", "IllegalArgumentException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.101 */                None < IllegalArgumentException >[0m
+    [36m| [0m[34m|[0m /* 17.102 */            }[0m
+    [36m| [0m[34m|[0m /* 17.103 */            expectEqual("budget.snapshot().completedCancellations", "1", budget.snapshot().completedCancellations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.104 */            lease.close()[0m
+    [36m| [0m[34m|[0m /* 17.105 */            lease.close()[0m
+    [36m| [0m[34m|[0m /* 17.106 */            let replacement = budget.acquireRequest(owner, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.107 */            replacement.close()[0m
+    [36m| [0m[34m|[0m /* 17.108 */            let final = budget.snapshot()[0m
+    [36m| [0m[34m|[0m /* 17.109 */            expectEqual("final.activeRequests", "0", final.activeRequests, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.110 */            expectEqual("final.admissionWaiters", "0", final.admissionWaiters, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.111 */            expectEqual("final.owners.isEmpty()", "true", final.owners.isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.112 */            expectEqual("final.rejectedOperations", "1", final.rejectedOperations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.113 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 17.114 */            source.cancel()[0m
+    [36m| [0m[34m|[0m /* 17.115 */            lease.close()[0m
+    [36m| [0m[34m|[0m /* 17.116 */        }[0m
+    [36m| [0m[34m|[0m /* 17.117 */    }[0m
+    [36m| [0m[34m|[0m /* 17.118 */    [0m
+    [36m| [0m[34m|[0m /* 17.119 */    @Attribute[TestCase_17][0m
+    [36m| [0m[34m|[0m /* 17.120 */    func explicitOperationalRefusalsAreRecordedWhileDiagnosticProbesStayUncounted(): Unit {[0m
+    [36m| [0m[34m|[0m /* 17.121 */        let budget = HttpResourceBudget(HttpResourceBudgetPolicy(1, 1, 1, 1, 1, 1, 1, 1, 1, 65552u64, 17u64, 1))[0m
+    [36m| [0m[34m|[0m /* 17.122 */        let owner = HttpResourceOwnerKey("https://example.test:443", "direct")[0m
+    [36m| [0m[34m|[0m /* 17.123 */        let lease = budget.acquireRequest(owner, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.124 */        try {[0m
+    [36m| [0m[34m|[0m /* 17.125 */            expectEqual("budget.tryAcquireRequest(owner).isNone()", "true", budget.tryAcquireRequest(owner).isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.126 */            expectEqual("budget.snapshot().rejectedOperations", "0", budget.snapshot().rejectedOperations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.127 */            budget.recordAdmissionRejection()[0m
+    [36m| [0m[34m|[0m /* 17.128 */            budget.recordAdmissionRejection()[0m
+    [36m| [0m[34m|[0m /* 17.129 */            expectEqual("budget.snapshot().rejectedOperations", "2", budget.snapshot().rejectedOperations, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.130 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 17.131 */            lease.close()[0m
+    [36m| [0m[34m|[0m /* 17.132 */        }[0m
+    [36m| [0m[34m|[0m /* 17.133 */    }[0m
+    [36m| [0m[34m|[0m /* 17.134 */    [0m
+    [36m| [0m[34m|[0m /* 17.135 */    @Attribute[TestCase_18][0m
+    [36m| [0m[34m|[0m /* 17.136 */    func ownerLimitRejectsExactlyOnceAndReclaimsOwnerOnLastLeaseRelease(): Unit {[0m
+    [36m| [0m[34m|[0m /* 17.137 */        let budget = HttpResourceBudget(HttpResourceBudgetPolicy(2, 1, 2, 2, 1, 2, 2, 1, 2, 131104u64, 34u64, 1, maximumOwners: 1))[0m
+    [36m| [0m[34m|[0m /* 17.138 */        let alpha = HttpResourceOwnerKey("https://alpha.example.test:443", "direct")[0m
+    [36m| [0m[34m|[0m /* 17.139 */        let beta = HttpResourceOwnerKey("https://beta.example.test:443", "direct")[0m
+    [36m| [0m[34m|[0m /* 17.140 */        let lease = budget.acquireRequest(alpha, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.141 */        try {[0m
+    [36m| [0m[34m|[0m /* 17.142 */            try {[0m
+    [36m| [0m[34m|[0m /* 17.143 */                try {[0m
+    [36m| [0m[34m|[0m /* 17.144 */                    assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 17.145 */                    budget.acquireRequest(beta, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.146 */                    failExpect("@ExpectThrows: Expected 'api.NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 17.147 */                    None < api.NetworkException >[0m
+    [36m| [0m[34m|[0m /* 17.148 */                } catch(e: api.NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 17.149 */                    if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 17.150 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.151 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.152 */                    if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 17.153 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.154 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.155 */                    if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.156 */                        throw e[0m
+    [36m| [0m[34m|[0m /* 17.157 */                    }[0m
+    [36m| [0m[34m|[0m /* 17.158 */                    e[0m
+    [36m| [0m[34m|[0m /* 17.159 */                }[0m
+    [36m| [0m[34m|[0m /* 17.160 */            } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 17.161 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 17.162 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 17.163 */                }[0m
+    [36m| [0m[34m|[0m /* 17.164 */                expectCaughtUnexpectedE("@ExpectThrows(api.NetworkException)", "api.NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 17.165 */                None < api.NetworkException >[0m
+    [36m| [0m[34m|[0m /* 17.166 */            }[0m
+    [36m| [0m[34m|[0m /* 17.167 */            expectEqual("budget.snapshot().rejectedOperations", "1", budget.snapshot().rejectedOperations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.168 */            lease.close()[0m
+    [36m| [0m[34m|[0m /* 17.169 */            let admitted = budget.acquireRequest(beta, api.OperationContext.background())[0m
+    [36m| [0m[34m|[0m /* 17.170 */            admitted.close()[0m
+    [36m| [0m[34m|[0m /* 17.171 */            expectEqual("budget.snapshot().owners.isEmpty()", "true", budget.snapshot().owners.isEmpty(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.172 */            expectEqual("budget.snapshot().rejectedOperations", "1", budget.snapshot().rejectedOperations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 17.173 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 17.174 */            lease.close()[0m
+    [36m| [0m[34m|[0m /* 17.175 */        }[0m
+    [36m| [0m[34m|[0m /* 17.176 */    }[0m
+    [36m| [0m[34m|[0m /* 17.177 */    [0m
+    [36m| [0m[34m|[0m /* 17.178 */    init() {[0m
+    [36m| [0m[34m|[0m /* 17.179 */    }[0m
+    [36m| [0m[34m|[0m /* 17.180 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 17.181 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.182 */        [0m
+    [36m| [0m[34m|[0m /* 17.183 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 17.184 */    }[0m
+    [36m| [0m[34m|[0m /* 17.185 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 17.186 */        [0m
+    [36m| [0m[34m|[0m /* 17.187 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 17.188 */        let suiteBuilder = TestSuite.builder("HttpResourceObservationTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 17.189 */        [0m
+    [36m| [0m[34m|[0m /* 17.190 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.191 */            [0m
+    [36m| [0m[34m|[0m /* 17.192 */            let actualWaiterRejectionsRecoverWithoutCountingProbesOrCancellationRequestsTestFunc = { => actualWaiterRejectionsRecoverWithoutCountingProbesOrCancellationRequests();() }[0m
+    [36m| [0m[34m|[0m /* 17.193 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 17.194 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 17.195 */            "actualWaiterRejectionsRecoverWithoutCountingProbesOrCancellationRequests",[0m
+    [36m| [0m[34m|[0m /* 17.196 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 17.197 */            body: actualWaiterRejectionsRecoverWithoutCountingProbesOrCancellationRequestsTestFunc[0m
+    [36m| [0m[34m|[0m /* 17.198 */            )[0m
+    [36m| [0m[34m|[0m /* 17.199 */            )[0m
+    [36m| [0m[34m|[0m /* 17.200 */            [0m
+    [36m| [0m[34m|[0m /* 17.201 */        }()[0m
+    [36m| [0m[34m|[0m /* 17.202 */        [0m
+    [36m| [0m[34m|[0m /* 17.203 */        [0m
+    [36m| [0m[34m|[0m /* 17.204 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.205 */            [0m
+    [36m| [0m[34m|[0m /* 17.206 */            let explicitOperationalRefusalsAreRecordedWhileDiagnosticProbesStayUncountedTestFunc = { => explicitOperationalRefusalsAreRecordedWhileDiagnosticProbesStayUncounted();() }[0m
+    [36m| [0m[34m|[0m /* 17.207 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 17.208 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 17.209 */            "explicitOperationalRefusalsAreRecordedWhileDiagnosticProbesStayUncounted",[0m
+    [36m| [0m[34m|[0m /* 17.210 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 17.211 */            body: explicitOperationalRefusalsAreRecordedWhileDiagnosticProbesStayUncountedTestFunc[0m
+    [36m| [0m[34m|[0m /* 17.212 */            )[0m
+    [36m| [0m[34m|[0m /* 17.213 */            )[0m
+    [36m| [0m[34m|[0m /* 17.214 */            [0m
+    [36m| [0m[34m|[0m /* 17.215 */        }()[0m
+    [36m| [0m[34m|[0m /* 17.216 */        [0m
+    [36m| [0m[34m|[0m /* 17.217 */        [0m
+    [36m| [0m[34m|[0m /* 17.218 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 17.219 */            [0m
+    [36m| [0m[34m|[0m /* 17.220 */            let ownerLimitRejectsExactlyOnceAndReclaimsOwnerOnLastLeaseReleaseTestFunc = { => ownerLimitRejectsExactlyOnceAndReclaimsOwnerOnLastLeaseRelease();() }[0m
+    [36m| [0m[34m|[0m /* 17.221 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 17.222 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 17.223 */            "ownerLimitRejectsExactlyOnceAndReclaimsOwnerOnLastLeaseRelease",[0m
+    [36m| [0m[34m|[0m /* 17.224 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 17.225 */            body: ownerLimitRejectsExactlyOnceAndReclaimsOwnerOnLastLeaseReleaseTestFunc[0m
+    [36m| [0m[34m|[0m /* 17.226 */            )[0m
+    [36m| [0m[34m|[0m /* 17.227 */            )[0m
+    [36m| [0m[34m|[0m /* 17.228 */            [0m
+    [36m| [0m[34m|[0m /* 17.229 */        }()[0m
+    [36m| [0m[34m|[0m /* 17.230 */        [0m
+    [36m| [0m[34m|[0m /* 17.231 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 17.232 */    }[0m
+    [36m| [0m[34m|[0m /* 17.233 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 17.234 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 17.235 */    }[0m
+    [36m| [0m[34m|[0m /* 17.236 */}[0m
+    [36m| [0m[34m|[0m /* 17.237 */[0m
+    [36m| [0m[34m|[0m /* 17.238 */[0m
+    [36m| [0m[34m|[0m /* 17.239 */interface TestPackageExtension_HttpResourceObservationTest {[0m
+    [36m| [0m[34m|[0m /* 17.240 */    func registerHttpResourceObservationTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 17.241 */}[0m
+    [36m| [0m[34m|[0m /* 17.242 */extend TestPackage <: TestPackageExtension_HttpResourceObservationTest {[0m
+    [36m| [0m[34m|[0m /* 17.243 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 17.244 */    public func registerHttpResourceObservationTest() {[0m
+    [36m| [0m[34m|[0m /* 17.245 */        registerSuite({ => HttpResourceObservationTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 17.246 */    }[0m
+    [36m| [0m[34m|[0m /* 17.247 */}[0m
+    [36m| [0m[34m|[0m /* 17.248 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:17:1:
+   [36m| [0m
+[36m17[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m [36m| [0m[34m|[0m class HttpResourceObservationTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m94[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 17.72 */                None < api.NetworkException >[0m
+   [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:17:1:
+   [36m| [0m
+[36m17[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m [36m| [0m[34m|[0m class HttpResourceObservationTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m94[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+   [36m| [0m
+   [36m| [0m/* 17.83 */                    None < IllegalArgumentException >[0m
+   [36m| [0m                               [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:17:1:
+   [36m| [0m
+[36m17[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m [36m| [0m[34m|[0m class HttpResourceObservationTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m94[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.101 */                None < IllegalArgumentException >[0m
+    [36m| [0m                            [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:17:1:
+   [36m| [0m
+[36m17[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m [36m| [0m[34m|[0m class HttpResourceObservationTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m94[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.147 */                    None < api.NetworkException >[0m
+    [36m| [0m                                [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:17:1:
+   [36m| [0m
+[36m17[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m [36m| [0m[34m|[0m class HttpResourceObservationTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m94[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 17.165 */                None < api.NetworkException >[0m
+    [36m| [0m                            [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m <repo>/src/internal/http_resource_observation_test.cj:17:1:
+   [36m| [0m
+[36m17[0m [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m18[0m [36m| [0m[34m|[0m class HttpResourceObservationTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m94[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+7 warnings generated, 7 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal, time elapsed: 3768485 ns, RESULT:
+    TCS: HttpResourceBudgetTest, time elapsed: 3452689 ns, RESULT:
+    [ PASSED ] CASE: openAdmissionPreservesCancelledContext (182594 ns)
+    [ FAILED ] CASE: closedAdmissionWinsOverCancelledContext (276465 ns)
+    Expect Failed: `(match(error.category) {
+    case NetworkErrorCategory.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.code) {
+    case NetworkErrorCode.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.category) {
+    case NetworkErrorCategory.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.code) {
+    case NetworkErrorCode.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.category) {
+    case NetworkErrorCategory.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.code) {
+    case NetworkErrorCode.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.category) {
+    case NetworkErrorCategory.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.code) {
+    case NetworkErrorCode.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.category) {
+    case NetworkErrorCategory.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.code) {
+    case NetworkErrorCode.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.category) {
+    case NetworkErrorCategory.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(match(error.code) {
+    case NetworkErrorCode.Closed => true
+    case _ => false
+} == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 18
+    PASSED: 1, SKIPPED: 16, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: HttpResourceBudgetTest, CASE: closedAdmissionWinsOverCancelledContext
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 10982402 ns, RESULT:
+TP: wirestack.*, time elapsed: 10921580 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal, time elapsed: 3768485 ns, RESULT:
+        TCS: HttpResourceBudgetTest, time elapsed: 3452689 ns, RESULT:
+        [ FAILED ] CASE: closedAdmissionWinsOverCancelledContext (276465 ns)
+Summary: TOTAL: 18
+    PASSED: 1, SKIPPED: 16, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------
+Error: cjpm test failed
