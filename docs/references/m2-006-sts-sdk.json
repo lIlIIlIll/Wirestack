@@ -1,0 +1,25 @@
+{
+  "archive": {
+    "archive_prefix": "cangjie",
+    "name": "cangjie-sdk-mac-aarch64-1.2.0.tar.gz",
+    "sha256": "de88d6ba2185c94979e0ab2fe8ac1d81535dfdff3fcb51fbba71e4b99d851f97",
+    "size_bytes": 163787681,
+    "url": "https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-mac-aarch64-1.2.0.tar.gz&objectKey=6ab1e6451320215435b23d52"
+  },
+  "channel": "STS",
+  "platform": {
+    "machines": [
+      "arm64",
+      "aarch64"
+    ],
+    "native_target": "aarch64-apple-darwin",
+    "system": "Darwin"
+  },
+  "schema_version": 1,
+  "sources": {
+    "download_page": "https://cangjie-lang.cn/en/download/1.2.0",
+    "install_guide": "https://cj-docs.gitcode.com/zh/1.2.0/dev-guide/source_zh_cn/first_understanding/install.html",
+    "release_notes": "https://cj-docs.gitcode.com/zh/1.2.0/release-notes/cangjie_1.2_release_notes.html"
+  },
+  "version": "1.2.0"
+}
