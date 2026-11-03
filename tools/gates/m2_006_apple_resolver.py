@@ -334,11 +334,26 @@ def process_failures(
 
 
 def xcrun(root: Path, env: dict[str, str], sdk: str, *arguments: str) -> str:
-    process = run_command(
-        ["xcrun", "--sdk", sdk, *arguments], cwd=root, env=env, timeout=30
-    )
-    require_success(process, f"xcrun {sdk} {' '.join(arguments)}")
-    return process["output"].strip()
+    # Discovery returns operational paths, not sanitized evidence text.
+    try:
+        process = subprocess.run(
+            ["xcrun", "--sdk", sdk, *arguments],
+            cwd=root,
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            errors="replace",
+            timeout=30,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise GateError(f"xcrun {sdk} {' '.join(arguments)} timed out") from error
+    if process.returncode != 0:
+        diagnostics = _sanitize_text(process.stdout, {})[-4000:]
+        raise GateError(f"xcrun {sdk} {' '.join(arguments)} failed:\n{diagnostics}")
+    return process.stdout.strip()
 
 
 def deployment_flags(selected: str) -> list[str]:
