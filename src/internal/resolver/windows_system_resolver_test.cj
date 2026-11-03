@@ -98,30 +98,47 @@ class M2004WindowsSystemResolverTest {
         let resolver = SystemResolver(workerCount: 1, queueCapacity: 2)
         let source = api.CancellationSource()
         let resolving = spawn {
-            resolver.resolve(
-                api.HostName("delay.m2-004.test"),
-                context: api.OperationContext(cancellation: source.token)
-            )
-        }
-        sleep(20 * Duration.millisecond)
-        let cancelStarted = MonoTime.now()
-        source.cancel()
-        let cancelled = m2004ResolveError({=> let _ = resolving.get(Duration.second) })
-        @Expect(m2004IsCode(cancelled.resolveCode, api.ResolveErrorCode.Cancelled))
-        @Expect(MonoTime.now() - cancelStarted < 50 * Duration.millisecond)
-
-        let deadlineStarted = MonoTime.now()
-        let timedOut = m2004ResolveError({=>
-            let _ = resolver.resolve(
-                api.HostName("delay.m2-004.test"),
-                context: api.OperationContext(
-                    deadline: Some(api.Deadline.after(20 * Duration.millisecond))
+            // Return the expected error as a value: an uncaught worker exception
+            // adds Future diagnostics to the resolver cancellation measurement.
+            m2004ResolveError({=>
+                let _ = resolver.resolve(
+                    api.HostName("delay.m2-004.test"),
+                    context: api.OperationContext(cancellation: source.token)
                 )
-            )
-        })
-        @Expect(m2004IsCode(timedOut.resolveCode, api.ResolveErrorCode.Timeout))
-        @Expect(MonoTime.now() - deadlineStarted < 50 * Duration.millisecond)
-        resolver.close()
+            })
+        }
+        try {
+            let entered = api.Deadline.after(Duration.second)
+            while (resolver.metrics().runningJobs != 1) {
+                if (entered.isExpired()) { throw Exception("delayed native resolver did not enter") }
+                sleep(Duration.millisecond)
+            }
+            let cancelStarted = MonoTime.now()
+            let _ = source.cancel()
+            let cancelled = resolving.get(Duration.second)
+            let cancelLatency = MonoTime.now() - cancelStarted
+            @Expect(m2004IsCode(cancelled.resolveCode, api.ResolveErrorCode.Cancelled))
+            @Expect(cancelLatency < 50 * Duration.millisecond)
+            @Expect(resolver.metrics().runningJobs, 1)
+
+            let deadlineStarted = MonoTime.now()
+            let timedOut = m2004ResolveError({=>
+                let _ = resolver.resolve(
+                    api.HostName("delay.m2-004.test"),
+                    context: api.OperationContext(
+                        deadline: Some(api.Deadline.after(20 * Duration.millisecond))
+                    )
+                )
+            })
+            let deadlineLatency = MonoTime.now() - deadlineStarted
+            @Expect(m2004IsCode(timedOut.resolveCode, api.ResolveErrorCode.Timeout))
+            @Expect(deadlineLatency < 50 * Duration.millisecond)
+            @Expect(resolver.metrics().runningJobs, 1)
+        } finally {
+            let _ = source.cancel()
+            try { let _ = resolving.get(Duration.second) }
+            finally { resolver.close() }
+        }
     }
 
     @TestCase

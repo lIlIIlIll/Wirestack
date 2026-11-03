@@ -26,6 +26,14 @@ environment retains the inherited Windows runtime search paths after the SDK
 entries. The report uses the canonical `cjpm` command name and separately binds
 the selected executable through the SDK identity.
 
+The cancellation case waits for an actual running native job, catches the
+expected resolver error inside the worker, and returns that error as a value.
+It retains the separate 50 ms cancellation and Deadline limits, checks that
+native work is still running, and joins the caller before closing the resolver.
+Uncaught-worker diagnostics are not part of the resolver latency measurement.
+The [first STS attempt and compilation-only repair receipt](maintenance/native-cancellation-regression.json)
+retain the failed native case. They do not establish current Windows acceptance.
+
 After source freeze and authorized publication, the workflow writes the
 current report, validation, and six logs under
 [`current-desktop/windows-x86_64/`](current-desktop/windows-x86_64/).
