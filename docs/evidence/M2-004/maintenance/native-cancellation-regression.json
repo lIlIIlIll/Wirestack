@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "task_id": "M2-004",
+  "status": "NOT_QUALIFIED",
+  "initial_native_run": {
+    "run_id": 41691173589,
+    "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/41691173589",
+    "source_revision": "7caaf541e248ca2d6d8467b45801aef944c77a1c",
+    "selected_passed": 5,
+    "selected_failed": 1,
+    "failed_case": "fixtureCancellationAndDeadlineReturnBeforeNativeCleanup",
+    "failed_assertion": "MonoTime.now() - cancelStarted < 50 * Duration.millisecond",
+    "log": "docs/evidence/M2-004/maintenance/native-41691173589-resolver-tests.log",
+    "log_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "61124c82fa18e3c171e309491368498fb42de9b78c7dfba1f390e7e2c82ca67a"
+    }
+  },
+  "source_change": {
+    "path": "src/internal/resolver/windows_system_resolver_test.cj",
+    "digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "333d1fff0201b512ca3a002ab41db0e094569b5e783c618099e71f1244a9103a"
+    },
+    "latency_limit_ms": 50,
+    "waits_for_native_entry": true,
+    "expected_worker_error_returned_as_value": true,
+    "joins_worker_and_closes_resolver": true
+  },
+  "linux_compilation_only": {
+    "argv": [
+      "cjpm",
+      "test",
+      "--dry-run",
+      "--filter=M2004WindowsSystemResolverTest",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color",
+      "src/internal/resolver"
+    ],
+    "exit_code": 0,
+    "selected_cases": "NORUN",
+    "selected_case_count": 6
+  },
+  "current_windows_native_acceptance": "NOT_RUN"
+}
