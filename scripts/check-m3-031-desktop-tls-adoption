@@ -2,11 +2,19 @@
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 hosted="$repo_root/docs/evidence/M3-031/hosted-run.json"
+sdk_archive="${WIRESTACK_BASELINE_SDK_ARCHIVE:?WIRESTACK_BASELINE_SDK_ARCHIVE must select the pinned STS archive}"
+current_core="$repo_root/docs/evidence/M3-031/current-core/qualification.json"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-current-core \
+  --input "$current_core" --sdk-archive "$sdk_archive" \
+  --output "$repo_root/build/gates/m3-031/current-core-validation.json"
+
 python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-hosted \
   --input "$hosted" --output "$repo_root/build/gates/m3-031/hosted-validation.json"
 revision="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["revision"])' "$repo_root/build/gates/m3-031/hosted-validation.json")"
 python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" audit-core \
+  --sdk-archive "$sdk_archive" \
   --output "$repo_root/build/gates/m3-031/core-prerequisite-audit.json"
+
 python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-provider \
   --input "$repo_root/docs/evidence/M3-031/windows-x86_64/provider-result.json" \
   --platform windows-x86_64 --expected-revision "$revision" \
@@ -19,5 +27,5 @@ python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" ag
   --core "$repo_root/build/gates/m3-031/core-prerequisite-audit.json" \
   --windows "$repo_root/docs/evidence/M3-031/windows-x86_64/provider-result.json" \
   --macos "$repo_root/docs/evidence/M3-031/macos-arm64/provider-result.json" \
-  --expected-revision "$revision" \
+  --expected-revision "$revision" --sdk-archive "$sdk_archive" \
   --output "$repo_root/build/gates/m3-031/desktop-provider-matrix.json"
