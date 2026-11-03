@@ -27,6 +27,14 @@ from tools.evidence_digest import artifact_byte_digest, text_evidence_digest
 
 SUPPORT_FILES = ('tools/m12_002_platform.py', 'tools/m11_004_installed_consumers.py',
     'tools/m11_003_native_websocket.py', 'tools/m7_021_linux_release.py', 'tools/evidence_digest.py')
+# The complete native command inventory: every claim below is re-derived from these logs.
+COMMAND_IDS = frozenset({'kernel', 'glibc', 'virtualization', 'cpu', 'os-release', 'compiler',
+    'cjpm', 'native-cc', 'native-ld',
+    *{f'{stage}-{name}' for stage in ('same-binary', 'clean', 'build', 'rebuilt')
+      for name in consumers.APP_NAMES}})
+# Consumer sources travel to the VM under a different layout than in the repository.
+SOURCE_LAYOUTS = (('examples/linux/m11_004/', 'consumers/'),
+    ('examples/linux/m12_002/sdk/', 'consumers/trust/'))
 
 
 def require(condition: bool, message: str) -> None:
@@ -39,27 +47,162 @@ def linux_sdk_files(files: dict) -> dict:
         if 'windows_' not in name and not name.endswith(('.dll', '.dll.a'))}
 
 
+def transferred_path(key: str) -> str:
+    """Map a repository source path onto the layout it takes inside the native VM tree."""
+    for prefix, layout in SOURCE_LAYOUTS:
+        if key.startswith(prefix):
+            return layout + key[len(prefix):]
+    raise ValueError('source qualification contains an unknown consumer source: ' + key)
+
+
+def validate_transferred_sources(tree: Path, stable: dict) -> dict:
+    """Verify the sources actually present in the VM before any of them is rebuilt."""
+    recorded = {}
+    for key, expected in stable['consumer_sources'].items():
+        path = tree / transferred_path(key)
+        require(path.is_file(), 'transferred consumer source is missing: ' + key)
+        actual = text_evidence_digest(path).to_json()
+        require(actual == expected, 'transferred consumer source changed: ' + key)
+        recorded[key] = actual
+    return recorded
+
+
+def evidence_log(command: dict, evidence: Path, stream: str) -> Path:
+    """A report may only read the log it retained for itself, named after its own command."""
+    entry = command[stream]
+    relative = entry.get('path')
+    require(isinstance(relative, str) and relative and not Path(relative).is_absolute()
+        and '..' not in Path(relative).parts,
+        'native command evidence path escapes its evidence tree: ' + command['id'])
+    require(Path(relative).name == f'{command["id"]}.{stream}.log',
+        'native command evidence is not its own retained log: ' + command['id'])
+    path = evidence / relative
+    require(path.is_file(), 'native command evidence is missing: ' + command['id'])
+    return path
+
+
+def command_output(report: dict, evidence: Path, name: str) -> str:
+    command = next((item for item in report['commands'] if item['id'] == name), None)
+    require(command is not None, 'native command is missing: ' + name)
+    return evidence_log(command, evidence, 'stdout').read_text()
+
+
+FIXED_COMMANDS = {'kernel': ['uname', '-r'], 'glibc': ['getconf', 'GNU_LIBC_VERSION'],
+    'virtualization': ['systemd-detect-virt'], 'cpu': ['lscpu', '-J'],
+    'os-release': ['cat', '/etc/os-release'], 'compiler': ['<sdk>/bin/cjc', '--version'],
+    'cjpm': ['<sdk>/tools/bin/cjpm', '--version'], 'native-cc': ['cc', '--version'],
+    'native-ld': ['ld', '--version']}
+FIXTURES = ('certificate.der', 'key.der', 'untrusted.der')
+PORT = '[1-9][0-9]{0,4}'
+SELF = '<self>/main'
+INSTALLED = '<installed-tree>/consumers/{}/target/release/bin'
+REBUILT_DIR = 'rebuilt-installed-tree/consumers/{}'
+REBUILT = REBUILT_DIR + '/target/release/bin'
+
+
+def command_contract(name: str) -> tuple[tuple[str, str], list[str]]:
+    """The one invocation shape that can produce each recorded native scenario."""
+    if name in FIXED_COMMANDS:
+        return ('exact', '<evidence>'), FIXED_COMMANDS[name]
+    for stage, template, match in (('same-binary', INSTALLED, 'exact'), ('rebuilt', REBUILT, 'endswith')):
+        suffix = name.removeprefix(stage + '-')
+        if name.startswith(stage + '-') and suffix in consumers.APP_NAMES:
+            argv = [SELF, 'self-check', *(f'<support>/fixtures/{item}' for item in FIXTURES)]
+            if suffix == 'cli':
+                argv.append(PORT)
+            return (match, template.format(suffix)), argv
+    for stage in ('clean', 'build'):
+        app = name.removeprefix(stage + '-')
+        if name.startswith(stage + '-') and app in consumers.APP_NAMES:
+            return ('endswith', REBUILT_DIR.format(app)), ['<sdk>/tools/bin/cjpm', stage]
+    raise ValueError('native command has no declared contract: ' + name)
+
+
+def matches(actual, expected, cwd: str) -> bool:
+    if expected == SELF:
+        return actual == cwd + '/main'
+    if expected == PORT:
+        return isinstance(actual, str) and re.fullmatch(PORT, actual) is not None
+    return actual == expected
+
+
+def verify_command_contract(command: dict) -> None:
+    (match, cwd), argv = command_contract(command['id'])
+    actual_cwd = command.get('cwd')
+    conformant = isinstance(actual_cwd, str) and (actual_cwd == cwd if match == 'exact'
+        else actual_cwd.endswith(cwd))
+    require(conformant, 'native command working directory changed: ' + command['id'])
+    recorded = command.get('argv')
+    require(isinstance(recorded, list) and len(recorded) == len(argv)
+        and all(matches(value, shape, actual_cwd) for value, shape in zip(recorded, argv)),
+        'native command shape changed: ' + command['id'])
+
+
+def observed_platform(report: dict, evidence: Path) -> dict:
+    """Recompute every claimed platform attribute from the command that actually ran."""
+    observed = {'kernel': command_output(report, evidence, 'kernel').strip(),
+        'glibc': command_output(report, evidence, 'glibc').strip(),
+        'virtualization': command_output(report, evidence, 'virtualization').strip()}
+    inventory = json.loads(command_output(report, evidence, 'cpu'))
+    rows = inventory.get('lscpu') if isinstance(inventory, dict) else None
+    require(isinstance(rows, list) and rows, 'native CPU inventory is not a populated lscpu object')
+    fields = {}
+    for row in rows:
+        require(isinstance(row, dict) and isinstance(row.get('field'), str)
+            and isinstance(row.get('data'), str), 'native CPU inventory holds a malformed item')
+        fields[row['field'].rstrip(':')] = row['data']
+    require('Model name' in fields and 'Flags' in fields, 'native CPU inventory lacks a model or flags')
+    observed['cpu_model'] = fields['Model name']
+    observed['cpu_flags'] = fields['Flags'].split()
+    return observed
+
+
+def verify_commands(report: dict, evidence: Path) -> None:
+    ids = [command['id'] for command in report['commands']]
+    require(len(ids) == len(set(ids)), 'native command inventory contains duplicates')
+    require(set(ids) == COMMAND_IDS,
+        'native command inventory is incomplete; missing=' + repr(sorted(COMMAND_IDS - set(ids)))
+        + ' extra=' + repr(sorted(set(ids) - COMMAND_IDS)))
+    for command in report['commands']:
+        require(command['exit_code'] == 0 and not command['timed_out'], 'native command failed: ' + command['id'])
+        verify_command_contract(command)
+        for stream in ('stdout', 'stderr'):
+            item = command[stream]
+            path = evidence_log(command, evidence, stream)
+            require(text_evidence_digest(path).to_json() == item['digest'],
+                'native raw log changed: ' + command['id'])
+
+
 def verify_report(report: dict, evidence: Path, stable: dict) -> None:
     require(report['status'] == 'PASS', 'native VM acceptance did not pass')
     require(report['archive_digest'] == stable['archive_digest'], 'installed archive binding changed')
+    verify_commands(report, evidence)
+    observed = observed_platform(report, evidence)
+    for field, value in observed.items():
+        require(report[field] == value, 'native platform claim differs from its captured output: ' + field)
+    require(report['host_kernel'] == stable['kernel'],
+        'host identity is not the kernel observed by the source qualification')
     require(report['kernel'] != report['host_kernel'] and report['virtualization'] == 'kvm',
         'container/shared-kernel output is not independent native VM evidence')
     require(report['sdk_files'].keys() == linux_sdk_files(stable['sdk_files']).keys(),
         'native Linux SDK closure is incomplete')
     require('avx' not in report['cpu_flags'] and 'avx2' not in report['cpu_flags'], 'CPU boundary was not exercised')
     require(report['same_binary_check_count'] == report['rebuilt_check_count'] == 47, 'native scenarios missing')
+    require(isinstance(report.get('support_sources'), dict) and report['support_sources'].keys() == set(SUPPORT_FILES),
+        'platform support source inventory is incomplete')
+    require(isinstance(report.get('transferred_sources'), dict)
+        and report['transferred_sources'].keys() == stable['consumer_sources'].keys(),
+        'transferred consumer source inventory is incomplete')
+    for key, expected in stable['consumer_sources'].items():
+        require(report['transferred_sources'][key] == expected,
+            'transferred consumer source differs from source qualification: ' + key)
     for name in consumers.APP_NAMES:
         require(report['same_binary'][name]['digest'] == stable['consumers'][name]['binary_digest'],
             'same-binary proof accidentally substituted a rebuild')
         for stage in ('same-binary', 'rebuilt'):
-            consumers.validate_checks((evidence / f'{stage}-{name}.stdout.log').read_text(), name)
+            consumers.validate_checks(command_output(report, evidence, f'{stage}-{name}'), name)
     for name, entry in report['support_sources'].items():
         require(text_evidence_digest(ROOT / name).to_json() == entry, 'platform support source changed')
-    for command in report['commands']:
-        require(command['exit_code'] == 0 and not command['timed_out'], 'native command failed')
-        for stream in ('stdout', 'stderr'):
-            item = command[stream]
-            require(text_evidence_digest(evidence / item['path']).to_json() == item['digest'], 'native raw log changed')
     for name, entry in report['sdk_files'].items():
         require(entry == stable['sdk_files'][name], 'native SDK closure differs from source qualification')
 
@@ -134,6 +277,8 @@ def main() -> int:
     require(all((args.sdk_root, args.tree, args.fixtures, args.host_kernel,
         args.image_provenance, args.output)), 'native capture requires all installed input paths')
     output = args.output.resolve()
+    require(args.host_kernel == stable['kernel'],
+        'host identity is not the kernel observed by the source qualification')
     output.mkdir(parents=True, exist_ok=False)
     capture = Capture(args.sdk_root.resolve(), args.tree.resolve(), output)
     report = {'schema_version': 1, 'task_id': 'M12-002', 'status': 'RUNNING',
@@ -164,6 +309,7 @@ def main() -> int:
             require(actual == expected, 'transferred Linux SDK input changed: ' + relative)
             report['sdk_files'][relative] = actual
         consumers.validate_installed(capture.tree / 'install/wirestack', stable['installed_manifest'])
+        report['transferred_sources'] = validate_transferred_sources(capture.tree, stable)
         report['installed_payload_verified'] = stable['installed_manifest']['artifactBuildFingerprint']
         report['native_tool_files'] = {name: artifact_byte_digest(Path(shutil.which(name))).to_json()
             for name in ('cc', 'ld')}

@@ -1,0 +1,33 @@
+# The docs gate at this revision, run through `scripts/check-docs --json` with the pinned
+# cjdoc 0.7.2. The per-package documents all pass; the combined strict check still aborts
+# inside cjdoc itself, on public source this task does not change.
+#
+# Result: status=FAIL, issues=[{"code": "CJDOC_CHECK", "detail": "combined strict check returned a non-zero status"}]
+#
+# Per-package commands (35 total, one package at a time):
+#   check                7 commands: PASS
+#   generate             7 commands: PASS
+#   render-api-surface   7 commands: PASS
+#   render-coverage      7 commands: PASS
+#   render-markdown      7 commands: PASS
+#
+# Coverage reported by each scoped strict check:
+#   documentation coverage: symbols 1024/1024 (100%), parameters 508/508 (100%)
+#   documentation coverage: symbols 1260/1260 (100%), parameters 606/606 (100%)
+#   documentation coverage: symbols 756/756 (100%), parameters 316/316 (100%)
+#   documentation coverage: symbols 786/786 (100%), parameters 327/327 (100%)
+#   documentation coverage: symbols 815/815 (100%), parameters 338/338 (100%)
+#   documentation coverage: symbols 836/836 (100%), parameters 371/371 (100%)
+#   documentation coverage: symbols 932/932 (100%), parameters 380/380 (100%)
+#
+# Combined check (all packages in one cjdoc invocation):
+#   kind=check package=combined returncode=1 status=FAIL
+#   stderr tail:
+#     2026-10-22 16:35:21.888263 1774423 E Cannot allocate memory of 13779556(B), throw an OutOfMemory exception
+#     An exception has occurred:
+#     Out of memory
+#
+# This is the failure the deployment snapshot already records as
+# repository_full_gate=NOT_RERUN_KNOWN_CJDOC_HEAP_OOM_ON_UNCHANGED_PUBLIC_SOURCE:
+# the combined invocation exhausts the cjdoc heap while every scoped package passes. It is
+# recorded here as an observed refusal, not as a pass.
