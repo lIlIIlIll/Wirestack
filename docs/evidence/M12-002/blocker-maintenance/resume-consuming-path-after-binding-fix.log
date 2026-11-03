@@ -1,0 +1,6 @@
+test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates (tools.tests.test_m12_002_source_sdk.ResumeCaptureTests.test_failed_and_timed_out_post_relocation_receipts_are_rerun_without_duplicates) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.018s
+
+OK
