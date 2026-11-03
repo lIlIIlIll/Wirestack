@@ -172,6 +172,7 @@ class HttpClientExtensionsTest {
         }
         var second: ?Future<Bool> = None<Future<Bool>>
         try {
+            connector.waitUntilEntered()
             @Expect(waitForHttpConnectionReservation(client, 1, Duration.second))
             second = Some(spawn {
                 try {
@@ -179,25 +180,27 @@ class HttpClientExtensionsTest {
                     response.close()
                     false
                 } catch (error: api.NetworkException) {
-                    match (error.code) {
-                        case api.NetworkErrorCode.Closed => true
-                        case _ => false
-                    }
+                    @Expect(match (error.category) { case api.NetworkErrorCategory.Closed => true; case _ => false })
+                    @Expect(match (error.phase) { case api.NetworkPhase.PoolAcquire => true; case _ => false })
+                    @Expect(match (error.retryability) { case api.Retryability.Never => true; case _ => false })
+                    match (error.code) { case api.NetworkErrorCode.Closed => true; case _ => false }
                 }
             })
             @Expect(waitForHttpAdmissionWaiter(client, 1, Duration.second))
             client.close()
             client.close()
-            var secondRejected = false
-            try { secondRejected = second.getOrThrow().get(Duration.second) } catch (_: Exception) { }
-            @Expect(secondRejected)
+            @Expect(second.getOrThrow().get(Duration.second))
             @Expect(client.resourceSnapshot().admissionWaiters, 0)
         } finally {
             connector.release()
             client.close()
-            try { let _ = first.get(5 * Duration.second) } catch (_: Exception) { }
-            if (let Some(value) <- second) {
-                try { let _ = value.get(5 * Duration.second) } catch (_: Exception) { }
+            try { @Expect(first.get(5 * Duration.second)) }
+            finally {
+                if (let Some(value) <- second) { let _ = value.get(5 * Duration.second) }
+                @Expect(client.resourceSnapshot().activeRequests, 0)
+                @Expect(client.resourceSnapshot().activeConnections, 0)
+                @Expect(client.resourceSnapshot().reservedConnections, 0)
+                @Expect(client.resourceSnapshot().admissionWaiters, 0)
             }
         }
     }
@@ -316,14 +319,28 @@ private class StallingHttpConnector <: HttpConnector {
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private var released = false
+    private var entered = false
 
     public func connect(endpoint: SocketEndpoint, context: OperationContext): api.DuplexTransport {
         let _ = endpoint
         let _ = context
         synchronized(mutex) {
+            entered = true
+            changed.notifyAll()
             while (!released) { changed.wait() }
         }
         throw Exception("stalled connector released without a transport")
+    }
+
+    func waitUntilEntered(): Unit {
+        synchronized(mutex) {
+            let deadline = Deadline.after(Duration.second)
+            while (!entered) {
+                let remaining = deadline.remaining()
+                if (remaining <= Duration.Zero) { throw Exception("connector did not enter") }
+                changed.wait(timeout: remaining)
+            }
+        }
     }
 
     func release(): Unit {
