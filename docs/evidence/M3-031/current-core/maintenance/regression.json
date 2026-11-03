@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "source_task": "M3-031",
+  "kind": "prefreeze-core-admission-regression",
+  "status": "PASS",
+  "qualification": "NOT_QUALIFIED",
+  "native_current_core": "NOT_RUN",
+  "native_desktop": "NOT_RUN",
+  "result": {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tools.tests.test_m3_031_desktop_tls_adoption",
+      "-v"
+    ],
+    "exit_code": 0,
+    "tests_run": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "scope": [
+    "actual package/project summary grammar and unrelated filtered skip counts",
+    "required-case skip/failure/error/duplicate and timed-out receipt rejection",
+    "host-independent synthetic Linux fixture with production native-platform check retained",
+    "raw M2 reports/logs are audit inputs, only compatible PASS validation JSONs are required indexed reports"
+  ],
+  "sources": {
+    "tools/m3_031_desktop_tls_adoption.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "50e82645ba7c4fae2eb2bf51fa3d6082e548384b8cff75ad4a472a403e58c7fc"
+    },
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0b94d8851f6b5df391ba44fd88512ad0b46b01b9b0ce1d343124400c9ffb30f8"
+    },
+    "tools/tasks/M3-031.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b9efc371eb66f595dcb99319b558c37d67e5f97c6f87fdd130feb24b9e3ffe11"
+    }
+  },
+  "logs": [
+    {
+      "path": "docs/evidence/M3-031/current-core/maintenance/review-red.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a881d5984b10618b5a6fd523610be7ef7cf89c696c738f09dc97c650042245d0"
+      }
+    },
+    {
+      "path": "docs/evidence/M3-031/current-core/maintenance/combined-before-shared-fixture-correction.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f40bf1e17511112150821f34a4203e7b10fc730515c39f23c7695fdf104709b1"
+      }
+    },
+    {
+      "path": "docs/evidence/M3-031/current-core/maintenance/incomplete-project-summary-fixture.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "29753e1eef9d7b1ed692f59f686db39716898219d373cba34850325568d98f3a"
+      }
+    },
+    {
+      "path": "docs/evidence/M3-031/current-core/maintenance/core-module-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1ad893de768c4ff25c98cb5741f031a656318e530fd480f8c7bbe0c18b62b955"
+      }
+    }
+  ],
+  "boundary": "The initial red execution had four selected Core/consumer cases, one failure and two errors. Subsequent combined224 and Core28 runs exposed the shared synthetic fixture missing the complete project-summary structure; their failures are retained. The final module run passed after fixture correction. No native qualification or historical report rewrite is claimed."
+}
