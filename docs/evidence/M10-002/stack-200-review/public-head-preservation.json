@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "source_task": "M10-002",
+  "kind": "public-candidate-preservation",
+  "status": "PASS",
+  "scope": "provenance only, before any owner-head rewrite",
+  "records": [
+    {
+      "task_id": "M0-016",
+      "owner_ref": "refs/heads/task/M0-016-advisory-review",
+      "owner_sha_at_preservation": "f550113ff4ed5e85e8af45c53801b9b14ddc3b53",
+      "preservation_ref": "refs/heads/evidence/M0-016/f550113ff4ed5e85e8af45c53801b9b14ddc3b53",
+      "preserved_sha": "f550113ff4ed5e85e8af45c53801b9b14ddc3b53",
+      "owner_ref_unchanged_at_api_check": true
+    },
+    {
+      "task_id": "M3-031",
+      "owner_ref": "refs/heads/task/M3-031-provider-requalification",
+      "owner_sha_at_preservation": "2567b49bedda1e2e855b426be5aa8828b65896cb",
+      "preservation_ref": "refs/heads/evidence/M3-031/2567b49bedda1e2e855b426be5aa8828b65896cb",
+      "preserved_sha": "2567b49bedda1e2e855b426be5aa8828b65896cb",
+      "owner_ref_unchanged_at_api_check": true
+    },
+    {
+      "task_id": "M7-030",
+      "owner_ref": "refs/heads/m7-030-frozen-artifact-prerequisite-stacked",
+      "owner_sha_at_preservation": "812aec9cb4021b272ade3900062658f3d567a27f",
+      "preservation_ref": "refs/heads/evidence/M7-030/812aec9cb4021b272ade3900062658f3d567a27f",
+      "preserved_sha": "812aec9cb4021b272ade3900062658f3d567a27f",
+      "owner_ref_unchanged_at_api_check": true
+    },
+    {
+      "task_id": "M12-002",
+      "owner_ref": "refs/heads/fix/stack200-m12-002",
+      "owner_sha_at_preservation": "bc20ad705a0a82ae16391fc307cce46071f14941",
+      "preservation_ref": "refs/heads/evidence/M12-002/bc20ad705a0a82ae16391fc307cce46071f14941",
+      "preserved_sha": "bc20ad705a0a82ae16391fc307cce46071f14941",
+      "owner_ref_unchanged_at_api_check": true
+    },
+    {
+      "task_id": "M10-002",
+      "owner_ref": "refs/heads/fix/M10-002-resource-owner-backpressure",
+      "owner_sha_at_preservation": "fe7735229d349c907acfd405f1ec10db5b85aab0",
+      "preservation_ref": "refs/heads/evidence/M10-002/fe7735229d349c907acfd405f1ec10db5b85aab0",
+      "preserved_sha": "fe7735229d349c907acfd405f1ec10db5b85aab0",
+      "owner_ref_unchanged_at_api_check": true
+    }
+  ],
+  "unchanged_base": {
+    "ref": "refs/heads/fix/M10-001-terminal-deadline-checks",
+    "sha": "5a3e858e1647ca764402fe73af8d5eb30136ef8c"
+  },
+  "publication_commits_created": 0,
+  "count_scope": "source/publication history only; GitButler internal workspace/oplog snapshots are excluded",
+  "native_qualification": "NOT_RUN",
+  "enforcement": {
+    "exact_create_only_leases": true,
+    "unprotected_native_force_removed": true,
+    "native_hook_bypass_removed": true,
+    "global_pre_push_privacy_dispatcher_enabled": true,
+    "original_user_workspace_modified": false
+  },
+  "auth_failure": "initial SSH routing selected an unrelated account; only isolated checkout URL/identity/credential scope changed to authenticated HTTPS; global configuration remained untouched",
+  "guard_audit": "docs/evidence/M10-002/stack-200-review/preservation-push-guard.log",
+  "successful_remaining_refs_log": "docs/evidence/M10-002/stack-200-review/remaining-head-preservation.log"
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "source_task": "M10-002",
+  "kind": "documentation-tool-selection",
+  "status": "PASS",
+  "task_status_at_capture": "BLOCKED",
+  "release_qualification": "NOT_QUALIFIED",
+  "scope": "Select the repository-pinned CI-built documentation executable and exercise the current public source without higher default limits",
+  "authority": {
+    "pin": "docs/references/m7-033-ci-toolchain.json",
+    "cjdoc_version": "0.7.2",
+    "cjdoc_source_commit": "582a95278c95024dc2cf3dfe9f011259c1002fc2",
+    "patch": "tools/docs/cjdoc-0.7.2-bounded-doc-ir.patch",
+    "patch_sha256": "33f494d373d3f410a07c8bc6a06e6269b601fca977baf82b1ed1f39a9ad0efda"
+  },
+  "ci_artifact": {
+    "workflow": ".github/workflows/m7-033-docs.yml",
+    "run_id": 40894453667,
+    "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/40894453667",
+    "run_head_sha": "5a3e858e1647ca764402fe73af8d5eb30136ef8c",
+    "run_conclusion": "success",
+    "artifact_id": 12907730247,
+    "artifact_name": "m7-033-cjdoc-9243e646cbf585609c6ceb9c442954e97bbaf5e3",
+    "artifact_name_identity": "workflow merge-checkout identity, not the PR source-head identity",
+    "zip_size_bytes": 7711752,
+    "zip_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "62f07480c142f01c28d3d8ff560bc40a284030442a5127d2a44e48368047496e"
+    },
+    "native_binary_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "5c26d3a7a7d39be07abbfd6563818aaecfd56559f3c7050c364c588a5196d1fb"
+    }
+  },
+  "environment": {
+    "sdk_channel": "STS",
+    "sdk_version": "1.1.3",
+    "sdk_archive": "cangjie-sdk-linux-x64-1.1.3.tar.gz",
+    "sdk_archive_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a"
+    },
+    "sdk_build_performed": false,
+    "global_tools_modified": false,
+    "heap_override_added": false,
+    "coverage_or_resource_limits_changed": false
+  },
+  "previous_failure": {
+    "command": [
+      "scripts/check"
+    ],
+    "exit_code": 1,
+    "point": "combined strict documentation check",
+    "message": "Cannot allocate memory of 13779556(B), throw an OutOfMemory exception",
+    "native_binary_sha256": "ea949af377d74618122e6fd31d68fafd5df607471a2f8561139105922ab84eb4",
+    "source_provenance": "not established by the 0.7.2 version label",
+    "log": "docs/evidence/M10-002/stack-200-review/canonical-before-source-publication.log"
+  },
+  "successful_command": {
+    "argv": [
+      "scripts/check-docs",
+      "--html",
+      "--json",
+      "--output",
+      "build/check-docs-pinned-ci.json"
+    ],
+    "selected_CJDOC_BIN": "<task-cache>/cjdoc-native-40894453667/native/bin/cjdoc",
+    "exit_code": 0,
+    "command_count": 41,
+    "layers": 7,
+    "public_symbols": 1873,
+    "documented_symbols": 1873,
+    "parameters": 950,
+    "documented_parameters": 950,
+    "html": "generated",
+    "browser_search_navigation": "NOT_RUN",
+    "report": "docs/evidence/M10-002/stack-200-review/docs-pinned-ci-tool.json",
+    "log": "docs/evidence/M10-002/stack-200-review/docs-pinned-ci-tool.log"
+  },
+  "boundary": "The full canonical script stopped before native check/build/tests in the failed run. The standalone documentation success does not establish full acceptance, desktop qualification, resource profiles, release qualification, or browser behavior."
+}

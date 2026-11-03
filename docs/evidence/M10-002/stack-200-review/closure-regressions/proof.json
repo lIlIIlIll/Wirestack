@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "task_id": "M10-002",
+  "kind": "deterministic-admission-maintenance-proof",
+  "status": "PASS",
+  "task_status": "BLOCKED",
+  "source_state": "uncommitted owner changes over workspace HEAD 9e9501c4f535f430e4dffcf79a9f68b68c5aa191; not final integrated acceptance",
+  "platform": "linux-x86_64-glibc",
+  "sdk": "STS 1.1.3",
+  "sdk_archive_sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a",
+  "sdk_matched_archive_files": 497,
+  "sources": {
+    "src/internal/http1/http2_connection_pool.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "29c40f40d0903e345f8a579a1c59bb68792e3e03f00567667c9e7957a47baaee"
+    },
+    "src/internal/http1/http2_connection_pool_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "69e8c02844fef9426ca6fda38b13c330d9849b99154bb3abee3ecf46987f0def"
+    },
+    "src/internal/http_resource_budget.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "80a8ff831e33a16ad81580ac5fb2a8a98769b6795e3d01a8fb70257562a2673d"
+    },
+    "src/internal/http_resource_budget_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d2dbbdcab58e47b35f8f1e1ec30cb72cacb44463f12d6d65198649a64dfda0b8"
+    },
+    "src/http/client_extensions_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "43fc82d0f0f1b36219fa4a242d42765a376035e01f8c2fa5e1392b8be3dd87d1"
+    }
+  },
+  "runs": [
+    {
+      "log": "docs/evidence/M10-002/stack-200-review/closure-regressions/budget-before-restored-cache.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "50e64e7117f8673ad7784cadc1219bfd418cc8fd543f74bdd3f32cb8a71a143d"
+      },
+      "exit_code": 1,
+      "passed": 1,
+      "skipped": 16,
+      "errors": 0,
+      "failed": 1
+    },
+    {
+      "log": "docs/evidence/M10-002/stack-200-review/closure-regressions/pool-before.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d6634088a596b02c8d25c259f4bcaaa152fe20be2d458004a9232c5cc743cd1d"
+      },
+      "exit_code": 1,
+      "passed": 0,
+      "skipped": 175,
+      "errors": 0,
+      "failed": 1
+    },
+    {
+      "log": "docs/evidence/M10-002/stack-200-review/closure-regressions/budget-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8a79bba07f90023018938573913b6a6317485dfba66891dba5d9b65ba50f0d02"
+      },
+      "exit_code": 0,
+      "passed": 15,
+      "skipped": 3,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "log": "docs/evidence/M10-002/stack-200-review/closure-regressions/pool-cleanup-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5e4c77a6123f5ebd550cd76eb8defece83c043055ac6be9773882c4af01a78bd"
+      },
+      "exit_code": 0,
+      "passed": 23,
+      "skipped": 153,
+      "errors": 0,
+      "failed": 0
+    },
+    {
+      "log": "docs/evidence/M10-002/stack-200-review/closure-regressions/client-cleanup-after.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8a1430db039a9d03160b22fdc1466d2b8f7c1e080cff33f12717de19dd919510"
+      },
+      "exit_code": 0,
+      "passed": 5,
+      "skipped": 161,
+      "errors": 0,
+      "failed": 0
+    }
+  ],
+  "scope": "Tests force the specific off-lock discard and closed-ledger precedence defects. They do not establish which interleaving caused the two historical full-suite failures. Filter-excluded tests are not native qualification passes. No coverage or mutation claim."
+}
