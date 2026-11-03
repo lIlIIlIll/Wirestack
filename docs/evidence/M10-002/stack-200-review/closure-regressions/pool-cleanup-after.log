@@ -1,0 +1,2190 @@
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/client_pipeline.cj:92:9:
+   [36m| [0m
+[36m92[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/server_connection.cj:166:23:
+    [36m| [0m
+[36m166[0m [36m| [0m        try { if (let Some(handoff) <- pendingHandoff) { handoff.failed() } }[0m
+    [36m| [0m                      [33m^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:238:9:
+    [36m| [0m
+[36m238[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/proxy_client_pipeline.cj:279:9:
+    [36m| [0m
+[36m279[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool.cj:453:42:
+    [36m| [0m
+[36m453[0m [36m| [0m            if (pendingClaimOutstanding) { synchronized(mutex) { pendingStreamClaims-- } }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool.cj:455:42:
+    [36m| [0m
+[36m455[0m [36m| [0m            if (!streamLeaseTransferred) { closeOptionalHttp2ResourceLease(streamResourceLease) }[0m
+    [36m| [0m                                         [33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool.cj:765:32:
+    [36m| [0m
+[36m765[0m [36m| [0m              if (waiterId != 0) {[0m
+    [36m| [0m [33m_[0m[33m_______________________________^[0m
+[36m766[0m [36m| [0m[33m|[0m                 synchronized(mutex) { removeHttp2WaiterLocked(waiterId, false) }[0m
+[36m767[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+   [36m==>[0m <repo>/src/internal/http1/tls_client_pipeline.cj:869:9:
+    [36m| [0m
+[36m869[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+    [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+8 warnings generated, 8 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/http/client.cj:566:31:
+    [36m| [0m
+[36m566[0m [36m| [0m            if (!transferred) { lifetime.close() }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/http/client.cj:894:29:
+    [36m| [0m
+[36m894[0m [36m| [0m              if (!published) {[0m
+    [36m| [0m [33m_[0m[33m____________________________^[0m
+[36m895[0m [36m| [0m[33m|[0m                 direct.close()[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m897[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <repo>/src/http/client.cj:896:41:
+    [36m| [0m
+[36m896[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                        [33m^^^^^^^^^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable pattern
+   [36m==>[0m <repo>/src/http/client.cj:896:78:
+    [36m| [0m
+[36m896[0m [36m| [0m                match (tunneled) { case Some(native) => native.close(); case None => () }[0m
+    [36m| [0m                                                                             [33m^^^^ [0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/client.cj:119:31:
+    [36m| [0m
+[36m119[0m [36m| [0m              if (!transferred) {[0m
+    [36m| [0m [33m_[0m[33m______________________________^[0m
+[36m120[0m [36m| [0m[33m|[0m                 try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m122[0m [36m| [0m[33m|[0m             }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/client.cj:120:31:
+    [36m| [0m
+[36m120[0m [36m| [0m                try { if (let Some(value) <- decodedStream) { value.close() } }[0m
+    [36m| [0m                              [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/client.cj:123:21:
+    [36m| [0m
+[36m123[0m [36m| [0m            if (let Some(value) <- lease) { value.close() }[0m
+    [36m| [0m                    [33m^^^^^^^^^^^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m==>[0m <repo>/src/gzip/body.cj:138:25:
+    [36m| [0m
+[36m138[0m [36m| [0m              if (failed) {[0m
+    [36m| [0m [33m_[0m[33m________________________^[0m
+[36m139[0m [36m| [0m[33m|[0m                 try { releaseIfTerminal() } catch (_: Exception) { /* Cleanup must not replace the read failure. */ }[0m
+[36m140[0m [36m| [0m[33m|[0m             } else { releaseIfTerminal() }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:24:9:
+   [36m| [0m
+[36m24[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused variable:'resourceLease'
+  [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:36:9:
+   [36m| [0m
+[36m36[0m [36m| [0m        resourceLease: ?internal.HttpResourceLease): Http1ClientConnection {[0m
+   [36m| [0m        [33m^^^^^^^^^^^^^ unused variable[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 20.85 */                None < NetworkException >[0m
+    [36m| [0m                           [33m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 20.1 */@Attribute[TEST_GENERATED] class Http2ConnectionPoolTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 20.2 */    @Attribute[TestCase_73][0m
+    [36m| [0m[34m|[0m /* 20.3 */    func throwingReentrantH2ObserverSeesAdmittedNotReservedStreams(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.4 */        let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.5 */        let factory = PoolFakeFactory(8u32)[0m
+    [36m| [0m[34m|[0m /* 20.6 */        let sink = ReentrantH2PoolObservationSink(pool)[0m
+    [36m| [0m[34m|[0m /* 20.7 */        let context = OperationContext(eventSink: Some(sink))[0m
+    [36m| [0m[34m|[0m /* 20.8 */        let key = poolKey("example.test", "h2")[0m
+    [36m| [0m[34m|[0m /* 20.9 */        let first = pool.acquire(key, PoolNoopGoAwayListener(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.10 */        let second = pool.acquire(key, PoolNoopGoAwayListener(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.11 */        expectEqual("sink.acquired.load()", "2", sink.acquired.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.12 */        expectEqual("sink.pendingAtAcquire.load()", "0", sink.pendingAtAcquire.load(), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.13 */        factory.connection(0).finish(first.admission.stream.id)[0m
+    [36m| [0m[34m|[0m /* 20.14 */        pool.release(first, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.15 */        factory.connection(0).finish(second.admission.stream.id)[0m
+    [36m| [0m[34m|[0m /* 20.16 */        pool.release(second, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.17 */        pool.retire()[0m
+    [36m| [0m[34m|[0m /* 20.18 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.19 */        expectEqual("pool.observationSnapshot().activeStreams", "0", pool.observationSnapshot().activeStreams, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.20 */        expectEqual("pool.observationSnapshot().idleConnections", "0", pool.observationSnapshot().idleConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.21 */    }[0m
+    [36m| [0m[34m|[0m /* 20.22 */    [0m
+    [36m| [0m[34m|[0m /* 20.23 */    @Attribute[TestCase_74][0m
+    [36m| [0m[34m|[0m /* 20.24 */    func observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreams(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.25 */        let one = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.26 */        let two = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.27 */        let factory = PoolFakeFactory(8u32)[0m
+    [36m| [0m[34m|[0m /* 20.28 */        let sink = api.NetworkEventBuffer(capacity: 64)[0m
+    [36m| [0m[34m|[0m /* 20.29 */        let context = OperationContext(eventSink: Some(sink), requestId: Some(71), attemptId: Some(72))[0m
+    [36m| [0m[34m|[0m /* 20.30 */        let key = poolKey("example.test", "h2")[0m
+    [36m| [0m[34m|[0m /* 20.31 */        let first = one.acquire(key, PoolNoopGoAwayListener(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.32 */        let other = two.acquire(key, PoolNoopGoAwayListener(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.33 */        expectEqual("first.connectionId != other.connectionId", "true", first.connectionId != other.connectionId, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.34 */        expectEqual("first.admission.stream.id.value", "other.admission.stream.id.value", first.admission.stream.id.value, other.admission.stream.id.value, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.35 */        let shared = one.acquire(key, PoolNoopGoAwayListener(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.36 */        expectEqual("shared.connectionId", "first.connectionId", shared.connectionId, first.connectionId, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.37 */        expectEqual("shared.admission.stream.id.value != first.admission.stream.id.value", "true", shared.admission.stream.id.value != first.admission.stream.id.value, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.38 */        expectEqual("one.observationSnapshot().leasedConnections", "1", one.observationSnapshot().leasedConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.39 */        expectEqual("one.observationSnapshot().activeStreams", "2", one.observationSnapshot().activeStreams, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.40 */        expectEqual("one.observationSnapshot().reservedStreams", "0", one.observationSnapshot().reservedStreams, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.41 */        one.retire()[0m
+    [36m| [0m[34m|[0m /* 20.42 */        expectEqual("one.observationSnapshot().drainingConnections", "1", one.observationSnapshot().drainingConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.43 */        factory.connection(0).finish(first.admission.stream.id)[0m
+    [36m| [0m[34m|[0m /* 20.44 */        one.release(first, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.45 */        expectEqual("one.observationSnapshot().activeStreams", "1", one.observationSnapshot().activeStreams, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.46 */        factory.connection(0).finish(shared.admission.stream.id)[0m
+    [36m| [0m[34m|[0m /* 20.47 */        one.release(shared, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.48 */        expectEqual("one.observationSnapshot().leasedConnections", "0", one.observationSnapshot().leasedConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.49 */        expectEqual("one.observationSnapshot().drainingConnections", "0", one.observationSnapshot().drainingConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.50 */        expectEqual("one.observationSnapshot().activeStreams", "0", one.observationSnapshot().activeStreams, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.51 */        factory.connection(1).finish(other.admission.stream.id)[0m
+    [36m| [0m[34m|[0m /* 20.52 */        two.release(other, context: context)[0m
+    [36m| [0m[34m|[0m /* 20.53 */        two.close()[0m
+    [36m| [0m[34m|[0m /* 20.54 */        one.close()[0m
+    [36m| [0m[34m|[0m /* 20.55 */        var acquired: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 20.56 */        var released: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 20.57 */        var closed: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 20.58 */        for(event in sink.drain()) {[0m
+    [36m| [0m[34m|[0m /* 20.59 */            match(event.kind) {[0m
+    [36m| [0m[34m|[0m /* 20.60 */                case NetworkEventKind.HttpConnectionAcquired => acquired ++[0m
+    [36m| [0m[34m|[0m /* 20.61 */                case NetworkEventKind.HttpConnectionReleased => released ++[0m
+    [36m| [0m[34m|[0m /* 20.62 */                case NetworkEventKind.ConnectionClosed => closed ++[0m
+    [36m| [0m[34m|[0m /* 20.63 */                case NetworkEventKind.Http2StreamOpened | NetworkEventKind.Http2StreamClosed => fail("pool duplicated protocol stream events")[0m
+    [36m| [0m[34m|[0m /* 20.64 */                case _ =>()[0m
+    [36m| [0m[34m|[0m /* 20.65 */            }[0m
+    [36m| [0m[34m|[0m /* 20.66 */        }[0m
+    [36m| [0m[34m|[0m /* 20.67 */        expectEqual("acquired", "3", acquired, 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.68 */        expectEqual("released", "3", released, 3, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.69 */        expectEqual("closed", "2", closed, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.70 */    }[0m
+    [36m| [0m[34m|[0m /* 20.71 */    [0m
+    [36m| [0m[34m|[0m /* 20.72 */    @Attribute[TestCase_75][0m
+    [36m| [0m[34m|[0m /* 20.73 */    func retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.74 */        let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.75 */        let factory = PoolFakeFactory(8u32)[0m
+    [36m| [0m[34m|[0m /* 20.76 */        let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.77 */        let active = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.78 */        pool.retire()[0m
+    [36m| [0m[34m|[0m /* 20.79 */        expectEqual("! active.connection.isClosed()", "true", ! active.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.80 */        try {[0m
+    [36m| [0m[34m|[0m /* 20.81 */            try {[0m
+    [36m| [0m[34m|[0m /* 20.82 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 20.83 */                pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.84 */                failExpect("@ExpectThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 20.85 */                None < NetworkException >[0m
+    [36m| [0m[34m|[0m /* 20.86 */            } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 20.87 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 20.88 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 20.89 */                }[0m
+    [36m| [0m[34m|[0m /* 20.90 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 20.91 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 20.92 */                }[0m
+    [36m| [0m[34m|[0m /* 20.93 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 20.94 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 20.95 */                }[0m
+    [36m| [0m[34m|[0m /* 20.96 */                e[0m
+    [36m| [0m[34m|[0m /* 20.97 */            }[0m
+    [36m| [0m[34m|[0m /* 20.98 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 20.99 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 20.100 */                throw e[0m
+    [36m| [0m[34m|[0m /* 20.101 */            }[0m
+    [36m| [0m[34m|[0m /* 20.102 */            expectCaughtUnexpectedE("@ExpectThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 20.103 */            None < NetworkException >[0m
+    [36m| [0m[34m|[0m /* 20.104 */        }[0m
+    [36m| [0m[34m|[0m /* 20.105 */        expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.106 */        factory.finish(active)[0m
+    [36m| [0m[34m|[0m /* 20.107 */        pool.release(active)[0m
+    [36m| [0m[34m|[0m /* 20.108 */        expectEqual("active.connection.isClosed()", "true", active.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.109 */        expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.110 */        pool.release(active)[0m
+    [36m| [0m[34m|[0m /* 20.111 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.112 */    }[0m
+    [36m| [0m[34m|[0m /* 20.113 */    [0m
+    [36m| [0m[34m|[0m /* 20.114 */    @Attribute[TestCase_76][0m
+    [36m| [0m[34m|[0m /* 20.115 */    func retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.116 */        for(strict in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 20.117 */            let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.118 */            let gate = PoolAdmissionGate()[0m
+    [36m| [0m[34m|[0m /* 20.119 */            let factory = PoolGatedFactory(gate)[0m
+    [36m| [0m[34m|[0m /* 20.120 */            let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.121 */            let pending = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 20.122 */                Some(pool.acquire(key, PoolNoopGoAwayListener(), factory))[0m
+    [36m| [0m[34m|[0m /* 20.123 */            } catch(_: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 20.124 */                None < Http2PoolLease >[0m
+    [36m| [0m[34m|[0m /* 20.125 */            }[0m
+    [36m| [0m[34m|[0m /* 20.126 */        }[0m
+    [36m| [0m[34m|[0m /* 20.127 */        gate.waitUntilEntered()[0m
+    [36m| [0m[34m|[0m /* 20.128 */        expectEqual("pool.observationSnapshot().connectingConnections", "1", pool.observationSnapshot().connectingConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.129 */        expectEqual("pool.observationSnapshot().reservedStreams", "1", pool.observationSnapshot().reservedStreams, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.130 */        if(strict) {[0m
+    [36m| [0m[34m|[0m /* 20.131 */            pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.132 */        }[0m
+    [36m| [0m[34m|[0m /* 20.133 */        else {[0m
+    [36m| [0m[34m|[0m /* 20.134 */            pool.retire()[0m
+    [36m| [0m[34m|[0m /* 20.135 */        }[0m
+    [36m| [0m[34m|[0m /* 20.136 */        gate.release()[0m
+    [36m| [0m[34m|[0m /* 20.137 */        let result = pending.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.138 */        if(strict) {[0m
+    [36m| [0m[34m|[0m /* 20.139 */            expectEqual("result.isNone()", "true", result.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.140 */            expectEqual("factory.connectionClosed", "true", factory.connectionClosed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.141 */        }[0m
+    [36m| [0m[34m|[0m /* 20.142 */        else {[0m
+    [36m| [0m[34m|[0m /* 20.143 */            let lease = result.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 20.144 */            expectEqual("! factory.connectionClosed", "true", ! factory.connectionClosed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.145 */            factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.146 */            pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.147 */            expectEqual("factory.connectionClosed", "true", factory.connectionClosed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.148 */        }[0m
+    [36m| [0m[34m|[0m /* 20.149 */        expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.150 */        expectEqual("pool.snapshot().reservations", "0", pool.snapshot().reservations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.151 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.152 */    }[0m
+    [36m| [0m[34m|[0m /* 20.153 */}[0m
+    [36m| [0m[34m|[0m /* 20.154 */[0m
+    [36m| [0m[34m|[0m /* 20.155 */@Attribute[TestCase_77][0m
+    [36m| [0m[34m|[0m /* 20.156 */func alpnPrefersH2AndFallsBackOnlyToHttp11(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.157 */    expectEqual("httpClientAlpnProtocols()", "[\"h2\", \"http/1.1\"]", httpClientAlpnProtocols(),["h2", "http/1.1"], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.158 */    expectEqual("isNegotiatedHttp2(selectHttpNegotiatedProtocol(Some(\"h2\")))", "true", isNegotiatedHttp2(selectHttpNegotiatedProtocol(Some("h2"))), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.159 */    expectEqual("isNegotiatedHttp11(selectHttpNegotiatedProtocol(Some(\"http/1.1\")))", "true", isNegotiatedHttp11(selectHttpNegotiatedProtocol(Some("http/1.1"))), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.160 */    expectEqual("isNegotiatedHttp11(selectHttpNegotiatedProtocol(None < String >))", "true", isNegotiatedHttp11(selectHttpNegotiatedProtocol(None < String >)), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.161 */    var rejected = false[0m
+    [36m| [0m[34m|[0m /* 20.162 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.163 */        let _ = selectHttpNegotiatedProtocol(Some("acme/1"))[0m
+    [36m| [0m[34m|[0m /* 20.164 */    } catch(_: IllegalArgumentException) {[0m
+    [36m| [0m[34m|[0m /* 20.165 */        rejected = true[0m
+    [36m| [0m[34m|[0m /* 20.166 */    }[0m
+    [36m| [0m[34m|[0m /* 20.167 */    expectEqual("rejected", "true", rejected, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.168 */}[0m
+    [36m| [0m[34m|[0m /* 20.169 */[0m
+    [36m| [0m[34m|[0m /* 20.170 */@Attribute[TestCase_78][0m
+    [36m| [0m[34m|[0m /* 20.171 */func oneConnectionIsSharedUntilPeerStreamCapacityIsFull(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.172 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.173 */    let factory = PoolFakeFactory(10u32)[0m
+    [36m| [0m[34m|[0m /* 20.174 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.175 */    let leases = ArrayList < Http2PoolLease >()[0m
+    [36m| [0m[34m|[0m /* 20.176 */    for(_ in 0 .. 10) {[0m
+    [36m| [0m[34m|[0m /* 20.177 */        leases.add(pool.acquire(key, PoolNoopGoAwayListener(), factory))[0m
+    [36m| [0m[34m|[0m /* 20.178 */    }[0m
+    [36m| [0m[34m|[0m /* 20.179 */    expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.180 */    let full = pool.snapshot()[0m
+    [36m| [0m[34m|[0m /* 20.181 */    expectEqual("full.connections", "1", full.connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.182 */    expectEqual("full.activeStreams", "10", full.activeStreams, 10, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.183 */    expectEqual("full.availableStreamCapacity", "0", full.availableStreamCapacity, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.184 */    leases.add(pool.acquire(key, PoolNoopGoAwayListener(), factory))[0m
+    [36m| [0m[34m|[0m /* 20.185 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.186 */    expectEqual("pool.snapshot().connections", "2", pool.snapshot().connections, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.187 */    for(lease in leases) {[0m
+    [36m| [0m[34m|[0m /* 20.188 */        factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.189 */        pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.190 */    }[0m
+    [36m| [0m[34m|[0m /* 20.191 */    expectEqual("pool.snapshot().activeStreams", "0", pool.snapshot().activeStreams, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.192 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.193 */}[0m
+    [36m| [0m[34m|[0m /* 20.194 */[0m
+    [36m| [0m[34m|[0m /* 20.195 */@Attribute[TestCase_79][0m
+    [36m| [0m[34m|[0m /* 20.196 */func concurrentFirstUseDoesNotCreateAConnectionStampede(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.197 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.198 */    let factory = PoolFakeFactory(32u32)[0m
+    [36m| [0m[34m|[0m /* 20.199 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.200 */    let pending = ArrayList < Future < Http2PoolLease >>()[0m
+    [36m| [0m[34m|[0m /* 20.201 */    for(_ in 0 .. 32) {[0m
+    [36m| [0m[34m|[0m /* 20.202 */        pending.add(spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.203 */        })[0m
+    [36m| [0m[34m|[0m /* 20.204 */    }[0m
+    [36m| [0m[34m|[0m /* 20.205 */    let leases = ArrayList < Http2PoolLease >()[0m
+    [36m| [0m[34m|[0m /* 20.206 */    for(future in pending) {[0m
+    [36m| [0m[34m|[0m /* 20.207 */        leases.add(future.get(Duration.second))[0m
+    [36m| [0m[34m|[0m /* 20.208 */    }[0m
+    [36m| [0m[34m|[0m /* 20.209 */    expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.210 */    expectEqual("pool.snapshot().activeStreams", "32", pool.snapshot().activeStreams, 32, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.211 */    for(lease in leases) {[0m
+    [36m| [0m[34m|[0m /* 20.212 */        factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.213 */        pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.214 */    }[0m
+    [36m| [0m[34m|[0m /* 20.215 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.216 */}[0m
+    [36m| [0m[34m|[0m /* 20.217 */[0m
+    [36m| [0m[34m|[0m /* 20.218 */@Attribute[TestCase_80][0m
+    [36m| [0m[34m|[0m /* 20.219 */func newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.220 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.221 */    let gate = PoolAdmissionGate()[0m
+    [36m| [0m[34m|[0m /* 20.222 */    let factory = PoolGatedFactory(gate)[0m
+    [36m| [0m[34m|[0m /* 20.223 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.224 */    let pending = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.225 */    }[0m
+    [36m| [0m[34m|[0m /* 20.226 */    gate.waitUntilEntered()[0m
+    [36m| [0m[34m|[0m /* 20.227 */    let beforePublication = pool.snapshot()[0m
+    [36m| [0m[34m|[0m /* 20.228 */    gate.release()[0m
+    [36m| [0m[34m|[0m /* 20.229 */    let lease = pending.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.230 */    expectEqual("beforePublication.connections", "0", beforePublication.connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.231 */    expectEqual("beforePublication.reservations", "1", beforePublication.reservations, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.232 */    expectEqual("pool.snapshot().activeStreams", "1", pool.snapshot().activeStreams, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.233 */    factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.234 */    pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.235 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.236 */}[0m
+    [36m| [0m[34m|[0m /* 20.237 */[0m
+    [36m| [0m[34m|[0m /* 20.238 */@Attribute[TestCase_81][0m
+    [36m| [0m[34m|[0m /* 20.239 */func closeRacingUnpublishedAdmissionReleasesConnectionOwners(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.240 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.241 */    let gate = PoolAdmissionGate()[0m
+    [36m| [0m[34m|[0m /* 20.242 */    let factory = PoolGatedFactory(gate)[0m
+    [36m| [0m[34m|[0m /* 20.243 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.244 */    let pending = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.245 */    }[0m
+    [36m| [0m[34m|[0m /* 20.246 */    gate.waitUntilEntered()[0m
+    [36m| [0m[34m|[0m /* 20.247 */    expectEqual("factory.activeStreamCount", "1", factory.activeStreamCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.248 */    expectEqual("factory.ownedStreamCount", "1", factory.ownedStreamCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.249 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.250 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.251 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 20.252 */        gate.release()[0m
+    [36m| [0m[34m|[0m /* 20.253 */    }[0m
+    [36m| [0m[34m|[0m /* 20.254 */    var rejectedAsClosed = false[0m
+    [36m| [0m[34m|[0m /* 20.255 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.256 */        let _ = pending.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.257 */    } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 20.258 */        rejectedAsClosed = isPoolClosed(error.category)[0m
+    [36m| [0m[34m|[0m /* 20.259 */    }[0m
+    [36m| [0m[34m|[0m /* 20.260 */    expectEqual("rejectedAsClosed", "true", rejectedAsClosed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.261 */    expectEqual("factory.activeStreamCount", "0", factory.activeStreamCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.262 */    expectEqual("factory.ownedStreamCount", "0", factory.ownedStreamCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.263 */    expectEqual("factory.connectionClosed", "true", factory.connectionClosed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.264 */    let terminal = pool.snapshot()[0m
+    [36m| [0m[34m|[0m /* 20.265 */    expectEqual("terminal.connections", "0", terminal.connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.266 */    expectEqual("terminal.reservations", "0", terminal.reservations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.267 */}[0m
+    [36m| [0m[34m|[0m /* 20.268 */[0m
+    [36m| [0m[34m|[0m /* 20.269 */@Attribute[TestCase_82][0m
+    [36m| [0m[34m|[0m /* 20.270 */func completeSecurityKeyPreventsCrossContextReuse(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.271 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.272 */    let factory = PoolFakeFactory(100u32)[0m
+    [36m| [0m[34m|[0m /* 20.273 */    let first = pool.acquire(poolKey("origin.example", "h2,http/1.1"), PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.274 */    let second = pool.acquire(poolKey("origin.example", "h2"), PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.275 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.276 */    expectEqual("pool.snapshot().connections", "2", pool.snapshot().connections, 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.277 */    factory.finish(first)[0m
+    [36m| [0m[34m|[0m /* 20.278 */    pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 20.279 */    factory.finish(second)[0m
+    [36m| [0m[34m|[0m /* 20.280 */    pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 20.281 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.282 */}[0m
+    [36m| [0m[34m|[0m /* 20.283 */[0m
+    [36m| [0m[34m|[0m /* 20.284 */@Attribute[TestCase_83][0m
+    [36m| [0m[34m|[0m /* 20.285 */func drainingConnectionRetainsExistingStreamButReceivesNoNewLease(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.286 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.287 */    let factory = PoolFakeFactory(8u32)[0m
+    [36m| [0m[34m|[0m /* 20.288 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.289 */    let existing = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.290 */    let firstConnection = factory.connection(0)[0m
+    [36m| [0m[34m|[0m /* 20.291 */    firstConnection.beginDrain()[0m
+    [36m| [0m[34m|[0m /* 20.292 */    let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.293 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.294 */    expectEqual("existing.connectionId != replacement.connectionId", "true", existing.connectionId != replacement.connectionId, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.295 */    expectEqual("firstConnection.activeStreamCount", "1", firstConnection.activeStreamCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.296 */    factory.finish(existing)[0m
+    [36m| [0m[34m|[0m /* 20.297 */    pool.release(existing)[0m
+    [36m| [0m[34m|[0m /* 20.298 */    expectEqual("firstConnection.closeCalls.load()", "1", firstConnection.closeCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.299 */    factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.300 */    pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.301 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.302 */}[0m
+    [36m| [0m[34m|[0m /* 20.303 */[0m
+    [36m| [0m[34m|[0m /* 20.304 */@Attribute[TestCase_84][0m
+    [36m| [0m[34m|[0m /* 20.305 */func drainingConnectionWaitsForNonLocalOwnersBeforeDiscard(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.306 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.307 */    let factory = PoolFakeFactory(8u32)[0m
+    [36m| [0m[34m|[0m /* 20.308 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.309 */    let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.310 */    let draining = factory.connection(0)[0m
+    [36m| [0m[34m|[0m /* 20.311 */    draining.retainOwner()[0m
+    [36m| [0m[34m|[0m /* 20.312 */    draining.beginDrain()[0m
+    [36m| [0m[34m|[0m /* 20.313 */    factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.314 */    pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.315 */    expectEqual("draining.activeStreamCount", "0", draining.activeStreamCount, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.316 */    expectEqual("draining.ownedStreamCount", "1", draining.ownedStreamCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.317 */    expectEqual("draining.closeCalls.load()", "0", draining.closeCalls.load(), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.318 */    expectEqual("pool.snapshot().ownedStreams", "1", pool.snapshot().ownedStreams, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.319 */    draining.releaseOwner()[0m
+    [36m| [0m[34m|[0m /* 20.320 */    let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.321 */    expectEqual("draining.closeCalls.load()", "1", draining.closeCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.322 */    factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.323 */    pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.324 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.325 */}[0m
+    [36m| [0m[34m|[0m /* 20.326 */[0m
+    [36m| [0m[34m|[0m /* 20.327 */@Attribute[TestCase_85][0m
+    [36m| [0m[34m|[0m /* 20.328 */func fullBoundedPoolHonorsOneCallerDeadline(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.329 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 1))[0m
+    [36m| [0m[34m|[0m /* 20.330 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.331 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.332 */    let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.333 */    var timedOut = false[0m
+    [36m| [0m[34m|[0m /* 20.334 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.335 */        let _ = pool.acquire(key, PoolNoopGoAwayListener(), factory, context: OperationContext(deadline: Some(Deadline.after(Duration.Zero))))[0m
+    [36m| [0m[34m|[0m /* 20.336 */    } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 20.337 */        timedOut = isPoolDeadline(error.category)[0m
+    [36m| [0m[34m|[0m /* 20.338 */    }[0m
+    [36m| [0m[34m|[0m /* 20.339 */    expectEqual("timedOut", "true", timedOut, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.340 */    expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.341 */    factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.342 */    pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.343 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.344 */}[0m
+    [36m| [0m[34m|[0m /* 20.345 */[0m
+    [36m| [0m[34m|[0m /* 20.346 */@Attribute[TestCase_86][0m
+    [36m| [0m[34m|[0m /* 20.347 */func poolCloseAbortsEverySharedConnectionExactlyOnce(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.348 */    let pool = Http2ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 20.349 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.350 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.351 */    let _ = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.352 */    let _ = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.353 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.354 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.355 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.356 */    for(connection in factory.connections()) {[0m
+    [36m| [0m[34m|[0m /* 20.357 */        expectEqual("connection.abortCalls.load()", "1", connection.abortCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.358 */    }[0m
+    [36m| [0m[34m|[0m /* 20.359 */}[0m
+    [36m| [0m[34m|[0m /* 20.360 */[0m
+    [36m| [0m[34m|[0m /* 20.361 */@Attribute[TestCase_87][0m
+    [36m| [0m[34m|[0m /* 20.362 */func drainsExpiredHttp2ConnectionAfterActiveStreamCompletion(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.363 */    let clock = Http2PoolTestClock()[0m
+    [36m| [0m[34m|[0m /* 20.364 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(), resourceBudget: None < internal.HttpResourceBudget >, clock: clock)[0m
+    [36m| [0m[34m|[0m /* 20.365 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.366 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.367 */    let expired = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.368 */    let oldConnection = factory.connection(0)[0m
+    [36m| [0m[34m|[0m /* 20.369 */    expectEqual("oldConnection.activeStreamCount", "1", oldConnection.activeStreamCount, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.370 */    clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.371 */    expectEqual("oldConnection.closeCalls.load()", "0", oldConnection.closeCalls.load(), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.372 */    factory.finish(expired)[0m
+    [36m| [0m[34m|[0m /* 20.373 */    pool.release(expired)[0m
+    [36m| [0m[34m|[0m /* 20.374 */    expectEqual("oldConnection.closeCalls.load()", "1", oldConnection.closeCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.375 */    expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.376 */    let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.377 */    expectEqual("replacement.connectionId != expired.connectionId", "true", replacement.connectionId != expired.connectionId, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.378 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.379 */    factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.380 */    pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.381 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.382 */}[0m
+    [36m| [0m[34m|[0m /* 20.383 */[0m
+    [36m| [0m[34m|[0m /* 20.384 */@Attribute[TestCase_88][0m
+    [36m| [0m[34m|[0m /* 20.385 */func expiresConnectionsAtMaximumLifetime(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.386 */    let clock = Http2PoolTestClock()[0m
+    [36m| [0m[34m|[0m /* 20.387 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(), resourceBudget: None < internal.HttpResourceBudget >, clock: clock)[0m
+    [36m| [0m[34m|[0m /* 20.388 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.389 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.390 */    let expired = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.391 */    factory.finish(expired)[0m
+    [36m| [0m[34m|[0m /* 20.392 */    pool.release(expired)[0m
+    [36m| [0m[34m|[0m /* 20.393 */    clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.394 */    let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.395 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.396 */    expectEqual("pool.snapshot().connections", "1", pool.snapshot().connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.397 */    factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.398 */    pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.399 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.400 */}[0m
+    [36m| [0m[34m|[0m /* 20.401 */[0m
+    [36m| [0m[34m|[0m /* 20.402 */@Attribute[TestCase_89][0m
+    [36m| [0m[34m|[0m /* 20.403 */func admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.404 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2))[0m
+    [36m| [0m[34m|[0m /* 20.405 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.406 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.407 */    let otherKey = poolKey("other.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.408 */    let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.409 */    let sameOrigin = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.410 */    }[0m
+    [36m| [0m[34m|[0m /* 20.411 */    expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.412 */    let otherOrigin = spawn { pool.acquire(otherKey, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.413 */    }[0m
+    [36m| [0m[34m|[0m /* 20.414 */    expectEqual("pool.waitUntilWaiters(2, Duration.second)", "true", pool.waitUntilWaiters(2, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.415 */    factory.finish(first)[0m
+    [36m| [0m[34m|[0m /* 20.416 */    pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 20.417 */    let second = sameOrigin.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.418 */    expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.419 */    expectEqual("pool.snapshot().waiters", "1", pool.snapshot().waiters, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.420 */    factory.finish(second)[0m
+    [36m| [0m[34m|[0m /* 20.421 */    pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 20.422 */    let third = otherOrigin.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.423 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.424 */    factory.finish(third)[0m
+    [36m| [0m[34m|[0m /* 20.425 */    pool.release(third)[0m
+    [36m| [0m[34m|[0m /* 20.426 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.427 */}[0m
+    [36m| [0m[34m|[0m /* 20.428 */[0m
+    [36m| [0m[34m|[0m /* 20.429 */@Attribute[TestCase_90][0m
+    [36m| [0m[34m|[0m /* 20.430 */func discardedConnectionCleanupPreservesCrossOriginAdmissionTurn(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.431 */    exerciseDiscardedWaiterOwnership(false)[0m
+    [36m| [0m[34m|[0m /* 20.432 */}[0m
+    [36m| [0m[34m|[0m /* 20.433 */[0m
+    [36m| [0m[34m|[0m /* 20.434 */@Attribute[TestCase_91][0m
+    [36m| [0m[34m|[0m /* 20.435 */func cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.436 */    exerciseDiscardedWaiterOwnership(true)[0m
+    [36m| [0m[34m|[0m /* 20.437 */}[0m
+    [36m| [0m[34m|[0m /* 20.438 */[0m
+    [36m| [0m[34m|[0m /* 20.439 */@Attribute[TestCase_92][0m
+    [36m| [0m[34m|[0m /* 20.440 */func saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.441 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2))[0m
+    [36m| [0m[34m|[0m /* 20.442 */    let factory = PoolFakeFactory(2u32)[0m
+    [36m| [0m[34m|[0m /* 20.443 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.444 */    let otherKey = poolKey("other.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.445 */    let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.446 */    let second = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.447 */    let acquired = PoolAdmissionGate()[0m
+    [36m| [0m[34m|[0m /* 20.448 */    let cancellation = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 20.449 */    let refillCompleted = AtomicBool(false)[0m
+    [36m| [0m[34m|[0m /* 20.450 */    var otherOrigin = None < Future < Unit >>[0m
+    [36m| [0m[34m|[0m /* 20.451 */    var refill = None < Future < Unit >>[0m
+    [36m| [0m[34m|[0m /* 20.452 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.453 */        expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.454 */        otherOrigin = Some(spawn { let replacement = pool.acquire(otherKey, PoolNoopGoAwayListener(), factory, context: OperationContext(cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 20.455 */            try {[0m
+    [36m| [0m[34m|[0m /* 20.456 */                expectEqual("replacement.connectionId != first.connectionId", "true", replacement.connectionId != first.connectionId, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.457 */                acquired.enter()[0m
+    [36m| [0m[34m|[0m /* 20.458 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 20.459 */                factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.460 */                pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.461 */            }[0m
+    [36m| [0m[34m|[0m /* 20.462 */        })[0m
+    [36m| [0m[34m|[0m /* 20.463 */        expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.464 */        refill = Some(spawn { let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory, context: OperationContext(cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 20.465 */            try {[0m
+    [36m| [0m[34m|[0m /* 20.466 */                refillCompleted.store(true)[0m
+    [36m| [0m[34m|[0m /* 20.467 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 20.468 */                factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.469 */                pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.470 */            }[0m
+    [36m| [0m[34m|[0m /* 20.471 */        })[0m
+    [36m| [0m[34m|[0m /* 20.472 */        expectEqual("pool.waitUntilWaiters(2, Duration.second)", "true", pool.waitUntilWaiters(2, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.473 */        factory.finish(first)[0m
+    [36m| [0m[34m|[0m /* 20.474 */        pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 20.475 */        factory.finish(second)[0m
+    [36m| [0m[34m|[0m /* 20.476 */        pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 20.477 */        acquired.waitUntilEntered()[0m
+    [36m| [0m[34m|[0m /* 20.478 */        expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.479 */        expectEqual("factory.connection(0).closeCalls.load()", "1", factory.connection(0).closeCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.480 */        expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.481 */        expectEqual("! refillCompleted.load()", "true", ! refillCompleted.load(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.482 */        expectEqual("pool.snapshot().activeStreams", "1", pool.snapshot().activeStreams, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.483 */        acquired.release()[0m
+    [36m| [0m[34m|[0m /* 20.484 */        otherOrigin.getOrThrow().get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.485 */        refill.getOrThrow().get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.486 */        expectEqual("refillCompleted.load()", "true", refillCompleted.load(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.487 */        expectEqual("pool.snapshot().waiters", "0", pool.snapshot().waiters, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.488 */        expectEqual("pool.snapshot().activeStreams", "0", pool.snapshot().activeStreams, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.489 */    } finally {[0m
+    [36m| [0m[34m|[0m /* 20.490 */        acquired.release()[0m
+    [36m| [0m[34m|[0m /* 20.491 */        let _ = cancellation.cancel()[0m
+    [36m| [0m[34m|[0m /* 20.492 */        if(factory.connection(0).has(first.admission.stream.id)) {[0m
+    [36m| [0m[34m|[0m /* 20.493 */            factory.finish(first)[0m
+    [36m| [0m[34m|[0m /* 20.494 */        }[0m
+    [36m| [0m[34m|[0m /* 20.495 */        if(factory.connection(0).has(second.admission.stream.id)) {[0m
+    [36m| [0m[34m|[0m /* 20.496 */            factory.finish(second)[0m
+    [36m| [0m[34m|[0m /* 20.497 */        }[0m
+    [36m| [0m[34m|[0m /* 20.498 */        pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 20.499 */        pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 20.500 */        try {[0m
+    [36m| [0m[34m|[0m /* 20.501 */            if(let Some(worker) <- otherOrigin) {[0m
+    [36m| [0m[34m|[0m /* 20.502 */                worker.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.503 */            }[0m
+    [36m| [0m[34m|[0m /* 20.504 */        } finally {[0m
+    [36m| [0m[34m|[0m /* 20.505 */            try {[0m
+    [36m| [0m[34m|[0m /* 20.506 */                if(let Some(worker) <- refill) {[0m
+    [36m| [0m[34m|[0m /* 20.507 */                    worker.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.508 */                }[0m
+    [36m| [0m[34m|[0m /* 20.509 */            } finally {[0m
+    [36m| [0m[34m|[0m /* 20.510 */                pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.511 */            }[0m
+    [36m| [0m[34m|[0m /* 20.512 */        }[0m
+    [36m| [0m[34m|[0m /* 20.513 */    }[0m
+    [36m| [0m[34m|[0m /* 20.514 */}[0m
+    [36m| [0m[34m|[0m /* 20.515 */[0m
+    [36m| [0m[34m|[0m /* 20.516 */@Attribute[TestCase_93][0m
+    [36m| [0m[34m|[0m /* 20.517 */func sequentialOriginChangeReclaimsIdleCrossKeyConnection(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.518 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 1))[0m
+    [36m| [0m[34m|[0m /* 20.519 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.520 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.521 */    let otherKey = poolKey("other.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.522 */    let idle = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.523 */    factory.finish(idle)[0m
+    [36m| [0m[34m|[0m /* 20.524 */    pool.release(idle)[0m
+    [36m| [0m[34m|[0m /* 20.525 */    expectEqual("pool.snapshot().connections", "1", pool.snapshot().connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.526 */    let replacement = pool.acquire(otherKey, PoolNoopGoAwayListener(), factory, context: OperationContext(deadline: Some(Deadline.after(Duration.second))))[0m
+    [36m| [0m[34m|[0m /* 20.527 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.528 */    expectEqual("factory.connection(0).closeCalls.load()", "1", factory.connection(0).closeCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.529 */    expectEqual("pool.snapshot().connections", "1", pool.snapshot().connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.530 */    factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.531 */    pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.532 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.533 */}[0m
+    [36m| [0m[34m|[0m /* 20.534 */[0m
+    [36m| [0m[34m|[0m /* 20.535 */@Attribute[TestCase_94][0m
+    [36m| [0m[34m|[0m /* 20.536 */func expiredConnectionDoesNotContributeSnapshotCapacity(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.537 */    let clock = Http2PoolTestClock()[0m
+    [36m| [0m[34m|[0m /* 20.538 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(), resourceBudget: None < internal.HttpResourceBudget >, clock: clock)[0m
+    [36m| [0m[34m|[0m /* 20.539 */    let factory = PoolFakeFactory(1u32)[0m
+    [36m| [0m[34m|[0m /* 20.540 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.541 */    let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.542 */    factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.543 */    pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.544 */    expectEqual("pool.snapshot().availableStreamCapacity", "1", pool.snapshot().availableStreamCapacity, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.545 */    clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.546 */    expectEqual("pool.snapshot().availableStreamCapacity", "0", pool.snapshot().availableStreamCapacity, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.547 */    expectEqual("pool.snapshot().connections", "1", pool.snapshot().connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.548 */    let replacement = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.549 */    expectEqual("factory.createCalls.load()", "2", factory.createCalls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.550 */    expectEqual("factory.connection(0).closeCalls.load()", "1", factory.connection(0).closeCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.551 */    factory.finish(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.552 */    pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 20.553 */    expectEqual("pool.snapshot().availableStreamCapacity", "1", pool.snapshot().availableStreamCapacity, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.554 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.555 */}[0m
+    [36m| [0m[34m|[0m /* 20.556 */[0m
+    [36m| [0m[34m|[0m /* 20.557 */@Attribute[TestCase_95][0m
+    [36m| [0m[34m|[0m /* 20.558 */func cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuse(): Unit {[0m
+    [36m| [0m[34m|[0m /* 20.559 */    let pool = Http2ConnectionPool(config: Http2ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumWaiters: 2))[0m
+    [36m| [0m[34m|[0m /* 20.560 */    let factory = PoolFakeFactory(2u32)[0m
+    [36m| [0m[34m|[0m /* 20.561 */    let key = poolKey("origin.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.562 */    let otherKey = poolKey("other.example", "h2,http/1.1")[0m
+    [36m| [0m[34m|[0m /* 20.563 */    let first = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.564 */    let second = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.565 */    let cancellation = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 20.566 */    let otherOrigin = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 20.567 */        let lease = pool.acquire(otherKey, PoolNoopGoAwayListener(), factory, context: OperationContext(cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 20.568 */        factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.569 */        pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.570 */        false[0m
+    [36m| [0m[34m|[0m /* 20.571 */    } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 20.572 */        match(error.category) {[0m
+    [36m| [0m[34m|[0m /* 20.573 */            case NetworkErrorCategory.Cancelled => match(error.phase) {[0m
+    [36m| [0m[34m|[0m /* 20.574 */                case NetworkPhase.PoolAcquire => true[0m
+    [36m| [0m[34m|[0m /* 20.575 */                case _ => false[0m
+    [36m| [0m[34m|[0m /* 20.576 */            }[0m
+    [36m| [0m[34m|[0m /* 20.577 */            case _ => false[0m
+    [36m| [0m[34m|[0m /* 20.578 */        }[0m
+    [36m| [0m[34m|[0m /* 20.579 */    }[0m
+    [36m| [0m[34m|[0m /* 20.580 */}[0m
+    [36m| [0m[34m|[0m /* 20.581 */expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.582 */factory.finish(first)[0m
+    [36m| [0m[34m|[0m /* 20.583 */pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 20.584 */let _ = cancellation.cancel()[0m
+    [36m| [0m[34m|[0m /* 20.585 */expectEqual("otherOrigin.get(Duration.second)", "true", otherOrigin.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.586 */let reused = AtomicInt64(0)[0m
+    [36m| [0m[34m|[0m /* 20.587 */let refill = spawn { let lease = pool.acquire(key, PoolNoopGoAwayListener(), factory)[0m
+    [36m| [0m[34m|[0m /* 20.588 */    reused.store(lease.connectionId)[0m
+    [36m| [0m[34m|[0m /* 20.589 */    factory.finish(lease)[0m
+    [36m| [0m[34m|[0m /* 20.590 */    pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 20.591 */    true[0m
+    [36m| [0m[34m|[0m /* 20.592 */}[0m
+    [36m| [0m[34m|[0m /* 20.593 */try {[0m
+    [36m| [0m[34m|[0m /* 20.594 */    var restored = false[0m
+    [36m| [0m[34m|[0m /* 20.595 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.596 */        restored = refill.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.597 */    } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 20.598 */    }[0m
+    [36m| [0m[34m|[0m /* 20.599 */    expectEqual("restored", "true", restored, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.600 */    expectEqual("reused.load()", "first.connectionId", reused.load(), first.connectionId, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.601 */    expectEqual("factory.createCalls.load()", "1", factory.createCalls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.602 */    expectEqual("factory.connection(0).closeCalls.load()", "0", factory.connection(0).closeCalls.load(), 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 20.603 */} finally {[0m
+    [36m| [0m[34m|[0m /* 20.604 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.605 */        factory.finish(second)[0m
+    [36m| [0m[34m|[0m /* 20.606 */    } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 20.607 */    }[0m
+    [36m| [0m[34m|[0m /* 20.608 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.609 */        pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 20.610 */    } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 20.611 */    }[0m
+    [36m| [0m[34m|[0m /* 20.612 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 20.613 */    try {[0m
+    [36m| [0m[34m|[0m /* 20.614 */        let _ = refill.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 20.615 */    } catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 20.616 */    }[0m
+    [36m| [0m[34m|[0m /* 20.617 */}[0m
+    [36m| [0m[34m|[0m /* 20.618 */}[0m
+    [36m| [0m[34m|[0m /* 20.619 */[0m
+    [36m| [0m[34m|[0m /* 20.620 */init() {[0m
+    [36m| [0m[34m|[0m /* 20.621 */}[0m
+    [36m| [0m[34m|[0m /* 20.622 */private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 20.623 */let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.624 */[0m
+    [36m| [0m[34m|[0m /* 20.625 */return configuration[0m
+    [36m| [0m[34m|[0m /* 20.626 */}[0m
+    [36m| [0m[34m|[0m /* 20.627 */public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 20.628 */[0m
+    [36m| [0m[34m|[0m /* 20.629 */let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 20.630 */let suiteBuilder = TestSuite.builder("Http2ConnectionPoolTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 20.631 */[0m
+    [36m| [0m[34m|[0m /* 20.632 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.633 */    [0m
+    [36m| [0m[34m|[0m /* 20.634 */    let throwingReentrantH2ObserverSeesAdmittedNotReservedStreamsTestFunc = { => throwingReentrantH2ObserverSeesAdmittedNotReservedStreams();() }[0m
+    [36m| [0m[34m|[0m /* 20.635 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.636 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.637 */    "throwingReentrantH2ObserverSeesAdmittedNotReservedStreams",[0m
+    [36m| [0m[34m|[0m /* 20.638 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.639 */    body: throwingReentrantH2ObserverSeesAdmittedNotReservedStreamsTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.640 */    )[0m
+    [36m| [0m[34m|[0m /* 20.641 */    )[0m
+    [36m| [0m[34m|[0m /* 20.642 */    [0m
+    [36m| [0m[34m|[0m /* 20.643 */}()[0m
+    [36m| [0m[34m|[0m /* 20.644 */[0m
+    [36m| [0m[34m|[0m /* 20.645 */[0m
+    [36m| [0m[34m|[0m /* 20.646 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.647 */    [0m
+    [36m| [0m[34m|[0m /* 20.648 */    let observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreamsTestFunc = { => observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreams();() }[0m
+    [36m| [0m[34m|[0m /* 20.649 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.650 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.651 */    "observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreams",[0m
+    [36m| [0m[34m|[0m /* 20.652 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.653 */    body: observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreamsTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.654 */    )[0m
+    [36m| [0m[34m|[0m /* 20.655 */    )[0m
+    [36m| [0m[34m|[0m /* 20.656 */    [0m
+    [36m| [0m[34m|[0m /* 20.657 */}()[0m
+    [36m| [0m[34m|[0m /* 20.658 */[0m
+    [36m| [0m[34m|[0m /* 20.659 */[0m
+    [36m| [0m[34m|[0m /* 20.660 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.661 */    [0m
+    [36m| [0m[34m|[0m /* 20.662 */    let retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTerminationTestFunc = { => retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination();() }[0m
+    [36m| [0m[34m|[0m /* 20.663 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.664 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.665 */    "retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination",[0m
+    [36m| [0m[34m|[0m /* 20.666 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.667 */    body: retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTerminationTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.668 */    )[0m
+    [36m| [0m[34m|[0m /* 20.669 */    )[0m
+    [36m| [0m[34m|[0m /* 20.670 */    [0m
+    [36m| [0m[34m|[0m /* 20.671 */}()[0m
+    [36m| [0m[34m|[0m /* 20.672 */[0m
+    [36m| [0m[34m|[0m /* 20.673 */[0m
+    [36m| [0m[34m|[0m /* 20.674 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.675 */    [0m
+    [36m| [0m[34m|[0m /* 20.676 */    let retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResultTestFunc = { => retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult();() }[0m
+    [36m| [0m[34m|[0m /* 20.677 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.678 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.679 */    "retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult",[0m
+    [36m| [0m[34m|[0m /* 20.680 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.681 */    body: retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResultTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.682 */    )[0m
+    [36m| [0m[34m|[0m /* 20.683 */    )[0m
+    [36m| [0m[34m|[0m /* 20.684 */    [0m
+    [36m| [0m[34m|[0m /* 20.685 */}()[0m
+    [36m| [0m[34m|[0m /* 20.686 */[0m
+    [36m| [0m[34m|[0m /* 20.687 */[0m
+    [36m| [0m[34m|[0m /* 20.688 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.689 */    [0m
+    [36m| [0m[34m|[0m /* 20.690 */    let alpnPrefersH2AndFallsBackOnlyToHttp11TestFunc = { => alpnPrefersH2AndFallsBackOnlyToHttp11();() }[0m
+    [36m| [0m[34m|[0m /* 20.691 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.692 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.693 */    "alpnPrefersH2AndFallsBackOnlyToHttp11",[0m
+    [36m| [0m[34m|[0m /* 20.694 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.695 */    body: alpnPrefersH2AndFallsBackOnlyToHttp11TestFunc[0m
+    [36m| [0m[34m|[0m /* 20.696 */    )[0m
+    [36m| [0m[34m|[0m /* 20.697 */    )[0m
+    [36m| [0m[34m|[0m /* 20.698 */    [0m
+    [36m| [0m[34m|[0m /* 20.699 */}()[0m
+    [36m| [0m[34m|[0m /* 20.700 */[0m
+    [36m| [0m[34m|[0m /* 20.701 */[0m
+    [36m| [0m[34m|[0m /* 20.702 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.703 */    [0m
+    [36m| [0m[34m|[0m /* 20.704 */    let oneConnectionIsSharedUntilPeerStreamCapacityIsFullTestFunc = { => oneConnectionIsSharedUntilPeerStreamCapacityIsFull();() }[0m
+    [36m| [0m[34m|[0m /* 20.705 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.706 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.707 */    "oneConnectionIsSharedUntilPeerStreamCapacityIsFull",[0m
+    [36m| [0m[34m|[0m /* 20.708 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.709 */    body: oneConnectionIsSharedUntilPeerStreamCapacityIsFullTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.710 */    )[0m
+    [36m| [0m[34m|[0m /* 20.711 */    )[0m
+    [36m| [0m[34m|[0m /* 20.712 */    [0m
+    [36m| [0m[34m|[0m /* 20.713 */}()[0m
+    [36m| [0m[34m|[0m /* 20.714 */[0m
+    [36m| [0m[34m|[0m /* 20.715 */[0m
+    [36m| [0m[34m|[0m /* 20.716 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.717 */    [0m
+    [36m| [0m[34m|[0m /* 20.718 */    let concurrentFirstUseDoesNotCreateAConnectionStampedeTestFunc = { => concurrentFirstUseDoesNotCreateAConnectionStampede();() }[0m
+    [36m| [0m[34m|[0m /* 20.719 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.720 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.721 */    "concurrentFirstUseDoesNotCreateAConnectionStampede",[0m
+    [36m| [0m[34m|[0m /* 20.722 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.723 */    body: concurrentFirstUseDoesNotCreateAConnectionStampedeTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.724 */    )[0m
+    [36m| [0m[34m|[0m /* 20.725 */    )[0m
+    [36m| [0m[34m|[0m /* 20.726 */    [0m
+    [36m| [0m[34m|[0m /* 20.727 */}()[0m
+    [36m| [0m[34m|[0m /* 20.728 */[0m
+    [36m| [0m[34m|[0m /* 20.729 */[0m
+    [36m| [0m[34m|[0m /* 20.730 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.731 */    [0m
+    [36m| [0m[34m|[0m /* 20.732 */    let newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmittedTestFunc = { => newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted();() }[0m
+    [36m| [0m[34m|[0m /* 20.733 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.734 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.735 */    "newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted",[0m
+    [36m| [0m[34m|[0m /* 20.736 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.737 */    body: newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmittedTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.738 */    )[0m
+    [36m| [0m[34m|[0m /* 20.739 */    )[0m
+    [36m| [0m[34m|[0m /* 20.740 */    [0m
+    [36m| [0m[34m|[0m /* 20.741 */}()[0m
+    [36m| [0m[34m|[0m /* 20.742 */[0m
+    [36m| [0m[34m|[0m /* 20.743 */[0m
+    [36m| [0m[34m|[0m /* 20.744 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.745 */    [0m
+    [36m| [0m[34m|[0m /* 20.746 */    let closeRacingUnpublishedAdmissionReleasesConnectionOwnersTestFunc = { => closeRacingUnpublishedAdmissionReleasesConnectionOwners();() }[0m
+    [36m| [0m[34m|[0m /* 20.747 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.748 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.749 */    "closeRacingUnpublishedAdmissionReleasesConnectionOwners",[0m
+    [36m| [0m[34m|[0m /* 20.750 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.751 */    body: closeRacingUnpublishedAdmissionReleasesConnectionOwnersTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.752 */    )[0m
+    [36m| [0m[34m|[0m /* 20.753 */    )[0m
+    [36m| [0m[34m|[0m /* 20.754 */    [0m
+    [36m| [0m[34m|[0m /* 20.755 */}()[0m
+    [36m| [0m[34m|[0m /* 20.756 */[0m
+    [36m| [0m[34m|[0m /* 20.757 */[0m
+    [36m| [0m[34m|[0m /* 20.758 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.759 */    [0m
+    [36m| [0m[34m|[0m /* 20.760 */    let completeSecurityKeyPreventsCrossContextReuseTestFunc = { => completeSecurityKeyPreventsCrossContextReuse();() }[0m
+    [36m| [0m[34m|[0m /* 20.761 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.762 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.763 */    "completeSecurityKeyPreventsCrossContextReuse",[0m
+    [36m| [0m[34m|[0m /* 20.764 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.765 */    body: completeSecurityKeyPreventsCrossContextReuseTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.766 */    )[0m
+    [36m| [0m[34m|[0m /* 20.767 */    )[0m
+    [36m| [0m[34m|[0m /* 20.768 */    [0m
+    [36m| [0m[34m|[0m /* 20.769 */}()[0m
+    [36m| [0m[34m|[0m /* 20.770 */[0m
+    [36m| [0m[34m|[0m /* 20.771 */[0m
+    [36m| [0m[34m|[0m /* 20.772 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.773 */    [0m
+    [36m| [0m[34m|[0m /* 20.774 */    let drainingConnectionRetainsExistingStreamButReceivesNoNewLeaseTestFunc = { => drainingConnectionRetainsExistingStreamButReceivesNoNewLease();() }[0m
+    [36m| [0m[34m|[0m /* 20.775 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.776 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.777 */    "drainingConnectionRetainsExistingStreamButReceivesNoNewLease",[0m
+    [36m| [0m[34m|[0m /* 20.778 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.779 */    body: drainingConnectionRetainsExistingStreamButReceivesNoNewLeaseTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.780 */    )[0m
+    [36m| [0m[34m|[0m /* 20.781 */    )[0m
+    [36m| [0m[34m|[0m /* 20.782 */    [0m
+    [36m| [0m[34m|[0m /* 20.783 */}()[0m
+    [36m| [0m[34m|[0m /* 20.784 */[0m
+    [36m| [0m[34m|[0m /* 20.785 */[0m
+    [36m| [0m[34m|[0m /* 20.786 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.787 */    [0m
+    [36m| [0m[34m|[0m /* 20.788 */    let drainingConnectionWaitsForNonLocalOwnersBeforeDiscardTestFunc = { => drainingConnectionWaitsForNonLocalOwnersBeforeDiscard();() }[0m
+    [36m| [0m[34m|[0m /* 20.789 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.790 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.791 */    "drainingConnectionWaitsForNonLocalOwnersBeforeDiscard",[0m
+    [36m| [0m[34m|[0m /* 20.792 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.793 */    body: drainingConnectionWaitsForNonLocalOwnersBeforeDiscardTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.794 */    )[0m
+    [36m| [0m[34m|[0m /* 20.795 */    )[0m
+    [36m| [0m[34m|[0m /* 20.796 */    [0m
+    [36m| [0m[34m|[0m /* 20.797 */}()[0m
+    [36m| [0m[34m|[0m /* 20.798 */[0m
+    [36m| [0m[34m|[0m /* 20.799 */[0m
+    [36m| [0m[34m|[0m /* 20.800 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.801 */    [0m
+    [36m| [0m[34m|[0m /* 20.802 */    let fullBoundedPoolHonorsOneCallerDeadlineTestFunc = { => fullBoundedPoolHonorsOneCallerDeadline();() }[0m
+    [36m| [0m[34m|[0m /* 20.803 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.804 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.805 */    "fullBoundedPoolHonorsOneCallerDeadline",[0m
+    [36m| [0m[34m|[0m /* 20.806 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.807 */    body: fullBoundedPoolHonorsOneCallerDeadlineTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.808 */    )[0m
+    [36m| [0m[34m|[0m /* 20.809 */    )[0m
+    [36m| [0m[34m|[0m /* 20.810 */    [0m
+    [36m| [0m[34m|[0m /* 20.811 */}()[0m
+    [36m| [0m[34m|[0m /* 20.812 */[0m
+    [36m| [0m[34m|[0m /* 20.813 */[0m
+    [36m| [0m[34m|[0m /* 20.814 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.815 */    [0m
+    [36m| [0m[34m|[0m /* 20.816 */    let poolCloseAbortsEverySharedConnectionExactlyOnceTestFunc = { => poolCloseAbortsEverySharedConnectionExactlyOnce();() }[0m
+    [36m| [0m[34m|[0m /* 20.817 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.818 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.819 */    "poolCloseAbortsEverySharedConnectionExactlyOnce",[0m
+    [36m| [0m[34m|[0m /* 20.820 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.821 */    body: poolCloseAbortsEverySharedConnectionExactlyOnceTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.822 */    )[0m
+    [36m| [0m[34m|[0m /* 20.823 */    )[0m
+    [36m| [0m[34m|[0m /* 20.824 */    [0m
+    [36m| [0m[34m|[0m /* 20.825 */}()[0m
+    [36m| [0m[34m|[0m /* 20.826 */[0m
+    [36m| [0m[34m|[0m /* 20.827 */[0m
+    [36m| [0m[34m|[0m /* 20.828 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.829 */    [0m
+    [36m| [0m[34m|[0m /* 20.830 */    let drainsExpiredHttp2ConnectionAfterActiveStreamCompletionTestFunc = { => drainsExpiredHttp2ConnectionAfterActiveStreamCompletion();() }[0m
+    [36m| [0m[34m|[0m /* 20.831 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.832 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.833 */    "drainsExpiredHttp2ConnectionAfterActiveStreamCompletion",[0m
+    [36m| [0m[34m|[0m /* 20.834 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.835 */    body: drainsExpiredHttp2ConnectionAfterActiveStreamCompletionTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.836 */    )[0m
+    [36m| [0m[34m|[0m /* 20.837 */    )[0m
+    [36m| [0m[34m|[0m /* 20.838 */    [0m
+    [36m| [0m[34m|[0m /* 20.839 */}()[0m
+    [36m| [0m[34m|[0m /* 20.840 */[0m
+    [36m| [0m[34m|[0m /* 20.841 */[0m
+    [36m| [0m[34m|[0m /* 20.842 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.843 */    [0m
+    [36m| [0m[34m|[0m /* 20.844 */    let expiresConnectionsAtMaximumLifetimeTestFunc = { => expiresConnectionsAtMaximumLifetime();() }[0m
+    [36m| [0m[34m|[0m /* 20.845 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.846 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.847 */    "expiresConnectionsAtMaximumLifetime",[0m
+    [36m| [0m[34m|[0m /* 20.848 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.849 */    body: expiresConnectionsAtMaximumLifetimeTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.850 */    )[0m
+    [36m| [0m[34m|[0m /* 20.851 */    )[0m
+    [36m| [0m[34m|[0m /* 20.852 */    [0m
+    [36m| [0m[34m|[0m /* 20.853 */}()[0m
+    [36m| [0m[34m|[0m /* 20.854 */[0m
+    [36m| [0m[34m|[0m /* 20.855 */[0m
+    [36m| [0m[34m|[0m /* 20.856 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.857 */    [0m
+    [36m| [0m[34m|[0m /* 20.858 */    let admissionRotatesOriginsAndYieldsAFullHttp2PoolSlotTestFunc = { => admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot();() }[0m
+    [36m| [0m[34m|[0m /* 20.859 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.860 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.861 */    "admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot",[0m
+    [36m| [0m[34m|[0m /* 20.862 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.863 */    body: admissionRotatesOriginsAndYieldsAFullHttp2PoolSlotTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.864 */    )[0m
+    [36m| [0m[34m|[0m /* 20.865 */    )[0m
+    [36m| [0m[34m|[0m /* 20.866 */    [0m
+    [36m| [0m[34m|[0m /* 20.867 */}()[0m
+    [36m| [0m[34m|[0m /* 20.868 */[0m
+    [36m| [0m[34m|[0m /* 20.869 */[0m
+    [36m| [0m[34m|[0m /* 20.870 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.871 */    [0m
+    [36m| [0m[34m|[0m /* 20.872 */    let discardedConnectionCleanupPreservesCrossOriginAdmissionTurnTestFunc = { => discardedConnectionCleanupPreservesCrossOriginAdmissionTurn();() }[0m
+    [36m| [0m[34m|[0m /* 20.873 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.874 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.875 */    "discardedConnectionCleanupPreservesCrossOriginAdmissionTurn",[0m
+    [36m| [0m[34m|[0m /* 20.876 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.877 */    body: discardedConnectionCleanupPreservesCrossOriginAdmissionTurnTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.878 */    )[0m
+    [36m| [0m[34m|[0m /* 20.879 */    )[0m
+    [36m| [0m[34m|[0m /* 20.880 */    [0m
+    [36m| [0m[34m|[0m /* 20.881 */}()[0m
+    [36m| [0m[34m|[0m /* 20.882 */[0m
+    [36m| [0m[34m|[0m /* 20.883 */[0m
+    [36m| [0m[34m|[0m /* 20.884 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.885 */    [0m
+    [36m| [0m[34m|[0m /* 20.886 */    let cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurnTestFunc = { => cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn();() }[0m
+    [36m| [0m[34m|[0m /* 20.887 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.888 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.889 */    "cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn",[0m
+    [36m| [0m[34m|[0m /* 20.890 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.891 */    body: cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurnTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.892 */    )[0m
+    [36m| [0m[34m|[0m /* 20.893 */    )[0m
+    [36m| [0m[34m|[0m /* 20.894 */    [0m
+    [36m| [0m[34m|[0m /* 20.895 */}()[0m
+    [36m| [0m[34m|[0m /* 20.896 */[0m
+    [36m| [0m[34m|[0m /* 20.897 */[0m
+    [36m| [0m[34m|[0m /* 20.898 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.899 */    [0m
+    [36m| [0m[34m|[0m /* 20.900 */    let saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefillTestFunc = { => saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill();() }[0m
+    [36m| [0m[34m|[0m /* 20.901 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.902 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.903 */    "saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill",[0m
+    [36m| [0m[34m|[0m /* 20.904 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.905 */    body: saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefillTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.906 */    )[0m
+    [36m| [0m[34m|[0m /* 20.907 */    )[0m
+    [36m| [0m[34m|[0m /* 20.908 */    [0m
+    [36m| [0m[34m|[0m /* 20.909 */}()[0m
+    [36m| [0m[34m|[0m /* 20.910 */[0m
+    [36m| [0m[34m|[0m /* 20.911 */[0m
+    [36m| [0m[34m|[0m /* 20.912 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.913 */    [0m
+    [36m| [0m[34m|[0m /* 20.914 */    let sequentialOriginChangeReclaimsIdleCrossKeyConnectionTestFunc = { => sequentialOriginChangeReclaimsIdleCrossKeyConnection();() }[0m
+    [36m| [0m[34m|[0m /* 20.915 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.916 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.917 */    "sequentialOriginChangeReclaimsIdleCrossKeyConnection",[0m
+    [36m| [0m[34m|[0m /* 20.918 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.919 */    body: sequentialOriginChangeReclaimsIdleCrossKeyConnectionTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.920 */    )[0m
+    [36m| [0m[34m|[0m /* 20.921 */    )[0m
+    [36m| [0m[34m|[0m /* 20.922 */    [0m
+    [36m| [0m[34m|[0m /* 20.923 */}()[0m
+    [36m| [0m[34m|[0m /* 20.924 */[0m
+    [36m| [0m[34m|[0m /* 20.925 */[0m
+    [36m| [0m[34m|[0m /* 20.926 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.927 */    [0m
+    [36m| [0m[34m|[0m /* 20.928 */    let expiredConnectionDoesNotContributeSnapshotCapacityTestFunc = { => expiredConnectionDoesNotContributeSnapshotCapacity();() }[0m
+    [36m| [0m[34m|[0m /* 20.929 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.930 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.931 */    "expiredConnectionDoesNotContributeSnapshotCapacity",[0m
+    [36m| [0m[34m|[0m /* 20.932 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.933 */    body: expiredConnectionDoesNotContributeSnapshotCapacityTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.934 */    )[0m
+    [36m| [0m[34m|[0m /* 20.935 */    )[0m
+    [36m| [0m[34m|[0m /* 20.936 */    [0m
+    [36m| [0m[34m|[0m /* 20.937 */}()[0m
+    [36m| [0m[34m|[0m /* 20.938 */[0m
+    [36m| [0m[34m|[0m /* 20.939 */[0m
+    [36m| [0m[34m|[0m /* 20.940 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 20.941 */    [0m
+    [36m| [0m[34m|[0m /* 20.942 */    let cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuseTestFunc = { => cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuse();() }[0m
+    [36m| [0m[34m|[0m /* 20.943 */    suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 20.944 */    UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 20.945 */    "cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuse",[0m
+    [36m| [0m[34m|[0m /* 20.946 */    configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 20.947 */    body: cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuseTestFunc[0m
+    [36m| [0m[34m|[0m /* 20.948 */    )[0m
+    [36m| [0m[34m|[0m /* 20.949 */    )[0m
+    [36m| [0m[34m|[0m /* 20.950 */    [0m
+    [36m| [0m[34m|[0m /* 20.951 */}()[0m
+    [36m| [0m[34m|[0m /* 20.952 */[0m
+    [36m| [0m[34m|[0m /* 20.953 */return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 20.954 */}[0m
+    [36m| [0m[34m|[0m /* 20.955 */private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 20.956 */throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 20.957 */}[0m
+    [36m| [0m[34m|[0m /* 20.958 */}[0m
+    [36m| [0m[34m|[0m /* 20.959 */[0m
+    [36m| [0m[34m|[0m /* 20.960 */[0m
+    [36m| [0m[34m|[0m /* 20.961 */interface TestPackageExtension_Http2ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m /* 20.962 */func registerHttp2ConnectionPoolTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 20.963 */}[0m
+    [36m| [0m[34m|[0m /* 20.964 */extend TestPackage <: TestPackageExtension_Http2ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m /* 20.965 */@Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 20.966 */public func registerHttp2ConnectionPoolTest() {[0m
+    [36m| [0m[34m|[0m /* 20.967 */registerSuite({ => Http2ConnectionPoolTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 20.968 */}[0m
+    [36m| [0m[34m|[0m /* 20.969 */}[0m
+    [36m| [0m[34m|[0m /* 20.970 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool_test.cj:20:1:
+    [36m| [0m
+[36m20[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m21[0m  [36m| [0m[34m|[0m class Http2ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m624[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 20.103 */            None < NetworkException >[0m
+    [36m| [0m                        [33m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/http2_connection_pool_test.cj:20:1:
+    [36m| [0m
+[36m20[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m21[0m  [36m| [0m[34m|[0m class Http2ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m624[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 48.135 */            None < NetworkException >[0m
+    [36m| [0m                        [33m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 48.1 */@Attribute[TEST_GENERATED] class Http1ConnectionPoolTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 48.2 */    @Attribute[TestCase_39][0m
+    [36m| [0m[34m|[0m /* 48.3 */    func transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilClose(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.4 */        let(transport, peer) = MemoryTransport.pair(capacity: 2048)[0m
+    [36m| [0m[34m|[0m /* 48.5 */        writeAll(peer, ByteSpan("HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\nx".toArray()))[0m
+    [36m| [0m[34m|[0m /* 48.6 */        let pool = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.7 */        let sink = api.NetworkEventBuffer(capacity: 64)[0m
+    [36m| [0m[34m|[0m /* 48.8 */        let context = OperationContext(eventSink: Some(sink), requestId: Some(71), attemptId: Some(72), connectionId: Some(api.nextNetworkCorrelationId()))[0m
+    [36m| [0m[34m|[0m /* 48.9 */        let lease = pool.adopt(poolTestKey(), Http1ClientConnection(transport), context: context)[0m
+    [36m| [0m[34m|[0m /* 48.10 */        let request = HttpRequest.get("http://example.test/chat").withHeaders(HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "websocket").build())[0m
+    [36m| [0m[34m|[0m /* 48.11 */        let result = lease.connection.upgradeTracked(request, context: context, onTerminated: { _ =>[0m
+    [36m| [0m[34m|[0m /* 48.12 */            pool.discard(lease, context: context)[0m
+    [36m| [0m[34m|[0m /* 48.13 */        })[0m
+    [36m| [0m[34m|[0m /* 48.14 */        let upgraded = match(result) {[0m
+    [36m| [0m[34m|[0m /* 48.15 */            case Http1UpgradeExchangeResult.Upgraded(value) => value[0m
+    [36m| [0m[34m|[0m /* 48.16 */            case _ => throw Exception("upgrade rejected")[0m
+    [36m| [0m[34m|[0m /* 48.17 */        }[0m
+    [36m| [0m[34m|[0m /* 48.18 */        let _ = sink.drain()[0m
+    [36m| [0m[34m|[0m /* 48.19 */        pool.transfer(lease)[0m
+    [36m| [0m[34m|[0m /* 48.20 */        pool.transfer(lease)[0m
+    [36m| [0m[34m|[0m /* 48.21 */        pool.retire()[0m
+    [36m| [0m[34m|[0m /* 48.22 */        pool.retire()[0m
+    [36m| [0m[34m|[0m /* 48.23 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.24 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.25 */        expectEqual("pool.observationSnapshot().leasedConnections", "1", pool.observationSnapshot().leasedConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.26 */        expectEqual("pool.observationSnapshot().drainingConnections", "1", pool.observationSnapshot().drainingConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.27 */        expectEqual("! upgraded.transport.isClosed()", "true", ! upgraded.transport.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.28 */        var drains: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 48.29 */        for(event in sink.drain()) {[0m
+    [36m| [0m[34m|[0m /* 48.30 */            match(event.kind) {[0m
+    [36m| [0m[34m|[0m /* 48.31 */                case NetworkEventKind.ConnectionDraining => drains ++[0m
+    [36m| [0m[34m|[0m /* 48.32 */                expectEqual("event.connectionId", "context.connectionId", event.connectionId, context.connectionId, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.33 */                case NetworkEventKind.ConnectionClosed => fail("pool closed a transferred session")[0m
+    [36m| [0m[34m|[0m /* 48.34 */                case _ =>()[0m
+    [36m| [0m[34m|[0m /* 48.35 */            }[0m
+    [36m| [0m[34m|[0m /* 48.36 */        }[0m
+    [36m| [0m[34m|[0m /* 48.37 */        expectEqual("drains", "1", drains, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.38 */        upgraded.transport.close()[0m
+    [36m| [0m[34m|[0m /* 48.39 */        upgraded.transport.close()[0m
+    [36m| [0m[34m|[0m /* 48.40 */        expectEqual("pool.observationSnapshot().leasedConnections", "0", pool.observationSnapshot().leasedConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.41 */        expectEqual("pool.observationSnapshot().drainingConnections", "0", pool.observationSnapshot().drainingConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.42 */        var closes: Int64 = 0[0m
+    [36m| [0m[34m|[0m /* 48.43 */        for(event in sink.drain()) {[0m
+    [36m| [0m[34m|[0m /* 48.44 */            match(event.kind) {[0m
+    [36m| [0m[34m|[0m /* 48.45 */                case NetworkEventKind.ConnectionClosed => closes ++[0m
+    [36m| [0m[34m|[0m /* 48.46 */                case _ =>()[0m
+    [36m| [0m[34m|[0m /* 48.47 */            }[0m
+    [36m| [0m[34m|[0m /* 48.48 */        }[0m
+    [36m| [0m[34m|[0m /* 48.49 */        expectEqual("closes", "1", closes, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.50 */        peer.close()[0m
+    [36m| [0m[34m|[0m /* 48.51 */    }[0m
+    [36m| [0m[34m|[0m /* 48.52 */    [0m
+    [36m| [0m[34m|[0m /* 48.53 */    @Attribute[TestCase_40][0m
+    [36m| [0m[34m|[0m /* 48.54 */    func globalPhysicalIdsRemainStableAcrossClaimsAndPools(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.55 */        let one = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.56 */        let two = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.57 */        let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.58 */        let first = one.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.59 */        let other = two.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.60 */        expectEqual("first.connectionId != other.connectionId", "true", first.connectionId != other.connectionId, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.61 */        one.release(first)[0m
+    [36m| [0m[34m|[0m /* 48.62 */        let reused = one.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.63 */        expectEqual("reused.connectionId", "first.connectionId", reused.connectionId, first.connectionId, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.64 */        one.discard(first)[0m
+    [36m| [0m[34m|[0m /* 48.65 */        expectEqual("one.observationSnapshot().leasedConnections", "1", one.observationSnapshot().leasedConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.66 */        one.release(reused)[0m
+    [36m| [0m[34m|[0m /* 48.67 */        two.release(other)[0m
+    [36m| [0m[34m|[0m /* 48.68 */        expectEqual("one.observationSnapshot().idleConnections", "1", one.observationSnapshot().idleConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.69 */        one.close()[0m
+    [36m| [0m[34m|[0m /* 48.70 */        two.close()[0m
+    [36m| [0m[34m|[0m /* 48.71 */        expectEqual("one.observationSnapshot().idleConnections", "0", one.observationSnapshot().idleConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.72 */    }[0m
+    [36m| [0m[34m|[0m /* 48.73 */    [0m
+    [36m| [0m[34m|[0m /* 48.74 */    @Attribute[TestCase_41][0m
+    [36m| [0m[34m|[0m /* 48.75 */    func throwingReentrantSinkCannotChangePoolOwnership(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.76 */        let pool = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.77 */        let sink = ReentrantPoolObservationSink(pool)[0m
+    [36m| [0m[34m|[0m /* 48.78 */        let context = OperationContext(eventSink: Some(sink))[0m
+    [36m| [0m[34m|[0m /* 48.79 */        let lease = pool.acquire(poolTestKey(), PoolTestFactory(), context: context)[0m
+    [36m| [0m[34m|[0m /* 48.80 */        pool.release(lease, context: context)[0m
+    [36m| [0m[34m|[0m /* 48.81 */        expectEqual("pool.observationSnapshot().idleConnections", "1", pool.observationSnapshot().idleConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.82 */        pool.retire()[0m
+    [36m| [0m[34m|[0m /* 48.83 */        expectEqual("pool.observationSnapshot().idleConnections", "0", pool.observationSnapshot().idleConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.84 */        expectEqual("sink.calls.load() > 0", "true", sink.calls.load() > 0, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.85 */        expectEqual("sink.closedSamples.load()", "1", sink.closedSamples.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.86 */        pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.87 */    }[0m
+    [36m| [0m[34m|[0m /* 48.88 */    [0m
+    [36m| [0m[34m|[0m /* 48.89 */    @Attribute[TestCase_42][0m
+    [36m| [0m[34m|[0m /* 48.90 */    func boundedFullSinkDoesNotPreventWaiterCancellationOrReclamation(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.91 */        let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1))[0m
+    [36m| [0m[34m|[0m /* 48.92 */        let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.93 */        let sink = api.NetworkEventBuffer(capacity: 1)[0m
+    [36m| [0m[34m|[0m /* 48.94 */        let source = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 48.95 */        let active = pool.acquire(poolTestKey(), factory, context: OperationContext(eventSink: Some(sink)))[0m
+    [36m| [0m[34m|[0m /* 48.96 */        let pending = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 48.97 */            let _ = pool.acquire(poolTestKey(), factory, context: OperationContext(cancellation: source.token, eventSink: Some(sink)))[0m
+    [36m| [0m[34m|[0m /* 48.98 */            false[0m
+    [36m| [0m[34m|[0m /* 48.99 */        } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 48.100 */            match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 48.101 */                case NetworkErrorCode.Cancelled => true[0m
+    [36m| [0m[34m|[0m /* 48.102 */                case _ => false[0m
+    [36m| [0m[34m|[0m /* 48.103 */            }[0m
+    [36m| [0m[34m|[0m /* 48.104 */        }[0m
+    [36m| [0m[34m|[0m /* 48.105 */    }[0m
+    [36m| [0m[34m|[0m /* 48.106 */    expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.107 */    expectEqual("pool.observationSnapshot().queuedRequests", "1", pool.observationSnapshot().queuedRequests, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.108 */    source.cancel()[0m
+    [36m| [0m[34m|[0m /* 48.109 */    expectEqual("pending.get(Duration.second)", "true", pending.get(Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.110 */    expectEqual("pool.observationSnapshot().queuedRequests", "0", pool.observationSnapshot().queuedRequests, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.111 */    expectEqual("sink.snapshot().queuedEvents", "1", sink.snapshot().queuedEvents, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.112 */    expectEqual("sink.snapshot().droppedEvents > 0", "true", sink.snapshot().droppedEvents > 0, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.113 */    pool.release(active)[0m
+    [36m| [0m[34m|[0m /* 48.114 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.115 */    expectEqual("pool.observationSnapshot().leasedConnections", "0", pool.observationSnapshot().leasedConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.116 */    expectEqual("pool.observationSnapshot().connectingConnections", "0", pool.observationSnapshot().connectingConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.117 */}[0m
+    [36m| [0m[34m|[0m /* 48.118 */[0m
+    [36m| [0m[34m|[0m /* 48.119 */@Attribute[TestCase_43][0m
+    [36m| [0m[34m|[0m /* 48.120 */func retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.121 */    let pool = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.122 */    let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.123 */    let active = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.124 */    let idle = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.125 */    pool.release(idle)[0m
+    [36m| [0m[34m|[0m /* 48.126 */    pool.retire()[0m
+    [36m| [0m[34m|[0m /* 48.127 */    expectEqual("idle.connection.isClosed()", "true", idle.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.128 */    expectEqual("! active.connection.isClosed()", "true", ! active.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.129 */    expectEqual("pool.snapshot().connections", "1", pool.snapshot().connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.130 */    try {[0m
+    [36m| [0m[34m|[0m /* 48.131 */        try {[0m
+    [36m| [0m[34m|[0m /* 48.132 */            assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 48.133 */            pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.134 */            failExpect("@ExpectThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 48.135 */            None < NetworkException >[0m
+    [36m| [0m[34m|[0m /* 48.136 */        } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 48.137 */            if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 48.138 */                throw e[0m
+    [36m| [0m[34m|[0m /* 48.139 */            }[0m
+    [36m| [0m[34m|[0m /* 48.140 */            if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 48.141 */                throw e[0m
+    [36m| [0m[34m|[0m /* 48.142 */            }[0m
+    [36m| [0m[34m|[0m /* 48.143 */            if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 48.144 */                throw e[0m
+    [36m| [0m[34m|[0m /* 48.145 */            }[0m
+    [36m| [0m[34m|[0m /* 48.146 */            e[0m
+    [36m| [0m[34m|[0m /* 48.147 */        }[0m
+    [36m| [0m[34m|[0m /* 48.148 */    } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 48.149 */        if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 48.150 */            throw e[0m
+    [36m| [0m[34m|[0m /* 48.151 */        }[0m
+    [36m| [0m[34m|[0m /* 48.152 */        expectCaughtUnexpectedE("@ExpectThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 48.153 */        None < NetworkException >[0m
+    [36m| [0m[34m|[0m /* 48.154 */    }[0m
+    [36m| [0m[34m|[0m /* 48.155 */    pool.release(active)[0m
+    [36m| [0m[34m|[0m /* 48.156 */    expectEqual("active.connection.isClosed()", "true", active.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.157 */    expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.158 */    pool.release(active)[0m
+    [36m| [0m[34m|[0m /* 48.159 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.160 */}[0m
+    [36m| [0m[34m|[0m /* 48.161 */[0m
+    [36m| [0m[34m|[0m /* 48.162 */@Attribute[TestCase_44][0m
+    [36m| [0m[34m|[0m /* 48.163 */func emitsSecretFreeAcquireAndReleaseLifecycle(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.164 */    let pool = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.165 */    let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.166 */    let sink = PoolEventSink()[0m
+    [36m| [0m[34m|[0m /* 48.167 */    let context = OperationContext(trace: Some(NetworkTraceContext("pool-trace")), eventSink: Some(sink))[0m
+    [36m| [0m[34m|[0m /* 48.168 */    let first = pool.acquire(poolTestKey(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 48.169 */    pool.release(first, context: context)[0m
+    [36m| [0m[34m|[0m /* 48.170 */    let second = pool.acquire(poolTestKey(), factory, context: context)[0m
+    [36m| [0m[34m|[0m /* 48.171 */    pool.discard(second, context: context)[0m
+    [36m| [0m[34m|[0m /* 48.172 */    let lifecycle = ArrayList < NetworkEvent >()[0m
+    [36m| [0m[34m|[0m /* 48.173 */    for(event in sink.events) {[0m
+    [36m| [0m[34m|[0m /* 48.174 */        match(event.kind) {[0m
+    [36m| [0m[34m|[0m /* 48.175 */            case NetworkEventKind.HttpConnectionAcquired | NetworkEventKind.HttpConnectionReleased | NetworkEventKind.ConnectionClosed => lifecycle.add(event)[0m
+    [36m| [0m[34m|[0m /* 48.176 */            case _ =>()[0m
+    [36m| [0m[34m|[0m /* 48.177 */        }[0m
+    [36m| [0m[34m|[0m /* 48.178 */    }[0m
+    [36m| [0m[34m|[0m /* 48.179 */    expectEqual("lifecycle.size", "5", lifecycle.size, 5, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.180 */    expectPoolEvent(lifecycle[0], NetworkEventKind.HttpConnectionAcquired, NetworkEventOutcome.Succeeded, first.connectionId)[0m
+    [36m| [0m[34m|[0m /* 48.181 */    expectPoolEvent(lifecycle[1], NetworkEventKind.HttpConnectionReleased, NetworkEventOutcome.Released, first.connectionId)[0m
+    [36m| [0m[34m|[0m /* 48.182 */    expectPoolEvent(lifecycle[2], NetworkEventKind.HttpConnectionAcquired, NetworkEventOutcome.Reused, second.connectionId)[0m
+    [36m| [0m[34m|[0m /* 48.183 */    expectPoolEvent(lifecycle[3], NetworkEventKind.HttpConnectionReleased, NetworkEventOutcome.Discarded, second.connectionId)[0m
+    [36m| [0m[34m|[0m /* 48.184 */    expectPoolEvent(lifecycle[4], NetworkEventKind.ConnectionClosed, NetworkEventOutcome.Succeeded, second.connectionId)[0m
+    [36m| [0m[34m|[0m /* 48.185 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.186 */}[0m
+    [36m| [0m[34m|[0m /* 48.187 */[0m
+    [36m| [0m[34m|[0m /* 48.188 */@Attribute[TestCase_45][0m
+    [36m| [0m[34m|[0m /* 48.189 */func reusesOnlyTheSameCompleteKey(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.190 */    let pool = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.191 */    let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.192 */    let first = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.193 */    pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 48.194 */    let second = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.195 */    expectEqual("second.id != first.id", "true", second.id != first.id, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.196 */    expectEqual("factory.calls.load()", "1", factory.calls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.197 */    pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 48.198 */    expectEqual("pool.snapshot().idleConnections", "0", pool.snapshot().idleConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.199 */    pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 48.200 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.201 */}[0m
+    [36m| [0m[34m|[0m /* 48.202 */[0m
+    [36m| [0m[34m|[0m /* 48.203 */@Attribute[TestCase_46][0m
+    [36m| [0m[34m|[0m /* 48.204 */func enforcesTotalPerKeyIdleAndWaiterBounds(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.205 */    let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(maximumConnections: 2, maximumConnectionsPerKey: 1, maximumIdleConnections: 0, maximumWaiters: 0))[0m
+    [36m| [0m[34m|[0m /* 48.206 */    let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.207 */    let first = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.208 */    let second = pool.acquire(poolTestKey(host: "other.test"), factory)[0m
+    [36m| [0m[34m|[0m /* 48.209 */    var exhausted = false[0m
+    [36m| [0m[34m|[0m /* 48.210 */    try {[0m
+    [36m| [0m[34m|[0m /* 48.211 */        let _ = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.212 */    } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 48.213 */        match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 48.214 */            case NetworkErrorCode.ResourceExhausted => exhausted = true[0m
+    [36m| [0m[34m|[0m /* 48.215 */            case _ =>()[0m
+    [36m| [0m[34m|[0m /* 48.216 */        }[0m
+    [36m| [0m[34m|[0m /* 48.217 */    }[0m
+    [36m| [0m[34m|[0m /* 48.218 */    expectEqual("exhausted", "true", exhausted, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.219 */    pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 48.220 */    expectEqual("pool.snapshot().connections", "1", pool.snapshot().connections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.221 */    pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 48.222 */    expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.223 */    pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.224 */}[0m
+    [36m| [0m[34m|[0m /* 48.225 */[0m
+    [36m| [0m[34m|[0m /* 48.226 */@Attribute[TestCase_47][0m
+    [36m| [0m[34m|[0m /* 48.227 */func activeWaitHonorsCancellationAndReleasesWaiterSlot(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.228 */    let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1, maximumWaiters: 1))[0m
+    [36m| [0m[34m|[0m /* 48.229 */    let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.230 */    let held = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.231 */    let cancellation = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 48.232 */    let cancelled = AtomicBool(false)[0m
+    [36m| [0m[34m|[0m /* 48.233 */    let future = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 48.234 */        let _ = pool.acquire(poolTestKey(), factory, context: OperationContext(cancellation: cancellation.token))[0m
+    [36m| [0m[34m|[0m /* 48.235 */    } catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 48.236 */        match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 48.237 */            case NetworkErrorCode.Cancelled => cancelled.store(true)[0m
+    [36m| [0m[34m|[0m /* 48.238 */            case _ =>()[0m
+    [36m| [0m[34m|[0m /* 48.239 */        }[0m
+    [36m| [0m[34m|[0m /* 48.240 */    }[0m
+    [36m| [0m[34m|[0m /* 48.241 */}[0m
+    [36m| [0m[34m|[0m /* 48.242 */expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.243 */cancellation.cancel()[0m
+    [36m| [0m[34m|[0m /* 48.244 */future.get()[0m
+    [36m| [0m[34m|[0m /* 48.245 */expectEqual("cancelled.load()", "true", cancelled.load(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.246 */expectEqual("pool.snapshot().waiters", "0", pool.snapshot().waiters, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.247 */pool.release(held)[0m
+    [36m| [0m[34m|[0m /* 48.248 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.249 */}[0m
+    [36m| [0m[34m|[0m /* 48.250 */[0m
+    [36m| [0m[34m|[0m /* 48.251 */@Attribute[TestCase_48][0m
+    [36m| [0m[34m|[0m /* 48.252 */func evictsExpiredAndClosedConnectionsInsteadOfReusingThem(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.253 */let clock = PoolTestClock()[0m
+    [36m| [0m[34m|[0m /* 48.254 */let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(idleTimeout: Duration.second), clock: clock)[0m
+    [36m| [0m[34m|[0m /* 48.255 */let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.256 */let expired = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.257 */pool.release(expired)[0m
+    [36m| [0m[34m|[0m /* 48.258 */clock.advance(2 * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.259 */let replacement = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.260 */expectEqual("replacement.id != expired.id", "true", replacement.id != expired.id, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.261 */expectEqual("factory.calls.load()", "2", factory.calls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.262 */replacement.connection.close()[0m
+    [36m| [0m[34m|[0m /* 48.263 */pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 48.264 */expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.265 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.266 */}[0m
+    [36m| [0m[34m|[0m /* 48.267 */[0m
+    [36m| [0m[34m|[0m /* 48.268 */@Attribute[TestCase_49][0m
+    [36m| [0m[34m|[0m /* 48.269 */func poolClosureDuringAggregateAdmissionPreventsFactoryWork(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.270 */let budget = internal.HttpResourceBudget(internal.HttpResourceBudgetPolicy(1, 1, 1, 1, 1, 1, 1, 1, 1, 1048576u64, 1048576u64, 2))[0m
+    [36m| [0m[34m|[0m /* 48.271 */let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(maximumConnections: 2, maximumConnectionsPerKey: 2, maximumIdleConnections: 1), resourceBudget: Some(budget))[0m
+    [36m| [0m[34m|[0m /* 48.272 */let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.273 */let held = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.274 */let blocker = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 48.275 */    let _ = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.276 */    false[0m
+    [36m| [0m[34m|[0m /* 48.277 */} catch(error: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 48.278 */    match(error.code) {[0m
+    [36m| [0m[34m|[0m /* 48.279 */        case NetworkErrorCode.Closed => true[0m
+    [36m| [0m[34m|[0m /* 48.280 */        case _ => false[0m
+    [36m| [0m[34m|[0m /* 48.281 */    }[0m
+    [36m| [0m[34m|[0m /* 48.282 */}[0m
+    [36m| [0m[34m|[0m /* 48.283 */}[0m
+    [36m| [0m[34m|[0m /* 48.284 */expectEqual("waitForAggregateConnectionWaiter(budget, 1, Duration.second)", "true", waitForAggregateConnectionWaiter(budget, 1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.285 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.286 */var rejected = false[0m
+    [36m| [0m[34m|[0m /* 48.287 */try {[0m
+    [36m| [0m[34m|[0m /* 48.288 */rejected = blocker.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.289 */} catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 48.290 */}[0m
+    [36m| [0m[34m|[0m /* 48.291 */expectEqual("rejected", "true", rejected, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.292 */expectEqual("factory.calls.load()", "1", factory.calls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.293 */expectEqual("pool.snapshot().reservations", "0", pool.snapshot().reservations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.294 */expectEqual("pool.snapshot().closed", "true", pool.snapshot().closed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.295 */expectEqual("budget.snapshot().activeConnections", "0", budget.snapshot().activeConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.296 */expectEqual("budget.snapshot().reservedConnections", "0", budget.snapshot().reservedConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.297 */pool.release(held)[0m
+    [36m| [0m[34m|[0m /* 48.298 */}[0m
+    [36m| [0m[34m|[0m /* 48.299 */[0m
+    [36m| [0m[34m|[0m /* 48.300 */@Attribute[TestCase_50][0m
+    [36m| [0m[34m|[0m /* 48.301 */func failedCreationRollsBackItsCapacityReservation(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.302 */let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1))[0m
+    [36m| [0m[34m|[0m /* 48.303 */var failed = false[0m
+    [36m| [0m[34m|[0m /* 48.304 */try {[0m
+    [36m| [0m[34m|[0m /* 48.305 */let _ = pool.acquire(poolTestKey(), FailingPoolFactory())[0m
+    [36m| [0m[34m|[0m /* 48.306 */} catch(_: Exception) {[0m
+    [36m| [0m[34m|[0m /* 48.307 */failed = true[0m
+    [36m| [0m[34m|[0m /* 48.308 */}[0m
+    [36m| [0m[34m|[0m /* 48.309 */expectEqual("failed", "true", failed, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.310 */expectEqual("pool.snapshot().reservations", "0", pool.snapshot().reservations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.311 */let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.312 */let lease = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.313 */pool.discard(lease)[0m
+    [36m| [0m[34m|[0m /* 48.314 */expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.315 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.316 */}[0m
+    [36m| [0m[34m|[0m /* 48.317 */[0m
+    [36m| [0m[34m|[0m /* 48.318 */@Attribute[TestCase_51][0m
+    [36m| [0m[34m|[0m /* 48.319 */func evictsLeasedConnectionAtMaximumLifetimeOnRelease(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.320 */let clock = PoolTestClock()[0m
+    [36m| [0m[34m|[0m /* 48.321 */let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(idleTimeout: 3600 * Duration.second), clock: clock)[0m
+    [36m| [0m[34m|[0m /* 48.322 */let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.323 */let expired = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.324 */clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.325 */pool.release(expired)[0m
+    [36m| [0m[34m|[0m /* 48.326 */expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.327 */let replacement = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.328 */expectEqual("replacement.id != expired.id", "true", replacement.id != expired.id, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.329 */expectEqual("factory.calls.load()", "2", factory.calls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.330 */pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 48.331 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.332 */}[0m
+    [36m| [0m[34m|[0m /* 48.333 */[0m
+    [36m| [0m[34m|[0m /* 48.334 */@Attribute[TestCase_52][0m
+    [36m| [0m[34m|[0m /* 48.335 */func expiresConnectionsAtMaximumLifetime(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.336 */let clock = PoolTestClock()[0m
+    [36m| [0m[34m|[0m /* 48.337 */let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(idleTimeout: 3600 * Duration.second), clock: clock)[0m
+    [36m| [0m[34m|[0m /* 48.338 */let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.339 */let expired = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.340 */pool.release(expired)[0m
+    [36m| [0m[34m|[0m /* 48.341 */clock.advance(HTTP_CONNECTION_MAXIMUM_LIFETIME_SECONDS * Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.342 */let replacement = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.343 */expectEqual("replacement.id != expired.id", "true", replacement.id != expired.id, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.344 */expectEqual("factory.calls.load()", "2", factory.calls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.345 */pool.release(replacement)[0m
+    [36m| [0m[34m|[0m /* 48.346 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.347 */}[0m
+    [36m| [0m[34m|[0m /* 48.348 */[0m
+    [36m| [0m[34m|[0m /* 48.349 */@Attribute[TestCase_53][0m
+    [36m| [0m[34m|[0m /* 48.350 */func admissionRotatesOriginsAndYieldsTheFullPoolSlot(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.351 */let pool = Http1ConnectionPool(config: Http1ConnectionPoolConfig(maximumConnections: 1, maximumConnectionsPerKey: 1, maximumIdleConnections: 1, maximumWaiters: 2))[0m
+    [36m| [0m[34m|[0m /* 48.352 */let factory = PoolTestFactory()[0m
+    [36m| [0m[34m|[0m /* 48.353 */let first = pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.354 */let sameOrigin = spawn { pool.acquire(poolTestKey(), factory)[0m
+    [36m| [0m[34m|[0m /* 48.355 */}[0m
+    [36m| [0m[34m|[0m /* 48.356 */expectEqual("pool.waitUntilWaiters(1, Duration.second)", "true", pool.waitUntilWaiters(1, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.357 */let otherOrigin = spawn { pool.acquire(poolTestKey(host: "other.test"), factory)[0m
+    [36m| [0m[34m|[0m /* 48.358 */}[0m
+    [36m| [0m[34m|[0m /* 48.359 */expectEqual("pool.waitUntilWaiters(2, Duration.second)", "true", pool.waitUntilWaiters(2, Duration.second), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.360 */pool.release(first)[0m
+    [36m| [0m[34m|[0m /* 48.361 */let second = sameOrigin.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.362 */expectEqual("factory.calls.load()", "1", factory.calls.load(), 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.363 */expectEqual("pool.snapshot().waiters", "1", pool.snapshot().waiters, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.364 */pool.release(second)[0m
+    [36m| [0m[34m|[0m /* 48.365 */let third = otherOrigin.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.366 */expectEqual("factory.calls.load()", "2", factory.calls.load(), 2, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.367 */pool.release(third)[0m
+    [36m| [0m[34m|[0m /* 48.368 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.369 */}[0m
+    [36m| [0m[34m|[0m /* 48.370 */[0m
+    [36m| [0m[34m|[0m /* 48.371 */@Attribute[TestCase_54][0m
+    [36m| [0m[34m|[0m /* 48.372 */func retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResult(): Unit {[0m
+    [36m| [0m[34m|[0m /* 48.373 */for(strict in[false, true]) {[0m
+    [36m| [0m[34m|[0m /* 48.374 */let pool = Http1ConnectionPool()[0m
+    [36m| [0m[34m|[0m /* 48.375 */let factory = RotationPoolFactory()[0m
+    [36m| [0m[34m|[0m /* 48.376 */let pending = spawn { try {[0m
+    [36m| [0m[34m|[0m /* 48.377 */    Some(pool.acquire(poolTestKey(), factory))[0m
+    [36m| [0m[34m|[0m /* 48.378 */} catch(_: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 48.379 */    None < Http1PoolLease >[0m
+    [36m| [0m[34m|[0m /* 48.380 */}[0m
+    [36m| [0m[34m|[0m /* 48.381 */}[0m
+    [36m| [0m[34m|[0m /* 48.382 */factory.waitUntilEntered()[0m
+    [36m| [0m[34m|[0m /* 48.383 */expectEqual("pool.observationSnapshot().connectingConnections", "1", pool.observationSnapshot().connectingConnections, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.384 */expectEqual("pool.observationSnapshot().leasedConnections", "0", pool.observationSnapshot().leasedConnections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.385 */if(strict) {[0m
+    [36m| [0m[34m|[0m /* 48.386 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.387 */}[0m
+    [36m| [0m[34m|[0m /* 48.388 */else {[0m
+    [36m| [0m[34m|[0m /* 48.389 */pool.retire()[0m
+    [36m| [0m[34m|[0m /* 48.390 */}[0m
+    [36m| [0m[34m|[0m /* 48.391 */factory.release()[0m
+    [36m| [0m[34m|[0m /* 48.392 */let result = pending.get(Duration.second)[0m
+    [36m| [0m[34m|[0m /* 48.393 */if(strict) {[0m
+    [36m| [0m[34m|[0m /* 48.394 */expectEqual("result.isNone()", "true", result.isNone(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.395 */}[0m
+    [36m| [0m[34m|[0m /* 48.396 */else {[0m
+    [36m| [0m[34m|[0m /* 48.397 */let lease = result.getOrThrow()[0m
+    [36m| [0m[34m|[0m /* 48.398 */expectEqual("! lease.connection.isClosed()", "true", ! lease.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.399 */pool.release(lease)[0m
+    [36m| [0m[34m|[0m /* 48.400 */expectEqual("lease.connection.isClosed()", "true", lease.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.401 */}[0m
+    [36m| [0m[34m|[0m /* 48.402 */expectEqual("factory.connection.isClosed()", "true", factory.connection.isClosed(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.403 */expectEqual("pool.snapshot().connections", "0", pool.snapshot().connections, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.404 */expectEqual("pool.snapshot().reservations", "0", pool.snapshot().reservations, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 48.405 */pool.close()[0m
+    [36m| [0m[34m|[0m /* 48.406 */factory.peer.close()[0m
+    [36m| [0m[34m|[0m /* 48.407 */}[0m
+    [36m| [0m[34m|[0m /* 48.408 */}[0m
+    [36m| [0m[34m|[0m /* 48.409 */[0m
+    [36m| [0m[34m|[0m /* 48.410 */init() {[0m
+    [36m| [0m[34m|[0m /* 48.411 */}[0m
+    [36m| [0m[34m|[0m /* 48.412 */private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 48.413 */let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.414 */[0m
+    [36m| [0m[34m|[0m /* 48.415 */return configuration[0m
+    [36m| [0m[34m|[0m /* 48.416 */}[0m
+    [36m| [0m[34m|[0m /* 48.417 */public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 48.418 */[0m
+    [36m| [0m[34m|[0m /* 48.419 */let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 48.420 */let suiteBuilder = TestSuite.builder("Http1ConnectionPoolTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 48.421 */[0m
+    [36m| [0m[34m|[0m /* 48.422 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.423 */[0m
+    [36m| [0m[34m|[0m /* 48.424 */let transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilCloseTestFunc = { => transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilClose();() }[0m
+    [36m| [0m[34m|[0m /* 48.425 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.426 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.427 */"transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilClose",[0m
+    [36m| [0m[34m|[0m /* 48.428 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.429 */body: transferredSessionReportsDrainOnceAndRetainsItsRealOwnerUntilCloseTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.430 */)[0m
+    [36m| [0m[34m|[0m /* 48.431 */)[0m
+    [36m| [0m[34m|[0m /* 48.432 */[0m
+    [36m| [0m[34m|[0m /* 48.433 */}()[0m
+    [36m| [0m[34m|[0m /* 48.434 */[0m
+    [36m| [0m[34m|[0m /* 48.435 */[0m
+    [36m| [0m[34m|[0m /* 48.436 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.437 */[0m
+    [36m| [0m[34m|[0m /* 48.438 */let globalPhysicalIdsRemainStableAcrossClaimsAndPoolsTestFunc = { => globalPhysicalIdsRemainStableAcrossClaimsAndPools();() }[0m
+    [36m| [0m[34m|[0m /* 48.439 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.440 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.441 */"globalPhysicalIdsRemainStableAcrossClaimsAndPools",[0m
+    [36m| [0m[34m|[0m /* 48.442 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.443 */body: globalPhysicalIdsRemainStableAcrossClaimsAndPoolsTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.444 */)[0m
+    [36m| [0m[34m|[0m /* 48.445 */)[0m
+    [36m| [0m[34m|[0m /* 48.446 */[0m
+    [36m| [0m[34m|[0m /* 48.447 */}()[0m
+    [36m| [0m[34m|[0m /* 48.448 */[0m
+    [36m| [0m[34m|[0m /* 48.449 */[0m
+    [36m| [0m[34m|[0m /* 48.450 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.451 */[0m
+    [36m| [0m[34m|[0m /* 48.452 */let throwingReentrantSinkCannotChangePoolOwnershipTestFunc = { => throwingReentrantSinkCannotChangePoolOwnership();() }[0m
+    [36m| [0m[34m|[0m /* 48.453 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.454 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.455 */"throwingReentrantSinkCannotChangePoolOwnership",[0m
+    [36m| [0m[34m|[0m /* 48.456 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.457 */body: throwingReentrantSinkCannotChangePoolOwnershipTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.458 */)[0m
+    [36m| [0m[34m|[0m /* 48.459 */)[0m
+    [36m| [0m[34m|[0m /* 48.460 */[0m
+    [36m| [0m[34m|[0m /* 48.461 */}()[0m
+    [36m| [0m[34m|[0m /* 48.462 */[0m
+    [36m| [0m[34m|[0m /* 48.463 */[0m
+    [36m| [0m[34m|[0m /* 48.464 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.465 */[0m
+    [36m| [0m[34m|[0m /* 48.466 */let boundedFullSinkDoesNotPreventWaiterCancellationOrReclamationTestFunc = { => boundedFullSinkDoesNotPreventWaiterCancellationOrReclamation();() }[0m
+    [36m| [0m[34m|[0m /* 48.467 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.468 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.469 */"boundedFullSinkDoesNotPreventWaiterCancellationOrReclamation",[0m
+    [36m| [0m[34m|[0m /* 48.470 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.471 */body: boundedFullSinkDoesNotPreventWaiterCancellationOrReclamationTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.472 */)[0m
+    [36m| [0m[34m|[0m /* 48.473 */)[0m
+    [36m| [0m[34m|[0m /* 48.474 */[0m
+    [36m| [0m[34m|[0m /* 48.475 */}()[0m
+    [36m| [0m[34m|[0m /* 48.476 */[0m
+    [36m| [0m[34m|[0m /* 48.477 */[0m
+    [36m| [0m[34m|[0m /* 48.478 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.479 */[0m
+    [36m| [0m[34m|[0m /* 48.480 */let retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuseTestFunc = { => retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse();() }[0m
+    [36m| [0m[34m|[0m /* 48.481 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.482 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.483 */"retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuse",[0m
+    [36m| [0m[34m|[0m /* 48.484 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.485 */body: retirementEvictsIdleAndDrainsClaimedConnectionsWithoutReuseTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.486 */)[0m
+    [36m| [0m[34m|[0m /* 48.487 */)[0m
+    [36m| [0m[34m|[0m /* 48.488 */[0m
+    [36m| [0m[34m|[0m /* 48.489 */}()[0m
+    [36m| [0m[34m|[0m /* 48.490 */[0m
+    [36m| [0m[34m|[0m /* 48.491 */[0m
+    [36m| [0m[34m|[0m /* 48.492 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.493 */[0m
+    [36m| [0m[34m|[0m /* 48.494 */let emitsSecretFreeAcquireAndReleaseLifecycleTestFunc = { => emitsSecretFreeAcquireAndReleaseLifecycle();() }[0m
+    [36m| [0m[34m|[0m /* 48.495 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.496 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.497 */"emitsSecretFreeAcquireAndReleaseLifecycle",[0m
+    [36m| [0m[34m|[0m /* 48.498 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.499 */body: emitsSecretFreeAcquireAndReleaseLifecycleTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.500 */)[0m
+    [36m| [0m[34m|[0m /* 48.501 */)[0m
+    [36m| [0m[34m|[0m /* 48.502 */[0m
+    [36m| [0m[34m|[0m /* 48.503 */}()[0m
+    [36m| [0m[34m|[0m /* 48.504 */[0m
+    [36m| [0m[34m|[0m /* 48.505 */[0m
+    [36m| [0m[34m|[0m /* 48.506 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.507 */[0m
+    [36m| [0m[34m|[0m /* 48.508 */let reusesOnlyTheSameCompleteKeyTestFunc = { => reusesOnlyTheSameCompleteKey();() }[0m
+    [36m| [0m[34m|[0m /* 48.509 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.510 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.511 */"reusesOnlyTheSameCompleteKey",[0m
+    [36m| [0m[34m|[0m /* 48.512 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.513 */body: reusesOnlyTheSameCompleteKeyTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.514 */)[0m
+    [36m| [0m[34m|[0m /* 48.515 */)[0m
+    [36m| [0m[34m|[0m /* 48.516 */[0m
+    [36m| [0m[34m|[0m /* 48.517 */}()[0m
+    [36m| [0m[34m|[0m /* 48.518 */[0m
+    [36m| [0m[34m|[0m /* 48.519 */[0m
+    [36m| [0m[34m|[0m /* 48.520 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.521 */[0m
+    [36m| [0m[34m|[0m /* 48.522 */let enforcesTotalPerKeyIdleAndWaiterBoundsTestFunc = { => enforcesTotalPerKeyIdleAndWaiterBounds();() }[0m
+    [36m| [0m[34m|[0m /* 48.523 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.524 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.525 */"enforcesTotalPerKeyIdleAndWaiterBounds",[0m
+    [36m| [0m[34m|[0m /* 48.526 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.527 */body: enforcesTotalPerKeyIdleAndWaiterBoundsTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.528 */)[0m
+    [36m| [0m[34m|[0m /* 48.529 */)[0m
+    [36m| [0m[34m|[0m /* 48.530 */[0m
+    [36m| [0m[34m|[0m /* 48.531 */}()[0m
+    [36m| [0m[34m|[0m /* 48.532 */[0m
+    [36m| [0m[34m|[0m /* 48.533 */[0m
+    [36m| [0m[34m|[0m /* 48.534 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.535 */[0m
+    [36m| [0m[34m|[0m /* 48.536 */let activeWaitHonorsCancellationAndReleasesWaiterSlotTestFunc = { => activeWaitHonorsCancellationAndReleasesWaiterSlot();() }[0m
+    [36m| [0m[34m|[0m /* 48.537 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.538 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.539 */"activeWaitHonorsCancellationAndReleasesWaiterSlot",[0m
+    [36m| [0m[34m|[0m /* 48.540 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.541 */body: activeWaitHonorsCancellationAndReleasesWaiterSlotTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.542 */)[0m
+    [36m| [0m[34m|[0m /* 48.543 */)[0m
+    [36m| [0m[34m|[0m /* 48.544 */[0m
+    [36m| [0m[34m|[0m /* 48.545 */}()[0m
+    [36m| [0m[34m|[0m /* 48.546 */[0m
+    [36m| [0m[34m|[0m /* 48.547 */[0m
+    [36m| [0m[34m|[0m /* 48.548 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.549 */[0m
+    [36m| [0m[34m|[0m /* 48.550 */let evictsExpiredAndClosedConnectionsInsteadOfReusingThemTestFunc = { => evictsExpiredAndClosedConnectionsInsteadOfReusingThem();() }[0m
+    [36m| [0m[34m|[0m /* 48.551 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.552 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.553 */"evictsExpiredAndClosedConnectionsInsteadOfReusingThem",[0m
+    [36m| [0m[34m|[0m /* 48.554 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.555 */body: evictsExpiredAndClosedConnectionsInsteadOfReusingThemTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.556 */)[0m
+    [36m| [0m[34m|[0m /* 48.557 */)[0m
+    [36m| [0m[34m|[0m /* 48.558 */[0m
+    [36m| [0m[34m|[0m /* 48.559 */}()[0m
+    [36m| [0m[34m|[0m /* 48.560 */[0m
+    [36m| [0m[34m|[0m /* 48.561 */[0m
+    [36m| [0m[34m|[0m /* 48.562 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.563 */[0m
+    [36m| [0m[34m|[0m /* 48.564 */let poolClosureDuringAggregateAdmissionPreventsFactoryWorkTestFunc = { => poolClosureDuringAggregateAdmissionPreventsFactoryWork();() }[0m
+    [36m| [0m[34m|[0m /* 48.565 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.566 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.567 */"poolClosureDuringAggregateAdmissionPreventsFactoryWork",[0m
+    [36m| [0m[34m|[0m /* 48.568 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.569 */body: poolClosureDuringAggregateAdmissionPreventsFactoryWorkTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.570 */)[0m
+    [36m| [0m[34m|[0m /* 48.571 */)[0m
+    [36m| [0m[34m|[0m /* 48.572 */[0m
+    [36m| [0m[34m|[0m /* 48.573 */}()[0m
+    [36m| [0m[34m|[0m /* 48.574 */[0m
+    [36m| [0m[34m|[0m /* 48.575 */[0m
+    [36m| [0m[34m|[0m /* 48.576 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.577 */[0m
+    [36m| [0m[34m|[0m /* 48.578 */let failedCreationRollsBackItsCapacityReservationTestFunc = { => failedCreationRollsBackItsCapacityReservation();() }[0m
+    [36m| [0m[34m|[0m /* 48.579 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.580 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.581 */"failedCreationRollsBackItsCapacityReservation",[0m
+    [36m| [0m[34m|[0m /* 48.582 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.583 */body: failedCreationRollsBackItsCapacityReservationTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.584 */)[0m
+    [36m| [0m[34m|[0m /* 48.585 */)[0m
+    [36m| [0m[34m|[0m /* 48.586 */[0m
+    [36m| [0m[34m|[0m /* 48.587 */}()[0m
+    [36m| [0m[34m|[0m /* 48.588 */[0m
+    [36m| [0m[34m|[0m /* 48.589 */[0m
+    [36m| [0m[34m|[0m /* 48.590 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.591 */[0m
+    [36m| [0m[34m|[0m /* 48.592 */let evictsLeasedConnectionAtMaximumLifetimeOnReleaseTestFunc = { => evictsLeasedConnectionAtMaximumLifetimeOnRelease();() }[0m
+    [36m| [0m[34m|[0m /* 48.593 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.594 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.595 */"evictsLeasedConnectionAtMaximumLifetimeOnRelease",[0m
+    [36m| [0m[34m|[0m /* 48.596 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.597 */body: evictsLeasedConnectionAtMaximumLifetimeOnReleaseTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.598 */)[0m
+    [36m| [0m[34m|[0m /* 48.599 */)[0m
+    [36m| [0m[34m|[0m /* 48.600 */[0m
+    [36m| [0m[34m|[0m /* 48.601 */}()[0m
+    [36m| [0m[34m|[0m /* 48.602 */[0m
+    [36m| [0m[34m|[0m /* 48.603 */[0m
+    [36m| [0m[34m|[0m /* 48.604 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.605 */[0m
+    [36m| [0m[34m|[0m /* 48.606 */let expiresConnectionsAtMaximumLifetimeTestFunc = { => expiresConnectionsAtMaximumLifetime();() }[0m
+    [36m| [0m[34m|[0m /* 48.607 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.608 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.609 */"expiresConnectionsAtMaximumLifetime",[0m
+    [36m| [0m[34m|[0m /* 48.610 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.611 */body: expiresConnectionsAtMaximumLifetimeTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.612 */)[0m
+    [36m| [0m[34m|[0m /* 48.613 */)[0m
+    [36m| [0m[34m|[0m /* 48.614 */[0m
+    [36m| [0m[34m|[0m /* 48.615 */}()[0m
+    [36m| [0m[34m|[0m /* 48.616 */[0m
+    [36m| [0m[34m|[0m /* 48.617 */[0m
+    [36m| [0m[34m|[0m /* 48.618 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.619 */[0m
+    [36m| [0m[34m|[0m /* 48.620 */let admissionRotatesOriginsAndYieldsTheFullPoolSlotTestFunc = { => admissionRotatesOriginsAndYieldsTheFullPoolSlot();() }[0m
+    [36m| [0m[34m|[0m /* 48.621 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.622 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.623 */"admissionRotatesOriginsAndYieldsTheFullPoolSlot",[0m
+    [36m| [0m[34m|[0m /* 48.624 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.625 */body: admissionRotatesOriginsAndYieldsTheFullPoolSlotTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.626 */)[0m
+    [36m| [0m[34m|[0m /* 48.627 */)[0m
+    [36m| [0m[34m|[0m /* 48.628 */[0m
+    [36m| [0m[34m|[0m /* 48.629 */}()[0m
+    [36m| [0m[34m|[0m /* 48.630 */[0m
+    [36m| [0m[34m|[0m /* 48.631 */[0m
+    [36m| [0m[34m|[0m /* 48.632 */{ => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 48.633 */[0m
+    [36m| [0m[34m|[0m /* 48.634 */let retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResultTestFunc = { => retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResult();() }[0m
+    [36m| [0m[34m|[0m /* 48.635 */suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 48.636 */UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 48.637 */"retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResult",[0m
+    [36m| [0m[34m|[0m /* 48.638 */configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 48.639 */body: retiringH1PreservesStartedFactoryAndCloseRejectsItsLateResultTestFunc[0m
+    [36m| [0m[34m|[0m /* 48.640 */)[0m
+    [36m| [0m[34m|[0m /* 48.641 */)[0m
+    [36m| [0m[34m|[0m /* 48.642 */[0m
+    [36m| [0m[34m|[0m /* 48.643 */}()[0m
+    [36m| [0m[34m|[0m /* 48.644 */[0m
+    [36m| [0m[34m|[0m /* 48.645 */return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 48.646 */}[0m
+    [36m| [0m[34m|[0m /* 48.647 */private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 48.648 */throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 48.649 */}[0m
+    [36m| [0m[34m|[0m /* 48.650 */}[0m
+    [36m| [0m[34m|[0m /* 48.651 */[0m
+    [36m| [0m[34m|[0m /* 48.652 */[0m
+    [36m| [0m[34m|[0m /* 48.653 */interface TestPackageExtension_Http1ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m /* 48.654 */func registerHttp1ConnectionPoolTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 48.655 */}[0m
+    [36m| [0m[34m|[0m /* 48.656 */extend TestPackage <: TestPackageExtension_Http1ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m /* 48.657 */@Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 48.658 */public func registerHttp1ConnectionPoolTest() {[0m
+    [36m| [0m[34m|[0m /* 48.659 */registerSuite({ => Http1ConnectionPoolTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 48.660 */}[0m
+    [36m| [0m[34m|[0m /* 48.661 */}[0m
+    [36m| [0m[34m|[0m /* 48.662 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m___________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:48:1:
+    [36m| [0m
+[36m48[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m49[0m  [36m| [0m[34m|[0m class Http1ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m446[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unused expression
+    [36m| [0m
+    [36m| [0m/* 48.153 */        None < NetworkException >[0m
+    [36m| [0m                    [33m^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/connection_pool_test.cj:48:1:
+    [36m| [0m
+[36m48[0m  [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m49[0m  [36m| [0m[34m|[0m class Http1ConnectionPoolTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m446[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 272.15 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 272.16 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 272.17 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 272.1 */@Attribute[TEST_GENERATED] class Http1RequestWriteBudgetReviewTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 272.2 */    @Attribute[TestCase_140][0m
+    [36m| [0m[34m|[0m /* 272.3 */    func expectContinueReusesOneRequestWriteBudgetForHeadAndBody(): Unit {[0m
+    [36m| [0m[34m|[0m /* 272.4 */        let clock = ReviewContinueManualClock()[0m
+    [36m| [0m[34m|[0m /* 272.5 */        let transport = ReviewWriteBudgetTransport(clock)[0m
+    [36m| [0m[34m|[0m /* 272.6 */        let request = HttpRequest(HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"), headers: HttpHeaders.builder().add("Content-Length", "1").add("Expect", "100-continue").build(), body: RequestBody.bytes([120u8]))[0m
+    [36m| [0m[34m|[0m /* 272.7 */        let writer = Http1RequestWriter(request)[0m
+    [36m| [0m[34m|[0m /* 272.8 */        let context = OperationContext(deadline: Some(Deadline.after(Duration.second, clock: clock)), timeoutPolicy: OperationTimeoutPolicy(requestWrite: Some(5 * Duration.millisecond)))[0m
+    [36m| [0m[34m|[0m /* 272.9 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 272.10 */            try {[0m
+    [36m| [0m[34m|[0m /* 272.11 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 272.12 */                exchangeHttp1ExpectContinue(transport, request, writer, Duration.second, context: context)[0m
+    [36m| [0m[34m|[0m /* 272.13 */                fail("@AssertThrows: Expected 'Http1RequestWriteException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 272.14 */            } catch(e: Http1RequestWriteException) {[0m
+    [36m| [0m[34m|[0m /* 272.15 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 272.16 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 272.17 */                }[0m
+    [36m| [0m[34m|[0m /* 272.18 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 272.19 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 272.20 */                }[0m
+    [36m| [0m[34m|[0m /* 272.21 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 272.22 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 272.23 */                }[0m
+    [36m| [0m[34m|[0m /* 272.24 */                e[0m
+    [36m| [0m[34m|[0m /* 272.25 */            }[0m
+    [36m| [0m[34m|[0m /* 272.26 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 272.27 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 272.28 */                throw e[0m
+    [36m| [0m[34m|[0m /* 272.29 */            }[0m
+    [36m| [0m[34m|[0m /* 272.30 */            assertCaughtUnexpectedE("@AssertThrows(Http1RequestWriteException)", "Http1RequestWriteException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 272.31 */        }[0m
+    [36m| [0m[34m|[0m /* 272.32 */        [0m
+    [36m| [0m[34m|[0m /* 272.33 */        expectEqual("transport.headWrites", "1", transport.headWrites, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.34 */        expectEqual("transport.bodyWriteAttempted", "true", transport.bodyWriteAttempted, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.35 */        expectEqual("transport.bodyWriteExpired", "true", transport.bodyWriteExpired, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.36 */        expectEqual("transport.bodyWriteCompleted", "false", transport.bodyWriteCompleted, false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.37 */        expectEqual("writer.evidence.bodyBytesWritten", "0", writer.evidence.bodyBytesWritten, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.38 */        expectEqual("error.cause.isSome()", "true", error.cause.isSome(), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.39 */        match(error.cause.getOrThrow()) {[0m
+    [36m| [0m[34m|[0m /* 272.40 */            case value: api.NetworkException => match(value.code) {[0m
+    [36m| [0m[34m|[0m /* 272.41 */                case api.NetworkErrorCode.TimedOut =>()[0m
+    [36m| [0m[34m|[0m /* 272.42 */                case _ => fail("request-write budget expiry lost its timeout")[0m
+    [36m| [0m[34m|[0m /* 272.43 */            }[0m
+    [36m| [0m[34m|[0m /* 272.44 */            case _ => fail("request-write budget expiry lost its network cause")[0m
+    [36m| [0m[34m|[0m /* 272.45 */        }[0m
+    [36m| [0m[34m|[0m /* 272.46 */    }[0m
+    [36m| [0m[34m|[0m /* 272.47 */    [0m
+    [36m| [0m[34m|[0m /* 272.48 */    @Attribute[TestCase_141][0m
+    [36m| [0m[34m|[0m /* 272.49 */    func completeRequestReusesOneRequestWriteBudgetForHeadAndBody(): Unit {[0m
+    [36m| [0m[34m|[0m /* 272.50 */        let clock = ReviewContinueManualClock()[0m
+    [36m| [0m[34m|[0m /* 272.51 */        let transport = ReviewWriteBudgetTransport(clock, headWriteAdvance: 5 * Duration.millisecond, bodyWriteAdvance: 2 * Duration.millisecond)[0m
+    [36m| [0m[34m|[0m /* 272.52 */        let request = HttpRequest(HttpMethod("POST"), HttpUrl.parse("http://example.test/upload"), headers: HttpHeaders.builder().add("Content-Length", "1").build(), body: RequestBody.bytes([120u8]))[0m
+    [36m| [0m[34m|[0m /* 272.53 */        let context = OperationContext(deadline: Some(Deadline.after(Duration.second, clock: clock)), timeoutPolicy: OperationTimeoutPolicy(requestWrite: Some(6 * Duration.millisecond)))[0m
+    [36m| [0m[34m|[0m /* 272.54 */        let error = try {[0m
+    [36m| [0m[34m|[0m /* 272.55 */            try {[0m
+    [36m| [0m[34m|[0m /* 272.56 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 272.57 */                writeHttp1Request(transport, request, context: context)[0m
+    [36m| [0m[34m|[0m /* 272.58 */                fail("@AssertThrows: Expected 'Http1RequestWriteException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 272.59 */            } catch(e: Http1RequestWriteException) {[0m
+    [36m| [0m[34m|[0m /* 272.60 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 272.61 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 272.62 */                }[0m
+    [36m| [0m[34m|[0m /* 272.63 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 272.64 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 272.65 */                }[0m
+    [36m| [0m[34m|[0m /* 272.66 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 272.67 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 272.68 */                }[0m
+    [36m| [0m[34m|[0m /* 272.69 */                e[0m
+    [36m| [0m[34m|[0m /* 272.70 */            }[0m
+    [36m| [0m[34m|[0m /* 272.71 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 272.72 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 272.73 */                throw e[0m
+    [36m| [0m[34m|[0m /* 272.74 */            }[0m
+    [36m| [0m[34m|[0m /* 272.75 */            assertCaughtUnexpectedE("@AssertThrows(Http1RequestWriteException)", "Http1RequestWriteException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 272.76 */        }[0m
+    [36m| [0m[34m|[0m /* 272.77 */        [0m
+    [36m| [0m[34m|[0m /* 272.78 */        expectEqual("transport.headWrites", "1", transport.headWrites, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.79 */        expectEqual("transport.bodyWriteAttempted", "true", transport.bodyWriteAttempted, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.80 */        expectEqual("transport.bodyWriteExpired", "true", transport.bodyWriteExpired, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.81 */        expectEqual("transport.bodyWriteCompleted", "false", transport.bodyWriteCompleted, false, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.82 */        expectEqual("error.evidence.wireBytesWritten > 0", "true", error.evidence.wireBytesWritten > 0, true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.83 */        expectEqual("error.evidence.bodyBytesWritten", "0", error.evidence.bodyBytesWritten, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.84 */        expectEqual("clock.now()", "clock.start + 7 * Duration.millisecond", clock.now(), clock.start + 7 * Duration.millisecond, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 272.85 */        match(error.cause.getOrThrow()) {[0m
+    [36m| [0m[34m|[0m /* 272.86 */            case value: api.NetworkException => match(value.code) {[0m
+    [36m| [0m[34m|[0m /* 272.87 */                case api.NetworkErrorCode.TimedOut =>()[0m
+    [36m| [0m[34m|[0m /* 272.88 */                case _ => fail("request-write budget expiry lost its timeout")[0m
+    [36m| [0m[34m|[0m /* 272.89 */            }[0m
+    [36m| [0m[34m|[0m /* 272.90 */            match(value.phase) {[0m
+    [36m| [0m[34m|[0m /* 272.91 */                case api.NetworkPhase.TcpWrite =>()[0m
+    [36m| [0m[34m|[0m /* 272.92 */                case _ => fail("request-write budget expiry lost its TCP-write phase")[0m
+    [36m| [0m[34m|[0m /* 272.93 */            }[0m
+    [36m| [0m[34m|[0m /* 272.94 */            case _ => fail("request-write budget expiry lost its network cause")[0m
+    [36m| [0m[34m|[0m /* 272.95 */        }[0m
+    [36m| [0m[34m|[0m /* 272.96 */    }[0m
+    [36m| [0m[34m|[0m /* 272.97 */    [0m
+    [36m| [0m[34m|[0m /* 272.98 */    init() {[0m
+    [36m| [0m[34m|[0m /* 272.99 */    }[0m
+    [36m| [0m[34m|[0m /* 272.100 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 272.101 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 272.102 */        [0m
+    [36m| [0m[34m|[0m /* 272.103 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 272.104 */    }[0m
+    [36m| [0m[34m|[0m /* 272.105 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 272.106 */        [0m
+    [36m| [0m[34m|[0m /* 272.107 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 272.108 */        let suiteBuilder = TestSuite.builder("Http1RequestWriteBudgetReviewTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 272.109 */        [0m
+    [36m| [0m[34m|[0m /* 272.110 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 272.111 */            [0m
+    [36m| [0m[34m|[0m /* 272.112 */            let expectContinueReusesOneRequestWriteBudgetForHeadAndBodyTestFunc = { => expectContinueReusesOneRequestWriteBudgetForHeadAndBody();() }[0m
+    [36m| [0m[34m|[0m /* 272.113 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 272.114 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 272.115 */            "expectContinueReusesOneRequestWriteBudgetForHeadAndBody",[0m
+    [36m| [0m[34m|[0m /* 272.116 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 272.117 */            body: expectContinueReusesOneRequestWriteBudgetForHeadAndBodyTestFunc[0m
+    [36m| [0m[34m|[0m /* 272.118 */            )[0m
+    [36m| [0m[34m|[0m /* 272.119 */            )[0m
+    [36m| [0m[34m|[0m /* 272.120 */            [0m
+    [36m| [0m[34m|[0m /* 272.121 */        }()[0m
+    [36m| [0m[34m|[0m /* 272.122 */        [0m
+    [36m| [0m[34m|[0m /* 272.123 */        [0m
+    [36m| [0m[34m|[0m /* 272.124 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 272.125 */            [0m
+    [36m| [0m[34m|[0m /* 272.126 */            let completeRequestReusesOneRequestWriteBudgetForHeadAndBodyTestFunc = { => completeRequestReusesOneRequestWriteBudgetForHeadAndBody();() }[0m
+    [36m| [0m[34m|[0m /* 272.127 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 272.128 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 272.129 */            "completeRequestReusesOneRequestWriteBudgetForHeadAndBody",[0m
+    [36m| [0m[34m|[0m /* 272.130 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 272.131 */            body: completeRequestReusesOneRequestWriteBudgetForHeadAndBodyTestFunc[0m
+    [36m| [0m[34m|[0m /* 272.132 */            )[0m
+    [36m| [0m[34m|[0m /* 272.133 */            )[0m
+    [36m| [0m[34m|[0m /* 272.134 */            [0m
+    [36m| [0m[34m|[0m /* 272.135 */        }()[0m
+    [36m| [0m[34m|[0m /* 272.136 */        [0m
+    [36m| [0m[34m|[0m /* 272.137 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 272.138 */    }[0m
+    [36m| [0m[34m|[0m /* 272.139 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 272.140 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 272.141 */    }[0m
+    [36m| [0m[34m|[0m /* 272.142 */}[0m
+    [36m| [0m[34m|[0m /* 272.143 */[0m
+    [36m| [0m[34m|[0m /* 272.144 */[0m
+    [36m| [0m[34m|[0m /* 272.145 */interface TestPackageExtension_Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m /* 272.146 */    func registerHttp1RequestWriteBudgetReviewTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 272.147 */}[0m
+    [36m| [0m[34m|[0m /* 272.148 */extend TestPackage <: TestPackageExtension_Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m /* 272.149 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 272.150 */    public func registerHttp1RequestWriteBudgetReviewTest() {[0m
+    [36m| [0m[34m|[0m /* 272.151 */        registerSuite({ => Http1RequestWriteBudgetReviewTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 272.152 */    }[0m
+    [36m| [0m[34m|[0m /* 272.153 */}[0m
+    [36m| [0m[34m|[0m /* 272.154 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m____________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/response_reader_deadline_test.cj:272:1:
+    [36m| [0m
+[36m272[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m273[0m [36m| [0m[34m|[0m class Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m353[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 272.18 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 272.19 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 272.20 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/response_reader_deadline_test.cj:272:1:
+    [36m| [0m
+[36m272[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m273[0m [36m| [0m[34m|[0m class Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m353[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 272.21 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 272.22 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 272.23 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/response_reader_deadline_test.cj:272:1:
+    [36m| [0m
+[36m272[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m273[0m [36m| [0m[34m|[0m class Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m353[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 272.60 */                if(e is AssertException) {[0m
+    [36m| [0m [33m_[0m[33m_____________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 272.61 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 272.62 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/response_reader_deadline_test.cj:272:1:
+    [36m| [0m
+[36m272[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m273[0m [36m| [0m[34m|[0m class Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m353[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 272.63 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m [33m_[0m[33m_________________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 272.64 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 272.65 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/response_reader_deadline_test.cj:272:1:
+    [36m| [0m
+[36m272[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m273[0m [36m| [0m[34m|[0m class Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m353[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+    [36m| [0m
+    [36m| [0m  /* 272.66 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m [33m_[0m[33m______________________________________________________________^[0m
+    [36m| [0m[33m|[0m /* 272.67 */                    throw e[0m
+    [36m| [0m[33m|[0m /* 272.68 */                }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____________________________^ unreachable block in 'if' expression[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+   [36m==>[0m <repo>/src/internal/http1/response_reader_deadline_test.cj:272:1:
+    [36m| [0m
+[36m272[0m [36m| [0m  @Test[0m
+    [36m| [0m [34m_[0m[34m^[0m
+[36m273[0m [36m| [0m[34m|[0m class Http1RequestWriteBudgetReviewTest {[0m
+    [36m| [0m[34m|[0m ...[0m
+[36m353[0m [36m| [0m[34m|[0m }[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+    [36m| [0m
+
+12 warnings generated, 12 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 45671809 ns, RESULT:
+    TCS: Http2ConnectionPoolTest, time elapsed: 22389772 ns, RESULT:
+    [ PASSED ] CASE: throwingReentrantH2ObserverSeesAdmittedNotReservedStreams (906788 ns)
+    [ PASSED ] CASE: observedSnapshotsTrackPhysicalOwnersAndConnectionLocalStreams (432623 ns)
+    [ PASSED ] CASE: retiringH2BlocksNewStreamsAndKeepsExistingClaimsUntilTermination (181160 ns)
+    [ PASSED ] CASE: retirementPreservesStartedH2AdmissionButCloseRejectsItsLateResult (407317 ns)
+    [ PASSED ] CASE: alpnPrefersH2AndFallsBackOnlyToHttp11 (33801 ns)
+    [ PASSED ] CASE: oneConnectionIsSharedUntilPeerStreamCapacityIsFull (333605 ns)
+    [ PASSED ] CASE: concurrentFirstUseDoesNotCreateAConnectionStampede (5101328 ns)
+    [ PASSED ] CASE: newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted (166842 ns)
+    [ PASSED ] CASE: closeRacingUnpublishedAdmissionReleasesConnectionOwners (5852032 ns)
+    [ PASSED ] CASE: completeSecurityKeyPreventsCrossContextReuse (416378 ns)
+    [ PASSED ] CASE: drainingConnectionRetainsExistingStreamButReceivesNoNewLease (621888 ns)
+    [ PASSED ] CASE: drainingConnectionWaitsForNonLocalOwnersBeforeDiscard (155118 ns)
+    [ PASSED ] CASE: fullBoundedPoolHonorsOneCallerDeadline (120489 ns)
+    [ PASSED ] CASE: poolCloseAbortsEverySharedConnectionExactlyOnce (135167 ns)
+    [ PASSED ] CASE: drainsExpiredHttp2ConnectionAfterActiveStreamCompletion (177145 ns)
+    [ PASSED ] CASE: expiresConnectionsAtMaximumLifetime (126364 ns)
+    [ PASSED ] CASE: admissionRotatesOriginsAndYieldsAFullHttp2PoolSlot (319519 ns)
+    [ PASSED ] CASE: discardedConnectionCleanupPreservesCrossOriginAdmissionTurn (455970 ns)
+    [ PASSED ] CASE: cancelledDiscardWaiterIsRemovedWithoutStealingTheNextTurn (367644 ns)
+    [ PASSED ] CASE: saturatedCrossOriginWaiterDrainsHttp2ConnectionBeforeSameKeyRefill (490950 ns)
+    [ PASSED ] CASE: sequentialOriginChangeReclaimsIdleCrossKeyConnection (206026 ns)
+    [ PASSED ] CASE: expiredConnectionDoesNotContributeSnapshotCapacity (194941 ns)
+    [ PASSED ] CASE: cancelledCrossOriginWaiterClearsHttp2YieldAndRestoresSameKeyReuse (299101 ns)
+Summary: TOTAL: 176
+    PASSED: 23, SKIPPED: 153, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 51095248 ns, RESULT:
+TP: wirestack.*, time elapsed: 50936350 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.http1, time elapsed: 45671809 ns
+Summary: TOTAL: 176
+    PASSED: 23, SKIPPED: 153, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
