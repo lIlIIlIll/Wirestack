@@ -2,16 +2,17 @@
   "schema_version": 1,
   "kind": "requalification-status",
   "source_task": "M12-002",
-  "status": "IN_PROGRESS",
+  "status": "BLOCKED",
   "completion_claim": false,
   "release_qualification": "NOT_QUALIFIED",
-  "recorded_at_utc": "2026-10-17T22:27:37Z",
-  "method": "Typed text-evidence and artifact-byte SHA-256 comparison between the committed M12-002 reports and this revision. No capture, measurement or verification command was rerun for this record; the retained scratch inputs and SDK installations are not available in this checkout.",
+  "recorded_at_utc": "2026-10-23T16:55:48Z",
+  "method": "Round-four source, test and documentation updates were applied to PR head c0906d4bf374637d2fcd87cd658b26366a6ca074. The four focused Python suites and architecture guard were run. The current task gate stops before commands because M10-004 depends on incomplete M10-003. No source/binary capture, collect, verify, full contracts acceptance or native qualification ran; required archive, candidate SDK, retained private capture roots and native guest are unavailable.",
   "captured_evidence": {
     "acceptance": "docs/evidence/M12-002/README.md",
     "verification_snapshot": "docs/evidence/M12-002/verification.json",
     "task_gate": "docs/evidence/M12-002/task-gate.json",
-    "deployment_matrix": "docs/evidence/M12-002/deployment-matrix.json"
+    "deployment_matrix": "docs/evidence/M12-002/deployment-matrix.json",
+    "review_remediation": "docs/evidence/M12-002/review-remediation/report.json"
   },
   "stale_bindings": {
     "docs/evidence/M12-002/verification.json": {
@@ -93,23 +94,87 @@
     }
   },
   "rejected_commands": {
-    "python3 tools/m12_002_deployment.py verify": "Rejects this revision: the committed source-SDK, native, binary and verification records bind digests that the current tree no longer matches. The private retained archive and exact SDK installations required to rerun the command are not present in a clean checkout.",
-    "python3 tools/m12_002_deployment.py contracts": "Requires WIRESTACK_STABLE_SDK_ROOT and WIRESTACK_CANDIDATE_SDK_ROOT; the selected SDK installations are not available in a clean checkout."
+    "python3 tools/m12_002_deployment.py verify": "Previously observed exit 1 at the stale committed verification.json; verify was not rerun after round-four source changes, and no current verify result is claimed. The selected archive docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is absent, so a current deployment snapshot cannot be regenerated.",
+    "python3 tools/m12_002_deployment.py contracts": "The round-four selector-refusal smoke set both SDK selectors to '.' and exited 1 before suite execution with 'WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch'. This is not contracts acceptance. The earlier 146-test result belongs to a prior revision.",
+    "scripts/check-m7-032-public-api --json": "Exit 1 with {\"status\": \"FAIL\", \"error\": \"committed public API inventory is stale\"}; the current public API inventory is M7-032's to refresh, not this task's."
   },
   "required_before_completion": [
-    "Recollect both installed-source profiles, the native platform profile and the binary matrix with the exact retained SDKs, native VM, archive and retained capture root.",
-    "Regenerate docs/evidence/M12-002/verification.json with tools/m12_002_deployment.py collect --binary-report <verified report> after the final source and documentation edits.",
-    "Rerun scripts/check-task M12-002 --json to regenerate the task gate from the corrected capture.",
-    "Only then link the regenerated reports and claim COMPLETE."
+    "Obtain the selected development archive that the source, binary and deployment verifiers bind.",
+    "Recapture stable-native with the installed sts1.1.3 and candidate-native with a second explicitly supported STS identity.",
+    "Re-execute the native platform profile in a KVM guest with the selected glibc 2.44 runtime and confirm the transferred consumer sources before rebuild.",
+    "Regenerate docs/evidence/M12-002/verification.json with tools/m12_002_deployment.py collect --binary-report <verified report> after the final source edits.",
+    "Rerun scripts/check-task M12-002 --json and only then claim COMPLETE."
   ],
   "not_run": [
     {
-      "gate": "qualified-deployment-inputs",
-      "reason": "The retained private archive, SDK installations and native capture root are absent; rerunning requires the exact retained environment."
+      "gate": "source and binary capture",
+      "reason": "The selected archive and the second supported SDK identity are absent; only sts1.1.3 is installed and authorized."
     },
     {
       "gate": "native minimum profile",
-      "reason": "No Cangjie toolchain or KVM/private-glibc runtime is available in this checkout."
+      "reason": "No KVM guest image, glibc 2.44 runtime or provenance is retained in this checkout."
+    },
+    {
+      "gate": "qualified-deployment-inputs",
+      "reason": "Depends on the three inputs above; see docs/evidence/M12-002/review-remediation/report.json."
     }
-  ]
+  ],
+  "required_retained_inputs": {
+    "WIRESTACK_STABLE_SDK_ROOT": "exact stable SDK installation",
+    "WIRESTACK_CANDIDATE_SDK_ROOT": "exact candidate SDK installation",
+    "WIRESTACK_SOURCE_CAPTURE_ROOT": "private source-capture root holding <profile>/ TLS fixtures; the source verifier re-hashes the seven fixture files there, and private keys are never committed",
+    "WIRESTACK_BINARY_CAPTURE_ROOT": "retained binary capture directory holding raw disassembly output and installed consumers",
+    "WIRESTACK_BINARY_WRAPPER": "exact SDK environment wrapper file used by the capture",
+    "WIRESTACK_BINARY_OPENSSL_LIBRARY": "exact independent OpenSSL SSL library file",
+    "WIRESTACK_BINARY_OPENSSL_CRYPTO_LIBRARY": "exact independent OpenSSL crypto library file",
+    "note": "Every selector is required and has no default. The two TLS libraries must be distinct files and must match the binary report's external_tls_fixture digests."
+  },
+  "round_3_hardening": {
+    "evidence": "docs/evidence/M12-002/review-remediation/round-3.json",
+    "source_base_commit": "5f448b1ecdfc2cd297427b24457f0639ccd1aa65",
+    "changes": [
+      "tools/m12_002_deployment.py passes the selected wrapper, capture root and both TLS libraries into m12_002_binary.verify, which previously received five arguments for a nine-parameter signature",
+      "collect() validates the complete snapshot in memory and publishes it atomically, so a refused verification leaves no COMPLETE snapshot",
+      "verify_scan_verdicts() re-derives ISA counts from the retained complete raw disassembly bound by disassembly_raw and the truncation marker, failing closed when unavailable",
+      "verify_tls_fixtures() re-hashes the seven retained fixture files under WIRESTACK_SOURCE_CAPTURE_ROOT/<profile> instead of comparing each digest with itself"
+    ],
+    "tests_run": "python3 -m unittest tools.tests.test_m12_002_deployment tools.tests.test_m12_002_binary tools.tests.test_m12_002_source_sdk: Ran 161 tests, OK (skipped=1)",
+    "not_run": [
+      "capture",
+      "collect",
+      "verify",
+      "contracts"
+    ],
+    "status_effect": "none; M12-002 remains BLOCKED and NOT_QUALIFIED"
+  },
+  "round_4_hardening": {
+    "evidence": "docs/evidence/M12-002/review-remediation/round-4.json",
+    "source_base_commit": "c0906d4bf374637d2fcd87cd658b26366a6ca074",
+    "changes": [
+      "Source resume excludes ephemeral listener/client commands and retains only successful records.",
+      "The optional /etc/pki mount contract matches the actual Capture.hidden() namespace order.",
+      "Binary nm scans accept only expected exit statuses 0 and 1; status 2 remains an error.",
+      "contracts requires, validates and exports the explicit source-capture root before running tests."
+    ],
+    "tests_run": "python3 -m unittest tools.tests.test_m12_002_source_sdk tools.tests.test_m12_002_binary tools.tests.test_m12_002_platform tools.tests.test_m12_002_deployment -v: Ran 196 tests in 6.865s, OK (skipped=1; captured-evidence input unavailable).",
+    "architecture_guard": "python3 tools/architecture_guard.py --root . --format text: PASS",
+    "task_gate": "scripts/check-task M12-002 --json --output docs/evidence/M12-002/review-remediation/round-4-task-gate.json: exit 2, INVALID; DEPENDENCY_INCOMPLETE because M10-004 requires incomplete M10-003; zero commands run.",
+    "contracts_refusal_smoke": "WIRESTACK_STABLE_SDK_ROOT=. WIRESTACK_CANDIDATE_SDK_ROOT=. python3 tools/m12_002_deployment.py contracts: exit 1 before suite execution with WIRESTACK_SOURCE_CAPTURE_ROOT must select the retained profile scratch.",
+    "unrelated_gate": "scripts/check-m7-032-public-api --json: exit 1, committed M7-032 public API inventory is stale.",
+    "not_run": [
+      "source or binary profile recapture",
+      "collect",
+      "verify after round-four source changes",
+      "full contracts acceptance with authorized exact SDKs",
+      "native platform qualification"
+    ],
+    "missing_inputs": [
+      "docs/evidence/M12-001/native-final/wirestack-baseline.tar.gz is absent",
+      "candidate SDK is unavailable and not authorized",
+      "retained private source and binary capture roots are unavailable",
+      "no KVM guest with the selected glibc 2.44 runtime is retained",
+      "raw archive-0 disassembly is linked to unavailable private scratch, so ISA counts cannot be recomputed"
+    ],
+    "status_effect": "none; M12-002 remains BLOCKED and NOT_QUALIFIED"
+  }
 }
