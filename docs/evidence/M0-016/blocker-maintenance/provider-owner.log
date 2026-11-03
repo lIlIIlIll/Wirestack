@@ -1,0 +1,120 @@
+test_advisory_review_rejects_diverged_upstream_graph (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_advisory_review_rejects_diverged_upstream_graph) ... ok
+test_advisory_review_rejects_unapproved_source_repository (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_advisory_review_rejects_unapproved_source_repository) ... ok
+test_advisory_review_rejects_unrelated_tag_commit (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_advisory_review_rejects_unrelated_tag_commit) ... ok
+test_advisory_review_verifies_upstream_tag_and_commit_ancestry (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_advisory_review_verifies_upstream_tag_and_commit_ancestry) ... ok
+test_archive_provider_requires_exact_commit (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_archive_provider_requires_exact_commit) ... ok
+test_archive_provider_requires_release_tag_resolution (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_archive_provider_requires_release_tag_resolution) ... ok
+test_archive_result_binds_release_tag_resolution (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_archive_result_binds_release_tag_resolution) ... ok
+test_archive_source_resolves_and_matches_release_tag_commit (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_archive_source_resolves_and_matches_release_tag_commit) ... ok
+test_blocked_capability_cannot_pass (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_blocked_capability_cannot_pass) ... ok
+test_blocked_cell_retains_artifact_bindings (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_blocked_cell_retains_artifact_bindings) ... ok
+test_build_environment_captures_inherited_and_override_values (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_build_environment_captures_inherited_and_override_values) ... ok
+test_build_environment_snapshot_is_bounded (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_build_environment_snapshot_is_bounded) ... ok
+test_build_provenance_is_durable_and_fail_closed (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_build_provenance_is_durable_and_fail_closed) ... ok
+test_cli_uses_temporary_spec_matrix_review_and_license_files (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_cli_uses_temporary_spec_matrix_review_and_license_files) ... M0-016 validation: FAIL: $TASK_TMP/tmpf9yxsjnh/docs/evidence/M0-016/results/linux-glibc-x86_64/aws-lc.json: provider license manifest matrix digest mismatch
+FAIL
+test_diagnostic_build_instruments_provider_sources (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_diagnostic_build_instruments_provider_sources) ... ok
+test_exported_symbol_inventory_is_bounded_and_digest_bound (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_exported_symbol_inventory_is_bounded_and_digest_bound) ... ok
+test_failure_messages_are_bounded_by_utf8_bytes (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_failure_messages_are_bounded_by_utf8_bytes) ... ok
+test_github_tag_resolution_uses_bounded_ephemeral_token (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_github_tag_resolution_uses_bounded_ephemeral_token) ... ok
+test_hosted_execution_identity_matches_clean_checkout (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_hosted_execution_identity_matches_clean_checkout) ... ok
+test_hosted_execution_identity_rejects_revision_mismatch (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_hosted_execution_identity_rejects_revision_mismatch) ... ok
+test_hosted_workflows_supply_read_only_tag_resolution_token (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_hosted_workflows_supply_read_only_tag_resolution_token) ... ok
+test_license_bundle_ignores_symlinks_outside_provider_source (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_license_bundle_ignores_symlinks_outside_provider_source) ... ok
+test_license_bundle_rejects_escape_and_stale_digest (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_license_bundle_rejects_escape_and_stale_digest) ... ok
+test_license_bundle_rejects_raw_only_crlf_digest (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_license_bundle_rejects_raw_only_crlf_digest) ... ok
+test_license_file_invalid_utf8_fails_closed (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_license_file_invalid_utf8_fails_closed) ... ok
+test_license_file_metadata_is_line_ending_stable (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_license_file_metadata_is_line_ending_stable) ... ok
+test_license_manifest_digest_is_line_ending_stable (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_license_manifest_digest_is_line_ending_stable) ... ok
+test_local_execution_identity_rejects_dirty_checkout (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_local_execution_identity_rejects_dirty_checkout) ... ok
+test_local_execution_identity_uses_clean_exact_checkout (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_local_execution_identity_uses_clean_exact_checkout) ... ok
+test_matrix_contract_only_does_not_promote_stale_retained_results (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_matrix_contract_only_does_not_promote_stale_retained_results) ... M0-016 validation: PASS
+M0-016 validation: FAIL: --matrix-contract-only requires --matrix
+ok
+test_matrix_retained_result_validates_durable_license_bundle (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_matrix_retained_result_validates_durable_license_bundle) ... ok
+test_memory_diagnostic_records_provider_leak_detection_boundary (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_memory_diagnostic_records_provider_leak_detection_boundary) ... ok
+test_metrics_require_dual_version_resumption_and_external_trust (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_metrics_require_dual_version_resumption_and_external_trust) ... ok
+test_metrics_require_expired_and_malformed_certificate_coverage (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_metrics_require_expired_and_malformed_certificate_coverage) ... ok
+test_metrics_require_negative_alpn_coverage (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_metrics_require_negative_alpn_coverage) ... ok
+test_metrics_require_required_and_optional_client_auth (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_metrics_require_required_and_optional_client_auth) ... ok
+test_missing_archive_digest_fails (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_missing_archive_digest_fails) ... ok
+test_missing_platform_cell_fails (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_missing_platform_cell_fails) ... ok
+test_musl_package_installation_has_no_tag_resolution_token (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_musl_package_installation_has_no_tag_resolution_token) ... ok
+test_musl_result_requires_immutable_container_identity (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_musl_result_requires_immutable_container_identity) ... ok
+test_native_pocs_drive_provider_specific_session_and_trust_callbacks (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_native_pocs_drive_provider_specific_session_and_trust_callbacks) ... ok
+test_native_pocs_expose_external_trust_as_a_distinct_capability (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_native_pocs_expose_external_trust_as_a_distinct_capability) ... ok
+test_non_windows_build_rejects_assembler_identity (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_non_windows_build_rejects_assembler_identity) ... ok
+test_openssl_build_retains_musl_secure_heap_override_in_provenance (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_openssl_build_retains_musl_secure_heap_override_in_provenance) ... ok
+test_openssl_resumption_requires_fresh_cache_miss (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_openssl_resumption_requires_fresh_cache_miss) ... ok
+test_partial_matrix_cell_requires_retained_result (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_partial_matrix_cell_requires_retained_result) ... ok
+test_partial_rejects_not_run_and_requires_blocked_capability (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_partial_rejects_not_run_and_requires_blocked_capability) ... ok
+test_pass_requires_measured_schema_v2 (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_pass_requires_measured_schema_v2) ... ok
+test_platform_peak_resident_probes_are_native (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_platform_peak_resident_probes_are_native) ... ok
+test_pre_execution_fail_result_is_retained_without_metrics (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_pre_execution_fail_result_is_retained_without_metrics) ... ok
+test_promoted_cell_requires_current_security_disposition (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_promoted_cell_requires_current_security_disposition) ... ERROR
+test_provider_allocation_and_cancellation_metrics_fail_closed (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_provider_allocation_and_cancellation_metrics_fail_closed) ... ok
+test_provider_subprocesses_cannot_inherit_github_token (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_provider_subprocesses_cannot_inherit_github_token) ... ok
+test_retained_result_digest_must_match (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_retained_result_digest_must_match) ... ok
+test_retained_source_identity_matches_provider_pin (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_retained_source_identity_matches_provider_pin) ... ok
+test_reviewed_provider_inventory_preserves_statuses_and_ids (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_reviewed_provider_inventory_preserves_statuses_and_ids) ... ok
+test_schema_v1_partial_cannot_claim_unmeasured_external_trust (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_schema_v1_partial_cannot_claim_unmeasured_external_trust) ... ok
+test_schema_v2_cannot_claim_a_fully_measured_pass (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_schema_v2_cannot_claim_a_fully_measured_pass) ... ok
+test_schema_v5_requires_measured_session_resumption (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_schema_v5_requires_measured_session_resumption) ... ok
+test_security_freshness_boundaries_and_future_timestamps (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_security_freshness_boundaries_and_future_timestamps) ... ok
+test_security_update_evidence_fails_closed (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_security_update_evidence_fails_closed) ... ok
+test_static_archive_inventory_is_structured_and_bounded (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_static_archive_inventory_is_structured_and_bounded) ... ok
+test_supported_diagnostic_requires_instrumented_provider_archives (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_supported_diagnostic_requires_instrumented_provider_archives) ... ok
+test_synthetic_provider_spec_and_matrix_contract_validate (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_synthetic_provider_spec_and_matrix_contract_validate) ... ok
+test_system_tls_dependency_fails (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_system_tls_dependency_fails) ... ok
+test_windows_aws_lc_assembler_identity_is_required (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_windows_aws_lc_assembler_identity_is_required) ... ok
+test_windows_workflow_pins_nasm_fallback (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_windows_workflow_pins_nasm_fallback) ... ok
+test_atomic_json_has_platform_stable_lf (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_atomic_json_has_platform_stable_lf) ... ok
+test_digest_bound_license_bundles_disable_checkout_conversion (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_digest_bound_license_bundles_disable_checkout_conversion) ... ok
+test_expected_revision_mismatch_fails (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_expected_revision_mismatch_fails) ... ok
+test_linux_and_macos_results_require_native_runner_identity (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_linux_and_macos_results_require_native_runner_identity) ... ok
+test_linux_export_scan_retains_symbols_from_multiline_output (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_linux_export_scan_retains_symbols_from_multiline_output) ... ok
+test_successful_result_requires_final_binary_identity (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_successful_result_requires_final_binary_identity) ... ok
+test_successful_result_requires_zero_poc_exit_code (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_successful_result_requires_zero_poc_exit_code) ... ok
+test_windows_archive_names_cover_all_providers (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_archive_names_cover_all_providers) ... ok
+test_windows_cmake_and_poc_use_static_crt (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_cmake_and_poc_use_static_crt) ... ok
+test_windows_compile_uses_msvc_and_no_posix_link_flags (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_compile_uses_msvc_and_no_posix_link_flags) ... ok
+test_windows_dependency_scan_fails_closed_when_dumpbin_fails (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_dependency_scan_fails_closed_when_dumpbin_fails) ... ok
+test_windows_dependency_scan_rejects_prefixless_aws_lc_dlls (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_dependency_scan_rejects_prefixless_aws_lc_dlls) ... ok
+test_windows_dependency_scan_rejects_prefixless_mbedtls_dlls (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_dependency_scan_rejects_prefixless_mbedtls_dlls) ... ok
+test_windows_dependency_scan_rejects_versioned_tls_dll (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_dependency_scan_rejects_versioned_tls_dll) ... ok
+test_windows_export_scan_rejects_unrecognized_success_output (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_export_scan_rejects_unrecognized_success_output) ... ok
+test_windows_export_scan_retains_symbols_from_multiline_output (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_export_scan_retains_symbols_from_multiline_output) ... ok
+test_windows_openssl_build_uses_vc_target_and_nmake (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_openssl_build_uses_vc_target_and_nmake) ... ok
+test_windows_result_requires_native_hosted_runner_identity (tools.tests.test_tls_provider_poc.ProviderPocWindowsTests.test_windows_result_requires_native_hosted_runner_identity) ... ok
+
+======================================================================
+ERROR: test_promoted_cell_requires_current_security_disposition (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_promoted_cell_requires_current_security_disposition)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_tls_provider_poc.py", line 934, in test_promoted_cell_requires_current_security_disposition
+    validator.validate_retained_results(value, self.spec, ROOT)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/tls_provider_poc/validate.py", line 903, in validate_retained_results
+    require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tools/tls_provider_poc/validate.py", line 61, in require
+    raise ValidationError(message)
+provider_validate.ValidationError: <repo>/docs/evidence/M0-016/results/linux-musl-x86_64/aws-lc.json: platform mismatch
+
+======================================================================
+FAIL: test_cli_uses_temporary_spec_matrix_review_and_license_files (tools.tests.test_tls_provider_poc.ProviderPocValidationTests.test_cli_uses_temporary_spec_matrix_review_and_license_files)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tools/tests/test_tls_provider_poc.py", line 519, in test_cli_uses_temporary_spec_matrix_review_and_license_files
+    self.assertEqual(0, validator.main([
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+        "--spec", str(spec_path), "--matrix", str(matrix_path),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ]))
+    ^^^
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 85 tests in 0.206s
+
+FAILED (failures=1, errors=1)
